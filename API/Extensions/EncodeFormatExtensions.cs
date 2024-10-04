@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using API.Entities.Enums;
 
 namespace API.Extensions;
@@ -13,6 +13,7 @@ public static class EncodeFormatExtensions
             EncodeFormat.PNG => ".png",
             EncodeFormat.WEBP => ".webp",
             EncodeFormat.AVIF => ".avif",
+            EncodeFormat.JPEG => ".jpg",
             _ => throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null)
         };
     }

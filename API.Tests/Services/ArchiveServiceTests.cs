@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -7,8 +7,9 @@ using System.Linq;
 using API.Archive;
 using API.Entities.Enums;
 using API.Services;
+using API.Services.ImageServices;
+using API.Services.ImageServices.ImageMagick;
 using EasyCaching.Core;
-using ImageMagick;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.Extensions;
@@ -29,7 +30,7 @@ public class ArchiveServiceTests
     {
         _testOutputHelper = testOutputHelper;
         _archiveService = new ArchiveService(_logger, _directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>()),
+            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageFactory>()),
             Substitute.For<IMediaErrorService>());
     }
 
@@ -167,16 +168,16 @@ public class ArchiveServiceTests
     public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds, Substitute.For<IEasyCachingProviderFactory>(), new ImageMagickImageFactory());
         var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
-        using var thumbnail = new MagickImage(Path.Join(testDirectory, expectedOutputFile));
+        using var thumbnail = imageService.ImageFactory.Create(Path.Join(testDirectory, expectedOutputFile));
         int width = 320;
         int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
         thumbnail.Thumbnail(width, height);
         using MemoryStream stream = new MemoryStream();
-        thumbnail.Write(stream, MagickFormat.Png32);
+        thumbnail.Save(stream, EncodeFormat.PNG, 100);
         var expectedBytes = stream.ToArray();
 
         archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
@@ -204,7 +205,7 @@ public class ArchiveServiceTests
     [InlineData("sorting.zip", "sorting.expected.png")]
     public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
     {
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageConverterService>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageFactory>());
         var archiveService =  Substitute.For<ArchiveService>(_logger,
             new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
             Substitute.For<IMediaErrorService>());
@@ -230,7 +231,7 @@ public class ArchiveServiceTests
     public void CanParseCoverImage(string inputFile)
     {
         var imageService = Substitute.For<IImageService>();
-        imageService.WriteCoverThumbnail(Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
+        imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
             .Returns(x => "cover.jpg");
         var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");

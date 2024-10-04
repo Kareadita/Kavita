@@ -43,7 +43,7 @@ public class OpdsController : BaseApiController
     private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
     private readonly ILocalizationService _localizationService;
-    private readonly IImageConverterService _converterService;
+    private readonly IImageService _imageService;
     private readonly IMapper _mapper;
 
 
@@ -82,7 +82,7 @@ public class OpdsController : BaseApiController
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
         IAccountService accountService, ILocalizationService localizationService,
-        IImageConverterService converterService,
+        IImageService imageService,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
@@ -93,7 +93,7 @@ public class OpdsController : BaseApiController
         _seriesService = seriesService;
         _accountService = accountService;
         _localizationService = localizationService;
-        _converterService = converterService;
+        _imageService = imageService;
         _mapper = mapper;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
@@ -1245,7 +1245,7 @@ public class OpdsController : BaseApiController
             var path = _cacheService.GetCachedPagePath(chapter.Id, pageNumber);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", pageNumber));
-            path = _converterService.ConvertFile(path, Request.SupportedImageTypesFromRequest());
+            path = _imageService.ReplaceImageFileFormat(path, Request.SupportedImageTypesFromRequest());
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path);
 

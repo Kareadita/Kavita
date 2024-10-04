@@ -42,7 +42,7 @@ public class ReaderController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
-    private readonly IImageConverterService _converterService;
+    private readonly IImageService _imageService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
@@ -51,7 +51,7 @@ public class ReaderController : BaseApiController
         IAccountService accountService, IEventHub eventHub,
         IScrobblingService scrobblingService,
         ILocalizationService localizationService,
-        IImageConverterService converterService)
+        IImageService imageService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -62,7 +62,7 @@ public class ReaderController : BaseApiController
         _eventHub = eventHub;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
-        _converterService = converterService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class ReaderController : BaseApiController
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
-            path = _converterService.ConvertFile(path, Request.SupportedImageTypesFromRequest());
+            path = _imageService.ReplaceImageFileFormat(path, Request.SupportedImageTypesFromRequest());
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path), true);
@@ -188,7 +188,7 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
-            path = _converterService.ConvertFile(path, Request.SupportedImageTypesFromRequest());
+            path = _imageService.ReplaceImageFileFormat(path, Request.SupportedImageTypesFromRequest());
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, format.GetMimeType(), Path.GetFileName(path));

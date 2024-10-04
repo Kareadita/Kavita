@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -823,7 +823,7 @@ public class ReadingListService : IReadingListService
         destFile += settings.EncodeMediaAs.GetExtension();
 
         if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
-        ImageService.CreateMergedImage(
+        _imageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             settings.CoverImageSize,
             destFile);

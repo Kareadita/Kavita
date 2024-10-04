@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-using System.Threading.Tasks;
-using ImageMagick;
-
-
-namespace API.Helpers
+namespace API.Services.ImageServices
 {
     /**
      * C# port of smartcrop.js
@@ -33,22 +29,16 @@ namespace API.Helpers
      * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    public static class SmartCropHelper
+    public static class SmartCrop
     {
 
-        public static MagickGeometry SmartCrop(MagickImage inputImage, int width, int height)
-        {
-            SmartCropOptions options = new SmartCropOptions
-            {
-                Width = width,
-                Height = height
-            };
-            CropResult result = SmartCrop(inputImage, options);
-            return new MagickGeometry(result.TopCrop.X, result.TopCrop.Y, result.TopCrop.Width, result.TopCrop.Height) { FillArea = false };
-        }
-
-
-        public static CropResult SmartCrop(MagickImage inputImage, SmartCropOptions options = null)
+        /// <summary>
+        /// Performs content aware smart cropping on the input image using the specified options.
+        /// </summary>
+        /// <param name="inputImage">The input image to crop.</param>
+        /// <param name="options">The options for smart cropping.</param>
+        /// <returns>The crop result containing the generated crops and the top crop.</returns>
+        public static CropResult Crop(IImage inputImage, SmartCropOptions options = null)
         {
             if (options.Aspect != 0)
             {
@@ -59,7 +49,7 @@ namespace API.Helpers
             var prescale = 1.0f;
 
             // Open the image
-            var image = (MagickImage)inputImage.Clone();
+            var image = inputImage.Clone();
             if (options.Width != 0 && options.Height != 0)
             {
                 scale = Math.Min(image.Width / options.Width, image.Height / options.Height);
@@ -115,7 +105,7 @@ namespace API.Helpers
             var scoreOutput = DownSample(output, options.ScoreDownSample);
 
             var topScore = double.NegativeInfinity;
-            Crop topCrop = null;
+            CropItem topCrop = null;
             result.Crops = GenerateCrops(options, input.Width, input.Height);
 
             foreach (var crop in result.Crops)
@@ -133,10 +123,10 @@ namespace API.Helpers
         }
         private static float Thirds(double x)
         {
-            x = (((x - 1.0 / 3.0 + 1.0) % 2.0) * 0.5 - 0.5) * 16.0;
+            x = ((x - 1.0 / 3.0 + 1.0) % 2.0 * 0.5 - 0.5) * 16.0;
             return (float)Math.Max(1.0 - x * x, 0.0);
         }
-        private static float Importance(SmartCropOptions options, Crop crop, double x, double y)
+        private static float Importance(SmartCropOptions options, CropItem crop, double x, double y)
         {
             if (crop.X > x || x >= crop.X + crop.Width || crop.Y > y || y >= crop.Y + crop.Height)
             {
@@ -161,7 +151,7 @@ namespace API.Helpers
 
             return (float)(s + d);
         }
-        private static ScoreResult Score(SmartCropOptions options, ImageData output, Crop crop)
+        private static ScoreResult Score(SmartCropOptions options, ImageData output, CropItem crop)
         {
 
 
@@ -184,10 +174,10 @@ namespace API.Helpers
                     var i = Importance(options, crop, x, y);
                     var detail = od[p + 1] / 255.0;
 
-                    rskin += (od[p] / 255.0) * (detail + options.SkinBias) * i;
+                    rskin += od[p] / 255.0 * (detail + options.SkinBias) * i;
                     rdetail += detail * i;
-                    rsaturation += (od[p + 2] / 255.0) * (detail + options.SaturationBias) * i;
-                    rboost += (od[p + 3] / 255.0) * i;
+                    rsaturation += od[p + 2] / 255.0 * (detail + options.SaturationBias) * i;
+                    rboost += od[p + 3] / 255.0 * i;
                 }
             }
 
@@ -200,7 +190,7 @@ namespace API.Helpers
                 Total = (float)((rdetail * options.DetailWeight + rskin * options.SkinWeight +
                                  rsaturation * options.SaturationWeight +
                                  rboost * options.BoostWeight) /
-                                (double)(crop.Width * crop.Height))
+                                (crop.Width * crop.Height))
             };
         }
         private static void EdgeDetect(ImageData input, ImageData output)
@@ -208,7 +198,7 @@ namespace API.Helpers
             // Get the pixel collection of both input and output images
             float[] inputPixels = input.Data;
             float[] outputPixels = output.Data;
-            
+
             int width = input.Width;
             int height = input.Height;
 
@@ -237,12 +227,12 @@ namespace API.Helpers
                 }
             }
         }
-        private static List<Crop> GenerateCrops(SmartCropOptions options, int width, int height)
+        private static List<CropItem> GenerateCrops(SmartCropOptions options, int width, int height)
         {
-            var results = new List<Crop>();
+            var results = new List<CropItem>();
             var minDimension = Math.Min(width, height);
             var cropWidth = options.CropWidth != 0 ? options.CropWidth : minDimension;
-            var cropHeight = options.CropHeight!=0 ? options.CropHeight : minDimension;
+            var cropHeight = options.CropHeight != 0 ? options.CropHeight : minDimension;
 
             for (var scale = options.MaxScale; scale >= options.MinScale; scale -= options.ScaleStep)
             {
@@ -250,7 +240,7 @@ namespace API.Helpers
                 {
                     for (var x = 0; x + cropWidth * scale <= width; x += options.Step)
                     {
-                        results.Add(new Crop
+                        results.Add(new CropItem
                         {
                             X = x,
                             Y = y,
@@ -265,13 +255,13 @@ namespace API.Helpers
         }
         private static void ApplyBoosts(SmartCropOptions options, ImageData output)
         {
-            if (options.Boosts.Count==0) return;
+            if (options.Boosts.Count == 0) return;
             var od = output.Data;
             for (int i = 0; i < output.Width; i += 4)
             {
                 od[i + 3] = 0;
             }
-            foreach(Boost boost in options.Boosts)
+            foreach (Boost boost in options.Boosts)
             {
                 ApplyBoost(boost, options, output);
             }
@@ -299,7 +289,7 @@ namespace API.Helpers
                     {
                         for (var u = 0; u < factor; u++)
                         {
-                            var j = ((y * factor + v) * iwidth + (x * factor + u)) * 4;
+                            var j = ((y * factor + v) * iwidth + x * factor + u) * 4;
                             r += idata[j];
                             g += idata[j + 1];
                             b += idata[j + 2];
@@ -322,9 +312,9 @@ namespace API.Helpers
         {
             var od = output.Data;
             var w = output.Width;
-            var x0 = (int)(boost.X);
+            var x0 = (int)boost.X;
             var x1 = (int)(boost.X + boost.Width);
-            var y0 = (int)(boost.Y);
+            var y0 = (int)boost.Y;
             var y1 = (int)(boost.Y + boost.Height);
             var weight = boost.Weight * 255;
             for (var y = y0; y < y1; y++)
@@ -379,7 +369,7 @@ namespace API.Helpers
 
             return l > 0.5f ? d / (2.0f - maximum - minimum) : d / (maximum + minimum);
         }
-        private static void  SkinDetect(SmartCropOptions options, ImageData i, ImageData o)
+        private static void SkinDetect(SmartCropOptions options, ImageData i, ImageData o)
         {
             float[] id = i.Data;
             float[] od = o.Data;
@@ -410,7 +400,7 @@ namespace API.Helpers
         {
             return CIE(data[p], data[p + 1], data[p + 2]);
         }
-        private static float CIE(float r, float g,  float b)
+        private static float CIE(float r, float g, float b)
         {
             return 0.5126f * b + 0.7152f * g + 0.0722f * r;
         }
@@ -423,6 +413,9 @@ namespace API.Helpers
             double d = Math.Sqrt(rd * rd + gd * gd + bd * bd);
             return (float)(1.0 - d);
         }
+        /// <summary>
+        /// Represents the options for content aware smart cropping.
+        /// </summary>
         public class SmartCropOptions
         {
             public int Width { get; set; } = 0;
@@ -457,8 +450,8 @@ namespace API.Helpers
         }
         public class CropResult
         {
-            public List<Crop> Crops { get; set; }
-            public Crop TopCrop { get; set; }
+            public List<CropItem> Crops { get; set; }
+            public CropItem TopCrop { get; set; }
         }
         public class ScoreResult
         {
@@ -468,13 +461,12 @@ namespace API.Helpers
             public float Boost { get; set; }
             public float Total { get; set; }
         }
-        public class Crop
+        public class CropItem
         {
             public int X { get; set; }
             public int Y { get; set; }
             public int Width { get; set; }
             public int Height { get; set; }
-
             public ScoreResult Score { get; set; }
         }
         public class Boost
@@ -498,48 +490,11 @@ namespace API.Helpers
                 Data = new float[width * height * 4];
             }
 
-            public ImageData(MagickImage image)
+            public ImageData(IImage image)
             {
                 Width = image.Width;
                 Height = image.Height;
-                float scale = 1.0f / 256;
-                if (image.ChannelCount == 4)
-                {
-                    Data = image.GetPixels().GetValues();
-                    for (int x = 0; x < Data.Length; x++)
-                    {
-                        Data[x] *= scale;
-                    }
-                }
-                else if (image.ChannelCount == 3)
-                {
-                    float[] temp = image.GetPixels().GetValues();
-                    Data = new float[Width * Height * 4];
-                    int oi = 0;
-                    int ii = 0;
-                    for(int y = 0; y < Height*Width; y++)
-                    {
-
-                        Data[oi++] = temp[ii++] * scale;
-                        Data[oi++] = temp[ii++] * scale;
-                        Data[oi++] = temp[ii++] * scale;
-                        Data[oi++] = 255F;
-                    }
-                }
-                else if (image.ChannelCount == 1)
-                {
-                    float[] temp = image.GetPixels().GetValues();
-                    Data = new float[Width * Height * 4];
-                    int oi = 0;
-                    int ii = 0;
-                    for (int y = 0; y < Height * Width; y++)
-                    {
-                        Data[oi++] = temp[ii++] * scale;
-                        Data[oi++] = temp[oi-1];
-                        Data[oi++] = temp[oi-1];
-                        Data[oi++] = 255F;
-                    }
-                }
+                Data = image.GetRGBAImageData();
             }
         }
     }

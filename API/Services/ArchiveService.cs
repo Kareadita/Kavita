@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -233,7 +233,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(entryName, stream, fileName, outputDirectory, format, size);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -244,7 +244,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(entryName, stream, fileName, outputDirectory, format, size);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,6 +11,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.ImageServices;
 using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -18,7 +19,6 @@ using Docnet.Core.Models;
 using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
-using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
@@ -1228,7 +1228,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(fileFilePath, stream, fileName, outputDirectory, encodeFormat, size);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
         }
         catch (Exception ex)
         {
@@ -1251,7 +1251,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(fileFilePath, stream, fileName, outputDirectory, encodeFormat, size);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
 
         }
         catch (Exception ex)
@@ -1272,25 +1272,15 @@ public class BookService : IBookService
     /// <param name="docReader"></param>
     /// <param name="pageNumber"></param>
     /// <param name="stream"></param>
-    private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
+    private void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
-        var floats = new float[rawBytes.Length];
-        for (var i = 0; i < rawBytes.Length; i += 4)
-        {
-            floats[i] = rawBytes[i + 2] << 8;
-            floats[i + 1] = rawBytes[i + 1] << 8;
-            floats[i+2] = rawBytes[i] << 8;
-            floats[i+3] = rawBytes[i + 3] << 8;
-        }
         var width = pageReader.GetPageWidth();
         var height = pageReader.GetPageHeight();
-        MagickImage image = new MagickImage(MagickColor.FromRgba(0, 0, 0,0), width, height);
-        using var pixels = image.GetPixels();
-        pixels.SetArea(0,0,width, height, floats);
+        IImage image = _imageService.ImageFactory.CreateFromBGRAByteArray(rawBytes, width, height);
         stream.Seek(0, SeekOrigin.Begin);
-        image.Write(stream, MagickFormat.Png);
+        image.Save(stream, EncodeFormat.PNG, 100);
         stream.Seek(0, SeekOrigin.Begin);
     }
 

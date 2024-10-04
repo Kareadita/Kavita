@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -158,7 +158,7 @@ public class CacheServiceTests
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(),
                 Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         await ResetDB();
         var s = new SeriesBuilder("Test").Build();
@@ -234,7 +234,7 @@ public class CacheServiceTests
         var cleanupService = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         cleanupService.CleanupChapters(new []{1, 3});
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption:SearchOption.AllDirectories));
@@ -256,7 +256,7 @@ public class CacheServiceTests
         var cs = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         var c = new ChapterBuilder("1")
             .WithFile(new MangaFileBuilder($"{DataDirectory}1.epub", MangaFormat.Epub).Build())
@@ -297,7 +297,7 @@ public class CacheServiceTests
         var cs = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(),Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(),Substitute.For<IImageService>());
 
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");
@@ -341,7 +341,7 @@ public class CacheServiceTests
         var cs = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");
@@ -382,7 +382,7 @@ public class CacheServiceTests
         var cs = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");
@@ -427,7 +427,7 @@ public class CacheServiceTests
         var cs = new CacheService(_logger, _unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
-            Substitute.For<IBookmarkService>(), Substitute.For<IImageConverterService>());
+            Substitute.For<IBookmarkService>(), Substitute.For<IImageService>());
 
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");

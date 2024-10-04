@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +11,6 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using ImageMagick;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using static System.Net.Mime.MediaTypeNames;
@@ -53,20 +52,21 @@ public class CacheService : ICacheService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
-    private readonly IImageConverterService _converterService;
+    private readonly IImageService _imageService;
+
 
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IBookmarkService bookmarkService, IImageConverterService converterService)
+        IBookmarkService bookmarkService, IImageService imageService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
-        _converterService = converterService;
+        _imageService = imageService;
     }
 
     public IEnumerable<string> GetCachedPages(int chapterId)
@@ -99,14 +99,18 @@ public class CacheService : ICacheService
             for (var i = 0; i < files.Length; i++)
             {
                 var file = files[i];
-                MagickImageInfo info = new MagickImageInfo(file);
-
+                var info = _imageService.ImageFactory.GetDimensions(file);
+                if (info == null)
+                {
+                    _logger.LogError("There was an error calculating image dimensions for image {file}", file);
+                    continue;
+                }
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = info.Height,
-                    Width = info.Width,
-                    IsWide = info.Width > info.Height,
+                    Height = info.Value.Height,
+                    Width = info.Value.Width,
+                    IsWide = info.Value.Width > info.Value.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });
             }

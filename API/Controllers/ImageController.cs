@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -171,7 +171,7 @@ public class ImageController : BaseApiController
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         destFile += settings.EncodeMediaAs.GetExtension();
         if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
-        ImageService.CreateMergedImage(
+        _imageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             settings.CoverImageSize,
             destFile);
