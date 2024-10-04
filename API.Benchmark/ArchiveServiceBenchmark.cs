@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using API.Entities.Enums;
@@ -25,8 +25,8 @@ public class ArchiveServiceBenchmark
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
     private readonly IImageFactory _imageFactory;
-    private const string SourceImage = "C:/Users/josep/Pictures/obey_by_grrsa-d6llkaa_colored_by_me.png";
-
+    private const string SourceImage = "Data/comic-normal.jpg";
+        
 
     public ArchiveServiceBenchmark()
     {
@@ -61,9 +61,9 @@ public class ArchiveServiceBenchmark
     }
 
     [Benchmark]
-    public void ImageSharp_ExtractImage_PNG()
+    public void ImageMagick_ExtractImage_PNG()
     {
-        var outputDirectory = "C:/Users/josep/Pictures/imagesharp/";
+        var outputDirectory = "Data/ImageMagick";
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
@@ -75,9 +75,9 @@ public class ArchiveServiceBenchmark
     }
 
     [Benchmark]
-    public void ImageSharp_ExtractImage_WebP()
+    public void ImageMagick_ExtractImage_WebP()
     {
-        var outputDirectory = "C:/Users/josep/Pictures/imagesharp/";
+        var outputDirectory = "Data/ImageMagick";
         _directoryService.ExistOrCreate(outputDirectory);
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
@@ -88,33 +88,6 @@ public class ArchiveServiceBenchmark
         thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"), EncodeFormat.PNG, 100);
     }
 
-    [Benchmark]
-    public void NetVips_ExtractImage_PNG()
-    {
-        var outputDirectory = "C:/Users/josep/Pictures/netvips/";
-        _directoryService.ExistOrCreate(outputDirectory);
-
-        using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail = _imageFactory.Create(stream);
-        int width = 320;
-        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
-        thumbnail.Thumbnail(width, height);
-        thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.png"), EncodeFormat.PNG, 100);
-    }
-
-    [Benchmark]
-    public void NetVips_ExtractImage_WebP()
-    {
-        var outputDirectory = "C:/Users/josep/Pictures/netvips/";
-        _directoryService.ExistOrCreate(outputDirectory);
-
-        using var stream = new FileStream(SourceImage, FileMode.Open);
-        using var thumbnail = _imageFactory.Create(stream);
-        int width = 320;
-        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
-        thumbnail.Thumbnail(width, height);
-        thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "netvips.webp"), EncodeFormat.WEBP, 100);
-    }
 
     // Benchmark to test default GetNumberOfPages from archive
     // vs a new method where I try to open the archive and return said stream
