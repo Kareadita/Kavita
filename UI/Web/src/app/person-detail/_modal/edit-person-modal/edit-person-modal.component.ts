@@ -12,8 +12,8 @@ import {
   NgbNavLinkBase,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@ngneat/transloco";
 import {PersonService} from "../../../_services/person.service";
+import { TranslocoDirective } from '@jsverse/transloco';
 
 enum TabID {
   General = 0,

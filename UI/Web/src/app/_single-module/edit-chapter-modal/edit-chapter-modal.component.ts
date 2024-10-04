@@ -493,7 +493,7 @@ export class EditChapterModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role };
+      return {id: 0, name: title, role: role, description: '', coverImageLocked: false };
     });
 
     return personSettings;

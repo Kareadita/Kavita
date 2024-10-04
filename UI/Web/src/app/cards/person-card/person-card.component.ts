@@ -23,7 +23,8 @@ import {BrowsePerson} from "../../_models/person/browse-person";
 import {Person} from "../../_models/metadata/person";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
+
 
 @Component({
   selector: 'app-person-card',

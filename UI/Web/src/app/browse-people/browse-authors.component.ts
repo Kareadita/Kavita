@@ -10,7 +10,6 @@ import {
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
-import {TranslocoDirective} from "@ngneat/transloco";
 import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
 import {DecimalPipe} from "@angular/common";
 import {Series} from "../_models/series";
@@ -28,6 +27,7 @@ import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {JumpbarService} from "../_services/jumpbar.service";
 import {PersonCardComponent} from "../cards/person-card/person-card.component";
 import {ImageService} from "../_services/image.service";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 
 @Component({
