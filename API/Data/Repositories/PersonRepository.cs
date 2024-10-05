@@ -27,7 +27,7 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null);
     Task<int> GetCountAsync();
 
-    Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
+    //Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
     Task<string> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
@@ -107,12 +107,12 @@ public class PersonRepository : IPersonRepository
         return await _context.Person.CountAsync();
     }
 
-    public async Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames)
-    {
-        return await _context.Person
-            .Where(p => p.Role == role && normalizeNames.Contains(p.NormalizedName))
-            .ToListAsync();
-    }
+    // public async Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames)
+    // {
+    //     return await _context.Person
+    //         .Where(p => p.Role == role && normalizeNames.Contains(p.NormalizedName))
+    //         .ToListAsync();
+    // }
 
     public async Task<string> GetCoverImageAsync(int personId)
     {
@@ -144,44 +144,72 @@ public class PersonRepository : IPersonRepository
 
     public async Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId)
     {
+        // TODO: This will need to check both series and chapters (in cases where komf only updates series)
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Person
             .Where(p => p.Id == personId)
             .RestrictAgainstAgeRestriction(ageRating)
-            .Select(p => p.Role)
+            .SelectMany(p => p.ChapterPeople.Select(cp => cp.Role))
             .Distinct()
             .ToListAsync();
     }
 
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId)
     {
+        // TODO: This will need to check both series and chapters (in cases where komf only updates series)
         var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Person
             .Where(p => p.NormalizedName == normalized)
             .RestrictAgainstAgeRestriction(ageRating)
-            .Select(p => p.Role)
+            .SelectMany(p => p.ChapterPeople.Select(cp => cp.Role))
             .Distinct()
             .ToListAsync();
     }
 
     public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)
     {
+        // TODO: Implement People Support
+        // var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        //
+        // var query = _context.Person
+        //     .Where(p => p.Role == PersonRole.Writer)
+        //     .RestrictAgainstAgeRestriction(ageRating)
+        //     .Select(p => new BrowsePersonDto
+        //     {
+        //         Id = p.Id,
+        //         Name = p.Name,
+        //         Role = p.Role,
+        //         Description = p.Description,
+        //         SeriesCount = p.SeriesMetadataPeople.Count,
+        //         IssueCount = p.ChapterPeople.Count
+        //     })
+        //     .OrderBy(p => p.Name);
+        //
+        // return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var query = _context.Person
-            .Where(p => p.Role == PersonRole.Writer)
+            .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == PersonRole.Writer)) // Filter by role in series
             .RestrictAgainstAgeRestriction(ageRating)
             .Select(p => new BrowsePersonDto
             {
                 Id = p.Id,
                 Name = p.Name,
-                Role = p.Role,
                 Description = p.Description,
-                SeriesCount = p.SeriesMetadataPeople.Count,
-                IssueCount = p.ChapterPeople.Count
+                SeriesCount = p.SeriesMetadataPeople
+                    .Where(smp => smp.Role == PersonRole.Writer)
+                    .Select(smp => smp.SeriesMetadata.SeriesId)
+                    .Distinct()
+                    .Count(),
+                IssueCount = p.ChapterPeople
+                    .Where(cp => cp.Role == PersonRole.Writer)
+                    .Select(cp => cp.Chapter.Id)
+                    .Distinct()
+                    .Count()
             })
             .OrderBy(p => p.Name);
 
@@ -228,8 +256,9 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
         return await _context.Person
-            .Where(p => p.Role == role)
+            .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == role) || p.ChapterPeople.Any(cp => cp.Role == role)) // Filter by role in both series and chapters
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)

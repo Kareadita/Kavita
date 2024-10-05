@@ -10,5 +10,5 @@ public class ChapterPeople
     public int PersonId { get; set; }
     public virtual Person Person { get; set; }
 
-    public PersonRole Role { get; set; }
+    public required PersonRole Role { get; set; }
 }

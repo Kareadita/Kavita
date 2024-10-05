@@ -199,79 +199,81 @@ public class SeriesService : ISeriesService
 
             if (updateSeriesMetadataDto.SeriesMetadata != null)
             {
-                if (PersonHelper.HasAnyPeople(updateSeriesMetadataDto.SeriesMetadata))
-                {
-                    void HandleAddPerson(Person person)
-                    {
-                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                    }
-
-                    series.Metadata.People ??= new List<Person>();
-                    var allWriters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Writer,
-                        updateSeriesMetadataDto.SeriesMetadata!.Writers.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allWriters.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.WriterLocked = true);
-
-                    var allCharacters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Character,
-                        updateSeriesMetadataDto.SeriesMetadata!.Characters.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allCharacters.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
-
-                    var allColorists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Colorist,
-                        updateSeriesMetadataDto.SeriesMetadata!.Colorists.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allColorists.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.ColoristLocked = true);
-
-                    var allEditors = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Editor,
-                        updateSeriesMetadataDto.SeriesMetadata!.Editors.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allEditors.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.EditorLocked = true);
-
-                    var allInkers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Inker,
-                        updateSeriesMetadataDto.SeriesMetadata!.Inkers.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allInkers.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.InkerLocked = true);
-
-                    var allLetterers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Letterer,
-                        updateSeriesMetadataDto.SeriesMetadata!.Letterers.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allLetterers.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.LettererLocked = true);
-
-                    var allPencillers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Penciller,
-                        updateSeriesMetadataDto.SeriesMetadata!.Pencillers.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPencillers.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.PencillerLocked = true);
-
-                    var allPublishers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Publisher,
-                        updateSeriesMetadataDto.SeriesMetadata!.Publishers.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPublishers.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.PublisherLocked = true);
-
-                    var allImprints = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Imprint,
-                        updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Imprint, updateSeriesMetadataDto.SeriesMetadata.Imprints, series, allImprints.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.ImprintLocked = true);
-
-                    var allTeams = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Team,
-                        updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Team, updateSeriesMetadataDto.SeriesMetadata.Teams, series, allTeams.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.TeamLocked = true);
-
-                    var allLocations = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Location,
-                        updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Location, updateSeriesMetadataDto.SeriesMetadata.Locations, series, allLocations.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.LocationLocked = true);
-
-                    var allTranslators = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Translator,
-                        updateSeriesMetadataDto.SeriesMetadata!.Translators.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allTranslators.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.TranslatorLocked = true);
-
-                    var allCoverArtists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.CoverArtist,
-                        updateSeriesMetadataDto.SeriesMetadata!.CoverArtists.Select(p => Parser.Normalize(p.Name)));
-                    PersonHelper.UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allCoverArtists.AsReadOnly(),
-                        HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
-                }
+                // TODO: Re-implement People support
+                // if (PersonHelper.HasAnyPeople(updateSeriesMetadataDto.SeriesMetadata))
+                // {
+                //     void HandleAddPerson(Person person)
+                //     {
+                //         PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                //     }
+                //
+                //
+                //     series.Metadata.People ??= new List<Person>();
+                //     var allWriters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Writer,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Writers.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allWriters.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.WriterLocked = true);
+                //
+                //     var allCharacters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Character,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Characters.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allCharacters.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
+                //
+                //     var allColorists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Colorist,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Colorists.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allColorists.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.ColoristLocked = true);
+                //
+                //     var allEditors = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Editor,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Editors.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allEditors.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.EditorLocked = true);
+                //
+                //     var allInkers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Inker,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Inkers.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allInkers.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.InkerLocked = true);
+                //
+                //     var allLetterers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Letterer,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Letterers.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allLetterers.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.LettererLocked = true);
+                //
+                //     var allPencillers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Penciller,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Pencillers.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPencillers.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.PencillerLocked = true);
+                //
+                //     var allPublishers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Publisher,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Publishers.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPublishers.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.PublisherLocked = true);
+                //
+                //     var allImprints = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Imprint,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Imprint, updateSeriesMetadataDto.SeriesMetadata.Imprints, series, allImprints.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.ImprintLocked = true);
+                //
+                //     var allTeams = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Team,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Team, updateSeriesMetadataDto.SeriesMetadata.Teams, series, allTeams.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.TeamLocked = true);
+                //
+                //     var allLocations = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Location,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Imprints.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Location, updateSeriesMetadataDto.SeriesMetadata.Locations, series, allLocations.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.LocationLocked = true);
+                //
+                //     var allTranslators = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Translator,
+                //         updateSeriesMetadataDto.SeriesMetadata!.Translators.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allTranslators.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.TranslatorLocked = true);
+                //
+                //     var allCoverArtists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.CoverArtist,
+                //         updateSeriesMetadataDto.SeriesMetadata!.CoverArtists.Select(p => Parser.Normalize(p.Name)));
+                //     PersonHelper.UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allCoverArtists.AsReadOnly(),
+                //         HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
+                // }
 
                 series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
                 series.Metadata.PublicationStatusLocked = updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked;

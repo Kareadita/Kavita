@@ -310,8 +310,10 @@ public class ScannerService : IScannerService
         }
 
         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
-        if (parsedSeries.Count == 0) return;
-
+        if (parsedSeries.Count == 0)
+        {
+            return;
+        }
 
 
         // Don't allow any processing on files that aren't part of this series

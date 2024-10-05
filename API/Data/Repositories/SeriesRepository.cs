@@ -1275,7 +1275,7 @@ public class SeriesRepository : ISeriesRepository
 
         var query = sQuery
             .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.PersonId)))
             .WhereIf(hasCollectionTagFilter,
                 s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
             .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))

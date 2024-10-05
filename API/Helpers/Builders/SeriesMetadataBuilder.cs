@@ -17,7 +17,7 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             CollectionTags = new List<CollectionTag>(),
             Genres = new List<Genre>(),
             Tags = new List<Tag>(),
-            People = new List<Person>()
+            People = new List<SeriesMetadataPeople>()
         };
     }
 

@@ -45,10 +45,12 @@ public static class SearchQueryableExtensions
     public static IQueryable<Person> SearchPeople(this IQueryable<SeriesMetadata> queryable,
         string searchQuery, IEnumerable<int> seriesIds)
     {
+        // TODO: Implement People support
         return queryable
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
-            .AsSplitQuery()
+            .SelectMany(sm => sm.People)
+            .Where(p => p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
+            .Select(p => p.Person)
             .Distinct()
             .OrderBy(p => p.NormalizedName);
     }
