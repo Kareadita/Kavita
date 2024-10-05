@@ -72,10 +72,10 @@ public class TagManagerService : ITagManagerService
     {
         _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
-        _people = (await _unitOfWork.PersonRepository.GetAllPeople())
-            .GroupBy(GetPersonKey)
-            .Select(g => g.First())
-            .ToDictionary(GetPersonKey);
+        // _people = (await _unitOfWork.PersonRepository.GetAllPeople())
+        //     .GroupBy(GetPersonKey)
+        //     .Select(g => g.First())
+        //     .ToDictionary(GetPersonKey);
         var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser()!;
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(defaultAdmin.Id, CollectionIncludes.Series))
             .ToDictionary(t => t.NormalizedTitle);
@@ -166,11 +166,13 @@ public class TagManagerService : ITagManagerService
                 return result;
             }
 
-            // We need to create a new Genre
-            result = new PersonBuilder(name, role).Build();
-            _unitOfWork.PersonRepository.Attach(result);
-            await _unitOfWork.CommitAsync();
-            _people.Add(key, result);
+            // TODO: Implement Person support
+            return null;
+            // // We need to create a new Genre
+            // result = new PersonBuilder(name, role).Build();
+            // _unitOfWork.PersonRepository.Attach(result);
+            // await _unitOfWork.CommitAsync();
+            // _people.Add(key, result);
             return result;
         }
         catch (DbUpdateConcurrencyException ex)
@@ -224,10 +226,10 @@ public class TagManagerService : ITagManagerService
         return normalizedName + "_" + role;
     }
 
-    private static string GetPersonKey(Person p)
-    {
-        return GetPersonKey(p.NormalizedName, p.Role);
-    }
+    // private static string GetPersonKey(Person p)
+    // {
+    //     return GetPersonKey(p.NormalizedName, p.Role);
+    // }
 
     /// <summary>
     /// Gets the CollectionTag entity for the given string. If one doesn't exist, one will be created and committed.
