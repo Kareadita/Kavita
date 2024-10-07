@@ -36,7 +36,7 @@ public interface IPersonRepository
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
-
+    Task<Person> GetPersonByName(string name);
 }
 
 public class PersonRepository : IPersonRepository
@@ -232,6 +232,12 @@ public class PersonRepository : IPersonRepository
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<Person> GetPersonByName(string name)
+    {
+        var normalizedName = name.ToNormalized();
+        return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == normalizedName);
     }
 
 

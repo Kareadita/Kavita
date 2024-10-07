@@ -914,98 +914,97 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        // TODO: Implement People Support
         if (!chapter.ColoristLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Colorist);
             PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
             await UpdatePeople(chapter, people, PersonRole.Colorist);
         }
-        //
-        // if (!chapter.CharacterLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Characters);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        //     await UpdatePeople(chapter, people, PersonRole.Character);
-        // }
-        //
-        //
-        // if (!chapter.TranslatorLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Translator);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        //     await UpdatePeople(chapter, people, PersonRole.Translator);
-        // }
-        //
-        // if (!chapter.WriterLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Writer);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        //     await UpdatePeople(chapter, people, PersonRole.Writer);
-        // }
-        //
-        // if (!chapter.EditorLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Editor);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        //     await UpdatePeople(chapter, people, PersonRole.Editor);
-        // }
-        //
-        // if (!chapter.InkerLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Inker);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        //     await UpdatePeople(chapter, people, PersonRole.Inker);
-        // }
-        //
-        // if (!chapter.LettererLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Letterer);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        //     await UpdatePeople(chapter, people, PersonRole.Letterer);
-        // }
-        //
-        // if (!chapter.PencillerLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Penciller);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        //     await UpdatePeople(chapter, people, PersonRole.Penciller);
-        // }
-        //
-        // if (!chapter.CoverArtistLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.CoverArtist);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        //     await UpdatePeople(chapter, people, PersonRole.CoverArtist);
-        // }
-        //
-        // if (!chapter.PublisherLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Publisher);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        //     await UpdatePeople(chapter, people, PersonRole.Publisher);
-        // }
-        //
-        // if (!chapter.ImprintLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Imprint);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
-        //     await UpdatePeople(chapter, people, PersonRole.Imprint);
-        // }
-        //
-        // if (!chapter.TeamLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Teams);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
-        //     await UpdatePeople(chapter, people, PersonRole.Team);
-        // }
-        //
-        // if (!chapter.LocationLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Locations);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
-        //     await UpdatePeople(chapter, people, PersonRole.Location);
-        // }
+
+        if (!chapter.CharacterLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Characters);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
+            await UpdatePeople(chapter, people, PersonRole.Character);
+        }
+
+
+        if (!chapter.TranslatorLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Translator);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+            await UpdatePeople(chapter, people, PersonRole.Translator);
+        }
+
+        if (!chapter.WriterLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Writer);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
+            await UpdatePeople(chapter, people, PersonRole.Writer);
+        }
+
+        if (!chapter.EditorLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Editor);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
+            await UpdatePeople(chapter, people, PersonRole.Editor);
+        }
+
+        if (!chapter.InkerLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Inker);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
+            await UpdatePeople(chapter, people, PersonRole.Inker);
+        }
+
+        if (!chapter.LettererLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Letterer);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
+            await UpdatePeople(chapter, people, PersonRole.Letterer);
+        }
+
+        if (!chapter.PencillerLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Penciller);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
+            await UpdatePeople(chapter, people, PersonRole.Penciller);
+        }
+
+        if (!chapter.CoverArtistLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.CoverArtist);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
+            await UpdatePeople(chapter, people, PersonRole.CoverArtist);
+        }
+
+        if (!chapter.PublisherLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Publisher);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
+            await UpdatePeople(chapter, people, PersonRole.Publisher);
+        }
+
+        if (!chapter.ImprintLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Imprint);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
+            await UpdatePeople(chapter, people, PersonRole.Imprint);
+        }
+
+        if (!chapter.TeamLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Teams);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
+            await UpdatePeople(chapter, people, PersonRole.Team);
+        }
+
+        if (!chapter.LocationLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Locations);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
+            await UpdatePeople(chapter, people, PersonRole.Location);
+        }
 
 
         if (!chapter.GenresLocked)
@@ -1034,13 +1033,42 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    // private async Task UpdatePeople(Chapter chapter, IList<string> people, PersonRole role)
-    // {
-    //     foreach (var person in people)
-    //     {
-    //         var p = await _tagManagerService.GetPerson(person, role);
-    //         if (p == null) continue;
-    //         chapter.People.Add(p);
-    //     }
-    // }
+    private async Task UpdatePeople(Chapter chapter, IList<string> people, PersonRole role)
+    {
+        foreach (var personName in people)
+        {
+            var person = await _unitOfWork.PersonRepository.GetPersonByName(personName);
+
+            // If the person doesn't exist, create a new Person entity
+            if (person == null)
+            {
+                var normalizedPersonName = personName.ToNormalized();
+
+                person = new Person
+                {
+                    Name = personName,
+                    NormalizedName = normalizedPersonName
+                };
+
+                _unitOfWork.PersonRepository.Attach(person);
+                await _unitOfWork.CommitAsync();
+            }
+
+
+            // Check if this person with the specific role already exists for the chapter
+            if (chapter.People.Any(cp => cp.PersonId == person.Id && cp.Role == role)) continue;
+
+            var chapterPerson = new ChapterPeople
+            {
+                PersonId = person.Id,
+                Person = person,
+                ChapterId = chapter.Id,
+                Chapter = chapter,
+                Role = role
+            };
+
+            chapter.People.Add(chapterPerson);
+        }
+    }
+
 }

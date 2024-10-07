@@ -78,6 +78,34 @@ public static class PersonHelper
 
     }
 
+    public static void RemovePeople(ICollection<ChapterPeople> existingChapterPeople, IEnumerable<string> people, PersonRole role, Action<ChapterPeople>? action = null)
+    {
+        // Normalize the input people names
+        var normalizedPeople = people.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
+
+        if (normalizedPeople.Count == 0)
+        {
+            // If no people provided, remove all people with the given role
+            var peopleToRemove = existingChapterPeople.Where(cp => cp.Role == role).ToList();
+            foreach (var chapterPerson in peopleToRemove)
+            {
+                existingChapterPeople.Remove(chapterPerson);
+                action?.Invoke(chapterPerson);
+            }
+            return;
+        }
+
+        // Otherwise, remove specific people by name and role
+        foreach (var normalizedPerson in normalizedPeople)
+        {
+            var chapterPersonToRemove = existingChapterPeople.FirstOrDefault(cp => cp.Role == role && cp.Person.NormalizedName == normalizedPerson);
+            if (chapterPersonToRemove == null) continue;
+
+            existingChapterPeople.Remove(chapterPersonToRemove);
+            action?.Invoke(chapterPersonToRemove);
+        }
+    }
+
     /// <summary>
     /// Removes all people that are not present in the removeAllExcept list.
     /// </summary>
