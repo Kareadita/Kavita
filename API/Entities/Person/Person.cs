@@ -48,17 +48,10 @@ public class Person : IHasCoverImage
     /// <remarks>Kavita+ Only</remarks>
     public long MetronId { get; set; } = 0;
 
-    // TODO: I need to rearchcitect this whole system unfortunately.
-    // The relationship itself needs to have the role and the person needs to be unique
-
-
     // Relationships
     public ICollection<ChapterPeople> ChapterPeople { get; set; } = new List<ChapterPeople>();
     public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = new List<SeriesMetadataPeople>();
 
-    // Old Stuff
-    //     public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
-//     public ICollection<Chapter> ChapterMetadatas { get; set; } = null!;
 
     public void ResetColorScape()
     {

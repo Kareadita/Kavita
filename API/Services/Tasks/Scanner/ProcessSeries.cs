@@ -915,12 +915,12 @@ public class ProcessSeries : IProcessSeries
         }
 
         // TODO: Implement People Support
-        // if (!chapter.ColoristLocked)
-        // {
-        //     var people = TagHelper.GetTagValues(comicInfo.Colorist);
-        //     PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        //     await UpdatePeople(chapter, people, PersonRole.Colorist);
-        // }
+        if (!chapter.ColoristLocked)
+        {
+            var people = TagHelper.GetTagValues(comicInfo.Colorist);
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
+            await UpdatePeople(chapter, people, PersonRole.Colorist);
+        }
         //
         // if (!chapter.CharacterLocked)
         // {

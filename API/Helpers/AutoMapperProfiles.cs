@@ -96,7 +96,7 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(
                         src => src.PagesRead));
 
-        // CreateMap<SeriesMetadata, SeriesMetadataDto>()
+        CreateMap<SeriesMetadata, SeriesMetadataDto>();
         //     .ForMember(dest => dest.Writers,
         //         opt =>
         //             opt.MapFrom(
@@ -158,49 +158,9 @@ public class AutoMapperProfiles : Profile
         //             opt.MapFrom(
         //                 src => src.Tags.OrderBy(p => p.NormalizedTitle)));
         //
-        // CreateMap<Chapter, ChapterMetadataDto>()
-        //     .ForMember(dest => dest.Writers,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.CoverArtists,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Colorists,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Inkers,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Imprints,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Imprint).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Letterers,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Pencillers,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Penciller).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Publishers,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Translators,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Translator).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Characters,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Editors,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Teams,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Team).OrderBy(p => p.NormalizedName)))
-        //     .ForMember(dest => dest.Locations,
-        //         opt =>
-        //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Location).OrderBy(p => p.NormalizedName)))
-        //     ;
 
-        // CreateMap<Chapter, ChapterDto>()
+
+        CreateMap<Chapter, ChapterDto>();
         //     .ForMember(dest => dest.Writers,
         //         opt =>
         //             opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer).OrderBy(p => p.NormalizedName)))

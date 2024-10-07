@@ -81,8 +81,7 @@ public static class TagHelper
             return ImmutableList<string>.Empty;
         }
 
-        return comicInfoTagSeparatedByComma.Split(",")
-            .Select(s => s.Trim())
+        return comicInfoTagSeparatedByComma.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .DistinctBy(Parser.Normalize)
             .ToList();
     }
