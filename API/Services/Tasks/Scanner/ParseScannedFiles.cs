@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
@@ -620,12 +619,17 @@ public class ParseScannedFiles
                    .Truncate(TimeSpan.TicksPerSecond);
     }
 
-
-
     /// <summary>
     /// Checks if there are any ParserInfos that have a Series that matches the LocalizedSeries field in any other info. If so,
     /// rewrites the infos with series name instead of the localized name, so they stack.
     /// </summary>
+    /// <remarks>
+    /// If the series for a ParserInfo matches either the series or localized series of the first ParserInfo in the folder,
+    /// then this rewrites the info's series and localized series to match.
+    /// When multiple series exist in sub-folders within a folder, this allows for each subfolder to be a separate series.
+    /// If the info's series doesn't match any series or localized series yet, it's considered a separate series (as long as it
+    /// exists in a separate folder from the other identified series - otherwise log an error).
+    /// </remarks>
     /// <example>
     /// Accel World v01.cbz has Series "Accel World" and Localized Series "World of Acceleration"
     /// World of Acceleration v02.cbz has Series "World of Acceleration"
@@ -633,49 +637,40 @@ public class ParseScannedFiles
     /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
     /// </example>
     /// <param name="infos">A collection of ParserInfos</param>
-    private void MergeLocalizedSeriesWithSeries(IList<ParserInfo> infos)
+    public void MergeLocalizedSeriesWithSeries(IList<ParserInfo> infos)
     {
         var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
         if (!hasLocalizedSeries) return;
 
-        var localizedSeries = infos
-            .Where(i => !i.IsSpecial)
-            .Select(i => i.LocalizedSeries)
-            .Distinct()
-            .FirstOrDefault(i => !string.IsNullOrEmpty(i));
-        if (string.IsNullOrEmpty(localizedSeries)) return;
+        // (Series, LocalizedSeries, FilePath)
+        var localizedSeries = new List<(string, string, string)>();
 
-        // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
-        string? nonLocalizedSeries;
-        // Normalize this as many of the cases is a capitalization difference
-        var nonLocalizedSeriesFound = infos
-            .Where(i => !i.IsSpecial)
-            .Select(i => i.Series)
-            .DistinctBy(Parser.Parser.Normalize)
-            .ToList();
+        foreach (var info in infos)
+        {
+            var normalizedSeries = info.Series.ToNormalized();
+            var filePath = info.FullFilePath[..info.FullFilePath.IndexOf(info.Filename)];
+            var foundMatch = false;
 
-        if (nonLocalizedSeriesFound.Count == 1)
-        {
-            nonLocalizedSeries = nonLocalizedSeriesFound[0];
-        }
-        else
-        {
-            // There can be a case where there are multiple series in a folder that causes merging.
-            if (nonLocalizedSeriesFound.Count > 2)
+            foreach (var localizedSeriesTuple in localizedSeries)
             {
-                _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                if (!string.IsNullOrEmpty(normalizedSeries) && normalizedSeries == localizedSeriesTuple.Item2.ToNormalized())
+                {
+                    foundMatch = true;
+                    info.Series = localizedSeriesTuple.Item1;
+                    info.LocalizedSeries = localizedSeriesTuple.Item2;
+                    break;
+                }
             }
-            nonLocalizedSeries = nonLocalizedSeriesFound.Find(s => !s.Equals(localizedSeries));
-        }
 
-        if (nonLocalizedSeries == null) return;
-
-        var normalizedNonLocalizedSeries = nonLocalizedSeries.ToNormalized();
-        foreach (var infoNeedingMapping in infos.Where(i =>
-                     !i.Series.ToNormalized().Equals(normalizedNonLocalizedSeries)))
-        {
-            infoNeedingMapping.Series = nonLocalizedSeries;
-            infoNeedingMapping.LocalizedSeries = localizedSeries;
+            if (!foundMatch)
+            {
+                localizedSeries.Add((info.Series, info.LocalizedSeries, filePath));
+                var otherSeriesInSameFolder = localizedSeries.Where(s => s.Item3.Equals(filePath)).Select(s => s.Item1);
+                if (otherSeriesInSameFolder.Count() > 1)
+                {
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", otherSeriesInSameFolder));
+                }
+            }
         }
     }
 }
