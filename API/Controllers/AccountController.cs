@@ -515,10 +515,10 @@ public class AccountController : BaseApiController
             // Validate email change
             var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
             if (emailValidationErrors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "email-taken"));
+
             user.Email = dto.Email;
-            user.EmailConfirmed = false;
+            user.EmailConfirmed = true;
             user.NormalizedEmail = _userManager.NormalizeEmail(dto.Email);
-            user.ConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             _unitOfWork.UserRepository.Update(user);
         }
 
