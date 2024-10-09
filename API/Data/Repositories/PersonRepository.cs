@@ -18,6 +18,8 @@ public interface IPersonRepository
 {
     void Attach(Person person);
     void Remove(Person person);
+    void Remove(ChapterPeople person);
+    void Remove(SeriesMetadataPeople person);
     void Update(Person person);
 
     Task<IList<Person>> GetAllPeople();
@@ -36,7 +38,7 @@ public interface IPersonRepository
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
-    Task<Person> GetPersonByName(string name);
+    Task<Person> GetPersonByName(string name, bool noTracking = false);
 }
 
 public class PersonRepository : IPersonRepository
@@ -58,6 +60,16 @@ public class PersonRepository : IPersonRepository
     public void Remove(Person person)
     {
         _context.Person.Remove(person);
+    }
+
+    public void Remove(ChapterPeople person)
+    {
+        _context.ChapterPeople.Remove(person);
+    }
+
+    public void Remove(SeriesMetadataPeople person)
+    {
+        _context.SeriesMetadataPeople.Remove(person);
     }
 
     public void Update(Person person)
@@ -234,9 +246,15 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Person> GetPersonByName(string name)
+    public async Task<Person> GetPersonByName(string name, bool noTracking = false)
     {
         var normalizedName = name.ToNormalized();
+
+        if (noTracking)
+        {
+            return await _context.Person.AsNoTracking().FirstOrDefaultAsync(p => p.NormalizedName == normalizedName);
+        }
+
         return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == normalizedName);
     }
 

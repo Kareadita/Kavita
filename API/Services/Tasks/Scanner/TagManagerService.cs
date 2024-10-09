@@ -41,7 +41,7 @@ public interface ITagManagerService
 public class TagManagerService : ITagManagerService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<TagManagerService> _logger;
+    private readonly ILogger<ProcessSeries> _logger;
     private Dictionary<string, Genre> _genres;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, Person> _people;
@@ -52,7 +52,7 @@ public class TagManagerService : ITagManagerService
     private readonly SemaphoreSlim _personSemaphore = new SemaphoreSlim(1, 1);
     private readonly SemaphoreSlim _collectionTagSemaphore = new SemaphoreSlim(1, 1);
 
-    public TagManagerService(IUnitOfWork unitOfWork, ILogger<TagManagerService> logger)
+    public TagManagerService(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;

@@ -24,6 +24,8 @@ public static class ApplicationServiceExtensions
     {
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
+        //services.AddScoped<DataContext>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFileService, FileService>();
@@ -45,7 +47,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IBookmarkService, BookmarkService>();
         services.AddScoped<IThemeService, ThemeService>();
         services.AddScoped<ISeriesService, SeriesService>();
-        services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IReadingListService, ReadingListService>();
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<IStatisticService, StatisticService>();
@@ -55,6 +56,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IStreamService, StreamService>();
 
         services.AddScoped<IScannerService, ScannerService>();
+        services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
         services.AddScoped<ILibraryWatcher, LibraryWatcher>();

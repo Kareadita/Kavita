@@ -663,6 +663,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1304,6 +1305,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1674,6 +1676,7 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
@@ -1684,6 +1687,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -1707,6 +1711,7 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = GetLibraryIdsForUser(userId);
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
+
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => formats.Contains(s.Format))

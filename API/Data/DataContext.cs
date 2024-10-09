@@ -158,9 +158,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.AgeRating)
             .HasDefaultValue(AgeRating.Unknown);
 
-        // Configure the many-to-many relationship for Movie and Person (Actor)
+        // Configure the many-to-many relationship for Movie and Person
         builder.Entity<ChapterPeople>()
-            .HasKey(cp => new { cp.ChapterId, cp.PersonId });
+            .HasKey(cp => new { cp.ChapterId, cp.PersonId, cp.Role });
 
         builder.Entity<ChapterPeople>()
             .HasOne(cp => cp.Chapter)
@@ -172,8 +172,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithMany(p => p.ChapterPeople)
             .HasForeignKey(cp => cp.PersonId);
 
+
         builder.Entity<SeriesMetadataPeople>()
-            .HasKey(smp => new { smp.SeriesMetadataId, smp.PersonId });
+            .HasKey(smp => new { smp.SeriesMetadataId, smp.PersonId, smp.Role });
 
         builder.Entity<SeriesMetadataPeople>()
             .HasOne(smp => smp.SeriesMetadata)

@@ -912,7 +912,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ChapterId", "PersonId");
+                    b.HasKey("ChapterId", "PersonId", "Role");
 
                     b.HasIndex("PersonId");
 
@@ -1959,7 +1959,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("SeriesMetadataId", "PersonId");
+                    b.HasKey("SeriesMetadataId", "PersonId", "Role");
 
                     b.HasIndex("PersonId");
 

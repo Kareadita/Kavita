@@ -78,33 +78,6 @@ public static class PersonHelper
 
     }
 
-    public static void RemovePeople(ICollection<ChapterPeople> existingChapterPeople, IEnumerable<string> people, PersonRole role, Action<ChapterPeople>? action = null)
-    {
-        // Normalize the input people names
-        var normalizedPeople = people.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
-
-        if (normalizedPeople.Count == 0)
-        {
-            // If no people provided, remove all people with the given role
-            var peopleToRemove = existingChapterPeople.Where(cp => cp.Role == role).ToList();
-            foreach (var chapterPerson in peopleToRemove)
-            {
-                existingChapterPeople.Remove(chapterPerson);
-                action?.Invoke(chapterPerson);
-            }
-            return;
-        }
-
-        // Otherwise, remove specific people by name and role
-        foreach (var normalizedPerson in normalizedPeople)
-        {
-            var chapterPersonToRemove = existingChapterPeople.FirstOrDefault(cp => cp.Role == role && cp.Person.NormalizedName == normalizedPerson);
-            if (chapterPersonToRemove == null) continue;
-
-            existingChapterPeople.Remove(chapterPersonToRemove);
-            action?.Invoke(chapterPersonToRemove);
-        }
-    }
 
     /// <summary>
     /// Removes all people that are not present in the removeAllExcept list.
@@ -131,18 +104,40 @@ public static class PersonHelper
     /// </summary>
     /// <param name="metadataPeople"></param>
     /// <param name="person"></param>
-    public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
+    // public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
+    // {
+    //
+    //     if (string.IsNullOrEmpty(person.Name)) return;
+    //     var existingPerson = metadataPeople.FirstOrDefault(p =>
+    //         p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
+    //
+    //     if (existingPerson == null)
+    //     {
+    //         metadataPeople.Add(person);
+    //     }
+    // }
+
+
+    public static void AddPersonIfNotExists(ICollection<SeriesMetadataPeople> metadataPeople, Person person, PersonRole role)
     {
-        // TODO: Implement People support
-        // if (string.IsNullOrEmpty(person.Name)) return;
-        // var existingPerson = metadataPeople.FirstOrDefault(p =>
-        //     p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
-        //
-        // if (existingPerson == null)
-        // {
-        //     metadataPeople.Add(person);
-        // }
+        if (string.IsNullOrEmpty(person.Name)) return;
+
+        // Check if the person with the specific role already exists in the collection
+        var existingPerson = metadataPeople.FirstOrDefault(p =>
+            p.Person.NormalizedName == person.Name.ToNormalized() && p.Role == role);
+
+        // Add the person with the role if not already present
+        if (existingPerson == null)
+        {
+            metadataPeople.Add(new SeriesMetadataPeople
+            {
+                Person = person,
+                Role = role
+            });
+        }
     }
+
+
 
 
     /// <summary>

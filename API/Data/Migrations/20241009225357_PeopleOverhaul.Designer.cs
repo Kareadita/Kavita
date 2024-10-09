@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241007201603_PeopleOverhaul")]
+    [Migration("20241009225357_PeopleOverhaul")]
     partial class PeopleOverhaul
     {
         /// <inheritdoc />
@@ -915,7 +915,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ChapterId", "PersonId");
+                    b.HasKey("ChapterId", "PersonId", "Role");
 
                     b.HasIndex("PersonId");
 
@@ -1962,7 +1962,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("SeriesMetadataId", "PersonId");
+                    b.HasKey("SeriesMetadataId", "PersonId", "Role");
 
                     b.HasIndex("PersonId");
 

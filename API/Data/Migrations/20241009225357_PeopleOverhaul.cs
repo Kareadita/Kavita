@@ -33,7 +33,7 @@ namespace API.Data.Migrations
             //     table: "Person",
             //     type: "TEXT",
             //     nullable: true);
-
+            //
             // migrationBuilder.AddColumn<string>(
             //     name: "CoverImage",
             //     table: "Person",
@@ -46,13 +46,13 @@ namespace API.Data.Migrations
             //     type: "INTEGER",
             //     nullable: false,
             //     defaultValue: false);
-
+            //
             // migrationBuilder.AddColumn<string>(
             //     name: "Description",
             //     table: "Person",
             //     type: "TEXT",
             //     nullable: true);
-
+            //
             // migrationBuilder.AddColumn<string>(
             //     name: "HardcoverId",
             //     table: "Person",
@@ -88,7 +88,7 @@ namespace API.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChapterPeople", x => new { x.ChapterId, x.PersonId });
+                    table.PrimaryKey("PK_ChapterPeople", x => new { x.ChapterId, x.PersonId, x.Role });
                     table.ForeignKey(
                         name: "FK_ChapterPeople_Chapter_ChapterId",
                         column: x => x.ChapterId,
@@ -113,7 +113,7 @@ namespace API.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SeriesMetadataPeople", x => new { x.SeriesMetadataId, x.PersonId });
+                    table.PrimaryKey("PK_SeriesMetadataPeople", x => new { x.SeriesMetadataId, x.PersonId, x.Role });
                     table.ForeignKey(
                         name: "FK_SeriesMetadataPeople_Person_PersonId",
                         column: x => x.PersonId,
