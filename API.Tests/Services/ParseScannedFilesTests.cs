@@ -1,24 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
-using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
-using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using AutoMapper;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -52,7 +43,7 @@ public class MockReadingItemService : IReadingItemService
         return 1;
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size  = CoverImageSize.Default)
+    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         return string.Empty;
     }
@@ -110,6 +101,94 @@ public class ParseScannedFilesTests : AbstractDbTest
 
         await _context.SaveChangesAsync();
     }
+
+    #region MergeLocalizedSeriesWithSeries
+
+    /// <summary>
+    /// Test that a file encountered with a series matching a previously encountered localized series gets updated
+    /// </summary>
+    [Fact]
+    public void MergeLocalizedSeriesWithSeries_ShouldUpdateSeriesAndLocalizedSeries()
+    {
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
+        // Series of vol 2 matches localized series of vol 1 - update so they stack
+        var infos = new List<ParserInfo>(){
+            new() { FullFilePath = "C:/Data/Accel World v01.cbz", Filename = "Accel World v01.cbz", Series = "Accel World", LocalizedSeries = "World of Acceleration" },
+            new() { FullFilePath = "C:/Data/Accel World v02.cbz", Filename = "Accel World v02.cbz", Series = "World of Acceleration" }
+        };
+        psf.MergeLocalizedSeriesWithSeries(infos);
+        Assert.Equal("Accel World", infos[1].Series);
+        Assert.Equal("World of Acceleration", infos[1].LocalizedSeries);
+
+        // Series of vol 2 matches localized series of vol 1 - update so they stack
+        infos = [
+            new() { FullFilePath = "C:/Data/Accel World v01.cbz", Filename = "Accel World v01.cbz", Series = "Accel World", LocalizedSeries = "World of Acceleration" },
+            new() { FullFilePath = "C:/Data/Accel World v02.cbz", Filename = "Accel World v02.cbz", Series = "World of Acceleration", LocalizedSeries = "Accel World" }
+        ];
+        psf.MergeLocalizedSeriesWithSeries(infos);
+        Assert.Equal("Accel World", infos[1].Series);
+        Assert.Equal("World of Acceleration", infos[1].LocalizedSeries);
+
+        // Multiple series subfolders within the same folder, make sure they don't stack
+        infos = [
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Avant-garde Yumeko/Avant-garde Yumeko v01.cbz", Filename = "Avant-garde Yumeko v01.cbz", Series = "Avant-garde Yumeko", LocalizedSeries = "アバンギャルド夢子" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Blood on the Tracks/Blood on the Tracks v01.cbz", Filename = "Blood on the Tracks v01.cbz", Series = "Blood on the Tracks", LocalizedSeries = "血の轍" }
+        ];
+        psf.MergeLocalizedSeriesWithSeries(infos);
+        Assert.Equal("Avant-garde Yumeko", infos[0].Series);
+        Assert.Equal("アバンギャルド夢子", infos[0].LocalizedSeries);
+        Assert.Equal("Blood on the Tracks", infos[1].Series);
+        Assert.Equal("血の轍", infos[1].LocalizedSeries);
+
+        // Multiple series subfolders within the same folder, make sure they don't stack
+        infos = [
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Avant-garde Yumeko/Avant-garde Yumeko v01.cbz", Filename = "Avant-garde Yumeko v01.cbz", Series = "Avant-garde Yumeko", LocalizedSeries = "Avant-garde Yumeko" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Blood on the Tracks/Blood on the Tracks v01.cbz", Filename = "Blood on the Tracks v01.cbz", Series = "Blood on the Tracks" }
+        ];
+        psf.MergeLocalizedSeriesWithSeries(infos);
+        Assert.Equal("Avant-garde Yumeko", infos[0].Series);
+        Assert.Equal("Avant-garde Yumeko", infos[0].LocalizedSeries);
+        Assert.Equal("Blood on the Tracks", infos[1].Series);
+        Assert.Equal("", infos[1].LocalizedSeries);
+
+        // Multiple series subfolders within the same folder, make sure only matching series stack
+        infos = [
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Avant-garde Yumeko/Avant-garde Yumeko v01.cbz", Filename = "Avant-garde Yumeko v01.cbz", Series = "Avant-garde Yumeko", LocalizedSeries = "アバンギャルド夢子" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Avant-garde Yumeko/Avant-garde Yumeko v02.cbz", Filename = "Avant-garde Yumeko v02.cbz", Series = "アバンギャルド夢子" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Avant-garde Yumeko/Avant-garde Yumeko v03.cbz", Filename = "Avant-garde Yumeko v03.cbz", Series = "Avant-garde Yumeko", LocalizedSeries = "アバンギャルド夢子" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Blood on the Tracks/Blood on the Tracks v01.cbz", Filename = "Blood on the Tracks v01.cbz", Series = "Blood on the Tracks", LocalizedSeries = "血の轍" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Blood on the Tracks/Blood on the Tracks v02.cbz", Filename = "Blood on the Tracks v02.cbz", Series = "Blood on the Tracks", LocalizedSeries = "血の轍" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Blood on the Tracks/Blood on the Tracks v03.cbz", Filename = "Blood on the Tracks v03.cbz", Series = "血の轍" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Welcome Back, Alice/Welcome Back Alice v01.cbz", Filename = "Welcome Back Alice v01.cbz", Series = "Welcome Back, Alice", LocalizedSeries = "おかえりアリス" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Welcome Back, Alice/Welcome Back Alice v02.cbz", Filename = "Welcome Back Alice v02.cbz", Series = "Welcome Back, Alice" },
+            new() { FullFilePath = "C:/Data/OSHIMI Shuzo/Welcome Back, Alice/Welcome Back Alice v03.cbz", Filename = "Welcome Back Alice v03.cbz", Series = "Welcome Back, Alice" }
+        ];
+        psf.MergeLocalizedSeriesWithSeries(infos);
+        Assert.Equal("Avant-garde Yumeko", infos[0].Series);
+        Assert.Equal("アバンギャルド夢子", infos[0].LocalizedSeries);
+        Assert.Equal("Avant-garde Yumeko", infos[1].Series);
+        Assert.Equal("アバンギャルド夢子", infos[1].LocalizedSeries);
+        Assert.Equal("Avant-garde Yumeko", infos[2].Series);
+        Assert.Equal("アバンギャルド夢子", infos[2].LocalizedSeries);
+        Assert.Equal("Blood on the Tracks", infos[3].Series);
+        Assert.Equal("血の轍", infos[3].LocalizedSeries);
+        Assert.Equal("Blood on the Tracks", infos[4].Series);
+        Assert.Equal("血の轍", infos[4].LocalizedSeries);
+        Assert.Equal("Blood on the Tracks", infos[5].Series);
+        Assert.Equal("血の轍", infos[5].LocalizedSeries);
+        Assert.Equal("Welcome Back, Alice", infos[6].Series);
+        Assert.Equal("おかえりアリス", infos[6].LocalizedSeries);
+        Assert.Equal("Welcome Back, Alice", infos[7].Series);
+        Assert.Equal("", infos[7].LocalizedSeries); // not updated, because series didn't match localized series of vol 1
+        Assert.Equal("Welcome Back, Alice", infos[8].Series);
+        Assert.Equal("", infos[8].LocalizedSeries); // not updated, beceasue series didn't match localized series of vol 1
+    }
+
+    #endregion
 
     #region MergeName
 
@@ -231,7 +310,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.NotNull(library);
 
         library.Type = LibraryType.Manga;
-        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false,
+        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() { "C:/Data/" }, false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1));
 
 
@@ -243,7 +322,6 @@ public class ParseScannedFilesTests : AbstractDbTest
     }
 
     #endregion
-
 
     #region ProcessFiles
 
