@@ -388,37 +388,7 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
-        if (!series.Metadata.GenresLocked)
-        {
-            // TODO: Refactor to be closer to how People works
-            var genres = chapters.SelectMany(c => c.Genres).ToList();
-            GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
-            {
-                series.Metadata.Genres.Remove(genre);
-            });
-        }
-
-
-
-        //     if (!series.Metadata.TagsLocked)
-        //     {
-        // foreach (var tag in chapter.Tags)
-        // {
-        //     TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-        // }
-        //     }
-        //
-        //     if (!series.Metadata.GenresLocked)
-        //     {
-        //         foreach (var genre in chapter.Genres)
-        //         {
-        //             GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-        //         }
-        //     }
-
-        // TODO: Implement People Support
-        #region People
-        // // Handle People
+        #region PeopleAndTagsAndGenres
         foreach (var chapter in chapters)
         {
             if (!series.Metadata.WriterLocked)
@@ -502,187 +472,77 @@ public class ProcessSeries : IProcessSeries
 
             if (!series.Metadata.TagsLocked)
             {
-                // TODO: Refactor to be closer to how People works
-                foreach (var tag in chapter.Tags) // This needs removal code
-                {
-                    TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-                }
+                UpdateSeriesMetadataTags(series.Metadata.Tags, chapter.Tags);
             }
 
             if (!series.Metadata.GenresLocked)
             {
-                // TODO: Refactor to be closer to how People works
-                foreach (var genre in chapter.Genres)
-                {
-                    GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-                }
+                UpdateSeriesMetadataGenres(series.Metadata.Genres, chapter.Genres);
             }
         }
-
-        //
-        //     if (!series.Metadata.CoverArtistLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.CoverArtist))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.PublisherLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Publisher))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.CharacterLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Character))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.ColoristLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Colorist))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.EditorLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Editor))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.InkerLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Inker))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.ImprintLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Imprint))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.TeamLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Team))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.LocationLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Location))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.LettererLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Letterer))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.PencillerLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Penciller))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.TranslatorLocked)
-        //     {
-        //         foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Translator))
-        //         {
-        //             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.TagsLocked)
-        //     {
-        //         foreach (var tag in chapter.Tags)
-        //         {
-        //             TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-        //         }
-        //     }
-        //
-        //     if (!series.Metadata.GenresLocked)
-        //     {
-        //         foreach (var genre in chapter.Genres)
-        //         {
-        //             GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-        //         }
-        //     }
-        // }
-        // // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
-        // // I might be able to filter out people that are in locked fields?
-        // var people = chapters.SelectMany(c => c.People).ToList();
-        // PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
-        //     people, person =>
-        //     {
-        //         switch (person.Role)
-        //         {
-        //             case PersonRole.Writer:
-        //                 if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Penciller:
-        //                 if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Inker:
-        //                 if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Imprint:
-        //                 if (!series.Metadata.ImprintLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Colorist:
-        //                 if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Letterer:
-        //                 if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.CoverArtist:
-        //                 if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Editor:
-        //                 if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Publisher:
-        //                 if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Character:
-        //                 if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Translator:
-        //                 if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
-        //                 break;
-        //             case PersonRole.Other:
-        //             default:
-        //                 series.Metadata.People.Remove(person);
-        //                 break;
-        //         }
-        //     });
-        //
         #endregion
-
     }
+
+    private static void UpdateSeriesMetadataTags(ICollection<Tag> metadataTags, IEnumerable<Tag> chapterTags)
+    {
+        // Normalize and group by tag
+        var tagsToAdd = chapterTags
+            .Select(tag => tag)
+            .ToList();
+
+        // Remove any tags that are not part of the new list
+        var tagsToRemove = metadataTags
+            .Where(mt => tagsToAdd.TrueForAll(ct => ct.NormalizedTitle != mt.NormalizedTitle))
+            .ToList();
+
+        foreach (var tagToRemove in tagsToRemove)
+        {
+            metadataTags.Remove(tagToRemove);
+        }
+
+        // Add new tags if they do not already exist
+        foreach (var tag in tagsToAdd)
+        {
+            var existingTag = metadataTags
+                .FirstOrDefault(mt => mt.NormalizedTitle == tag.NormalizedTitle);
+
+            if (existingTag == null)
+            {
+                metadataTags.Add(tag);
+            }
+        }
+    }
+
+    private static void UpdateSeriesMetadataGenres(ICollection<Genre> metadataGenres, IEnumerable<Genre> chapterGenres)
+    {
+        // Normalize and group by genre
+        var genresToAdd = chapterGenres
+            .Select(genre => genre)
+            .ToList();
+
+        // Remove any genres that are not part of the new list
+        var genresToRemove = metadataGenres
+            .Where(mg => genresToAdd.TrueForAll(cg => cg.NormalizedTitle != mg.NormalizedTitle))
+            .ToList();
+
+        foreach (var genreToRemove in genresToRemove)
+        {
+            metadataGenres.Remove(genreToRemove);
+        }
+
+        // Add new genres if they do not already exist
+        foreach (var genre in genresToAdd)
+        {
+            var existingGenre = metadataGenres
+                .FirstOrDefault(mg => mg.NormalizedTitle == genre.NormalizedTitle);
+
+            if (existingGenre == null)
+            {
+                metadataGenres.Add(genre);
+            }
+        }
+    }
+
 
 
     private static void UpdateSeriesMetadataPeople(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople, IEnumerable<ChapterPeople> chapterPeople, PersonRole role)
@@ -695,7 +555,7 @@ public class ProcessSeries : IProcessSeries
 
         // Remove any people who are not part of the new list
         var peopleToRemove = metadataPeople
-            .Where(mp => mp.Role == role && peopleToAdd.All(p => p.NormalizedName != mp.Person.NormalizedName))
+            .Where(mp => mp.Role == role && peopleToAdd.TrueForAll(p => p.NormalizedName != mp.Person.NormalizedName))
             .ToList();
 
         foreach (var personToRemove in peopleToRemove)

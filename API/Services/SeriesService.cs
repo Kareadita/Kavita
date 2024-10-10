@@ -199,7 +199,7 @@ public class SeriesService : ISeriesService
 
             if (updateSeriesMetadataDto.SeriesMetadata != null)
             {
-                // TODO: Re-implement People support
+                // TODO: Implement People support
                 // if (PersonHelper.HasAnyPeople(updateSeriesMetadataDto.SeriesMetadata))
                 // {
                 //     void HandleAddPerson(Person person)
