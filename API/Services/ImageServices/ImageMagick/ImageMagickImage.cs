@@ -27,8 +27,11 @@ public class ImageMagickImage : IImage
     /// <returns>An instance of <see cref="ImageMagickImage"/>.</returns>
     public static IImage CreateFromBase64(string base64)
     {
+        if (string.IsNullOrEmpty(base64))
+            throw new ArgumentNullException(nameof(base64));
+
         ImageMagickImage m = new ImageMagickImage();
-        m._image = (MagickImage)MagickImage.FromBase64(base64);
+        m._image = (MagickImage) MagickImage.FromBase64(base64);
         return m;
     }
 
@@ -41,7 +44,7 @@ public class ImageMagickImage : IImage
     /// <returns>An instance of <see cref="ImageMagickImage"/>.</returns>
     public static IImage CreateFromBGRAByteArray(byte[] bgraByteArray, int width, int height)
     {
-        //Convert to RGBA float array (Image Magick 16 uses float array with values from 0-65535)
+        // Convert to RGBA float array (Image Magick 16 uses float array with values from 0-65535)
         var floats = new float[bgraByteArray.Length];
         for (var i = 0; i < bgraByteArray.Length; i += 4)
         {
@@ -50,10 +53,12 @@ public class ImageMagickImage : IImage
             floats[i + 2] = bgraByteArray[i] << 8;
             floats[i + 3] = bgraByteArray[i + 3] << 8;
         }
+
         ImageMagickImage m = new ImageMagickImage();
         m._image = new MagickImage(MagickColor.FromRgba(0, 0, 0, 0), width, height);
         using var pixels = m._image.GetPixels();
         pixels.SetArea(0, 0, width, height, floats);
+
         return m;
     }
 
@@ -85,7 +90,7 @@ public class ImageMagickImage : IImage
     /// <param name="image">The existing <see cref="MagickImage"/>.</param>
     public ImageMagickImage(MagickImage image)
     {
-        _image = (MagickImage)image.Clone();
+        _image = (MagickImage) image.Clone();
     }
 
     /// <summary>
@@ -164,7 +169,7 @@ public class ImageMagickImage : IImage
     /// <inheritdoc/>
     public float[] GetRGBAImageData()
     {
-        float[] data = null;
+        float[] data = [];
         float scale = 1.0f / 256;
         if (_image.ChannelCount == 4)
         {

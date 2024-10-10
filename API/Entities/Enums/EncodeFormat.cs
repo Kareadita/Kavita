@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
-public enum EncodeFormat 
+public enum EncodeFormat
 {
     [Description("PNG")]
     PNG = 0,
@@ -10,7 +10,7 @@ public enum EncodeFormat
     WEBP = 1,
     [Description("AVIF")]
     AVIF = 2,
-    //Internal Use
+    /// Internal Use
     [Description("JPEG")]
     JPEG = 3
 }

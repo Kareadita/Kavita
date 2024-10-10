@@ -26,6 +26,13 @@ public static class Parser
 
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
+    /// <summary>
+    /// Mime Mappings on Browsers Non Universally Supported Image Formats.
+    /// Examples:
+    /// Browser presents jp2, which means it supports images with file extensions jp2 and j2k.  (JPEG200)
+    /// Browser present heif, which means it supports images with file extensions heif and heic (HEIF)
+    /// Browser present jxl, which means it supports images with file extension jxl             (JPEG-XL)
+    /// </summary>
     public static Dictionary<string, List<string>> NonUniversalSupportedMimeMappings = new Dictionary<string, List<string>>()
         {
             { "jp2", ["jp2", "j2k"] } ,
@@ -35,9 +42,22 @@ public static class Parser
             { "jxl", ["jxl"] } ,
             { "avif", ["avif"] } ,
         };
-    public static string[] NonUniversalFileImageExtensionArray = { "avif", "jxl", "heif", "heic", "j2k", "jp2" };
+
+    /// <summary>
+    /// Browser Universally Supported Image extensions that we support. Means, all browsers support this image formats.
+    /// </summary>
     public static string[] UniversalFileImageExtensionArray = { "png", "jpeg", "jpg", "webp", "gif" };
+    /// <summary>
+    /// Browser Non Universally Supported Image extensions that we support.
+    /// </summary>
+    public static string[] NonUniversalFileImageExtensionArray = { "avif", "jxl", "heif", "heic", "j2k", "jp2" };
+    /// <summary>
+    /// Regex to Match Non Universally supported Images extensions.
+    /// </summary>
     public static string NonUniversalFileImageExtensions = @"^(\." + string.Join(@"|\.", NonUniversalFileImageExtensionArray) + ")";
+    /// <summary>
+    /// Regex to Match All our supported Images extensions.
+    /// </summary>
     public static string ImageFileExtensions = @"^(\." + string.Join(@"|\.", UniversalFileImageExtensionArray.Union(NonUniversalFileImageExtensionArray)) + ")"; // Don't forget to update CoverChooser
 
 

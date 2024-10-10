@@ -80,28 +80,30 @@ public static class HttpExtensions
 
         List<string> supportedExtensions = new List<string>();
 
-        //Add default extensions supported by all browsers.
+        // Add default extensions supported by all browsers.
         supportedExtensions.AddRange(Parser.UniversalFileImageExtensionArray);
-        //Browser add specific image mime types, when the image type is not a global standard, browser specify the specific image type in the accept header.
-        //Let's reuse that to identify the additional image types supported by the browser.
-        foreach (string v in split)
+
+        // Browser add specific image mime types, when the image type is not a global standard, browser specify the specific image type in the accept header.
+        // Let's reuse that to identify the additional image types supported by the browser.
+        foreach (var v in split)
         {
             if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
             {
-                string mimeimagepart = v.Substring(6).ToLowerInvariant();
-                if (mimeimagepart.StartsWith("*")) continue;
-                if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeimagepart))
+                var mimeImagePart = v.Substring(6).ToLowerInvariant();
+                if (mimeImagePart.StartsWith("*")) continue;
+                if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeImagePart))
                 {
-                    Parser.NonUniversalSupportedMimeMappings[mimeimagepart].ForEach(x => AddExtension(supportedExtensions, x));
+                    Parser.NonUniversalSupportedMimeMappings[mimeImagePart].ForEach(x => AddExtension(supportedExtensions, x));
                 }
-                else if (mimeimagepart == "svg+xml")
+                else if (mimeImagePart == "svg+xml")
                 {
                     AddExtension(supportedExtensions, "svg");
                 }
                 else
-                    AddExtension(supportedExtensions, mimeimagepart);
+                    AddExtension(supportedExtensions, mimeImagePart);
             }
         }
+
         return supportedExtensions;
     }
 }
