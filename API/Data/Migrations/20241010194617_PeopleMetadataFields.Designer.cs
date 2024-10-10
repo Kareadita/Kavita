@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241009225357_PeopleOverhaul")]
-    partial class PeopleOverhaul
+    [Migration("20241010194617_PeopleMetadataFields")]
+    partial class PeopleMetadataFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1571,9 +1571,6 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<long>("MalId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("MetronId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

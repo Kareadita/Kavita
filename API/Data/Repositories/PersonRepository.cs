@@ -38,7 +38,7 @@ public interface IPersonRepository
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
-    Task<Person> GetPersonByName(string name, bool noTracking = false);
+    Task<Person> GetPersonByName(string name);
 }
 
 public class PersonRepository : IPersonRepository
@@ -229,16 +229,9 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Person> GetPersonByName(string name, bool noTracking = false)
+    public async Task<Person> GetPersonByName(string name)
     {
-        var normalizedName = name.ToNormalized();
-
-        if (noTracking)
-        {
-            return await _context.Person.AsNoTracking().FirstOrDefaultAsync(p => p.NormalizedName == normalizedName);
-        }
-
-        return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == normalizedName);
+        return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == name.ToNormalized());
     }
 
 

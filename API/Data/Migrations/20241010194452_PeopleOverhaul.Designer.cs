@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241010194452_PeopleOverhaul")]
+    partial class PeopleOverhaul
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -1549,25 +1552,10 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AniListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Asin")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HardcoverId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("MalId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

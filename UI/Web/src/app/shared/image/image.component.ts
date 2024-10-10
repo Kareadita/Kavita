@@ -109,7 +109,8 @@ export class ImageComponent implements OnChanges {
     }
 
     if (this.classes != '') {
-      this.renderer.addClass(this.imgElem.nativeElement, this.classes);
+      const classTokens = this.classes.split(' ');
+      classTokens.forEach(cls => this.renderer.addClass(this.imgElem.nativeElement, cls));
     }
     this.cdRef.markForCheck();
   }

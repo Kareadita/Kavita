@@ -1684,15 +1684,6 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Tags)
 
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.People)
-            .ThenInclude(p => p.SeriesMetadata)
-
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.People)
-            .ThenInclude(p => p.Person)
-
-
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
@@ -1712,6 +1703,7 @@ public class SeriesRepository : ISeriesRepository
 
             .AsSplitQuery();
         return query.SingleOrDefaultAsync();
+
     #nullable enable
     }
 

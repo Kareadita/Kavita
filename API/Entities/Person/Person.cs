@@ -46,7 +46,7 @@ public class Person : IHasCoverImage
     /// https://metron.cloud/creator/{slug}/
     /// </summary>
     /// <remarks>Kavita+ Only</remarks>
-    public long MetronId { get; set; } = 0;
+    //public long MetronId { get; set; } = 0;
 
     // Relationships
     public ICollection<ChapterPeople> ChapterPeople { get; set; } = new List<ChapterPeople>();

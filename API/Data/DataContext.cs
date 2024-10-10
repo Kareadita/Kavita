@@ -170,7 +170,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<ChapterPeople>()
             .HasOne(cp => cp.Person)
             .WithMany(p => p.ChapterPeople)
-            .HasForeignKey(cp => cp.PersonId);
+            .HasForeignKey(cp => cp.PersonId)
+            .OnDelete(DeleteBehavior.Cascade);
 
 
         builder.Entity<SeriesMetadataPeople>()
@@ -184,7 +185,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<SeriesMetadataPeople>()
             .HasOne(smp => smp.Person)
             .WithMany(p => p.SeriesMetadataPeople)
-            .HasForeignKey(smp => smp.PersonId);
+            .HasForeignKey(smp => smp.PersonId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     #nullable enable

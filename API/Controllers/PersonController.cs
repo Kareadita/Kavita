@@ -66,6 +66,7 @@ public class PersonController : BaseApiController
         dto.Description ??= string.Empty;
         person.Description = dto.Description;
         person.CoverImageLocked = dto.CoverImageLocked;
+
         if (dto.MalId is > 0)
         {
             person.MalId = (long) dto.MalId;
@@ -81,6 +82,7 @@ public class PersonController : BaseApiController
         }
         if (!string.IsNullOrEmpty(dto.Asin?.Trim()))
         {
+            // TODO: Validate ASIN
             person.Asin = dto.Asin.Trim();
         }
 
