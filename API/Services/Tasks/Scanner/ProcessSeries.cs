@@ -352,6 +352,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
             foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
+                // TODO: Remove this _tagManagerService
                 var (tag, _) = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
                 if (tag == null) continue;
 
@@ -985,7 +986,7 @@ public class ProcessSeries : IProcessSeries
         if (!chapter.TagsLocked)
         {
             var tags = TagHelper.GetTagValues(comicInfo.Tags);
-            await UpdateChapterTags(chapter, tags, _tagManagerService);
+            await UpdateChapterTags(chapter, tags);
         }
     }
 
@@ -998,7 +999,7 @@ public class ProcessSeries : IProcessSeries
 
         // Remove any genres that are not part of the new list
         var genresToRemove = chapter.Genres
-            .Where(g => genresToAdd.All(ga => ga.NormalizedTitle != g.NormalizedTitle))
+            .Where(g => genresToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
             .ToList();
 
         foreach (var genreToRemove in genresToRemove)
@@ -1040,18 +1041,16 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-
-
-    private static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, ITagManagerService tagManagerService)
+    private async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames)
     {
-        // Normalize and build tags from the list of tag names
+        // Normalize and build genres from the list of genre names
         var tagsToAdd = tagNames
-            .Select(t => new TagBuilder(t).Build())
+            .Select(g => new TagBuilder(g).Build())
             .ToList();
 
-        // Remove any tags that are not part of the new list
+        // Remove any genres that are not part of the new list
         var tagsToRemove = chapter.Tags
-            .Where(t => tagsToAdd.TrueForAll(ta => ta.NormalizedTitle != t.NormalizedTitle))
+            .Where(g => tagsToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
             .ToList();
 
         foreach (var tagToRemove in tagsToRemove)
@@ -1059,19 +1058,35 @@ public class ProcessSeries : IProcessSeries
             chapter.Tags.Remove(tagToRemove);
         }
 
-        // Add new tags if they do not already exist
+        // Get all normalized titles for bulk lookup
+        var normalizedTitles = tagsToAdd.Select(g => g.NormalizedTitle).ToList();
+
+        // Bulk lookup for existing genres in the database
+        var existingTags = await _unitOfWork.DataContext.Tag
+            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
+            .ToListAsync();
+
+        // Find genres that do not exist in the database
+        var missingGenres = tagsToAdd
+            .Where(g => existingTags.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
+            .ToList();
+
+        // Add missing genres to the database
+        if (missingGenres.Count != 0)
+        {
+            _unitOfWork.DataContext.Tag.AddRange(missingGenres);
+            await _unitOfWork.CommitAsync();  // Commit the changes to the database
+        }
+
+        // Add the new or existing genres to the chapter
         foreach (var tag in tagsToAdd)
         {
-            var existingTag = chapter.Tags
-                .FirstOrDefault(t => t.NormalizedTitle == tag.NormalizedTitle);
+            var existingGenre = existingTags.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle)
+                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle);
 
-            if (existingTag == null)
+            if (existingGenre != null && !chapter.Tags.Contains(existingGenre))
             {
-                var t = await tagManagerService.GetTag(tag.Title);
-                if (t != null)
-                {
-                    chapter.Tags.Add(t);
-                }
+                chapter.Tags.Add(existingGenre);
             }
         }
     }
