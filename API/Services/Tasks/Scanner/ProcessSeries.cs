@@ -417,7 +417,7 @@ public class ProcessSeries : IProcessSeries
         //     }
 
         // TODO: Implement People Support
-        // #region People
+        #region People
         // // Handle People
         foreach (var chapter in chapters)
         {
@@ -503,9 +503,18 @@ public class ProcessSeries : IProcessSeries
             if (!series.Metadata.TagsLocked)
             {
                 // TODO: Refactor to be closer to how People works
-                foreach (var tag in chapter.Tags)
+                foreach (var tag in chapter.Tags) // This needs removal code
                 {
                     TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
+                }
+            }
+
+            if (!series.Metadata.GenresLocked)
+            {
+                // TODO: Refactor to be closer to how People works
+                foreach (var genre in chapter.Genres)
+                {
+                    GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
                 }
             }
         }
@@ -671,7 +680,7 @@ public class ProcessSeries : IProcessSeries
         //         }
         //     });
         //
-        // #endregion
+        #endregion
 
     }
 

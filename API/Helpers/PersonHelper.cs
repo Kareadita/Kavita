@@ -10,6 +10,7 @@ using API.Helpers.Builders;
 namespace API.Helpers;
 #nullable enable
 
+// This isn't needed in the new person architecture
 public static class PersonHelper
 {
 

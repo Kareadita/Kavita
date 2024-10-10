@@ -183,29 +183,12 @@ public class PersonRepository : IPersonRepository
 
     public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)
     {
-        // TODO: Implement People Support
-        // var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        //
-        // var query = _context.Person
-        //     .Where(p => p.Role == PersonRole.Writer)
-        //     .RestrictAgainstAgeRestriction(ageRating)
-        //     .Select(p => new BrowsePersonDto
-        //     {
-        //         Id = p.Id,
-        //         Name = p.Name,
-        //         Role = p.Role,
-        //         Description = p.Description,
-        //         SeriesCount = p.SeriesMetadataPeople.Count,
-        //         IssueCount = p.ChapterPeople.Count
-        //     })
-        //     .OrderBy(p => p.Name);
-        //
-        // return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        //List<PersonRole> roles = [PersonRole.Writer];
 
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var query = _context.Person
-            .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == PersonRole.Writer)) // Filter by role in series
+            .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == PersonRole.Writer) || p.ChapterPeople.Any(cmp => cmp.Role == PersonRole.CoverArtist))
             .RestrictAgainstAgeRestriction(ageRating)
             .Select(p => new BrowsePersonDto
             {
