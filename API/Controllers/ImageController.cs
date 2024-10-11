@@ -305,7 +305,7 @@ public class ImageController : BaseApiController
     /// <summary>
     /// Returns cover image for Person
     /// </summary>
-    /// <param name="personId"></param>
+    /// <param name="name"></param>
     /// <returns></returns>
     [HttpGet("person-cover-by-name")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
@@ -313,6 +313,7 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
+
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageByNameAsync(name));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);

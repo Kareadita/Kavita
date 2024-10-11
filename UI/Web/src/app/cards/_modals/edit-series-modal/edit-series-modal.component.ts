@@ -488,12 +488,12 @@ export class EditSeriesModalComponent implements OnInit {
 
   fetchPeople(role: PersonRole, filter: string) {
     return this.metadataService.getAllPeople().pipe(map(people => {
-      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
+      return people.filter(p => this.utilityService.filter(p.name, filter));
     }));
   }
 
   createBlankPersonSettings(id: string, role: PersonRole) {
-    var personSettings = new TypeaheadSettings<Person>();
+    const personSettings = new TypeaheadSettings<Person>();
     personSettings.minCharacters = 0;
     personSettings.multiple = true;
     personSettings.showLocked = true;
@@ -508,7 +508,7 @@ export class EditSeriesModalComponent implements OnInit {
     }
 
     personSettings.selectionCompareFn = (a: Person, b: Person) => {
-      return a.name == b.name && a.role == b.role;
+      return a.name == b.name;
     }
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(role, filter).pipe(map(items => personSettings.compareFn(items, filter)));

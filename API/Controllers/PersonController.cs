@@ -64,27 +64,28 @@ public class PersonController : BaseApiController
         if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
         dto.Description ??= string.Empty;
-        // person.Description = dto.Description;
-        // person.CoverImageLocked = dto.CoverImageLocked;
-        //
-        // if (dto.MalId is > 0)
-        // {
-        //     person.MalId = (long) dto.MalId;
-        // }
-        // if (dto.AniListId is > 0)
-        // {
-        //     person.AniListId = (int) dto.AniListId;
-        // }
-        //
-        // if (!string.IsNullOrEmpty(dto.HardcoverId?.Trim()))
-        // {
-        //     person.HardcoverId = dto.HardcoverId.Trim();
-        // }
-        // if (!string.IsNullOrEmpty(dto.Asin?.Trim()))
-        // {
-        //     // TODO: Validate ASIN
-        //     person.Asin = dto.Asin.Trim();
-        // }
+        person.Description = dto.Description;
+        person.CoverImageLocked = dto.CoverImageLocked;
+
+        if (dto.MalId is > 0)
+        {
+            person.MalId = (long) dto.MalId;
+        }
+        if (dto.AniListId is > 0)
+        {
+            person.AniListId = (int) dto.AniListId;
+        }
+
+        if (!string.IsNullOrEmpty(dto.HardcoverId?.Trim()))
+        {
+            person.HardcoverId = dto.HardcoverId.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(dto.Asin?.Trim()))
+        {
+            // TODO: Validate ASIN
+            person.Asin = dto.Asin.Trim();
+        }
 
         _unitOfWork.PersonRepository.Update(person);
         await _unitOfWork.CommitAsync();
