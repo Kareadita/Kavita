@@ -63,7 +63,7 @@ public class ImageServiceTests
             var thumbnail = factory.Create(imagePath);
             thumbnail = ImageService.Thumbnail(thumbnail, dims.Width, dims.Height);
             var outputFileName = fileName + outputExtension + ".png";
-            thumbnail.Save(Path.Join(_testDirectory, outputFileName), EncodeFormat.PNG,100);
+            thumbnail.Save(Path.Join(_testDirectory, outputFileName), EncodeFormat.PNG);
         }
     }
 
@@ -166,7 +166,7 @@ public class ImageServiceTests
         ImageMagickImageFactory factory = new ImageMagickImageFactory();
         var color = ImageService.HexToRgb(hexColor);
         using var colorImage = factory.Create(200,100,color.R, color.G, color.B);
-        colorImage.Save(outputPath, EncodeFormat.PNG, 100);
+        colorImage.Save(outputPath, EncodeFormat.PNG);
     }
 
     private void GenerateHtmlFileForColorScape()

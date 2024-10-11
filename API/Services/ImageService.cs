@@ -49,9 +49,8 @@ public interface IImageService
     /// <param name="outputDirectory">The output directory to save the image.</param>
     /// <param name="encodeFormat">The encoding format to convert and save the image.</param>
     /// <param name="size">The size of the cover image.</param>
-    /// <param name="quality">The quality of the image. Default is 100.</param>
     /// <returns>The file name with extension of the saved image.</returns>
-    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size, int quality = 100);
+    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size);
 
     /// <summary>
     /// Creates a thumbnail version of a base64 encoded image.
@@ -60,9 +59,8 @@ public interface IImageService
     /// <param name="fileName">The name of the output file.</param>
     /// <param name="encodeFormat">The encoding format to convert and save the image.</param>
     /// <param name="thumbnailWidth">The width of the thumbnail. Default is 320.</param>
-    /// <param name="quality">The quality of the image. Default is 100.</param>
     /// <returns>The file name with extension of the saved thumbnail image.</returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = 320, int quality = 100);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = 320);
 
     /// <summary>
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
@@ -73,9 +71,8 @@ public interface IImageService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <param name="size">The size of the cover image.</param>
-    /// <param name="quality">The quality of the image. Default is 100.</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default, int quality = 100);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
 
     /// <summary>
     /// Writes out a thumbnail image from a file path input and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
@@ -85,9 +82,8 @@ public interface IImageService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <param name="size">The size of the cover image.</param>
-    /// <param name="quality">The quality of the image. Default is 100.</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default, int quality = 100);
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
 
     /// <summary>
     /// Converts the specified image file to the specified encoding format and saves it to the output path.
@@ -95,9 +91,8 @@ public interface IImageService
     /// <param name="filePath">The full path of the image file to convert.</param>
     /// <param name="outputPath">The path to save the converted image file.</param>
     /// <param name="encodeFormat">The encoding format to convert the image.</param>
-    /// <param name="quality">The quality of the image. Default is 100.</param>
     /// <returns>The file path of the converted image file.</returns>
-    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat, int quality = 100);
+    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
 
     /// <summary>
     /// Checks if the specified file is an image.
@@ -111,18 +106,16 @@ public interface IImageService
     /// </summary>
     /// <param name="url">The URL of the favicon.</param>
     /// <param name="encodeFormat">The encoding format to convert and save the favicon.</param>
-    /// <param name="quality">The quality of the favicon. Default is 100.</param>
     /// <returns>The file name with extension of the saved favicon.</returns>
-    Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, int quality = 100);
+    Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
 
     /// <summary>
     /// Downloads the publisher image for the specified publisher name and saves it to the output directory.
     /// </summary>
     /// <param name="publisherName">The name of the publisher.</param>
     /// <param name="encodeFormat">The encoding format to convert and save the publisher image.</param>
-    /// <param name="quality">The quality of the publisher image. Default is 100.</param>
     /// <returns>The file name with extension of the saved publisher image.</returns>
-    Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat, int quality = 100);
+    Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
 
     /// <summary>
     /// Updates the color scape of an entity with a cover image.
@@ -136,9 +129,8 @@ public interface IImageService
     /// <param name="filename">The name of the image file.</param>
     /// <param name="supportedImageFormats">The list of supported image formats by the browser.</param>
     /// <param name="format">The encoding format to convert the image. Default is JPG</param>
-    /// <param name="quality">The quality of the image. Default is 99.</param>
     /// <returns>The file name with extension of the replaced image file.</returns>
-    string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG, int quality = 99);
+    string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG);
 
     /// <summary>
     /// Creates a merged image from a list of cover images and saves it to the specified destination.
@@ -147,8 +139,7 @@ public interface IImageService
     /// <param name="size">The size of the merged image.</param>
     /// <param name="dest">The destination path to save the merged image.</param>
     /// <param name="format">The encoding format to convert and save the merged image. Default is PNG.</param>
-    /// <param name="quality">The quality of the merged image. Default is 100.</param>
-    void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG, int quality = 100);
+    void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG);
 
     /// <summary>
     /// The image factory used to create and manipulate images.
@@ -311,7 +302,7 @@ public class ImageService : IImageService
 
 
     /// <inheritdoc/>
-    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size, int quality = 100)
+    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
@@ -320,7 +311,7 @@ public class ImageService : IImageService
             var (width, height) = size.GetDimensions();
             using var thumbnail = Thumbnail(_imageFactory.Create(path), width, height);
             var filename = fileName + encodeFormat.GetExtension();
-            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat, quality);
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
             return filename;
         }
         catch (Exception ex)
@@ -332,7 +323,7 @@ public class ImageService : IImageService
     }
 
     /// <inheritdoc/>
-    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default, int quality = 100)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
@@ -348,14 +339,14 @@ public class ImageService : IImageService
 
         try
         {
-            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat, quality);
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
         }
         catch (Exception) {/* Swallow exception */}
 
         return filename;
     }
     /// <inheritdoc/>
-    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default, int quality = 100)
+    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var (width, height) = size.GetDimensions();
         using var thumbnail = Thumbnail(_imageFactory.Create(sourceFile), width, height);
@@ -365,18 +356,18 @@ public class ImageService : IImageService
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         } catch (Exception) {/* Swallow exception */}
-        thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat, quality);
+        thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
 
         return filename;
     }
     /// <inheritdoc/>
-    public async Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat, int quality = 100)
+    public async Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
     {
         var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
         using var sourceImage = _imageFactory.Create(filePath);
-        await sourceImage.SaveAsync(outputFile, encodeFormat, quality).ConfigureAwait(false);
+        await sourceImage.SaveAsync(outputFile, encodeFormat).ConfigureAwait(false);
 
         return outputFile;
     }
@@ -396,7 +387,7 @@ public class ImageService : IImageService
         return Task.FromResult(false);
     }
     /// <inheritdoc/>
-    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, int quality = 100)
+    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
     {
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
@@ -470,7 +461,7 @@ public class ImageService : IImageService
             // Create the destination file path
             using var image = _imageFactory.Create(faviconStream);
             var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat, quality);
+            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat);
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
             return filename;
         } catch (Exception ex)
@@ -480,7 +471,7 @@ public class ImageService : IImageService
         }
     }
     /// <inheritdoc/>
-    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat, int quality = 100)
+    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat)
     {
         try
         {
@@ -501,7 +492,7 @@ public class ImageService : IImageService
             // Create the destination file path
             using var image = _imageFactory.Create(publisherStream);
             var filename = GetPublisherFormat(publisherName, encodeFormat);
-            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat, quality);
+            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat);
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName);
             return filename;
         } catch (Exception ex)
@@ -713,7 +704,7 @@ public class ImageService : IImageService
 
 
     /// <inheritdoc/>
-    public string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG, int quality = 99)
+    public string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG)
     {
         if (CheckDirectSupport(filename, supportedImageFormats)) return filename;
 
@@ -733,7 +724,7 @@ public class ImageService : IImageService
                 return destination;
             }
             using var sourceImage = _imageFactory.Create(filename);
-            sourceImage.Save(destination, format, quality);
+            sourceImage.Save(destination, format);
             try
             {
                 File.Delete(filename);
@@ -802,7 +793,7 @@ public class ImageService : IImageService
     }
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, int quality = 100)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
     {
         try
         {
@@ -811,7 +802,7 @@ public class ImageService : IImageService
             int thumbnailHeight = (int)(thumbnail.Height * ((double)thumbnailWidth / thumbnail.Width));
             thumbnail.Thumbnail(thumbnailWidth, thumbnailHeight);
             fileName += encodeFormat.GetExtension();
-            thumbnail.Save(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName), encodeFormat, quality);
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName), encodeFormat);
             return fileName;
         }
         catch (Exception e)
@@ -905,7 +896,7 @@ public class ImageService : IImageService
     }
 
     /// <inheritdoc/>
-    public void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG, int quality = 100)
+    public void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG)
     {
         var (width, height) = size.GetDimensions();
         int rows, cols;
@@ -952,7 +943,7 @@ public class ImageService : IImageService
             image.Composite(tile,x,y);
         }
 
-        image.Save(dest, format, quality);
+        image.Save(dest, format);
     }
 
     /// <inheritdoc/>

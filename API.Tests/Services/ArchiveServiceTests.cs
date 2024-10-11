@@ -177,7 +177,7 @@ public class ArchiveServiceTests
         int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
         thumbnail.Thumbnail(width, height);
         using MemoryStream stream = new MemoryStream();
-        thumbnail.Save(stream, EncodeFormat.PNG, 100);
+        thumbnail.Save(stream, EncodeFormat.PNG);
         var expectedBytes = stream.ToArray();
 
         archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);

@@ -26,7 +26,7 @@ public class ArchiveServiceBenchmark
     private readonly IImageService _imageService;
     private readonly IImageFactory _imageFactory;
     private const string SourceImage = "Data/comic-normal.jpg";
-        
+
 
     public ArchiveServiceBenchmark()
     {
@@ -71,7 +71,7 @@ public class ArchiveServiceBenchmark
         int width = 320;
         int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
         thumbnail2.Thumbnail(width, height);
-        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.png"), EncodeFormat.PNG, 100);
+        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.png"), EncodeFormat.PNG);
     }
 
     [Benchmark]
@@ -85,7 +85,7 @@ public class ArchiveServiceBenchmark
         int width = 320;
         int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
         thumbnail2.Thumbnail(width, height);
-        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"), EncodeFormat.PNG, 100);
+        thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"), EncodeFormat.PNG);
     }
 
 

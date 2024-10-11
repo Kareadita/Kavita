@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities.Enums;
+using API.Extensions;
 using ImageMagick;
 
 namespace API.Services.ImageServices.ImageMagick;
@@ -139,30 +140,30 @@ public class ImageMagickImage : IImage
     }
 
     /// <inheritdoc/>
-    public void Save(string filename, EncodeFormat format, int quality)
+    public void Save(string filename, EncodeFormat format)
     {
-        _image.Quality = quality;
+        _image.Quality = format.DefaultQuality();
         _image.Write(filename, MagickFormatFromEncodeFormat(format));
     }
 
     /// <inheritdoc/>
-    public void Save(Stream stream, EncodeFormat format, int quality)
+    public void Save(Stream stream, EncodeFormat format)
     {
-        _image.Quality = quality;
+        _image.Quality = format.DefaultQuality();
         _image.Write(stream, MagickFormatFromEncodeFormat(format));
     }
 
     /// <inheritdoc/>
-    public Task SaveAsync(string filename, EncodeFormat format, int quality, CancellationToken token = default)
+    public Task SaveAsync(string filename, EncodeFormat format, CancellationToken token = default)
     {
-        _image.Quality = quality;
+        _image.Quality = format.DefaultQuality();
         return _image.WriteAsync(filename, MagickFormatFromEncodeFormat(format), token);
     }
 
     /// <inheritdoc/>
-    public Task SaveAsync(Stream stream, EncodeFormat format, int quality, CancellationToken token = default)
+    public Task SaveAsync(Stream stream, EncodeFormat format, CancellationToken token = default)
     {
-        _image.Quality = quality;
+        _image.Quality = format.DefaultQuality();
         return _image.WriteAsync(stream, MagickFormatFromEncodeFormat(format), token);
     }
 

@@ -1280,7 +1280,7 @@ public class BookService : IBookService
         var height = pageReader.GetPageHeight();
         IImage image = _imageService.ImageFactory.CreateFromBGRAByteArray(rawBytes, width, height);
         stream.Seek(0, SeekOrigin.Begin);
-        image.Save(stream, EncodeFormat.PNG, 100);
+        image.Save(stream, EncodeFormat.PNG);
         stream.Seek(0, SeekOrigin.Begin);
     }
 
