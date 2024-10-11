@@ -15,59 +15,79 @@
               <ng-template ngbNavContent>
                 <div class="row g-0">
                   <div class="mb-3">
-                    <label for="name" class="form-label">{{t('name-label')}}</label>
-                    <div class="input-group">
-                      <input id="name" class="form-control" formControlName="name" type="text" readonly
-                             [class.is-invalid]="editForm.get('name')?.invalid && editForm.get('name')?.touched">
-                      @if (editForm.get('name')?.errors; as errors) {
-                        @if (errors.required) {
-                          <div class="invalid-feedback">
-                            {{t('required-field')}}
-                          </div>
-                        }
-                      }
-                    </div>
+                    @if (editForm.get('name'); as formControl) {
+                      <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="name" class="form-control" formControlName="name" type="text" readonly
+                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                          @if (formControl.errors; as errors) {
+                            @if (errors.required) {
+                              <div class="invalid-feedback">{{t('required-field')}}</div>
+                            }
+                          }
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row g-0">
                   <div class="mb-3 col-md-6 col-xs-12 pe-2">
-                    <label for="mal-id" class="form-label">{{t('mal-id-label')}}</label>
-                    <div class="input-group">
-                      <input id="mal-id" class="form-control" formControlName="malId" type="number">
-                    </div>
+                    @if (editForm.get('malId'); as formControl) {
+                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="mal-id" class="form-control" formControlName="malId" type="number"
+                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
 
                   <div class="mb-3 col-md-6 col-xs-12">
-                    <label for="anilist-id" class="form-label">{{t('anilist-id-label')}}</label>
-                    <div class="input-group">
-                      <input id="anilist-id" class="form-control" formControlName="anilistId" type="number">
-                    </div>
+                    @if (editForm.get('aniListId'); as formControl) {
+                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="anilist-id" class="form-control" formControlName="aniListId" type="number"
+                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row g-0">
                   <div class="mb-3 col-md-6 col-xs-12 pe-2">
-                    <label for="hardcover-id" class="form-label">{{t('hardcover-id-label')}}</label>
-                    <div class="input-group">
-                      <input id="hardcover-id" class="form-control" formControlName="hardcoverId" type="text">
-                    </div>
+                    @if (editForm.get('hardcoverId'); as formControl) {
+                      <app-setting-item [title]="t('hardcover-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="hardcover-id" class="form-control" formControlName="hardcoverId" type="text"
+                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
 
                   <div class="mb-3 col-md-6 col-xs-12">
-                    <label for="asin" class="form-label">{{t('asin-label')}}</label>
-                    <div class="input-group">
-                      <input id="asin" class="form-control" formControlName="asin" type="text">
-                    </div>
+                    @if (editForm.get('hardcoverId'); as formControl) {
+                      <app-setting-item [title]="t('asin-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="asin" class="form-control" formControlName="asin" type="text"
+                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row g-0">
                   <div class="mb-3" style="width: 100%">
-                    <label for="description" class="form-label">{{t('description-label')}}</label>
-                    <div class="input-group">
-                      <textarea id="description" class="form-control" formControlName="description" rows="4"></textarea>
-                    </div>
+                    <app-setting-item [title]="t('description-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        <div class="input-group">
+                          <textarea id="description" class="form-control" formControlName="description" rows="4"></textarea>
+                        </div>
+                      </ng-template>
+                    </app-setting-item>
                   </div>
                 </div>
 
@@ -81,12 +101,12 @@
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                <!--              <app-cover-image-chooser [(imageUrls)]="imageUrls"-->
-                <!--                                       (imageSelected)="updateSelectedIndex($event)"-->
-                <!--                                       (selectedBase64Url)="updateSelectedImage($event)"-->
-                <!--                                       [showReset]="person.coverImageLocked"-->
-                <!--                                       (resetClicked)="handleReset()">-->
-                <!--              </app-cover-image-chooser>-->
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls"
+                                             (imageSelected)="updateSelectedIndex($event)"
+                                             (selectedBase64Url)="updateSelectedImage($event)"
+                                             [showReset]="person.coverImageLocked"
+                                             (resetClicked)="handleReset()">
+                    </app-cover-image-chooser>
               </ng-template>
             </li>
 

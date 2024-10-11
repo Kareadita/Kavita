@@ -8,6 +8,7 @@ using API.Helpers;
 using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Nager.ArticleNumber;
 
 namespace API.Controllers;
 
@@ -81,10 +82,11 @@ public class PersonController : BaseApiController
             person.HardcoverId = dto.HardcoverId.Trim();
         }
 
-        if (!string.IsNullOrEmpty(dto.Asin?.Trim()))
+        var asin = dto.Asin?.Trim();
+        if (!string.IsNullOrEmpty(asin) &&
+            (ArticleNumberHelper.IsValidIsbn10(asin) || ArticleNumberHelper.IsValidIsbn13(asin)))
         {
-            // TODO: Validate ASIN
-            person.Asin = dto.Asin.Trim();
+            person.Asin = asin;
         }
 
         _unitOfWork.PersonRepository.Update(person);

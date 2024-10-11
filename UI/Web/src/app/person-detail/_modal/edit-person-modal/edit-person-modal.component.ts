@@ -14,6 +14,12 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {PersonService} from "../../../_services/person.service";
 import { TranslocoDirective } from '@jsverse/transloco';
+import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {forkJoin} from "rxjs";
+import {EditVolumeModalCloseResult} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {UploadService} from "../../../_services/upload.service";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 
 enum TabID {
   General = 0,
@@ -32,7 +38,10 @@ enum TabID {
     TranslocoDirective,
     NgbNavLinkBase,
     NgbNavContent,
-    NgbNavOutlet
+    NgbNavOutlet,
+    CoverImageChooserComponent,
+    CompactNumberPipe,
+    SettingItemComponent
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',
@@ -44,6 +53,7 @@ export class EditPersonModalComponent implements OnInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly personService = inject(PersonService);
+  private readonly uploadService = inject(UploadService);
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
@@ -52,14 +62,18 @@ export class EditPersonModalComponent implements OnInit {
 
   tabs = ['general-tab', 'cover-image-tab'];
   active = this.tabs[0];
-  editForm = new FormGroup({
-    name: new FormControl('', Validators.required),
+  editForm: FormGroup = new FormGroup({
+    name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
     asin: new FormControl('', []),
     aniListId: new FormControl('', []),
     malId: new FormControl('', []),
     hardcoverId: new FormControl('', []),
   });
+
+  imageUrls: Array<string> = [];
+  selectedCover: string = '';
+  coverImageReset = false;
 
   ngOnInit() {
     if (this.person) {
@@ -69,6 +83,10 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.get('aniListId')!.setValue((this.person.aniListId || '')  + '') ;
       this.editForm.get('malId')!.setValue((this.person.malId || '')  + '');
       this.editForm.get('hardcoverId')!.setValue(this.person.hardcoverId || '');
+
+      this.editForm.addControl('coverImageIndex', new FormControl(0, []));
+      this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
+
       this.cdRef.markForCheck();
     }
   }
@@ -79,6 +97,15 @@ export class EditPersonModalComponent implements OnInit {
   }
 
   save() {
+    const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
+
+    const apis = [];
+
+    if (selectedIndex > 0 || this.coverImageReset) {
+      apis.push(this.uploadService.updateVolumeCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
+    }
+
+
 
     const person: Person = {
       id: this.person.id,
@@ -93,10 +120,31 @@ export class EditPersonModalComponent implements OnInit {
       malId: this.editForm.get('malId')!.value === '' ? null : parseInt(this.editForm.get('malId').value, 10),
       hardcoverId: this.editForm.get('hardcoverId')!.value || '',
     };
-    this.personService.updatePerson(person).subscribe(res => {
-      this.modal.close({success: true, coverImageUpdate: false, person: res});
-    });
+    apis.push(this.personService.updatePerson(person));
 
+    forkJoin(apis).subscribe(_ => {
+      this.modal.close({success: true, coverImageUpdate: false, person: person});
+    });
+  }
+
+  updateSelectedIndex(index: number) {
+    this.editForm.patchValue({
+      coverImageIndex: index
+    });
+    this.cdRef.markForCheck();
+  }
+
+  updateSelectedImage(url: string) {
+    this.selectedCover = url;
+    this.cdRef.markForCheck();
+  }
+
+  handleReset() {
+    this.coverImageReset = true;
+    this.editForm.patchValue({
+      coverImageLocked: false
+    });
+    this.cdRef.markForCheck();
   }
 
 }
