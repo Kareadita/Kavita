@@ -490,7 +490,7 @@ public class UploadController : BaseApiController
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
-        // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+        // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
@@ -507,8 +507,8 @@ public class UploadController : BaseApiController
             {
                 person.CoverImage = filePath;
                 person.CoverImageLocked = true;
-                // TODO: Update colorscape
-                _unitOfWork.PersonRepository.Update(person);
+                _imageService.UpdateColorScape(person);
+                //_unitOfWork.PersonRepository.Update(person);
             }
 
             if (_unitOfWork.HasChanges())

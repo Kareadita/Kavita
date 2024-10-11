@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class PeopleOverhaul : Migration
+    public partial class PeopleOverhaulPart1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,28 +16,9 @@ namespace API.Data.Migrations
             migrationBuilder.DropTable(
                 name: "PersonSeriesMetadata");
 
-            migrationBuilder.RenameColumn(
+            migrationBuilder.DropColumn(
                 name: "Role",
-                table: "Person",
-                newName: "CoverImageLocked");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CoverImage",
-                table: "Person",
-                type: "TEXT",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "PrimaryColor",
-                table: "Person",
-                type: "TEXT",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "SecondaryColor",
-                table: "Person",
-                type: "TEXT",
-                nullable: true);
+                table: "Person");
 
             migrationBuilder.CreateTable(
                 name: "ChapterPeople",
@@ -109,22 +90,12 @@ namespace API.Data.Migrations
             migrationBuilder.DropTable(
                 name: "SeriesMetadataPeople");
 
-            migrationBuilder.DropColumn(
-                name: "CoverImage",
-                table: "Person");
-
-            migrationBuilder.DropColumn(
-                name: "PrimaryColor",
-                table: "Person");
-
-            migrationBuilder.DropColumn(
-                name: "SecondaryColor",
-                table: "Person");
-
-            migrationBuilder.RenameColumn(
-                name: "CoverImageLocked",
+            migrationBuilder.AddColumn<int>(
+                name: "Role",
                 table: "Person",
-                newName: "Role");
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.CreateTable(
                 name: "ChapterPerson",

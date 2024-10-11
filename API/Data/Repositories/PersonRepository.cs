@@ -29,7 +29,6 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null);
     Task<int> GetCountAsync();
 
-    //Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames);
     Task<string> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
@@ -119,13 +118,6 @@ public class PersonRepository : IPersonRepository
         return await _context.Person.CountAsync();
     }
 
-    // public async Task<IList<Person>> GetAllPeopleByRoleAndNames(PersonRole role, IEnumerable<string> normalizeNames)
-    // {
-    //     return await _context.Person
-    //         .Where(p => p.Role == role && normalizeNames.Contains(p.NormalizedName))
-    //         .ToListAsync();
-    // }
-
     public async Task<string> GetCoverImageAsync(int personId)
     {
         return await _context.Person
@@ -194,7 +186,7 @@ public class PersonRepository : IPersonRepository
             {
                 Id = p.Id,
                 Name = p.Name,
-                Description = p.Description,
+                //Description = p.Description,
                 SeriesCount = p.SeriesMetadataPeople
                     .Where(smp => smp.Role == PersonRole.Writer)
                     .Select(smp => smp.SeriesMetadata.SeriesId)

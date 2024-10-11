@@ -1549,25 +1549,10 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AniListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Asin")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HardcoverId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("MalId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

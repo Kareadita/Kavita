@@ -5,65 +5,54 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class PeopleMetadataFields : Migration
+    public partial class PeopleOverhaulPart2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "AniListId",
+            migrationBuilder.AddColumn<string>(
+                name: "CoverImage",
+                table: "Person",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "CoverImageLocked",
                 table: "Person",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: false);
 
             migrationBuilder.AddColumn<string>(
-                name: "Asin",
+                name: "PrimaryColor",
                 table: "Person",
                 type: "TEXT",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "Description",
+                name: "SecondaryColor",
                 table: "Person",
                 type: "TEXT",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "HardcoverId",
-                table: "Person",
-                type: "TEXT",
-                nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "MalId",
-                table: "Person",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0L);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "AniListId",
+                name: "CoverImage",
                 table: "Person");
 
             migrationBuilder.DropColumn(
-                name: "Asin",
+                name: "CoverImageLocked",
                 table: "Person");
 
             migrationBuilder.DropColumn(
-                name: "Description",
+                name: "PrimaryColor",
                 table: "Person");
 
             migrationBuilder.DropColumn(
-                name: "HardcoverId",
-                table: "Person");
-
-            migrationBuilder.DropColumn(
-                name: "MalId",
+                name: "SecondaryColor",
                 table: "Person");
         }
     }

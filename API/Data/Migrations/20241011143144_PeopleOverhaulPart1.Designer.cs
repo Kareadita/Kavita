@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241010194617_PeopleMetadataFields")]
-    partial class PeopleMetadataFields
+    [Migration("20241011143144_PeopleOverhaulPart1")]
+    partial class PeopleOverhaulPart1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1552,37 +1552,10 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AniListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Asin")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CoverImage")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("CoverImageLocked")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HardcoverId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("MalId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PrimaryColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
