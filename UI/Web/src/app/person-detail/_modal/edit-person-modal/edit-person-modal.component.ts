@@ -8,7 +8,7 @@ import {
   NgbActiveModal,
   NgbNav,
   NgbNavContent,
-  NgbNavItem,
+  NgbNavItem, NgbNavLink,
   NgbNavLinkBase,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
@@ -16,14 +16,15 @@ import {PersonService} from "../../../_services/person.service";
 import { TranslocoDirective } from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {forkJoin} from "rxjs";
-import {EditVolumeModalCloseResult} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {UploadService} from "../../../_services/upload.service";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {AccountService} from "../../../_services/account.service";
+import {User} from "../../../_models/user";
 
 enum TabID {
-  General = 0,
-  CoverImage = 1,
+  General = 'general-tab',
+  CoverImage = 'cover-image-tab',
 }
 
 @Component({
@@ -41,7 +42,8 @@ enum TabID {
     NgbNavOutlet,
     CoverImageChooserComponent,
     CompactNumberPipe,
-    SettingItemComponent
+    SettingItemComponent,
+    NgbNavLink
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',
@@ -54,14 +56,14 @@ export class EditPersonModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly personService = inject(PersonService);
   private readonly uploadService = inject(UploadService);
+  protected readonly accountService = inject(AccountService);
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
 
   @Input({required: true}) person!: Person;
 
-  tabs = ['general-tab', 'cover-image-tab'];
-  active = this.tabs[0];
+  active = TabID.General;
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
@@ -74,6 +76,7 @@ export class EditPersonModalComponent implements OnInit {
   imageUrls: Array<string> = [];
   selectedCover: string = '';
   coverImageReset = false;
+  touchedCoverImage = false;
 
   ngOnInit() {
     if (this.person) {
@@ -97,19 +100,14 @@ export class EditPersonModalComponent implements OnInit {
   }
 
   save() {
-    const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
-
     const apis = [];
 
-    if (selectedIndex > 0 || this.coverImageReset) {
-      apis.push(this.uploadService.updateVolumeCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
+    if (this.touchedCoverImage || this.coverImageReset) {
+      apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
     }
-
-
 
     const person: Person = {
       id: this.person.id,
-      role: PersonRole.Other, // Not used on backend, so we use
       coverImageLocked: this.person.coverImageLocked,
       name: this.editForm.get('name')!.value || '',
       description: this.editForm.get('description')!.value || '',
@@ -131,11 +129,13 @@ export class EditPersonModalComponent implements OnInit {
     this.editForm.patchValue({
       coverImageIndex: index
     });
+    this.touchedCoverImage = true;
     this.cdRef.markForCheck();
   }
 
   updateSelectedImage(url: string) {
     this.selectedCover = url;
+    this.touchedCoverImage = true;
     this.cdRef.markForCheck();
   }
 
@@ -144,6 +144,7 @@ export class EditPersonModalComponent implements OnInit {
     this.editForm.patchValue({
       coverImageLocked: false
     });
+    this.touchedCoverImage = true;
     this.cdRef.markForCheck();
   }
 

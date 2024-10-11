@@ -10,8 +10,8 @@
         <form [formGroup]="editForm">
           <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
-            <li [ngbNavItem]="tabs[TabID.General]">
-              <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
+            <li [ngbNavItem]="TabID.General">
+              <a ngbNavLink>{{t(TabID.General)}}</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
                   <div class="mb-3">
@@ -68,7 +68,7 @@
                   </div>
 
                   <div class="mb-3 col-md-6 col-xs-12">
-                    @if (editForm.get('hardcoverId'); as formControl) {
+                    @if (editForm.get('asin'); as formControl) {
                       <app-setting-item [title]="t('asin-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
                           <input id="asin" class="form-control" formControlName="asin" type="text"
@@ -95,21 +95,20 @@
             </li>
 
 
-            <li [ngbNavItem]="tabs[TabID.CoverImage]">
-              <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls"
-                                             (imageSelected)="updateSelectedIndex($event)"
-                                             (selectedBase64Url)="updateSelectedImage($event)"
-                                             [showReset]="person.coverImageLocked"
-                                             (resetClicked)="handleReset()">
-                    </app-cover-image-chooser>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls"
+                                         (imageSelected)="updateSelectedIndex($event)"
+                                         (selectedBase64Url)="updateSelectedImage($event)"
+                                         [showReset]="person.coverImageLocked"
+                                         (resetClicked)="handleReset()">
+                </app-cover-image-chooser>
               </ng-template>
             </li>
-
           </ul>
         </form>
 

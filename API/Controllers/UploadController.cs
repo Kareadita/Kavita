@@ -508,7 +508,7 @@ public class UploadController : BaseApiController
                 person.CoverImage = filePath;
                 person.CoverImageLocked = true;
                 _imageService.UpdateColorScape(person);
-                //_unitOfWork.PersonRepository.Update(person);
+                _unitOfWork.PersonRepository.Update(person);
             }
 
             if (_unitOfWork.HasChanges())

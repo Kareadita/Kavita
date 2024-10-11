@@ -914,7 +914,8 @@
 
     "browse-authors": {
         "title": "{{side-nav.browse-authors}}",
-        "author-count": "{{num}} Authors"
+        "author-count": "{{num}} Authors",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
     "library-settings-modal": {
