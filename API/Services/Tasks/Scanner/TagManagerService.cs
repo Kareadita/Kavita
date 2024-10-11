@@ -28,9 +28,7 @@ public interface ITagManagerService
     /// <returns></returns>
     void Reset();
 
-    Task<Genre?> GetGenre(string genre);
     Task<Tag?> GetTag(string tag);
-    Task<Person?> GetPerson(string name, PersonRole role);
     Task<Tuple<AppUserCollection?, bool>> GetCollectionTag(string? tag, AppUser userWithCollections);
 }
 
@@ -70,7 +68,7 @@ public class TagManagerService : ITagManagerService
 
     public async Task Prime()
     {
-        _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
+        //_genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
         // _people = (await _unitOfWork.PersonRepository.GetAllPeople())
         //     .GroupBy(GetPersonKey)

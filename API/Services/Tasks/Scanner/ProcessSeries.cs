@@ -462,6 +462,7 @@ public class ProcessSeries : IProcessSeries
         #endregion
     }
 
+
     private static void UpdateSeriesMetadataTags(ICollection<Tag> metadataTags, IEnumerable<Tag> chapterTags)
     {
         // Normalize and group by tag
