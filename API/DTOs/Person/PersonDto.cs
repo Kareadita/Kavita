@@ -1,4 +1,4 @@
-﻿namespace API.DTOs;
+namespace API.DTOs;
 
 public class PersonDto
 {
@@ -8,6 +8,8 @@ public class PersonDto
     public bool CoverImageLocked { get; set; }
     public string PrimaryColor { get; set; }
     public string SecondaryColor { get; set; }
+
+    public string? CoverImage { get; set; }
 
     public string Description { get; set; }
     /// <summary>

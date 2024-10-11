@@ -20,6 +20,7 @@ export interface Person {
   id: number;
   name: string;
   description: string;
+  coverImage?: string;
   coverImageLocked: boolean;
   malId?: number;
   aniListId?: number;
