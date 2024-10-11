@@ -95,5 +95,11 @@ public class PersonController : BaseApiController
         return Ok(_mapper.Map<PersonDto>(person));
     }
 
+    [HttpGet("series-known-for")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
+    {
+        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId));
+    }
+
 
 }

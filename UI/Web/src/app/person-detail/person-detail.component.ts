@@ -38,6 +38,7 @@ import {Action, ActionFactoryService, ActionItem} from "../_services/action-fact
 import {Chapter} from "../_models/chapter";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-person-detail',
@@ -53,7 +54,8 @@ import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-m
     CarouselReelComponent,
     SeriesCardComponent,
     CardItemComponent,
-    CardActionablesComponent
+    CardActionablesComponent,
+    TranslocoDirective
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -97,17 +99,16 @@ export class PersonDetailComponent {
       this.person$ = this.personService.get(this.personName).pipe(tap(p => {
         this.person = p;
 
+        this.works$ = this.personService.getSeriesMostKnownFor(this.person.id).pipe(
+          takeUntilDestroyed(this.destroyRef)
+        );
+
         this.cdRef.markForCheck();
       }), takeUntilDestroyed(this.destroyRef));
 
       this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
         this.roles = roles;
         this.filter = this.createFilter(roles);
-
-        this.works$ = this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter!).pipe(
-          map((d: PaginatedResult<Series[]>) => d.result),
-          takeUntilDestroyed(this.destroyRef)
-        );
 
         this.cdRef.markForCheck();
       }), takeUntilDestroyed(this.destroyRef));

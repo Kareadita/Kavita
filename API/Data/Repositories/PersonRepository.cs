@@ -38,6 +38,8 @@ public interface IPersonRepository
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
     Task<Person> GetPersonByName(string name);
+
+    Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
 }
 
 public class PersonRepository : IPersonRepository
@@ -224,6 +226,20 @@ public class PersonRepository : IPersonRepository
     public async Task<Person> GetPersonByName(string name)
     {
         return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == name.ToNormalized());
+    }
+
+    public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId)
+    {
+        return await _context.Person
+            .Where(p => p.Id == personId)
+            .SelectMany(p => p.SeriesMetadataPeople)
+            .Select(smp => smp.SeriesMetadata)
+            .Select(sm => sm.Series)
+            .Distinct()
+            .OrderByDescending(s => s.ExternalSeriesMetadata.AverageExternalRating)
+            .Take(20)
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
 

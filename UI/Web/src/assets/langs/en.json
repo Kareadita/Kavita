@@ -918,6 +918,10 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
+    "person-detail": {
+        "known-for-title": "Known For"
+    },
+
     "library-settings-modal": {
         "close": "{{common.close}}",
         "edit-title": "Edit {{name}}",

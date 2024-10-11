@@ -30,6 +30,9 @@ export class PersonService {
     return this.httpClient.get<Array<PersonRole>>(this.baseUrl + `person/roles?name=${name}`);
   }
 
+  getSeriesMostKnownFor(personId: number) {
+    return this.httpClient.get<Array<Series>>(this.baseUrl + `person/series-known-for?personId=${personId}`);
+  }
 
   getAuthorsToBrowse(pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();

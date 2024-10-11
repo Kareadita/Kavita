@@ -515,7 +515,7 @@ export class EditSeriesModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false };
+      return {id: 0, name: title, description: '', coverImageLocked: false };
     });
 
     return personSettings;
