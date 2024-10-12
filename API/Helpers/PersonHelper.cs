@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -13,6 +15,68 @@ namespace API.Helpers;
 // This isn't needed in the new person architecture
 public static class PersonHelper
 {
+
+
+    public static async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)
+    {
+        var modification = false;
+        // Normalize the input names for comparison
+        var normalizedPeople = people.Select(p => p.ToNormalized()).ToList();
+
+        // Get all existing ChapterPeople for the role
+        var existingChapterPeople = chapter.People.Where(cp => cp.Role == role).ToList();
+
+        // Remove people not in the new list
+        foreach (var existingChapterPerson in existingChapterPeople)
+        {
+            if (!normalizedPeople.Contains(existingChapterPerson.Person.NormalizedName))
+            {
+                chapter.People.Remove(existingChapterPerson);
+                unitOfWork.PersonRepository.Remove(existingChapterPerson);
+                modification = true;
+            }
+        }
+
+        // Add new people or existing ones if not already in the Chapter
+        foreach (var personName in people)
+        {
+            var person = await unitOfWork.PersonRepository.GetPersonByName(personName);
+
+            // If the person doesn't exist, create a new Person entity
+            if (person == null)
+            {
+                person = new PersonBuilder(personName).Build();
+
+                modification = true;
+                unitOfWork.DataContext.Person.Attach(person);
+                await unitOfWork.CommitAsync();
+            }
+
+            // Check if the person with the specific role is already added to the chapter's People collection
+            var existingChapterPerson = chapter.People
+                .FirstOrDefault(cp => cp.PersonId == person.Id && cp.Role == role);
+
+            // Check if this person with the specific role already exists for the chapter
+            if (existingChapterPerson == null)
+            {
+                var chapterPerson = new ChapterPeople
+                {
+                    PersonId = person.Id,
+                    ChapterId = chapter.Id,
+                    Role = role
+                };
+
+                chapter.People.Add(chapterPerson);
+                modification = true;
+            }
+        }
+
+        // Commit the changes to remove and add people
+        if (modification)
+        {
+            await unitOfWork.CommitAsync();
+        }
+    }
 
     /// <summary>
     /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and

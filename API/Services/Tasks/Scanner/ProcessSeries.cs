@@ -1092,70 +1092,11 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-
-
     private async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role)
     {
-        var modification = false;
         try
         {
-            // Normalize the input names for comparison
-            var normalizedPeople = people.Select(p => p.ToNormalized()).ToList();
-
-            // Get all existing ChapterPeople for the role
-            var existingChapterPeople = chapter.People.Where(cp => cp.Role == role).ToList();
-
-            // Remove people not in the new list
-            foreach (var existingChapterPerson in existingChapterPeople)
-            {
-                if (!normalizedPeople.Contains(existingChapterPerson.Person.NormalizedName))
-                {
-                    chapter.People.Remove(existingChapterPerson);
-                    _unitOfWork.PersonRepository.Remove(existingChapterPerson);
-                    modification = true;
-                }
-            }
-
-            // Add new people or existing ones if not already in the Chapter
-            foreach (var personName in people)
-            {
-                var person = await _unitOfWork.PersonRepository.GetPersonByName(personName);
-
-                // If the person doesn't exist, create a new Person entity
-                if (person == null)
-                {
-                    person = new PersonBuilder(personName).Build();
-
-                    modification = true;
-                    _unitOfWork.DataContext.Person.Attach(person);
-                    await _unitOfWork.CommitAsync();
-                }
-
-                // Check if the person with the specific role is already added to the chapter's People collection
-                var existingChapterPerson = chapter.People
-                    .FirstOrDefault(cp => cp.PersonId == person.Id && cp.Role == role);
-
-                // Check if this person with the specific role already exists for the chapter
-                if (existingChapterPerson == null)
-                {
-                    var chapterPerson = new ChapterPeople
-                    {
-                        PersonId = person.Id,
-                        ChapterId = chapter.Id,
-                        Role = role
-                    };
-
-                    chapter.People.Add(chapterPerson);
-                    modification = true;
-                }
-            }
-
-            // Commit the changes to remove and add people
-            if (modification)
-            {
-                await _unitOfWork.CommitAsync();
-            }
-
+            await PersonHelper.UpdateChapterPeopleAsync(chapter, people, role, _unitOfWork);
         }
         catch (Exception ex)
         {

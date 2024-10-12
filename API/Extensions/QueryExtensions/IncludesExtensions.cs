@@ -56,7 +56,8 @@ public static class IncludesExtensions
         if (includes.HasFlag(ChapterIncludes.People))
         {
             queryable = queryable
-                .Include(c => c.People);
+                .Include(c => c.People)
+                .ThenInclude(cp => cp.Person);
         }
 
         if (includes.HasFlag(ChapterIncludes.Genres))
