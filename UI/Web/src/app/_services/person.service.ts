@@ -8,6 +8,7 @@ import {Series} from "../_models/series";
 import {map} from "rxjs/operators";
 import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/person/browse-person";
+import {Chapter} from "../_models/chapter";
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,10 @@ export class PersonService {
 
   getSeriesMostKnownFor(personId: number) {
     return this.httpClient.get<Array<Series>>(this.baseUrl + `person/series-known-for?personId=${personId}`);
+  }
+
+  getChaptersByRole(personId: number, role: PersonRole) {
+    return this.httpClient.get<Array<Chapter>>(this.baseUrl + `person/chapters-by-role?personId=${personId}&role=${role}`);
   }
 
   getAuthorsToBrowse(pageNum?: number, itemsPerPage?: number) {

@@ -95,10 +95,21 @@ public class PersonController : BaseApiController
         return Ok(_mapper.Map<PersonDto>(person));
     }
 
+    /// <summary>
+    /// Returns the top 20 series that the "person" is known for. This will use Average Rating when applicable (Kavita+ field), else it's a random sort
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
     [HttpGet("series-known-for")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
         return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId));
+    }
+
+    [HttpGet("chapters-by-role")]
+    public async Task<ActionResult<IEnumerable<ChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
+    {
+        return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, User.GetUserId(), role));
     }
 
 

@@ -913,8 +913,8 @@
     },
 
     "browse-authors": {
-        "title": "{{side-nav.browse-authors}}",
-        "author-count": "{{num}} Authors",
+        "title": "Browse Authors & Writers",
+        "author-count": "{{num}} People",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
@@ -2235,7 +2235,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formats",
         "genres": "{{metadata-fields.genres-title}}",

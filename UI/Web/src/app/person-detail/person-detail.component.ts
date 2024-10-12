@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
-import {Observable, switchMap, tap, map} from "rxjs";
+import {Observable, switchMap, tap, map, forkJoin} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
 import {AsyncPipe, DOCUMENT, NgStyle} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
@@ -68,7 +68,7 @@ export class PersonDetailComponent {
   private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly personService = inject(PersonService);
+  protected readonly personService = inject(PersonService);
   private readonly actionService = inject(ActionFactoryService);
   private readonly modalService = inject(NgbModal);
   protected readonly imageService = inject(ImageService);
@@ -86,6 +86,7 @@ export class PersonDetailComponent {
   defaultSummaryText = 'No information about this Person';
   filter: SeriesFilterV2 | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
+  chaptersByRole: any = {};
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.route.paramMap.subscribe(_ => {
@@ -96,19 +97,26 @@ export class PersonDetailComponent {
       }
 
       this.personName = personName;
+
+
       this.person$ = this.personService.get(this.personName).pipe(tap(p => {
         this.person = p;
+
+        this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
+          this.roles = roles;
+          this.filter = this.createFilter(roles);
+
+          for(let role of roles) {
+            this.chaptersByRole[role] = this.personService.getChaptersByRole(this.person!.id, role).pipe(takeUntilDestroyed(this.destroyRef));
+          }
+
+          this.cdRef.markForCheck();
+        }), takeUntilDestroyed(this.destroyRef));
+
 
         this.works$ = this.personService.getSeriesMostKnownFor(this.person.id).pipe(
           takeUntilDestroyed(this.destroyRef)
         );
-
-        this.cdRef.markForCheck();
-      }), takeUntilDestroyed(this.destroyRef));
-
-      this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
-        this.roles = roles;
-        this.filter = this.createFilter(roles);
 
         this.cdRef.markForCheck();
       }), takeUntilDestroyed(this.destroyRef));

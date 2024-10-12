@@ -40,6 +40,7 @@ public interface IPersonRepository
     Task<Person> GetPersonByName(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
+    Task<IEnumerable<ChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
 }
 
 public class PersonRepository : IPersonRepository
@@ -177,25 +178,24 @@ public class PersonRepository : IPersonRepository
 
     public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)
     {
-        //List<PersonRole> roles = [PersonRole.Writer];
-
+        List<PersonRole> roles = [PersonRole.Writer, PersonRole.CoverArtist];
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var query = _context.Person
-            .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == PersonRole.Writer) || p.ChapterPeople.Any(cmp => cmp.Role == PersonRole.CoverArtist))
+            .Where(p => p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) || p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role)))
             .RestrictAgainstAgeRestriction(ageRating)
             .Select(p => new BrowsePersonDto
             {
                 Id = p.Id,
                 Name = p.Name,
-                //Description = p.Description,
+                Description = p.Description,
                 SeriesCount = p.SeriesMetadataPeople
-                    .Where(smp => smp.Role == PersonRole.Writer)
+                    .Where(smp => roles.Contains(smp.Role))
                     .Select(smp => smp.SeriesMetadata.SeriesId)
                     .Distinct()
                     .Count(),
                 IssueCount = p.ChapterPeople
-                    .Where(cp => cp.Role == PersonRole.Writer)
+                    .Where(cp => roles.Contains(cp.Role))
                     .Select(cp => cp.Chapter.Id)
                     .Distinct()
                     .Count()
@@ -239,6 +239,23 @@ public class PersonRepository : IPersonRepository
             .OrderByDescending(s => s.ExternalSeriesMetadata.AverageExternalRating)
             .Take(20)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        return await _context.Person
+            .Where(p => p.Id == personId)
+            .SelectMany(p => p.ChapterPeople)
+            .Where(cp => cp.Role == role)
+            .Select(cp => cp.Chapter)
+            .Where(ch => ch.Volume.Series.Metadata.AgeRating <= ageRating.AgeRating
+                         && (ageRating.IncludeUnknowns || ch.Volume.Series.Metadata.AgeRating != AgeRating.Unknown))
+            .OrderBy(ch => ch.SortOrder)
+            .Take(20)
+            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 

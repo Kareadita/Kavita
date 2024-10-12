@@ -60,16 +60,13 @@
    @if (roles$ | async; as roles) {
      @for(role of roles; track role) {
        <div class="row mt-2">
-         <app-carousel-reel [items]="[]" [title]="'As a ' + (role | personRole)" (sectionClick)="loadFilterByPerson()">
+         <app-carousel-reel [items]="(chaptersByRole[role] | async)!" [title]="'As a ' + (role | personRole)" (sectionClick)="loadFilterByPerson()">
            <ng-template #carouselItem let-item>
              <app-card-item [entity]="item"
                             [imageUrl]="imageService.getChapterCoverImage(item.id)"
                             [title]="item.name"
                             [suppressArchiveWarning]="true"
                             (clicked)="navigateToSeries(item)">
-               <ng-template #subtitle>
-                 Role here
-               </ng-template>
              </app-card-item>
            </ng-template>
          </app-carousel-reel>
