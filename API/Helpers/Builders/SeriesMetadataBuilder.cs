@@ -45,4 +45,19 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.AgeRating = rating;
         return this;
     }
+
+    public SeriesMetadataBuilder WithPerson(Person person, PersonRole role)
+    {
+        _seriesMetadata.People ??= new List<SeriesMetadataPeople>();
+        _seriesMetadata.People.Add(new SeriesMetadataPeople()
+        {
+            Role = role,
+            Person = person,
+            SeriesMetadata = _seriesMetadata,
+            PersonId = person.Id,
+            SeriesMetadataId = _seriesMetadata.Id
+        });
+
+        return this;
+    }
 }
