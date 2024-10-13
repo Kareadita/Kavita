@@ -993,102 +993,26 @@ public class ProcessSeries : IProcessSeries
 
     private async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames)
     {
-        // Normalize and build genres from the list of genre names
-        var genresToAdd = genreNames
-            .Select(g => new GenreBuilder(g).Build())
-            .ToList();
-
-        // Remove any genres that are not part of the new list
-        var genresToRemove = chapter.Genres
-            .Where(g => genresToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
-            .ToList();
-
-        foreach (var genreToRemove in genresToRemove)
+        try
         {
-            chapter.Genres.Remove(genreToRemove);
+            await GenreHelper.UpdateChapterGenres(chapter, genreNames, _unitOfWork);
         }
-
-        // Get all normalized titles for bulk lookup
-        var normalizedTitles = genresToAdd.Select(g => g.NormalizedTitle).ToList();
-
-        // Bulk lookup for existing genres in the database
-        var existingGenres = await _unitOfWork.DataContext.Genre
-            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
-            .ToListAsync();
-
-        // Find genres that do not exist in the database
-        var missingGenres = genresToAdd
-            .Where(g => existingGenres.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
-            .ToList();
-
-        // Add missing genres to the database
-        if (missingGenres.Count != 0)
+        catch (Exception ex)
         {
-            _unitOfWork.DataContext.Genre.AddRange(missingGenres);
-            await _unitOfWork.CommitAsync();  // Commit the changes to the database
-        }
-
-        // Add the new or existing genres to the chapter
-        foreach (var genre in genresToAdd)
-        {
-            var existingGenre = existingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle)
-                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle);
-
-            if (existingGenre != null && !chapter.Genres.Contains(existingGenre))
-            {
-                chapter.Genres.Add(existingGenre);
-            }
+            _logger.LogError(ex, "There was an error updating the chapter genres");
         }
     }
 
 
     private async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames)
     {
-        // Normalize and build genres from the list of genre names
-        var tagsToAdd = tagNames
-            .Select(g => new TagBuilder(g).Build())
-            .ToList();
-
-        // Remove any genres that are not part of the new list
-        var tagsToRemove = chapter.Tags
-            .Where(g => tagsToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
-            .ToList();
-
-        foreach (var tagToRemove in tagsToRemove)
+        try
         {
-            chapter.Tags.Remove(tagToRemove);
+            await TagHelper.UpdateChapterTags(chapter, tagNames, _unitOfWork);
         }
-
-        // Get all normalized titles for bulk lookup
-        var normalizedTitles = tagsToAdd.Select(g => g.NormalizedTitle).ToList();
-
-        // Bulk lookup for existing genres in the database
-        var existingTags = await _unitOfWork.DataContext.Tag
-            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
-            .ToListAsync();
-
-        // Find genres that do not exist in the database
-        var missingGenres = tagsToAdd
-            .Where(g => existingTags.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
-            .ToList();
-
-        // Add missing genres to the database
-        if (missingGenres.Count != 0)
+        catch (Exception ex)
         {
-            _unitOfWork.DataContext.Tag.AddRange(missingGenres);
-            await _unitOfWork.CommitAsync();  // Commit the changes to the database
-        }
-
-        // Add the new or existing genres to the chapter
-        foreach (var tag in tagsToAdd)
-        {
-            var existingGenre = existingTags.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle)
-                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle);
-
-            if (existingGenre != null && !chapter.Tags.Contains(existingGenre))
-            {
-                chapter.Tags.Add(existingGenre);
-            }
+            _logger.LogError(ex, "There was an error updating the chapter tags");
         }
     }
 
