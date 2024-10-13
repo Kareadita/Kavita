@@ -17,7 +17,6 @@ using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using Hangfire;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,13 +26,6 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    /// <summary>
-    /// Do not allow this Prime to be invoked by multiple threads. It will break the DB.
-    /// </summary>
-    /// <returns></returns>
-    Task Prime();
-
-    void Reset();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
 }
 
@@ -53,7 +45,6 @@ public class ProcessSeries : IProcessSeries
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IReadingListService _readingListService;
     private readonly IExternalMetadataService _externalMetadataService;
-    private readonly ITagManagerService _tagManagerService;
 
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
@@ -73,31 +64,8 @@ public class ProcessSeries : IProcessSeries
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _readingListService = readingListService;
         _externalMetadataService = externalMetadataService;
-        _tagManagerService = new TagManagerService(_unitOfWork, _logger);
     }
 
-    /// <summary>
-    /// Invoke this before processing any series, just once to prime all the needed data during a scan
-    /// </summary>
-    public async Task Prime()
-    {
-        try
-        {
-            await _tagManagerService.Prime();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex, "Unable to prime tag manager. Scan cannot proceed. Report to Kavita dev");
-        }
-    }
-
-    /// <summary>
-    /// Frees up memory
-    /// </summary>
-    public void Reset()
-    {
-        _tagManagerService.Reset();
-    }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
     {
@@ -343,29 +311,35 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Language = firstChapter.Language;
         }
 
+        // if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
+        // {
+        //     // Get the default admin to associate these tags to
+        //     var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+        //     if (defaultAdmin == null) return;
+        //
+        //     _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+        //     foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        //     {
+        //         // TODO: Remove this _tagManagerService
+        //         var (tag, _) = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
+        //         if (tag == null) continue;
+        //
+        //         // Check if the Series is already on the tag
+        //         if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
+        //         {
+        //             continue;
+        //         }
+        //
+        //         tag.Items.Add(series);
+        //         await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
+        //     }
+        // }
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
-            // Get the default admin to associate these tags to
-            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
-            if (defaultAdmin == null) return;
-
-            _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-            foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-            {
-                // TODO: Remove this _tagManagerService
-                var (tag, _) = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
-                if (tag == null) continue;
-
-                // Check if the Series is already on the tag
-                if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
-                {
-                    continue;
-                }
-
-                tag.Items.Add(series);
-                await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
-            }
+            await UpdateCollectionTags(series, firstChapter);
         }
+
+
 
         #region PeopleAndTagsAndGenres
         if (!series.Metadata.WriterLocked)
@@ -460,6 +434,47 @@ public class ProcessSeries : IProcessSeries
         }
 
         #endregion
+    }
+
+    private async Task UpdateCollectionTags(Series series, Chapter firstChapter)
+    {
+        // Get the default admin to associate these tags to
+        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+        if (defaultAdmin == null) return;
+
+        _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+
+        foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            // Try to find an existing collection tag by its normalized name
+            var normalizedCollectionName = collection.ToNormalized();
+            var collectionTag = defaultAdmin.Collections.FirstOrDefault(c => c.NormalizedTitle == normalizedCollectionName);
+
+            // If the collection tag does not exist, create a new one
+            if (collectionTag == null)
+            {
+                _logger.LogDebug("Creating new collection tag for {Tag}", collection);
+
+                collectionTag = new AppUserCollectionBuilder(collection).Build();
+                defaultAdmin.Collections.Add(collectionTag);
+
+                _unitOfWork.UserRepository.Update(defaultAdmin);
+
+                await _unitOfWork.CommitAsync();
+            }
+
+            // Check if the Series is already associated with this collection
+            if (collectionTag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
+            {
+                continue;
+            }
+
+            // Add the series to the collection tag
+            collectionTag.Items.Add(series);
+
+            // Update the collection age rating
+            await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collectionTag);
+        }
     }
 
 

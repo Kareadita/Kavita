@@ -322,11 +322,6 @@ public class ScannerService : IScannerService
             key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             .ToList();
 
-        if (toProcess.Count > 0)
-        {
-            await _processSeries.Prime();
-        }
-
         var seriesLeftToProcess = toProcess.Count;
         foreach (var pSeries in toProcess)
         {
@@ -334,8 +329,6 @@ public class ScannerService : IScannerService
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
             seriesLeftToProcess--;
         }
-
-        _processSeries.Reset();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
@@ -495,7 +488,7 @@ public class ScannerService : IScannerService
 
             await ScanLibrary(lib.Id, forceUpdate, true);
         }
-        _processSeries.Reset();
+
         _logger.LogInformation("[ScannerService] Scan of All Libraries Finished");
     }
 
@@ -551,11 +544,6 @@ public class ScannerService : IScannerService
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 4: Save Library", library.Name);
         if (await _unitOfWork.CommitAsync())
         {
-            if (isSingleScan)
-            {
-                _processSeries.Reset();
-            }
-
             if (totalFiles == 0)
             {
                 _logger.LogInformation(
@@ -617,25 +605,15 @@ public class ScannerService : IScannerService
             .Where(k => parsedSeries[k].Any() && !string.IsNullOrEmpty(parsedSeries[k][0].Filename))
             .ToList();
 
-        if (toProcess.Count > 0)
-        {
-            // This grabs all the shared entities, like tags, genre, people. To be solved later in this refactor on how to not have blocking access.
-            await _processSeries.Prime();
-        }
 
         var totalFiles = 0;
-        //var tasks = new List<Task>();
         var seriesLeftToProcess = toProcess.Count;
         foreach (var pSeries in toProcess)
         {
             totalFiles += parsedSeries[pSeries].Count;
-            //tasks.Add(_processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, forceUpdate));
-            // We can't do Task.WhenAll because of concurrency issues.
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, forceUpdate);
             seriesLeftToProcess--;
         }
-
-        //await Task.WhenAll(tasks);
 
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

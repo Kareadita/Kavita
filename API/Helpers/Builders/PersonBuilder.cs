@@ -17,9 +17,8 @@ public class PersonBuilder : IEntityBuilder<Person>
         {
             Name = name.Trim(),
             NormalizedName = name.ToNormalized(),
-            //Role = role,
-            // ChapterMetadatas = new List<Chapter>(),
-            // SeriesMetadatas = new List<SeriesMetadata>()
+            SeriesMetadataPeople = new List<SeriesMetadataPeople>(),
+            ChapterPeople = new List<ChapterPeople>()
         };
     }
 
@@ -31,6 +30,12 @@ public class PersonBuilder : IEntityBuilder<Person>
     public PersonBuilder WithId(int id)
     {
         _person.Id = id;
+        return this;
+    }
+
+    public PersonBuilder WithSeriesMetadata(SeriesMetadataPeople seriesMetadataPeople)
+    {
+        _person.SeriesMetadataPeople.Add(seriesMetadataPeople);
         return this;
     }
 

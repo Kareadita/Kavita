@@ -60,6 +60,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime);
 }
+
 public class CollectionTagRepository : ICollectionTagRepository
 {
     private readonly DataContext _context;
@@ -218,7 +219,6 @@ public class CollectionTagRepository : ICollectionTagRepository
             .AsSplitQuery()
             .ToListAsync();
     }
-
 
     public async Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None)
     {
