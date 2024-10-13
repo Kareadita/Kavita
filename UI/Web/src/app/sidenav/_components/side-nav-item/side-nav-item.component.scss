@@ -7,7 +7,7 @@
         }
 
         .card-actions {
-           opacity: 0 !important;
+            opacity: 0 !important;
         }
 
         &.active {
@@ -22,13 +22,13 @@
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0 0 0 10px;
     width: 100%;
     height: auto;
-    min-height: 40px;
+    min-height: 50px;
     overflow: hidden;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
+    font-family: sans-serif;
 
     .side-nav-text {
         opacity: 1;
@@ -36,7 +36,7 @@
         word-break: break-all;
         -webkit-line-clamp: 1;
         text-overflow: ellipsis;
-        display: -webkit-box !important;
+        display: -webkit-box;
         -webkit-box-orient: vertical;
         overflow: hidden;
 
@@ -49,6 +49,11 @@
     span {
         display:flex;
 
+        &:first-of-type {
+            text-align: center;
+            width: 56px;
+        }
+
         &:last-child {
             flex-grow: 1;
             justify-content: end;
@@ -58,12 +63,10 @@
             align-items: center;
             height: 100%;
             justify-content: inherit;
-            min-width: 30px;
             width: 100%;
-            padding-left: 5px;
 
             i {
-                font-size: 18px;
+                font-size: 21.33px;
             }
         }
     }
@@ -71,13 +74,15 @@
     &.closed {
         .side-nav-text {
             opacity: 0;
+            display: none;
         }
 
         .card-actions {
            opacity: 0;
+           display: none;
         }
 
-        &.active {
+        &.active, &.active:hover {
             color: var(--side-nav-item-active-color);
             background-color: unset;
         }
@@ -112,14 +117,14 @@
 
         .active-highlight {
             background-color: var(--side-nav-item-active-color);
-            width: 5px;
+            width: 2px;
             height: 100%;
             position: absolute;
             left: 0;
         }
 
         .side-nav-text, i {
-            color: var(--side-nav-item-active-text-color) !important;
+            color: var(--side-nav-item-active-text-color);
         }
 
         &:hover {
