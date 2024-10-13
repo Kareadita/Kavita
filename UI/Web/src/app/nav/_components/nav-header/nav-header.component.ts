@@ -178,7 +178,7 @@ export class NavHeaderComponent implements OnInit {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
-  goToPerson(name: string) { // role: PersonRole, filter: any
+  goToPerson(name: string) {
     this.clearSearch();
     this.router.navigate(['person', name]);
   }

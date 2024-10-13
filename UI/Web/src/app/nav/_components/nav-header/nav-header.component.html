@@ -114,14 +114,8 @@
                     <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getPersonImageByName(item)"></app-image>
                   </div>
                   <div class="ms-1">
-                    <div [innerHTML]="item.name"></div>
+                    <div>{{item.name}}</div>
                   </div>
-
-<!--                  <div class="ms-1">-->
-
-<!--                    <div [innerHTML]="item.name"></div>-->
-<!--&lt;!&ndash;                    <div class="text-light fst-italic">{{item.role | personRole}}</div>&ndash;&gt;-->
-<!--                  </div>-->
                 </div>
               </ng-template>
 

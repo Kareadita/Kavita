@@ -7,13 +7,14 @@ import {BookmarkSearchResult} from "./bookmark-search-result";
 import {Genre} from "../metadata/genre";
 import {ReadingList} from "../reading-list";
 import {UserCollection} from "../collection-tag";
+import {Person} from "../metadata/person";
 
 export class SearchResultGroup {
     libraries: Array<Library> = [];
     series: Array<SearchResult> = [];
     collections: Array<UserCollection> = [];
     readingLists: Array<ReadingList> = [];
-    persons: Array<string> = [];
+    persons: Array<Person> = [];
     genres: Array<Genre> = [];
     tags: Array<Tag> = [];
     files: Array<MangaFile> = [];

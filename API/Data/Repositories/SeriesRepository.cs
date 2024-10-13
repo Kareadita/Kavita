@@ -363,11 +363,11 @@ public class SeriesRepository : ISeriesRepository
         var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var seriesIds = _context.Series
+        var seriesIds = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id)
-            .ToList();
+            .ToListAsync();
 
         result.Libraries = await _context.Library
             .Search(searchQuery, userId, libraryIds)
@@ -440,9 +440,8 @@ public class SeriesRepository : ISeriesRepository
             .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
             .OrderBy(t => t.NormalizedName)
-            .Select(p => p.Name)
             .Distinct()
-            //.ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Genres = await _context.SeriesMetadata

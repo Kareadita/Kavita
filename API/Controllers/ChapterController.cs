@@ -162,7 +162,6 @@ public class ChapterController : BaseApiController
         }
         #endregion
 
-        // TODO: Implement People support
         #region People
         if (PersonHelper.HasAnyPeople(dto))
         {
