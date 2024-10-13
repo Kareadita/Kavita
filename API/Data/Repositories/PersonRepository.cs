@@ -253,13 +253,10 @@ public class PersonRepository : IPersonRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        return await _context.Person
-            .Where(p => p.Id == personId)
-            .SelectMany(p => p.ChapterPeople)
-            .Where(cp => cp.Role == role)
+        return await _context.ChapterPeople
+            .Where(cp => cp.PersonId == personId && cp.Role == role)
             .Select(cp => cp.Chapter)
-            .Where(ch => ch.Volume.Series.Metadata.AgeRating <= ageRating.AgeRating
-                         && (ageRating.IncludeUnknowns || ch.Volume.Series.Metadata.AgeRating != AgeRating.Unknown))
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(ch => ch.SortOrder)
             .Take(20)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)

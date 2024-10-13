@@ -25,6 +25,19 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
+    public static IQueryable<Chapter> RestrictAgainstAgeRestriction(this IQueryable<Chapter> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+        var q = queryable.Where(chapter => chapter.Volume.Series.Metadata.AgeRating <= restriction.AgeRating);
+
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(s => s.Volume.Series.Metadata.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
+    }
+
     [Obsolete]
     public static IQueryable<CollectionTag> RestrictAgainstAgeRestriction(this IQueryable<CollectionTag> queryable, AgeRestriction restriction)
     {
