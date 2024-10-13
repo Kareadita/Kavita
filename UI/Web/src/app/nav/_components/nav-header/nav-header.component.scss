@@ -4,88 +4,111 @@
 }
 
 .navbar {
-    background-color: var(--navbar-bg-color);
+  background-color: var(--navbar-bg-color);
 
-    .side-nav-toggle {
-        cursor: pointer;
-        margin-left: 13px;
-        font-size: 1.2rem;
-        i {
-            color: var(--navbar-fa-icon-color);
-        }
+  .navbar-nav {
+    .nav-item {
+      &.search {
+        width: 100%;
+      }
     }
-}
+  }
 
-/* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) {
-    .navbar-nav {
-        width: 0;
+  .side-nav-toggle {
+    cursor: pointer;
+    margin-left: 13px;
+    font-size: 1.2rem;
+
+    i {
+      color: var(--navbar-fa-icon-color);
+      opacity: 0.8;
     }
-}
-
-// On Really small screens, hide the server settings wheel and show it in nav
-// TODO: Look into doing this with bootstrap 5 (and moving to _utilities.scss)
-.xs-only {
-    display: none;
-}
-.not-xs-only {
-    display: inherit;
-}
-@media only screen and (max-width:300px) {
-    .xs-only {
-        display: inherit;
-    }
-    .not-xs-only {
-        display: none;
-    }
-}
-
-.nav-item.dropdown {
-    position: unset;
-}
-
-.navbar-brand {
-    font-family: var(--brand-font-family);
-    font-weight: bold;
-    margin: 0 1rem;
 
     &:hover {
-        text-decoration: none;
+      i {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+  // On Really small screens, hide the server settings wheel and show it in nav
+  // TODO: Look into doing this with bootstrap 5 (and moving to _utilities.scss)
+  .xs-only {
+    display: none;
+  }
+
+  .not-xs-only {
+    display: inherit;
+  }
+
+  @media only screen and (max-width:300px) {
+    .xs-only {
+      display: inherit;
+    }
+
+    .not-xs-only {
+      display: none;
+    }
+  }
+
+  .nav-item.dropdown {
+    position: unset;
+  }
+
+  .navbar-brand {
+    font-family: var(--brand-font-family);
+    font-weight: bold;
+    margin: 0 2rem;
+
+    &:hover {
+      text-decoration: none;
     }
 
     .logo {
-        max-height: 28px;
-        vertical-align: text-top;
+      max-height: 28px;
+      vertical-align: text-top;
     }
 
     .phone-hidden {
-        vertical-align: middle;
+      vertical-align: middle;
     }
-}
+  }
 
-.focus-visible:focus {
+  .focus-visible:focus {
     visibility: visible;
-    color:  var(--nav-header-text-color);
-}
+    color: var(--nav-header-text-color);
+  }
 
-.ng-autocomplete {
+  .ng-autocomplete {
     margin-bottom: 0px;
-}
+  }
 
-.primary-text {
-    color:  var(--nav-header-text-color);
+  .primary-text {
+    color: var(--nav-header-text-color);
     border: none;
-}
+  }
 
-.search-result {
+  .search-result {
     width: 24px;
     margin-top: 5px;
-}
+  }
 
-.scroll-to-top:hover {
+  .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;
-}
+  }
 
-.text-light {
+  .text-light {
     color: var(--search-result-text-lite-color) !important;
+  }
+
+/* small devices (phones, 650px and down) */
+@media only screen and (max-width:650px) {
+  .navbar-nav {
+    width: 0;
+  }
+
+  .navbar-brand {
+    margin: 0 1rem 0 1rem;
+  }
 }
