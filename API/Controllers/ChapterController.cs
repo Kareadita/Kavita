@@ -136,29 +136,18 @@ public class ChapterController : BaseApiController
 
 
         #region Genres
-        if (dto.Genres != null &&
-            dto.Genres.Count != 0)
+        if (dto.Genres is {Count: > 0})
         {
-            var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(dto.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
             chapter.Genres ??= new List<Genre>();
-            GenreHelper.UpdateGenreList(dto.Genres, chapter, allGenres, genre =>
-            {
-                chapter.Genres.Add(genre);
-            }, () => chapter.GenresLocked = true);
+            await GenreHelper.UpdateChapterGenres(chapter, dto.Genres.Select(t => t.Title), _unitOfWork);
         }
         #endregion
 
         #region Tags
         if (dto.Tags is {Count: > 0})
         {
-            var allTags = (await _unitOfWork.TagRepository
-                    .GetAllTagsByNameAsync(dto.Tags.Select(t => Parser.Normalize(t.Title))))
-                .ToList();
             chapter.Tags ??= new List<Tag>();
-            TagHelper.UpdateTagList(dto.Tags, chapter, allTags, tag =>
-            {
-                chapter.Tags.Add(tag);
-            }, () => chapter.TagsLocked = true);
+            await TagHelper.UpdateChapterTags(chapter, dto.Tags.Select(t => t.Title), _unitOfWork);
         }
         #endregion
 
