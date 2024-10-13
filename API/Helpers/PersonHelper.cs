@@ -6,6 +6,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers.Builders;
 
@@ -15,6 +16,134 @@ namespace API.Helpers;
 // This isn't needed in the new person architecture
 public static class PersonHelper
 {
+
+    public static async Task UpdateSeriesMetadataPeopleAsync(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
+        IEnumerable<ChapterPeople> chapterPeople, PersonRole role, IUnitOfWork unitOfWork)
+    {
+        // Normalize and group by person
+        var peopleToAdd = chapterPeople
+            .Where(cp => cp.Role == role)
+            .Select(cp => cp.Person)
+            .ToList();
+
+        var modification = false;
+
+        // Remove any people who are not part of the new list
+        var peopleToRemove = metadataPeople
+            .Where(mp => mp.Role == role && peopleToAdd.TrueForAll(p => p.NormalizedName != mp.Person.NormalizedName))
+            .ToList();
+
+        foreach (var personToRemove in peopleToRemove)
+        {
+            metadataPeople.Remove(personToRemove);
+            modification = true;
+        }
+
+        // Add new people if they do not already exist
+        foreach (var person in peopleToAdd)
+        {
+            var existingPerson = metadataPeople
+                .FirstOrDefault(mp => mp.Person.NormalizedName == person.NormalizedName && mp.Role == role);
+
+            if (existingPerson == null)
+            {
+                // Check if the person already exists in the database
+                var dbPerson = await unitOfWork.PersonRepository.GetPersonByName(person.Name);
+
+                if (dbPerson == null)
+                {
+                    // Create a new Person entity if not found in the database
+                    dbPerson = new PersonBuilder(person.Name).Build();
+
+                    // Attach and save the new Person entity
+                    unitOfWork.DataContext.Person.Attach(dbPerson);
+                    await unitOfWork.CommitAsync();
+                }
+
+                // Add the person to the SeriesMetadataPeople collection
+                metadataPeople.Add(new SeriesMetadataPeople
+                {
+                    PersonId = dbPerson.Id,
+                    Person = dbPerson,
+                    SeriesMetadataId = metadata.Id,
+                    SeriesMetadata = metadata,
+                    Role = role
+                });
+                modification = true;
+            }
+        }
+
+        // Commit the changes if any modifications were made
+        if (modification)
+        {
+            await unitOfWork.CommitAsync();
+        }
+    }
+
+
+    public static async Task UpdateSeriesMetadataPeopleAsync(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
+        IEnumerable<SeriesMetadataPeople> seriesPeople, PersonRole role, IUnitOfWork unitOfWork)
+    {
+        // Normalize and group by person
+        var peopleToAdd = seriesPeople
+            .Where(cp => cp.Role == role)
+            .Select(cp => cp.Person)
+            .ToList();
+
+        var modification = false;
+
+        // Remove any people who are not part of the new list
+        var peopleToRemove = metadataPeople
+            .Where(mp => mp.Role == role && peopleToAdd.TrueForAll(p => p.NormalizedName != mp.Person.NormalizedName))
+            .ToList();
+
+        foreach (var personToRemove in peopleToRemove)
+        {
+            metadataPeople.Remove(personToRemove);
+            modification = true;
+        }
+
+        // Add new people if they do not already exist
+        foreach (var person in peopleToAdd)
+        {
+            var existingPerson = metadataPeople
+                .FirstOrDefault(mp => mp.Person.NormalizedName == person.NormalizedName && mp.Role == role);
+
+            if (existingPerson == null)
+            {
+                // Check if the person already exists in the database
+                var dbPerson = await unitOfWork.PersonRepository.GetPersonByName(person.Name);
+
+                if (dbPerson == null)
+                {
+                    // Create a new Person entity if not found in the database
+                    dbPerson = new PersonBuilder(person.Name).Build();
+
+                    // Attach and save the new Person entity
+                    unitOfWork.DataContext.Person.Attach(dbPerson);
+                    await unitOfWork.CommitAsync();
+                }
+
+                // Add the person to the SeriesMetadataPeople collection
+                metadataPeople.Add(new SeriesMetadataPeople
+                {
+                    PersonId = dbPerson.Id,
+                    Person = dbPerson,
+                    SeriesMetadataId = metadata.Id,
+                    SeriesMetadata = metadata,
+                    Role = role
+                });
+                modification = true;
+            }
+        }
+
+        // Commit the changes if any modifications were made
+        if (modification)
+        {
+            await unitOfWork.CommitAsync();
+        }
+    }
+
 
 
     public static async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)

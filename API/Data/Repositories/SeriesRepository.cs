@@ -44,6 +44,9 @@ public enum SeriesIncludes
 {
     None = 1,
     Volumes = 2,
+    /// <summary>
+    /// This will include all necessary includes
+    /// </summary>
     Metadata = 4,
     Related = 8,
     Library = 16,
@@ -51,8 +54,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
-    ExternalMetadata = 512
-
+    ExternalMetadata = 512,
 }
 
 /// <summary>
@@ -526,14 +528,6 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="includes"></param>
     /// <returns></returns>
     public async Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
-    {
-        return await _context.Series
-            .Where(s => s.Id == seriesId)
-            .Includes(includes)
-            .SingleOrDefaultAsync();
-    }
-
-    public async Task<Series?> GetSeriesByIdForUserAsync(int seriesId, int userId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)

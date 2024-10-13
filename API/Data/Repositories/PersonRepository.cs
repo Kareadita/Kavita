@@ -17,6 +17,7 @@ namespace API.Data.Repositories;
 public interface IPersonRepository
 {
     void Attach(Person person);
+    void Attach(IEnumerable<Person> person);
     void Remove(Person person);
     void Remove(ChapterPeople person);
     void Remove(SeriesMetadataPeople person);
@@ -41,6 +42,7 @@ public interface IPersonRepository
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
     Task<IEnumerable<ChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
+    Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames);
 }
 
 public class PersonRepository : IPersonRepository
@@ -57,6 +59,11 @@ public class PersonRepository : IPersonRepository
     public void Attach(Person person)
     {
         _context.Person.Attach(person);
+    }
+
+    public void Attach(IEnumerable<Person> person)
+    {
+        _context.Person.AttachRange(person);
     }
 
     public void Remove(Person person)
@@ -256,6 +263,14 @@ public class PersonRepository : IPersonRepository
             .OrderBy(ch => ch.SortOrder)
             .Take(20)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames)
+    {
+        return await _context.Person
+            .Where(p => normalizedNames.Contains(p.NormalizedName))
+            .OrderBy(p => p.Name)
             .ToListAsync();
     }
 

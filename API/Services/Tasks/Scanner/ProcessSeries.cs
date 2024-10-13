@@ -371,79 +371,79 @@ public class ProcessSeries : IProcessSeries
         if (!series.Metadata.WriterLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
         }
 
         if (!series.Metadata.ColoristLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Colorist)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Colorist);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Colorist);
         }
 
         if (!series.Metadata.PublisherLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Publisher)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Publisher);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Publisher);
         }
 
         if (!series.Metadata.CoverArtistLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.CoverArtist)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.CoverArtist);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.CoverArtist);
         }
 
         if (!series.Metadata.CharacterLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Character)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Character);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Character);
         }
 
         if (!series.Metadata.EditorLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Editor)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Editor);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Editor);
         }
 
         if (!series.Metadata.InkerLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Inker)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Inker);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Inker);
         }
 
         if (!series.Metadata.ImprintLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Imprint)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Imprint);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Imprint);
         }
 
         if (!series.Metadata.TeamLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Team)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Team);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Team);
         }
 
         if (!series.Metadata.LocationLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Location)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Location);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Location);
         }
 
         if (!series.Metadata.LettererLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Letterer)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Letterer);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Letterer);
         }
 
         if (!series.Metadata.PencillerLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Penciller)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Penciller);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Penciller);
         }
 
         if (!series.Metadata.TranslatorLocked)
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Translator)).ToList();
-            UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Translator);
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Translator);
         }
 
 
@@ -523,42 +523,10 @@ public class ProcessSeries : IProcessSeries
 
 
 
-    private static void UpdateSeriesMetadataPeople(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople, IEnumerable<ChapterPeople> chapterPeople, PersonRole role)
+    private async Task UpdateSeriesMetadataPeople(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
+        IEnumerable<ChapterPeople> chapterPeople, PersonRole role)
     {
-        // Normalize and group by person
-        var peopleToAdd = chapterPeople
-            .Where(cp => cp.Role == role)
-            .Select(cp => cp.Person)
-            .ToList();
-
-        // Remove any people who are not part of the new list
-        var peopleToRemove = metadataPeople
-            .Where(mp => mp.Role == role && peopleToAdd.TrueForAll(p => p.NormalizedName != mp.Person.NormalizedName))
-            .ToList();
-
-        foreach (var personToRemove in peopleToRemove)
-        {
-            metadataPeople.Remove(personToRemove);
-        }
-
-        // Add new people if they do not already exist
-        foreach (var person in peopleToAdd)
-        {
-            var existingPerson = metadataPeople
-                .FirstOrDefault(mp => mp.Person.NormalizedName == person.NormalizedName && mp.Role == role);
-
-            if (existingPerson == null)
-            {
-                metadataPeople.Add(new SeriesMetadataPeople
-                {
-                    PersonId = person.Id,
-                    Person = person,
-                    SeriesMetadataId = metadata.Id,
-                    SeriesMetadata = metadata,
-                    Role = role
-                });
-            }
-        }
+        await PersonHelper.UpdateSeriesMetadataPeopleAsync(metadata, metadataPeople, chapterPeople, role, _unitOfWork);
     }
 
     private void DeterminePublicationStatus(Series series, List<Chapter> chapters)
