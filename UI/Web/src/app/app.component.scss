@@ -1,4 +1,5 @@
 @import '../theme/variables';
+
 .content-wrapper {
     padding: 0 0 0 10px;
     height: calc(var(--vh)* 100 - var(--nav-offset));
@@ -14,6 +15,7 @@
     scrollbar-width: thin;
     mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 95%, transparent 100%);
+    //margin-top: 7px;
 
     // For firefox
     @supports (-moz-appearance:none) {
@@ -55,7 +57,7 @@
 }
 
 .companion-bar-content {
-    margin-left: 190px;
+  margin-left: var(--side-nav-width);
 }
 
 @media (max-width: $grid-breakpoints-lg) {
@@ -88,6 +90,7 @@
         scrollbar-width: thin;
         margin-bottom: 20px;
         overflow-y: auto;
+        margin-top: 3px;
     }
 
     .companion-bar-content {

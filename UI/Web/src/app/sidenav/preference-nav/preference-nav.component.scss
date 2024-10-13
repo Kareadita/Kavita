@@ -2,12 +2,12 @@
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
   padding-bottom: 10px;
-  width: 190px;
-  background-color: var(--side-nav-bg-color);
+  width: var(--side-nav-width);
+  //background-color: var(--side-nav-bg-color);
   height: calc((var(--vh)*100) - 75px);
   position: fixed;
   margin: 0;
-  left: 10px;
+  left: 0px;
   top: 73px;
   overflow-y: hidden;
   overflow-x: hidden;
@@ -16,38 +16,36 @@
   border: var(--side-nav-border);
   scrollbar-gutter: stable both-edges;
   scrollbar-width: thin;
-
   // For firefox
   @supports (-moz-appearance:none) {
-      scrollbar-color: transparent transparent;
-      scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
   }
 
   &::-webkit-scrollbar {
-      background-color: transparent;  /*make scrollbar space invisible */
-      width: inherit;
-      display: none;
-      visibility: hidden;
-      background: transparent;
+    background-color: transparent; /*make scrollbar space invisible */
+    width: inherit;
+    display: none;
+    visibility: hidden;
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-      background: transparent; /*makes it invisible when not hovering*/
+    background: transparent; /*makes it invisible when not hovering*/
   }
 
   &:hover {
-      scrollbar-width: thin;
-      overflow-y: auto;
+    scrollbar-width: thin;
+    overflow-y: auto;
+    // For firefox
+    @supports (-moz-appearance:none) {
+      scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+    }
 
-      // For firefox
-      @supports (-moz-appearance:none) {
-          scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
-      }
-
-      &::-webkit-scrollbar-thumb {
-          visibility: visible;
-          background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
-      }
+    &::-webkit-scrollbar-thumb {
+      visibility: visible;
+      background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+    }
   }
 
   &.no-donate {
