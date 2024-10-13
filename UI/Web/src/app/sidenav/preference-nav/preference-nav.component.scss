@@ -2,20 +2,6 @@
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
   padding-bottom: 10px;
-  width: var(--side-nav-width);
-  //background-color: var(--side-nav-bg-color);
-  height: calc((var(--vh)*100) - 75px);
-  position: fixed;
-  margin: 0;
-  left: 0px;
-  top: 73px;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  border-radius: var(--side-nav-border-radius);
-  transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
-  border: var(--side-nav-border);
-  scrollbar-gutter: stable both-edges;
-  scrollbar-width: thin;
   // For firefox
   @supports (-moz-appearance:none) {
     scrollbar-color: transparent transparent;
@@ -131,13 +117,4 @@
   color: #d5d5d5;
   font-weight: bold;
   margin-left: 5px;
-}
-
-.side-nav-header:first-of-type {
-  margin-top: 0.5rem !important;
-}
-
-// Overrides for this component
-::ng-deep .side-nav-item {
-  padding: 0 0 0 20px !important;
 }

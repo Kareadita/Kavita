@@ -17,7 +17,72 @@
   }
 
   &.preference {
-    height: calc((var(--vh) * 100));
+    height: calc((var(--vh)*100) - 75px);
+    width: 238px;
+
+    .side-nav {
+      overflow-x: hidden;
+
+      .side-nav-header {
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 15px;
+        &:first-of-type {
+            margin-top: 0.7rem;
+        }
+      }
+
+      .side-nav-item {
+        font-size: 0.9rem;
+        min-height: 30px;
+        padding-left: 12px;
+        justify-content: unset;
+
+        &.active {
+          .active-highlight {
+            width: 4px;
+            height: 4px;
+            border-radius: 50px;
+            opacity: 1;
+            position: unset;
+          }
+        }
+
+        .active-highlight {
+          width: 4px;
+          height: 4px;
+          border-radius: 50px;
+          opacity: 0;
+          margin-left: 13px;
+        }
+
+        .side-nav-text {
+          text-align: unset;
+          width: 100%;
+          margin-left: 7px;
+          flex-grow: 1;
+
+          div {
+            min-width: unset;
+            width: unset;
+            text-overflow: ellipsis;
+            display: block;
+            font-size: 13px;
+          }
+        }
+
+        span {
+          justify-content: unset;
+
+          div {
+            justify-content: unset;
+          }
+        }
+
+        .card-actions {
+          display: none;
+        }
+      }
+    }
   }
 
   &.no-donate {
@@ -37,8 +102,9 @@
     border: var(--side-nav-border-closed);
     height: calc((var(--vh) * 100) - 104px);
     border-radius: unset;
+
     .side-nav {
-        padding-bottom: unset;
+      padding-bottom: unset;
     }
   }
 
