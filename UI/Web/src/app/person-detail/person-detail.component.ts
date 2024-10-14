@@ -18,7 +18,7 @@ import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
+import {TagBadgeComponent, TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
@@ -27,7 +27,6 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {allPeople, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
-import {SeriesService} from "../_services/series.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {AccountService} from "../_services/account.service";
@@ -36,7 +35,7 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 
 @Component({
@@ -65,7 +64,6 @@ export class PersonDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly personService = inject(PersonService);
@@ -141,7 +139,7 @@ export class PersonDetailComponent {
       // Create a filter of all roles with OR
       const params: any = {};
       params['page'] = 1;
-      params['title'] = 'All Works of ' + person.name;
+      params['title'] = translate('person-detail.browse-person-title', {name: person.name});
 
       const searchFilter = {...this.filter!};
       searchFilter.limitTo = 0;
@@ -160,10 +158,11 @@ export class PersonDetailComponent {
   }
 
   loadFilterByRole(role: PersonRole) {
+    const personPipe = new PersonRolePipe();
     // Create a filter of all roles with OR
     const params: any = {};
     params['page'] = 1;
-    params['title'] = 'All Works of ' + this.person!.name;
+    params['title'] = translate('person-detail.browse-person-by-role-title', {name: this.person!.name, role: personPipe.transform(role)});
 
     const searchFilter = this.filterUtilityService.createSeriesV2Filter();
     searchFilter.limitTo = 0;
@@ -171,7 +170,7 @@ export class PersonDetailComponent {
 
     searchFilter.statements.push({comparison: FilterComparison.Contains, value: this.person!.id + '', field: personRoleForFilterField(role)});
 
-    return this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params);
+    this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params).subscribe();
   }
 
   navigateToSeries(series: Series) {
@@ -202,4 +201,5 @@ export class PersonDetailComponent {
     }
   }
 
+  protected readonly TagBadgeCursor = TagBadgeCursor;
 }

@@ -29,7 +29,7 @@
               <div class="mt-1">
                 <h5>Roles in Libraries</h5>
                 @for(role of roles; track role) {
-                  <app-tag-badge>{{role | personRole}}</app-tag-badge>
+                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
                 }
               </div>
             }

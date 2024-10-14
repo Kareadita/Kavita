@@ -252,8 +252,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-
-        // TODO: We need LibraryId, SeriesId, and LibraryType on a higher order ChapterDto
+        
         return await _context.ChapterPeople
             .Where(cp => cp.PersonId == personId && cp.Role == role)
             .Select(cp => cp.Chapter)

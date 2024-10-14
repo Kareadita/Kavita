@@ -798,7 +798,7 @@ export class ActionFactoryService {
         title: 'edit',
         description: 'edit-person-tooltip',
         callback: this.dummyCallback,
-        requiresAdmin: false,
+        requiresAdmin: true,
         children: [],
       }
     ];

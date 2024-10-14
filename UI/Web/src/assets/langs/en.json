@@ -920,7 +920,9 @@
 
     "person-detail": {
         "known-for-title": "Known For",
-        "individual-role-title": "As a {{role}}"
+        "individual-role-title": "As a {{role}}",
+        "browse-person-title": "All Works of {{name}}",
+        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}"
     },
 
     "library-settings-modal": {
