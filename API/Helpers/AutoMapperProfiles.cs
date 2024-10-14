@@ -338,6 +338,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Chapter, StandaloneChapterDto>()
             .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Volume.SeriesId))
+            .ForMember(dest => dest.VolumeTitle, opt => opt.MapFrom(src => src.Volume.Name))
             .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
             .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
     }

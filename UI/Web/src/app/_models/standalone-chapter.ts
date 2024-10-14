@@ -5,4 +5,5 @@ export interface StandaloneChapter extends Chapter {
   seriesId: number;
   libraryId: number;
   libraryType: LibraryType;
+  volumeTitle?: string;
 }

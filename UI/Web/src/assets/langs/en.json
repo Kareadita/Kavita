@@ -915,12 +915,12 @@
     "browse-authors": {
         "title": "Browse Authors & Writers",
         "author-count": "{{num}} People",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "individual-role-title": "As a {{role}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
     "person-detail": {
-        "known-for-title": "Known For"
+        "known-for-title": "Known For",
+        "individual-role-title": "As a {{role}}"
     },
 
     "library-settings-modal": {
