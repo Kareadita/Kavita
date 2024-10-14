@@ -107,7 +107,7 @@ public class PersonController : BaseApiController
     }
 
     [HttpGet("chapters-by-role")]
-    public async Task<ActionResult<IEnumerable<ChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
+    public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {
         return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, User.GetUserId(), role));
     }

@@ -9,6 +9,7 @@ import {map} from "rxjs/operators";
 import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/person/browse-person";
 import {Chapter} from "../_models/chapter";
+import {StandaloneChapter} from "../_models/standalone-chapter";
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +37,7 @@ export class PersonService {
   }
 
   getChaptersByRole(personId: number, role: PersonRole) {
-    return this.httpClient.get<Array<Chapter>>(this.baseUrl + `person/chapters-by-role?personId=${personId}&role=${role}`);
+    return this.httpClient.get<Array<StandaloneChapter>>(this.baseUrl + `person/chapters-by-role?personId=${personId}&role=${role}`);
   }
 
   getAuthorsToBrowse(pageNum?: number, itemsPerPage?: number) {

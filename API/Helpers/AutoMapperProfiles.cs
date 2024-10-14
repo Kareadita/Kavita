@@ -335,5 +335,10 @@ public class AutoMapperProfiles : Profile
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();
+
+        CreateMap<Chapter, StandaloneChapterDto>()
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Volume.SeriesId))
+            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
+            .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
     }
 }

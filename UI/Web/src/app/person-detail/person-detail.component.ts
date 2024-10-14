@@ -25,7 +25,7 @@ import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
-import {FilterField, allPeople} from "../_models/metadata/v2/filter-field";
+import {FilterField, allPeople, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
 import {SeriesService} from "../_services/series.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -39,6 +39,7 @@ import {Chapter} from "../_models/chapter";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 
 @Component({
   selector: 'app-person-detail',
@@ -55,7 +56,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
     SeriesCardComponent,
     CardItemComponent,
     CardActionablesComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    ChapterCardComponent
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -157,6 +159,21 @@ export class PersonDetailComponent {
         return loadPage(p);
       })).subscribe();
     }
+  }
+
+  loadFilterByRole(role: PersonRole) {
+    // Create a filter of all roles with OR
+    const params: any = {};
+    params['page'] = 1;
+    params['title'] = 'All Works of ' + this.person!.name;
+
+    const searchFilter = this.filterUtilityService.createSeriesV2Filter();
+    searchFilter.limitTo = 0;
+    searchFilter.combination = FilterCombination.Or;
+
+    searchFilter.statements.push({comparison: FilterComparison.Contains, value: this.person!.id + '', field: personRoleForFilterField(role)});
+
+    return this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params);
   }
 
   navigateToSeries(series: Series) {

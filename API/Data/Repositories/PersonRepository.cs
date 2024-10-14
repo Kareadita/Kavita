@@ -41,7 +41,7 @@ public interface IPersonRepository
     Task<Person> GetPersonByName(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
-    Task<IEnumerable<ChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
+    Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames);
 }
 
@@ -249,17 +249,18 @@ public class PersonRepository : IPersonRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
+    public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
+        // TODO: We need LibraryId, SeriesId, and LibraryType on a higher order ChapterDto
         return await _context.ChapterPeople
             .Where(cp => cp.PersonId == personId && cp.Role == role)
             .Select(cp => cp.Chapter)
             .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(ch => ch.SortOrder)
             .Take(20)
-            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<StandaloneChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
