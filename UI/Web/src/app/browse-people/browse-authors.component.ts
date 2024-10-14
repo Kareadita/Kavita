@@ -28,6 +28,7 @@ import {JumpbarService} from "../_services/jumpbar.service";
 import {PersonCardComponent} from "../cards/person-card/person-card.component";
 import {ImageService} from "../_services/image.service";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 
 
 @Component({
@@ -40,6 +41,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     DecimalPipe,
     CardItemComponent,
     PersonCardComponent,
+    CompactNumberPipe,
   ],
   templateUrl: './browse-authors.component.html',
   styleUrl: './browse-authors.component.scss',

@@ -20,7 +20,10 @@
       <ng-template #cardItem let-item let-position="idx">
         <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">
           <ng-template #subtitle>
-            <span style="font-size: 12px">{{item.issueCount}} works</span>
+            <div class="d-flex justify-content-evenly">
+                <div style="font-size: 12px">{{item.seriesCount | compactNumber}} series</div>
+                <div style="font-size: 12px">{{item.issueCount | compactNumber}} issues</div>
+            </div>
           </ng-template>
         </app-person-card>
       </ng-template>

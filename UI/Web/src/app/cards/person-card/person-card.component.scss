@@ -13,8 +13,19 @@ $image-height: 160px;
 .card-item-container {
   .overlay {
     height: $image-height;
+
+    /* TODO: Robbie fix this hack */
+    .missing-img {
+      position: absolute;
+      left: 43%;
+      top: 25%;
+    }
   }
   .card-overlay {
     height: $image-height;
   }
+  .card-body {
+    bottom: 0;
+  }
 }
+
