@@ -24,6 +24,10 @@ export class PersonBadgeComponent implements OnInit {
 
   staff!: SeriesStaff;
 
+  get HasCoverImage() {
+    return this.isStaff || (this.person as Person).coverImage;
+  }
+
   get ImageUrl() {
     if (this.isStaff && this.staff.imageUrl && !this.staff.imageUrl.endsWith('default.jpg')) {
       return (this.person as SeriesStaff).imageUrl || '';
