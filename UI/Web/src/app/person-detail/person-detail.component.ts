@@ -37,6 +37,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
+import {ThemeService} from "../_services/theme.service";
 
 @Component({
   selector: 'app-person-detail',
@@ -71,6 +72,7 @@ export class PersonDetailComponent {
   private readonly modalService = inject(NgbModal);
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
+  private readonly themeService = inject(ThemeService);
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
@@ -101,6 +103,8 @@ export class PersonDetailComponent {
 
       this.person$ = this.personService.get(this.personName).pipe(tap(p => {
         this.person = p;
+
+        this.themeService.setColorScape(this.person.primaryColor || '', this.person.secondaryColor);
 
         this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
           this.roles = roles;

@@ -26,4 +26,6 @@ export interface Person {
   aniListId?: number;
   hardcoverId?: string;
   asin?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }

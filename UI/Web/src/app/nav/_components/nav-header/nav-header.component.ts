@@ -17,7 +17,7 @@ import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
-import {PersonRole} from 'src/app/_models/metadata/person';
+import {Person, PersonRole} from 'src/app/_models/metadata/person';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {SearchResult} from 'src/app/_models/search/search-result';
 import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
@@ -178,9 +178,9 @@ export class NavHeaderComponent implements OnInit {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
-  goToPerson(name: string) {
+  goToPerson(person: Person) {
     this.clearSearch();
-    this.router.navigate(['person', name]);
+    this.router.navigate(['person', person.name]);
   }
 
   clearSearch() {
