@@ -33,8 +33,6 @@ public interface IPersonRepository
 
     Task<string> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
-    Task<PersonDto> GetPersonDtoAsync(int personId, int userId);
-    Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
@@ -144,30 +142,6 @@ public class PersonRepository : IPersonRepository
             .Where(c => c.NormalizedName == normalized)
             .Select(c => c.CoverImage)
             .SingleOrDefaultAsync();
-    }
-
-    public async Task<PersonDto> GetPersonDtoAsync(int personId, int userId)
-    {
-        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-
-        return await _context.Person
-            .Where(p => p.Id == personId)
-            .RestrictAgainstAgeRestriction(ageRating)
-            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<IEnumerable<PersonRole>> GetRolesForPerson(int personId, int userId)
-    {
-        // TODO: This will need to check both series and chapters (in cases where komf only updates series)
-        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-
-        return await _context.Person
-            .Where(p => p.Id == personId)
-            .RestrictAgainstAgeRestriction(ageRating)
-            .SelectMany(p => p.ChapterPeople.Select(cp => cp.Role))
-            .Distinct()
-            .ToListAsync();
     }
 
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId)

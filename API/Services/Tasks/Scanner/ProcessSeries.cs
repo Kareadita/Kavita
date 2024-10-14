@@ -316,7 +316,6 @@ public class ProcessSeries : IProcessSeries
         }
 
 
-
         #region PeopleAndTagsAndGenres
         if (!series.Metadata.WriterLocked)
         {
