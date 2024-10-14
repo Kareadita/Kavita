@@ -72,6 +72,8 @@ export class PersonDetailComponent {
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
 
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
@@ -180,15 +182,15 @@ export class PersonDetailComponent {
   handleAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case(Action.Edit):
-          const ref = this.modalService.open(EditPersonModalComponent, {scrollable: true, size: 'lg', fullscreen: 'md'});
-          ref.componentInstance.person = this.person;
+        const ref = this.modalService.open(EditPersonModalComponent, {scrollable: true, size: 'lg', fullscreen: 'md'});
+        ref.componentInstance.person = this.person;
 
-          ref.closed.subscribe(r => {
-            if (r.success) {
-              this.person = {...r.person};
-              this.cdRef.markForCheck();
-            }
-          });
+        ref.closed.subscribe(r => {
+          if (r.success) {
+            this.person = {...r.person};
+            this.cdRef.markForCheck();
+          }
+        });
         break;
       default:
         break;
@@ -200,6 +202,4 @@ export class PersonDetailComponent {
       action.callback(action, this.person);
     }
   }
-
-  protected readonly TagBadgeCursor = TagBadgeCursor;
 }
