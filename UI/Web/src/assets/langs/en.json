@@ -915,7 +915,8 @@
     "browse-authors": {
         "title": "Browse Authors & Writers",
         "author-count": "{{num}} People",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "individual-role-title": "As a {{role}}"
     },
 
     "person-detail": {
