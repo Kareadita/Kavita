@@ -1,0 +1,33 @@
+<div class="main-container container-fluid">
+  <ng-container *transloco="let t; read:'browse-authors'" >
+    <app-side-nav-companion-bar [hasFilter]="false">
+      <h2 title>
+        <span>{{t('title')}}</span>
+      </h2>
+      <h6 subtitle>{{t('author-count', {num: pagination.totalItems | number})}} </h6>
+
+    </app-side-nav-companion-bar>
+
+    <app-card-detail-layout
+      [isLoading]="isLoading"
+      [items]="authors"
+      [pagination]="pagination"
+      [trackByIdentity]="trackByIdentity"
+      [jumpBarKeys]="jumpKeys"
+      [filteringDisabled]="true"
+      [refresh]="refresh"
+    >
+      <ng-template #cardItem let-item let-position="idx">
+        <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">
+          <ng-template #subtitle>
+            <div class="d-flex justify-content-evenly">
+                <div style="font-size: 12px">{{item.seriesCount | compactNumber}} series</div>
+                <div style="font-size: 12px">{{item.issueCount | compactNumber}} issues</div>
+            </div>
+          </ng-template>
+        </app-person-card>
+      </ng-template>
+    </app-card-detail-layout>
+
+  </ng-container>
+</div>

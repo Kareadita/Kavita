@@ -44,6 +44,9 @@ public enum SeriesIncludes
 {
     None = 1,
     Volumes = 2,
+    /// <summary>
+    /// This will include all necessary includes
+    /// </summary>
     Metadata = 4,
     Related = 8,
     Library = 16,
@@ -51,8 +54,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
-    ExternalMetadata = 512
-
+    ExternalMetadata = 512,
 }
 
 /// <summary>
@@ -363,11 +365,11 @@ public class SeriesRepository : ISeriesRepository
         var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var seriesIds = _context.Series
+        var seriesIds = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id)
-            .ToList();
+            .ToListAsync();
 
         result.Libraries = await _context.Library
             .Search(searchQuery, userId, libraryIds)
@@ -440,6 +442,7 @@ public class SeriesRepository : ISeriesRepository
             .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
             .OrderBy(t => t.NormalizedName)
+            .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -525,14 +528,6 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="includes"></param>
     /// <returns></returns>
     public async Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
-    {
-        return await _context.Series
-            .Where(s => s.Id == seriesId)
-            .Includes(includes)
-            .SingleOrDefaultAsync();
-    }
-
-    public async Task<Series?> GetSeriesByIdForUserAsync(int seriesId, int userId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
@@ -661,6 +656,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1273,7 +1269,7 @@ public class SeriesRepository : ISeriesRepository
 
         var query = sQuery
             .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.PersonId)))
             .WhereIf(hasCollectionTagFilter,
                 s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
             .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
@@ -1302,6 +1298,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1672,6 +1669,7 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
@@ -1682,6 +1680,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -1697,6 +1696,7 @@ public class SeriesRepository : ISeriesRepository
 
             .AsSplitQuery();
         return query.SingleOrDefaultAsync();
+
     #nullable enable
     }
 
@@ -1705,6 +1705,7 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = GetLibraryIdsForUser(userId);
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
+
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => formats.Contains(s.Format))

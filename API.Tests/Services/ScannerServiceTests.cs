@@ -156,7 +156,7 @@ public class ScannerServiceTests : AbstractDbTest
             Substitute.For<IMetadataService>(),
             Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IReadingListService>(),
-            Substitute.For<IExternalMetadataService>(), new TagManagerService(_unitOfWork, Substitute.For<ILogger<TagManagerService>>()));
+            Substitute.For<IExternalMetadataService>());
 
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),

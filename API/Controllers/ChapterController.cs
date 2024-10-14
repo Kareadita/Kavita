@@ -79,7 +79,8 @@ public class ChapterController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
     {
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.Id, ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.Id,
+            ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags);
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
@@ -135,105 +136,130 @@ public class ChapterController : BaseApiController
 
 
         #region Genres
-        if (dto.Genres != null &&
-            dto.Genres.Count != 0)
+        if (dto.Genres is {Count: > 0})
         {
-            var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(dto.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
             chapter.Genres ??= new List<Genre>();
-            GenreHelper.UpdateGenreList(dto.Genres, chapter, allGenres, genre =>
-            {
-                chapter.Genres.Add(genre);
-            }, () => chapter.GenresLocked = true);
+            await GenreHelper.UpdateChapterGenres(chapter, dto.Genres.Select(t => t.Title), _unitOfWork);
         }
         #endregion
 
         #region Tags
         if (dto.Tags is {Count: > 0})
         {
-            var allTags = (await _unitOfWork.TagRepository
-                    .GetAllTagsByNameAsync(dto.Tags.Select(t => Parser.Normalize(t.Title))))
-                .ToList();
             chapter.Tags ??= new List<Tag>();
-            TagHelper.UpdateTagList(dto.Tags, chapter, allTags, tag =>
-            {
-                chapter.Tags.Add(tag);
-            }, () => chapter.TagsLocked = true);
+            await TagHelper.UpdateChapterTags(chapter, dto.Tags.Select(t => t.Title), _unitOfWork);
         }
         #endregion
 
         #region People
         if (PersonHelper.HasAnyPeople(dto))
         {
-            void HandleAddPerson(Person person)
-            {
-                PersonHelper.AddPersonIfNotExists(chapter.People, person);
-            }
+            chapter.People ??= new List<ChapterPeople>();
 
-            chapter.People ??= new List<Person>();
-            var allWriters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Writer,
-                dto.Writers.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Writer, dto.Writers, chapter, allWriters.AsReadOnly(),
-                HandleAddPerson,  () => chapter.WriterLocked = true);
 
-            var allCharacters = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Character,
-                dto.Characters.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Character, dto.Characters, chapter, allCharacters.AsReadOnly(),
-                HandleAddPerson,  () => chapter.CharacterLocked = true);
+            // Update writers
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Writers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Writer,
+                _unitOfWork
+            );
 
-            var allColorists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Colorist,
-                dto.Colorists.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Colorist, dto.Colorists, chapter, allColorists.AsReadOnly(),
-                HandleAddPerson,  () => chapter.ColoristLocked = true);
+            // Update characters
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Characters.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Character,
+                _unitOfWork
+            );
 
-            var allEditors = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Editor,
-                dto.Editors.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Editor, dto.Editors, chapter, allEditors.AsReadOnly(),
-                HandleAddPerson,  () => chapter.EditorLocked = true);
+            // Update pencillers
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Pencillers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Penciller,
+                _unitOfWork
+            );
 
-            var allInkers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Inker,
-                dto.Inkers.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Inker, dto.Inkers, chapter, allInkers.AsReadOnly(),
-                HandleAddPerson,  () => chapter.InkerLocked = true);
+            // Update inkers
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Inkers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Inker,
+                _unitOfWork
+            );
 
-            var allLetterers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Letterer,
-                dto.Letterers.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Letterer, dto.Letterers, chapter, allLetterers.AsReadOnly(),
-                HandleAddPerson,  () => chapter.LettererLocked = true);
+            // Update colorists
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Colorists.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Colorist,
+                _unitOfWork
+            );
 
-            var allPencillers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Penciller,
-                dto.Pencillers.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Penciller, dto.Pencillers, chapter, allPencillers.AsReadOnly(),
-                HandleAddPerson,  () => chapter.PencillerLocked = true);
+            // Update letterers
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Letterers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Letterer,
+                _unitOfWork
+            );
 
-            var allPublishers = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Publisher,
-                dto.Publishers.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Publisher, dto.Publishers, chapter, allPublishers.AsReadOnly(),
-                HandleAddPerson,  () => chapter.PublisherLocked = true);
+            // Update cover artists
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.CoverArtists.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.CoverArtist,
+                _unitOfWork
+            );
 
-            var allImprints = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Imprint,
-                dto.Imprints.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Imprint, dto.Imprints, chapter, allImprints.AsReadOnly(),
-                HandleAddPerson,  () => chapter.ImprintLocked = true);
+            // Update editors
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Editors.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Editor,
+                _unitOfWork
+            );
 
-            var allTeams = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Team,
-                dto.Imprints.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Team, dto.Teams, chapter, allTeams.AsReadOnly(),
-                HandleAddPerson,  () => chapter.TeamLocked = true);
+            // Update publishers
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Publishers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Publisher,
+                _unitOfWork
+            );
 
-            var allLocations = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Location,
-                dto.Imprints.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Location, dto.Locations, chapter, allLocations.AsReadOnly(),
-                HandleAddPerson,  () => chapter.LocationLocked = true);
+            // Update translators
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Translators.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Translator,
+                _unitOfWork
+            );
 
-            var allTranslators = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.Translator,
-                dto.Translators.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.Translator, dto.Translators, chapter, allTranslators.AsReadOnly(),
-                HandleAddPerson,  () => chapter.TranslatorLocked = true);
+            // Update imprints
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Imprints.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Imprint,
+                _unitOfWork
+            );
 
-            var allCoverArtists = await _unitOfWork.PersonRepository.GetAllPeopleByRoleAndNames(PersonRole.CoverArtist,
-                dto.CoverArtists.Select(p => Parser.Normalize(p.Name)));
-            PersonHelper.UpdatePeopleList(PersonRole.CoverArtist, dto.CoverArtists, chapter, allCoverArtists.AsReadOnly(),
-                HandleAddPerson,  () => chapter.CoverArtistLocked = true);
+            // Update teams
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Teams.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Team,
+                _unitOfWork
+            );
+
+            // Update locations
+            await PersonHelper.UpdateChapterPeopleAsync(
+                chapter,
+                dto.Locations.Select(p => Parser.Normalize(p.Name)).ToList(),
+                PersonRole.Location,
+                _unitOfWork
+            );
         }
         #endregion
 

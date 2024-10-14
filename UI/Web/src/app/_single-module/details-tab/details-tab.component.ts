@@ -46,16 +46,8 @@ export class DetailsTabComponent {
   @Input() webLinks: Array<string> = [];
 
 
-  openPerson(queryParamName: FilterField, filter: Person) {
-    if (queryParamName === FilterField.None) return;
-    this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter.id}`).subscribe();
-  }
-
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
-
-
-  protected readonly TagBadgeCursor = TagBadgeCursor;
 }

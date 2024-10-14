@@ -47,11 +47,11 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 
 @Component({
-    selector: 'app-library-detail',
-    templateUrl: './library-detail.component.html',
-    styleUrls: ['./library-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-library-detail',
+  templateUrl: './library-detail.component.html',
+  styleUrls: ['./library-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent,
     CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
 })
@@ -321,11 +321,11 @@ export class LibraryDetailComponent implements OnInit {
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
-      this.series = series.result;
-      this.pagination = series.pagination;
-      this.loadingSeries = false;
-      this.cdRef.markForCheck();
-    });
+        this.series = series.result;
+        this.pagination = series.pagination;
+        this.loadingSeries = false;
+        this.cdRef.markForCheck();
+      });
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;

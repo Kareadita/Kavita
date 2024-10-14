@@ -311,8 +311,10 @@ public class ScannerService : IScannerService
         }
 
         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
-        if (parsedSeries.Count == 0) return;
-
+        if (parsedSeries.Count == 0)
+        {
+            return;
+        }
 
 
         // Don't allow any processing on files that aren't part of this series
@@ -321,11 +323,6 @@ public class ScannerService : IScannerService
             key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             .ToList();
 
-        if (toProcess.Count > 0)
-        {
-            await _processSeries.Prime();
-        }
-
         var seriesLeftToProcess = toProcess.Count;
         foreach (var pSeries in toProcess)
         {
@@ -333,8 +330,6 @@ public class ScannerService : IScannerService
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
             seriesLeftToProcess--;
         }
-
-        _processSeries.Reset();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
@@ -497,7 +492,7 @@ public class ScannerService : IScannerService
 
             await ScanLibrary(lib.Id, forceUpdate, true);
         }
-        _processSeries.Reset();
+
         _logger.LogInformation("[ScannerService] Scan of All Libraries Finished");
     }
 
@@ -548,11 +543,6 @@ public class ScannerService : IScannerService
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
         if (await _unitOfWork.CommitAsync())
         {
-            if (isSingleScan)
-            {
-                _processSeries.Reset();
-            }
-
             if (totalFiles == 0)
             {
                 _logger.LogInformation(
@@ -682,13 +672,6 @@ public class ScannerService : IScannerService
                 )
                 .Distinct() // Ensure distinct people (name and role)
                 .ToList();
-
-            // Pass the distinct list of people to the method that creates missing ones in the DB
-            await CreateAllPeopleAsync(allPeople);
-
-            // Prime shared entities if there are any series to process
-            await _processSeries.Prime();
-
         }
 
         var totalFiles = 0;
@@ -701,6 +684,7 @@ public class ScannerService : IScannerService
             await _processSeries.ProcessSeriesAsync(pSeries.Value, library, seriesLeftToProcess, forceUpdate);
             seriesLeftToProcess--;
         }
+
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
@@ -801,39 +785,6 @@ public class ScannerService : IScannerService
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all Tags");
-        }
-    }
-
-    /// <summary>
-    /// Given a list of all People/Role, generates new People entries for any that do not exist.
-    /// Does not delete anything, that will be handled by nightly task
-    /// </summary>
-    /// <param name="people"></param>
-    private async Task CreateAllPeopleAsync(ICollection<(string Name, PersonRole Role)> people)
-    {
-        _logger.LogInformation("[ScannerService] Attempting to pre-save all People");
-
-        try
-        {
-            // Get all people (names and roles) that do not exist in the database
-            var nonExistingPeople = await _unitOfWork.PersonRepository.GetAllPeopleNotInListAsync(people);
-
-            // Create and attach new people
-            foreach (var (name, role) in nonExistingPeople)
-            {
-                var newPerson = new PersonBuilder(name, role).Build();
-                _unitOfWork.PersonRepository.Attach(newPerson);
-            }
-
-            // Commit changes
-            if (nonExistingPeople.Count > 0)
-            {
-                await _unitOfWork.CommitAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[ScannerService] There was an unknown issue when pre-saving all People");
         }
     }
 }
