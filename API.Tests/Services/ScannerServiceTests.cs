@@ -51,64 +51,13 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
     [Fact]
-    public void FindSeriesNotOnDisk_Should_Remove1()
-    {
-        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
-        //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
-
-        var existingSeries = new List<Series>
-        {
-            new SeriesBuilder("Darker Than Black")
-                .WithFormat(MangaFormat.Epub)
-
-                .WithVolume(new VolumeBuilder("1")
-                .WithName("1")
-                .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build()
-        };
-
-        Assert.Single(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
-    }
-
-    [Fact]
-    public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
-    {
-        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
-
-        var existingSeries = new List<Series>
-        {
-            new SeriesBuilder("Cage of Eden")
-                .WithFormat(MangaFormat.Archive)
-
-                .WithVolume(new VolumeBuilder("1")
-                    .WithName("1")
-                    .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build(),
-            new SeriesBuilder("Darker Than Black")
-                .WithFormat(MangaFormat.Archive)
-                .WithVolume(new VolumeBuilder("1")
-                    .WithName("1")
-                    .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build(),
-        };
-
-        Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
-    }
-
-    [Fact]
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
         var testcase = "Publisher - ComicVine.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
@@ -118,18 +67,67 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_ShouldCombineNestedFolder()
     {
         var testcase = "Series and Series-Series Combined - Manga.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
-        Assert.Single(postLib.Series);
         Assert.Equal(2, postLib.Series.First().Volumes.Count);
+    }
+
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeries()
+    {
+        var testcase = "Flat Series - Manga.json";
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+
+        // TODO: Trigger a deletion of ch 10
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
+    {
+        var testcase = "Flat Series with Specials Folder - Manga.json";
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(4, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecial()
+    {
+        const string testcase = "Flat Special - Manga.json";
+
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
     private async Task<Library> GenerateScannerData(string testcase)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
-        _testOutputHelper.WriteLine($"Test Directory Path: {testDirectoryPath}");
 
         var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
 
@@ -145,6 +143,11 @@ public class ScannerServiceTests : AbstractDbTest
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();
 
+        return library;
+    }
+
+    private ScannerService CreateServices()
+    {
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var mockReadingService = new MockReadingItemService(ds, Substitute.For<IBookService>());
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
@@ -159,11 +162,7 @@ public class ScannerServiceTests : AbstractDbTest
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
             mockReadingService, processSeries, Substitute.For<IWordCountAnalyzerService>());
-
-        await scanner.ScanLibrary(library.Id);
-
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        return postLib;
+        return scanner;
     }
 
     private static (string Publisher, LibraryType Type) SplitPublisherAndLibraryType(string input)
@@ -208,6 +207,8 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Generate the files and folders
         await Scaffold(testDirectory, filePaths);
+
+        _testOutputHelper.WriteLine($"Test Directory Path: {testDirectory}");
 
         return testDirectory;
     }

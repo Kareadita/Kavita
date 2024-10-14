@@ -29,7 +29,6 @@
     <ItemGroup>
         <Folder Include="Services\Test Data\ArchiveService\ComicInfos" />
         <Folder Include="Services\Test Data\ImageService\Covers\" />
-        <Folder Include="Services\Test Data\ScannerService\Manga" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System;
+using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -252,7 +253,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        
+
         return await _context.ChapterPeople
             .Where(cp => cp.PersonId == personId && cp.Role == role)
             .Select(cp => cp.Chapter)
@@ -270,7 +271,6 @@ public class PersonRepository : IPersonRepository
             .OrderBy(p => p.Name)
             .ToListAsync();
     }
-
 
     public async Task<IList<Person>> GetAllPeople()
     {
@@ -301,6 +301,4 @@ public class PersonRepository : IPersonRepository
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
-
-
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities.Enums;
 
@@ -79,7 +80,25 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             // NOTE: This uses rootPath. LibraryRoot works better for manga, but it's not always that way.
             // It might be worth writing some logic if the file is a special, to take the folder above the Specials/
             // if present
-            ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+            var tempRootPath = rootPath;
+            if (rootPath.EndsWith("Specials") || rootPath.EndsWith("Specials/"))
+            {
+                tempRootPath = rootPath.Replace("Specials", string.Empty).TrimEnd('/');
+            }
+
+            // Check if the folder the file exists in is Specials/ and if so, take the parent directory as series (cleaned)
+            var fileDirectory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(fileDirectory) &&
+                (fileDirectory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase) ||
+                 fileDirectory.EndsWith("Specials/", StringComparison.OrdinalIgnoreCase)))
+            {
+                ret.Series = Parser.CleanTitle(Directory.GetParent(fileDirectory)?.Name ?? string.Empty);
+            }
+            else
+            {
+                ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
+            }
+
         }
 
         if (string.IsNullOrEmpty(ret.Series))

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -189,8 +190,6 @@ public class ProcessSeries : IProcessSeries
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
 
-                    // BackgroundJob.Enqueue(() =>
-                    //     _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
                     await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
@@ -214,7 +213,6 @@ public class ProcessSeries : IProcessSeries
         await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
-
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
@@ -311,29 +309,7 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Language = firstChapter.Language;
         }
 
-        // if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
-        // {
-        //     // Get the default admin to associate these tags to
-        //     var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
-        //     if (defaultAdmin == null) return;
-        //
-        //     _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-        //     foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-        //     {
-        //         // TODO: Remove this _tagManagerService
-        //         var (tag, _) = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
-        //         if (tag == null) continue;
-        //
-        //         // Check if the Series is already on the tag
-        //         if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
-        //         {
-        //             continue;
-        //         }
-        //
-        //         tag.Items.Add(series);
-        //         await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
-        //     }
-        // }
+
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             await UpdateCollectionTags(series, firstChapter);
@@ -636,54 +612,44 @@ public class ProcessSeries : IProcessSeries
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(series, volume, infos, forceUpdate);
+            await UpdateChapters(series, volume, infos, forceUpdate);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
-
-            // Update all the metadata on the Chapters
-            foreach (var chapter in volume.Chapters)
-            {
-                var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
-                try
-                {
-                    var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-                    await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was some issue when updating chapter's metadata");
-                }
-            }
         }
 
         // Remove existing volumes that aren't in parsedInfos
+        RemoveVolumes(series, parsedInfos);
+    }
+
+    private void RemoveVolumes(Series series, IList<ParserInfo> parsedInfos)
+    {
+
         var nonDeletedVolumes = series.Volumes
             .Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.LookupName))
             .ToList();
-        if (series.Volumes.Count != nonDeletedVolumes.Count)
-        {
-            _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
-                (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
-            var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
-            foreach (var volume in deletedVolumes)
-            {
-                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
-                if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
-                {
-                    // This can happen when file is renamed and volume is removed
-                    _logger.LogInformation(
-                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
-                        file);
-                }
+        if (series.Volumes.Count == nonDeletedVolumes.Count) return;
 
-                _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+
+        _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+            (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
+        var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
+        foreach (var volume in deletedVolumes)
+        {
+            var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
+            if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
+            {
+                // This can happen when file is renamed and volume is removed
+                _logger.LogInformation(
+                    "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
+                    file);
             }
 
-            series.Volumes = nonDeletedVolumes;
+            _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
         }
+
+        series.Volumes = nonDeletedVolumes;
     }
 
-    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -714,10 +680,7 @@ public class ProcessSeries : IProcessSeries
                 chapter.UpdateFrom(info);
             }
 
-            if (chapter == null)
-            {
-                continue;
-            }
+
             // Add files
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
 
@@ -738,27 +701,86 @@ public class ProcessSeries : IProcessSeries
                 chapter.Title = chapter.GetNumberTitle();
             }
 
+            try
+            {
+                await UpdateChapterFromComicInfo(chapter, info.ComicInfo, forceUpdate);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was some issue when updating chapter's metadata");
+            }
+
         }
 
+        RemoveChapters(volume, parsedInfos);
 
+        // // Update all the metadata on the Chapters
+        // foreach (var chapter in volume.Chapters)
+        // {
+        //     var firstFile = chapter.Files.MinBy(x => x.Chapter);
+        //     if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
+        //     try
+        //     {
+        //         var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
+        //         await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "There was some issue when updating chapter's metadata");
+        //     }
+        // }
+    }
+
+    private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    {
         // Remove chapters that aren't in parsedInfos or have no files linked
-        var existingChapters = volume.Chapters.ToList();
+        var existingChapters = volume.Chapters;
+
+        // Extract the directories (without filenames) from parserInfos
+        var parsedDirectories = parsedInfos
+            .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
+            .Distinct()
+            .ToList();
+
         foreach (var existingChapter in existingChapters)
         {
-            if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
+            // Get the directories for the files in the current chapter
+            var chapterFileDirectories = existingChapter.Files
+                .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
+                .Distinct()
+                .ToList();
+
+            // Check if any of the chapter's file directories match the parsedDirectories
+            var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
+
+            if (hasMatchingDirectory)
             {
+                // Ensure we remove any files that no longer exist AND order the remaining files
+                existingChapter.Files = existingChapter.Files
+                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+                    .OrderByNatural(f => f.FilePath)
+                    .ToList();
+
+                // Update the chapter's page count after filtering the files
+                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+
+                // If no files remain after filtering, remove the chapter
+                if (existingChapter.Files.Count != 0) continue;
+
                 _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else
             {
-                // Ensure we remove any files that no longer exist AND order
-                existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-                    .OrderByNatural(f => f.FilePath)
-                    .ToList();
-                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+                // If there are no matching directories in the current scan, check if the files still exist on disk
+                var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
+
+                // If no files exist, remove the chapter
+                if (filesExist) continue;
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                volume.Chapters.Remove(existingChapter);
             }
         }
     }
@@ -796,8 +818,6 @@ public class ProcessSeries : IProcessSeries
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
-
-        _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         if (!chapter.AgeRatingLocked)
         {
@@ -855,7 +875,7 @@ public class ProcessSeries : IProcessSeries
                 .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             );
 
-            // For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
+            // TODO: For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
         }
 
         if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
