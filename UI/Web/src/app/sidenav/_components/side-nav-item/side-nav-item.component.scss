@@ -17,6 +17,26 @@
     }
 }
 
+::ng-deep .side-nav app-side-nav-item:first-child {
+    .active-highlight {
+        border-top-left-radius: 3px;
+    }
+}
+
+::ng-deep .side-nav app-side-nav-item:first-child {
+    .side-nav-item {
+        border-top-left-radius: 3px;
+    }
+}
+
+@media (max-width: $grid-breakpoints-lg) {
+    ::ng-deep .side-nav app-side-nav-item:first-child {
+        .side-nav-item {
+            border-top-left-radius: 0px;
+        }
+    }
+}
+
 .side-nav-item {
     position: relative;
     align-items: center;
@@ -28,6 +48,14 @@
     overflow: hidden;
     cursor: pointer;
     font-size: 1.05rem;
+
+    .active-highlight {
+        background-color: #2f2f2f;
+        width: 2px;
+        height: 100%;
+        position: absolute;
+        left: 0;
+    }
 
     .side-nav-text {
         opacity: 1;
@@ -46,7 +74,7 @@
     }
 
     span {
-        display:flex;
+        display: flex;
 
         &:first-of-type {
             text-align: center;
@@ -77,8 +105,8 @@
         }
 
         .card-actions {
-           opacity: 0;
-           display: none;
+            opacity: 0;
+            display: none;
         }
 
         &.active, &.active:hover {
@@ -116,10 +144,6 @@
 
         .active-highlight {
             background-color: var(--side-nav-item-active-color);
-            width: 2px;
-            height: 100%;
-            position: absolute;
-            left: 0;
         }
 
         .side-nav-text, i {
@@ -135,7 +159,6 @@
                 color: var(--side-nav-hover-text-color) !important;
             }
         }
-
     }
 }
 
@@ -163,7 +186,7 @@ a {
 
         &.closed {
             .card-actions {
-               font-size: inherit;
+                font-size: inherit;
             }
         }
     }
