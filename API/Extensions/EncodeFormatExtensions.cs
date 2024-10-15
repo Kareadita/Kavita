@@ -22,7 +22,7 @@ public static class EncodeFormatExtensions
     {
         return encodeFormat switch
         {
-            EncodeFormat.PNG => 100, // (Image Magick Maximum Deflate Compression) (In case of PNG, png is always lossless, Quality indicate the compression level)
+            EncodeFormat.PNG => 100, // (Image Magick Maximum Deflate Compression) (In case of PNG, png is always lossless, Quality indicates the compression level)
             EncodeFormat.WEBP => 100,
             EncodeFormat.AVIF => 100,
             EncodeFormat.JPEG => 99, // (Best Compression speed, with almost no visual quality loss)

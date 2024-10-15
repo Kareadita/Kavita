@@ -63,7 +63,6 @@ public interface IImage : IDisposable
     /// </summary>
     /// <param name="filename">The name of the file to save the image to.</param>
     /// <param name="format">The format to save the image in.</param>
-    /// <param name="quality">The quality of the saved image.</param>
     void Save(string filename, EncodeFormat format);
 
     /// <summary>
@@ -71,7 +70,6 @@ public interface IImage : IDisposable
     /// </summary>
     /// <param name="stream">The stream to save the image to.</param>
     /// <param name="format">The format to save the image in.</param>
-    /// <param name="quality">The quality of the saved image.</param>
     void Save(Stream stream, EncodeFormat format);
 
     /// <summary>
@@ -79,7 +77,6 @@ public interface IImage : IDisposable
     /// </summary>
     /// <param name="filename">The name of the file to save the image to.</param>
     /// <param name="format">The format to save the image in.</param>
-    /// <param name="quality">The quality of the saved image.</param>
     /// <param name="token">The cancellation token.</param>
     /// <returns>A task representing the asynchronous save operation.</returns>
     Task SaveAsync(string filename, EncodeFormat format, CancellationToken token = default);
@@ -89,7 +86,6 @@ public interface IImage : IDisposable
     /// </summary>
     /// <param name="stream">The stream to save the image to.</param>
     /// <param name="format">The format to save the image in.</param>
-    /// <param name="quality">The quality of the saved image.</param>
     /// <param name="token">The cancellation token.</param>
     /// <returns>A task representing the asynchronous save operation.</returns>
     Task SaveAsync(Stream stream, EncodeFormat format, CancellationToken token = default);
