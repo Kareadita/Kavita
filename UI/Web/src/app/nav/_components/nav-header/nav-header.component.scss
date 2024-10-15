@@ -1,5 +1,5 @@
 
-.btn:focus, .btn:hover {
+.btn:focus {
     box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
@@ -29,6 +29,14 @@
         opacity: 1;
       }
     }
+  }
+
+  .nav-item:not(.search) {
+      display: unset;
+      opacity: 0.8;
+      &:hover {
+        opacity: 1;
+      }
   }
 }
 
