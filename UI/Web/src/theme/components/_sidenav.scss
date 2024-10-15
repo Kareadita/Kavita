@@ -158,6 +158,10 @@
   z-index: 999;
   background-color: #0c0d0d;
 
+  &.closed {
+      background-color: transparent;
+  }
+
   .donate {
     .side-nav-item {
       width: 100%;
@@ -307,11 +311,11 @@
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh) * 100) - var(--nav-mobile-offset));
+        height: 100vh;
         position: absolute;
         left: 0;
-        top: var(--nav-mobile-offset);
-        z-index: 998;
+        top: 0;
+        z-index: 1041;
 
         &.closed {
             display: none;
