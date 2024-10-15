@@ -240,6 +240,7 @@
 @media (max-width: $grid-breakpoints-lg) {
   .side-nav-container {
     padding: 10px 0;
+    padding-left: 5px;
     width: 55vw;
     background-color: var(--side-nav-mobile-bg-color);
     height: 100dvh;
