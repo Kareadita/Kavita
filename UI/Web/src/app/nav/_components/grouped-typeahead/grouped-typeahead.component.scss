@@ -1,8 +1,3 @@
-form {
-    /*max-height: 38px;*/
-}
-
-
 .search-result img {
     width: 100% !important;
 }
@@ -17,9 +12,7 @@ form {
 
 .typeahead-input {
     border: 1px solid transparent;
-    border-radius: 50px;
-    padding: 0px 6px;
-    display: inline-block;
+    border-radius: 4px;
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -42,16 +35,14 @@ form {
 
 
     input {
+        width: 100%;
+        padding: 0px 6px;
         outline: 0 !important;
         border-radius: .28571429rem;
-        padding: 0px !important;
-        min-height: 0px !important;
-        max-width: 100% !important;
         margin: 0px !important;
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-        width: 300px;
         transition-property: all;
         transition-duration: 0.3s;
         display: block;
