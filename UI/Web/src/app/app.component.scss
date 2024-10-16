@@ -84,13 +84,11 @@
         margin-left: 0;
         padding-left: 0;
         width: 100%;
-        padding: 10px 0 0;
         height: calc(var(--vh) * 100 - var(--nav-mobile-offset));
         scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
         scrollbar-width: thin;
         margin-bottom: 20px;
         overflow-y: auto;
-        margin-top: 3px;
     }
 
     .companion-bar-content {
