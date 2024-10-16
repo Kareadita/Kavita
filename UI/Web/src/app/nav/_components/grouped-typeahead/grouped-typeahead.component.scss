@@ -31,6 +31,12 @@
         display: flex;
         position: relative;
         min-height: 32px;
+        .btn-close {
+            position: unset;
+            margin-top: unset;
+            align-self: center;
+            margin: 0 8px;
+        }
     }
 
 
@@ -67,6 +73,11 @@
         border-color: var(--input-focused-border-color);
         input {
             color: #000;
+        }
+        .search {
+          .btn-close {
+              filter: unset !important;
+          }
         }
     }
 

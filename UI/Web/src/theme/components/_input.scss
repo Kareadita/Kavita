@@ -6,10 +6,8 @@ input:not([type="range"]), .form-control {
     &:focus {
         border-color: var(--input-focused-border-color);
         background-color: var(--input-bg-color);
-        background-color: #fff;
         color: var(--input-text-color);
-        color: #000;
-        box-shadow: 0 0 transparent;
+        box-shadow: 0 0 0 .25rem var(--input-focus-boxshadow-color);
     }
 
     &:read-only {
