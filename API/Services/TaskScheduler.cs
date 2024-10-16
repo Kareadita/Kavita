@@ -282,19 +282,16 @@ public class TaskScheduler : ITaskScheduler
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
         var normalizedOriginal = Tasks.Scanner.Parser.Parser.NormalizePath(originalPath);
+
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, normalizedOriginal]) ||
             HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
-            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
-                normalizedFolder);
+            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued", normalizedFolder);
             return;
         }
 
         // Not sure where we should put this code, but we can get a bunch of ScanFolders when original has slight variations, like
         // create a folder, add a new file, etc. All of these can be merged into just 1 request.
-
-
-
 
         _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
         BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder, normalizedOriginal), delay);
