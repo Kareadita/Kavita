@@ -65,6 +65,9 @@
         width: 100%;
         background-color: #fff;
         border-color: var(--input-focused-border-color);
+        input {
+            color: #000;
+        }
     }
 
 }
