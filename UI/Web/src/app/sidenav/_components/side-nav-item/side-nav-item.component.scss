@@ -1,22 +1,5 @@
 @import '../../../../theme/variables';
 
-::ng-deep .side-nav.closed {
-    .side-nav-item {
-        .side-nav-text {
-            opacity: 0 !important;
-        }
-
-        .card-actions {
-            opacity: 0 !important;
-        }
-
-        &.active {
-            color: var(--side-nav-item-active-color);
-            background-color: unset !important;
-        }
-    }
-}
-
 ::ng-deep .side-nav app-side-nav-item:first-child {
     .active-highlight {
         border-top-left-radius: 3px;
@@ -37,143 +20,8 @@
     }
 }
 
-.side-nav-item {
-    position: relative;
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: auto;
-    min-height: 50px;
-    overflow: hidden;
-    cursor: pointer;
-    font-size: 1.05rem;
-
-    .active-highlight {
-        background-color: #2f2f2f;
-        width: 2px;
-        height: 100%;
-        position: absolute;
-        left: 0;
-    }
-
-    .side-nav-text {
-        opacity: 1;
-        min-width: 100px;
-        word-break: break-all;
-        -webkit-line-clamp: 1;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-
-        div {
-            min-width: 102px;
-            width: 100%
-        }
-    }
-
-    span {
-        display: flex;
-
-        &:first-of-type {
-            text-align: center;
-            width: 56px;
-        }
-
-        &:last-child {
-            flex-grow: 1;
-            justify-content: end;
-        }
-
-        div {
-            align-items: center;
-            height: 100%;
-            justify-content: inherit;
-            width: 100%;
-
-            i {
-                font-size: 21.33px;
-            }
-        }
-    }
-
-    &.closed {
-        .side-nav-text {
-            opacity: 0;
-            display: none;
-        }
-
-        .card-actions {
-            opacity: 0;
-            display: none;
-        }
-
-        &.active, &.active:hover {
-            color: var(--side-nav-item-active-color);
-            background-color: unset;
-        }
-
-        i {
-            color: var(--side-nav-item-closed-color);
-        }
-
-        &:hover {
-            color: var(--side-nav-hover-text-color);
-            background-color: var(--side-nav-hover-bg-color);
-
-            i {
-                color: var(--side-nav-item-closed-hover-color);
-            }
-        }
-    }
-
-    &:hover {
-        color: var(--side-nav-hover-text-color);
-        background-color: var(--side-nav-hover-bg-color);
-
-        .card-actions i.fa {
-            // TODO: The override to white does not work, please fix for light themes
-            color: var(--side-nav-hover-text-color) !important;
-        }
-    }
-
-    &.active {
-        color: var(--side-nav-item-active-color);
-        background-color: var(--side-nav-active-bg-color);
-
-        .active-highlight {
-            background-color: var(--side-nav-item-active-color);
-        }
-
-        .side-nav-text, i {
-            color: var(--side-nav-item-active-text-color);
-        }
-
-        &:hover {
-            color: var(--side-nav-hover-text-color);
-            background-color: var(--side-nav-hover-bg-color);
-
-            .card-actions i.fa {
-                // TODO: The override to white does not work, please fix for light themes
-                color: var(--side-nav-hover-text-color) !important;
-            }
-        }
-    }
-}
-
-
-a {
-    text-decoration: none;
-    color: var(--side-nav-text-color);
-}
-
 @media (max-width: $grid-breakpoints-lg) {
     .side-nav-item {
-        align-items: center;
-        padding: 0 10px;
-        height: 55px;
-        font-size: 1rem;
 
         .side-nav-text {
             width: 100%;
@@ -181,13 +29,6 @@ a {
 
         span:last-child {
             flex-grow: 0;
-        }
-
-
-        &.closed {
-            .card-actions {
-                font-size: inherit;
-            }
         }
     }
 }

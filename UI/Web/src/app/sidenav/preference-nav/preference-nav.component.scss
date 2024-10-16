@@ -1,7 +1,6 @@
 @import '../../../theme/variables';
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
-  padding-bottom: 10px;
   // For firefox
   @supports (-moz-appearance:none) {
     scrollbar-color: transparent transparent;
@@ -32,37 +31,6 @@
       visibility: visible;
       background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
     }
-  }
-
-  &.no-donate {
-    height: calc((var(--vh)*100) - 82px);
-  }
-
-  &.hidden {
-    display: none;
-    opacity: 0;
-  }
-
-  &.closed {
-    width: 50px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background-color: var(--side-nav-closed-bg-color);
-    border: var(--side-nav-border-closed);
-  }
-
-  .side-nav-item:first {
-    border-top-left-radius: var(--side-nav-border-radius);
-    border-top-right-radius: var(--side-nav-border-radius);
-  }
-}
-
-::ng-deep .side-nav-text {
-  div {
-    display: flex;
-  }
-  span {
-    font-size: 0.6rem;
   }
 }
 
@@ -96,21 +64,6 @@
       height: calc((var(--vh)*100) - var(--nav-mobile-offset));
     }
   }
-
-  .side-nav-overlay {
-    background-color: var(--side-nav-overlay-color);
-    width: 100vw;
-    height: calc((var(--vh)*100) - var(--nav-offset));
-    position: absolute;
-    left: 0;
-    z-index: 998;
-
-    &.closed {
-      display: none;
-    }
-  }
-
-
 }
 
 .side-nav-header {

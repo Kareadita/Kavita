@@ -1,5 +1,6 @@
 @import "../variables";
 
+//START sidebar container
 .side-nav-container {
   width: var(--side-nav-width);
   background-color: var(--side-nav-bg-color);
@@ -15,13 +16,14 @@
   &::-webkit-scrollbar {
     visibility: hidden;
   }
-
+  //START preference sidebar
   &.preference {
     height: calc((var(--vh)*100) - 75px);
     width: 238px;
 
     .side-nav {
       overflow-x: hidden;
+      padding-bottom: 10px;
 
       .side-nav-header {
         color: #ffffff;
@@ -40,35 +42,15 @@
 
         &.active {
           .side-nav-text {
-            div {
-              color: #fff;
-            }
+            color: var(--side-nav-item-active-text-color);
           }
         }
-
 
         .side-nav-text {
           text-align: unset;
-          width: 100%;
           margin-left: 12px;
-          flex-grow: 1;
-
-          div {
-            min-width: unset;
-            width: unset;
-            text-overflow: ellipsis;
-            display: block;
-            font-size: 13px;
-            color: #999999;
-          }
-        }
-
-        span {
-          justify-content: unset;
-
-          div {
-            justify-content: unset;
-          }
+          font-size: 13px;
+          color: #999999;
         }
 
         .card-actions {
@@ -77,6 +59,7 @@
       }
     }
   }
+  //END preference sidebar
 
   &.no-donate {
     height: calc((var(--vh) * 100) - 82px);
@@ -86,7 +69,7 @@
     display: none;
     opacity: 0;
   }
-
+  //START closed state of the sidebar
   &.closed {
     width: 65px;
     overflow-x: hidden;
@@ -98,18 +81,126 @@
 
     .side-nav {
       .side-nav-item {
+        color: var(--side-nav-item-closed-color);
+
+        &:hover {
+          &.active {
+            color: var(--side-nav-item-active-color);
+          }
+        }
+
         .active-highlight {
           opacity: 0;
+        }
+
+        .side-nav-text {
+          opacity: 0;
+          display: none;
+        }
+
+        .card-actions {
+          opacity: 0;
+          display: none;
         }
       }
     }
   }
-
+  //END closed state of the sidebar
+  //START sidebar
   .side-nav {
     overflow-y: hidden;
     height: 100%;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
+    //START sidebar nav item
+    .side-nav-item {
+      position: relative;
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      height: auto;
+      min-height: 50px;
+      overflow: hidden;
+      cursor: pointer;
+      font-size: 1.05rem;
+      text-decoration: none;
+      color: var(--side-nav-text-color);
+
+      .phone-hidden {
+        display: flex;
+
+        &:first-of-type {
+          text-align: center;
+          width: 56px;
+        }
+
+        &:last-child {
+          flex-grow: 1;
+          justify-content: end;
+        }
+
+        div {
+          align-items: center;
+          height: 100%;
+          justify-content: inherit;
+          width: 100%;
+
+          i {
+            font-size: var(--side-nav-icon-size);
+          }
+        }
+      }
+
+      .active-highlight {
+        background-color: #2f2f2f;
+        width: 2px;
+        height: 100%;
+        position: absolute;
+        left: 0;
+      }
+
+      .side-nav-text {
+        opacity: 1;
+        min-width: 100px;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+
+        div {
+          min-width: 102px;
+          width: 100%
+        }
+      }
+
+      .card-actions {
+        flex-grow: 1;
+        justify-content: end;
+        display: flex;
+      }
+
+      &.active {
+        background-color: var(--side-nav-active-bg-color);
+        color: var(--side-nav-item-active-text-color);
+
+        .active-highlight {
+          background-color: var(--side-nav-item-active-color);
+        }
+      }
+
+      &:hover {
+        color: var(--side-nav-hover-text-color);
+        background-color: var(--side-nav-hover-bg-color);
+
+        &.active {
+          color: var(--side-nav-item-active-text-color);
+        }
+      }
+    }
+    //END sidebar nav item
     // For firefox
     @supports (-moz-appearance: none) {
       scrollbar-color: transparent transparent;
@@ -141,14 +232,12 @@
         background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
       }
     }
-
-    .side-nav-item:first {
-      border-top-left-radius: var(--side-nav-border-radius);
-      border-top-right-radius: var(--side-nav-border-radius);
-    }
   }
+  //END sidebar
 }
+//END sidebar container
 
+//START kavita+ subscription bottom heart button
 .sidenav-bottom {
   position: absolute;
   bottom: 0;
@@ -158,69 +247,48 @@
   z-index: 999;
   background-color: #0c0d0d;
 
-  &.closed {
-      background-color: transparent;
-  }
-
   .donate {
     .side-nav-item {
       width: 100%;
       padding: 0 80px;
       justify-content: center;
       align-items: center;
+      display: flex;
+      min-height: 50px;
+      color: var(--side-nav-text-color);
 
       &:hover {
-        background-color: unset !important;
-        color: white !important;
-
-        i {
-          color: var(--side-nav-item-closed-color) !important;
-
-          &:hover {
-            color: white !important;
-          }
-        }
+        color: var(--side-nav-hover-text-color);
+        background-color: var(--side-nav-hover-bg-color);
       }
 
       .active-highlight {
         display: none;
       }
 
-      span {
-        flex-grow: unset !important;
-        min-width: unset !important;
-
+      .phone-hidden {
         div {
-          min-width: unset !important;
-
           i {
-            font-size: 1rem !important;
+            font-size: var(--side-nav-icon-size);
           }
         }
       }
 
-      &.closed {
-        span {
-          &.phone-hidden {
-            div {
-              width: 100%;
-            }
-          }
+      .side-nav-text {
+        display: none !important;
+      }
 
-          .side-nav-text {
-            div {
-              width: 0;
-            }
-          }
-        }
+      .card-actions {
+        display: none;
       }
     }
   }
-
+  //START sidebar closed
   &.closed {
     width: 65px;
     overflow-x: hidden;
     overflow-y: auto;
+    background-color: unset;
 
     .side-nav-item {
       width: 100%;
@@ -230,12 +298,22 @@
       text-align: center;
       min-height: unset;
 
+      .phone-hidden {
+        div {
+          i {
+            color: var(--side-nav-item-closed-color);
+          }
+        }
+      }
+
       &:hover {
-        background-color: unset;
+        background-color: unset !important;
       }
     }
   }
+  //END sidebar closed
 }
+//END kavita+ subscription bottom heart button
 
 @media (max-width: $grid-breakpoints-lg) {
   .side-nav-container {
