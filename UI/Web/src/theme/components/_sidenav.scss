@@ -4,7 +4,7 @@
 .side-nav-container {
   width: var(--side-nav-width);
   background-color: var(--side-nav-bg-color);
-  height: calc((var(--vh) * 100) - 115px);
+  height: calc((var(--vh) * 100) - 118px);
   position: fixed;
   margin: 0;
   left: 10px;
@@ -246,7 +246,7 @@
   font-size: 12px;
   transition: width var(--side-nav-openclose-transition);
   z-index: 999;
-  background-color: #0c0d0d;
+  background-color: var(--side-nav-bg-color);
 
   .donate {
     .side-nav-item {
@@ -286,7 +286,7 @@
   }
   //START sidebar closed
   &.closed {
-    width: 65px;
+    width: 55px;
     overflow-x: hidden;
     overflow-y: auto;
     background-color: unset;
@@ -298,14 +298,7 @@
       line-height: 40px;
       text-align: center;
       min-height: unset;
-
-      .phone-hidden {
-        div {
-          i {
-            color: var(--side-nav-item-closed-color);
-          }
-        }
-      }
+      color: var(--side-nav-item-closed-color);
 
       &:hover {
         background-color: unset !important;
@@ -367,6 +360,7 @@
       .side-nav-item {
         .active-highlight {
           border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
         }
       }
     }

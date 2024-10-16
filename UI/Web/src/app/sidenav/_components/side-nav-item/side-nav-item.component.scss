@@ -12,10 +12,28 @@
     }
 }
 
+::ng-deep .side-nav app-side-nav-item:last-child {
+  .active-highlight {
+    border-bottom-left-radius: 3px;
+  }
+}
+
+::ng-deep .side-nav app-side-nav-item:last-child {
+  .side-nav-item {
+    border-bottom-left-radius: 3px;
+  }
+}
+
 @media (max-width: $grid-breakpoints-lg) {
     ::ng-deep .side-nav app-side-nav-item:first-child {
         .side-nav-item {
             border-top-left-radius: 0px;
+        }
+    }
+
+    ::ng-deep .side-nav app-side-nav-item:last-child {
+        .side-nav-item {
+            border-bottom-left-radius: 0px;
         }
     }
 }
