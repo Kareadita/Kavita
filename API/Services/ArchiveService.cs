@@ -58,6 +58,7 @@ public class ArchiveService : IArchiveService
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
     private readonly IMediaErrorService _mediaErrorService;
+
     private const string ComicInfoFilename = "ComicInfo.xml";
 
     public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService,

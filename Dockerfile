@@ -1,7 +1,7 @@
 #This Dockerfile creates a build for all architectures
 
 #Image that copies in the files and passes them to the main image
-FROM ubuntu:focal AS copytask
+FROM ubuntu:oracular AS copytask
 
 ARG TARGETPLATFORM
 
@@ -14,7 +14,7 @@ RUN /copy_runtime.sh
 RUN chmod +x /Kavita/Kavita
 
 #Production image
-FROM ubuntu:focal
+FROM ubuntu:oracular
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
@@ -22,7 +22,7 @@ COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 libgdiplus curl \
+  && apt-get install -y libicu-dev libssl3t64 libgdiplus curl libjxl0.10 libavif-bin libheif1 libopenjp2-7 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh

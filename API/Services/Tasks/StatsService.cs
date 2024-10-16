@@ -46,8 +46,7 @@ public class StatsService : IStatsService
         _context = context;
         _statisticService = statisticService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(ApiUrl);
     }
 
     /// <summary>

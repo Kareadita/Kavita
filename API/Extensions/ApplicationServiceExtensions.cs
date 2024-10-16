@@ -3,6 +3,8 @@ using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
+using API.Services.ImageServices;
+using API.Services.ImageServices.ImageMagick;
 using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
@@ -33,6 +35,9 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ITaskScheduler, TaskScheduler>();
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IArchiveService, ArchiveService>();
+
+        services.AddScoped<IImageFactory, ImageMagickImageFactory>();
+
         services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
