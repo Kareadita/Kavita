@@ -192,6 +192,7 @@
   --tagbadge-filled-bg-color: var(--primary-color);
   /* Side Nav */
   --side-nav-width: 260px;
+  --side-nav-icon-size: 21.33px;
   --side-nav-bg-color: var(--elevation-layer9-dark);
   --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
   --side-nav-openclose-transition: 0.15s ease-in-out;
@@ -199,7 +200,7 @@
   --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
   --side-nav-hover-text-color: white;
   --side-nav-hover-bg-color: black;
-  --side-nav-text-color: hsla(0,0%,100%,.75);
+  --side-nav-text-color: hsla(0,0%,100%,.85);
   --side-nav-border-radius: 3px;
   --side-nav-border: none;
   --side-nav-border-closed: none;
