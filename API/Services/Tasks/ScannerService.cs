@@ -157,15 +157,14 @@ public class ScannerService : IScannerService
             }
         }
 
-        // TODO: Figure out why we have the library type restriction here
-        if (series != null)//  && series.Library.Type is not (LibraryType.Book or LibraryType.LightNovel)
+        if (series != null)
         {
             if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
                 _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
-            _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
+            _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
             BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
@@ -227,12 +226,14 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // TODO: We need to refactor this to handle the path changes better
         var folderPath = series.LowestFolderPath ?? series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
         {
             // We don't care if it's multiple due to new scan loop enforcing all in one root directory
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-            var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
+            var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths,
+                files.Select(f => f.FilePath).ToList());
             if (seriesDirs.Keys.Count == 0)
             {
                 _logger.LogCritical("Scan Series has files spread outside a main series folder. Defaulting to library folder (this is expensive)");
@@ -259,7 +260,6 @@ public class ScannerService : IScannerService
         }
 
         // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
-        //var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
@@ -268,12 +268,7 @@ public class ScannerService : IScannerService
         var (scanElapsedTime, parsedSeries) = await ScanFiles(library, [folderPath],
             false, true);
 
-        // // Transform seen series into the parsedSeries (I think we can actually just have processedSeries be used instead
-        // var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
-
         _logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
-
-        // We now technically have all scannedSeries, we could invoke each Series to be scanned
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
@@ -357,6 +352,7 @@ public class ScannerService : IScannerService
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
     {
+
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName ?? string.Empty)
             .Where(f => !string.IsNullOrEmpty(f))

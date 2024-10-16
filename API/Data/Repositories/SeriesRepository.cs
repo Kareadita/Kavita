@@ -140,7 +140,7 @@ public interface ISeriesRepository
     Task<IList<Series>> GetWantToReadForUserAsync(int userId);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series?> GetSeriesThatContainsLowestFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
+    Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None);
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
@@ -1603,9 +1603,24 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<Series?> GetSeriesThatContainsLowestFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
+    public async Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
+        // Check if the path ends with a file (has a file extension)
+        string directoryPath;
+        if (Path.HasExtension(path))
+        {
+            // Remove the file part and get the directory path
+            directoryPath = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(directoryPath)) return null;
+        }
+        else
+        {
+            // Use the path as is if it doesn't end with a file
+            directoryPath = path;
+        }
+
+        // Normalize the directory path
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(directoryPath);
         if (string.IsNullOrEmpty(normalized)) return null;
 
         normalized = normalized.TrimEnd('/');
