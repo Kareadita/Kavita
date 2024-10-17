@@ -17,7 +17,15 @@ export enum PersonRole {
 }
 
 export interface Person {
-    id: number;
-    name: string;
-    role: PersonRole;
+  id: number;
+  name: string;
+  description: string;
+  coverImage?: string;
+  coverImageLocked: boolean;
+  malId?: number;
+  aniListId?: number;
+  hardcoverId?: string;
+  asin?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }

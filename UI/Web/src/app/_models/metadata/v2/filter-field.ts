@@ -1,3 +1,5 @@
+import {PersonRole} from "../person";
+
 export enum FilterField
 {
     None = -1,
@@ -47,3 +49,36 @@ enumArray.sort((a, b) => a.value.localeCompare(b.value));
 
 export const allFields = enumArray
     .map(key => parseInt(key.key, 10))as FilterField[];
+
+export const allPeople = [
+  FilterField.Characters,
+  FilterField.Colorist,
+  FilterField.CoverArtist,
+  FilterField.Editor,
+  FilterField.Inker,
+  FilterField.Letterer,
+  FilterField.Penciller,
+  FilterField.Publisher,
+  FilterField.Translators,
+  FilterField.Writers,
+];
+
+export const personRoleForFilterField = (role: PersonRole) => {
+  switch (role) {
+    case PersonRole.Artist: return FilterField.CoverArtist;
+    case PersonRole.Character: return FilterField.Characters;
+    case PersonRole.Colorist: return FilterField.Colorist;
+    case PersonRole.CoverArtist: return FilterField.CoverArtist;
+    case PersonRole.Editor: return FilterField.Editor;
+    case PersonRole.Inker: return FilterField.Inker;
+    case PersonRole.Letterer: return FilterField.Letterer;
+    case PersonRole.Penciller: return FilterField.Penciller;
+    case PersonRole.Publisher: return FilterField.Publisher;
+    case PersonRole.Translator: return FilterField.Translators;
+    case PersonRole.Writer: return FilterField.Writers;
+    case PersonRole.Imprint: return FilterField.Imprint;
+    case PersonRole.Location: return FilterField.Location;
+    case PersonRole.Team: return FilterField.Team;
+    case PersonRole.Other: return FilterField.None;
+  }
+};

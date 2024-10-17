@@ -192,7 +192,7 @@ export class EditChapterModalComponent implements OnInit {
     })).subscribe();
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
-    this.editForm.addControl('sortOrder', new FormControl(this.chapter.sortOrder, [Validators.required, Validators.min(0)]));
+    this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
     this.editForm.addControl('summary', new FormControl(this.chapter.summary || '', []));
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
@@ -466,12 +466,12 @@ export class EditChapterModalComponent implements OnInit {
 
   fetchPeople(role: PersonRole, filter: string) {
     return this.metadataService.getAllPeople().pipe(map(people => {
-      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
+      return people.filter(p => this.utilityService.filter(p.name, filter));
     }));
   }
 
   createBlankPersonSettings(id: string, role: PersonRole) {
-    var personSettings = new TypeaheadSettings<Person>();
+    let personSettings = new TypeaheadSettings<Person>();
     personSettings.minCharacters = 0;
     personSettings.multiple = true;
     personSettings.showLocked = true;
@@ -486,14 +486,14 @@ export class EditChapterModalComponent implements OnInit {
     }
 
     personSettings.selectionCompareFn = (a: Person, b: Person) => {
-      return a.name == b.name && a.role == b.role;
+      return a.name == b.name;
     }
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(role, filter).pipe(map(items => personSettings.compareFn(items, filter)));
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role };
+      return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false };
     });
 
     return personSettings;

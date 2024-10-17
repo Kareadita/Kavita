@@ -64,6 +64,12 @@ export class UploadService {
     }));
   }
 
+  updatePersonCoverImage(personId: number, url: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/person', {id: personId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+      this.toastr.info(translate('series-detail.cover-change'));
+    }));
+  }
+
   resetChapterCoverLock(chapterId: number, ) {
     return this.httpClient.post<number>(this.baseUrl + 'upload/reset-chapter-lock', {id: chapterId, url: ''});
   }

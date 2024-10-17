@@ -18,7 +18,7 @@ export class PersonRolePipe implements PipeTransform {
       case PersonRole.Colorist:
         return this.translocoService.translate('person-role-pipe.colorist');
       case PersonRole.CoverArtist:
-        return this.translocoService.translate('person-role-pipe.cover-artist');
+        return this.translocoService.translate('person-role-pipe.artist');
       case PersonRole.Editor:
         return this.translocoService.translate('person-role-pipe.editor');
       case PersonRole.Inker:

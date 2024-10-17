@@ -17,7 +17,7 @@ import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
-import {PersonRole} from 'src/app/_models/metadata/person';
+import {Person, PersonRole} from 'src/app/_models/metadata/person';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {SearchResult} from 'src/app/_models/search/search-result';
 import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
@@ -178,56 +178,9 @@ export class NavHeaderComponent implements OnInit {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
-  goToPerson(role: PersonRole, filter: any) {
+  goToPerson(person: Person) {
     this.clearSearch();
-    filter = filter + '';
-    switch(role) {
-      case PersonRole.Other:
-        break;
-      case PersonRole.Writer:
-        this.goTo({field: FilterField.Writers, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Artist:
-        this.goTo({field: FilterField.CoverArtist, comparison: FilterComparison.Equal, value: filter}); // TODO: What is this supposed to be?
-        break;
-      case PersonRole.Character:
-        this.goTo({field: FilterField.Characters, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Colorist:
-        this.goTo({field: FilterField.Colorist, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Editor:
-        this.goTo({field: FilterField.Editor, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Inker:
-        this.goTo({field: FilterField.Inker, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.CoverArtist:
-        this.goTo({field: FilterField.CoverArtist, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Letterer:
-        this.goTo({field: FilterField.Letterer, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Penciller:
-        this.goTo({field: FilterField.Penciller, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Publisher:
-        this.goTo({field: FilterField.Publisher, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Imprint:
-        this.goTo({field: FilterField.Imprint, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Team:
-        this.goTo({field: FilterField.Team, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Location:
-        this.goTo({field: FilterField.Location, comparison: FilterComparison.Equal, value: filter});
-        break;
-      case PersonRole.Translator:
-        this.goTo({field: FilterField.Translators, comparison: FilterComparison.Equal, value: filter});
-        break;
-
-    }
+    this.router.navigate(['person', person.name]);
   }
 
   clearSearch() {

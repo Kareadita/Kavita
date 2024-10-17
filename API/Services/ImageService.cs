@@ -888,6 +888,16 @@ public class ImageService : IImageService
         return $"thumbnail{chapterId}";
     }
 
+    /// <summary>
+    /// Returns the name format for a person cover
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
+    public static string GetPersonFormat(int personId)
+    {
+        return $"person{personId}";
+    }
+
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
         return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";

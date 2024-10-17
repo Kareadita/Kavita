@@ -9,6 +9,7 @@ namespace API.Data;
 
 public interface IUnitOfWork
 {
+    DataContext DataContext { get; }
     ISeriesRepository SeriesRepository { get; }
     IUserRepository UserRepository { get; }
     ILibraryRepository LibraryRepository { get; }
@@ -36,6 +37,7 @@ public interface IUnitOfWork
     bool HasChanges();
     Task<bool> RollbackAsync();
 }
+
 public class UnitOfWork : IUnitOfWork
 {
     private readonly DataContext _context;
@@ -47,33 +49,57 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
         _mapper = mapper;
         _userManager = userManager;
+
+        SeriesRepository = new SeriesRepository(_context, _mapper, _userManager);
+        UserRepository = new UserRepository(_context, _userManager, _mapper);
+        LibraryRepository = new LibraryRepository(_context, _mapper);
+        VolumeRepository = new VolumeRepository(_context, _mapper);
+        SettingsRepository = new SettingsRepository(_context, _mapper);
+        AppUserProgressRepository = new AppUserProgressRepository(_context, _mapper);
+        CollectionTagRepository = new CollectionTagRepository(_context, _mapper);
+        ChapterRepository = new ChapterRepository(_context, _mapper);
+        ReadingListRepository = new ReadingListRepository(_context, _mapper);
+        SeriesMetadataRepository = new SeriesMetadataRepository(_context);
+        PersonRepository = new PersonRepository(_context, _mapper);
+        GenreRepository = new GenreRepository(_context, _mapper);
+        TagRepository = new TagRepository(_context, _mapper);
+        SiteThemeRepository = new SiteThemeRepository(_context, _mapper);
+        MangaFileRepository = new MangaFileRepository(_context);
+        DeviceRepository = new DeviceRepository(_context, _mapper);
+        MediaErrorRepository = new MediaErrorRepository(_context, _mapper);
+        ScrobbleRepository = new ScrobbleRepository(_context, _mapper);
+        UserTableOfContentRepository = new UserTableOfContentRepository(_context, _mapper);
+        AppUserSmartFilterRepository = new AppUserSmartFilterRepository(_context, _mapper);
+        AppUserExternalSourceRepository = new AppUserExternalSourceRepository(_context, _mapper);
+        ExternalSeriesMetadataRepository = new ExternalSeriesMetadataRepository(_context, _mapper);
     }
 
-    public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _userManager);
-    public IUserRepository UserRepository => new UserRepository(_context, _userManager, _mapper);
-    public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
-
-    public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
-
-    public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
-
-    public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context, _mapper);
-    public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
-    public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
-    public IReadingListRepository ReadingListRepository => new ReadingListRepository(_context, _mapper);
-    public ISeriesMetadataRepository SeriesMetadataRepository => new SeriesMetadataRepository(_context);
-    public IPersonRepository PersonRepository => new PersonRepository(_context, _mapper);
-    public IGenreRepository GenreRepository => new GenreRepository(_context, _mapper);
-    public ITagRepository TagRepository => new TagRepository(_context, _mapper);
-    public ISiteThemeRepository SiteThemeRepository => new SiteThemeRepository(_context, _mapper);
-    public IMangaFileRepository MangaFileRepository => new MangaFileRepository(_context);
-    public IDeviceRepository DeviceRepository => new DeviceRepository(_context, _mapper);
-    public IMediaErrorRepository MediaErrorRepository => new MediaErrorRepository(_context, _mapper);
-    public IScrobbleRepository ScrobbleRepository => new ScrobbleRepository(_context, _mapper);
-    public IUserTableOfContentRepository UserTableOfContentRepository => new UserTableOfContentRepository(_context, _mapper);
-    public IAppUserSmartFilterRepository AppUserSmartFilterRepository => new AppUserSmartFilterRepository(_context, _mapper);
-    public IAppUserExternalSourceRepository AppUserExternalSourceRepository => new AppUserExternalSourceRepository(_context, _mapper);
-    public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository => new ExternalSeriesMetadataRepository(_context, _mapper);
+    /// <summary>
+    /// This is here for Scanner only. Don't use otherwise.
+    /// </summary>
+    public DataContext DataContext => _context;
+    public ISeriesRepository SeriesRepository { get; }
+    public IUserRepository UserRepository { get; }
+    public ILibraryRepository LibraryRepository { get; }
+    public IVolumeRepository VolumeRepository { get; }
+    public ISettingsRepository SettingsRepository { get; }
+    public IAppUserProgressRepository AppUserProgressRepository { get; }
+    public ICollectionTagRepository CollectionTagRepository { get; }
+    public IChapterRepository ChapterRepository { get; }
+    public IReadingListRepository ReadingListRepository { get; }
+    public ISeriesMetadataRepository SeriesMetadataRepository { get; }
+    public IPersonRepository PersonRepository { get; }
+    public IGenreRepository GenreRepository { get; }
+    public ITagRepository TagRepository { get; }
+    public ISiteThemeRepository SiteThemeRepository { get; }
+    public IMangaFileRepository MangaFileRepository { get; }
+    public IDeviceRepository DeviceRepository { get; }
+    public IMediaErrorRepository MediaErrorRepository { get; }
+    public IScrobbleRepository ScrobbleRepository { get; }
+    public IUserTableOfContentRepository UserTableOfContentRepository { get; }
+    public IAppUserSmartFilterRepository AppUserSmartFilterRepository { get; }
+    public IAppUserExternalSourceRepository AppUserExternalSourceRepository { get; }
+    public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository { get; }
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.
