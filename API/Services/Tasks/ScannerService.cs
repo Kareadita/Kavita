@@ -164,7 +164,8 @@ public class ScannerService : IScannerService
                 _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
-            _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
+
+            _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
             BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
@@ -259,8 +260,6 @@ public class ScannerService : IScannerService
             return;
         }
 
-        // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
-
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
 
@@ -352,7 +351,6 @@ public class ScannerService : IScannerService
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
     {
-
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName ?? string.Empty)
             .Where(f => !string.IsNullOrEmpty(f))

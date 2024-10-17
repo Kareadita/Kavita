@@ -286,7 +286,8 @@ public class TaskScheduler : ITaskScheduler
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, normalizedOriginal]) ||
             HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
-            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued", normalizedFolder);
+            _logger.LogDebug("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                normalizedFolder);
             return;
         }
 
@@ -302,7 +303,7 @@ public class TaskScheduler : ITaskScheduler
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
-            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+            _logger.LogDebug("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
             return;
         }
