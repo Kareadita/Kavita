@@ -125,7 +125,7 @@
         "background-color-label": "背景顏色",
         "auto-close-menu-label": "自動關閉選單",
         "show-screen-hints-label": "顯示螢幕提示",
-        "emulate-comic-book-label": "模仿漫畫",
+        "emulate-comic-book-label": "模擬漫畫書",
         "swipe-to-paginate-label": "滑動到分頁",
         "book-reader-settings-title": "書本閱讀器",
         "tap-to-paginate-label": "點擊翻頁",
@@ -353,7 +353,7 @@
     "top-readers": {
         "title": "熱門讀者",
         "time-selection-label": "時間",
-        "comics-label": "漫畫：{{value}}小時",
+        "comics-label": "美漫：{{value}}小時",
         "manga-label": "漫畫：{{value}}小時",
         "books-label": "書籍：{{value}}小時",
         "this-week": "{{time-periods.this-week}}",
@@ -465,11 +465,11 @@
         "annual": "年度"
     },
     "publication-status-pipe": {
-        "ongoing": "進行中",
-        "hiatus": "差距",
-        "completed": "完全的",
-        "cancelled": "取消",
-        "ended": "完結"
+        "ongoing": "連載中",
+        "hiatus": "暫停連載",
+        "completed": "完結",
+        "cancelled": "腰斬",
+        "ended": "已結束"
     },
     "person-role-pipe": {
         "artist": "畫家",
@@ -497,7 +497,7 @@
     },
     "library-type-pipe": {
         "book": "書籍",
-        "comic": "漫畫",
+        "comic": "美漫",
         "manga": "漫畫",
         "comicVine": "Comic Vine",
         "image": "圖片",
