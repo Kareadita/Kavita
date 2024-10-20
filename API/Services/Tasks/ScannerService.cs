@@ -317,7 +317,7 @@ public class ScannerService : IScannerService
             // Process Series
             var seriesProcessStopWatch = Stopwatch.StartNew();
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
-            _logger.LogDebug("Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
             seriesLeftToProcess--;
         }
 
@@ -643,7 +643,7 @@ public class ScannerService : IScannerService
             totalFiles += pSeries.Value.Count;
             var seriesProcessStopWatch = Stopwatch.StartNew();
             await _processSeries.ProcessSeriesAsync(pSeries.Value, library, seriesLeftToProcess, forceUpdate);
-            _logger.LogDebug("Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
             seriesLeftToProcess--;
         }
 

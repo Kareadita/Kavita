@@ -18,6 +18,7 @@ using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -183,14 +184,18 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                await _readingListService.CreateReadingListsFromSeries(library.Id, series.Id);
+                if (library.ManageReadingLists)
+                {
+                    BackgroundJob.Enqueue(() =>
+                        _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
+                }
+
 
                 if (seriesAdded)
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
-                    _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
-
-                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+                    BackgroundJob.Enqueue(() =>
+                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
@@ -209,9 +214,9 @@ public class ProcessSeries : IProcessSeries
             return;
         }
 
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
-        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
+        BackgroundJob.Enqueue(() =>
+            _metadataService.GenerateCoversForSeries(series.Id, series.LibraryId, false, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
@@ -683,7 +688,6 @@ public class ProcessSeries : IProcessSeries
             // Add files
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
 
-            // TODO: Investigate using the ChapterBuilder here
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
@@ -818,6 +822,7 @@ public class ProcessSeries : IProcessSeries
         if (firstFile == null ||
             _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
+        var sw = Stopwatch.StartNew();
         if (!chapter.AgeRatingLocked)
         {
             chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
@@ -991,6 +996,8 @@ public class ProcessSeries : IProcessSeries
             var tags = TagHelper.GetTagValues(comicInfo.Tags);
             await UpdateChapterTags(chapter, tags);
         }
+
+        _logger.LogDebug("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
     }
 
     private async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames)
