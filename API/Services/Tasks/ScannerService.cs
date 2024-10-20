@@ -304,13 +304,7 @@ public class ScannerService : IScannerService
              }
         }
 
-        // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
-        if (parsedSeries.Count == 0)
-        {
-            return;
-        }
-
-
+        // At this point, parsedSeries will have at least one key then we can perform the update. If it still doesn't, just return and don't do anything
         // Don't allow any processing on files that aren't part of this series
         var toProcess = parsedSeries.Keys.Where(key =>
             key.NormalizedName.Equals(series.NormalizedName) ||
@@ -321,7 +315,9 @@ public class ScannerService : IScannerService
         foreach (var pSeries in toProcess)
         {
             // Process Series
+            var seriesProcessStopWatch = Stopwatch.StartNew();
             await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
             seriesLeftToProcess--;
         }
 
@@ -636,36 +632,6 @@ public class ScannerService : IScannerService
                                      ?? [])); // Handle null Tag or ComicInfo safely
 
             await CreateAllTagsAsync(allTags.Distinct().ToList());
-
-            // Do the above for People as well (until we overhaul the People code)
-            var allPeople = toProcess
-                .SelectMany(s => s.Value
-                    .SelectMany(p => new List<(string Name, PersonRole Role)>
-                            {
-                                // Split comma-delimited strings into individual names
-                                (p.ComicInfo?.Writer ?? string.Empty, PersonRole.Writer),
-                                (p.ComicInfo?.Penciller ?? string.Empty, PersonRole.Penciller),
-                                (p.ComicInfo?.Inker ?? string.Empty, PersonRole.Inker),
-                                (p.ComicInfo?.Colorist ?? string.Empty, PersonRole.Colorist),
-                                (p.ComicInfo?.Letterer ?? string.Empty, PersonRole.Letterer),
-                                (p.ComicInfo?.CoverArtist ?? string.Empty, PersonRole.CoverArtist),
-                                (p.ComicInfo?.Editor ?? string.Empty, PersonRole.Editor),
-                                (p.ComicInfo?.Publisher ?? string.Empty, PersonRole.Publisher),
-                                (p.ComicInfo?.Imprint ?? string.Empty, PersonRole.Imprint),
-                                (p.ComicInfo?.Characters ?? string.Empty, PersonRole.Character),
-                                (p.ComicInfo?.Teams ?? string.Empty, PersonRole.Team),
-                                (p.ComicInfo?.Locations ?? string.Empty, PersonRole.Location)
-                            }
-                            // Split by comma for each field that contains comma-delimited values
-                            .SelectMany(pair => pair.Name
-                                    .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split by comma and remove empty entries
-                                    .Select(name => pair with {Name = name.Trim()}) // Trim each name and keep the role
-                            )
-                            .Where(pair => !string.IsNullOrWhiteSpace(pair.Name)) // Filter out empty/null names
-                    )
-                )
-                .Distinct() // Ensure distinct people (name and role)
-                .ToList();
         }
 
         var totalFiles = 0;
@@ -675,7 +641,9 @@ public class ScannerService : IScannerService
         foreach (var pSeries in toProcess)
         {
             totalFiles += pSeries.Value.Count;
+            var seriesProcessStopWatch = Stopwatch.StartNew();
             await _processSeries.ProcessSeriesAsync(pSeries.Value, library, seriesLeftToProcess, forceUpdate);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
             seriesLeftToProcess--;
         }
 
