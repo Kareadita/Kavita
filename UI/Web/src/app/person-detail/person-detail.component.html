@@ -5,33 +5,32 @@
       <app-side-nav-companion-bar>
         <ng-container title>
           <h2 class="title text-break">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{person.name}}</span>
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
           </h2>
         </ng-container>
       </app-side-nav-companion-bar>
     </div>
 
-    <div class="main-container container-fluid pt-2 mb-5">
-      <div class="row mb-0 mb-xl-3 info-container">
-        <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
-          <app-image [styles]="{'background': 'none', 'max-height': '400px', 'height': '200px', 'width': '200px', 'border-radius': '50%'}"
+    <div class="main-container container-fluid pt-2 mb-5 ms-1">
+      <div class="mb-0 mb-xl-3 info-container">
+        <div class="image-container">
+          <app-image [styles]="{'background': 'none', 'max-height': '400px', 'height': '250px', 'width': '250px', 'border-radius': '3%'}"
                      [imageUrl]="imageService.getPersonImage(person.id)"
                      [errorImage]="imageService.noPersonImage"></app-image>
         </div>
-
-        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
-          <div class="row g-0 mt-2">
-            <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
-
-            @if (roles$ | async; as roles) {
+        <div class="person-details-container ">
+          <div class="person-details row g-0 mt-2">
+            <div class="person-name-role-container">
+              @if (roles$ | async; as roles) {
               <div class="mt-1">
-                <h5>Roles in Libraries</h5>
                 @for(role of roles; track role) {
-                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
+                <app-tag-badge title="Roles in Libraries" [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
                 }
               </div>
-            }
+              }
+            </div>
+            <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
           </div>
         </div>
       </div>

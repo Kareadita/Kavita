@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'card-item'">
-  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
-    <div class="overlay" (click)="handleClick($event)">
+  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}" (click)="handleClick($event)">
+    <div class="overlay">
       @if(entity.coverImage) {
         <app-image [imageUrl]="imageUrl" [errorImage]="imageService.noPersonImage" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px"></app-image>
     } @else {
@@ -22,7 +22,6 @@
         </div>
       }
 
-      <div class="card-overlay"></div>
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-body">
@@ -38,9 +37,9 @@
         </div>
 
         @if (subtitleTemplate) {
-          <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
-          </div>
+        <div class="series-issues-count">
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+        </div>
         }
       </div>
     }

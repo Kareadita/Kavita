@@ -1,4 +1,59 @@
+@import '../../theme/variables';
+
 .main-container {
   margin-top: 10px;
-  padding: 0 0 0 10px;
+
+  .main-container {
+    padding: unset;
+
+    .info-container {
+      display: flex;
+      gap: 3rem;
+
+      .image-container {
+        background-color: rgba(0, 0, 0, .45);
+        border-radius: 3%;
+        box-shadow: 0 0 4px rgba(0, 0, 0, .3);
+      }
+
+      .person-details-container {
+        .person-details {
+          gap: 2rem;
+
+          .person-name-role-container {
+            .person-name {
+              margin: unset;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: $grid-breakpoints-sm) {
+  .main-container {
+
+    .main-container {
+
+      .info-container {
+        flex-direction: column;
+
+        .image-container {
+          display: flex;
+          align-self: center;
+        }
+        .person-details-container {
+          .person-details {
+            margin: 0 8px;
+            .person-name-role-container {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+          }
+        }
+      }
+    }
+  }
 }
