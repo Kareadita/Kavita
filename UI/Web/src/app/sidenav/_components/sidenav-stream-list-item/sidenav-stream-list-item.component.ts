@@ -20,9 +20,4 @@ export class SidenavStreamListItemComponent {
   @Output() hide: EventEmitter<SideNavStream> = new EventEmitter<SideNavStream>();
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly baseUrl = inject(APP_BASE_HREF);
-
-  constructor() {
-    console.log('baseUrl', this.baseUrl);
-  }
-
 }

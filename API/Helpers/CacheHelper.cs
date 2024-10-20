@@ -14,8 +14,8 @@ public interface ICacheHelper
 
     bool CoverImageExists(string path);
 
-    bool IsFileUnmodifiedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile firstFile);
-    bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile);
+    bool IsFileUnmodifiedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile);
+    bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile? firstFile);
 
 }
 
@@ -56,7 +56,7 @@ public class CacheHelper : ICacheHelper
     /// <param name="forceUpdate"></param>
     /// <param name="firstFile"></param>
     /// <returns></returns>
-    public bool IsFileUnmodifiedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile firstFile)
+    public bool IsFileUnmodifiedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile)
     {
         return firstFile != null &&
                (!forceUpdate &&
@@ -71,7 +71,7 @@ public class CacheHelper : ICacheHelper
     /// <param name="forceUpdate">Should we ignore any logic and force this to return true</param>
     /// <param name="firstFile">The file in question</param>
     /// <returns></returns>
-    public bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile)
+    public bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile? firstFile)
     {
         if (firstFile == null) return false;
         if (forceUpdate) return true;

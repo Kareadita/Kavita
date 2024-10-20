@@ -408,7 +408,7 @@ public class DefaultParserTests
         expected = new ParserInfo
         {
             Series = "Foo 50", Volumes = API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume, IsSpecial = true,
-            Chapters = "50", Filename = "Foo 50 SP01.cbz", Format = MangaFormat.Archive,
+            Chapters = Parser.DefaultChapter, Filename = "Foo 50 SP01.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         };
 

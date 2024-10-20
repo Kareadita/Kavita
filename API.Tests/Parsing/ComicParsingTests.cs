@@ -1,11 +1,6 @@
-using System.IO.Abstractions.TestingHelpers;
 using API.Entities.Enums;
-using API.Services;
 using API.Services.Tasks.Scanner.Parser;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace API.Tests.Parsing;
 
@@ -73,41 +68,41 @@ public class ComicParsingTests
     [InlineData("SKY WORLD สกายเวิลด์ เล่มที่ 1", "SKY WORLD สกายเวิลด์")]
     public void ParseComicSeriesTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(filename));
+        Assert.Equal(expected, Parser.ParseComicSeries(filename));
     }
 
     [Theory]
-    [InlineData("01 Spider-Man & Wolverine 01.cbr", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman & Catwoman - Trail of the Gun 01", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman & Daredevil - King of New York", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman & Robin the Teen Wonder #0", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman & Wildcat (1 of 3)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman And Superman World's Finest #01", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Babe 01", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("01 Spider-Man & Wolverine 01.cbr", Parser.LooseLeafVolume)]
+    [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", Parser.LooseLeafVolume)]
+    [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", Parser.LooseLeafVolume)]
+    [InlineData("Batman & Catwoman - Trail of the Gun 01", Parser.LooseLeafVolume)]
+    [InlineData("Batman & Daredevil - King of New York", Parser.LooseLeafVolume)]
+    [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", Parser.LooseLeafVolume)]
+    [InlineData("Batman & Robin the Teen Wonder #0", Parser.LooseLeafVolume)]
+    [InlineData("Batman & Wildcat (1 of 3)", Parser.LooseLeafVolume)]
+    [InlineData("Batman And Superman World's Finest #01", Parser.LooseLeafVolume)]
+    [InlineData("Babe 01", Parser.LooseLeafVolume)]
+    [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", Parser.LooseLeafVolume)]
     [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
-    [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", Parser.LooseLeafVolume)]
     [InlineData("Superman v1 024 (09-10 1943)", "1")]
     [InlineData("Superman v1.5 024 (09-10 1943)", "1.5")]
-    [InlineData("Amazing Man Comics chapter 25", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("spawn-123", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("spawn-chapter-123", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman Beyond 04 (of 6) (1999)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman Beyond 001 (2012)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman Beyond 2.0 001 (2013)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Amazing Man Comics chapter 25", Parser.LooseLeafVolume)]
+    [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", Parser.LooseLeafVolume)]
+    [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", Parser.LooseLeafVolume)]
+    [InlineData("spawn-123", Parser.LooseLeafVolume)]
+    [InlineData("spawn-chapter-123", Parser.LooseLeafVolume)]
+    [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", Parser.LooseLeafVolume)]
+    [InlineData("Batman Beyond 04 (of 6) (1999)", Parser.LooseLeafVolume)]
+    [InlineData("Batman Beyond 001 (2012)", Parser.LooseLeafVolume)]
+    [InlineData("Batman Beyond 2.0 001 (2013)", Parser.LooseLeafVolume)]
+    [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", Parser.LooseLeafVolume)]
     [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "1")]
-    [InlineData("Chew Script Book (2011) (digital-Empire) SP04", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Chew Script Book (2011) (digital-Empire) SP04", Parser.LooseLeafVolume)]
     [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "2000")]
     [InlineData("Batgirl V2000 #57", "2000")]
-    [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
-    [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", Parser.LooseLeafVolume)]
+    [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", Parser.LooseLeafVolume)]
     [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
     [InlineData("Daredevil - v6.5", "6.5")]
     // Tome Tests
@@ -117,25 +112,25 @@ public class ComicParsingTests
     [InlineData("Conquistador_Tome_2", "2")]
     [InlineData("Max_l_explorateur-_Tome_0", "0")]
     [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
-    [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", Parser.LooseLeafVolume)]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
     // Russian Tests
     [InlineData("Kebab Том 1 Глава 3", "1")]
-    [InlineData("Манга Глава 2", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Манга Глава 2", Parser.LooseLeafVolume)]
     [InlineData("ย้อนเวลากลับมาร้าย เล่ม 1", "1")]
     [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1 ตอนที่ 3", "1")]
-    [InlineData("วิวาห์รัก เดิมพันชีวิต ตอนที่ 2", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("วิวาห์รัก เดิมพันชีวิต ตอนที่ 2", Parser.LooseLeafVolume)]
     public void ParseComicVolumeTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(filename));
+        Assert.Equal(expected, Parser.ParseComicVolume(filename));
     }
 
     [Theory]
     [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
-    [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
-    [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", Parser.DefaultChapter)]
+    [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", Parser.DefaultChapter)]
     [InlineData("Batman & Catwoman - Trail of the Gun 01", "1")]
-    [InlineData("Batman & Daredevil - King of New York", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Batman & Daredevil - King of New York", Parser.DefaultChapter)]
     [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
     [InlineData("Batman & Robin the Teen Wonder #0", "0")]
     [InlineData("Batman & Wildcat (1 of 3)", "1")]
@@ -159,8 +154,8 @@ public class ComicParsingTests
     [InlineData("Batman Beyond 001 (2012)", "1")]
     [InlineData("Batman Beyond 2.0 001 (2013)", "1")]
     [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "1")]
-    [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
-    [InlineData("Chew Script Book (2011) (digital-Empire) SP04", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", Parser.DefaultChapter)]
+    [InlineData("Chew Script Book (2011) (digital-Empire) SP04", Parser.DefaultChapter)]
     [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "57")]
     [InlineData("Batgirl V2000 #57", "57")]
     [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "21")]
@@ -169,7 +164,7 @@ public class ComicParsingTests
     [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
     [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
     [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
-    [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", Parser.DefaultChapter)]
     [InlineData("Kebab Том 1 Глава 3", "3")]
     [InlineData("Манга Глава 2", "2")]
     [InlineData("Манга 2 Глава", "2")]
@@ -179,35 +174,35 @@ public class ComicParsingTests
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     public void ParseComicChapterTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename, LibraryType.Comic));
+        Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Comic));
     }
 
 
     [Theory]
-    [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", true)]
-    [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", true)]
+    [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", false)]
+    [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", false)]
     [InlineData("Baldwin the Brave & Other Tales Special SP1.cbr", true)]
-    [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", true)]
-    [InlineData("Boule et Bill - THS -Bill à disparu", true)]
-    [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
-    [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
+    [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", false)]
+    [InlineData("Boule et Bill - THS -Bill à disparu", false)]
+    [InlineData("Asterix - HS - Les 12 travaux d'Astérix", false)]
+    [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", false)]
     [InlineData("laughs", false)]
-    [InlineData("Annual Days of Summer", true)]
-    [InlineData("Adventure Time 2013 Annual #001 (2013)", true)]
-    [InlineData("Adventure Time 2013_Annual_#001 (2013)", true)]
-    [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
+    [InlineData("Annual Days of Summer", false)]
+    [InlineData("Adventure Time 2013 Annual #001 (2013)", false)]
+    [InlineData("Adventure Time 2013_Annual_#001 (2013)", false)]
+    [InlineData("Adventure Time 2013_-_Annual #001 (2013)", false)]
     [InlineData("G.I. Joe - A Real American Hero Yearbook 004 Reprint (2021)", false)]
     [InlineData("Mazebook 001", false)]
-    [InlineData("X-23 One Shot (2010)", true)]
-    [InlineData("Casus Belli v1 Hors-Série 21 - Mousquetaires et Sorcellerie", true)]
-    [InlineData("Batman Beyond Annual", true)]
-    [InlineData("Batman Beyond Bonus", true)]
-    [InlineData("Batman Beyond OneShot", true)]
-    [InlineData("Batman Beyond Specials", true)]
-    [InlineData("Batman Beyond Omnibus (1999)", true)]
-    [InlineData("Batman Beyond Omnibus", true)]
-    [InlineData("01 Annual Batman Beyond", true)]
-    [InlineData("Blood Syndicate Annual #001", true)]
+    [InlineData("X-23 One Shot (2010)", false)]
+    [InlineData("Casus Belli v1 Hors-Série 21 - Mousquetaires et Sorcellerie", false)]
+    [InlineData("Batman Beyond Annual", false)]
+    [InlineData("Batman Beyond Bonus", false)]
+    [InlineData("Batman Beyond OneShot", false)]
+    [InlineData("Batman Beyond Specials", false)]
+    [InlineData("Batman Beyond Omnibus (1999)", false)]
+    [InlineData("Batman Beyond Omnibus", false)]
+    [InlineData("01 Annual Batman Beyond", false)]
+    [InlineData("Blood Syndicate Annual #001", false)]
     public void IsComicSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected, Parser.IsSpecial(input, LibraryType.Comic));

@@ -153,7 +153,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <summary>
     /// All people attached at a Chapter level. Usually Comics will have different people per issue.
     /// </summary>
-    public ICollection<Person> People { get; set; } = new List<Person>();
+    public ICollection<ChapterPeople> People { get; set; } = new List<ChapterPeople>();
     /// <summary>
     /// Genres for the Chapter
     /// </summary>
