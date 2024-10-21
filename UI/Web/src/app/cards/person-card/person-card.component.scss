@@ -1,0 +1,31 @@
+
+$image-height: 160px;
+@use '../../../card-item-common';
+
+// Override so we can have square cards
+
+.bulk-mode {
+  &.always-show {
+    height: $image-height;
+  }
+}
+
+.card-item-container {
+  .overlay {
+    height: $image-height;
+
+    /* TODO: Robbie fix this hack */
+    .missing-img {
+      position: absolute;
+      left: 43%;
+      top: 25%;
+    }
+  }
+  .card-overlay {
+    height: $image-height;
+  }
+  .card-body {
+    bottom: 0;
+  }
+}
+

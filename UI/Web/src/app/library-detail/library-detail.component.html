@@ -14,20 +14,20 @@
     <app-loading [absolute]="true" [loading]="bulkLoader"></app-loading>
     @if (filter) {
       <app-card-detail-layout
-                              [isLoading]="loadingSeries"
-                              [items]="series"
-                              [pagination]="pagination"
-                              [filterSettings]="filterSettings"
-                              [trackByIdentity]="trackByIdentity"
-                              [filterOpen]="filterOpen"
-                              [jumpBarKeys]="jumpKeys"
-                              [refresh]="refresh"
-                              (applyFilter)="updateFilter($event)"
+        [isLoading]="loadingSeries"
+        [items]="series"
+        [pagination]="pagination"
+        [filterSettings]="filterSettings"
+        [trackByIdentity]="trackByIdentity"
+        [filterOpen]="filterOpen"
+        [jumpBarKeys]="jumpKeys"
+        [refresh]="refresh"
+        (applyFilter)="updateFilter($event)"
       >
         <ng-template #cardItem let-item let-position="idx">
           <app-series-card [series]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
-                          (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                          [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+                           (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
+                           [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
         </ng-template>
       </app-card-detail-layout>
     }

@@ -1,17 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers.Builders;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Helpers;
 #nullable enable
 
 public static class GenreHelper
 {
+
+    public static async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames, IUnitOfWork unitOfWork)
+    {
+        // Normalize and build genres from the list of genre names
+        var genresToAdd = genreNames
+            .Select(g => new GenreBuilder(g).Build())
+            .ToList();
+
+        // Remove any genres that are not part of the new list
+        var genresToRemove = chapter.Genres
+            .Where(g => genresToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
+            .ToList();
+
+        foreach (var genreToRemove in genresToRemove)
+        {
+            chapter.Genres.Remove(genreToRemove);
+        }
+
+        // Get all normalized titles for bulk lookup
+        var normalizedTitles = genresToAdd.Select(g => g.NormalizedTitle).ToList();
+
+        // Bulk lookup for existing genres in the database
+        var existingGenres = await unitOfWork.DataContext.Genre
+            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
+            .ToListAsync();
+
+        // Find genres that do not exist in the database
+        var missingGenres = genresToAdd
+            .Where(g => existingGenres.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
+            .ToList();
+
+        // Add missing genres to the database
+        if (missingGenres.Count != 0)
+        {
+            unitOfWork.DataContext.Genre.AddRange(missingGenres);
+            await unitOfWork.CommitAsync();  // Commit the changes to the database
+        }
+
+        // Add the new or existing genres to the chapter
+        foreach (var genre in genresToAdd)
+        {
+            var existingGenre = existingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle)
+                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle);
+
+            if (existingGenre != null && !chapter.Genres.Contains(existingGenre))
+            {
+                chapter.Genres.Add(existingGenre);
+            }
+        }
+    }
+
 
     public static void UpdateGenre(Dictionary<string, Genre> allGenres,
         IEnumerable<string> names, Action<Genre, bool> action)

@@ -28,6 +28,12 @@ public static class SeriesExtensions
             firstVolume = volumes[1];
         }
 
+        // If the first volume is 0, then use Volume 1
+        if (firstVolume.MinNumber.Is(0f) && volumes.Count > 1)
+        {
+            firstVolume = volumes[1];
+        }
+
         var chapters = firstVolume.Chapters
             .OrderBy(c => c.SortOrder)
             .ToList();

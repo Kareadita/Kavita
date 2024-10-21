@@ -3,18 +3,71 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Helpers;
 #nullable enable
 
 public static class TagHelper
 {
+
+    public static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, IUnitOfWork unitOfWork)
+    {
+        // Normalize and build genres from the list of genre names
+        var tagsToAdd = tagNames
+            .Select(g => new TagBuilder(g).Build())
+            .ToList();
+
+        // Remove any genres that are not part of the new list
+        var tagsToRemove = chapter.Tags
+            .Where(g => tagsToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
+            .ToList();
+
+        foreach (var tagToRemove in tagsToRemove)
+        {
+            chapter.Tags.Remove(tagToRemove);
+        }
+
+        // Get all normalized titles for bulk lookup
+        var normalizedTitles = tagsToAdd.Select(g => g.NormalizedTitle).ToList();
+
+        // Bulk lookup for existing genres in the database
+        var existingTags = await unitOfWork.DataContext.Tag
+            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
+            .ToListAsync();
+
+        // Find genres that do not exist in the database
+        var missingGenres = tagsToAdd
+            .Where(g => existingTags.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
+            .ToList();
+
+        // Add missing genres to the database
+        if (missingGenres.Count != 0)
+        {
+            unitOfWork.DataContext.Tag.AddRange(missingGenres);
+            await unitOfWork.CommitAsync();  // Commit the changes to the database
+        }
+
+        // Add the new or existing genres to the chapter
+        foreach (var tag in tagsToAdd)
+        {
+            var existingGenre = existingTags.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle)
+                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == tag.NormalizedTitle);
+
+            if (existingGenre != null && !chapter.Tags.Contains(existingGenre))
+            {
+                chapter.Tags.Add(existingGenre);
+            }
+        }
+    }
+
     public static void UpdateTag(Dictionary<string, Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
     {
         foreach (var name in names)
@@ -81,8 +134,7 @@ public static class TagHelper
             return ImmutableList<string>.Empty;
         }
 
-        return comicInfoTagSeparatedByComma.Split(",")
-            .Select(s => s.Trim())
+        return comicInfoTagSeparatedByComma.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .DistinctBy(Parser.Normalize)
             .ToList();
     }

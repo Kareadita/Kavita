@@ -55,7 +55,7 @@ public interface IDirectoryService
     bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
-    string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
+    string? FindLowestDirectoriesFromFiles(IList<string> libraryFolders,
         IList<string> filePaths);
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
@@ -69,14 +69,13 @@ public interface IDirectoryService
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
     IEnumerable<string> GetDirectories(string folderPath);
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
+    IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null);
     string GetParentDirectoryName(string fileOrFolder);
-    IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null);
+    IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null, SearchOption searchOption = SearchOption.AllDirectories);
     DateTime GetLastWriteTime(string folderPath);
-    GlobMatcher? CreateMatcherFromFile(string filePath);
 }
 public class DirectoryService : IDirectoryService
 {
-    public const string KavitaIgnoreFile = ".kavitaignore";
     public IFileSystem FileSystem { get; }
     public string CacheDirectory { get; }
     public string CoverImageDirectory { get; }
@@ -95,11 +94,9 @@ public class DirectoryService : IDirectoryService
 
     private static readonly Regex ExcludeDirectories = new Regex(
         @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle|\.yacreaderlibrary",
-        MatchOptions,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        MatchOptions, Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        MatchOptions,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        MatchOptions, Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -136,20 +133,36 @@ public class DirectoryService : IDirectoryService
     /// </summary>
     /// <remarks>This will always exclude <see cref="Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith"/> patterns</remarks>
     /// <param name="path">Directory to search</param>
-    /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
+    /// <param name="searchPatternExpression">Regex version of search pattern (e.g., \.mp3|\.mp4). Defaults to * meaning all files.</param>
     /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
     /// <returns>List of file paths</returns>
     public IEnumerable<string> GetFilesWithCertainExtensions(string path,
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
-        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        // If directory doesn't exist, exit the iterator with no results
+        if (!FileSystem.Directory.Exists(path))
+            yield break;
 
-        return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
-            .Where(file =>
-                reSearchPattern.IsMatch(FileSystem.Path.GetExtension(file)) && !FileSystem.Path.GetFileName(file).StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith));
+        // Compile the regex pattern for faster repeated matching
+        var reSearchPattern = new Regex(searchPatternExpression,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            Parser.RegexTimeout);
+
+        // Enumerate files in the directory and apply filters
+        foreach (var file in FileSystem.Directory.EnumerateFiles(path, "*", searchOption))
+        {
+            var fileName = FileSystem.Path.GetFileName(file);
+            var fileExtension = FileSystem.Path.GetExtension(file);
+
+            // Check if the file matches the pattern and exclude macOS metadata files
+            if (reSearchPattern.IsMatch(fileExtension) && !fileName.StartsWith(Parser.MacOsMetadataFileStartsWith))
+            {
+                yield return file;
+            }
+        }
     }
+
 
 
     /// <summary>
@@ -172,8 +185,6 @@ public class DirectoryService : IDirectoryService
         {
             rootPath = rootPath.Replace(FileSystem.Path.DirectorySeparatorChar, FileSystem.Path.AltDirectorySeparatorChar);
         }
-
-
 
         var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
         var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
@@ -215,24 +226,33 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
+        if (!FileSystem.Directory.Exists(path))
+            yield break; // Use yield break to exit the iterator early
 
-        if (fileNameRegex != string.Empty)
+        Regex? reSearchPattern = null;
+        if (!string.IsNullOrEmpty(fileNameRegex))
         {
-            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase,
-                Tasks.Scanner.Parser.Parser.RegexTimeout);
-            return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
-                .Where(file =>
-                {
-                    var fileName = FileSystem.Path.GetFileName(file);
-                    return reSearchPattern.IsMatch(fileName) &&
-                           !fileName.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
-                });
+            // Compile the regex for better performance when used frequently
+            reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, Tasks.Scanner.Parser.Parser.RegexTimeout);
         }
 
-        return FileSystem.Directory.EnumerateFiles(path, "*", searchOption).Where(file =>
-            !FileSystem.Path.GetFileName(file).StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith));
+        // Enumerate files lazily
+        foreach (var file in FileSystem.Directory.EnumerateFiles(path, "*", searchOption))
+        {
+            var fileName = FileSystem.Path.GetFileName(file);
+
+            // Exclude macOS metadata files
+            if (fileName.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith))
+                continue;
+
+            // If a regex is provided, match the file name against it
+            if (reSearchPattern != null && !reSearchPattern.IsMatch(fileName))
+                continue;
+
+            yield return file; // Yield each matching file as it's found
+        }
     }
+
 
     /// <summary>
     /// Copies a file into a directory. Does not maintain parent folder of file.
@@ -329,7 +349,7 @@ public class DirectoryService : IDirectoryService
             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
         }
 
-        return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
+        return !FileSystem.Directory.Exists(path) ? [] : FileSystem.Directory.GetFiles(path);
     }
 
     /// <summary>
@@ -391,10 +411,12 @@ public class DirectoryService : IDirectoryService
         {
             foreach (var file in di.EnumerateFiles())
             {
+                if (!file.Exists) continue;
                 file.Delete();
             }
             foreach (var dir in di.EnumerateDirectories())
             {
+                if (!dir.Exists) continue;
                 dir.Delete(true);
             }
         }
@@ -594,45 +616,59 @@ public class DirectoryService : IDirectoryService
     /// <summary>
     /// Finds the lowest directory from a set of file paths. Does not return the root path, will always select the lowest non-root path.
     /// </summary>
-    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns an empty dictionary back</remarks>
+    /// <remarks>If the file paths do not contain anything from libraryFolders, this returns null.</remarks>
     /// <param name="libraryFolders">List of top level folders which files belong to</param>
     /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
-    /// <returns></returns>
-    public string? FindLowestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+    /// <returns>Lowest non-root path, or null if not found</returns>
+    public string? FindLowestDirectoriesFromFiles(IList<string> libraryFolders, IList<string> filePaths)
     {
-        var dirs = new Dictionary<string, string>();
+        // Normalize the file paths only once
         var normalizedFilePaths = filePaths.Select(Parser.NormalizePath).ToList();
 
-        foreach (var folder in libraryFolders.Select(Parser.NormalizePath))
+        // Use a list to store all directories for comparison
+        var dirs = new List<string>();
+
+        // Iterate through each library folder and collect matching directories
+        foreach (var normalizedFolder in libraryFolders.Select(Parser.NormalizePath))
         {
             foreach (var file in normalizedFilePaths)
             {
-                if (!file.Contains(folder)) continue;
+                // If the file path contains the folder path, get its directory
+                if (!file.Contains(normalizedFolder)) continue;
 
-                var lowestPath =   Path.GetDirectoryName(file);
+                var lowestPath = Path.GetDirectoryName(file);
                 if (!string.IsNullOrEmpty(lowestPath))
                 {
-                    dirs.TryAdd(Parser.NormalizePath(lowestPath), string.Empty);
+                    dirs.Add(Parser.NormalizePath(lowestPath)); // Add to list
                 }
-
             }
         }
 
-        if (dirs.Keys.Count == 1) return dirs.Keys.First();
-        if (dirs.Keys.Count > 1)
+        if (dirs.Count == 0)
         {
-            // For each key, validate that each file exists in the key path
-            foreach (var folder in dirs.Keys)
-            {
-                if (normalizedFilePaths.TrueForAll(filePath => filePath.Contains(Parser.NormalizePath(folder))))
-                {
-                    return folder;
-                }
-            }
+            return null; // No directories found
         }
 
-        return null;
+        // Now find the deepest common directory among all paths
+        var commonPath = dirs.Aggregate(GetDeepestCommonPath); // Use new method to get deepest path
+
+        // Return the common path if it exists and is not one of the root directories
+        return libraryFolders.Any(folder => commonPath == Parser.NormalizePath(folder)) ? null : commonPath;
     }
+
+    public static string GetDeepestCommonPath(string path1, string path2)
+    {
+        var parts1 = path1.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var parts2 = path2.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        // Get the longest matching parts, ensuring that deeper parts in hierarchy are considered
+        var commonParts = parts1.Zip(parts2, (p1, p2) => p1 == p2 ? p1 : null)
+            .TakeWhile(part => part != null)
+            .ToArray();
+
+        return Parser.NormalizePath(string.Join(Path.DirectorySeparatorChar.ToString(), commonParts));
+    }
+
 
     /// <summary>
     /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
@@ -665,8 +701,9 @@ public class DirectoryService : IDirectoryService
     /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
     /// </summary>
     /// <param name="folderPath"></param>
+    /// <param name="matcher"></param>
     /// <returns></returns>
-    public IEnumerable<string> GetAllDirectories(string folderPath)
+    public IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null)
     {
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         var directories = new List<string>();
@@ -675,7 +712,7 @@ public class DirectoryService : IDirectoryService
         foreach (var foundDir in foundDirs)
         {
             directories.Add(foundDir);
-            directories.AddRange(GetAllDirectories(foundDir));
+            directories.AddRange(GetAllDirectories(foundDir, matcher));
         }
 
         return directories;
@@ -699,93 +736,82 @@ public class DirectoryService : IDirectoryService
     }
 
     /// <summary>
-    /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
+    /// Scans a directory by utilizing a recursive folder search.
     /// </summary>
     /// <param name="folderPath"></param>
     /// <param name="fileTypes"></param>
     /// <param name="matcher"></param>
+    /// <param name="searchOption">Pass TopDirectories</param>
     /// <returns></returns>
-    public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null)
+    public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null,
+        SearchOption searchOption = SearchOption.AllDirectories)
     {
         _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
+
         if (!Exists(folderPath)) return files;
 
-        var potentialIgnoreFile = FileSystem.Path.Join(folderPath, KavitaIgnoreFile);
-        if (matcher == null)
+        if (searchOption == SearchOption.AllDirectories)
         {
-            matcher = CreateMatcherFromFile(potentialIgnoreFile);
+
+            // Stack to hold directories to process
+            var directoriesToProcess = new Stack<string>();
+            directoriesToProcess.Push(folderPath);
+
+            while (directoriesToProcess.Count > 0)
+            {
+                var currentDirectory = directoriesToProcess.Pop();
+
+                // Get files from the current directory
+                var filesInCurrentDirectory = GetFilesWithCertainExtensions(currentDirectory, fileTypes);
+                files.AddRange(filesInCurrentDirectory);
+
+                // Get subdirectories and add them to the stack
+                var subdirectories = GetDirectories(currentDirectory, matcher);
+                foreach (var subdirectory in subdirectories)
+                {
+                    directoriesToProcess.Push(subdirectory);
+                }
+            }
         }
         else
         {
-            matcher.Merge(CreateMatcherFromFile(potentialIgnoreFile));
+            // If TopDirectoryOnly is specified, only get files in the specified folder
+            var filesInCurrentDirectory = GetFilesWithCertainExtensions(folderPath, fileTypes);
+            files.AddRange(filesInCurrentDirectory);
         }
 
-
-        var directories = GetDirectories(folderPath, matcher);
-
-        foreach (var directory in directories)
+        // Filter out unwanted files based on matcher if provided
+        if (matcher != null)
         {
-            files.AddRange(ScanFiles(directory, fileTypes, matcher));
-        }
-
-
-        // Get the matcher from either ignore or global (default setup)
-        if (matcher == null)
-        {
-            files.AddRange(GetFilesWithCertainExtensions(folderPath, fileTypes));
-        }
-        else
-        {
-            var foundFiles = GetFilesWithCertainExtensions(folderPath,
-                    fileTypes)
-                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
-            files.AddRange(foundFiles);
+            files = files.Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name)).ToList();
         }
 
         return files;
     }
 
+
     /// <summary>
     /// Recursively scans a folder and returns the max last write time on any folders and files
     /// </summary>
-    /// <remarks>If the folder is empty or non-existant, this will return MaxValue for a DateTime</remarks>
+    /// <remarks>If the folder is empty or non-existent, this will return MaxValue for a DateTime</remarks>
     /// <param name="folderPath"></param>
     /// <returns>Max Last Write Time</returns>
     public DateTime GetLastWriteTime(string folderPath)
     {
         if (!FileSystem.Directory.Exists(folderPath)) return DateTime.MaxValue;
+
         var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
-        return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
-    }
 
-    /// <summary>
-    /// Generates a GlobMatcher from a .kavitaignore file found at path. Returns null otherwise.
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <returns></returns>
-    public GlobMatcher? CreateMatcherFromFile(string filePath)
-    {
-        if (!FileSystem.File.Exists(filePath))
-        {
-            return null;
-        }
+        // Find the max last write time of the files
+        var maxFiles = fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
 
-        // Read file in and add each line to Matcher
-        var lines = FileSystem.File.ReadAllLines(filePath);
-        if (lines.Length == 0)
-        {
-            return null;
-        }
+        // Get the last write time of the directory itself
+        var directoryLastWriteTime = FileSystem.Directory.GetLastWriteTime(folderPath);
 
-        GlobMatcher matcher = new();
-        foreach (var line in lines.Where(s => !string.IsNullOrEmpty(s)))
-        {
-            matcher.AddExclude(line);
-        }
-
-        return matcher;
+        // Use comparison to get the max DateTime value
+        return directoryLastWriteTime > maxFiles ? directoryLastWriteTime : maxFiles;
     }
 
 

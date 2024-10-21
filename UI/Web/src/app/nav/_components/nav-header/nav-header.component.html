@@ -108,15 +108,18 @@
                     </div>
                   </ng-template>
 
-                  <ng-template #personTemplate let-item>
-                    <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
-                      <div class="ms-1">
-
-                        <div [innerHTML]="item.name"></div>
-                        <div class="text-light fst-italic">{{item.role | personRole}}</div>
-                      </div>
-                    </div>
-                  </ng-template>
+              <ng-template #personTemplate let-item>
+                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item)">
+                  <div style="width: 24px" class="me-1">
+                    <app-image class="me-3 search-result"
+                               [styles]="{'background': 'none', 'max-height': '24px', 'height': '24px', 'width': '24px', 'border-radius': '50%'}"
+                               width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage"></app-image>
+                  </div>
+                  <div class="ms-1">
+                    <div>{{item.name}}</div>
+                  </div>
+                </div>
+              </ng-template>
 
                   <ng-template #genreTemplate let-item>
                     <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">

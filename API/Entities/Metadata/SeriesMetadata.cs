@@ -14,16 +14,6 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
-    [Obsolete("Use AppUserCollection instead")]
-    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
-
-    public ICollection<Genre> Genres { get; set; } = new List<Genre>();
-    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
-    /// <summary>
-    /// All people attached at a Series level.
-    /// </summary>
-    public ICollection<Person> People { get; set; } = new List<Person>();
-
     /// <summary>
     /// Highest Age Rating from all Chapters
     /// </summary>
@@ -51,7 +41,8 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// <remarks>This is not populated from Chapters of the Series</remarks>
     public string WebLinks { get; set; } = string.Empty;
 
-    // Locks
+    #region Locks
+
     public bool LanguageLocked { get; set; }
     public bool SummaryLocked { get; set; }
     /// <summary>
@@ -79,9 +70,26 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 
-    // Relationship
-    public Series Series { get; set; } = null!;
+    #endregion
+
+    #region Relationships
+
+    [Obsolete("Use AppUserCollection instead")]
+    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
+
+    public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+    /// <summary>
+    /// All people attached at a Series level.
+    /// </summary>
+    public ICollection<SeriesMetadataPeople> People { get; set; } = new List<SeriesMetadataPeople>();
+
     public int SeriesId { get; set; }
+    public Series Series { get; set; } = null!;
+
+    #endregion
+
 
     /// <inheritdoc />
     [ConcurrencyCheck]

@@ -47,6 +47,14 @@ const routes: Routes = [
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },
       {
+        path: 'person',
+        loadChildren: () => import('./_routes/person-detail-routing.module').then(m => m.routes)
+      },
+      {
+        path: 'browse/authors',
+        loadChildren: () => import('./_routes/browse-authors-routing.module').then(m => m.routes)
+      },
+      {
         path: 'library',
         runGuardsAndResolvers: 'always',
         canActivate: [AuthGuard, LibraryAccessGuard],

@@ -206,24 +206,6 @@ public class ParseScannedFilesTests : AbstractDbTest
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
-        // var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        //
-        // Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
-        // {
-        //     var skippedScan = parsedInfo.Item1;
-        //     var parsedFiles = parsedInfo.Item2;
-        //     if (parsedFiles.Count == 0) return Task.CompletedTask;
-        //
-        //     var foundParsedSeries = new ParsedSeries()
-        //     {
-        //         Name = parsedFiles.First().Series,
-        //         NormalizedName = parsedFiles.First().Series.ToNormalized(),
-        //         Format = parsedFiles.First().Format
-        //     };
-        //
-        //     parsedSeries.Add(foundParsedSeries, parsedFiles);
-        //     return Task.CompletedTask;
-        // }
 
         var library =
             await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
@@ -273,7 +255,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var directoriesSeen = new HashSet<string>();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        var scanResults = await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
         foreach (var scanResult in scanResults)
         {
             directoriesSeen.Add(scanResult.Folder);
@@ -295,7 +277,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.NotNull(library);
 
         var directoriesSeen = new HashSet<string>();
-        var scanResults = await psf.ProcessFiles("C:/Data/", false,
+        var scanResults = await psf.ScanFiles("C:/Data/", false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         foreach (var scanResult in scanResults)
@@ -328,7 +310,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = await psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         Assert.Equal(2, scanResults.Count);
     }
@@ -357,7 +339,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = await psf.ProcessFiles("C:/Data", false,
+        var scanResults = await psf.ScanFiles("C:/Data", false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
 
         Assert.Single(scanResults);

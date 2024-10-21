@@ -44,6 +44,9 @@ public enum SeriesIncludes
 {
     None = 1,
     Volumes = 2,
+    /// <summary>
+    /// This will include all necessary includes
+    /// </summary>
     Metadata = 4,
     Related = 8,
     Library = 16,
@@ -51,8 +54,7 @@ public enum SeriesIncludes
     ExternalReviews = 64,
     ExternalRatings = 128,
     ExternalRecommendations = 256,
-    ExternalMetadata = 512
-
+    ExternalMetadata = 512,
 }
 
 /// <summary>
@@ -138,7 +140,7 @@ public interface ISeriesRepository
     Task<IList<Series>> GetWantToReadForUserAsync(int userId);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series?> GetSeriesThatContainsLowestFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
+    Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None);
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
@@ -363,11 +365,11 @@ public class SeriesRepository : ISeriesRepository
         var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var seriesIds = _context.Series
+        var seriesIds = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id)
-            .ToList();
+            .ToListAsync();
 
         result.Libraries = await _context.Library
             .Search(searchQuery, userId, libraryIds)
@@ -440,6 +442,7 @@ public class SeriesRepository : ISeriesRepository
             .SearchPeople(searchQuery, seriesIds)
             .Take(maxRecords)
             .OrderBy(t => t.NormalizedName)
+            .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -525,14 +528,6 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="includes"></param>
     /// <returns></returns>
     public async Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
-    {
-        return await _context.Series
-            .Where(s => s.Id == seriesId)
-            .Includes(includes)
-            .SingleOrDefaultAsync();
-    }
-
-    public async Task<Series?> GetSeriesByIdForUserAsync(int seriesId, int userId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
@@ -661,6 +656,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1273,7 +1269,7 @@ public class SeriesRepository : ISeriesRepository
 
         var query = sQuery
             .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.PersonId)))
             .WhereIf(hasCollectionTagFilter,
                 s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
             .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
@@ -1302,6 +1298,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
+            .ThenInclude(p => p.Person)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -1606,9 +1603,24 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<Series?> GetSeriesThatContainsLowestFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
+    public async Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
+        // Check if the path ends with a file (has a file extension)
+        string directoryPath;
+        if (Path.HasExtension(path))
+        {
+            // Remove the file part and get the directory path
+            directoryPath = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(directoryPath)) return null;
+        }
+        else
+        {
+            // Use the path as is if it doesn't end with a file
+            directoryPath = path;
+        }
+
+        // Normalize the directory path
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(directoryPath);
         if (string.IsNullOrEmpty(normalized)) return null;
 
         normalized = normalized.TrimEnd('/');
@@ -1672,6 +1684,7 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
@@ -1682,6 +1695,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+            .ThenInclude(p => p.Person)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -1697,6 +1711,7 @@ public class SeriesRepository : ISeriesRepository
 
             .AsSplitQuery();
         return query.SingleOrDefaultAsync();
+
     #nullable enable
     }
 
@@ -1705,6 +1720,7 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = GetLibraryIdsForUser(userId);
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
+
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => formats.Contains(s.Format))
@@ -1749,45 +1765,36 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="libraryId"></param>
     public async Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
-        if (seenSeries.Count == 0) return Array.Empty<Series>();
+        if (!seenSeries.Any()) return Array.Empty<Series>();
 
-        var ids = new List<int>();
+        // Get all series from DB in one go, based on libraryId
+        var dbSeries = await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .ToListAsync();
+
+        // Get a set of matching series ids for the given parsedSeries
+        var ids = new HashSet<int>();
+
         foreach (var parsedSeries in seenSeries)
         {
-            try
+            var matchingSeries = dbSeries
+                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName)
+                .OrderBy(s => s.Id) // Sort to handle potential duplicates
+                .ToList();
+
+            // Prefer the first match or handle duplicates by choosing the last one
+            if (matchingSeries.Any())
             {
-                var seriesId = await _context.Series
-                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
-                                s.LibraryId == libraryId)
-                    .Select(s => s.Id)
-                    .SingleOrDefaultAsync();
-                if (seriesId > 0)
-                {
-                    ids.Add(seriesId);
-                }
-            }
-            catch (Exception)
-            {
-                // This is due to v0.5.6 introducing bugs where we could have multiple series get duplicated and no way to delete them
-                // This here will delete the 2nd one as the first is the one to likely be used.
-                var sId = await _context.Series
-                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
-                                s.LibraryId == libraryId)
-                    .Select(s => s.Id)
-                    .OrderBy(s => s)
-                    .LastAsync();
-                if (sId > 0)
-                {
-                    ids.Add(sId);
-                }
+                ids.Add(matchingSeries.Last().Id);
             }
         }
 
-        var seriesToRemove = await _context.Series
-            .Where(s => s.LibraryId == libraryId)
+        // Filter out series that are not in the seenSeries
+        var seriesToRemove = dbSeries
             .Where(s => !ids.Contains(s.Id))
-            .ToListAsync();
+            .ToList();
 
+        // Remove series in bulk
         _context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;
