@@ -186,8 +186,7 @@ public class ProcessSeries : IProcessSeries
                 // Process reading list after commit as we need to commit per list
                 if (library.ManageReadingLists)
                 {
-                    BackgroundJob.Enqueue(() =>
-                        _readingListService.CreateReadingListsFromSeries(library.Id, series.Id));
+                    await _readingListService.CreateReadingListsFromSeries(series, library);
                 }
 
 
@@ -324,8 +323,10 @@ public class ProcessSeries : IProcessSeries
         #region PeopleAndTagsAndGenres
         if (!series.Metadata.WriterLocked)
         {
+            var personSw = Stopwatch.StartNew();
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process writer on Series: {File} for {Count} people", personSw.ElapsedMilliseconds, series.Name, chapterPeople.Count);
         }
 
         if (!series.Metadata.ColoristLocked)
@@ -423,6 +424,7 @@ public class ProcessSeries : IProcessSeries
         if (defaultAdmin == null) return;
 
         _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+        var sw = Stopwatch.StartNew();
 
         foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
         {
@@ -455,6 +457,8 @@ public class ProcessSeries : IProcessSeries
             // Update the collection age rating
             await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collectionTag);
         }
+
+        _logger.LogDebug("[TIME] Kavita took {Time} ms to process collections on Series: {Name}", sw.ElapsedMilliseconds, series.Name);
     }
 
 
@@ -903,8 +907,6 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-
-
         if (!chapter.ColoristLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Colorist);
@@ -926,8 +928,10 @@ public class ProcessSeries : IProcessSeries
 
         if (!chapter.WriterLocked)
         {
+            var personSw = Stopwatch.StartNew();
             var people = TagHelper.GetTagValues(comicInfo.Writer);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Writer);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process writer on Chapter: {File} for {Count} people", personSw.ElapsedMilliseconds, chapter.Files.First().FileName, people.Count);
         }
 
         if (!chapter.EditorLocked)
@@ -983,7 +987,6 @@ public class ProcessSeries : IProcessSeries
             var people = TagHelper.GetTagValues(comicInfo.Locations);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Location);
         }
-
 
         if (!chapter.GenresLocked)
         {
