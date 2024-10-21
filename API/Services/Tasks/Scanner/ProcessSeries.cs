@@ -215,7 +215,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         BackgroundJob.Enqueue(() =>
-            _metadataService.GenerateCoversForSeries(series.Id, series.LibraryId, false, false));
+            _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
     }
 
