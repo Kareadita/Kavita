@@ -593,7 +593,7 @@ public class ProcessSeries : IProcessSeries
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
-        _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
+        _logger.LogTrace("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
             Volume? volume;
@@ -621,7 +621,7 @@ public class ProcessSeries : IProcessSeries
             volume.LookupName = volumeNumber;
             volume.Name = volume.GetNumberTitle();
 
-            _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
+            _logger.LogTrace("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
 
             await UpdateChapters(series, volume, infos, forceUpdate);
@@ -641,7 +641,7 @@ public class ProcessSeries : IProcessSeries
         if (series.Volumes.Count == nonDeletedVolumes.Count) return;
 
 
-        _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+        _logger.LogTrace("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
             (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
         var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
         foreach (var volume in deletedVolumes)
@@ -655,7 +655,7 @@ public class ProcessSeries : IProcessSeries
                     file);
             }
 
-            _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+            _logger.LogTrace("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
         }
 
         series.Volumes = nonDeletedVolumes;
@@ -681,7 +681,7 @@ public class ProcessSeries : IProcessSeries
 
             if (chapter == null)
             {
-                _logger.LogDebug(
+                _logger.LogTrace(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 chapter = ChapterBuilder.FromParserInfo(info).Build();
                 volume.Chapters.Add(chapter);
@@ -778,7 +778,7 @@ public class ProcessSeries : IProcessSeries
                 // If no files remain after filtering, remove the chapter
                 if (existingChapter.Files.Count != 0) continue;
 
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
@@ -789,7 +789,7 @@ public class ProcessSeries : IProcessSeries
 
                 // If no files exist, remove the chapter
                 if (filesExist) continue;
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
