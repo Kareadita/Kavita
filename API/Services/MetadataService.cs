@@ -352,7 +352,7 @@ public class MetadataService : IMetadataService
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    /// <param name="forceColorscape">Will ensure that the colorscape is regenned</param>
+    /// <param name="forceColorScape">Will ensure that the colorscape is regenerated</param>
     public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true)
     {
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);

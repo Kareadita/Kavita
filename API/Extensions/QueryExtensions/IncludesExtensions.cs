@@ -56,7 +56,8 @@ public static class IncludesExtensions
         if (includes.HasFlag(ChapterIncludes.People))
         {
             queryable = queryable
-                .Include(c => c.People);
+                .Include(c => c.People)
+                .ThenInclude(cp => cp.Person);
         }
 
         if (includes.HasFlag(ChapterIncludes.Genres))
@@ -161,16 +162,15 @@ public static class IncludesExtensions
 
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
         {
-            query = query.Include(s => s.Metadata)
-                .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
+            query = query
                 .Include(s => s.Metadata)
                 .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
                 .Include(s => s.Metadata)
                 .ThenInclude(m => m.People)
+                .ThenInclude(smp => smp.Person)
                 .Include(s => s.Metadata)
                 .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
         }
-
 
         return query.AsSplitQuery();
     }

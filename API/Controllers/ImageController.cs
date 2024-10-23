@@ -45,7 +45,7 @@ public class ImageController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "apiKey"])]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -130,6 +130,7 @@ public class ImageController : BaseApiController
         {
             var destFile = await GenerateCollectionCoverImage(collectionTagId);
             if (string.IsNullOrEmpty(destFile)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+
             return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)),
                 _directoryService.FileSystem.Path.GetFileName(destFile));
         }
@@ -170,6 +171,7 @@ public class ImageController : BaseApiController
             ImageService.GetCollectionTagFormat(collectionId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         destFile += settings.EncodeMediaAs.GetExtension();
+
         if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
         ImageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
@@ -280,6 +282,43 @@ public class ImageController : BaseApiController
         var format = Path.GetExtension(file.FullName);
 
         return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+    }
+
+    /// <summary>
+    /// Returns cover image for Person
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
+    [HttpGet("person-cover")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
+    public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageAsync(personId));
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+        var format = _directoryService.FileSystem.Path.GetExtension(path);
+
+        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+    }
+
+    /// <summary>
+    /// Returns cover image for Person
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    [HttpGet("person-cover-by-name")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
+    public async Task<ActionResult> GetPersonCoverImageByName(string name, string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
+
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageByNameAsync(name));
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
+        var format = _directoryService.FileSystem.Path.GetExtension(path);
+
+        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>

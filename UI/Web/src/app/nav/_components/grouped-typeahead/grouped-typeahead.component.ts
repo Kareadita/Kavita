@@ -119,9 +119,7 @@ export class GroupedTypeaheadComponent implements OnInit {
 
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: MouseEvent) {
-    console.log('click: ', event)
     this.close();
-
   }
 
   @HostListener('window:keydown', ['$event'])

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -9,6 +10,7 @@ using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
@@ -26,13 +28,6 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    /// <summary>
-    /// Do not allow this Prime to be invoked by multiple threads. It will break the DB.
-    /// </summary>
-    /// <returns></returns>
-    Task Prime();
-
-    void Reset();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
 }
 
@@ -50,17 +45,15 @@ public class ProcessSeries : IProcessSeries
     private readonly IFileService _fileService;
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
-    private readonly ICollectionTagService _collectionTagService;
     private readonly IReadingListService _readingListService;
     private readonly IExternalMetadataService _externalMetadataService;
-    private readonly ITagManagerService _tagManagerService;
 
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService, IReadingListService readingListService,
-        IExternalMetadataService externalMetadataService, ITagManagerService tagManagerService)
+        IReadingListService readingListService,
+        IExternalMetadataService externalMetadataService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -71,34 +64,10 @@ public class ProcessSeries : IProcessSeries
         _fileService = fileService;
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-        _collectionTagService = collectionTagService;
         _readingListService = readingListService;
         _externalMetadataService = externalMetadataService;
-        _tagManagerService = tagManagerService;
     }
 
-    /// <summary>
-    /// Invoke this before processing any series, just once to prime all the needed data during a scan
-    /// </summary>
-    public async Task Prime()
-    {
-        try
-        {
-            await _tagManagerService.Prime();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex, "Unable to prime tag manager. Scan cannot proceed. Report to Kavita dev");
-        }
-    }
-
-    /// <summary>
-    /// Frees up memory
-    /// </summary>
-    public void Reset()
-    {
-        _tagManagerService.Reset();
-    }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
     {
@@ -192,29 +161,6 @@ public class ProcessSeries : IProcessSeries
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    foreach (var entry in ex.Entries)
-                    {
-                        if (entry.Entity is Series)
-                        {
-                            var proposedValues = entry.CurrentValues;
-                            var databaseValues = await entry.GetDatabaseValuesAsync();
-
-                            foreach (var property in proposedValues.Properties)
-                            {
-                                var proposedValue = proposedValues[property];
-                                var databaseValue = databaseValues[property];
-
-                                // TODO: decide which value should be written to database
-                                _logger.LogDebug("Property conflict, proposed: {Proposed} vs db: {Database}", proposedValue, databaseValue);
-                                // proposedValues[property] = <value to be saved>;
-                            }
-
-                            // Refresh original values to bypass next concurrency check
-                            entry.OriginalValues.SetValues(databaseValues);
-                        }
-                    }
-
-
                     _logger.LogCritical(ex,
                         "[ScannerService] There was an issue writing to the database for series {SeriesName}",
                         series.Name);
@@ -238,16 +184,17 @@ public class ProcessSeries : IProcessSeries
 
 
                 // Process reading list after commit as we need to commit per list
-                await _readingListService.CreateReadingListsFromSeries(library.Id, series.Id);
+                if (library.ManageReadingLists)
+                {
+                    await _readingListService.CreateReadingListsFromSeries(series, library);
+                }
+
 
                 if (seriesAdded)
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
-                    _logger.LogInformation("Linking up External Recommendations new series (if applicable)");
-
-                    // BackgroundJob.Enqueue(() =>
-                    //     _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
-                    await _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type);
+                    BackgroundJob.Enqueue(() =>
+                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
@@ -266,12 +213,10 @@ public class ProcessSeries : IProcessSeries
             return;
         }
 
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
-        // BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
-        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
+        BackgroundJob.Enqueue(() =>
+            _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
     }
-
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
@@ -291,7 +236,7 @@ public class ProcessSeries : IProcessSeries
 
             var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
 
-            _logger.LogError(ex, "Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct",
+            _logger.LogError(ex, "[ScannerService] Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct, scan will abort",
                 firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
 
             await _eventHub.SendMessageAsync(MessageFactory.Error,
@@ -341,10 +286,11 @@ public class ProcessSeries : IProcessSeries
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
-        if (firstFile == null) return;
-        if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
+        if (firstFile == null || Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-        var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
+        var chapters = series.Volumes
+            .SelectMany(volume => volume.Chapters)
+            .ToList();
 
         // Update Metadata based on Chapter metadata
         if (!series.Metadata.ReleaseYearLocked)
@@ -367,216 +313,220 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Language = firstChapter.Language;
         }
 
+
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
-            // Get the default admin to associate these tags to
-            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
-            if (defaultAdmin == null) return;
+            await UpdateCollectionTags(series, firstChapter);
+        }
 
-            _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-            foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
-            {
-                var t = await _tagManagerService.GetCollectionTag(collection, defaultAdmin);
-                if (t.Item1 == null) continue;
 
-                var tag = t.Item1;
+        #region PeopleAndTagsAndGenres
+        if (!series.Metadata.WriterLocked)
+        {
+            var personSw = Stopwatch.StartNew();
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process writer on Series: {File} for {Count} people", personSw.ElapsedMilliseconds, series.Name, chapterPeople.Count);
+        }
 
-                // Check if the Series is already on the tag
-                if (tag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
-                {
-                    continue;
-                }
+        if (!series.Metadata.ColoristLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Colorist)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Colorist);
+        }
 
-                tag.Items.Add(series);
-                await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
-            }
+        if (!series.Metadata.PublisherLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Publisher)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Publisher);
+        }
+
+        if (!series.Metadata.CoverArtistLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.CoverArtist)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.CoverArtist);
+        }
+
+        if (!series.Metadata.CharacterLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Character)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Character);
+        }
+
+        if (!series.Metadata.EditorLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Editor)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Editor);
+        }
+
+        if (!series.Metadata.InkerLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Inker)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Inker);
+        }
+
+        if (!series.Metadata.ImprintLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Imprint)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Imprint);
+        }
+
+        if (!series.Metadata.TeamLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Team)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Team);
+        }
+
+        if (!series.Metadata.LocationLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Location)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Location);
+        }
+
+        if (!series.Metadata.LettererLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Letterer)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Letterer);
+        }
+
+        if (!series.Metadata.PencillerLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Penciller)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Penciller);
+        }
+
+        if (!series.Metadata.TranslatorLocked)
+        {
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Translator)).ToList();
+            await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Translator);
+        }
+
+
+        if (!series.Metadata.TagsLocked)
+        {
+            var tags = chapters.SelectMany(c => c.Tags).ToList();
+            UpdateSeriesMetadataTags(series.Metadata.Tags, tags);
         }
 
         if (!series.Metadata.GenresLocked)
         {
             var genres = chapters.SelectMany(c => c.Genres).ToList();
-            GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
-            {
-                series.Metadata.Genres.Remove(genre);
-            });
+            UpdateSeriesMetadataGenres(series.Metadata.Genres, genres);
         }
-
-
-        #region People
-
-        // Handle People
-        foreach (var chapter in chapters)
-        {
-            if (!series.Metadata.WriterLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Writer))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.CoverArtistLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.CoverArtist))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.PublisherLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Publisher))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.CharacterLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Character))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.ColoristLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Colorist))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.EditorLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Editor))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.InkerLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Inker))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.ImprintLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Imprint))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.TeamLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Team))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.LocationLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Location))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.LettererLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Letterer))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.PencillerLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Penciller))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.TranslatorLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Translator))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.TagsLocked)
-            {
-                foreach (var tag in chapter.Tags)
-                {
-                    TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-                }
-            }
-
-            if (!series.Metadata.GenresLocked)
-            {
-                foreach (var genre in chapter.Genres)
-                {
-                    GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-                }
-            }
-        }
-        // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
-        // I might be able to filter out people that are in locked fields?
-        var people = chapters.SelectMany(c => c.People).ToList();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
-            people, person =>
-            {
-                switch (person.Role)
-                {
-                    case PersonRole.Writer:
-                        if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Penciller:
-                        if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Inker:
-                        if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Imprint:
-                        if (!series.Metadata.ImprintLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Colorist:
-                        if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Letterer:
-                        if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.CoverArtist:
-                        if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Editor:
-                        if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Publisher:
-                        if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Character:
-                        if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Translator:
-                        if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Other:
-                    default:
-                        series.Metadata.People.Remove(person);
-                        break;
-                }
-            });
 
         #endregion
+    }
 
+    private async Task UpdateCollectionTags(Series series, Chapter firstChapter)
+    {
+        // Get the default admin to associate these tags to
+        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
+        if (defaultAdmin == null) return;
+
+        _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+        var sw = Stopwatch.StartNew();
+
+        foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            // Try to find an existing collection tag by its normalized name
+            var normalizedCollectionName = collection.ToNormalized();
+            var collectionTag = defaultAdmin.Collections.FirstOrDefault(c => c.NormalizedTitle == normalizedCollectionName);
+
+            // If the collection tag does not exist, create a new one
+            if (collectionTag == null)
+            {
+                _logger.LogDebug("Creating new collection tag for {Tag}", collection);
+
+                collectionTag = new AppUserCollectionBuilder(collection).Build();
+                defaultAdmin.Collections.Add(collectionTag);
+
+                _unitOfWork.UserRepository.Update(defaultAdmin);
+
+                await _unitOfWork.CommitAsync();
+            }
+
+            // Check if the Series is already associated with this collection
+            if (collectionTag.Items.Any(s => s.MatchesSeriesByName(series.NormalizedName, series.NormalizedLocalizedName)))
+            {
+                continue;
+            }
+
+            // Add the series to the collection tag
+            collectionTag.Items.Add(series);
+
+            // Update the collection age rating
+            await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collectionTag);
+        }
+
+        _logger.LogDebug("[TIME] Kavita took {Time} ms to process collections on Series: {Name}", sw.ElapsedMilliseconds, series.Name);
+    }
+
+
+    private static void UpdateSeriesMetadataTags(ICollection<Tag> metadataTags, IList<Tag> chapterTags)
+    {
+        // Create a HashSet of normalized titles for faster lookups
+        var chapterTagTitles = new HashSet<string>(chapterTags.Select(t => t.NormalizedTitle));
+
+        // Remove any tags from metadataTags that are not part of chapterTags
+        var tagsToRemove = metadataTags
+            .Where(mt => !chapterTagTitles.Contains(mt.NormalizedTitle))
+            .ToList();
+
+        if (tagsToRemove.Count > 0)
+        {
+            foreach (var tagToRemove in tagsToRemove)
+            {
+                metadataTags.Remove(tagToRemove);
+            }
+        }
+
+        // Create a HashSet of metadataTags normalized titles for faster lookup
+        var metadataTagTitles = new HashSet<string>(metadataTags.Select(mt => mt.NormalizedTitle));
+
+        // Add any tags from chapterTags that do not already exist in metadataTags
+        foreach (var tag in chapterTags)
+        {
+            if (!metadataTagTitles.Contains(tag.NormalizedTitle))
+            {
+                metadataTags.Add(tag);
+            }
+        }
+    }
+
+    private static void UpdateSeriesMetadataGenres(ICollection<Genre> metadataGenres, IList<Genre> chapterGenres)
+    {
+        // Create a HashSet of normalized titles for chapterGenres for fast lookup
+        var chapterGenreTitles = new HashSet<string>(chapterGenres.Select(g => g.NormalizedTitle));
+
+        // Remove any genres from metadataGenres that are not present in chapterGenres
+        var genresToRemove = metadataGenres
+            .Where(mg => !chapterGenreTitles.Contains(mg.NormalizedTitle))
+            .ToList();
+
+        foreach (var genreToRemove in genresToRemove)
+        {
+            metadataGenres.Remove(genreToRemove);
+        }
+
+        // Create a HashSet of metadataGenres normalized titles for fast lookup
+        var metadataGenreTitles = new HashSet<string>(metadataGenres.Select(mg => mg.NormalizedTitle));
+
+        // Add any genres from chapterGenres that are not already in metadataGenres
+        foreach (var genre in chapterGenres)
+        {
+            if (!metadataGenreTitles.Contains(genre.NormalizedTitle))
+            {
+                metadataGenres.Add(genre);
+            }
+        }
+    }
+
+
+
+    private async Task UpdateSeriesMetadataPeople(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
+        IEnumerable<ChapterPeople> chapterPeople, PersonRole role)
+    {
+        await PersonHelper.UpdateSeriesMetadataPeopleAsync(metadata, metadataPeople, chapterPeople, role, _unitOfWork);
     }
 
     private void DeterminePublicationStatus(Series series, List<Chapter> chapters)
@@ -588,7 +538,9 @@ public class ProcessSeries : IProcessSeries
             // The actual number of count's defined across all chapter's metadata
             series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
 
-            var nonSpecialVolumes = series.Volumes.Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber));
+            var nonSpecialVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber))
+                .ToList();
 
             var maxVolume = (int) (nonSpecialVolumes.Any() ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int) chapters.Max(c => c.MaxNumber);
@@ -641,7 +593,7 @@ public class ProcessSeries : IProcessSeries
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
-        _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
+        _logger.LogTrace("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
             Volume? volume;
@@ -669,56 +621,47 @@ public class ProcessSeries : IProcessSeries
             volume.LookupName = volumeNumber;
             volume.Name = volume.GetNumberTitle();
 
-            _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
+            _logger.LogTrace("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(series, volume, infos, forceUpdate);
-            volume.Pages = volume.Chapters.Sum(c => c.Pages);
 
-            // Update all the metadata on the Chapters
-            foreach (var chapter in volume.Chapters)
-            {
-                var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
-                try
-                {
-                    var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-                    await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was some issue when updating chapter's metadata");
-                }
-            }
+            await UpdateChapters(series, volume, infos, forceUpdate);
+            volume.Pages = volume.Chapters.Sum(c => c.Pages);
         }
 
         // Remove existing volumes that aren't in parsedInfos
+        RemoveVolumes(series, parsedInfos);
+    }
+
+    private void RemoveVolumes(Series series, IList<ParserInfo> parsedInfos)
+    {
+
         var nonDeletedVolumes = series.Volumes
             .Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.LookupName))
             .ToList();
-        if (series.Volumes.Count != nonDeletedVolumes.Count)
-        {
-            _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
-                (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
-            var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
-            foreach (var volume in deletedVolumes)
-            {
-                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
-                if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
-                {
-                    // This can happen when file is renamed and volume is removed
-                    _logger.LogInformation(
-                        "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
-                        file);
-                }
+        if (series.Volumes.Count == nonDeletedVolumes.Count) return;
 
-                _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+
+        _logger.LogTrace("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+            (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
+        var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
+        foreach (var volume in deletedVolumes)
+        {
+            var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
+            if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
+            {
+                // This can happen when file is renamed and volume is removed
+                _logger.LogInformation(
+                    "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
+                    file);
             }
 
-            series.Volumes = nonDeletedVolumes;
+            _logger.LogTrace("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
         }
+
+        series.Volumes = nonDeletedVolumes;
     }
 
-    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -738,7 +681,7 @@ public class ProcessSeries : IProcessSeries
 
             if (chapter == null)
             {
-                _logger.LogDebug(
+                _logger.LogTrace(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 chapter = ChapterBuilder.FromParserInfo(info).Build();
                 volume.Chapters.Add(chapter);
@@ -749,14 +692,10 @@ public class ProcessSeries : IProcessSeries
                 chapter.UpdateFrom(info);
             }
 
-            if (chapter == null)
-            {
-                continue;
-            }
+
             // Add files
             AddOrUpdateFileForChapter(chapter, info, forceUpdate);
 
-            // TODO: Investigate using the ChapterBuilder here
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
             chapter.MinNumber = Parser.Parser.MinNumberFromRange(info.Chapters);
             chapter.MaxNumber = Parser.Parser.MaxNumberFromRange(info.Chapters);
@@ -773,27 +712,86 @@ public class ProcessSeries : IProcessSeries
                 chapter.Title = chapter.GetNumberTitle();
             }
 
+            try
+            {
+                await UpdateChapterFromComicInfo(chapter, info.ComicInfo, forceUpdate);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was some issue when updating chapter's metadata");
+            }
+
         }
 
+        RemoveChapters(volume, parsedInfos);
 
+        // // Update all the metadata on the Chapters
+        // foreach (var chapter in volume.Chapters)
+        // {
+        //     var firstFile = chapter.Files.MinBy(x => x.Chapter);
+        //     if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
+        //     try
+        //     {
+        //         var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
+        //         await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "There was some issue when updating chapter's metadata");
+        //     }
+        // }
+    }
+
+    private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    {
         // Remove chapters that aren't in parsedInfos or have no files linked
-        var existingChapters = volume.Chapters.ToList();
+        var existingChapters = volume.Chapters;
+
+        // Extract the directories (without filenames) from parserInfos
+        var parsedDirectories = parsedInfos
+            .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
+            .Distinct()
+            .ToList();
+
         foreach (var existingChapter in existingChapters)
         {
-            if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
+            // Get the directories for the files in the current chapter
+            var chapterFileDirectories = existingChapter.Files
+                .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
+                .Distinct()
+                .ToList();
+
+            // Check if any of the chapter's file directories match the parsedDirectories
+            var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
+
+            if (hasMatchingDirectory)
             {
-                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                // Ensure we remove any files that no longer exist AND order the remaining files
+                existingChapter.Files = existingChapter.Files
+                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
+                    .OrderByNatural(f => f.FilePath)
+                    .ToList();
+
+                // Update the chapter's page count after filtering the files
+                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+
+                // If no files remain after filtering, remove the chapter
+                if (existingChapter.Files.Count != 0) continue;
+
+                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
             else
             {
-                // Ensure we remove any files that no longer exist AND order
-                existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
-                    .OrderByNatural(f => f.FilePath)
-                    .ToList();
-                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
+                // If there are no matching directories in the current scan, check if the files still exist on disk
+                var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
+
+                // If no files exist, remove the chapter
+                if (filesExist) continue;
+                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                volume.Chapters.Remove(existingChapter);
             }
         }
     }
@@ -832,8 +830,7 @@ public class ProcessSeries : IProcessSeries
         if (firstFile == null ||
             _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-        _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
-
+        var sw = Stopwatch.StartNew();
         if (!chapter.AgeRatingLocked)
         {
             chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
@@ -890,7 +887,7 @@ public class ProcessSeries : IProcessSeries
                 .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             );
 
-            // For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
+            // TODO: For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
         }
 
         if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
@@ -917,129 +914,133 @@ public class ProcessSeries : IProcessSeries
         if (!chapter.ColoristLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Colorist);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-            await UpdatePeople(chapter, people, PersonRole.Colorist);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Colorist);
         }
 
         if (!chapter.CharacterLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Characters);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-            await UpdatePeople(chapter, people, PersonRole.Character);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Character);
         }
 
 
         if (!chapter.TranslatorLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Translator);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-            await UpdatePeople(chapter, people, PersonRole.Translator);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Translator);
         }
 
         if (!chapter.WriterLocked)
         {
+            var personSw = Stopwatch.StartNew();
             var people = TagHelper.GetTagValues(comicInfo.Writer);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-            await UpdatePeople(chapter, people, PersonRole.Writer);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Writer);
+            _logger.LogDebug("[TIME] Kavita took {Time} ms to process writer on Chapter: {File} for {Count} people", personSw.ElapsedMilliseconds, chapter.Files.First().FileName, people.Count);
         }
 
         if (!chapter.EditorLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Editor);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-            await UpdatePeople(chapter, people, PersonRole.Editor);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Editor);
         }
 
         if (!chapter.InkerLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Inker);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-            await UpdatePeople(chapter, people, PersonRole.Inker);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Inker);
         }
 
         if (!chapter.LettererLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Letterer);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-            await UpdatePeople(chapter, people, PersonRole.Letterer);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Letterer);
         }
 
         if (!chapter.PencillerLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Penciller);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-            await UpdatePeople(chapter, people, PersonRole.Penciller);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Penciller);
         }
 
         if (!chapter.CoverArtistLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.CoverArtist);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-            await UpdatePeople(chapter, people, PersonRole.CoverArtist);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.CoverArtist);
         }
 
         if (!chapter.PublisherLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Publisher);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-            await UpdatePeople(chapter, people, PersonRole.Publisher);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Publisher);
         }
 
         if (!chapter.ImprintLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Imprint);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Imprint);
-            await UpdatePeople(chapter, people, PersonRole.Imprint);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Imprint);
         }
 
         if (!chapter.TeamLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Teams);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Team);
-            await UpdatePeople(chapter, people, PersonRole.Team);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Team);
         }
 
         if (!chapter.LocationLocked)
         {
             var people = TagHelper.GetTagValues(comicInfo.Locations);
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Location);
-            await UpdatePeople(chapter, people, PersonRole.Location);
+            await UpdateChapterPeopleAsync(chapter, people, PersonRole.Location);
         }
-
 
         if (!chapter.GenresLocked)
         {
             var genres = TagHelper.GetTagValues(comicInfo.Genre);
-            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
-                genres.Select(g => new GenreBuilder(g).Build()).ToList());
-            foreach (var genre in genres)
-            {
-                var g = await _tagManagerService.GetGenre(genre);
-                if (g == null) continue;
-                chapter.Genres.Add(g);
-            }
+            await UpdateChapterGenres(chapter, genres);
         }
 
         if (!chapter.TagsLocked)
         {
             var tags = TagHelper.GetTagValues(comicInfo.Tags);
-            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
-            foreach (var tag in tags)
-            {
-                var t = await _tagManagerService.GetTag(tag);
-                if (t == null) continue;
-                chapter.Tags.Add(t);
-            }
+            await UpdateChapterTags(chapter, tags);
+        }
+
+        _logger.LogDebug("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
+    }
+
+    private async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames)
+    {
+        try
+        {
+            await GenreHelper.UpdateChapterGenres(chapter, genreNames, _unitOfWork);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error updating the chapter genres");
         }
     }
 
-    private async Task UpdatePeople(Chapter chapter, IList<string> people, PersonRole role)
+
+    private async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames)
     {
-        foreach (var person in people)
+        try
         {
-            var p = await _tagManagerService.GetPerson(person, role);
-            if (p == null) continue;
-            chapter.People.Add(p);
+            await TagHelper.UpdateChapterTags(chapter, tagNames, _unitOfWork);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error updating the chapter tags");
+        }
+    }
+
+    private async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role)
+    {
+        try
+        {
+            await PersonHelper.UpdateChapterPeopleAsync(chapter, people, role, _unitOfWork);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ScannerService] There was an issue adding/updating a person");
         }
     }
 }

@@ -901,6 +901,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
+        "browse-authors": "Browse Authors",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -909,6 +910,19 @@
         "back": "Back",
         "more": "More",
         "customize": "{{settings.customize}}"
+    },
+
+    "browse-authors": {
+        "title": "Browse Authors & Writers",
+        "author-count": "{{num}} People",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+
+    "person-detail": {
+        "known-for-title": "Known For",
+        "individual-role-title": "As a {{role}}",
+        "browse-person-title": "All Works of {{name}}",
+        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}"
     },
 
     "library-settings-modal": {
@@ -1985,6 +1999,24 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
+    "edit-person-modal": {
+        "title": "{{personName}} Details",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "Role",
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "hardcover-id-label": "Hardcover Id",
+        "asin-label": "ASIN",
+        "description-label": "Description",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "save": "{{common.save}}"
+    },
+
     "day-breakdown": {
         "title": "Day Breakdown",
         "no-data": "No progress, get to reading",
@@ -2197,7 +2229,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
 
     "filter-field-pipe": {
@@ -2205,7 +2238,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formats",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2555,6 +2588,7 @@
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
+        "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
 
         "book-num": "Book",

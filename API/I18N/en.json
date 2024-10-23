@@ -52,6 +52,8 @@
     "collection-already-exists":"Collection already exists",
     "error-import-stack": "There was an issue importing MAL stack",
 
+    "person-doesnt-exist": "Person does not exist",
+
     "device-doesnt-exist": "Device does not exist",
     "generic-device-create": "There was an error when creating the device",
     "generic-device-update": "There was an error when updating the device",
