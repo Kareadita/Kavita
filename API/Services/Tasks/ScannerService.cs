@@ -597,6 +597,7 @@ public class ScannerService : IScannerService
     {
         // Iterate over the dictionary and remove only the ParserInfos that don't need processing
         var toProcess = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        var scanSw = Stopwatch.StartNew();
 
         foreach (var series in parsedSeries)
         {
@@ -636,7 +637,7 @@ public class ScannerService : IScannerService
 
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
-        _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing", toProcess.Count);
+        _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
         foreach (var pSeries in toProcess)
         {

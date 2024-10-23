@@ -54,8 +54,6 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             Role = role,
             Person = person,
             SeriesMetadata = _seriesMetadata,
-            PersonId = person.Id,
-            SeriesMetadataId = _seriesMetadata.Id
         });
 
         return this;

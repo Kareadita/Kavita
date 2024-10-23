@@ -462,44 +462,45 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    private static void UpdateSeriesMetadataTags(ICollection<Tag> metadataTags, IEnumerable<Tag> chapterTags)
+    private static void UpdateSeriesMetadataTags(ICollection<Tag> metadataTags, IList<Tag> chapterTags)
     {
-        // Normalize and group by tag
-        var tagsToAdd = chapterTags
-            .Select(tag => tag)
-            .ToList();
+        // Create a HashSet of normalized titles for faster lookups
+        var chapterTagTitles = new HashSet<string>(chapterTags.Select(t => t.NormalizedTitle));
 
-        // Remove any tags that are not part of the new list
+        // Remove any tags from metadataTags that are not part of chapterTags
         var tagsToRemove = metadataTags
-            .Where(mt => tagsToAdd.TrueForAll(ct => ct.NormalizedTitle != mt.NormalizedTitle))
+            .Where(mt => !chapterTagTitles.Contains(mt.NormalizedTitle))
             .ToList();
 
-        foreach (var tagToRemove in tagsToRemove)
+        if (tagsToRemove.Count > 0)
         {
-            metadataTags.Remove(tagToRemove);
+            foreach (var tagToRemove in tagsToRemove)
+            {
+                metadataTags.Remove(tagToRemove);
+            }
         }
 
-        // Add new tags if they do not already exist
-        foreach (var tag in tagsToAdd)
-        {
-            var existingTag = metadataTags
-                .FirstOrDefault(mt => mt.NormalizedTitle == tag.NormalizedTitle);
+        // Create a HashSet of metadataTags normalized titles for faster lookup
+        var metadataTagTitles = new HashSet<string>(metadataTags.Select(mt => mt.NormalizedTitle));
 
-            if (existingTag == null)
+        // Add any tags from chapterTags that do not already exist in metadataTags
+        foreach (var tag in chapterTags)
+        {
+            if (!metadataTagTitles.Contains(tag.NormalizedTitle))
             {
                 metadataTags.Add(tag);
             }
         }
     }
 
-    private static void UpdateSeriesMetadataGenres(ICollection<Genre> metadataGenres, IEnumerable<Genre> chapterGenres)
+    private static void UpdateSeriesMetadataGenres(ICollection<Genre> metadataGenres, IList<Genre> chapterGenres)
     {
-        // Normalize and group by genre
-        var genresToAdd = chapterGenres.ToList();
+        // Create a HashSet of normalized titles for chapterGenres for fast lookup
+        var chapterGenreTitles = new HashSet<string>(chapterGenres.Select(g => g.NormalizedTitle));
 
-        // Remove any genres that are not part of the new list
+        // Remove any genres from metadataGenres that are not present in chapterGenres
         var genresToRemove = metadataGenres
-            .Where(mg => genresToAdd.TrueForAll(cg => cg.NormalizedTitle != mg.NormalizedTitle))
+            .Where(mg => !chapterGenreTitles.Contains(mg.NormalizedTitle))
             .ToList();
 
         foreach (var genreToRemove in genresToRemove)
@@ -507,13 +508,13 @@ public class ProcessSeries : IProcessSeries
             metadataGenres.Remove(genreToRemove);
         }
 
-        // Add new genres if they do not already exist
-        foreach (var genre in genresToAdd)
-        {
-            var existingGenre = metadataGenres
-                .FirstOrDefault(mg => mg.NormalizedTitle == genre.NormalizedTitle);
+        // Create a HashSet of metadataGenres normalized titles for fast lookup
+        var metadataGenreTitles = new HashSet<string>(metadataGenres.Select(mg => mg.NormalizedTitle));
 
-            if (existingGenre == null)
+        // Add any genres from chapterGenres that are not already in metadataGenres
+        foreach (var genre in chapterGenres)
+        {
+            if (!metadataGenreTitles.Contains(genre.NormalizedTitle))
             {
                 metadataGenres.Add(genre);
             }
@@ -537,7 +538,9 @@ public class ProcessSeries : IProcessSeries
             // The actual number of count's defined across all chapter's metadata
             series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
 
-            var nonSpecialVolumes = series.Volumes.Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber));
+            var nonSpecialVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.Parser.SpecialVolumeNumber))
+                .ToList();
 
             var maxVolume = (int) (nonSpecialVolumes.Any() ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int) chapters.Max(c => c.MaxNumber);
@@ -620,6 +623,7 @@ public class ProcessSeries : IProcessSeries
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
+
             await UpdateChapters(series, volume, infos, forceUpdate);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
         }
