@@ -14,193 +14,107 @@ namespace API.Helpers;
 
 public static class GenreHelper
 {
-
     public static async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames, IUnitOfWork unitOfWork)
     {
-        // Normalize and build genres from the list of genre names
-        var genresToAdd = genreNames
-            .Select(g => new GenreBuilder(g).Build())
-            .ToList();
+        // Normalize genre names once and store them in a hash set for quick lookups
+        var normalizedGenresToAdd = new HashSet<string>(genreNames.Select(g => g.ToNormalized()));
 
-        // Remove any genres that are not part of the new list
+        // Remove genres that are no longer in the new list
         var genresToRemove = chapter.Genres
-            .Where(g => genresToAdd.TrueForAll(ga => ga.NormalizedTitle != g.NormalizedTitle))
+            .Where(g => !normalizedGenresToAdd.Contains(g.NormalizedTitle))
             .ToList();
 
-        foreach (var genreToRemove in genresToRemove)
+        if (genresToRemove.Count > 0)
         {
-            chapter.Genres.Remove(genreToRemove);
+            foreach (var genreToRemove in genresToRemove)
+            {
+                chapter.Genres.Remove(genreToRemove);
+            }
         }
 
-        // Get all normalized titles for bulk lookup
-        var normalizedTitles = genresToAdd.Select(g => g.NormalizedTitle).ToList();
+        // Get all normalized titles to query the database for existing genres
+        var existingGenreTitles = await unitOfWork.DataContext.Genre
+            .Where(g => normalizedGenresToAdd.Contains(g.NormalizedTitle))
+            .ToDictionaryAsync(g => g.NormalizedTitle);
 
-        // Bulk lookup for existing genres in the database
-        var existingGenres = await unitOfWork.DataContext.Genre
-            .Where(g => normalizedTitles.Contains(g.NormalizedTitle))
-            .ToListAsync();
-
-        // Find genres that do not exist in the database
-        var missingGenres = genresToAdd
-            .Where(g => existingGenres.TrueForAll(eg => eg.NormalizedTitle != g.NormalizedTitle))
+        // Find missing genres that are not in the database
+        var missingGenres = normalizedGenresToAdd
+            .Where(nt => !existingGenreTitles.ContainsKey(nt))
+            .Select(title => new GenreBuilder(title).Build())
             .ToList();
 
         // Add missing genres to the database
-        if (missingGenres.Count != 0)
+        if (missingGenres.Count > 0)
         {
             unitOfWork.DataContext.Genre.AddRange(missingGenres);
-            await unitOfWork.CommitAsync();  // Commit the changes to the database
+            await unitOfWork.CommitAsync();
+
+            // Add newly inserted genres to existing genres dictionary for easier lookup
+            foreach (var genre in missingGenres)
+            {
+                existingGenreTitles[genre.NormalizedTitle] = genre;
+            }
         }
 
-        // Add the new or existing genres to the chapter
-        foreach (var genre in genresToAdd)
+        // Add genres that are either existing or newly added to the chapter
+        foreach (var normalizedTitle in normalizedGenresToAdd)
         {
-            var existingGenre = existingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle)
-                                ?? missingGenres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle);
+            var genre = existingGenreTitles[normalizedTitle];
 
-            if (existingGenre != null && !chapter.Genres.Contains(existingGenre))
+            if (!chapter.Genres.Contains(genre))
             {
-                chapter.Genres.Add(existingGenre);
+                chapter.Genres.Add(genre);
             }
         }
     }
 
 
-    public static void UpdateGenre(Dictionary<string, Genre> allGenres,
-        IEnumerable<string> names, Action<Genre, bool> action)
-    {
-        foreach (var name in names)
-        {
-            var normalizedName = name.ToNormalized();
-            if (string.IsNullOrEmpty(normalizedName)) continue;
-
-            if (allGenres.TryGetValue(normalizedName, out var genre))
-            {
-                action(genre, false);
-            }
-            else
-            {
-                genre = new GenreBuilder(name).Build();
-                allGenres.Add(normalizedName, genre);
-                action(genre, true);
-            }
-        }
-    }
-
-    public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre>? action = null)
-    {
-        var existing = existingGenres.ToList();
-        foreach (var genre in existing)
-        {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle != null && genre.NormalizedTitle.Equals(g.NormalizedTitle));
-            if (existingPerson != null) continue;
-            existingGenres.Remove(genre);
-            action?.Invoke(genre);
-        }
-
-    }
-
-    /// <summary>
-    /// Adds the genre to the list if it's not already in there.
-    /// </summary>
-    /// <param name="metadataGenres"></param>
-    /// <param name="genre"></param>
-    public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
-    {
-        var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedTitle.Equals(genre.Title?.ToNormalized()));
-        if (existingGenre == null)
-        {
-            metadataGenres.Add(genre);
-        }
-    }
-
-
-
-    public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Series series,
-        IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
+    public static void UpdateGenreList(ICollection<GenreTagDto>? existingGenres, Series series,
+        IReadOnlyCollection<Genre> newGenres, Action<Genre> handleAdd, Action onModified)
     {
         // TODO: Write some unit tests
-        if (tags == null) return;
+        if (existingGenres == null) return;
+
         var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.Genres.ToList();
+
+        // Convert tags and existing genres to hash sets for quick lookups by normalized title
+        var tagSet = new HashSet<string>(existingGenres.Select(t => t.Title.ToNormalized()));
+        var genreSet = new HashSet<string>(series.Metadata.Genres.Select(g => g.NormalizedTitle));
+
+        // Remove tags that are no longer present in the input tags
+        var existingTags = series.Metadata.Genres.ToList();  // Copy to avoid modifying collection while iterating
         foreach (var existing in existingTags)
         {
-            if (tags.SingleOrDefault(t => t.Title.ToNormalized().Equals(existing.NormalizedTitle)) == null)
+            if (!tagSet.Contains(existing.NormalizedTitle)) // This correctly ensures removal of non-present tags
             {
-                // Remove tag
                 series.Metadata.Genres.Remove(existing);
                 isModified = true;
             }
         }
 
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
+        // Prepare a dictionary for quick lookup of genres from the `newGenres` collection by normalized title
+        var allTagsDict = newGenres.ToDictionary(t => t.NormalizedTitle);
+
+        // Add new tags from the input list
+        foreach (var tagDto in existingGenres)
         {
-            var normalizedTitle = tagTitle.ToNormalized();
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
-            if (existingTag != null)
+            var normalizedTitle = tagDto.Title.ToNormalized();
+
+            if (!genreSet.Contains(normalizedTitle)) // This prevents re-adding existing genres
             {
-                if (series.Metadata.Genres.All(t => !t.NormalizedTitle.Equals(normalizedTitle)))
+                if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
                 {
-                    handleAdd(existingTag);
-                    isModified = true;
+                    handleAdd(existingTag);  // Add existing tag from allTagsDict
                 }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(new GenreBuilder(tagTitle).Build());
-                isModified = true;
-            }
-        }
-
-        if (isModified)
-        {
-            onModified();
-        }
-    }
-
-    public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Chapter chapter,
-        IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
-    {
-        // TODO: Write some unit tests
-        if (tags == null) return;
-        var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = chapter.Genres.ToList();
-        foreach (var existing in existingTags)
-        {
-            if (tags.SingleOrDefault(t => t.Title.ToNormalized().Equals(existing.NormalizedTitle)) == null)
-            {
-                // Remove tag
-                chapter.Genres.Remove(existing);
-                isModified = true;
-            }
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
-        {
-            var normalizedTitle = tagTitle.ToNormalized();
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
-            if (existingTag != null)
-            {
-                if (chapter.Genres.All(t => !t.NormalizedTitle.Equals(normalizedTitle)))
+                else
                 {
-                    handleAdd(existingTag);
-                    isModified = true;
+                    handleAdd(new GenreBuilder(tagDto.Title).Build());  // Add new genre if not found
                 }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(new GenreBuilder(tagTitle).Build());
                 isModified = true;
             }
         }
 
+        // Call onModified if any changes were made
         if (isModified)
         {
             onModified();

@@ -196,8 +196,10 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(t => t.Id == tag.Id)
             .SelectMany(uc => uc.Items.Select(s => s.Metadata))
             .Select(sm => sm.AgeRating)
-            .MaxAsync();
-        tag.AgeRating = maxAgeRating;
+            .ToListAsync();
+
+
+        tag.AgeRating = maxAgeRating.Count != 0 ? maxAgeRating.Max() : AgeRating.Unknown;
         await _context.SaveChangesAsync();
     }
 
