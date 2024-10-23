@@ -69,42 +69,49 @@ public static class GenreHelper
     }
 
 
-    public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Series series,
-        IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
+    public static void UpdateGenreList(ICollection<GenreTagDto>? existingGenres, Series series,
+        IReadOnlyCollection<Genre> newGenres, Action<Genre> handleAdd, Action onModified)
     {
         // TODO: Write some unit tests
-        if (tags == null) return;
+        if (existingGenres == null) return;
 
         var isModified = false;
 
         // Convert tags and existing genres to hash sets for quick lookups by normalized title
-        var tagSet = new HashSet<string>(tags.Select(t => t.Title.ToNormalized()));
+        var tagSet = new HashSet<string>(existingGenres.Select(t => t.Title.ToNormalized()));
         var genreSet = new HashSet<string>(series.Metadata.Genres.Select(g => g.NormalizedTitle));
 
         // Remove tags that are no longer present in the input tags
         var existingTags = series.Metadata.Genres.ToList();  // Copy to avoid modifying collection while iterating
         foreach (var existing in existingTags)
         {
-            if (tagSet.Contains(existing.NormalizedTitle)) continue;
-
-            series.Metadata.Genres.Remove(existing);
-            isModified = true;
+            if (!tagSet.Contains(existing.NormalizedTitle)) // This correctly ensures removal of non-present tags
+            {
+                series.Metadata.Genres.Remove(existing);
+                isModified = true;
+            }
         }
 
-        // Prepare a dictionary for quick lookup of genres from the `allTags` collection by normalized title
-        var allTagsDict = allTags.ToDictionary(t => t.NormalizedTitle);
+        // Prepare a dictionary for quick lookup of genres from the `newGenres` collection by normalized title
+        var allTagsDict = newGenres.ToDictionary(t => t.NormalizedTitle);
 
         // Add new tags from the input list
-        foreach (var normalizedTitle in tagSet)
+        foreach (var tagDto in existingGenres)
         {
-            if (genreSet.Contains(normalizedTitle)) continue; // If it's not in the existing genres
+            var normalizedTitle = tagDto.Title.ToNormalized();
 
-            handleAdd(allTagsDict.TryGetValue(normalizedTitle, out var existingTag)
-                ? existingTag
-                : new GenreBuilder(normalizedTitle).Build()); // Add new tag
-
-            // Add existing tag
-            isModified = true;
+            if (!genreSet.Contains(normalizedTitle)) // This prevents re-adding existing genres
+            {
+                if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
+                {
+                    handleAdd(existingTag);  // Add existing tag from allTagsDict
+                }
+                else
+                {
+                    handleAdd(new GenreBuilder(tagDto.Title).Build());  // Add new genre if not found
+                }
+                isModified = true;
+            }
         }
 
         // Call onModified if any changes were made

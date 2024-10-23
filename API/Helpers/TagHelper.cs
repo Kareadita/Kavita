@@ -21,18 +21,22 @@ public static class TagHelper
     {
         // Normalize tag names once and store them in a hash set for quick lookups
         var normalizedTagsToAdd = new HashSet<string>(tagNames.Select(t => t.ToNormalized()));
+        var existingTagsSet = new HashSet<string>(chapter.Tags.Select(t => t.NormalizedTitle));
 
-        // Remove tags that are no longer in the new list
+        var isModified = false;
+
+        // Remove tags that are no longer present in the new list
         var tagsToRemove = chapter.Tags
             .Where(t => !normalizedTagsToAdd.Contains(t.NormalizedTitle))
             .ToList();
 
-        if (tagsToRemove.Count > 0)
+        if (tagsToRemove.Any())
         {
             foreach (var tagToRemove in tagsToRemove)
             {
                 chapter.Tags.Remove(tagToRemove);
             }
+            isModified = true;
         }
 
         // Get all normalized titles for bulk lookup from the database
@@ -46,11 +50,12 @@ public static class TagHelper
             .Select(title => new TagBuilder(title).Build())
             .ToList();
 
-        // Add missing tags to the database
-        if (missingTags.Count > 0)
+        // Add missing tags to the database if any
+        if (missingTags.Any())
         {
             unitOfWork.DataContext.Tag.AddRange(missingTags);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync();  // Commit once after adding missing tags to avoid multiple DB calls
+            isModified = true;
 
             // Update the dictionary with newly inserted tags for easier lookup
             foreach (var tag in missingTags)
@@ -64,14 +69,25 @@ public static class TagHelper
         {
             var tag = existingTagTitles[normalizedTitle];
 
-            if (!chapter.Tags.Contains(tag))
+            if (!existingTagsSet.Contains(normalizedTitle))
             {
                 chapter.Tags.Add(tag);
+                isModified = true;
             }
+        }
+
+        // Commit changes if modifications were made to the chapter's tags
+        if (isModified)
+        {
+            await unitOfWork.CommitAsync();
         }
     }
 
-
+    /// <summary>
+    /// Returns a list of strings separated by ',', distinct by normalized names, already trimmed and empty entries removed.
+    /// </summary>
+    /// <param name="comicInfoTagSeparatedByComma"></param>
+    /// <returns></returns>
     public static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
         // TODO: Refactor this into an Extension
