@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -985,6 +984,199 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotNull(series.Metadata);
         Assert.Equal(0, series.Metadata.ReleaseYear);
         Assert.False(series.Metadata.ReleaseYearLocked);
+    }
+
+    #endregion
+
+    #region UpdateGenres
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewGenre_NoExistingGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        _context.Series.Add(s);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto> {new () {Id = 0, Title = "New Genre"}},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.False(series.Metadata.GenresLocked); // Ensure the lock is not activated unless specified.
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldReplaceExistingGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var g = new GenreBuilder("Existing Genre").Build();
+        s.Metadata.Genres = new List<Genre> { g };
+
+        _context.Series.Add(s);
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto> { new() { Id = 0, Title = "New Genre" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.DoesNotContain("Existing Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveAllGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var g = new GenreBuilder("Existing Genre").Build();
+        s.Metadata.Genres = new List<Genre> { g };
+
+        _context.Series.Add(s);
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto>(), // Removing all genres
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Empty(series.Metadata.Genres);
+    }
+
+    #endregion
+
+    #region UpdateTags
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewTag_NoExistingTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        _context.Series.Add(s);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto> { new() { Id = 0, Title = "New Tag" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldReplaceExistingTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var t = new TagBuilder("Existing Tag").Build();
+        s.Metadata.Tags = new List<Tag> { t };
+
+        _context.Series.Add(s);
+        _context.Tag.Add(t);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto> { new() { Id = 0, Title = "New Tag" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.DoesNotContain("Existing Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveAllTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var t = new TagBuilder("Existing Tag").Build();
+        s.Metadata.Tags = new List<Tag> { t };
+
+        _context.Series.Add(s);
+        _context.Tag.Add(t);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto>(), // Removing all tags
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Empty(series.Metadata.Tags);
     }
 
     #endregion
