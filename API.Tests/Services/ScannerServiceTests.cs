@@ -180,11 +180,17 @@ public class ScannerServiceTests : AbstractDbTest
 
     private ScannerService CreateServices()
     {
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        var mockReadingService = new MockReadingItemService(ds, Substitute.For<IBookService>());
+        var fs = new FileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), ds,
+            Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
+        var readingItemService = new ReadingItemService(archiveService, Substitute.For<IBookService>(),
+            Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>());
+
+
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
             Substitute.For<IEventHub>(),
-            ds, Substitute.For<ICacheHelper>(), mockReadingService, Substitute.For<IFileService>(),
+            ds, Substitute.For<ICacheHelper>(), readingItemService, new FileService(fs),
             Substitute.For<IMetadataService>(),
             Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IReadingListService>(),
@@ -193,7 +199,7 @@ public class ScannerServiceTests : AbstractDbTest
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
-            mockReadingService, processSeries, Substitute.For<IWordCountAnalyzerService>());
+            readingItemService, processSeries, Substitute.For<IWordCountAnalyzerService>());
         return scanner;
     }
 
@@ -276,12 +282,10 @@ public class ScannerServiceTests : AbstractDbTest
 
     private void CreateMinimalCbz(string filePath, ComicInfo? comicInfo = null)
     {
-        var tempImagePath = _imagePath; // Assuming _imagePath is a valid path to the 1x1 image
-
         using (var archive = ZipFile.Open(filePath, ZipArchiveMode.Create))
         {
             // Add the 1x1 image to the archive
-            archive.CreateEntryFromFile(tempImagePath, "1x1.png");
+            archive.CreateEntryFromFile(_imagePath, "1x1.png");
 
             if (comicInfo != null)
             {
@@ -297,14 +301,6 @@ public class ScannerServiceTests : AbstractDbTest
                 writer.Write(comicInfoXml);
             }
 
-            // if (includeMetadata)
-            // {
-            //     var comicInfo = GenerateComicInfo();
-            //     var entry = archive.CreateEntry("ComicInfo.xml");
-            //     using var entryStream = entry.Open();
-            //     using var writer = new StreamWriter(entryStream, Encoding.UTF8);
-            //     writer.Write(comicInfo);
-            // }
         }
         Console.WriteLine($"Created minimal CBZ archive: {filePath} with{(comicInfo != null ? "" : "out")} metadata.");
     }
@@ -314,10 +310,13 @@ public class ScannerServiceTests : AbstractDbTest
     {
         var xmlSerializer = new XmlSerializer(typeof(ComicInfo));
         using var stringWriter = new StringWriter();
-        using (var xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true }))
+        using (var xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(false), OmitXmlDeclaration = false}))
         {
             xmlSerializer.Serialize(xmlWriter, comicInfo);
         }
-        return stringWriter.ToString();
+
+        // For the love of god, I spent 2 hours trying to get utf-8 with no BOM
+        return stringWriter.ToString().Replace("""<?xml version="1.0" encoding="utf-16"?>""",
+            @"<?xml version='1.0' encoding='utf-8'?>");
     }
 }
