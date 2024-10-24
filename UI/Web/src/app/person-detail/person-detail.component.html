@@ -26,7 +26,7 @@
 
             @if (roles$ | async; as roles) {
               <div class="mt-1">
-                <h5>Roles in Libraries</h5>
+                <h5>{{t('all-roles')}}</h5>
                 @for(role of roles; track role) {
                   <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
                 }
@@ -46,9 +46,6 @@
                            [title]="item.name"
                            [suppressArchiveWarning]="true"
                            (clicked)="navigateToSeries(item)">
-              <ng-template #subtitle>
-                Hello
-              </ng-template>
             </app-card-item>
           </ng-template>
         </app-carousel-reel>

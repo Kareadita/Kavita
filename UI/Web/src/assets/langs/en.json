@@ -922,7 +922,8 @@
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
-        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}"
+        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
+        "all-roles": "Roles"
     },
 
     "library-settings-modal": {
