@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { AgeRatingPipe } from '../../_pipes/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -29,11 +29,12 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent, NgForOf, NgIf, ReactiveFormsModule, Select2Module, SettingItemComponent]
+  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent,
+    ReactiveFormsModule, SettingItemComponent, NgClass]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -64,6 +65,8 @@ export class ChangeAgeRestrictionComponent implements OnInit {
 
   updateRestrictionSelection(restriction: AgeRestriction) {
     this.selectedRestriction = restriction;
+
+    this.saveForm();
   }
 
   resetForm() {

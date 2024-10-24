@@ -157,6 +157,30 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(3, postLib.Series.First().Volumes.Count);
     }
 
+
+    /// <summary>
+    /// Files under a folder with a SP marker should group into one issue
+    /// </summary>
+    /// <remarks>https://github.com/Kareadita/Kavita/issues/3299</remarks>
+    [Fact]
+    public async Task ScanLibrary_ImageSeries_SpecialGrouping()
+    {
+        const string testcase = "Image Series with SP Folder - Manga.json";
+
+        var library = await GenerateScannerData(testcase);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+    }
+
+
+    #region Setup
     private async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo> comicInfos = null)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
@@ -319,4 +343,5 @@ public class ScannerServiceTests : AbstractDbTest
         return stringWriter.ToString().Replace("""<?xml version="1.0" encoding="utf-16"?>""",
             @"<?xml version='1.0' encoding='utf-8'?>");
     }
+    #endregion
 }
