@@ -197,5 +197,6 @@
     "error-import-stack": "Ocorreu um problema ao importar a pilha MAL",
     "collection-already-exists": "A coleção já existe",
     "generic-cover-person-save": "Não foi possível salvar a imagem da capa em Pessoa",
-    "generic-cover-volume-save": "Não foi possível salvar a imagem da capa no Volume"
+    "generic-cover-volume-save": "Não foi possível salvar a imagem da capa no Volume",
+    "person-doesnt-exist": "Pessoa não existe"
 }

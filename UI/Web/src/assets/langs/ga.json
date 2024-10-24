@@ -819,7 +819,8 @@
         "donate-tooltip": "Is féidir leat é seo a bhaint trí liostáil le Kavita +",
         "back": "Ar ais",
         "more": "Níos mó",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Brabhsáil Údair"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1997,14 +1998,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Clibeanna Bailiúcháin",
         "colorist": "Dathóir",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Eagarthóir",
         "formats": "Formáidí",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2351,10 +2353,39 @@
         "book-nums": "Leabhair",
         "issue-nums": "Saincheisteanna",
         "chapter-nums": "Caibidlí",
-        "volume-nums": "Imleabhair"
+        "volume-nums": "Imleabhair",
+        "author-count": "{{num}} Údair"
     },
     "confirm": {
         "alert": "Airdeall",
         "confirm": "Deimhnigh"
+    },
+    "browse-authors": {
+        "title": "Brabhsáil Údair & Scríbhneoirí",
+        "author-count": "{{num}} Daoine",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "person-detail": {
+        "known-for-title": "Aitheanta do",
+        "browse-person-title": "Gach Oibre de {{name}}",
+        "browse-person-by-role-title": "Gach Oibre de {{name}} mar {{role}}",
+        "individual-role-title": "Mar {{role}}"
+    },
+    "edit-person-modal": {
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "title": "Sonraí {{personName}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "close": "{{common.close}}",
+        "role-label": "Ról",
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "hardcover-id-label": "Hardcover Id",
+        "asin-label": "ASIN",
+        "description-label": "Cur síos",
+        "save": "{{common.save}}"
     }
 }

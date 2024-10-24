@@ -819,7 +819,8 @@
         "donate-tooltip": "Puedes eliminarlo suscribiéndote a Kavita+",
         "back": "Atras",
         "more": "Ver más",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Buscar autores"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1997,14 +1998,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Etiquetas de la colección",
         "colorist": "Colorista",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formatos",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2351,10 +2353,39 @@
         "book-nums": "Libros",
         "issue-nums": "Números",
         "chapter-nums": "Capítulos",
-        "volume-nums": "Volúmenes"
+        "volume-nums": "Volúmenes",
+        "author-count": "{{num}} autor(es)"
     },
     "confirm": {
         "alert": "Alerta",
         "confirm": "Confirmar"
+    },
+    "person-detail": {
+        "known-for-title": "Conocido por",
+        "individual-role-title": "Como {{role}}",
+        "browse-person-title": "Todas las obras de {{name}}",
+        "browse-person-by-role-title": "Todas las obras de {{name}} como {{rol}}"
+    },
+    "edit-person-modal": {
+        "loading": "{{common.loading}}",
+        "role-label": "Función",
+        "anilist-id-label": "Id de AniList",
+        "hardcover-id-label": "Id de Hardcover",
+        "asin-label": "ASIN",
+        "description-label": "Descripción",
+        "mal-id-label": "Id de MAL",
+        "title": "Detalles de {{personName}}",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "required-field": "{{validations.required-field}}",
+        "save": "{{common.save}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "browse-authors": {
+        "title": "Buscar autores y escritores",
+        "author-count": "{{num}} personas",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     }
 }
