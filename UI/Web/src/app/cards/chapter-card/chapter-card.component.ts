@@ -33,6 +33,8 @@ import {filter, map} from "rxjs/operators";
 import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 import {ReaderService} from "../../_services/reader.service";
 import {LibraryType} from "../../_models/library/library";
+import {Device} from "../../_models/device/device";
+import {ActionService} from "../../_services/action.service";
 
 @Component({
   selector: 'app-chapter-card',
@@ -59,6 +61,7 @@ export class ChapterCardComponent implements OnInit {
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly downloadService = inject(DownloadService);
+  private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
   private readonly scrollService = inject(ScrollService);
@@ -181,6 +184,12 @@ export class ChapterCardComponent implements OnInit {
     if (action.action == Action.Download) {
       this.downloadService.download('chapter', this.chapter);
       return; // Don't propagate the download from a card
+    }
+
+    if (action.action == Action.SendTo) {
+      const device = (action._extra!.data as Device);
+      this.actionService.sendToDevice([this.chapter.id], device);
+      return;
     }
 
     if (typeof action.callback === 'function') {

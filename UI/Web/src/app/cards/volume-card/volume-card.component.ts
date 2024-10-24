@@ -35,6 +35,8 @@ import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
+import {Device} from "../../_models/device/device";
+import {ActionService} from "../../_services/action.service";
 
 @Component({
   selector: 'app-volume-card',
@@ -63,11 +65,11 @@ export class VolumeCardComponent implements OnInit {
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly downloadService = inject(DownloadService);
+  private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly router = inject(Router);
   private readonly readerService = inject(ReaderService);
   protected readonly utilityService = inject(UtilityService);
@@ -194,6 +196,12 @@ export class VolumeCardComponent implements OnInit {
     if (action.action == Action.Download) {
       this.downloadService.download('volume', this.volume);
       return; // Don't propagate the download from a card
+    }
+
+    if (action.action == Action.SendTo) {
+      const device = (action._extra!.data as Device);
+      this.actionService.sendToDevice(this.volume.chapters.map(c => c.id), device);
+      return;
     }
 
     if (typeof action.callback === 'function') {
