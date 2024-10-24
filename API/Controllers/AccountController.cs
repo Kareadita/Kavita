@@ -508,6 +508,19 @@ public class AccountController : BaseApiController
             await _userManager.UpdateNormalizedUserNameAsync(user);
             _unitOfWork.UserRepository.Update(user);
         }
+    
+        // Update email
+        if (!string.IsNullOrEmpty(dto.Email) && !user.Email!.Equals(dto.Email))
+        {
+            // Validate email change
+            var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
+            if (emailValidationErrors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "email-taken"));
+
+            user.Email = dto.Email;
+            user.EmailConfirmed = true;
+            user.NormalizedEmail = _userManager.NormalizeEmail(dto.Email);
+            _unitOfWork.UserRepository.Update(user);
+        }
 
         // Update roles
         var existingRoles = await _userManager.GetRolesAsync(user);
