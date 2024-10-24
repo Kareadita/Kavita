@@ -22,14 +22,14 @@ public static class PersonHelper
     {
         var modification = false;
 
-        // Get all normalized names of people with the specified role from chapterPeople
+        // Get all people with the specified role from chapterPeople
         var peopleToAdd = chapterPeople
             .Where(cp => cp.Role == role)
-            .Select(cp => cp.Person.NormalizedName)
+            .Select(cp => new { cp.Person.Name, cp.Person.NormalizedName }) // Store both real and normalized names
             .ToList();
 
-        // Prepare a HashSet for quick lookup of people to add
-        var peopleToAddSet = new HashSet<string>(peopleToAdd);
+        // Prepare a HashSet for quick lookup of normalized names of people to add
+        var peopleToAddSet = new HashSet<string>(peopleToAdd.Select(p => p.NormalizedName));
 
         // Get all existing people from metadataPeople with the specified role
         var existingMetadataPeople = metadataPeople
@@ -48,9 +48,9 @@ public static class PersonHelper
             modification = true;
         }
 
-        // Bulk fetch existing people from the repository
+        // Bulk fetch existing people from the repository based on normalized names
         var existingPeopleInDb = await unitOfWork.PersonRepository
-            .GetPeopleByNames(peopleToAdd);
+            .GetPeopleByNames(peopleToAdd.Select(p => p.NormalizedName).ToList());
 
         // Prepare a dictionary for quick lookup of existing people by normalized name
         var existingPeopleDict = new Dictionary<string, Person>();
@@ -63,18 +63,21 @@ public static class PersonHelper
         var peopleToAttach = new List<Person>();
 
         // Identify new people (not already in metadataPeople) to add
-        foreach (var personName in peopleToAdd)
+        foreach (var personData in peopleToAdd)
         {
+            var personName = personData.Name;
+            var normalizedPersonName = personData.NormalizedName;
+
             // Check if the person already exists in metadataPeople with the specific role
             var personAlreadyInMetadata = metadataPeople
-                .Any(mp => mp.Person.NormalizedName == personName && mp.Role == role);
+                .Any(mp => mp.Person.NormalizedName == normalizedPersonName && mp.Role == role);
 
             if (!personAlreadyInMetadata)
             {
                 // Check if the person exists in the database
-                if (!existingPeopleDict.TryGetValue(personName, out var dbPerson))
+                if (!existingPeopleDict.TryGetValue(normalizedPersonName, out var dbPerson))
                 {
-                    // If not, create a new Person entity
+                    // If not, create a new Person entity using the real name
                     dbPerson = new PersonBuilder(personName).Build();
                     peopleToAttach.Add(dbPerson); // Add new person to the list to be attached
                     modification = true;
@@ -107,6 +110,7 @@ public static class PersonHelper
     }
 
 
+
     public static async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)
     {
         var modification = false;
@@ -119,10 +123,10 @@ public static class PersonHelper
             .Where(cp => cp.Role == role)
             .ToList();
 
-        // Prepare a hash set for quick lookup of existing people by name
+        // Prepare a hash set for quick lookup of existing people by normalized name
         var existingPeopleNames = new HashSet<string>(existingChapterPeople.Select(cp => cp.Person.NormalizedName));
 
-        // Bulk select all people from the repository whose names are in the provided list
+        // Bulk select all people from the repository whose normalized names are in the provided list
         var existingPeople = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedPeople);
 
         // Prepare a dictionary for quick lookup by normalized name
@@ -151,7 +155,11 @@ public static class PersonHelper
             // Bulk insert new people (if they don't already exist in the database)
             var newPeople = newPeopleNames
                 .Where(name => !existingPeopleDict.ContainsKey(name)) // Avoid adding duplicates
-                .Select(name => new PersonBuilder(name).Build())
+                .Select(name =>
+                {
+                    var realName = people.First(p => p.ToNormalized() == name); // Get the original name
+                    return new PersonBuilder(realName).Build(); // Use the real name for the Person entity
+                })
                 .ToList();
 
             foreach (var newPerson in newPeople)
@@ -187,6 +195,7 @@ public static class PersonHelper
             await unitOfWork.CommitAsync();
         }
     }
+
 
     public static bool HasAnyPeople(SeriesMetadataDto? dto)
     {

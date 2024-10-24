@@ -72,7 +72,6 @@ public static class GenreHelper
     public static void UpdateGenreList(ICollection<GenreTagDto>? existingGenres, Series series,
         IReadOnlyCollection<Genre> newGenres, Action<Genre> handleAdd, Action onModified)
     {
-        // TODO: Write some unit tests
         if (existingGenres == null) return;
 
         var isModified = false;
@@ -100,18 +99,17 @@ public static class GenreHelper
         {
             var normalizedTitle = tagDto.Title.ToNormalized();
 
-            if (!genreSet.Contains(normalizedTitle)) // This prevents re-adding existing genres
+            if (genreSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
+
+            if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
             {
-                if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
-                {
-                    handleAdd(existingTag);  // Add existing tag from allTagsDict
-                }
-                else
-                {
-                    handleAdd(new GenreBuilder(tagDto.Title).Build());  // Add new genre if not found
-                }
-                isModified = true;
+                handleAdd(existingTag);  // Add existing tag from allTagsDict
             }
+            else
+            {
+                handleAdd(new GenreBuilder(tagDto.Title).Build());  // Add new genre if not found
+            }
+            isModified = true;
         }
 
         // Call onModified if any changes were made

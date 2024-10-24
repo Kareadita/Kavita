@@ -33,6 +33,10 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/cleanup-want-to-read', {});
   }
 
+  cleanup() {
+    return this.http.post(this.baseUrl + 'server/cleanup', {});
+  }
+
   backupDatabase() {
     return this.http.post(this.baseUrl + 'server/backup-db', {});
   }

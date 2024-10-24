@@ -922,7 +922,8 @@
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
-        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}"
+        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
+        "all-roles": "Roles"
     },
 
     "library-settings-modal": {
@@ -1379,6 +1380,10 @@
         "clean-up-want-to-read-task": "Clean up Want to Read",
         "clean-up-want-to-read-task-desc": "Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.",
         "clean-up-want-to-read-task-success": "Want to Read has been cleaned up",
+
+        "clean-up-task": "General Cleanup",
+        "clean-up-task-desc": "Performs nightly cleanup activities on the server. Can be heavy, advised to not run with active users or scans. Runs every 24 hours.",
+        "clean-up-task-success": "Cleanup complete",
 
         "backup-database-task": "Backup Database",
         "backup-database-task-desc": "Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.",

@@ -51,7 +51,7 @@ public static class TagHelper
             .ToList();
 
         // Add missing tags to the database if any
-        if (missingTags.Any())
+        if (missingTags.Count != 0)
         {
             unitOfWork.DataContext.Tag.AddRange(missingTags);
             await unitOfWork.CommitAsync();  // Commit once after adding missing tags to avoid multiple DB calls
@@ -102,42 +102,49 @@ public static class TagHelper
     }
 
 
-    public static void UpdateTagList(ICollection<TagDto>? tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
+    public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
     {
-        if (tags == null) return;
+        if (existingDbTags == null) return;
 
         var isModified = false;
-        var existingTags = series.Metadata.Tags;
 
-        // Create a HashSet for quick lookup of tag IDs
-        var tagIds = new HashSet<int>(tags.Select(t => t.Id));
+        // Convert tags and existing genres to hash sets for quick lookups by normalized title
+        var existingTagSet = new HashSet<string>(existingDbTags.Select(t => t.Title.ToNormalized()));
+        var dbTagSet = new HashSet<string>(series.Metadata.Tags.Select(g => g.NormalizedTitle));
 
-        // Remove tags that no longer exist in the provided tag list
-        var tagsToRemove = existingTags.Where(existing => !tagIds.Contains(existing.Id)).ToList();
-        if (tagsToRemove.Count > 0)
+        // Remove tags that are no longer present in the input tags
+        var existingTagsCopy = series.Metadata.Tags.ToList();  // Copy to avoid modifying collection while iterating
+        foreach (var existing in existingTagsCopy)
         {
-            foreach (var tagToRemove in tagsToRemove)
+            if (!existingTagSet.Contains(existing.NormalizedTitle)) // This correctly ensures removal of non-present tags
             {
-                existingTags.Remove(tagToRemove);
+                series.Metadata.Tags.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // Prepare a dictionary for quick lookup of genres from the `newTags` collection by normalized title
+        var allTagsDict = newTags.ToDictionary(t => t.NormalizedTitle);
+
+        // Add new tags from the input list
+        foreach (var tagDto in existingDbTags)
+        {
+            var normalizedTitle = tagDto.Title.ToNormalized();
+
+            if (dbTagSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
+
+            if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
+            {
+                handleAdd(existingTag);  // Add existing tag from allTagsDict
+            }
+            else
+            {
+                handleAdd(new TagBuilder(tagDto.Title).Build());  // Add new genre if not found
             }
             isModified = true;
         }
 
-        // Create a HashSet of normalized titles for quick lookups
-        var normalizedTitlesToAdd = new HashSet<string>(tags.Select(t => t.Title.ToNormalized()));
-        var existingNormalizedTitles = new HashSet<string>(existingTags.Select(t => t.NormalizedTitle));
-
-        // Add missing tags based on normalized title comparison
-        foreach (var normalizedTitle in normalizedTitlesToAdd)
-        {
-            if (existingNormalizedTitles.Contains(normalizedTitle)) continue;
-
-            var existingTag = allTags.FirstOrDefault(t => t.NormalizedTitle == normalizedTitle);
-            handleAdd(existingTag ?? new TagBuilder(normalizedTitle).Build());
-            isModified = true;
-        }
-
-        // Call the modification handler if any changes were made
+        // Call onModified if any changes were made
         if (isModified)
         {
             onModified();
