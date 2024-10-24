@@ -819,7 +819,8 @@
         "donate-tooltip": "Você pode remover isso assinando Kavita+",
         "back": "Voltar",
         "more": "Mais",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Navegar pelos Autores"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1245,7 +1246,10 @@
         "sync-themes-task-desc": "Sincronize os temas baixados com alterações upstream se a versão corresponder.",
         "sync-themes-success": "A sincronização de temas foi colocada na fila",
         "check-for-updates-task": "Verifique se há atualizações",
-        "check-for-updates-task-desc": "Veja se há algum lançamento Estável antes da sua versão."
+        "check-for-updates-task-desc": "Veja se há algum lançamento Estável antes da sua versão.",
+        "clean-up-task": "Limpeza Geral",
+        "clean-up-task-success": "Limpeza concluída",
+        "clean-up-task-desc": "Executa atividades noturnas de limpeza no servidor. Pode ser pesado, recomendado para não ser executado com usuários ativos ou verificações. Funciona a cada 24 horas."
     },
     "manage-users": {
         "title": "Usuários Ativos",
@@ -1997,14 +2001,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Coleção de Tags",
         "colorist": "Colorista",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formatos",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2351,10 +2356,40 @@
         "book-nums": "Livros",
         "issue-nums": "Problemas",
         "chapter-nums": "Capítulos",
-        "volume-nums": "Volumes"
+        "volume-nums": "Volumes",
+        "author-count": "{{num}} Autores"
     },
     "confirm": {
         "confirm": "Confirmar",
         "alert": "Alerta"
+    },
+    "edit-person-modal": {
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "Papel",
+        "mal-id-label": "Id do MAL",
+        "title": "{{personName}} Detalhes",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "hardcover-id-label": "Hardcover Id",
+        "asin-label": "ASIN",
+        "anilist-id-label": "Id do AniList",
+        "description-label": "Descrição",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "save": "{{common.save}}"
+    },
+    "browse-authors": {
+        "author-count": "{{num}} Pessoa(s)",
+        "title": "Navegar pelos Autores e Escritores",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "person-detail": {
+        "browse-person-title": "Todas as obras de {{name}}",
+        "browse-person-by-role-title": "Todos os trabalhos de {{name}} como {{role}}",
+        "individual-role-title": "Como {{role}}",
+        "known-for-title": "Conhecido Por",
+        "all-roles": "Papéis"
     }
 }

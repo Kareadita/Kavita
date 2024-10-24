@@ -304,7 +304,7 @@
         "token-set": "Token Definido",
         "generate": "Gerar",
         "generic-instructions": "Preencha informações sobre os diferentes Serviços Externos que precisa para permitir que Kavita+ interaja com eles.",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "Os utilizadores novos devem clicar em \"{{scrobbling-providers.generate}}\" para permitir que o Kavita+ comunique com {{service}}. Depois the autorizar o programa, copie e cole o token na caixa de introdução. O token pode ser gerado novamente a qualquer momento.",
         "mal-instructions": "Kavita usa um ID de cliente MAL para autenticação. Crie um novo cliente para Kavita e, uma vez aprovado, forneça o ID do cliente e o seu nome de utilizador.",
         "scrobbling-applicable-label": "Scrobbling Aplicável",
         "token-input-label": "Colocar Token do {{service}} Aqui",
@@ -1956,7 +1956,7 @@
         "clear": "{{common.clear}}",
         "smart-filters-title": "Filtros Inteligentes",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "Não é possível reordenar itens com \"drag & drop\" enquanto um filtro está presente. Use {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Modo Vários"
     },

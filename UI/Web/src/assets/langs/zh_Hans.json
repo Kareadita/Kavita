@@ -819,7 +819,8 @@
         "donate-tooltip": "您可以通过订阅 Kavita+ 来删除此内容",
         "back": "后退",
         "more": "更多",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "浏览作者"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
