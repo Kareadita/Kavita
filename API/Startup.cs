@@ -273,6 +273,7 @@ public class Startup
 
                     // v0.8.4
                     await MigrateLowestSeriesFolderPath2.Migrate(dataContext, unitOfWork, logger);
+                    await ManualMigrateRemovePeople.Migrate(dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
