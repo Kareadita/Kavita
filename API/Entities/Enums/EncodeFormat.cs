@@ -9,5 +9,9 @@ public enum EncodeFormat
     [Description("WebP")]
     WEBP = 1,
     [Description("AVIF")]
-    AVIF = 2
+    AVIF = 2,
+    /// Internal Use
+    [Description("JPEG")]
+    JPEG = 3
 }
+

@@ -5,12 +5,11 @@ using System.Linq;
 using System.Text;
 using API.Entities.Enums;
 using API.Services;
+using API.Services.ImageServices.ImageMagick;
 using EasyCaching.Core;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using NSubstitute;
 using Xunit;
-using Image = NetVips.Image;
 
 namespace API.Tests.Services;
 
@@ -56,21 +55,15 @@ public class ImageServiceTests
             .ToList();
 
         // Step 3: Process each image
+        ImageMagickImageFactory factory = new ImageMagickImageFactory();
         foreach (var imagePath in imageFiles)
         {
             var fileName = Path.GetFileNameWithoutExtension(imagePath);
             var dims = CoverImageSize.Default.GetDimensions();
-            using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
-
-            var size = ImageService.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
-            var crop = ImageService.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
-
-            using var thumbnail = Image.Thumbnail(imagePath, dims.Width, dims.Height,
-                size: size,
-                crop: crop);
-
+            var thumbnail = factory.Create(imagePath);
+            thumbnail = ImageService.Thumbnail(thumbnail, dims.Width, dims.Height);
             var outputFileName = fileName + outputExtension + ".png";
-            thumbnail.WriteToFile(Path.Join(_testDirectory, outputFileName));
+            thumbnail.Save(Path.Join(_testDirectory, outputFileName), EncodeFormat.PNG);
         }
     }
 
@@ -80,6 +73,7 @@ public class ImageServiceTests
             .Where(file => !file.EndsWith("html"))
             .Where(file => !file.Contains(OutputPattern) && !file.Contains(BaselinePattern))
             .ToList();
+        ImageMagickImageFactory factory = new ImageMagickImageFactory();
 
         var htmlBuilder = new StringBuilder();
         htmlBuilder.AppendLine("<!DOCTYPE html>");
@@ -105,7 +99,7 @@ public class ImageServiceTests
             var outputPath = Path.Combine(_testDirectory, fileName + "_output.png");
             var dims = CoverImageSize.Default.GetDimensions();
 
-            using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
+            using var sourceImage = factory.Create(imagePath);
             htmlBuilder.AppendLine("<div class=\"image-row\">");
             htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImageService.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
             htmlBuilder.AppendLine($"<img src=\"./{Path.GetFileName(imagePath)}\" alt=\"{fileName}\">");
@@ -144,11 +138,16 @@ public class ImageServiceTests
             .Where(file => !file.Contains(OutputPattern) && !file.Contains(BaselinePattern))
             .ToList();
 
+        var factory = LoggerFactory.Create(builder => { builder.AddConsole(); });
+        var logger = factory.CreateLogger<ImageService>();
+
+        ImageService service = new ImageService(logger, null, null, new ImageMagickImageFactory());
+
         // Step 3: Process each image
         foreach (var imagePath in imageFiles)
         {
             var fileName = Path.GetFileNameWithoutExtension(imagePath);
-            var colors = ImageService.CalculateColorScape(imagePath);
+            var colors = service.CalculateColorScape(imagePath);
 
             // Generate primary color image
             GenerateColorImage(colors.Primary, Path.Combine(_testDirectoryColorScapes, $"{fileName}_primary_output.png"));
@@ -164,10 +163,10 @@ public class ImageServiceTests
 
     private static void GenerateColorImage(string hexColor, string outputPath)
     {
+        ImageMagickImageFactory factory = new ImageMagickImageFactory();
         var color = ImageService.HexToRgb(hexColor);
-        using var colorImage = Image.Black(200, 100);
-        using var output = colorImage + new[] { color.R / 255.0, color.G / 255.0, color.B / 255.0 };
-        output.WriteToFile(outputPath);
+        using var colorImage = factory.Create(200,100,color.R, color.G, color.B);
+        colorImage.Save(outputPath, EncodeFormat.PNG);
     }
 
     private void GenerateHtmlFileForColorScape()

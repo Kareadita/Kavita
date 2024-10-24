@@ -13,7 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using NetVips;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace API.Services;
 #nullable enable
@@ -52,18 +52,21 @@ public class CacheService : ICacheService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IBookmarkService _bookmarkService;
+    private readonly IImageService _imageService;
+
 
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
 
     public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IBookmarkService bookmarkService)
+        IBookmarkService bookmarkService, IImageService imageService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
+        _imageService = imageService;
     }
 
     public IEnumerable<string> GetCachedPages(int chapterId)
@@ -91,20 +94,23 @@ public class CacheService : ICacheService
         }
 
         var dimensions = new List<FileDimensionDto>();
-        var originalCacheSize = Cache.MaxFiles;
         try
         {
-            Cache.MaxFiles = 0;
             for (var i = 0; i < files.Length; i++)
             {
                 var file = files[i];
-                using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
+                var info = _imageService.ImageFactory.GetDimensions(file);
+                if (info == null)
+                {
+                    _logger.LogError("There was an error calculating image dimensions for image {file}", file);
+                    continue;
+                }
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = image.Height,
-                    Width = image.Width,
-                    IsWide = image.Width > image.Height,
+                    Height = info.Value.Height,
+                    Width = info.Value.Width,
+                    IsWide = info.Value.Width > info.Value.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });
             }
@@ -115,7 +121,6 @@ public class CacheService : ICacheService
         }
         finally
         {
-            Cache.MaxFiles = originalCacheSize;
         }
 
         _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);

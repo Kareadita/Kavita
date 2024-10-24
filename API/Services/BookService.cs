@@ -11,6 +11,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.ImageServices;
 using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -22,8 +23,6 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using Nager.ArticleNumber;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
@@ -1273,16 +1272,15 @@ public class BookService : IBookService
     /// <param name="docReader"></param>
     /// <param name="pageNumber"></param>
     /// <param name="stream"></param>
-    private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
+    private void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
         var width = pageReader.GetPageWidth();
         var height = pageReader.GetPageHeight();
-        var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
-
+        IImage image = _imageService.ImageFactory.CreateFromBGRAByteArray(rawBytes, width, height);
         stream.Seek(0, SeekOrigin.Begin);
-        image.SaveAsPng(stream);
+        image.Save(stream, EncodeFormat.PNG);
         stream.Seek(0, SeekOrigin.Begin);
     }
 

@@ -37,8 +37,7 @@ public class RecommendationService : IRecommendationService
         _unitOfWork = unitOfWork;
         _logger = logger;
 
-        FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
 
     public async Task<RecommendationDto> GetRecommendationsForSeries(int userId, int seriesId)

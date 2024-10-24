@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
@@ -25,7 +26,41 @@ public static class Parser
 
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
-    public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
+    /// <summary>
+    /// Mime Mappings on Browsers Non Universally Supported Image Formats.
+    /// Examples:
+    /// Browser presents jp2, which means it supports images with file extensions jp2 and j2k.  (JPEG200)
+    /// Browser present heif, which means it supports images with file extensions heif and heic (HEIF)
+    /// Browser present jxl, which means it supports images with file extension jxl             (JPEG-XL)
+    /// </summary>
+    public static Dictionary<string, List<string>> NonUniversalSupportedMimeMappings = new Dictionary<string, List<string>>()
+        {
+            { "jp2", ["jp2", "j2k"] } ,
+            { "j2k", ["jp2", "j2k"] } ,
+            { "heif", ["heif", "heic"] } ,
+            { "heic", ["heif", "heic"] } ,
+            { "jxl", ["jxl"] } ,
+            { "avif", ["avif"] } ,
+        };
+
+    /// <summary>
+    /// Browser Universally Supported Image extensions that we support. Means, all browsers support this image formats.
+    /// </summary>
+    public static string[] UniversalFileImageExtensionArray = { "png", "jpeg", "jpg", "webp", "gif" };
+    /// <summary>
+    /// Browser Non Universally Supported Image extensions that we support.
+    /// </summary>
+    public static string[] NonUniversalFileImageExtensionArray = { "avif", "jxl", "heif", "heic", "j2k", "jp2" };
+    /// <summary>
+    /// Regex to Match Non Universally supported Images extensions.
+    /// </summary>
+    public static string NonUniversalFileImageExtensions = @"^(\." + string.Join(@"|\.", NonUniversalFileImageExtensionArray) + ")";
+    /// <summary>
+    /// Regex to Match All our supported Images extensions.
+    /// </summary>
+    public static string ImageFileExtensions = @"^(\." + string.Join(@"|\.", UniversalFileImageExtensionArray.Union(NonUniversalFileImageExtensionArray)) + ")"; // Don't forget to update CoverChooser
+
+
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
     public const string EpubFileExtension = @"\.epub";
     public const string PdfFileExtension = @"\.pdf";
@@ -33,7 +68,7 @@ public static class Parser
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
 
-    public const string SupportedExtensions =
+    public static string SupportedExtensions =
         ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
 
     private const RegexOptions MatchOptions =
