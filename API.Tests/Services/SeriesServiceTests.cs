@@ -891,6 +891,62 @@ public class SeriesServiceTests : AbstractDbTest
     }
 
 
+    /// <summary>
+    /// I'm not sure how I could handle this use-case
+    /// </summary>
+    //[Fact]
+    public async Task UpdateSeriesMetadata_ShouldUpdate_ExistingPeople_NewName()
+    {
+        await ResetDb();  // Resets the database for a clean state
+
+        // Arrange: Build series, metadata, and existing people
+        var series = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test Library", LibraryType.Book).Build();
+
+        var existingPerson = new PersonBuilder("Existing Person").Build();
+        var existingWriter = new PersonBuilder("ExistingWriter").Build();  // Pre-existing writer
+
+        series.Metadata.People = new List<SeriesMetadataPeople>
+        {
+            new SeriesMetadataPeople { Person = existingWriter, Role = PersonRole.Writer },
+            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Translator").Build(), Role = PersonRole.Translator },
+            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher }
+        };
+
+        _context.Series.Add(series);
+        _context.Person.Add(existingPerson);
+        await _context.SaveChangesAsync();
+
+        // Act: Update series metadata, attempting to update the writer to "Existing Writer"
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = series.Id,  // Use the series ID
+                Writers = new List<PersonDto> { new() { Id = 0, Name = "Existing Writer" } },  // Trying to update writer's name
+                WriterLocked = true
+            }
+        });
+
+        // Assert: Ensure the operation was successful
+        Assert.True(success);
+
+        // Reload the series from the database
+        var updatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
+        Assert.NotNull(updatedSeries.Metadata);
+
+        // Assert that the people list still contains the updated person with the new name
+        var updatedPerson = updatedSeries.Metadata.People.FirstOrDefault(p => p.Role == PersonRole.Writer)?.Person;
+        Assert.NotNull(updatedPerson);  // Make sure the person exists
+        Assert.Equal("Existing Writer", updatedPerson.Name);  // Check if the person's name was updated
+
+        // Assert that the publisher lock is still true
+        Assert.True(updatedSeries.Metadata.WriterLocked);
+    }
+
+
     [Fact]
     public async Task UpdateSeriesMetadata_ShouldRemoveExistingPerson()
     {

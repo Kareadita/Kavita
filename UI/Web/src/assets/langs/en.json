@@ -1381,6 +1381,10 @@
         "clean-up-want-to-read-task-desc": "Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.",
         "clean-up-want-to-read-task-success": "Want to Read has been cleaned up",
 
+        "clean-up-task": "General Cleanup",
+        "clean-up-task-desc": "Performs nightly cleanup activities on the server. Can be heavy, advised to not run with active users or scans. Runs every 24 hours.",
+        "clean-up-task-success": "Cleanup complete",
+
         "backup-database-task": "Backup Database",
         "backup-database-task-desc": "Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.",
         "backup-database-task-success": "A job to backup the database has been queued",

@@ -88,6 +88,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'clean-up-want-to-read-task-success'
     },
     {
+      name: 'clean-up-task',
+      description: 'clean-up-task-desc',
+      api: this.serverService.cleanup(),
+      successMessage: 'clean-up-task-success'
+    },
+    {
       name: 'backup-database-task',
       description: 'backup-database-task-desc',
       api: this.serverService.backupDatabase(),
@@ -99,6 +105,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
+    // TODO: Remove this in v0.9. Users should have all updated by then
     {
       name: 'analyze-files-task',
       description: 'analyze-files-task-desc',
