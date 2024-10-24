@@ -7,7 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
@@ -35,6 +38,7 @@ public class ScannerServiceTests : AbstractDbTest
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests");
     private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/TestCases");
     private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/1x1.png");
+    private static readonly string[] ComicInfoExtensions = new[] { ".cbz", ".cbr", ".zip", ".rar" };
 
     public ScannerServiceTests(ITestOutputHelper testOutputHelper)
     {
@@ -125,9 +129,37 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
-    private async Task<Library> GenerateScannerData(string testcase)
+    /// <summary>
+    /// This is testing that if the first file is named A and has a localized name of B if all other files are named B, it should still group and name the series A
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_LocalizedSeries()
     {
-        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
+        const string testcase = "Series with Localized - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("My Dress-Up Darling v01.cbz", new ComicInfo()
+        {
+            Series = "My Dress-Up Darling",
+            LocalizedSeries = "Sono Bisque Doll wa Koi wo Suru"
+        });
+
+        var library = await GenerateScannerData(testcase, infos);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+    }
+
+    private async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo> comicInfos = null)
+    {
+        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
 
         var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
 
@@ -189,7 +221,7 @@ public class ScannerServiceTests : AbstractDbTest
 
 
 
-    private async Task<string> GenerateTestDirectory(string mapPath)
+    private async Task<string> GenerateTestDirectory(string mapPath, Dictionary<string, ComicInfo> comicInfos = null)
     {
         // Read the map file
         var mapContent = await File.ReadAllTextAsync(mapPath);
@@ -206,7 +238,7 @@ public class ScannerServiceTests : AbstractDbTest
         Directory.CreateDirectory(testDirectory);
 
         // Generate the files and folders
-        await Scaffold(testDirectory, filePaths);
+        await Scaffold(testDirectory, filePaths, comicInfos);
 
         _testOutputHelper.WriteLine($"Test Directory Path: {testDirectory}");
 
@@ -214,7 +246,7 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
 
-    private async Task Scaffold(string testDirectory, List<string> filePaths)
+    private async Task Scaffold(string testDirectory, List<string> filePaths, Dictionary<string, ComicInfo> comicInfos = null)
     {
         foreach (var relativePath in filePaths)
         {
@@ -229,9 +261,9 @@ public class ScannerServiceTests : AbstractDbTest
             }
 
             var ext = Path.GetExtension(fullPath).ToLower();
-            if (new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(ext))
+            if (ComicInfoExtensions.Contains(ext) && comicInfos != null && comicInfos.TryGetValue(Path.GetFileName(relativePath), out var info))
             {
-                CreateMinimalCbz(fullPath, includeMetadata: true);
+                CreateMinimalCbz(fullPath, info);
             }
             else
             {
@@ -242,7 +274,7 @@ public class ScannerServiceTests : AbstractDbTest
         }
     }
 
-    private void CreateMinimalCbz(string filePath, bool includeMetadata)
+    private void CreateMinimalCbz(string filePath, ComicInfo? comicInfo = null)
     {
         var tempImagePath = _imagePath; // Assuming _imagePath is a valid path to the 1x1 image
 
@@ -251,45 +283,41 @@ public class ScannerServiceTests : AbstractDbTest
             // Add the 1x1 image to the archive
             archive.CreateEntryFromFile(tempImagePath, "1x1.png");
 
-            if (includeMetadata)
+            if (comicInfo != null)
             {
-                var comicInfo = GenerateComicInfo();
+                // Serialize ComicInfo object to XML
+                var comicInfoXml = SerializeComicInfoToXml(comicInfo);
+
+                // Create an entry for ComicInfo.xml in the archive
                 var entry = archive.CreateEntry("ComicInfo.xml");
                 using var entryStream = entry.Open();
                 using var writer = new StreamWriter(entryStream, Encoding.UTF8);
-                writer.Write(comicInfo);
+
+                // Write the XML to the archive
+                writer.Write(comicInfoXml);
             }
+
+            // if (includeMetadata)
+            // {
+            //     var comicInfo = GenerateComicInfo();
+            //     var entry = archive.CreateEntry("ComicInfo.xml");
+            //     using var entryStream = entry.Open();
+            //     using var writer = new StreamWriter(entryStream, Encoding.UTF8);
+            //     writer.Write(comicInfo);
+            // }
         }
-        Console.WriteLine($"Created minimal CBZ archive: {filePath} with{(includeMetadata ? "" : "out")} metadata.");
+        Console.WriteLine($"Created minimal CBZ archive: {filePath} with{(comicInfo != null ? "" : "out")} metadata.");
     }
 
-    private string GenerateComicInfo()
+
+    private static string SerializeComicInfoToXml(ComicInfo comicInfo)
     {
-        var comicInfo = new StringBuilder();
-        comicInfo.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
-        comicInfo.AppendLine("<ComicInfo>");
-
-        // People Tags
-        string[] people = { "Joe Shmo", "Tommy Two Hands"};
-        string[] genres = { /* Your list of genres here */ };
-
-        void AddRandomTag(string tagName, string[] choices)
+        var xmlSerializer = new XmlSerializer(typeof(ComicInfo));
+        using var stringWriter = new StringWriter();
+        using (var xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true }))
         {
-            if (new Random().Next(0, 2) == 1) // 50% chance to include the tag
-            {
-                var selected = choices.OrderBy(x => Guid.NewGuid()).Take(new Random().Next(1, 5)).ToArray();
-                comicInfo.AppendLine($"  <{tagName}>{string.Join(", ", selected)}</{tagName}>");
-            }
+            xmlSerializer.Serialize(xmlWriter, comicInfo);
         }
-
-        foreach (var tag in new[] { "Writer", "Penciller", "Inker", "CoverArtist", "Publisher", "Character", "Imprint", "Colorist", "Letterer", "Editor", "Translator", "Team", "Location" })
-        {
-            AddRandomTag(tag, people);
-        }
-
-        AddRandomTag("Genre", genres);
-        comicInfo.AppendLine("</ComicInfo>");
-
-        return comicInfo.ToString();
+        return stringWriter.ToString();
     }
 }
