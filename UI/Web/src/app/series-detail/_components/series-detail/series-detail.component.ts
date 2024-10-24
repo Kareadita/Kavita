@@ -872,7 +872,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.showVolumeTab = this.shouldShowVolumeTab();
     this.showStorylineTab = this.shouldShowStorylineTab();
     this.showChapterTab = this.shouldShowChaptersTab();
-    this.showDetailsTab = hasAnyCast(this.seriesMetadata) || (this.seriesMetadata?.genres || []).length > 0 || (this.seriesMetadata?.tags || []).length > 0;
+    this.showDetailsTab = hasAnyCast(this.seriesMetadata) || (this.seriesMetadata?.genres || []).length > 0
+      || (this.seriesMetadata?.tags || []).length > 0 || (this.seriesMetadata?.webLinks || []).length > 0;
     this.cdRef.markForCheck();
   }
 
