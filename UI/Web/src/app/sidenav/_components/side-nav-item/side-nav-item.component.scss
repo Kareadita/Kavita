@@ -1,152 +1,45 @@
 @import '../../../../theme/variables';
 
-::ng-deep .side-nav.closed {
+::ng-deep .side-nav app-side-nav-item:first-child {
+    .active-highlight {
+        border-top-left-radius: 3px;
+    }
+}
+
+::ng-deep .side-nav app-side-nav-item:first-child {
     .side-nav-item {
-        .side-nav-text {
-            opacity: 0 !important;
-        }
-
-        .card-actions {
-           opacity: 0 !important;
-        }
-
-        &.active {
-            color: var(--side-nav-item-active-color);
-            background-color: unset !important;
-        }
+        border-top-left-radius: 3px;
     }
 }
 
-.side-nav-item {
-    position: relative;
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 0 0 10px;
-    width: 100%;
-    height: auto;
-    min-height: 40px;
-    overflow: hidden;
-    cursor: pointer;
-    font-size: 0.9rem;
-
-    .side-nav-text {
-        opacity: 1;
-        min-width: 100px;
-        word-break: break-all;
-        -webkit-line-clamp: 1;
-        text-overflow: ellipsis;
-        display: -webkit-box !important;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-
-        div {
-            min-width: 102px;
-            width: 100%
-        }
-    }
-
-    span {
-        display:flex;
-
-        &:last-child {
-            flex-grow: 1;
-            justify-content: end;
-        }
-
-        div {
-            align-items: center;
-            height: 100%;
-            justify-content: inherit;
-            min-width: 30px;
-            width: 100%;
-            padding-left: 5px;
-
-            i {
-                font-size: 18px;
-            }
-        }
-    }
-
-    &.closed {
-        .side-nav-text {
-            opacity: 0;
-        }
-
-        .card-actions {
-           opacity: 0;
-        }
-
-        &.active {
-            color: var(--side-nav-item-active-color);
-            background-color: unset;
-        }
-
-        i {
-            color: var(--side-nav-item-closed-color);
-        }
-
-        &:hover {
-            color: var(--side-nav-hover-text-color);
-            background-color: var(--side-nav-hover-bg-color);
-
-            i {
-                color: var(--side-nav-item-closed-hover-color);
-            }
-        }
-    }
-
-    &:hover {
-        color: var(--side-nav-hover-text-color);
-        background-color: var(--side-nav-hover-bg-color);
-
-        .card-actions i.fa {
-            // TODO: The override to white does not work, please fix for light themes
-            color: var(--side-nav-hover-text-color) !important;
-        }
-    }
-
-    &.active {
-        color: var(--side-nav-item-active-color);
-        background-color: var(--side-nav-active-bg-color);
-
-        .active-highlight {
-            background-color: var(--side-nav-item-active-color);
-            width: 5px;
-            height: 100%;
-            position: absolute;
-            left: 0;
-        }
-
-        .side-nav-text, i {
-            color: var(--side-nav-item-active-text-color) !important;
-        }
-
-        &:hover {
-            color: var(--side-nav-hover-text-color);
-            background-color: var(--side-nav-hover-bg-color);
-
-            .card-actions i.fa {
-                // TODO: The override to white does not work, please fix for light themes
-                color: var(--side-nav-hover-text-color) !important;
-            }
-        }
-
-    }
+::ng-deep .side-nav app-side-nav-item:last-child {
+  .active-highlight {
+    border-bottom-left-radius: 3px;
+  }
 }
 
+::ng-deep .side-nav app-side-nav-item:last-child {
+  .side-nav-item {
+    border-bottom-left-radius: 3px;
+  }
+}
 
-a {
-    text-decoration: none;
-    color: var(--side-nav-text-color);
+@media (max-width: $grid-breakpoints-lg) {
+    ::ng-deep .side-nav app-side-nav-item:first-child {
+        .side-nav-item {
+            border-top-left-radius: 0px;
+        }
+    }
+
+    ::ng-deep .side-nav app-side-nav-item:last-child {
+        .side-nav-item {
+            border-bottom-left-radius: 0px;
+        }
+    }
 }
 
 @media (max-width: $grid-breakpoints-lg) {
     .side-nav-item {
-        align-items: center;
-        padding: 0 10px;
-        height: 55px;
-        font-size: 1rem;
 
         .side-nav-text {
             width: 100%;
@@ -154,13 +47,6 @@ a {
 
         span:last-child {
             flex-grow: 0;
-        }
-
-
-        &.closed {
-            .card-actions {
-               font-size: inherit;
-            }
         }
     }
 }

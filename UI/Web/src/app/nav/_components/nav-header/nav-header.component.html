@@ -9,12 +9,12 @@
         }
 
         <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
-          <app-image width="28px" height="28px" imageUrl="assets/images/logo-32.png" classes="logo" />
+          <app-image width="24px" height="24px" imageUrl="assets/images/logo-32.png" classes="logo" />
           <span class="d-none d-md-inline logo"> Kavita</span>
         </a>
         <ul class="navbar-nav col me-auto">
           @if (accountService.currentUser$ | async; as user) {
-            <div class="nav-item">
+            <div class="nav-item search">
               <label for="nav-search" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
               <div class="ng-autocomplete">
                 <app-grouped-typeahead
@@ -161,8 +161,6 @@
           }
         </ul>
 
-
-        @if (!searchFocused) {
           @if((breakpoint$ | async)! > Breakpoint.Tablet) {
             @if (backToTopNeeded) {
               <div class="back-to-top">
@@ -206,7 +204,7 @@
               </div>
             }
           }
-        }
+        
 
       </div>
     </nav>
