@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nager.ArticleNumber;
 
 namespace API.Controllers;
+#nullable enable
 
 public class PersonController : BaseApiController
 {
@@ -39,11 +40,11 @@ public class PersonController : BaseApiController
     }
 
     /// <summary>
-    /// Returns a list of authors for browsing
+    /// Returns a list of authors & artists for browsing
     /// </summary>
     /// <param name="userParams"></param>
     /// <returns></returns>
-    [HttpPost("authors")]
+    [HttpPost("all")]
     public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetAuthorsForBrowse([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;

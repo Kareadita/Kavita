@@ -190,6 +190,7 @@ export class ChapterDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
+  weblinks: Array<string> = [];
   activeTabId = TabID.Details;
   /**
    * This is the download we get from download service.
@@ -259,6 +260,7 @@ export class ChapterDetailComponent implements OnInit {
 
       this.series = results.series;
       this.chapter = results.chapter;
+      this.weblinks = this.chapter.webLinks.split(',');
       this.libraryType = results.libraryType;
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
@@ -281,7 +283,8 @@ export class ChapterDetailComponent implements OnInit {
         }
       }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-      this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 || (this.chapter.tags || []).length > 0;
+      this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 ||
+        (this.chapter.tags || []).length > 0 || this.chapter.webLinks.length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });

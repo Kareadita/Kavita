@@ -85,6 +85,7 @@ export class SettingItemComponent {
   toggleEditMode() {
 
     if (!this.toggleOnViewClick) return;
+    if (!this.canEdit) return;
 
     this.isEditMode = !this.isEditMode;
     this.editMode.emit(this.isEditMode);

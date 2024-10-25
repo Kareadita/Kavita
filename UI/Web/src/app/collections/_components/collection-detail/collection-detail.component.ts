@@ -171,18 +171,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-    const navbar = this.document.querySelector('.navbar') as HTMLElement;
-    if (navbar === null) return 'calc(var(--vh)*100)';
-
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
-    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
-  }
-
-
   constructor(@Inject(DOCUMENT) private document: Document) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
@@ -299,10 +287,16 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
     switch (action.action) {
       case Action.Promote:
-        this.collectionService.promoteMultipleCollections([this.collectionTag.id], true).subscribe();
+        this.collectionService.promoteMultipleCollections([this.collectionTag.id], true).subscribe(() => {
+          this.collectionTag.promoted = true;
+          this.cdRef.markForCheck();
+        });
         break;
       case Action.UnPromote:
-        this.collectionService.promoteMultipleCollections([this.collectionTag.id], false).subscribe();
+        this.collectionService.promoteMultipleCollections([this.collectionTag.id], false).subscribe(() => {
+          this.collectionTag.promoted = false;
+          this.cdRef.markForCheck();
+        });
         break;
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);

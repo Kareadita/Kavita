@@ -110,7 +110,7 @@ public class ProcessSeries : IProcessSeries
 
         try
         {
-            _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
+            _logger.LogInformation("[ScannerService] Processing series {SeriesName} with {Count} files", series.OriginalName, parsedInfos.Count);
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
@@ -423,7 +423,7 @@ public class ProcessSeries : IProcessSeries
         var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(AppUserIncludes.Collections);
         if (defaultAdmin == null) return;
 
-        _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+        _logger.LogInformation("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
         var sw = Stopwatch.StartNew();
 
         foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
@@ -593,7 +593,6 @@ public class ProcessSeries : IProcessSeries
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
-        _logger.LogTrace("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
             Volume? volume;
@@ -621,7 +620,6 @@ public class ProcessSeries : IProcessSeries
             volume.LookupName = volumeNumber;
             volume.Name = volume.GetNumberTitle();
 
-            _logger.LogTrace("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
 
             await UpdateChapters(series, volume, infos, forceUpdate);
@@ -641,7 +639,7 @@ public class ProcessSeries : IProcessSeries
         if (series.Volumes.Count == nonDeletedVolumes.Count) return;
 
 
-        _logger.LogTrace("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+        _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
             (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
         var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
         foreach (var volume in deletedVolumes)
@@ -655,7 +653,7 @@ public class ProcessSeries : IProcessSeries
                     file);
             }
 
-            _logger.LogTrace("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+            _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
         }
 
         series.Volumes = nonDeletedVolumes;
@@ -681,7 +679,7 @@ public class ProcessSeries : IProcessSeries
 
             if (chapter == null)
             {
-                _logger.LogTrace(
+                _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 chapter = ChapterBuilder.FromParserInfo(info).Build();
                 volume.Chapters.Add(chapter);
@@ -778,7 +776,7 @@ public class ProcessSeries : IProcessSeries
                 // If no files remain after filtering, remove the chapter
                 if (existingChapter.Files.Count != 0) continue;
 
-                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }
@@ -789,7 +787,7 @@ public class ProcessSeries : IProcessSeries
 
                 // If no files exist, remove the chapter
                 if (filesExist) continue;
-                _logger.LogTrace("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
             }

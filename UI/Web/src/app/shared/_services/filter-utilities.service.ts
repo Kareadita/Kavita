@@ -7,7 +7,7 @@ import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";

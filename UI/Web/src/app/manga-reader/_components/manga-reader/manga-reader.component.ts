@@ -30,7 +30,7 @@ import {
   take,
   tap
 } from 'rxjs';
-import {ChangeContext, LabelType, NgxSliderModule, Options} from 'ngx-slider-v2';
+import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
