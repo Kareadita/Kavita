@@ -122,8 +122,10 @@ public class ReadingListRepository : IReadingListRepository
     {
         return _context.ReadingListItem
             .Where(item => item.ReadingListId == readingListId)
-            .SelectMany(item => item.Chapter.People.Where(p => p.Role == PersonRole.Character))
-            .OrderBy(p => p.NormalizedName)
+            .SelectMany(item => item.Chapter.People)
+            .Where(p => p.Role == PersonRole.Character)
+            .OrderBy(p => p.Person.NormalizedName)
+            .Select(p => p.Person)
             .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();

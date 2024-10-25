@@ -89,6 +89,19 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
+    /// Performs the nightly maintenance work on the Server. Can be heavy.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("cleanup")]
+    public ActionResult Cleanup()
+    {
+        _logger.LogInformation("{UserName} is clearing running general cleanup from admin dashboard", User.GetUsername());
+        RecurringJob.TriggerJob(TaskScheduler.CleanupTaskId);
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Performs an ad-hoc backup of the Database
     /// </summary>
     /// <returns></returns>

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -817,12 +816,17 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task UpdateSeriesMetadata_ShouldAddNewPerson_NoExistingPeople()
     {
         await ResetDb();
+        var g = new PersonBuilder("Existing Person").Build();
+        await _context.SaveChangesAsync();
+
         var s = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(g, PersonRole.Publisher)
+                .Build())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
-        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
+
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -833,7 +837,7 @@ public class SeriesServiceTests : AbstractDbTest
             SeriesMetadata = new SeriesMetadataDto
             {
                 SeriesId = 1,
-                Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
+                Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person"}},
             },
 
         });
@@ -842,7 +846,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.People.Select(g => g.Name).All(g => g == "Existing Person"));
+        Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
         Assert.False(series.Metadata.PublisherLocked); // PublisherLocked is false unless the UI Explicitly says it should be locked
     }
 
@@ -854,10 +858,14 @@ public class SeriesServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
-        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
-        s.Metadata.People = new List<Person>
-        {new PersonBuilder("Existing Writer", PersonRole.Writer).Build(),
-            new PersonBuilder("Existing Translator", PersonRole.Translator).Build(), new PersonBuilder("Existing Publisher 2", PersonRole.Publisher).Build()};
+        var g = new PersonBuilder("Existing Person").Build();
+        s.Metadata.People = new List<SeriesMetadataPeople>
+        {
+            new SeriesMetadataPeople() {Person = new PersonBuilder("Existing Writer").Build(), Role = PersonRole.Writer},
+            new SeriesMetadataPeople() {Person = new PersonBuilder("Existing Translator").Build(), Role = PersonRole.Translator},
+            new SeriesMetadataPeople() {Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher}
+        };
+
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -868,7 +876,7 @@ public class SeriesServiceTests : AbstractDbTest
             SeriesMetadata = new SeriesMetadataDto
             {
                 SeriesId = 1,
-                Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
+                Publishers = new List<PersonDto> {new () {Id = 0, Name = "Existing Person"}},
                 PublisherLocked = true
             },
 
@@ -878,8 +886,64 @@ public class SeriesServiceTests : AbstractDbTest
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.People.Select(g => g.Name).All(g => g == "Existing Person"));
+        Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
         Assert.True(series.Metadata.PublisherLocked);
+    }
+
+
+    /// <summary>
+    /// I'm not sure how I could handle this use-case
+    /// </summary>
+    //[Fact]
+    public async Task UpdateSeriesMetadata_ShouldUpdate_ExistingPeople_NewName()
+    {
+        await ResetDb();  // Resets the database for a clean state
+
+        // Arrange: Build series, metadata, and existing people
+        var series = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test Library", LibraryType.Book).Build();
+
+        var existingPerson = new PersonBuilder("Existing Person").Build();
+        var existingWriter = new PersonBuilder("ExistingWriter").Build();  // Pre-existing writer
+
+        series.Metadata.People = new List<SeriesMetadataPeople>
+        {
+            new SeriesMetadataPeople { Person = existingWriter, Role = PersonRole.Writer },
+            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Translator").Build(), Role = PersonRole.Translator },
+            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher }
+        };
+
+        _context.Series.Add(series);
+        _context.Person.Add(existingPerson);
+        await _context.SaveChangesAsync();
+
+        // Act: Update series metadata, attempting to update the writer to "Existing Writer"
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = series.Id,  // Use the series ID
+                Writers = new List<PersonDto> { new() { Id = 0, Name = "Existing Writer" } },  // Trying to update writer's name
+                WriterLocked = true
+            }
+        });
+
+        // Assert: Ensure the operation was successful
+        Assert.True(success);
+
+        // Reload the series from the database
+        var updatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
+        Assert.NotNull(updatedSeries.Metadata);
+
+        // Assert that the people list still contains the updated person with the new name
+        var updatedPerson = updatedSeries.Metadata.People.FirstOrDefault(p => p.Role == PersonRole.Writer)?.Person;
+        Assert.NotNull(updatedPerson);  // Make sure the person exists
+        Assert.Equal("Existing Writer", updatedPerson.Name);  // Check if the person's name was updated
+
+        // Assert that the publisher lock is still true
+        Assert.True(updatedSeries.Metadata.WriterLocked);
     }
 
 
@@ -891,7 +955,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
-        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
+        var g = new PersonBuilder("Existing Person").Build();
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -976,6 +1040,199 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotNull(series.Metadata);
         Assert.Equal(0, series.Metadata.ReleaseYear);
         Assert.False(series.Metadata.ReleaseYearLocked);
+    }
+
+    #endregion
+
+    #region UpdateGenres
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewGenre_NoExistingGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        _context.Series.Add(s);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto> {new () {Id = 0, Title = "New Genre"}},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.False(series.Metadata.GenresLocked); // Ensure the lock is not activated unless specified.
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldReplaceExistingGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var g = new GenreBuilder("Existing Genre").Build();
+        s.Metadata.Genres = new List<Genre> { g };
+
+        _context.Series.Add(s);
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto> { new() { Id = 0, Title = "New Genre" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.DoesNotContain("Existing Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveAllGenres()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var g = new GenreBuilder("Existing Genre").Build();
+        s.Metadata.Genres = new List<Genre> { g };
+
+        _context.Series.Add(s);
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Genres = new List<GenreTagDto>(), // Removing all genres
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Empty(series.Metadata.Genres);
+    }
+
+    #endregion
+
+    #region UpdateTags
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewTag_NoExistingTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        _context.Series.Add(s);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto> { new() { Id = 0, Title = "New Tag" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldReplaceExistingTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var t = new TagBuilder("Existing Tag").Build();
+        s.Metadata.Tags = new List<Tag> { t };
+
+        _context.Series.Add(s);
+        _context.Tag.Add(t);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto> { new() { Id = 0, Title = "New Tag" }},
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.DoesNotContain("Existing Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveAllTags()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
+
+        var t = new TagBuilder("Existing Tag").Build();
+        s.Metadata.Tags = new List<Tag> { t };
+
+        _context.Series.Add(s);
+        _context.Tag.Add(t);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = s.Id,
+                Tags = new List<TagDto>(), // Removing all tags
+            },
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series.Metadata);
+        Assert.Empty(series.Metadata.Tags);
     }
 
     #endregion

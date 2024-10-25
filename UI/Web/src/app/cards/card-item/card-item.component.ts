@@ -46,6 +46,9 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {BrowsePerson} from "../../_models/person/browse-person";
+
+export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 
 @Component({
   selector: 'app-card-item',
@@ -116,7 +119,7 @@ export class CardItemComponent implements OnInit {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input({required: true}) entity!: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter;
+  @Input({required: true}) entity!: CardEntity;
   /**
    * If the entity is selected or not.
    */
@@ -161,7 +164,7 @@ export class CardItemComponent implements OnInit {
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
-  @Output() readClicked = new EventEmitter<Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter>();
+  @Output() readClicked = new EventEmitter<CardEntity>();
   @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
   /**
    * Library name item belongs to

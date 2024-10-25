@@ -480,5 +480,54 @@ public class UploadController : BaseApiController
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "reset-chapter-lock"));
     }
 
+    /// <summary>
+    /// Replaces person tag cover image and locks it with a base64 encoded image
+    /// </summary>
+    /// <param name="uploadFileDto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
+    [HttpPost("person")]
+    public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
+    {
+        // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
+        // See if we can do this all in memory without touching underlying system
+        if (string.IsNullOrEmpty(uploadFileDto.Url))
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
+        }
+
+        try
+        {
+            var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
+            if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetPersonFormat(uploadFileDto.Id)}");
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                person.CoverImage = filePath;
+                person.CoverImageLocked = true;
+                _imageService.UpdateColorScape(person);
+                _unitOfWork.PersonRepository.Update(person);
+            }
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false);
+                return Ok();
+            }
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "There was an issue uploading cover image for Person {Id}", uploadFileDto.Id);
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-person-save"));
+    }
+
 
 }

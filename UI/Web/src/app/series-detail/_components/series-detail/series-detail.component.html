@@ -122,7 +122,7 @@
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Writers, item.id)">{{item.name}}</a>
+                      <a routerLink="/person/{{item.name}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
                   </app-badge-expander>
                 </div>

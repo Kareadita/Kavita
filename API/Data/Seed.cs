@@ -114,6 +114,14 @@ public static class Seed
         Order = 5,
         IsProvided = true,
         Visible = true
+    },
+    new AppUserSideNavStream()
+    {
+        Name = "browse-authors",
+        StreamType = SideNavStreamType.BrowseAuthors,
+        Order = 6,
+        IsProvided = true,
+        Visible = true
     });
 
 
@@ -183,10 +191,10 @@ public static class Seed
         var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
         foreach (var user in allUsers)
         {
-            if (user.SideNavStreams.Count != 0) continue;
             user.SideNavStreams ??= new List<AppUserSideNavStream>();
             foreach (var defaultStream in DefaultSideNavStreams)
             {
+                if (user.SideNavStreams.Any(s => s.Name == defaultStream.Name && s.StreamType == defaultStream.StreamType)) continue;
                 var newStream = new AppUserSideNavStream()
                 {
                     Name = defaultStream.Name,

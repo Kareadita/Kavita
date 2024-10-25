@@ -56,6 +56,10 @@
                 <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
               }
 
+              @case (SideNavStreamType.BrowseAuthors) {
+                <app-side-nav-item icon="fa-users" [title]="t('browse-authors')" link="/browse/authors/"></app-side-nav-item>
+              }
+
               @case (SideNavStreamType.SmartFilter) {
                 <app-side-nav-item icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded"></app-side-nav-item>
               }

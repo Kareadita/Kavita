@@ -126,26 +126,43 @@ public class QueryableExtensionsTests
     [InlineData(false, 1)]
     public void RestrictAgainstAgeRestriction_Person_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
-        var items = new List<Person>()
+        // Arrange
+        var items = new List<Person>
         {
-            new PersonBuilder("Test", PersonRole.Character)
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
-                .Build(),
-            new PersonBuilder("Test", PersonRole.Character)
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
-                .Build(),
-            new PersonBuilder("Test", PersonRole.Character)
-                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
-                .Build(),
+            CreatePersonWithSeriesMetadata("Test1", AgeRating.Teen),
+            CreatePersonWithSeriesMetadata("Test2", AgeRating.Unknown, AgeRating.Teen),
+            CreatePersonWithSeriesMetadata("Test3", AgeRating.X18Plus)
         };
 
-        var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
+        var ageRestriction = new AgeRestriction
         {
             AgeRating = AgeRating.Teen,
             IncludeUnknowns = includeUnknowns
-        });
+        };
+
+        // Act
+        var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(ageRestriction);
+
+        // Assert
         Assert.Equal(expectedCount, filtered.Count());
+    }
+
+    private static Person CreatePersonWithSeriesMetadata(string name, params AgeRating[] ageRatings)
+    {
+        var person = new PersonBuilder(name).Build();
+
+        foreach (var ageRating in ageRatings)
+        {
+            var seriesMetadata = new SeriesMetadataBuilder().WithAgeRating(ageRating).Build();
+            person.SeriesMetadataPeople.Add(new SeriesMetadataPeople
+            {
+                SeriesMetadata = seriesMetadata,
+                Person = person,
+                Role = PersonRole.Character // Role is now part of the relationship
+            });
+        }
+
+        return person;
     }
 
     [Theory]

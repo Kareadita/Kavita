@@ -278,7 +278,7 @@ public class LibraryWatcher : ILibraryWatcher
             _logger.LogTrace("Folder path: {FolderPath}", fullPath);
             if (string.IsNullOrEmpty(fullPath))
             {
-                _logger.LogTrace("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
+                _logger.LogInformation("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
                 return;
             }
 

@@ -1,15 +1,25 @@
-<div class="tagbadge cursor clickable" *ngIf="person !== undefined">
+@if (person !== undefined) {
+  <div class="tagbadge cursor clickable">
     <div class="d-flex flex-column">
-        <ng-container *ngIf="isStaff && staff.imageUrl && !staff.imageUrl.endsWith('default.jpg'); else localPerson">
-          <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}"[imageUrl]="staff.imageUrl"></app-image>
-        </ng-container>
-        <ng-template #localPerson>
-          <i class="fa fa-user-circle align-self-center text-center mb-2" aria-hidden="true"></i>
-        </ng-template>
-        <div class="flex-grow-1 text-center">
-          <span class="mt-0 mb-0">
-            {{person.name}}
-          </span>
-        </div>
+      @if (HasCoverImage) {
+        <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}"
+                   classes="align-self-center text-center mb-2"
+                   [imageUrl]="ImageUrl"
+                   [errorImage]="imageService.noPersonImage">
+        </app-image>
+      } @else {
+        <i class="fas fa-user mx-auto" aria-hidden="true"></i>
+      }
+
+
+      <div class="flex-grow-1 text-center mt-2">
+        @if (isStaff) {
+          <span class="mt-1 mb-0">{{person.name}}</span>
+        } @else {
+          <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">{{person.name}}</a>
+        }
+      </div>
     </div>
-</div>
+  </div>
+}
+

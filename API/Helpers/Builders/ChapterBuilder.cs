@@ -142,4 +142,17 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         _chapter.CreatedUtc = created.ToUniversalTime();
         return this;
     }
+
+    public ChapterBuilder WithPerson(Person person, PersonRole role)
+    {
+        _chapter.People ??= new List<ChapterPeople>();
+        _chapter.People.Add(new ChapterPeople()
+        {
+            Person = person,
+            Role = role,
+            Chapter = _chapter,
+        });
+
+        return this;
+    }
 }

@@ -426,6 +426,7 @@ public class ReadingListService : IReadingListService
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
         if (series == null || library == null) return;
+
         await CreateReadingListsFromSeries(series, library);
     }
 

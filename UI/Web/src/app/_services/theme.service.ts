@@ -195,7 +195,7 @@ export class ThemeService {
    * @param entity
    * @param id
    */
-  refreshColorScape(entity: 'series' | 'volume' | 'chapter', id: number) {
+  refreshColorScape(entity: 'series' | 'volume' | 'chapter' | 'person', id: number) {
     return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${entity}?id=${id}`).pipe(tap((cs) => {
       this.setColorScape(cs.primary || '', cs.secondary);
     }));

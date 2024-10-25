@@ -17,7 +17,7 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             CollectionTags = new List<CollectionTag>(),
             Genres = new List<Genre>(),
             Tags = new List<Tag>(),
-            People = new List<Person>()
+            People = new List<SeriesMetadataPeople>()
         };
     }
 
@@ -43,6 +43,19 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
     public SeriesMetadataBuilder WithAgeRating(AgeRating rating)
     {
         _seriesMetadata.AgeRating = rating;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithPerson(Person person, PersonRole role)
+    {
+        _seriesMetadata.People ??= new List<SeriesMetadataPeople>();
+        _seriesMetadata.People.Add(new SeriesMetadataPeople()
+        {
+            Role = role,
+            Person = person,
+            SeriesMetadata = _seriesMetadata,
+        });
+
         return this;
     }
 }

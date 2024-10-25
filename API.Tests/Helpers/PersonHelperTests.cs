@@ -1,415 +1,143 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Helpers;
 
-public class PersonHelperTests
+public class PersonHelperTests : AbstractDbTest
 {
-    #region UpdatePeople
-    [Fact]
-    public void UpdatePeople_ShouldAddNewPeople()
+    protected override async Task ResetDb()
     {
-        var allPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-        };
-        var peopleAdded = new List<Person>();
-
-        PersonHelper.UpdatePeople(allPeople, new[] {"Joseph Shmo", "Sally Ann"}, PersonRole.Writer, person =>
-        {
-            peopleAdded.Add(person);
-        });
-
-        Assert.Equal(2, peopleAdded.Count);
-        Assert.Equal(4, allPeople.Count);
+        _context.Series.RemoveRange(_context.Series.ToList());
+        await _context.SaveChangesAsync();
     }
-
-    [Fact]
-    public void UpdatePeople_ShouldNotAddDuplicatePeople()
-    {
-        var allPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-            new PersonBuilder("Sally Ann", PersonRole.CoverArtist).Build(),
-
-        };
-        var peopleAdded = new List<Person>();
-
-        PersonHelper.UpdatePeople(allPeople, new[] {"Joe Shmo", "Sally Ann"}, PersonRole.CoverArtist, person =>
-        {
-            peopleAdded.Add(person);
-        });
-
-        Assert.Equal(3, allPeople.Count);
-    }
-    #endregion
-
-    #region UpdatePeopleList
-
-    [Fact]
-    public void UpdatePeopleList_NullTags_NoChanges()
-    {
-        // Arrange
-        ICollection<PersonDto> tags = null;
-        var series = new SeriesBuilder("Test Series").Build();
-        var allTags = new List<Person>();
-        var handleAddCalled = false;
-        var onModifiedCalled = false;
-
-        // Act
-        PersonHelper.UpdatePeopleList(PersonRole.Writer, tags, series, allTags, p => handleAddCalled = true, () => onModifiedCalled = true);
-
-        // Assert
-        Assert.False(handleAddCalled);
-        Assert.False(onModifiedCalled);
-    }
-
-    [Fact]
-    public void UpdatePeopleList_AddNewTag_TagAddedAndOnModifiedCalled()
-    {
-        // Arrange
-        const PersonRole role = PersonRole.Writer;
-        var tags = new List<PersonDto>
-        {
-            new PersonDto { Id = 1, Name = "John Doe", Role = role }
-        };
-        var series = new SeriesBuilder("Test Series").Build();
-        var allTags = new List<Person>();
-        var handleAddCalled = false;
-        var onModifiedCalled = false;
-
-        // Act
-        PersonHelper.UpdatePeopleList(role, tags, series, allTags, p =>
-        {
-            handleAddCalled = true;
-            series.Metadata.People.Add(p);
-        }, () => onModifiedCalled = true);
-
-        // Assert
-        Assert.True(handleAddCalled);
-        Assert.True(onModifiedCalled);
-        Assert.Single(series.Metadata.People);
-        Assert.Equal("John Doe", series.Metadata.People.First().Name);
-    }
-
-    [Fact]
-    public void UpdatePeopleList_RemoveExistingTag_TagRemovedAndOnModifiedCalled()
-    {
-        // Arrange
-        const PersonRole role = PersonRole.Writer;
-        var tags = new List<PersonDto>();
-        var series = new SeriesBuilder("Test Series").Build();
-        var person = new PersonBuilder("John Doe", role).Build();
-        person.Id = 1;
-        series.Metadata.People.Add(person);
-        var allTags = new List<Person>
-        {
-            person
-        };
-        var handleAddCalled = false;
-        var onModifiedCalled = false;
-
-        // Act
-        PersonHelper.UpdatePeopleList(role, tags, series, allTags, p =>
-        {
-            handleAddCalled = true;
-            series.Metadata.People.Add(p);
-        }, () => onModifiedCalled = true);
-
-        // Assert
-        Assert.False(handleAddCalled);
-        Assert.True(onModifiedCalled);
-        Assert.Empty(series.Metadata.People);
-    }
-
-    [Fact]
-    public void UpdatePeopleList_UpdateExistingTag_OnModifiedCalled()
-    {
-        // Arrange
-        const PersonRole role = PersonRole.Writer;
-        var tags = new List<PersonDto>
-        {
-            new PersonDto { Id = 1, Name = "John Doe", Role = role }
-        };
-        var series = new SeriesBuilder("Test Series").Build();
-        var person = new PersonBuilder("John Doe", role).Build();
-        person.Id = 1;
-        series.Metadata.People.Add(person);
-        var allTags = new List<Person>
-        {
-            person
-        };
-        var handleAddCalled = false;
-        var onModifiedCalled = false;
-
-        // Act
-        PersonHelper.UpdatePeopleList(role, tags, series, allTags, p =>
-        {
-            handleAddCalled = true;
-            series.Metadata.People.Add(p);
-        }, () => onModifiedCalled = true);
-
-        // Assert
-        Assert.False(handleAddCalled);
-        Assert.False(onModifiedCalled);
-        Assert.Single(series.Metadata.People);
-        Assert.Equal("John Doe", series.Metadata.People.First().Name);
-    }
-
-    [Fact]
-    public void UpdatePeopleList_NoChanges_HandleAddAndOnModifiedNotCalled()
-    {
-        // Arrange
-        const PersonRole role = PersonRole.Writer;
-        var tags = new List<PersonDto>
-        {
-            new PersonDto { Id = 1, Name = "John Doe", Role = role }
-        };
-        var series = new SeriesBuilder("Test Series").Build();
-        var person = new PersonBuilder("John Doe", role).Build();
-        person.Id = 1;
-        series.Metadata.People.Add(person);
-        var allTags = new List<Person>
-        {
-            new PersonBuilder("John Doe", role).Build()
-        };
-        var handleAddCalled = false;
-        var onModifiedCalled = false;
-
-        // Act
-        PersonHelper.UpdatePeopleList(role, tags, series, allTags, p =>
-        {
-            handleAddCalled = true;
-            series.Metadata.People.Add(p);
-        }, () => onModifiedCalled = true);
-
-        // Assert
-        Assert.False(handleAddCalled);
-        Assert.False(onModifiedCalled);
-        Assert.Single(series.Metadata.People);
-        Assert.Equal("John Doe", series.Metadata.People.First().Name);
-    }
-
-
-
-    #endregion
-
-    #region RemovePeople
-    [Fact]
-    public void RemovePeople_ShouldRemovePeopleOfSameRole()
-    {
-        var existingPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-        };
-        var peopleRemoved = new List<Person>();
-        PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo", "Sally Ann"}, PersonRole.Writer, person =>
-        {
-            peopleRemoved.Add(person);
-        });
-
-        Assert.NotEqual(existingPeople, peopleRemoved);
-        Assert.Single(peopleRemoved);
-    }
-
-    [Fact]
-    public void RemovePeople_ShouldRemovePeopleFromBothRoles()
-    {
-        var existingPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-        };
-        var peopleRemoved = new List<Person>();
-        PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo", "Sally Ann"}, PersonRole.Writer, person =>
-        {
-            peopleRemoved.Add(person);
-        });
-
-        Assert.NotEqual(existingPeople, peopleRemoved);
-        Assert.Single(peopleRemoved);
-
-        PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo"}, PersonRole.CoverArtist, person =>
-        {
-            peopleRemoved.Add(person);
-        });
-
-        Assert.Empty(existingPeople);
-        Assert.Equal(2, peopleRemoved.Count);
-    }
-
-    [Fact]
-    public void RemovePeople_ShouldRemovePeopleOfSameRole_WhenNothingPassed()
-    {
-        var existingPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-        };
-        var peopleRemoved = new List<Person>();
-        PersonHelper.RemovePeople(existingPeople, new List<string>(), PersonRole.Writer, person =>
-        {
-            peopleRemoved.Add(person);
-        });
-
-        Assert.NotEqual(existingPeople, peopleRemoved);
-        Assert.Equal(2, peopleRemoved.Count);
-    }
-
-
-    #endregion
-
-    #region KeepOnlySamePeopleBetweenLists
-    [Fact]
-    public void KeepOnlySamePeopleBetweenLists()
-    {
-        var existingPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-            new PersonBuilder("Sally", PersonRole.Writer).Build(),
-        };
-
-        var peopleFromChapters = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-        };
-
-        var peopleRemoved = new List<Person>();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(existingPeople,
-            peopleFromChapters, person =>
-            {
-                peopleRemoved.Add(person);
-            });
-
-        Assert.Equal(2, peopleRemoved.Count);
-    }
-    #endregion
-
-    #region AddPeople
-
-    [Fact]
-    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonDoesNotExist()
-    {
-        // Arrange
-        var metadataPeople = new List<Person>();
-        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
-
-        // Act
-        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
-
-        // Assert
-        Assert.Single(metadataPeople);
-        Assert.Contains(person, metadataPeople);
-    }
-
-    [Fact]
-    public void AddPersonIfNotExists_ShouldNotAddPerson_WhenPersonAlreadyExists()
-    {
-        // Arrange
-        var metadataPeople = new List<Person>
-        {
-            new PersonBuilder("John Smith", PersonRole.Character)
-                .WithId(1)
-                .Build()
-        };
-        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
-        // Act
-        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
-
-        // Assert
-        Assert.Single(metadataPeople);
-        Assert.NotNull(metadataPeople.SingleOrDefault(p =>
-            p.Name.Equals(person.Name) && p.Role == person.Role && p.NormalizedName == person.NormalizedName));
-        Assert.Equal(1, metadataPeople.First().Id);
-    }
-
-    [Fact]
-    public void AddPersonIfNotExists_ShouldNotAddPerson_WhenPersonNameIsNullOrEmpty()
-    {
-        // Arrange
-        var metadataPeople = new List<Person>();
-        var person2 = new PersonBuilder(string.Empty, PersonRole.Character).Build();
-
-        // Act
-        PersonHelper.AddPersonIfNotExists(metadataPeople, person2);
-
-        // Assert
-        Assert.Empty(metadataPeople);
-    }
-
-    [Fact]
-    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonNameIsDifferentButRoleIsSame()
-    {
-        // Arrange
-        var metadataPeople = new List<Person>
-        {
-            new PersonBuilder("John Smith", PersonRole.Character).Build()
-        };
-        var person = new PersonBuilder("John Doe", PersonRole.Character).Build();
-
-        // Act
-        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
-
-        // Assert
-        Assert.Equal(2, metadataPeople.Count);
-        Assert.Contains(person, metadataPeople);
-    }
-
-    [Fact]
-    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonNameIsSameButRoleIsDifferent()
-    {
-        // Arrange
-        var metadataPeople = new List<Person>
-        {
-            new PersonBuilder("John Doe", PersonRole.Writer).Build()
-        };
-        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
-
-        // Act
-        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
-
-        // Assert
-        Assert.Equal(2, metadataPeople.Count);
-        Assert.Contains(person, metadataPeople);
-    }
-
-
-
-
-    [Fact]
-    public void AddPeople_ShouldAddOnlyNonExistingPeople()
-    {
-        var existingPeople = new List<Person>
-        {
-            new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
-            new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-            new PersonBuilder("Sally", PersonRole.Writer).Build(),
-        };
-
-
-        PersonHelper.AddPersonIfNotExists(existingPeople, new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build());
-        Assert.Equal(3, existingPeople.Count);
-
-        PersonHelper.AddPersonIfNotExists(existingPeople, new PersonBuilder("Joe Shmo", PersonRole.Writer).Build());
-        Assert.Equal(3, existingPeople.Count);
-
-        PersonHelper.AddPersonIfNotExists(existingPeople, new PersonBuilder("Joe Shmo Two", PersonRole.CoverArtist).Build());
-        Assert.Equal(4, existingPeople.Count);
-    }
-
-    #endregion
-
+    //
+    // // 1. Test adding new people and keeping existing ones
+    // [Fact]
+    // public async Task UpdateChapterPeopleAsync_AddNewPeople_ExistingPersonRetained()
+    // {
+    //     var existingPerson = new PersonBuilder("Joe Shmo").Build();
+    //     var chapter = new ChapterBuilder("1").Build();
+    //
+    //     // Create an existing person and assign them to the series with a role
+    //     var series = new SeriesBuilder("Test 1")
+    //         .WithFormat(MangaFormat.Archive)
+    //         .WithMetadata(new SeriesMetadataBuilder()
+    //             .WithPerson(existingPerson, PersonRole.Editor)
+    //             .Build())
+    //         .WithVolume(new VolumeBuilder("1").WithChapter(chapter).Build())
+    //         .Build();
+    //
+    //     _unitOfWork.SeriesRepository.Add(series);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Call UpdateChapterPeopleAsync with one existing and one new person
+    //     await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo", "New Person" }, PersonRole.Editor, _unitOfWork);
+    //
+    //     // Assert existing person retained and new person added
+    //     var people = await _unitOfWork.PersonRepository.GetAllPeople();
+    //     Assert.Contains(people, p => p.Name == "Joe Shmo");
+    //     Assert.Contains(people, p => p.Name == "New Person");
+    //
+    //     var chapterPeople = chapter.People.Select(cp => cp.Person.Name).ToList();
+    //     Assert.Contains("Joe Shmo", chapterPeople);
+    //     Assert.Contains("New Person", chapterPeople);
+    // }
+    //
+    // // 2. Test removing a person no longer in the list
+    // [Fact]
+    // public async Task UpdateChapterPeopleAsync_RemovePeople()
+    // {
+    //     var existingPerson1 = new PersonBuilder("Joe Shmo").Build();
+    //     var existingPerson2 = new PersonBuilder("Jane Doe").Build();
+    //     var chapter = new ChapterBuilder("1").Build();
+    //
+    //     var series = new SeriesBuilder("Test 1")
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithChapter(new ChapterBuilder("1")
+    //                 .WithPerson(existingPerson1, PersonRole.Editor)
+    //                 .WithPerson(existingPerson2, PersonRole.Editor)
+    //                 .Build())
+    //             .Build())
+    //         .Build();
+    //
+    //     _unitOfWork.SeriesRepository.Add(series);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Call UpdateChapterPeopleAsync with only one person
+    //     await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+    //
+    //     var people = await _unitOfWork.PersonRepository.GetAllPeople();
+    //     Assert.DoesNotContain(people, p => p.Name == "Jane Doe");
+    //
+    //     var chapterPeople = chapter.People.Select(cp => cp.Person.Name).ToList();
+    //     Assert.Contains("Joe Shmo", chapterPeople);
+    //     Assert.DoesNotContain("Jane Doe", chapterPeople);
+    // }
+    //
+    // // 3. Test no changes when the list of people is the same
+    // [Fact]
+    // public async Task UpdateChapterPeopleAsync_NoChanges()
+    // {
+    //     var existingPerson = new PersonBuilder("Joe Shmo").Build();
+    //     var chapter = new ChapterBuilder("1").Build();
+    //
+    //     var series = new SeriesBuilder("Test 1")
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithChapter(new ChapterBuilder("1")
+    //                 .WithPerson(existingPerson, PersonRole.Editor)
+    //                 .Build())
+    //             .Build())
+    //         .Build();
+    //
+    //     _unitOfWork.SeriesRepository.Add(series);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Call UpdateChapterPeopleAsync with the same list
+    //     await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+    //
+    //     var people = await _unitOfWork.PersonRepository.GetAllPeople();
+    //     Assert.Contains(people, p => p.Name == "Joe Shmo");
+    //
+    //     var chapterPeople = chapter.People.Select(cp => cp.Person.Name).ToList();
+    //     Assert.Contains("Joe Shmo", chapterPeople);
+    //     Assert.Single(chapter.People); // No duplicate entries
+    // }
+    //
+    // // 4. Test multiple roles for a person
+    // [Fact]
+    // public async Task UpdateChapterPeopleAsync_MultipleRoles()
+    // {
+    //     var person = new PersonBuilder("Joe Shmo").Build();
+    //     var chapter = new ChapterBuilder("1").Build();
+    //
+    //     var series = new SeriesBuilder("Test 1")
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithChapter(new ChapterBuilder("1")
+    //                 .WithPerson(person, PersonRole.Writer) // Assign person as Writer
+    //                 .Build())
+    //             .Build())
+    //         .Build();
+    //
+    //     _unitOfWork.SeriesRepository.Add(series);
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Add same person as Editor
+    //     await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+    //
+    //     // Ensure that the same person is assigned with two roles
+    //     var chapterPeople = chapter.People.Where(cp => cp.Person.Name == "Joe Shmo").ToList();
+    //     Assert.Equal(2, chapterPeople.Count); // One for each role
+    //     Assert.Contains(chapterPeople, cp => cp.Role == PersonRole.Writer);
+    //     Assert.Contains(chapterPeople, cp => cp.Role == PersonRole.Editor);
+    // }
 }

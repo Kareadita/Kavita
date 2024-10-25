@@ -186,6 +186,35 @@ public class SeriesExtensionsTests
     }
 
     [Fact]
+    public void GetCoverImage_JustVolumes_ButVolume0()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+
+            .WithVolume(new VolumeBuilder("0")
+                .WithName("Volume 0")
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithCoverImage("Volume 0")
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("1")
+                .WithName("Volume 1")
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithCoverImage("Volume 1")
+                    .Build())
+                .Build())
+            .Build();
+
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Volume 1", series.GetCoverImage());
+    }
+
+    [Fact]
     public void GetCoverImage_JustSpecials_WithDecimal()
     {
         var series = new SeriesBuilder("Test 1")
