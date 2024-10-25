@@ -84,6 +84,12 @@
 }
 
 
+@media only screen and (max-width: 980px) {
+  .typeahead-input {
+    width: 65%;
+  }
+}
+
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
@@ -91,18 +97,11 @@
         width: 75%;
         margin: 0 auto;
     }
-    input {
-        width: 100%
-    }
-
-    input:focus-visible {
-        width: 100% !important;
-    }
 }
 
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 500px) {
   .typeahead-input {
-    width: 90%;
+    width: 100%;
   }
 }
 
