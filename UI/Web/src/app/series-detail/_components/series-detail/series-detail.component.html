@@ -48,12 +48,12 @@
           </div>
 
           <div class="mt-3 mb-3">
-            <div class="row g-0">
+            <div class="row g-0" style="align-items: center;">
               <div class="col-auto">
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary-outline" (click)="read()">
                     <span>
-                      <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                      <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}} " aria-hidden="true"></i>
                       <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
                     </span>
                   </button>
@@ -72,7 +72,7 @@
               </div>
 
               <div class="col-auto ms-2">
-                <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+                <button class="btn btn-actions" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
                   <span>
                       <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                   </span>
@@ -81,7 +81,7 @@
 
               @if (isAdmin) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
+                  <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                   </button>
                 </div>
@@ -89,19 +89,19 @@
 
               @if ((accountService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
               }
 
               <div class="col-auto ms-2 d-none d-md-block">
-                <div class="card-actions mt-2" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>
               </div>
 
-              <div class="col-auto ms-2 d-none d-md-block">
+              <div class="col-auto ms-2 d-none d-md-block btn-actions">
                 <app-download-button [download$]="download$" [entity]="series" entityType="series"></app-download-button>
               </div>
 

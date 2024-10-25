@@ -65,7 +65,7 @@
 
               @if (accountService.isAdmin$ | async) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
+                  <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                   </button>
                 </div>
@@ -73,7 +73,7 @@
 
               <div class="col-auto ms-2 d-none d-md-block">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
                 </div>
               </div>
 
