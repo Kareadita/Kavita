@@ -35,7 +35,7 @@
     "@jsverse/transloco-persist-lang": "^7.0.2",
     "@jsverse/transloco-persist-translations": "^7.0.1",
     "@jsverse/transloco-preload-langs": "^7.0.1",
-    "@microsoft/signalr": "^7.0.14",
+    "@microsoft/signalr": "^8.0.7",
     "@ng-bootstrap/ng-bootstrap": "^17.0.1",
     "@popperjs/core": "^2.11.7",
     "@swimlane/ngx-charts": "^20.5.0",
