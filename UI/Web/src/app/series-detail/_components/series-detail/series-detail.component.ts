@@ -438,8 +438,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
-        return translate(chapterLocaleKey, {num: vol[0].minNumber});
+        return translate(volumeLocaleKey, {num: vol[0].minNumber});
       }
+
       return translate(volumeLocaleKey, {num: vol[0].minNumber})
         + ' ' + translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
     }
