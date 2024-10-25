@@ -186,6 +186,7 @@
       &.active {
         background-color: var(--side-nav-active-bg-color);
         color: var(--side-nav-item-active-text-color);
+        font-weight: bold;
 
         .active-highlight {
           background-color: var(--side-nav-item-active-color);
@@ -368,11 +369,6 @@
 
     .side-nav-item {
       padding: 0;
-    }
-
-    .side-nav-item:first {
-      border-top-left-radius: var(--side-nav-border-radius);
-      border-top-right-radius: var(--side-nav-border-radius);
     }
   }
 
