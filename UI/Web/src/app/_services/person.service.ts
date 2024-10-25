@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpParams} from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Person, PersonRole} from "../_models/metadata/person";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";

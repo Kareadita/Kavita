@@ -24,13 +24,14 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+                "@angular/localize/init",
+                "zone.js"
             ],
             "inlineStyleLanguage": "scss",
             "tsConfig": "tsconfig.app.json",
@@ -87,7 +88,7 @@
           "defaultConfiguration": ""
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "options": {
             "sslKey": "./ssl/server.key",
             "sslCert": "./ssl/server.crt",
@@ -101,7 +102,7 @@
           }
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "kavita-webui:build"
           }
