@@ -171,6 +171,7 @@ public class PersonRepository : IPersonRepository
                 Id = p.Id,
                 Name = p.Name,
                 Description = p.Description,
+                CoverImage = p.CoverImage,
                 SeriesCount = p.SeriesMetadataPeople
                     .Where(smp => roles.Contains(smp.Role))
                     .Select(smp => smp.SeriesMetadata.SeriesId)

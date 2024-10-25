@@ -44,7 +44,7 @@ export class PersonService {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<PaginatedResult<BrowsePerson[]>>(this.baseUrl + 'person/authors', {}, {observe: 'response', params}).pipe(
+    return this.httpClient.post<PaginatedResult<BrowsePerson[]>>(this.baseUrl + 'person/all', {}, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowsePerson[]>;
       })
