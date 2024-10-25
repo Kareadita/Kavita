@@ -124,7 +124,7 @@ export class CardActionablesComponent implements OnInit {
   openMobileActionableMenu(event: any) {
     this.preventEvent(event);
 
-    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: 'sm'});
+    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
     ref.componentInstance.actions = this.actions;
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);

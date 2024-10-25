@@ -110,7 +110,7 @@ public class ProcessSeries : IProcessSeries
 
         try
         {
-            _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
+            _logger.LogInformation("[ScannerService] Processing series {SeriesName} with {Count} files", series.OriginalName, parsedInfos.Count);
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
