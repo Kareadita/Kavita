@@ -35,6 +35,9 @@ export class ReadMoreComponent implements OnChanges {
   hideToggle: boolean = true;
   isCollapsed: boolean = true;
 
+  get displayText() {
+    return this.currentText.replace(/\n/g, '<br>')
+  }
 
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
