@@ -102,6 +102,7 @@
                   {{t('cover-image-description')}}
                 </p>
                 <app-cover-image-chooser [(imageUrls)]="imageUrls"
+                                         (imageUrlsChange)="handleUploadByUrl($event)"
                                          (imageSelected)="updateSelectedIndex($event)"
                                          (selectedBase64Url)="updateSelectedImage($event)"
                                          [showReset]="person.coverImageLocked"

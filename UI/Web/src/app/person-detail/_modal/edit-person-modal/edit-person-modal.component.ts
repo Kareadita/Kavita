@@ -102,7 +102,9 @@ export class EditPersonModalComponent implements OnInit {
   save() {
     const apis = [];
 
-    if (this.touchedCoverImage || this.coverImageReset) {
+    const hasCoverChanges = this.touchedCoverImage || this.coverImageReset;
+
+    if (hasCoverChanges) {
       apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
     }
 
@@ -121,8 +123,14 @@ export class EditPersonModalComponent implements OnInit {
     apis.push(this.personService.updatePerson(person));
 
     forkJoin(apis).subscribe(_ => {
-      this.modal.close({success: true, coverImageUpdate: false, person: person});
+      this.modal.close({success: true, coverImageUpdate: hasCoverChanges, person: person});
     });
+  }
+
+  handleUploadByUrl(urls: Array<string>) {
+    this.selectedCover = urls[0];
+    this.touchedCoverImage = true;
+    this.cdRef.markForCheck();
   }
 
   updateSelectedIndex(index: number) {
