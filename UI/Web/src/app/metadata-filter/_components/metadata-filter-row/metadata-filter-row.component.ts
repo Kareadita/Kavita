@@ -60,14 +60,18 @@ const unitLabels: Map<FilterField, FilterRowUi> = new Map([
 ]);
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast];
-const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
-    FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-    FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-    FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-    FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-    FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
-    FilterField.Imprint, FilterField.Team, FilterField.Location
+const NumberFields = [
+  FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
+  FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
+];
+const DropdownFields = [
+  FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
+  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+  FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+  FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
+  FilterField.Imprint, FilterField.Team, FilterField.Location
 ];
 const BooleanFields = [FilterField.WantToRead];
 const DateFields = [FilterField.ReadingDate];
