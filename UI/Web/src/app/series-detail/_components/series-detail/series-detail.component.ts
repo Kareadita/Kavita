@@ -704,6 +704,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
 
       if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
+
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
         if (date == null || date.expectedDate === null) {
           if (this.nextExpectedChapter !== undefined) {
@@ -716,7 +717,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.nextExpectedChapter = date;
         this.cdRef.markForCheck();
-      })
+      });
     });
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
