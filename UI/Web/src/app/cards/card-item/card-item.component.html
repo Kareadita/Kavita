@@ -39,7 +39,7 @@
 
       @if (count > 1) {
         <div class="count">
-          <span class="badge bg-primary">{{count}}</span>
+          <span class="badge bg-primary">{{count | compactNumber}}</span>
         </div>
       }
 
@@ -76,7 +76,7 @@
         <span class="card-format">
           @if (showFormat) {
             <app-series-format [format]="format"></app-series-format>
-          }  
+          }
         </span>
 
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">

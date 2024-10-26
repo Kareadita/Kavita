@@ -12,6 +12,7 @@
       <app-carousel-reel [items]="collections" [title]="t('collections-title')">
         <ng-template #carouselItem let-item>
           <app-card-item [title]="item.title" [entity]="item"
+                         [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
                          (clicked)="openCollection(item)" [linkUrl]="'/collections/' + item.id" [showFormat]="false"></app-card-item>
         </ng-template>
@@ -23,6 +24,7 @@
       <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
         <ng-template #carouselItem let-item>
           <app-card-item [title]="item.title" [entity]="item"
+                         [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
                          (clicked)="openReadingList(item)" [linkUrl]="'/lists/' + item.id" [showFormat]="false"></app-card-item>
         </ng-template>

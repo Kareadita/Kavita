@@ -18,4 +18,5 @@ export interface UserCollection {
   totalSourceCount: number;
   missingSeriesFromSource: string | null;
   ageRating: AgeRating;
+  itemCount: number;
 }

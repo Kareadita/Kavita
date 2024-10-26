@@ -59,7 +59,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Series, SeriesDto>();
         CreateMap<CollectionTag, CollectionTagDto>();
         CreateMap<AppUserCollection, AppUserCollectionDto>()
-            .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName));
+            .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
         CreateMap<Person, PersonDto>();
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
@@ -266,7 +267,8 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserBookmark, BookmarkDto>();
 
-        CreateMap<ReadingList, ReadingListDto>();
+        CreateMap<ReadingList, ReadingListDto>()
+            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
         CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
         CreateMap<ChapterDto, TachiyomiChapterDto>();

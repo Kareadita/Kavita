@@ -23,6 +23,11 @@ public class ReadingListDto : IHasCoverImage
     public string SecondaryColor { get; set; } = string.Empty;
 
     /// <summary>
+    /// Number of Items in the Reading List
+    /// </summary>
+    public int ItemCount { get; set; }
+
+    /// <summary>
     /// Minimum Year the Reading List starts
     /// </summary>
     public int StartingYear { get; set; }
