@@ -225,7 +225,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   close(event?: FocusEvent) {
     if (event) {
       // If the user is tabbing out of the input field, check if there are results first before closing
-      if (this.hasData) {
+      if (this.hasData || this.searchTerm) {
         return;
       }
     }
