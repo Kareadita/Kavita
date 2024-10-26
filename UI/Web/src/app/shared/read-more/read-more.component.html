@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'read-more'">
   <div class="read-more-cont">
-    <div [innerHTML]="displayText | safeHtml" [ngClass]="{'blur-text': blur && isCollapsed}"></div>
+    <div [innerHTML]="currentText | safeHtml" [ngClass]="{'blur-text': blur && isCollapsed}"></div>
 
     @if (text && text.length > maxLength && showToggle) {
       <a [class.hidden]="hideToggle" class="read-more-link" (click)="toggleView()">
