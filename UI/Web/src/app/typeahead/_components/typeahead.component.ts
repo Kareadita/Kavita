@@ -252,6 +252,7 @@ export class TypeaheadComponent implements OnInit {
       case KEY_CODES.ESC_KEY:
         this.hasFocus = false;
         event.stopPropagation();
+        event.preventDefault();
         break;
       default:
         break;
