@@ -1207,6 +1207,7 @@
         "bulk-action-label": "Bulk Action"
     },
 
+
     "copy-settings-from-library-modal": {
         "close": "{{common.close}}",
         "select": "Select",
@@ -2097,7 +2098,8 @@
     },
 
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Upcoming"
     },
 
     "server-stats": {
