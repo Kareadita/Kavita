@@ -1253,6 +1253,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
             FilterField.ReadTime => query.HasAverageReadTime(true, statement.Comparison, (int) value),
             FilterField.ReadingDate => query.HasReadingDate(true, statement.Comparison, (DateTime) value, userId),
+            FilterField.ReadLast => query.HasReadLast(true, statement.Comparison, (int) value, userId),
             FilterField.AverageRating => query.HasAverageRating(true, statement.Comparison, (float) value),
             _ => throw new ArgumentOutOfRangeException()
         };

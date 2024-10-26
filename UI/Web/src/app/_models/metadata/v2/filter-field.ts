@@ -34,7 +34,8 @@ export enum FilterField
     AverageRating = 28,
     Imprint = 29,
     Team = 30,
-    Location = 31
+    Location = 31,
+    ReadLast = 32
 }
 
 
