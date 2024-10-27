@@ -338,7 +338,15 @@
               <a ngbNavLink>{{t(TabID.Details)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags" [webLinks]="WebLinks"></app-details-tab>
+                  <app-details-tab [metadata]="seriesMetadata"
+                                   [genres]="seriesMetadata.genres"
+                                   [tags]="seriesMetadata.tags"
+                                   [webLinks]="WebLinks"
+                                   [readingTime]="series"
+                                   [releaseYear]="seriesMetadata.releaseYear"
+                                   [language]="seriesMetadata.language"
+                                   [format]="series.format">
+                  </app-details-tab>
                 }
               </ng-template>
             </li>
