@@ -9,7 +9,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
 {
     public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
     {
-        if (type != LibraryType.Image || !Parser.IsImage(filePath)) return null;
+        if (!IsApplicable(filePath, type)) return null;
 
         var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
@@ -29,7 +29,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
-            ret.Volumes = $"{Parser.SpecialVolumeNumber}";
+            ret.Volumes = Parser.SpecialVolume;
         }
 
         // Override the series name, as fallback folders needs it to try and parse folder name
@@ -37,6 +37,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         {
             ret.Series = Parser.CleanTitle(directoryName, replaceSpecials: false);
         }
+
 
         return string.IsNullOrEmpty(ret.Series) ? null : ret;
     }

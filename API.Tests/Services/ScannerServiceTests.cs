@@ -14,6 +14,7 @@ using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
@@ -205,6 +206,32 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
         Assert.Equal(3, postLib.Series.First().Volumes.Count);
+    }
+
+    /// <summary>
+    /// This test is currently disabled because the Image parser is unable to support multiple files mapping into one single Special.
+    /// https://github.com/Kareadita/Kavita/issues/3299
+    /// </summary>
+    public async Task ScanLibrary_ImageSeries_SpecialGrouping_NonEnglish()
+    {
+        const string testcase = "Image Series with SP Folder (Non English) - Image.json";
+
+        var library = await GenerateScannerData(testcase);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Equal(3, series.Volumes.Count);
+        var specialVolume = series.Volumes.FirstOrDefault(v => v.Name == Parser.SpecialVolume);
+        Assert.NotNull(specialVolume);
+        Assert.Single(specialVolume.Chapters);
+        Assert.True(specialVolume.Chapters.First().IsSpecial);
+        //Assert.Equal("葬送のフリーレン 公式ファンブック SP01", specialVolume.Chapters.First().Title);
     }
 
 
