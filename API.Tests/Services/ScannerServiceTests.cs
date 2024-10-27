@@ -157,6 +157,34 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(3, postLib.Series.First().Volumes.Count);
     }
 
+    [Fact]
+    public async Task ScanLibrary_LocalizedSeries2()
+    {
+        const string testcase = "Series with Localized 2 - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Immoral Guild v01.cbz", new ComicInfo()
+        {
+            Series = "Immoral Guild",
+            LocalizedSeries = "Futoku no Guild" // Filename has a capital N and localizedSeries has lowercase
+        });
+
+        var library = await GenerateScannerData(testcase, infos);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var s = postLib.Series.First();
+        Assert.Equal("Immoral Guild", s.Name);
+        Assert.Equal("Futoku no Guild", s.LocalizedName);
+        Assert.Equal(3, s.Volumes.Count);
+    }
+
 
     /// <summary>
     /// Files under a folder with a SP marker should group into one issue
