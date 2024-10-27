@@ -269,6 +269,49 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
 
+    /// <summary>
+    /// Tests that pdf parser handles the loose chapters correctly
+    /// https://github.com/Kareadita/Kavita/issues/3148
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_LooseChapters_Pdf()
+    {
+        const string testcase = "PDF Comic Chapters - Comic.json";
+
+        var library = await GenerateScannerData(testcase);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Equal(4, series.Volumes.First().Chapters.Count);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_LooseChapters_Pdf_LN()
+    {
+        const string testcase = "PDF Comic Chapters - LightNovel.json";
+
+        var library = await GenerateScannerData(testcase);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Equal(4, series.Volumes.First().Chapters.Count);
+    }
+
+
     #region Setup
     private async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo> comicInfos = null)
     {
