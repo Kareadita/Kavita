@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'cover-image-chooser'">
-  <div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
+  <div class="container-fluid" style="padding-left: 0; padding-right: 0">
     <form [formGroup]="form">
       <ngx-file-drop (onFileDrop)="dropped($event)"
                      (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false"

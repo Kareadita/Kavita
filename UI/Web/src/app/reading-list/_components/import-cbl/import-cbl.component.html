@@ -165,7 +165,7 @@
   <!-- Spacer -->
   <div class="col" aria-hidden="true"></div>
   <div class="col-auto ms-1">
-    <a class="btn btn-icon" [href]="WikiLink.ReadingListCBL" target="_blank" rel="noopener noreferrer">Help</a>
+    <a class="btn btn-icon" [href]="WikiLink.ReadingListCBL" target="_blank" rel="noopener noreferrer">{{t('help-label')}}</a>
   </div>
   <div class="col-auto ms-1">
     <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
