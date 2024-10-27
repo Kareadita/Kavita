@@ -84,16 +84,15 @@
             <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
           }
           @if (linkUrl) {
-            <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
+            <a class="dark-exempt btn-icon" [routerLink]="linkUrl">{{title}}</a>
           } @else {
             {{title}}
           }
         </span>
+
         <span class="card-actions">
         @if (actions && actions.length > 0) {
-
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-
         }
         </span>
       </div>

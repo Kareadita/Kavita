@@ -259,6 +259,8 @@ export class CardItemComponent implements OnInit {
       }
 
       this.cdRef.markForCheck();
+    } else {
+      this.tooltipTitle = this.title;
     }
 
 
