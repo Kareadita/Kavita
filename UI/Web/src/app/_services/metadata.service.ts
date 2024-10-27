@@ -18,6 +18,7 @@ import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 import {SeriesDetailPlus} from "../_models/series-detail/series-detail-plus";
 import {LibraryType} from "../_models/library/library";
 import {IHasCast} from "../_models/common/i-has-cast";
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +76,10 @@ export class MetadataService {
       method += '?libraryIds=' + libraries.join(',');
     }
     return this.httpClient.get<Array<Language>>(this.baseUrl + method);
+  }
+
+  getLanguageNameForCode(code: string) {
+    return this.httpClient.get<string>(`${this.baseUrl}metadata/language-title?code=${code}`, TextResonse);
   }
 
 

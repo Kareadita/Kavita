@@ -20,6 +20,8 @@ import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {MangaFormat} from "../../_models/manga-format";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
+import {LanguageNamePipe} from "../../_pipes/language-name.pipe";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-details-tab',
@@ -35,7 +37,9 @@ import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
     ReadTimePipe,
     SentenceCasePipe,
     SeriesFormatComponent,
-    MangaFormatPipe
+    MangaFormatPipe,
+    LanguageNamePipe,
+    AsyncPipe
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',

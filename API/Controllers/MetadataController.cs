@@ -171,6 +171,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
 
+    /// <summary>
+    /// Given a language code returns the display name
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    [HttpGet("language-title")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["code"])]
+    public ActionResult<string?> GetLanguageTitle(string code)
+    {
+        if (string.IsNullOrEmpty(code)) return BadRequest("Code must be provided");
+
+        return CultureInfo.GetCultures(CultureTypes.AllCultures)
+            .Where(l => code.Equals(l.IetfLanguageTag))
+            .Select(c => c.DisplayName)
+            .FirstOrDefault();
+    }
 
     /// <summary>
     /// If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.

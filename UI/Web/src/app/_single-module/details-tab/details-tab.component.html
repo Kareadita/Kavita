@@ -23,8 +23,7 @@
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('language-title')}}</h4>
       <div class="ms-3">
-        <!-- TODO: Turn this into a full language name -->
-        {{language | sentenceCase}}
+        {{language | languageName | async}}
       </div>
     </div>
   }
