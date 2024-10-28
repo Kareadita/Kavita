@@ -35,7 +35,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         // Override the series name, as fallback folders needs it to try and parse folder name
         if (string.IsNullOrEmpty(ret.Series) || ret.Series.Equals(directoryName))
         {
-            ret.Series = Parser.CleanTitle(directoryName, replaceSpecials: false);
+            ret.Series = Parser.CleanTitle(directoryName);
         }
 
 

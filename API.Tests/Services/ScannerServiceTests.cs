@@ -188,6 +188,36 @@ public class ScannerServiceTests : AbstractDbTest
 
 
     /// <summary>
+    /// Special Keywords shouldn't be removed from the series name and thus these 2 should group
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_ExtraShouldNotAffect()
+    {
+        const string testcase = "Series with Extra - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Vol.01.cbz", new ComicInfo()
+        {
+            Series = "The Novel's Extra",
+        });
+
+        var library = await GenerateScannerData(testcase, infos);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var s = postLib.Series.First();
+        Assert.Equal("The Novel's Extra", s.Name);
+        Assert.Equal(2, s.Volumes.Count);
+    }
+
+
+    /// <summary>
     /// Files under a folder with a SP marker should group into one issue
     /// </summary>
     /// <remarks>https://github.com/Kareadita/Kavita/issues/3299</remarks>
