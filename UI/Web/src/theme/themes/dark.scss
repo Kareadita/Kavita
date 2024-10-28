@@ -197,7 +197,7 @@
   --tagbadge-filled-bg-color: var(--primary-color);
   /* Side Nav */
   --side-nav-width: 260px;
-  --side-nav-icon-size: 21.33px;
+  --side-nav-icon-size: 0.9rem;
   --side-nav-bg-color: var(--elevation-layer9-dark);
   --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
   --side-nav-openclose-transition: 0.15s ease-in-out;
@@ -214,7 +214,7 @@
   --side-nav-bg-color-transition: 0.5s ease-in-out;
   --side-nav-closed-bg-color: transparent;
   --side-nav-item-active-color: var(--primary-color);
-  --side-nav-item-active-text-color: var(--primary-color);
+  --side-nav-item-active-text-color: #fff;
   --side-nav-active-bg-color: transparent;
   --side-nav-overlay-color: var(--elevation-layer11-dark);
   --side-nav-item-closed-color: var(--elevation-layer10);

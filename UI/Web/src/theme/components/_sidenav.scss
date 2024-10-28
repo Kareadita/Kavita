@@ -16,50 +16,6 @@
   &::-webkit-scrollbar {
     visibility: hidden;
   }
-  //START preference sidebar
-  &.preference {
-    height: calc((var(--vh)*100) - 4.6875rem);
-    width: 14.875rem;
-
-    .side-nav {
-      overflow-x: hidden;
-      padding-bottom: 0.625rem;
-
-      .side-nav-header {
-        color: #ffffff;
-        font-size: 0.9375rem;
-
-        &:first-of-type {
-          margin-top: 0.7rem;
-        }
-      }
-
-      .side-nav-item {
-        font-size: 0.9rem;
-        min-height: 1.875rem;
-        justify-content: unset;
-        margin-left: 1.125rem;
-
-        &.active {
-          .side-nav-text {
-            color: var(--side-nav-item-active-text-color);
-          }
-        }
-
-        .side-nav-text {
-          text-align: unset;
-          margin-left: 0.75rem;
-          font-size: 0.8125rem;
-          color: #999999;
-        }
-
-        .card-actions {
-          display: none;
-        }
-      }
-    }
-  }
-  //END preference sidebar
 
   &.no-donate {
     height: calc((var(--vh) * 100) - 5.125rem);
@@ -120,10 +76,10 @@
       justify-content: space-between;
       width: 100%;
       height: auto;
-      min-height: 3.125rem;
+      min-height: 2.6rem;
       overflow: hidden;
       cursor: pointer;
-      font-size: 1.05rem;
+      font-size: 0.9rem;
       text-decoration: none;
       color: var(--side-nav-text-color);
 
@@ -132,7 +88,8 @@
 
         &:first-of-type {
           text-align: center;
-          width: 3.5rem;
+          width: 2.5rem;
+          margin-left: 0.3rem;
         }
 
         &:last-child {
@@ -155,7 +112,7 @@
       .active-highlight {
         background-color: #2f2f2f;
         background-color: rgb(255 255 255 / 9%);
-        width: 0.125rem;
+        width: 0.25rem;
         height: 100%;
         position: absolute;
         left: 0;
@@ -186,7 +143,6 @@
       &.active {
         background-color: var(--side-nav-active-bg-color);
         color: var(--side-nav-item-active-text-color);
-        font-weight: bold;
 
         .active-highlight {
           background-color: var(--side-nav-item-active-color);
@@ -196,10 +152,6 @@
       &:hover {
         color: var(--side-nav-hover-text-color);
         background-color: var(--side-nav-hover-bg-color);
-
-        &.active {
-          color: var(--side-nav-item-active-text-color);
-        }
       }
     }
     //END sidebar nav item
@@ -236,6 +188,50 @@
     }
   }
   //END sidebar
+  //START preference sidebar
+  &.preference {
+    height: calc((var(--vh)*100) - 4.6875rem);
+    width: 14.875rem;
+
+    .side-nav {
+      overflow-x: hidden;
+      padding-bottom: 0.625rem;
+
+      .side-nav-header {
+        color: #ffffff;
+        font-size: 0.9375rem;
+
+        &:first-of-type {
+          margin-top: 0.7rem;
+        }
+      }
+
+      .side-nav-item {
+        font-size: 0.9rem;
+        min-height: 1.875rem;
+        justify-content: unset;
+        margin-left: 1.125rem;
+
+        &.active {
+          .side-nav-text {
+            color: var(--side-nav-item-active-text-color);
+          }
+        }
+
+        .side-nav-text {
+          text-align: unset;
+          margin-left: 0.75rem;
+          font-size: 0.8125rem;
+          color: #999999;
+        }
+
+        .card-actions {
+          display: none;
+        }
+      }
+    }
+  }
+  //END preference sidebar
 }
 //END sidebar container
 
