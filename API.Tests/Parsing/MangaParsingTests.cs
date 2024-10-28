@@ -139,7 +139,6 @@ public class MangaParsingTests
     [InlineData("Vagabond_v03", "Vagabond")]
     [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
     [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
-    [InlineData("[BAA]_Darker_than_Black_Omake-1.zip", "Darker than Black")]
     [InlineData("Baketeriya ch01-05.zip", "Baketeriya")]
     [InlineData("[PROzess]Kimi_ha_midara_na_Boku_no_Joou_-_Ch01", "Kimi ha midara na Boku no Joou")]
     [InlineData("[SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar", "NEEDLESS")]

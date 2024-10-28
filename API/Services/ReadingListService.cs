@@ -609,10 +609,6 @@ public class ReadingListService : IReadingListService
 
     private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
     {
-        if (useComicLibraryMatching)
-        {
-            return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
-        }
         return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
     }
 
