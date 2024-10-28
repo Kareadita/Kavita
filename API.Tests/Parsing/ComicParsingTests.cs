@@ -51,7 +51,7 @@ public class ComicParsingTests
     [InlineData("Demon 012 (Sep 1973) c2c", "Demon")]
     [InlineData("Dragon Age - Until We Sleep 01 (of 03)", "Dragon Age - Until We Sleep")]
     [InlineData("Green Lantern v2 017 - The Spy-Eye that doomed Green Lantern v2", "Green Lantern")]
-    [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire Special- Adam Strange")]
+    [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire Special - Adam Strange")]
     [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis Extra - Rags Morales Sketches")]
     [InlineData("Daredevil - t6 - 10 - (2019)", "Daredevil")]
     [InlineData("Batgirl T2000 #57", "Batgirl")]
