@@ -344,7 +344,7 @@ public class SeriesController : BaseApiController
     /// <param name="libraryId"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    [Obsolete("User all-v2")]
+    [Obsolete("Use all-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = User.GetUserId();
