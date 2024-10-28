@@ -69,15 +69,9 @@
 
     &.focused {
         width: 100%;
-        background-color: #fff;
-        border-color: var(--input-focused-border-color);
+        border-color: var(--primary-color);
         input {
-            color: #000;
-        }
-        .search {
-          .btn-close {
-              filter: unset !important;
-          }
+            color: #fff;
         }
     }
 
