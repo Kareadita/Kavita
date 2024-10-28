@@ -1,87 +1,94 @@
 <ng-container *transloco="let t; read: 'entity-title'">
-  @switch (libraryType) {
-    @case (LibraryType.Comic) {
-      @if (titleName !== '' && prioritizeTitleName) {
-        @if (isChapter && includeChapter) {
-          {{t('issue-num') + ' '  + number + ' - ' }}
-        }
+  {{renderText | defaultValue}}
+<!--  @switch (libraryType) {-->
+<!--    @case (LibraryType.Comic) {-->
+<!--      @if (titleName !== '' && prioritizeTitleName) {-->
+<!--        @if (isChapter && includeChapter) {-->
+<!--          {{t('issue-num') + ' '  + number + ' - ' }}-->
+<!--        }-->
 
-        {{titleName}}
-      } @else {
-        @if (includeVolume && volumeTitle !== '') {
-          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
-        }
-        {{number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + number : volumeTitle) : t('special')}}
-      }
-    }
+<!--        {{titleName}}-->
+<!--      } @else {-->
+<!--        @if (includeVolume && volumeTitle !== '') {-->
+<!--          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}-->
+<!--        }-->
+<!--        {{number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + number : volumeTitle) : t('special')}}-->
+<!--      }-->
+<!--    }-->
 
-    @case (LibraryType.ComicVine) {
-      @if (titleName !== '' && prioritizeTitleName) {
-        @if (isChapter && includeChapter) {
-          {{t('issue-num') + ' '  + number + ' - ' }}
-        }
+<!--    @case (LibraryType.ComicVine) {-->
+<!--      @if (titleName !== '' && prioritizeTitleName) {-->
+<!--        @if (isChapter && includeChapter) {-->
+<!--          {{t('issue-num') + ' '  + number + ' - ' }}-->
+<!--        }-->
 
-        {{titleName}}
-      } @else {
-        @if (includeVolume && volumeTitle !== '') {
-          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
-        }
-        {{number !== LooseLeafOrSpecial ? (isChapter ? t('issue-num') + number : volumeTitle) : t('special')}}
-      }
-    }
+<!--        {{titleName}}-->
+<!--      } @else {-->
+<!--        @if (includeVolume && volumeTitle !== '') {-->
+<!--          {{number !== LooseLeafOrSpecial ? (isChapter && includeVolume ? volumeTitle : '') : ''}}-->
+<!--        }-->
+<!--        @if (number !== LooseLeafOrSpecial) {-->
+<!--          {{isChapter ? t('issue-num') + number : volumeTitle}}-->
+<!--        } @else {-->
+<!--         {{t('special')}}-->
+<!--        }-->
+<!--      }-->
+<!--    }-->
 
-    @case (LibraryType.Manga) {
-      @if (titleName !== '' && prioritizeTitleName) {
-        @if (isChapter && includeChapter) {
-          @if (number === LooseLeafOrSpecial) {
-            {{t('chapter') + ' - ' }}
-          } @else {
-            {{t('chapter') + ' '  + number + ' - ' }}
-          }
+<!--    @case (LibraryType.Manga) {-->
+<!--      @if (titleName !== '' && prioritizeTitleName) {-->
+<!--        @if (isChapter && includeChapter) {-->
+<!--          @if (number === LooseLeafOrSpecial) {-->
+<!--            {{t('chapter') + ' - ' }}-->
+<!--          } @else {-->
+<!--            {{t('chapter') + ' '  + number + ' - ' }}-->
+<!--          }-->
 
-        }
-        {{titleName}}
-      } @else {
-        @if (includeVolume && volumeTitle !== '') {
-          @if (number !== LooseLeafOrSpecial && isChapter && includeVolume) {
-            {{volumeTitle}}
-          }
-        }
+<!--        }-->
+<!--        {{titleName}}-->
+<!--      } @else {-->
+<!--        @if (includeVolume && volumeTitle !== '') {-->
+<!--          @if (number !== LooseLeafOrSpecial && isChapter && includeVolume) {-->
+<!--            {{volumeTitle}}-->
+<!--          }-->
+<!--        }-->
 
-        @if (number !== LooseLeafOrSpecial) {
-          @if (isChapter) {
-            {{t('chapter') + ' ' + number}}
-          } @else {
-            {{volumeTitle}}
-          }
-        } @else {
-          {{t('special')}}
-        }
-      }
-    }
+<!--        @if (number !== LooseLeafOrSpecial) {-->
+<!--          @if (isChapter) {-->
+<!--            {{t('chapter') + ' ' + number}}-->
+<!--          } @else {-->
+<!--            {{volumeTitle}}-->
+<!--          }-->
+<!--        } @else if (fallbackToVolume && isChapter && volumeTitle) {-->
+<!--          {{t('vol-num', {num: volumeTitle})}}-->
+<!--        } @else {-->
+<!--          {{t('special')}}-->
+<!--        }-->
+<!--      }-->
+<!--    }-->
 
-    @case (LibraryType.Book) {
-      @if (titleName !== '' && prioritizeTitleName) {
-        {{titleName}}
-      } @else if (number === LooseLeafOrSpecial) {
-        {{null | defaultValue}}
-      } @else {
-        {{t('book-num', {num: volumeTitle})}}
-      }
-    }
+<!--    @case (LibraryType.Book) {-->
+<!--      @if (titleName !== '' && prioritizeTitleName) {-->
+<!--        {{titleName}}-->
+<!--      } @else if (number === LooseLeafOrSpecial) {-->
+<!--        {{null | defaultValue}}-->
+<!--      } @else {-->
+<!--        {{t('book-num', {num: volumeTitle})}}-->
+<!--      }-->
+<!--    }-->
 
-    @case (LibraryType.LightNovel) {
-      @if (titleName !== '' && prioritizeTitleName) {
-        {{titleName}}
-      } @else if (number === LooseLeafOrSpecial) {
-        {{null | defaultValue}}
-      } @else {
-        {{t('book-num', {num: (isChapter ? number : volumeTitle)})}}
-      }
-    }
+<!--    @case (LibraryType.LightNovel) {-->
+<!--      @if (titleName !== '' && prioritizeTitleName) {-->
+<!--        {{titleName}}-->
+<!--      } @else if (number === LooseLeafOrSpecial) {-->
+<!--        {{null | defaultValue}}-->
+<!--      } @else {-->
+<!--        {{t('book-num', {num: (isChapter ? number : volumeTitle)})}}-->
+<!--      }-->
+<!--    }-->
 
-    @case (LibraryType.Images) {
-      {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}
-    }
-  }
+<!--    @case (LibraryType.Images) {-->
+<!--      {{number !== LooseLeafOrSpecial ? (isChapter ? (t('chapter') + ' ')  + number : volumeTitle) : t('special')}}-->
+<!--    }-->
+<!--  }-->
 </ng-container>
