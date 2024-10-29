@@ -91,6 +91,8 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
 
       this.cdRef.markForCheck();
+    } else {
+      alert('no person')
     }
   }
 

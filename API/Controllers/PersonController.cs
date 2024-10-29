@@ -78,7 +78,7 @@ public class PersonController : BaseApiController
 
 
         // Validate the name is unique
-        if (!(await _unitOfWork.PersonRepository.IsNameUnique(dto.Name)))
+        if (dto.Name != person.Name && !(await _unitOfWork.PersonRepository.IsNameUnique(dto.Name)))
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
         }

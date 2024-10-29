@@ -14,6 +14,7 @@ using Flurl.Http;
 using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using MimeTypes;
 using NetVips;
 
 namespace API.Services.Tasks.Metadata;
@@ -174,7 +175,7 @@ public class CoverDbService : ICoverDbService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.PngloadStream(publisherStream);
+            using var image = Image.NewFromStream(publisherStream);
             var filename = ImageService.GetPublisherFormat(publisherName, encodeFormat);
             switch (encodeFormat)
             {
@@ -219,12 +220,12 @@ public class CoverDbService : ICoverDbService
 
             _logger.LogTrace("Fetching publisher image from {Url}", personImageLink);
             // Download the publisher file using Flurl
-            var publisherStream = await personImageLink
+            var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.WebploadStream(publisherStream);
+            using var image = Image.NewFromStream(personStream);
             var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
             switch (encodeFormat)
             {
