@@ -18,7 +18,7 @@
                     @if (editForm.get('name'); as formControl) {
                       <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
-                          <input id="name" class="form-control" formControlName="name" type="text" readonly
+                          <input id="name" class="form-control" formControlName="name" type="text"
                                  [class.is-invalid]="formControl.invalid && formControl.touched">
                           @if (formControl.errors; as errors) {
                             @if (errors.required) {
@@ -101,6 +101,7 @@
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
                 </p>
+                <button class="btn btn-primary" (click)="downloadCover()">Download</button>
                 <app-cover-image-chooser [(imageUrls)]="imageUrls"
                                          (imageUrlsChange)="handleUploadByUrl($event)"
                                          (imageSelected)="updateSelectedIndex($event)"
