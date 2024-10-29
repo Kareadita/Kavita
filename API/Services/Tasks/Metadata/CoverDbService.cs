@@ -22,7 +22,7 @@ public interface ICoverDbService
 {
     Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
-    Task<string> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
+    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
 }
 
 
@@ -206,8 +206,8 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     /// <param name="person"></param>
     /// <param name="encodeFormat"></param>
-    /// <returns></returns>
-    public async Task<string> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat)
+    /// <returns>Person image (in correct directory) or null if not found/error</returns>
+    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat)
     {
         try
         {
@@ -247,8 +247,9 @@ public class CoverDbService : ICoverDbService
         } catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
-            throw;
         }
+
+        return null;
     }
 
     private async Task<string> GetCoverPersonImagePath(Person person)

@@ -158,7 +158,10 @@ export class EditPersonModalComponent implements OnInit {
 
   downloadCover() {
     this.personService.downloadCover(this.person.id).subscribe(imgUrl => {
-
+      if (imgUrl) {
+        this.imageUrls.push(imgUrl);
+        this.cdRef.markForCheck();
+      }
     });
   }
 

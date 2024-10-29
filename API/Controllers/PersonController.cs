@@ -123,14 +123,12 @@ public class PersonController : BaseApiController
 
         var personImage = await _coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 
-        if (!string.IsNullOrEmpty(personImage))
-        {
-            person.CoverImage = personImage;
-            _imageService.UpdateColorScape(person);
-            _unitOfWork.PersonRepository.Update(person);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
-        }
+        if (string.IsNullOrEmpty(personImage)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+        person.CoverImage = personImage;
+        _imageService.UpdateColorScape(person);
+        _unitOfWork.PersonRepository.Update(person);
+        await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
 
 
         return Ok(personImage);

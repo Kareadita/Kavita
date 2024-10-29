@@ -161,14 +161,7 @@ export class PersonDetailComponent {
     };
 
 
-    if (this.person) {
-      loadPage(this.person).subscribe();
-    } else {
-      alert('no person flow')
-      // this.person$?.pipe(switchMap((p: Person) => {
-      //   return loadPage(p);
-      // })).subscribe();
-    }
+    loadPage(this.person!).subscribe();
   }
 
   loadFilterByRole(role: PersonRole) {
