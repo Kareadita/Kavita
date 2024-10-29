@@ -38,6 +38,7 @@ public interface IPersonRepository
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
     Task<Person> GetPersonByName(string name);
+    Task<bool> IsNameUnique(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
     Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
@@ -209,6 +210,11 @@ public class PersonRepository : IPersonRepository
     public async Task<Person> GetPersonByName(string name)
     {
         return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == name.ToNormalized());
+    }
+
+    public async Task<bool> IsNameUnique(string name)
+    {
+        return !(await _context.Person.AnyAsync(p => p.Name == name));
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId)

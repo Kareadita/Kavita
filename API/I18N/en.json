@@ -53,6 +53,8 @@
     "error-import-stack": "There was an issue importing MAL stack",
 
     "person-doesnt-exist": "Person does not exist",
+    "person-name-required": "Person name is required and must not be null",
+    "person-name-unique": "Person name must be unique",
 
     "device-doesnt-exist": "Device does not exist",
     "generic-device-create": "There was an error when creating the device",

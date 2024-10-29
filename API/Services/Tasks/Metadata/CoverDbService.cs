@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
@@ -43,12 +45,13 @@ public class CoverDbService : ICoverDbService
     /// <summary>
     /// A mapping of urls that need to get the icon from another url, due to strangeness (like app.plex.tv loading a black icon)
     /// </summary>
-    private static readonly IDictionary<string, string> FaviconUrlMapper = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> FaviconUrlMapper = new()
     {
         ["https://app.plex.tv"] = "https://plex.tv"
     };
 
-    public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
+    public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
+        IEasyCachingProviderFactory cacheFactory)
     {
         _logger = logger;
         _directoryService = directoryService;
@@ -164,11 +167,9 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            var finalUrl = publisherLink;
-
-            _logger.LogTrace("Fetching publisher image from {Url}", finalUrl);
-            // Download the favicon.ico file using Flurl
-            var publisherStream = await finalUrl
+            _logger.LogTrace("Fetching publisher image from {Url}", publisherLink);
+            // Download the publisher file using Flurl
+            var publisherStream = await publisherLink
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
@@ -206,16 +207,83 @@ public class CoverDbService : ICoverDbService
     /// <param name="person"></param>
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public Task<string> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat)
+    public async Task<string> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var personImageLink = await GetCoverPersonImagePath(person);
+            if (string.IsNullOrEmpty(personImageLink))
+            {
+                throw new KavitaException($"Could not grab person image for {person.Name}");
+            }
+
+            _logger.LogTrace("Fetching publisher image from {Url}", personImageLink);
+            // Download the publisher file using Flurl
+            var publisherStream = await personImageLink
+                .AllowHttpStatus("2xx,304")
+                .GetStreamAsync();
+
+            // Create the destination file path
+            using var image = Image.WebploadStream(publisherStream);
+            var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+
+            _logger.LogDebug("Person image for {PersonName} downloaded and saved successfully", person.Name);
+
+            return filename;
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
+            throw;
+        }
+    }
+
+    private async Task<string> GetCoverPersonImagePath(Person person)
+    {
+        var tempFile = Path.Join(_directoryService.TempDirectory, "people.yml");
+        if (File.Exists(tempFile))
+        {
+            File.Delete(tempFile);
+        }
+        var masterPeopleFile = await $"{NewHost}people/people.yml"
+            .DownloadFileAsync(_directoryService.TempDirectory);
+
+        if (!File.Exists(tempFile) || string.IsNullOrEmpty(masterPeopleFile))
+        {
+            _logger.LogError("Could not download people.yml from Github");
+            return null;
+        }
+
+        var coverDbRepository = new CoverDbRepository(masterPeopleFile);
+
+        var coverAuthor = coverDbRepository.FindAuthorByAny(person);
+        if (coverAuthor == null || string.IsNullOrEmpty(coverAuthor.ImagePath))
+        {
+            throw new KavitaException($"Could not grab person image for {person.Name}");
+        }
+
+        return $"{NewHost}{coverAuthor.ImagePath}";
     }
 
     private static async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
     {
         var correctSizeLink = string.Empty;
+        // TODO: Pull this down and store it in temp/ to save on requests
         var allOverrides = await $"{OldHost}favicons/urls.txt".GetStringAsync();
+
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
@@ -240,7 +308,9 @@ public class CoverDbService : ICoverDbService
     private static async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
     {
         var externalLink = string.Empty;
+        // TODO: Pull this down and store it in temp/ to save on requests
         var allOverrides = await $"{OldHost}publishers/publishers.txt".GetStringAsync();
+
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var externalFile = allOverrides
