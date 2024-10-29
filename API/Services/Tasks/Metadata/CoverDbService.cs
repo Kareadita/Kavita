@@ -30,6 +30,9 @@ public class CoverDbService : ICoverDbService
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
 
+    private const string OldHost = "https://www.kavitareader.com/assets/";
+    private const string NewHost = "https://www.kavitareader.com/CoversDB/";
+
     private static readonly string[] ValidIconRelations = {
         "icon",
         "apple-touch-icon",
@@ -212,7 +215,7 @@ public class CoverDbService : ICoverDbService
     private static async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
     {
         var correctSizeLink = string.Empty;
-        var allOverrides = await "https://www.kavitareader.com/assets/favicons/urls.txt".GetStringAsync();
+        var allOverrides = await $"{OldHost}favicons/urls.txt".GetStringAsync();
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
@@ -228,7 +231,7 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
             }
 
-            correctSizeLink = "https://www.kavitareader.com/assets/favicons/" + externalFile;
+            correctSizeLink = $"{OldHost}favicons/" + externalFile;
         }
 
         return correctSizeLink;
@@ -237,7 +240,7 @@ public class CoverDbService : ICoverDbService
     private static async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
     {
         var externalLink = string.Empty;
-        var allOverrides = await "https://www.kavitareader.com/assets/publishers/publishers.txt".GetStringAsync();
+        var allOverrides = await $"{OldHost}publishers/publishers.txt".GetStringAsync();
         if (!string.IsNullOrEmpty(allOverrides))
         {
             var externalFile = allOverrides
@@ -261,7 +264,7 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            externalLink = "https://www.kavitareader.com/assets/publishers/" + externalFile;
+            externalLink = $"{OldHost}publishers/" + externalFile;
         }
 
         return externalLink;
