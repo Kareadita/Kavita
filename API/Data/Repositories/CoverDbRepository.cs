@@ -8,6 +8,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 /// <summary>
 /// This is a manual repository, not a DB repo
@@ -35,16 +36,50 @@ public class CoverDbRepository
             author.Aliases.Contains(name, StringComparer.OrdinalIgnoreCase));
     }
 
-    public CoverDbAuthor? FindAuthorByAny(Person person)
+    public CoverDbAuthor? FindBestAuthorMatch(Person person)
     {
         var aniListId = person.AniListId > 0 ? $"{person.AniListId}" : string.Empty;
+        var highestScore = 0;
+        CoverDbAuthor? bestMatch = null;
 
-        return _authors.Find(author =>
-            author.Name.Equals(person.Name, StringComparison.OrdinalIgnoreCase) ||
-            author.Aliases.Contains(person.Name, StringComparer.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(author.Ids.AmazonId) && author.Ids.AmazonId == person.Asin) ||
-            (!string.IsNullOrEmpty(author.Ids.AnilistId) && author.Ids.AnilistId == aniListId) ||
-            (!string.IsNullOrEmpty(author.Ids.HardcoverId) && author.Ids.HardcoverId == person.HardcoverId)
-        );
+        foreach (var author in _authors)
+        {
+            var score = 0;
+
+            // Check metadata IDs and add points if they match
+            if (!string.IsNullOrEmpty(author.Ids.AmazonId) && author.Ids.AmazonId == person.Asin)
+            {
+                score += 10;
+            }
+            if (!string.IsNullOrEmpty(author.Ids.AnilistId) && author.Ids.AnilistId == aniListId)
+            {
+                score += 10;
+            }
+            if (!string.IsNullOrEmpty(author.Ids.HardcoverId) && author.Ids.HardcoverId == person.HardcoverId)
+            {
+                score += 10;
+            }
+
+            // Check for exact name match
+            if (author.Name.Equals(person.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                score += 7;
+            }
+
+            // Check for alias match
+            if (author.Aliases.Contains(person.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                score += 5;
+            }
+
+            // Update the best match if current score is higher
+            if (score <= highestScore) continue;
+
+            highestScore = score;
+            bestMatch = author;
+        }
+
+        return bestMatch;
     }
+
 }

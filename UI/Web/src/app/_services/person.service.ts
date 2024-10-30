@@ -53,6 +53,6 @@ export class PersonService {
   }
 
   downloadCover(personId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, TextResonse);
+    return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
   }
 }

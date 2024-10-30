@@ -101,7 +101,9 @@
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                <button class="btn btn-primary" (click)="downloadCover()">Download</button>
+
+                <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">Download from CoversDB</button>
+
                 <app-cover-image-chooser [(imageUrls)]="imageUrls"
                                          (imageUrlsChange)="handleUploadByUrl($event)"
                                          (imageSelected)="updateSelectedIndex($event)"

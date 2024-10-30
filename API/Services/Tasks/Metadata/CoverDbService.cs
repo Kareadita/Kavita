@@ -218,25 +218,30 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab person image for {person.Name}");
             }
 
+            // Create the destination file path
+            var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
+            var targetFile = Path.Combine(_directoryService.CoverImageDirectory, filename);
+
+            // Ensure if file exists, we delete to overwrite
+
+
             _logger.LogTrace("Fetching publisher image from {Url}", personImageLink);
             // Download the publisher file using Flurl
             var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
-            // Create the destination file path
             using var image = Image.NewFromStream(personStream);
-            var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
             switch (encodeFormat)
             {
                 case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    image.Pngsave(targetFile);
                     break;
                 case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    image.Webpsave(targetFile);
                     break;
                 case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.CoverImageDirectory, filename));
+                    image.Heifsave(targetFile);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
@@ -271,7 +276,7 @@ public class CoverDbService : ICoverDbService
 
         var coverDbRepository = new CoverDbRepository(masterPeopleFile);
 
-        var coverAuthor = coverDbRepository.FindAuthorByAny(person);
+        var coverAuthor = coverDbRepository.FindBestAuthorMatch(person);
         if (coverAuthor == null || string.IsNullOrEmpty(coverAuthor.ImagePath))
         {
             throw new KavitaException($"Could not grab person image for {person.Name}");
