@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
+import {NavigationEnd, Router} from "@angular/router";
+import {debounceTime} from "rxjs/operators";
 
 interface ColorSpace {
   primary: string;
@@ -44,8 +46,40 @@ export class ColorscapeService {
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor(@Inject(DOCUMENT) private document: Document, private readonly router: Router) {
 
+    // this.router.events.pipe(
+    //   filter(event => event instanceof NavigationEnd),
+    // ).subscribe(() => {
+    //   this.setColorScape('');
+    // });
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      tap(() => this.checkAndResetColorscapeAfterDelay())
+    ).subscribe();
+
+  }
+
+  /**
+   * Due to changing ColorScape on route end, we might go from one space to another, but the router events resets to default
+   * This delays it to see if the colors changed or not in 500ms and if not, then we will reset to default.
+   * @private
+   */
+  private checkAndResetColorscapeAfterDelay() {
+    // Capture the current colors at the start of NavigationEnd
+    const initialColors = this.colorSubject.getValue();
+
+    // Wait for 500ms, then check if colors have changed
+    timer(300).pipe(
+      take(1), // Complete after the timer emits
+      tap(() => {
+        const currentColors = this.colorSubject.getValue();
+        if (initialColors != null && currentColors != null && this.areColorSpacesVisuallyEqual(initialColors, currentColors)) {
+          this.setColorScape(''); // Reset to default if colors haven't changed
+        }
+      })
+    ).subscribe();
   }
 
   /**
@@ -71,7 +105,6 @@ export class ColorscapeService {
     const newColorsRGBA = this.convertColorsToRGBA(newColors);
     const oldColors = this.colorSubject.getValue() || this.convertColorsToRGBA(this.defaultColors());
     const duration = this.calculateTransitionDuration(oldColors, newColorsRGBA);
-
 
     // Check if the colors we are transitioning to are visually equal
     if (this.areColorSpacesVisuallyEqual(oldColors, newColorsRGBA)) {
@@ -402,9 +435,5 @@ export class ColorscapeService {
       this.document.head.appendChild(styleElement);
     }
     styleElement.textContent = styles;
-  }
-
-  private unsetPageColorOverrides() {
-    Array.from(this.document.head.children).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase() === colorScapeSelector).forEach(c => this.document.head.removeChild(c));
   }
 }

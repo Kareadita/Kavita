@@ -26,6 +26,7 @@ import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event"
 import {NavigationEnd, Router} from "@angular/router";
 import {ColorscapeService} from "./colorscape.service";
 import {ColorScape} from "../_models/theme/colorscape";
+import {debounceTime} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -57,12 +58,6 @@ export class ThemeService {
   messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService,
   private router: Router) {
     this.renderer = rendererFactory.createRenderer(null, null);
-
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.setColorScape('');
-    });
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
