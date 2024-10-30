@@ -13,6 +13,7 @@ using Flurl;
 using Flurl.Http;
 using HtmlAgilityPack;
 using Kavita.Common;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MimeTypes;
 using NetVips;
@@ -32,6 +33,7 @@ public class CoverDbService : ICoverDbService
     private readonly ILogger<CoverDbService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
+    private readonly IHostEnvironment _env;
 
     private const string OldHost = "https://www.kavitareader.com/assets/";
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
@@ -52,11 +54,12 @@ public class CoverDbService : ICoverDbService
     };
 
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
-        IEasyCachingProviderFactory cacheFactory)
+        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env)
     {
         _logger = logger;
         _directoryService = directoryService;
         _cacheFactory = cacheFactory;
+        _env = env;
     }
 
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
@@ -261,20 +264,39 @@ public class CoverDbService : ICoverDbService
     private async Task<string> GetCoverPersonImagePath(Person person)
     {
         var tempFile = Path.Join(_directoryService.TempDirectory, "people.yml");
+
+        // Check if the file already exists and skip download in Development environment
         if (File.Exists(tempFile))
         {
-            File.Delete(tempFile);
+            if (_env.IsDevelopment())
+            {
+                _logger.LogInformation("Using existing people.yml file in Development environment");
+            }
+            else
+            {
+                // Remove file if not in Development and file is older than 7 days
+                if (File.GetLastWriteTime(tempFile) < DateTime.Now.AddDays(-7))
+                {
+                    File.Delete(tempFile);
+                }
+            }
         }
-        var masterPeopleFile = await $"{NewHost}people/people.yml"
-            .DownloadFileAsync(_directoryService.TempDirectory);
 
-        if (!File.Exists(tempFile) || string.IsNullOrEmpty(masterPeopleFile))
+        // Download the file if it doesn't exist or was deleted due to age
+        if (!File.Exists(tempFile))
         {
-            _logger.LogError("Could not download people.yml from Github");
-            return null;
+            var masterPeopleFile = await $"{NewHost}people/people.yml"
+                .DownloadFileAsync(_directoryService.TempDirectory);
+
+            if (!File.Exists(tempFile) || string.IsNullOrEmpty(masterPeopleFile))
+            {
+                _logger.LogError("Could not download people.yml from Github");
+                return null;
+            }
         }
 
-        var coverDbRepository = new CoverDbRepository(masterPeopleFile);
+
+        var coverDbRepository = new CoverDbRepository(tempFile);
 
         var coverAuthor = coverDbRepository.FindBestAuthorMatch(person);
         if (coverAuthor == null || string.IsNullOrEmpty(coverAuthor.ImagePath))
