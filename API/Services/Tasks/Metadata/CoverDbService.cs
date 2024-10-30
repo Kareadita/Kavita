@@ -15,7 +15,6 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MimeTypes;
 using NetVips;
 
 namespace API.Services.Tasks.Metadata;
@@ -35,7 +34,6 @@ public class CoverDbService : ICoverDbService
     private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly IHostEnvironment _env;
 
-    private const string OldHost = "https://www.kavitareader.com/assets/";
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
 
     private static readonly string[] ValidIconRelations = {
@@ -91,6 +89,7 @@ public class CoverDbService : ICoverDbService
             var htmlContent = url.GetStringAsync().Result;
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
+
             var pngLinks = htmlDocument.DocumentNode.Descendants("link")
                 .Where(link => ValidIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
                 .Select(link => link.GetAttributeValue("href", string.Empty))
@@ -311,7 +310,7 @@ public class CoverDbService : ICoverDbService
     {
         var correctSizeLink = string.Empty;
         // TODO: Pull this down and store it in temp/ to save on requests
-        var allOverrides = await $"{OldHost}favicons/urls.txt".GetStringAsync();
+        var allOverrides = await $"{NewHost}favicons/urls.txt".GetStringAsync();
 
         if (!string.IsNullOrEmpty(allOverrides))
         {
@@ -328,7 +327,7 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
             }
 
-            correctSizeLink = $"{OldHost}favicons/" + externalFile;
+            correctSizeLink = $"{NewHost}favicons/" + externalFile;
         }
 
         return correctSizeLink;
@@ -338,7 +337,7 @@ public class CoverDbService : ICoverDbService
     {
         var externalLink = string.Empty;
         // TODO: Pull this down and store it in temp/ to save on requests
-        var allOverrides = await $"{OldHost}publishers/publishers.txt".GetStringAsync();
+        var allOverrides = await $"{NewHost}publishers/publishers.txt".GetStringAsync();
 
         if (!string.IsNullOrEmpty(allOverrides))
         {
@@ -363,7 +362,7 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            externalLink = $"{OldHost}publishers/" + externalFile;
+            externalLink = $"{NewHost}publishers/" + externalFile;
         }
 
         return externalLink;
