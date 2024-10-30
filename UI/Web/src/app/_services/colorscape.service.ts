@@ -189,7 +189,10 @@ export class ColorscapeService {
     const normalizedDistance = Math.min(totalDistance / (255 * 3 * 4), 1); // Max possible distance is 255*3*4
     const duration = this.minDuration + normalizedDistance * (this.maxDuration - this.minDuration);
 
-    return Math.round(duration);
+    // Add random variance to the duration
+    const durationVariance = this.getRandomInRange(-500, 500);
+
+    return Math.round(duration + durationVariance);
   }
 
   private rgbaToRgb(rgba: RGBAColor): RGB {
@@ -277,12 +280,19 @@ export class ColorscapeService {
     const primaryHSL = this.rgbToHsl(primary);
     const secondaryHSL = this.rgbToHsl(secondary);
 
-    if (isDarkTheme) {
-      return this.calculateDarkThemeColors(secondaryHSL, primaryHSL, primary);
-    } else {
-      // NOTE: Light themes look bad in general with this system.
-      return this.calculateLightThemeDarkColors(primaryHSL, primary);
-    }
+    return  isDarkTheme
+      ? this.calculateDarkThemeColors(secondaryHSL, primaryHSL, primary)
+      : this.calculateLightThemeDarkColors(primaryHSL, primary); // NOTE: Light themes look bad in general with this system.
+  }
+
+  private adjustColorWithVariance(color: string): string {
+    const rgb = this.hexToRgb(color);
+    const randomVariance = () => this.getRandomInRange(-10, 10); // Random variance for each color channel
+    return this.rgbToHex({
+      r: Math.min(255, Math.max(0, rgb.r + randomVariance())),
+      g: Math.min(255, Math.max(0, rgb.g + randomVariance())),
+      b: Math.min(255, Math.max(0, rgb.b + randomVariance()))
+    });
   }
 
   private calculateLightThemeDarkColors(primaryHSL: { h: number; s: number; l: number }, primary: RGB) {
@@ -322,12 +332,60 @@ export class ColorscapeService {
     complementaryHSL.s = Math.min(complementaryHSL.s + 0.1, 1);
     complementaryHSL.l = Math.max(complementaryHSL.l - 0.2, 0.2);
 
+    // Array of colors to shuffle
+    const colors = [
+      this.rgbToHex(primary),
+      this.rgbToHex(this.hslToRgb(lighterHSL)),
+      this.rgbToHex(this.hslToRgb(darkerHSL)),
+      this.rgbToHex(this.hslToRgb(complementaryHSL))
+    ];
+
+    // Shuffle colors array
+    this.shuffleArray(colors);
+
+    // Set a brightness threshold (you can adjust this value as needed)
+    const brightnessThreshold = 100; // Adjust based on your needs (0-255)
+
+    // Ensure the 'lighter' color is not too bright
+    if (this.getBrightness(colors[1]) > brightnessThreshold) {
+      // If it is too bright, find a suitable swap
+      for (let i = 0; i < colors.length; i++) {
+        if (this.getBrightness(colors[i]) <= brightnessThreshold) {
+          // Swap colors[1] (lighter) with a less bright color
+          [colors[1], colors[i]] = [colors[i], colors[1]];
+          break;
+        }
+      }
+    }
+
+    // Ensure no color is repeating and variance is maintained
+    const uniqueColors = new Set(colors);
+    if (uniqueColors.size < colors.length) {
+      // If there are duplicates, re-shuffle the array
+      this.shuffleArray(colors);
+    }
+
     return {
-      primary: this.rgbToHex(primary),
-      lighter: this.rgbToHex(this.hslToRgb(lighterHSL)),
-      darker: this.rgbToHex(this.hslToRgb(darkerHSL)),
-      complementary: this.rgbToHex(this.hslToRgb(complementaryHSL))
+      primary: colors[0],
+      lighter: colors[1],
+      darker: colors[2],
+      complementary: colors[3]
     };
+  }
+
+  // Calculate brightness of a color (RGB)
+  private getBrightness(color: string) {
+    const rgb = this.hexToRgb(color); // Convert hex to RGB
+    // Using the luminance formula for brightness
+    return (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b);
+  }
+
+  // Fisher-Yates shuffle algorithm
+  private shuffleArray(array: string[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
 
   private hexToRgb(hex: string): RGB {
@@ -435,5 +493,9 @@ export class ColorscapeService {
       this.document.head.appendChild(styleElement);
     }
     styleElement.textContent = styles;
+  }
+
+  private getRandomInRange(min: number, max: number): number {
+    return Math.random() * (max - min) + min;
   }
 }
