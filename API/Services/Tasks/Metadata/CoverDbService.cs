@@ -72,9 +72,9 @@ public class CoverDbService : ICoverDbService
         var res = await provider.GetAsync<string>(baseUrl);
         if (res.HasValue)
         {
-            var sanitizedBaseUrl = baseUrl.Replace(Environment.NewLine, string.Empty);
+            var sanitizedBaseUrl = baseUrl.Sanitize();
             _logger.LogInformation("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", sanitizedBaseUrl);
-            throw new KavitaException($"Kavita has already tried to fetch from {baseUrl} and failed. Skipping duplicate check");
+            throw new KavitaException($"Kavita has already tried to fetch from {sanitizedBaseUrl} and failed. Skipping duplicate check");
         }
 
         await provider.SetAsync(baseUrl, string.Empty, TimeSpan.FromDays(10));
@@ -171,7 +171,7 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            _logger.LogTrace("Fetching publisher image from {Url}", publisherLink);
+            _logger.LogTrace("Fetching publisher image from {Url}", publisherLink.Sanitize());
             // Download the publisher file using Flurl
             var publisherStream = await publisherLink
                 .AllowHttpStatus("2xx,304")
@@ -196,11 +196,11 @@ public class CoverDbService : ICoverDbService
             }
 
 
-            _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName);
+            _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
             return filename;
         } catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading image for {PublisherName}", publisherName);
+            _logger.LogError(ex, "Error downloading image for {PublisherName}", publisherName.Sanitize());
             throw;
         }
     }
@@ -228,7 +228,7 @@ public class CoverDbService : ICoverDbService
             // Ensure if file exists, we delete to overwrite
 
 
-            _logger.LogTrace("Fetching publisher image from {Url}", personImageLink);
+            _logger.LogTrace("Fetching publisher image from {Url}", personImageLink.Sanitize());
             // Download the publisher file using Flurl
             var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")
@@ -311,7 +311,8 @@ public class CoverDbService : ICoverDbService
     {
         var correctSizeLink = string.Empty;
         // TODO: Pull this down and store it in temp/ to save on requests
-        var allOverrides = await $"{NewHost}favicons/urls.txt".GetStringAsync();
+        var allOverrides = await $"{NewHost}favicons/urls.txt"
+            .GetStringAsync();
 
         if (!string.IsNullOrEmpty(allOverrides))
         {
@@ -325,7 +326,7 @@ public class CoverDbService : ICoverDbService
 
             if (string.IsNullOrEmpty(externalFile))
             {
-                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+                throw new KavitaException($"Could not grab favicon from {baseUrl.Sanitize()}");
             }
 
             correctSizeLink = $"{NewHost}favicons/" + externalFile;
