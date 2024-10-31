@@ -107,8 +107,14 @@ public class ReadingListService : IReadingListService
 
         if (title != string.Empty) return title;
 
+        // item.ChapterNumber is Range
         if (item.ChapterNumber == Parser.DefaultChapter &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
+        {
+            title = item.ChapterTitleName;
+        }
+        else if (item.IsSpecial &&
+                 !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
         }
@@ -116,6 +122,7 @@ public class ReadingListService : IReadingListService
         {
             title = ReaderService.FormatChapterName(item.LibraryType, true, true) + chapterNum;
         }
+
         return title;
     }
 

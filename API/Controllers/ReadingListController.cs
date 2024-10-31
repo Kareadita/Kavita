@@ -162,7 +162,7 @@ public class ReadingListController : BaseApiController
             return Ok(await _localizationService.Translate(User.GetUserId(), "reading-list-updated"));
         }
 
-        return BadRequest("Couldn't delete item(s)");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "reading-list-item-delete"));
     }
 
     /// <summary>
