@@ -2033,7 +2033,8 @@
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Description",
         "required-field": "{{validations.required-field}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}} Alternatively you can download a cover from CoversDB if available.",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
         "download-coversdb": "Download from CoversDB"
     },
