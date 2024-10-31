@@ -341,6 +341,46 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(4, series.Volumes.First().Chapters.Count);
     }
 
+    /// <summary>
+    /// This is the same as doing ScanFolder as the case where it can find the series is just ScanSeries
+    /// </summary>
+    [Fact]
+    public async Task ScanSeries_NewChapterInNestedFolder()
+    {
+        const string testcase = "Series with Localized - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("My Dress-Up Darling v01.cbz", new ComicInfo()
+        {
+            Series = "My Dress-Up Darling",
+            LocalizedSeries = "Sono Bisque Doll wa Koi wo Suru"
+        });
+
+        var library = await GenerateScannerData(testcase, infos);
+
+
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+        Assert.Equal(3, series.Volumes.Count);
+
+        // Bootstrap a new file in the nested "Sono Bisque Doll wa Koi wo Suru" directory and perform a series scan
+        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(testcase));
+        await Scaffold(testDirectory, ["My Dress-Up Darling/Sono Bisque Doll wa Koi wo Suru ch 11.cbz"]);
+
+        // Now that a new file exists in the subdirectory, scan again
+        await scanner.ScanSeries(series.Id);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, series.Volumes.Count);
+        Assert.Equal(2, series.Volumes.First(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber)).Chapters.Count);
+    }
+
 
     #region Setup
     private async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo> comicInfos = null)
