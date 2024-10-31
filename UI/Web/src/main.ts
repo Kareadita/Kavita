@@ -99,7 +99,7 @@ const languageCodes = [
   'syr', 'syr_SY', 'ta', 'ta_IN', 'te', 'te_IN', 'th', 'th_TH', 'tl', 'tl_PH', 'tn',
   'tn_ZA', 'tr', 'tr_TR', 'tt', 'tt_RU', 'ts', 'uk', 'uk_UA', 'ur', 'ur_PK', 'uz',
   'uz_UZ', 'uz_UZ', 'vi', 'vi_VN', 'xh', 'xh_ZA', 'zh', 'zh_CN', 'zh_HK', 'zh_MO',
-  'zh_SG', 'zh_TW', 'zu', 'zu_ZA', 'zh_Hans', 'zh_Hant', 'nb_NO'
+  'zh_SG', 'zh_TW', 'zu', 'zu_ZA', 'zh_Hans', 'zh_Hant', 'nb_NO', 'ga'
 ];
 
 const translocoOptions = {
