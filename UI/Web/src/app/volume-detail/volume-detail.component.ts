@@ -262,7 +262,6 @@ export class VolumeDetailComponent implements OnInit {
    * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
-  showDetailsTab: boolean = true;
   currentlyReadingChapter: Chapter | undefined = undefined;
 
   maxAgeRating: AgeRating = AgeRating.Unknown;
@@ -506,7 +505,6 @@ export class VolumeDetailComponent implements OnInit {
       this.setContinuePoint();
 
 
-      this.showDetailsTab = hasAnyCast(this.volumeCast) || (this.genres || []).length > 0 || (this.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });

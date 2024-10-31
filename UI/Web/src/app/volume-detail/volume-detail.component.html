@@ -191,21 +191,19 @@
             </li>
           }
 
-          @if (showDetailsTab) {
-            <li [ngbNavItem]="TabID.Details" id="details-tab">
-              <a ngbNavLink>{{t('details-tab')}}</a>
-              <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="volumeCast"
-                                   [genres]="genres"
-                                   [tags]="tags"
-                                   [readingTime]="volume"
-                                   [language]="volume.chapters[0].language"
-                                   [format]="series.format"></app-details-tab>
-                }
-              </ng-template>
-            </li>
-          }
+          <li [ngbNavItem]="TabID.Details" id="details-tab">
+            <a ngbNavLink>{{t('details-tab')}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                <app-details-tab [metadata]="volumeCast"
+                                 [genres]="genres"
+                                 [tags]="tags"
+                                 [readingTime]="volume"
+                                 [language]="volume.chapters[0].language"
+                                 [format]="series.format"></app-details-tab>
+              }
+            </ng-template>
+          </li>
         </ul>
       </div>
       <!-- Min height helps with scroll jerking when switching from chapter -> related/details -->
