@@ -26,7 +26,7 @@
                            [class.is-invalid]="settingsForm.get('taskScanCustom')?.invalid && settingsForm.get('taskScanCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
+                    @if (settingsForm.dirty || !settingsForm.untouched) {
                       <div id="task-scan-validations" class="invalid-feedback">
                         @if(settingsForm.get('taskScanCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
@@ -65,7 +65,7 @@
                            [class.is-invalid]="settingsForm.get('taskBackupCustom')?.invalid && settingsForm.get('taskBackupCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
+                    @if (settingsForm.dirty || !settingsForm.untouched) {
                       <div id="task-backup-validations" class="invalid-feedback">
                         @if(settingsForm.get('taskBackupCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
@@ -105,7 +105,7 @@
                            [class.is-invalid]="settingsForm.get('taskCleanupCustom')?.invalid && settingsForm.get('taskCleanupCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
+                    @if (settingsForm.dirty || !settingsForm.untouched) {
                       <div id="task-cleanup-validations" class="invalid-feedback">
                         @if(settingsForm.get('taskCleanupCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
@@ -151,7 +151,7 @@
         </tr>
         </thead>
         <tbody>
-          @for(task of recurringTasks$ | async; track task.lastExecutionUtc + task.cron; let idx = $index) {
+          @for(task of recurringTasks$ | async; track task; let idx = $index) {
             <tr>
               <td>
                 {{task.title | titlecase}}
