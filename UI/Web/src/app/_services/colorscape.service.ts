@@ -41,18 +41,14 @@ const colorScapeSelector = 'colorscape';
 })
 export class ColorscapeService {
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
+  private colorSeedSubject = new BehaviorSubject<{primary: string, complementary: string | null} | null>(null);
   public readonly colors$ = this.colorSubject.asObservable();
 
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration
+  private defaultColorspaceDuration = 300; // duration to wait before defaulting back to default colorspace
 
   constructor(@Inject(DOCUMENT) private document: Document, private readonly router: Router) {
-
-    // this.router.events.pipe(
-    //   filter(event => event instanceof NavigationEnd),
-    // ).subscribe(() => {
-    //   this.setColorScape('');
-    // });
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -70,8 +66,8 @@ export class ColorscapeService {
     // Capture the current colors at the start of NavigationEnd
     const initialColors = this.colorSubject.getValue();
 
-    // Wait for 500ms, then check if colors have changed
-    timer(300).pipe(
+    // Wait for X ms, then check if colors have changed
+    timer(this.defaultColorspaceDuration).pipe(
       take(1), // Complete after the timer emits
       tap(() => {
         const currentColors = this.colorSubject.getValue();
@@ -97,6 +93,15 @@ export class ColorscapeService {
     if (!elem) {
       return;
     }
+
+    // Check the old seed colors and check if they are similar, then avoid a change. In case you scan a series and this re-generates
+    const previousColors = this.colorSeedSubject.getValue();
+    if (previousColors != null && primaryColor == previousColors.primary) {
+      this.colorSeedSubject.next({primary: primaryColor, complementary: complementaryColor});
+      return;
+    }
+
+    this.colorSeedSubject.next({primary: primaryColor, complementary: complementaryColor});
 
     const newColors: ColorSpace = primaryColor ?
       this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme()) :
