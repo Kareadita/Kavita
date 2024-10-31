@@ -187,12 +187,26 @@ export class EntityTitleComponent implements OnInit {
 
   private calculateComicRenderText() {
     let renderText = '';
-    if (this.titleName !== '' && this.prioritizeTitleName) {
+
+    // If titleName is provided and prioritized
+    if (this.titleName && this.prioritizeTitleName) {
       if (this.isChapter && this.includeChapter) {
         renderText = translate('entity-title.issue-num') + ' ' + this.number + ' - ';
       }
       renderText += this.titleName;
+    } else {
+      // Otherwise, check volume and number logic
+      if (this.includeVolume && this.volumeTitle) {
+        if (this.number !== this.LooseLeafOrSpecial) {
+          renderText = this.isChapter ? this.volumeTitle : '';
+        }
+      }
+      // Render either issue number or volume title, or "special" if applicable
+      renderText += this.number !== this.LooseLeafOrSpecial
+        ? (this.isChapter ? translate('entity-title.issue-num') + ' ' + this.number : this.volumeTitle)
+        : translate('entity-title.special');
     }
+
     return renderText;
   }
 }
