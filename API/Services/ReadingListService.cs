@@ -114,9 +114,17 @@ public class ReadingListService : IReadingListService
             title = item.ChapterTitleName;
         }
         else if (item.IsSpecial &&
-                 !string.IsNullOrEmpty(item.ChapterTitleName))
+                 (!string.IsNullOrEmpty(item.ChapterTitleName) || !string.IsNullOrEmpty(chapterNum)))
         {
-            title = item.ChapterTitleName;
+            if (!string.IsNullOrEmpty(item.ChapterTitleName))
+            {
+                title = item.ChapterTitleName;
+            }
+            else
+            {
+                title = chapterNum;
+            }
+
         }
         else
         {
