@@ -73,9 +73,11 @@
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-title-container">
-        <span class="card-format">
+        <span>
           @if (showFormat) {
-            <app-series-format [format]="format"></app-series-format>
+            <span class="card-format">
+                <app-series-format [format]="format"></app-series-format>
+            </span>
           }
         </span>
 
