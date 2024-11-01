@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
-import {debounceTime} from "rxjs/operators";
 
 interface ColorSpace {
   primary: string;
@@ -18,19 +17,8 @@ interface ColorSpaceRGBA {
   complementary: RGBAColor;
 }
 
-interface RGBAColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
-
-interface RGB {
-  r: number;
-  g: number;
-  b: number;
-}
-
+interface RGBAColor {r: number;g: number;b: number;a: number;}
+interface RGB { r: number;g: number; b: number; }
 interface HSL { h: number; s: number; l: number; }
 
 const colorScapeSelector = 'colorscape';
@@ -51,7 +39,6 @@ export class ColorscapeService {
   private defaultColorspaceDuration = 300; // duration to wait before defaulting back to default colorspace
 
   constructor(@Inject(DOCUMENT) private document: Document, private readonly router: Router) {
-
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       tap(() => this.checkAndResetColorscapeAfterDelay())
@@ -102,8 +89,16 @@ export class ColorscapeService {
       this.colorSeedSubject.next({primary: primaryColor, complementary: complementaryColor});
       return;
     }
-
     this.colorSeedSubject.next({primary: primaryColor, complementary: complementaryColor});
+
+    // TODO: Check if there is a secondary color and if the color is a strong contrast (opposite on color wheel) to primary
+
+    // If we have a STRONG primary and secondary, generate LEFT/RIGHT orientation
+    // If we have only one color, randomize the position of the primary
+    // If we have 2 colors, but their contrast isn't STRONG, then use diagonal for Primary and Secondary
+
+
+
 
     const newColors: ColorSpace = primaryColor ?
       this.generateBackgroundColors(primaryColor, complementaryColor, this.isDarkTheme()) :
@@ -146,7 +141,8 @@ export class ColorscapeService {
     };
   }
 
-  private parseColorToRGBA(color: string): RGBAColor {
+  private parseColorToRGBA(color: string) {
+
     if (color.startsWith('#')) {
       return this.hexToRGBA(color);
     } else if (color.startsWith('rgb')) {
@@ -248,12 +244,19 @@ export class ColorscapeService {
     requestAnimationFrame(animate);
   }
 
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
   private interpolateRGBAColor(color1: RGBAColor, color2: RGBAColor, progress: number): RGBAColor {
+
+    const easedProgress = this.easeInOutCubic(progress);
+
     return {
-      r: Math.round(color1.r + (color2.r - color1.r) * progress),
-      g: Math.round(color1.g + (color2.g - color1.g) * progress),
-      b: Math.round(color1.b + (color2.b - color1.b) * progress),
-      a: color1.a + (color2.a - color1.a) * progress
+      r: Math.round(color1.r + (color2.r - color1.r) * easedProgress),
+      g: Math.round(color1.g + (color2.g - color1.g) * easedProgress),
+      b: Math.round(color1.b + (color2.b - color1.b) * easedProgress),
+      a: color1.a + (color2.a - color1.a) * easedProgress
     };
   }
 
