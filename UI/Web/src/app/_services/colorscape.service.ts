@@ -31,6 +31,8 @@ interface RGB {
   b: number;
 }
 
+interface HSL { h: number; s: number; l: number; }
+
 const colorScapeSelector = 'colorscape';
 
 /**
@@ -300,7 +302,7 @@ export class ColorscapeService {
     });
   }
 
-  private calculateLightThemeDarkColors(primaryHSL: { h: number; s: number; l: number }, primary: RGB) {
+  private calculateLightThemeDarkColors(primaryHSL: HSL, primary: RGB) {
     const lighterHSL = {...primaryHSL};
     lighterHSL.s = Math.max(lighterHSL.s - 0.3, 0);
     lighterHSL.l = Math.min(lighterHSL.l + 0.5, 0.95);
@@ -321,7 +323,7 @@ export class ColorscapeService {
     };
   }
 
-  private calculateDarkThemeColors(secondaryHSL: { h: number; s: number; l: number }, primaryHSL: {
+  private calculateDarkThemeColors(secondaryHSL: HSL, primaryHSL: {
     h: number;
     s: number;
     l: number
@@ -406,7 +408,7 @@ export class ColorscapeService {
     return `#${((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1)}`;
   }
 
-  private rgbToHsl(rgb: RGB): { h: number; s: number; l: number } {
+  private rgbToHsl(rgb: RGB): HSL {
     const r = rgb.r / 255;
     const g = rgb.g / 255;
     const b = rgb.b / 255;
@@ -430,7 +432,7 @@ export class ColorscapeService {
     return { h, s, l };
   }
 
-  private hslToRgb(hsl: { h: number; s: number; l: number }): RGB {
+  private hslToRgb(hsl: HSL): RGB {
     const { h, s, l } = hsl;
     let r, g, b;
 
@@ -460,7 +462,7 @@ export class ColorscapeService {
     };
   }
 
-  private adjustHue(hsl: { h: number; s: number; l: number }, amount: number): { h: number; s: number; l: number } {
+  private adjustHue(hsl: HSL, amount: number): HSL {
     return {
       h: (hsl.h + amount / 360) % 1,
       s: hsl.s,
