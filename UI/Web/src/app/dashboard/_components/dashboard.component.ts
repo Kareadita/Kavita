@@ -163,7 +163,7 @@ export class DashboardComponent implements OnInit {
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
-            s.api = this.metadataService.getAllGenres().pipe(
+            s.api = this.metadataService.getAllGenres([], QueryContext.Dashboard).pipe(
                 map(genres => {
                   this.genre = genres[Math.floor(Math.random() * genres.length)];
                   return this.genre;

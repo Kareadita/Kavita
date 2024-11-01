@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {tap} from 'rxjs/operators';
 import {of} from 'rxjs';
@@ -19,6 +19,7 @@ import {SeriesDetailPlus} from "../_models/series-detail/series-detail-plus";
 import {LibraryType} from "../_models/library/library";
 import {IHasCast} from "../_models/common/i-has-cast";
 import {TextResonse} from "../_types/text-response";
+import {QueryContext} from "../_models/metadata/v2/query-context";
 
 @Injectable({
   providedIn: 'root'
@@ -62,12 +63,12 @@ export class MetadataService {
     return this.httpClient.get<Array<Tag>>(this.baseUrl + method);
   }
 
-  getAllGenres(libraries?: Array<number>) {
+  getAllGenres(libraries?: Array<number>, context: QueryContext = QueryContext.None) {
     let method = 'metadata/genres'
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Array<Genre>>(this.baseUrl + method);
+    return this.httpClient.get<Array<Genre>>(this.baseUrl + method + '&context=' + context);
   }
 
   getAllLanguages(libraries?: Array<number>) {

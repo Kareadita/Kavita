@@ -65,6 +65,7 @@ public enum QueryContext
 {
     None = 1,
     Search = 2,
+    [Obsolete("Use Dashboard")]
     Recommended = 3,
     Dashboard = 4,
 }
@@ -1509,7 +1510,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
+        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 

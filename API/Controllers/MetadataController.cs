@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
@@ -33,18 +34,18 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all genres</param>
     /// <returns></returns>
     [HttpGet("genres")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
-    public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds", "context"])]
+    public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds, QueryContext context = QueryContext.None)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
 
         // NOTE: libraryIds isn't hooked up in the frontend
-        if (ids is {Count: > 0})
-        {
-            return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids));
-        }
+        // if (ids is {Count: > 0})
+        // {
+        //     return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids));
+        // }
 
-        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId()));
+        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
     }
 
     /// <summary>
