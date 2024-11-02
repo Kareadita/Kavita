@@ -1465,6 +1465,7 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
         "last-sync-title": "Last Sync:",
+        "last-sync-tooltip": "Kavita syncs daily against upstream collection provider.",
         "source-url-title": "Source Url:",
         "total-series-title": "Total Series:",
         "missing-series-title": "Missing Series:"

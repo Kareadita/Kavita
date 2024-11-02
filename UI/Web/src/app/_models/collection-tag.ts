@@ -16,6 +16,9 @@ export interface UserCollection {
   source: ScrobbleProvider;
   sourceUrl: string | null;
   totalSourceCount: number;
+  /**
+   * HTML anchors separated by <br/>
+   */
   missingSeriesFromSource: string | null;
   ageRating: AgeRating;
   itemCount: number;
