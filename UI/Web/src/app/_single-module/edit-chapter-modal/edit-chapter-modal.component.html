@@ -123,7 +123,7 @@
                     <div class="mb-3">
                       <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
-                          <div class="input-group"  [ngClass]="{'lock-active': chapter.releaseDateLocked}">
+                          <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
                             <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }"></ng-container>
                             <input
                               class="form-control"
