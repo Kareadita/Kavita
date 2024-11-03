@@ -699,7 +699,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadSeries(seriesId: number, loadExternal: boolean = false) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
+      this.seriesMetadata = {...metadata};
       this.cdRef.markForCheck();
 
       if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
