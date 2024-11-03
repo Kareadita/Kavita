@@ -108,6 +108,8 @@ export class EntityTitleComponent implements OnInit {
     let renderText = '';
     if (this.titleName !== '' && this.prioritizeTitleName) {
       renderText = this.titleName;
+    } else if (this.fallbackToVolume && this.isChapter) { // (his is a single volume on volume detail page
+      renderText = translate('entity-title.single-volume');
     } else if (this.number === this.LooseLeafOrSpecial) {
       renderText = '';
     } else {
@@ -120,6 +122,8 @@ export class EntityTitleComponent implements OnInit {
     let renderText = '';
     if (this.titleName !== '' && this.prioritizeTitleName) {
       renderText = this.titleName;
+    } else if (this.fallbackToVolume && this.isChapter) { // (his is a single volume on volume detail page
+      renderText = translate('entity-title.single-volume');
     } else if (this.number === this.LooseLeafOrSpecial) {
       renderText = '';
     } else {
