@@ -11,70 +11,67 @@
 
 
 .typeahead-input {
-    border: 1px solid transparent;
-    border-radius: 4px;
-    overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  box-shadow: none;
+  cursor: text;
+  background-color: var(--searchbar-bg-color);
+  color: var(--body-text-color);
+  min-height: 32px;
+  transition-property: all;
+  transition-duration: 0.3s;
+  display: block;
+  width: 50%;
+
+  .search {
+    display: flex;
     position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    box-shadow: none;
-    cursor: text;
-    background-color: rgb(255 255 255 / 12%);
-    color: var(--body-text-color);
     min-height: 32px;
+
+    .btn-close {
+      position: unset;
+      margin-top: unset;
+      align-self: center;
+      margin: 0 8px;
+    }
+  }
+
+
+  input {
+    width: 100%;
+    padding: 0px 6px;
+    outline: 0 !important;
+    border-radius: .28571429rem;
+    margin: 0px !important;
+    text-indent: 0 !important;
+    line-height: inherit !important;
+    box-shadow: none !important;
     transition-property: all;
     transition-duration: 0.3s;
     display: block;
-    width: 50%;
+    opacity: 1;
+    position: relative;
+    left: 4px;
+    border: none;
+    background-color: transparent;
 
-    .search {
-        display: flex;
-        position: relative;
-        min-height: 32px;
-        .btn-close {
-            position: unset;
-            margin-top: unset;
-            align-self: center;
-            margin: 0 8px;
-        }
+    &:focus-visible {
+      width: 100%;
     }
+  }
 
+  &.focused {
+    width: 100%;
+    border-color: var(--primary-color);
 
     input {
-        width: 100%;
-        padding: 0px 6px;
-        outline: 0 !important;
-        border-radius: .28571429rem;
-        margin: 0px !important;
-        text-indent: 0 !important;
-        line-height: inherit !important;
-        box-shadow: none !important;
-        transition-property: all;
-        transition-duration: 0.3s;
-        display: block;
-        opacity: 1;
-        position: relative;
-        left: 4px;
-        border: none;
-        background-color: transparent;
-
-        &:focus-visible {
-            width: 100%;
-        }
-
-        &:empty {
-            /*padding-top: 6px !important;*/
-        }
+      color: #fff;
     }
-
-    &.focused {
-        width: 100%;
-        border-color: var(--primary-color);
-        input {
-            color: #fff;
-        }
-    }
-
+  }
 }
 
 
