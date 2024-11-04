@@ -42,10 +42,10 @@
 
 .btn-actions {
   color: var(--btn-fa-icon-color);
-  border-radius: 6px;
+  border-radius: var(--btn-actions-border-radius);
 
   &:hover {
-    background-color: rgb(255 255 255 / 18%);
+    background-color: var(--btn-actions-hover-bg);
   }
 
   &:active, &:focus {
