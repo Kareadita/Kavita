@@ -161,7 +161,6 @@ public class TaskScheduler : ITaskScheduler
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup)).Value;
-        _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
         if (setting == null || (!nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
