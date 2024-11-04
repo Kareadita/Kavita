@@ -66,9 +66,12 @@ export class MetadataService {
   getAllGenres(libraries?: Array<number>, context: QueryContext = QueryContext.None) {
     let method = 'metadata/genres'
     if (libraries != undefined && libraries.length > 0) {
-      method += '?libraryIds=' + libraries.join(',');
+      method += '?libraryIds=' + libraries.join(',') + '&context=' + context;
+    } else {
+      method += '?context=' + context;
     }
-    return this.httpClient.get<Array<Genre>>(this.baseUrl + method + '&context=' + context);
+
+    return this.httpClient.get<Array<Genre>>(this.baseUrl + method);
   }
 
   getAllLanguages(libraries?: Array<number>) {
