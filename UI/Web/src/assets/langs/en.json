@@ -1842,7 +1842,7 @@
         "unit-reading-date": "Date",
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 Stars",
         "unit-read-last": "Days from TODAY"
     },
 

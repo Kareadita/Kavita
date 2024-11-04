@@ -93,11 +93,9 @@ public static class SeriesFilter
     {
         if (rating < 0 || !condition || userId <= 0) return queryable;
 
-        // Users see rating as %, so they are likely to pass 10%. We need to turn that into the underlying float encoding
-        if (rating.IsNot(0f))
-        {
-            rating /= 100f;
-        }
+        // AppUserRating stores a 5-digit number.
+        rating = Math.Clamp(rating, 0f, 5f);
+
 
         switch (comparison)
         {
