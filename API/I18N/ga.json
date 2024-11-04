@@ -43,7 +43,7 @@
     "generic-device-update": "Tharla earráid agus an gléas á nuashonrú",
     "send-to-kavita-email": "Ní féidir seoladh chuig an ngléas a úsáid gan R-phost a shocrú",
     "send-to-unallowed": "Ní féidir leat seoladh chuig gléas nach leatsa é",
-    "send-to-size-limit": "Tá na comhaid atá tú ag iarraidh a sheoladh rómhór do do sheoltóir ríomhphoist",
+    "send-to-size-limit": "Tá an comhad/na comhaid atá tú ag iarraidh a sheoladh rómhór do do sholáthraí ríomhphoist",
     "send-to-device-status": "Comhaid a aistriú chuig do ghléas",
     "must-be-defined": "Ní mór {0} a shainiú",
     "generic-favicon": "Bhí fadhb ann maidir le favicon a fháil don fhearann",
@@ -197,5 +197,9 @@
     "unable-to-reset-k+": "Ní féidir ceadúnas Kavita+ a athshocrú de bharr earráide. Déan teagmháil le Tacaíocht Kavita+",
     "series-restricted-age-restriction": "Níl cead ag an úsáideoir an tsraith seo a fheiceáil mar gheall ar shrianta aoise",
     "bad-copy-files-for-download": "Ní féidir na comhaid a chóipeáil go dtí an chartlann eolaire sealadach íoslódáil.",
-    "epub-malformed": "Tá an comhad míchumtha! Ní féidir a léamh."
+    "epub-malformed": "Tá an comhad míchumtha! Ní féidir a léamh.",
+    "person-doesnt-exist": "Níl duine ann",
+    "person-name-required": "Tá ainm an duine ag teastáil agus ní féidir é a bheith ar neamhní",
+    "person-name-unique": "Caithfidh ainm duine a bheith uathúil",
+    "person-image-doesnt-exist": "Níl an duine in CoversDB"
 }

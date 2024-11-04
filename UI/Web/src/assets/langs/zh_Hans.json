@@ -24,7 +24,7 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "保存…",
+        "saving": "正在保存…",
         "update": "更新",
         "account-detail-title": "帐户详细信息"
     },
@@ -88,7 +88,7 @@
     },
     "user-preferences": {
         "title": "用户面板",
-        "pref-description": "这些是绑定到您的帐户的全局设置。",
+        "pref-description": "这些是绑定到您帐户的全局设置",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -107,16 +107,16 @@
         "prompt-on-download-label": "下载时提示",
         "prompt-on-download-tooltip": "当下载大小超过 {{size}}MB 时提示",
         "disable-animations-label": "关闭动画",
-        "disable-animations-tooltip": "关闭站点中的动画。对电子墨水阅读器很有用。",
+        "disable-animations-tooltip": "关闭站点中的动画效果。适用于电子墨水阅读器",
         "collapse-series-relationships-label": "折叠系列关系",
-        "collapse-series-relationships-tooltip": "Kavitra 是否显示没有关系的系列或者是前传",
+        "collapse-series-relationships-tooltip": "是否显示没有关系的系列或者前传",
         "share-series-reviews-label": "分享系列评论",
         "share-series-reviews-tooltip": "是否对其他用户显示你的评论",
         "image-reader-settings-title": "图像阅读器",
         "reading-direction-label": "阅读方向",
         "reading-direction-tooltip": "单击方向移动到下一页。从右到左意味着您单击屏幕左侧以移至下一页。",
         "scaling-option-label": "缩放选项",
-        "scaling-option-tooltip": "如何将图像缩放到屏幕上。",
+        "scaling-option-tooltip": "图片在屏幕上的缩放方式",
         "page-splitting-label": "页面分割",
         "page-splitting-tooltip": "如何分割全宽图像（即左右图像合并）",
         "reading-mode-label": "阅读模式",
@@ -128,7 +128,7 @@
         "auto-close-menu-label": "自动关闭菜单",
         "auto-close-menu-tooltip": "菜单应该自动关闭",
         "show-screen-hints-label": "显示屏幕提示",
-        "show-screen-hints-tooltip": "显示覆盖以帮助了解分页区域和方向",
+        "show-screen-hints-tooltip": "显示一个覆盖图层以帮助了解分页区域和方向",
         "emulate-comic-book-label": "模仿美漫",
         "emulate-comic-book-tooltip": "应用阴影效果来模拟书籍",
         "swipe-to-paginate-label": "滑动翻页",
@@ -139,17 +139,17 @@
         "immersive-mode-label": "沉浸模式",
         "immersive-mode-tooltip": "点击阅读器的文档后隐藏菜单并打开“点击翻页”功能",
         "reading-direction-book-label": "阅读方向",
-        "reading-direction-book-tooltip": "单击方向移动到下一页。从右到左意味着您单击屏幕左侧以移至下一页。",
+        "reading-direction-book-tooltip": "切换至下一页的点击位置。从右至左表示您需点击屏幕左侧以切换至下一页。",
         "font-family-label": "字体",
         "font-family-tooltip": "要加载的字体，默认加载书籍的默认字体",
         "writing-style-label": "书籍排版",
-        "writing-style-tooltip": "更改书籍排版方向。横向是从左到右，竖向是从上到下。",
+        "writing-style-tooltip": "更改文本排版方向。横向从左到右，竖向从上到下。",
         "layout-mode-book-label": "布局模式",
         "layout-mode-book-tooltip": "确定内容如何布局，滚屏就像把书塞满屏幕，单列或双列匹配设备屏幕的高度且每个页面容纳单列或双列文本",
         "color-theme-book-label": "主题颜色",
         "color-theme-book-tooltip": "书籍阅读器目录和菜单的主题颜色",
         "font-size-book-label": "字体大小",
-        "font-size-book-tooltip": "应用于书中字体的缩放百分比",
+        "font-size-book-tooltip": "书籍中字体的缩放百分比",
         "line-height-book-label": "行间距",
         "line-height-book-tooltip": "书籍中每行之间的间距",
         "margin-book-label": "页边距",
@@ -157,13 +157,13 @@
         "pdf-reader-settings-title": "PDF 阅读器",
         "pdf-scroll-mode-label": "滚动模式",
         "pdf-scroll-mode-tooltip": "您如何滚动页面。垂直/水平和点击翻页（无滚动）",
-        "pdf-spread-mode-label": "页面阅读模式",
-        "pdf-spread-mode-tooltip": "页面应该如何布局。单或双（奇数/偶数）",
+        "pdf-spread-mode-label": "展开模式",
+        "pdf-spread-mode-tooltip": "页面应该如何布局。单页或双页（奇数/偶数）",
         "pdf-theme-label": "主题",
-        "pdf-theme-tooltip": "阅读器的颜色主题",
+        "pdf-theme-tooltip": "阅读器的主题颜色",
         "clients-opds-alert": "此服务器未启用OPDS，不会影响Tachiyomi用户。",
         "clients-opds-description": "所有第三方客户端均使用下方的API密钥或链接。它们就像密码一样，请保密。",
-        "clients-api-key-tooltip": "API 密钥就像密码一样。重置它将使所有现有客户端失效。",
+        "clients-api-key-tooltip": "API 密钥等同于密码。重置密钥将导致所有客户端失效。",
         "clients-opds-url-label": "OPDS 网址",
         "clients-api-key-label": "API 密钥",
         "clients-opds-url-tooltip": "查看受支持的 OPDS 客户端列表： ",
@@ -177,7 +177,7 @@
     },
     "theme-manager": {
         "title": "主题管理器",
-        "description": "Kavita 采用我的颜色，找到一种满足您需求的配色方案，或者自己构建一个配色方案并分享。 主题可以应用于您的帐户或应用于所有帐户。",
+        "description": "Kavita配色方案，找到一个满足您需求的配色方案，或者自己构建一个配色方案并分享。 主题可以应用于您的帐户或应用于所有帐户。",
         "site-themes": "网站主题",
         "set-default": "设为默认值",
         "default-theme": "默认",
@@ -481,7 +481,7 @@
         "letterer": "嵌字师",
         "penciller": "铅稿",
         "publisher": "出版社",
-        "writer": "作者",
+        "writer": "作家",
         "other": "其他",
         "imprint": "压印",
         "translator": "翻译",
@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "优质福利",
         "kavita+-desc-part-3": "今天！",
         "kavita+-requirement": "Kavita+ 仅设计为与最新版本（2 个版本）兼容。除此之外的任何版本都可能无法正常工作。",
-        "kavita+-releases": "查看发布"
+        "kavita+-releases": "查看发布",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "复制",
@@ -760,7 +761,7 @@
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "genres-title": "类型",
         "tags-title": "标签",
-        "writers-title": "作者",
+        "writers-title": "作家",
         "cover-artists-title": "艺术家",
         "characters-title": "人物",
         "colorists-title": "上色师",
@@ -819,7 +820,8 @@
         "donate-tooltip": "您可以通过订阅 Kavita+ 来删除此内容",
         "back": "后退",
         "more": "更多",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "浏览作者"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -957,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "format-title": "{{metadata-filter.format-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1006,7 +1013,9 @@
         "special": "特刊",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "single-volume": "单卷",
+        "vol-num": "{{user-scrobble-history.volume-num}}"
     },
     "external-series-card": {
         "open-external": "打开外部链接"
@@ -1032,7 +1041,7 @@
         "reset": "{{common.reset}}",
         "test": "测试",
         "host-name-label": "主机名",
-        "host-name-tooltip": "域名（反向代理）。如果设置了此项，始终使用此域名生成电子邮件。",
+        "host-name-tooltip": "域名（反向代理）。电子邮件功能所需。如果没有反向代理，则使用任意网址。",
         "host-name-validation": "主机名必须以http(s)开头，不能以 / 结尾",
         "sender-address-label": "发件人地址",
         "sender-address-tooltip": "这是收件人收到电子邮件时将看到的电子邮件地址。通常是与帐户关联的电子邮件地址。",
@@ -1245,7 +1254,10 @@
         "sync-themes-task-desc": "如果版本匹配，则将下载的主题与上游更改同步。",
         "sync-themes-success": "主题同步已排队",
         "check-for-updates-task": "检查更新",
-        "check-for-updates-task-desc": "查看您的版本之前是否有任何稳定版本发布。"
+        "check-for-updates-task-desc": "查看您的版本之前是否有任何稳定版本发布。",
+        "clean-up-task": "常规清理",
+        "clean-up-task-desc": "在服务器上执行夜间清理活动。可能很繁重，建议不要在有活动用户或扫描时运行。每 24 小时运行一次。",
+        "clean-up-task-success": "清理完成"
     },
     "manage-users": {
         "title": "活跃用户",
@@ -1522,7 +1534,8 @@
         "dry-run-step": "模拟运行",
         "final-import-step": "最后一步",
         "comicvine-parsing-label": "使用 Comic Vine 系列搭配",
-        "cbl-repo": "您可以在社区<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>中找到更多阅读列表。"
+        "cbl-repo": "您可以在社区<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>中找到更多阅读列表。",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "加载中...PDF文件可能需要比预期更长的时间",
@@ -1612,7 +1625,7 @@
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
         "cover-artist-label": "封面设计",
-        "writer-label": "作者",
+        "writer-label": "作家",
         "publisher-label": "出版社",
         "penciller-label": "铅稿",
         "letterer-label": "嵌字师",
@@ -1639,7 +1652,8 @@
         "unit-reading-date": "日期",
         "unit-average-rating": "Kavita+ 外部评级，百分比",
         "unit-reading-progress": "百分比",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-read-last": "从今天起"
     },
     "sort-field-pipe": {
         "sort-name": "排序名称",
@@ -1870,7 +1884,8 @@
         "provided-by-label": "由...提供"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "即将推出"
     },
     "server-stats": {
         "total-series-label": "系列总数",
@@ -1997,14 +2012,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "收藏标签",
         "colorist": "上色师",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "编辑",
         "formats": "格式",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2031,7 +2047,8 @@
         "file-path": "文件路径",
         "want-to-read": "想读",
         "read-date": "阅读日期",
-        "average-rating": "平均评分"
+        "average-rating": "平均评分",
+        "read-last": "最后阅读"
     },
     "filter-comparison-pipe": {
         "begins-with": "开始于",
@@ -2165,7 +2182,8 @@
         "confirm-reset-server-settings": "这会将您的设置重置为首次安装值。您确定要继续吗？",
         "bulk-covers": "刷新多个资料库的封面是一项繁重的工作，可能需要很长时间。您确定要继续吗？",
         "must-select-library": "必须至少选择一个资料库",
-        "bulk-scan": "扫描多个资料库将以线性方式进行。这可能需要很长时间，并且根据资料库的大小可能无法完成。"
+        "bulk-scan": "扫描多个资料库将以线性方式进行。这可能需要很长时间，并且根据资料库的大小可能无法完成。",
+        "person-image-downloaded": "已下载并应用了人物封面。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2351,10 +2369,46 @@
         "book-nums": "书籍",
         "issue-nums": "期",
         "chapter-nums": "章节",
-        "volume-nums": "卷"
+        "volume-nums": "卷",
+        "author-count": "{{num}} 作者"
     },
     "confirm": {
         "confirm": "确认",
         "alert": "警告"
+    },
+    "edit-person-modal": {
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "description-label": "描述",
+        "required-field": "{{validations.required-field}}",
+        "title": "{{personName}} 详细信息",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "角色",
+        "hardcover-id-label": "Hardcover Id",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "asin-label": "ASIN",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "cover-image-description-extra": "或者，您可以从 CoversDB 下载封面（如果有）。",
+        "download-coversdb": "从 CoversDB 下载",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}"
+    },
+    "person-detail": {
+        "all-roles": "角色",
+        "known-for-title": "众所周知",
+        "individual-role-title": "作为 {{role}}",
+        "browse-person-title": "{{name}} 的全部作品",
+        "browse-person-by-role-title": "{{name}} 作为 {{role}} 的所有作品"
+    },
+    "browse-authors": {
+        "author-count": "{{num}} 人",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "title": "浏览作者和作家"
     }
 }

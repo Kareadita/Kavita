@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "sochair phréimhe",
         "kavita+-desc-part-3": "inniu!",
         "kavita+-requirement": "Tá Kavita + deartha chun oibriú ach leis an eisiúint is déanaí - leaganacha 2. Tá rud ar bith taobh amuigh de sin faoi réir gan a bheith ag obair.",
-        "kavita+-releases": "Féach eisiúintí"
+        "kavita+-releases": "Féach eisiúintí",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "Cóipeáil",
@@ -819,7 +820,8 @@
         "donate-tooltip": "Is féidir leat é seo a bhaint trí liostáil le Kavita +",
         "back": "Ar ais",
         "more": "Níos mó",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Brabhsáil Údair"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -957,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1006,7 +1013,9 @@
         "special": "Speisialta",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "Imleabhar Aonair"
     },
     "external-series-card": {
         "open-external": "Oscail Seachtrach"
@@ -1032,7 +1041,7 @@
         "reset": "{{common.reset}}",
         "test": "Tástáil",
         "host-name-label": "Ainm an Óstríomhaire",
-        "host-name-tooltip": "Ainm Fearainn (seachfhreastalaí droim ar ais). Má shocraítear é, úsáidfidh giniúint ríomhphoist é seo i gcónaí.",
+        "host-name-tooltip": "Ainm Fearainn (ón Seachfhreastalaí Droim ar Ais). Ag teastáil le haghaidh feidhmiúlacht ríomhphoist. Mura bhfuil seachfhreastalaí droim ar ais, úsáid url ar bith.",
         "host-name-validation": "Ní mór d'ainm óstach tosú le http (í) agus ní chríochnaíonn sé i /",
         "sender-address-label": "Seoladh an tSeoltóra",
         "sender-address-tooltip": "Is é seo an seoladh ríomhphoist óna bhfeicfidh an glacadóir nuair a gheobhaidh siad an ríomhphost. De ghnáth an seoladh ríomhphoist a bhaineann leis an gcuntas.",
@@ -1245,7 +1254,10 @@
         "sync-themes-task-desc": "Sioncrónaigh téamaí íoslódála le hathruithe in aghaidh an tsrutha má oireann an leagan.",
         "sync-themes-success": "Tá sioncronú téamaí curtha i scuaine",
         "check-for-updates-task": "Seiceáil le haghaidh Nuashonruithe",
-        "check-for-updates-task-desc": "Féach an bhfuil aon eisiúintí Cobhsaí roimh do leagan."
+        "check-for-updates-task-desc": "Féach an bhfuil aon eisiúintí Cobhsaí roimh do leagan.",
+        "clean-up-task-success": "Glanta críochnaithe",
+        "clean-up-task": "Glanta Ginearálta",
+        "clean-up-task-desc": "Déanann sé gníomhaíochtaí glanta oíche ar an bhfreastalaí. Is féidir leis a bheith trom, moltar gan rith le húsáideoirí gníomhacha nó le scananna. Ritheann sé gach 24 uair an chloig."
     },
     "manage-users": {
         "title": "Úsáideoirí Gníomhacha",
@@ -1522,7 +1534,8 @@
         "dry-run-step": "Rith Tirim",
         "final-import-step": "An Chéim Dheiridh",
         "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic",
-        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
+        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>.",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "Á Luchtú...... D'fhéadfadh sé go dtógfadh PDFanna níos faide ná mar a bhíothas ag súil leis",
@@ -1639,7 +1652,8 @@
         "unit-reading-date": "Dáta",
         "unit-average-rating": "Kavita+ rátáil sheachtrach, faoin gcéad",
         "unit-reading-progress": "Faoin gcéad",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-read-last": "Laethanta ón lá INNIU"
     },
     "sort-field-pipe": {
         "sort-name": "Ainm Sórtála",
@@ -1870,7 +1884,8 @@
         "provided-by-label": "Curtha ar fáil ag"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Le teacht"
     },
     "server-stats": {
         "total-series-label": "Sraith Iomlán",
@@ -1997,14 +2012,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Clibeanna Bailiúcháin",
         "colorist": "Dathóir",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Eagarthóir",
         "formats": "Formáidí",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2031,7 +2047,8 @@
         "file-path": "Conair Chomhaid",
         "want-to-read": "Ag iarraidh Léamh",
         "read-date": "Dáta Léitheoireachta",
-        "average-rating": "Meánráta"
+        "average-rating": "Meánráta",
+        "read-last": "Léigh go deireanach"
     },
     "filter-comparison-pipe": {
         "begins-with": "Tosaíonn sé le",
@@ -2165,7 +2182,8 @@
         "confirm-reset-server-settings": "Athshocróidh sé seo do shocruithe chun luachanna a shuiteáil ar dtús. An bhfuil tú cinnte go bhfuil fonn ort leanúint ar aghaidh?",
         "bulk-scan": "Déanfar an iliomad leabharlann a scanadh go líneach. Seans go dtógfaidh sé seo go leor ama agus ní bheidh sé críochnaithe ag brath ar mhéid na leabharlainne.",
         "must-select-library": "Ní mór leabharlann amháin ar a laghad a roghnú",
-        "bulk-covers": "Bíonn sé dian ar chlúdaigh athnuachana ar leabharlanna iolracha agus féadfaidh sé tamall fada a ghlacadh. An bhfuil tú cinnte gur mhaith leat leanúint ar aghaidh?"
+        "bulk-covers": "Bíonn sé dian ar chlúdaigh athnuachana ar leabharlanna iolracha agus féadfaidh sé tamall fada a ghlacadh. An bhfuil tú cinnte gur mhaith leat leanúint ar aghaidh?",
+        "person-image-downloaded": "Rinneadh clúdach duine a íoslódáil agus a chur i bhfeidhm."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -2351,10 +2369,46 @@
         "book-nums": "Leabhair",
         "issue-nums": "Saincheisteanna",
         "chapter-nums": "Caibidlí",
-        "volume-nums": "Imleabhair"
+        "volume-nums": "Imleabhair",
+        "author-count": "{{num}} Údair"
     },
     "confirm": {
         "alert": "Airdeall",
         "confirm": "Deimhnigh"
+    },
+    "browse-authors": {
+        "title": "Brabhsáil Údair & Scríbhneoirí",
+        "author-count": "{{num}} Daoine",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "person-detail": {
+        "known-for-title": "Aitheanta do",
+        "browse-person-title": "Gach Oibre de {{name}}",
+        "browse-person-by-role-title": "Gach Oibre de {{name}} mar {{role}}",
+        "individual-role-title": "Mar {{role}}",
+        "all-roles": "Róil"
+    },
+    "edit-person-modal": {
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "title": "Sonraí {{personName}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "close": "{{common.close}}",
+        "role-label": "Ról",
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "hardcover-id-label": "Hardcover Id",
+        "asin-label": "ASIN",
+        "description-label": "Cur síos",
+        "save": "{{common.save}}",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "cover-image-description-extra": "Nó is féidir leat clúdach a íoslódáil ó CoversDB má tá sé ar fáil.",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "download-coversdb": "Íoslódáil ó CoverDB"
     }
 }

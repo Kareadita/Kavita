@@ -197,5 +197,6 @@
     "collection-already-exists": "La colección ya existe",
     "error-import-stack": "Problema al importar la pila MAL",
     "generic-cover-person-save": "No se puede guardar la imagen de portada para esta persona",
-    "generic-cover-volume-save": "No se puede guardar la imagen de portada en el volumen"
+    "generic-cover-volume-save": "No se puede guardar la imagen de portada en el volumen",
+    "person-doesnt-exist": "No existe la persona"
 }
