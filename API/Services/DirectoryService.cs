@@ -746,7 +746,6 @@ public class DirectoryService : IDirectoryService
     public IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null,
         SearchOption searchOption = SearchOption.AllDirectories)
     {
-        _logger.LogTrace("[ScanFiles] called on {Path}", folderPath);
         var files = new List<string>();
 
         if (!Exists(folderPath)) return files;

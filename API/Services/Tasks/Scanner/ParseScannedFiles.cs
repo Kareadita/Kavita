@@ -126,6 +126,13 @@ public class ParseScannedFiles
         IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false)
     {
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
+
+        // If there are no library file types, skip scanning entirely
+        if (string.IsNullOrWhiteSpace(fileExtensions))
+        {
+            return ArraySegment<ScanResult>.Empty;
+        }
+
         var matcher = BuildMatcher(library);
 
         var result = new List<ScanResult>();
@@ -459,7 +466,7 @@ public class ParseScannedFiles
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
 
-        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count());
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count);
         var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
 
         foreach (var folder in folders)
