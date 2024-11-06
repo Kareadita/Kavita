@@ -1,227 +1,388 @@
 @import "../variables";
 
+//START sidebar container
 .side-nav-container {
-    padding-bottom: 10px;
-    width: 190px;
-    background-color: var(--side-nav-bg-color);
-    height: calc((var(--vh) * 100) - 115px);
-    position: fixed;
-    margin: 0;
-    left: 10px;
-    top: 73px;
-    border-radius: var(--side-nav-border-radius);
-    transition:
-        width var(--side-nav-openclose-transition),
-        background-color var(--side-nav-bg-color-transition),
-        border-color var(--side-nav-border-transition);
-    border: var(--side-nav-border);
+  width: var(--side-nav-width);
+  background-color: var(--side-nav-bg-color);
+  height: calc((var(--vh) * 100) - 7.375rem);
+  position: fixed;
+  margin: 0;
+  left: 0.625rem;
+  top: 4rem;
+  border-radius: var(--side-nav-border-radius);
+  transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
+  border: var(--side-nav-border);
 
-    &::-webkit-scrollbar {
-        visibility: hidden;
+  &::-webkit-scrollbar {
+    visibility: hidden;
+  }
+
+  &.no-donate {
+    height: calc((var(--vh) * 100) - 5.125rem);
+  }
+
+  &.hidden {
+    display: none;
+    opacity: 0;
+  }
+  //START closed state of the sidebar
+  &.closed {
+    width: 4.0625rem;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-color: var(--side-nav-closed-bg-color);
+    border: var(--side-nav-border-closed);
+    height: calc((var(--vh) * 100) - 6.5rem);
+    border-radius: unset;
+
+    .side-nav {
+      .side-nav-item {
+        color: var(--side-nav-item-closed-color);
+
+        &:hover {
+          &.active {
+            color: var(--side-nav-item-active-text-color);
+          }
+        }
+
+        .active-highlight {
+          opacity: 0;
+        }
+
+        .side-nav-text {
+          opacity: 0;
+          display: none;
+        }
+
+        .card-actions {
+          opacity: 0;
+          display: none;
+        }
+      }
+    }
+  }
+  //END closed state of the sidebar
+  //START sidebar
+  .side-nav {
+    overflow-y: hidden;
+    height: 100%;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    //START sidebar nav item
+    .side-nav-item {
+      position: relative;
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      height: auto;
+      min-height: 2.6rem;
+      overflow: hidden;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: var(--side-nav-text-color);
+
+      .phone-hidden {
+        display: flex;
+
+        &:first-of-type {
+          text-align: center;
+          width: 2.5rem;
+          margin-left: 0.3rem;
+        }
+
+        &:last-child {
+          flex-grow: 1;
+          justify-content: end;
+        }
+
+        div {
+          align-items: center;
+          height: 100%;
+          justify-content: inherit;
+          width: 100%;
+
+          i {
+            font-size: var(--side-nav-icon-size);
+          }
+        }
+      }
+
+      .active-highlight {
+        background-color: #2f2f2f;
+        background-color: rgb(255 255 255 / 9%);
+        width: 0.25rem;
+        height: 100%;
+        position: absolute;
+        left: 0;
+      }
+
+      .side-nav-text {
+        opacity: 1;
+        min-width: 6.25rem;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+
+        div {
+          min-width: 6.375rem;
+          width: 100%
+        }
+      }
+
+      .card-actions {
+        flex-grow: 1;
+        justify-content: end;
+        display: flex;
+      }
+
+      &.active {
+        background-color: var(--side-nav-active-bg-color);
+        color: var(--side-nav-item-active-text-color);
+
+        .active-highlight {
+          background-color: var(--side-nav-item-active-color);
+        }
+      }
+
+      &:hover {
+        color: var(--side-nav-hover-text-color);
+        background-color: var(--side-nav-hover-bg-color);
+      }
+    }
+    //END sidebar nav item
+    // For firefox
+    @supports (-moz-appearance: none) {
+      scrollbar-color: transparent transparent;
+      scrollbar-width: thin;
     }
 
+    &::-webkit-scrollbar {
+      background-color: transparent; /*make scrollbar space invisible */
+      width: inherit;
+      display: none;
+      visibility: hidden;
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: transparent; /*makes it invisible when not hovering*/
+    }
+
+    &:hover {
+      scrollbar-width: thin;
+      overflow-y: auto;
+      // For firefox
+      @supports (-moz-appearance: none) {
+        scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
+      }
+
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+        background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
+      }
+    }
+  }
+  //END sidebar
+  //START preference sidebar
+  &.preference {
+    height: calc((var(--vh)*100) - 4.6875rem);
+    width: 14.875rem;
+
+    .side-nav {
+      overflow-x: hidden;
+      padding-bottom: 0.625rem;
+
+      .side-nav-header {
+        color: #ffffff;
+        font-size: 0.9375rem;
+
+        &:first-of-type {
+          margin-top: 0.7rem;
+        }
+      }
+
+      .side-nav-item {
+        font-size: 0.9rem;
+        min-height: 1.875rem;
+        justify-content: unset;
+        margin-left: 1.125rem;
+
+        &.active {
+          .side-nav-text {
+            color: var(--side-nav-item-active-text-color);
+          }
+        }
+
+        .side-nav-text {
+          text-align: unset;
+          margin-left: 0.75rem;
+          font-size: 0.8125rem;
+          color: #999999;
+        }
+
+        .card-actions {
+          display: none;
+        }
+      }
+    }
+  }
+  //END preference sidebar
+}
+//END sidebar container
+
+//START kavita+ subscription bottom heart button
+.sidenav-bottom {
+  position: absolute;
+  bottom: 0;
+  width: var(--side-nav-width);
+  font-size: 0.75rem;
+  transition: width var(--side-nav-openclose-transition);
+  z-index: 999;
+  background-color: var(--side-nav-bg-color);
+
+  .donate {
+    .side-nav-item {
+      width: 100%;
+      padding: 0 5rem;
+      justify-content: center;
+      align-items: center;
+      display: flex;
+      min-height: 3.125rem;
+      color: var(--side-nav-text-color);
+
+      &:hover {
+        color: var(--side-nav-hover-text-color);
+        background-color: var(--side-nav-hover-bg-color);
+      }
+
+      .active-highlight {
+        display: none;
+      }
+
+      .phone-hidden {
+        div {
+          i {
+            font-size: var(--side-nav-icon-size);
+          }
+        }
+      }
+
+      .side-nav-text {
+        display: none !important;
+      }
+
+      .card-actions {
+        display: none;
+      }
+    }
+  }
+  //START sidebar closed
+  &.closed {
+    width: 3.4375rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: unset;
+
+    .side-nav-item {
+      width: 100%;
+      padding: 0;
+      display: block;
+      line-height: 2.5rem;
+      text-align: center;
+      min-height: unset;
+      color: var(--side-nav-item-closed-color);
+
+      &:hover {
+        background-color: unset !important;
+      }
+    }
+  }
+  //END sidebar closed
+}
+//END kavita+ subscription bottom heart button
+
+@media (max-width: $grid-breakpoints-lg) {
+  .side-nav-container {
+    padding: 0.625rem 0;
+    padding-left: 0.3125rem;
+    width: 55vw;
+    background-color: var(--side-nav-mobile-bg-color);
+    height: 100dvh;
+    position: fixed;
+    margin: 0;
+    left: 0;
+    top: 0;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 1050;
+    overflow-y: auto;
+    border: var(--side-nav-mobile-border);
+    border-radius: 0rem;
+
     &.preference {
-        height: calc((var(--vh) * 100));
+        background-color: unset;
+      .side-nav {
+        .side-nav-header {
+          font-size: 1.25rem;
+        }
+
+        .side-nav-item {
+          .active-highlight {
+          }
+
+          .side-nav-text {
+            div {
+              font-size: 1rem;
+            }
+          }
+        }
+      }
     }
 
     &.no-donate {
-        height: calc((var(--vh) * 100) - 82px);
-    }
-
-    &.hidden {
-        display: none;
-        opacity: 0;
+      height: 100dvh;
     }
 
     &.closed {
-        width: 55px;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        background-color: var(--side-nav-closed-bg-color);
-        border: var(--side-nav-border-closed);
+      width: 0;
+      overflow: hidden;
+      box-shadow: none;
     }
 
     .side-nav {
-        overflow-y: hidden;
-        height: 100%;
-        mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
-        scrollbar-gutter: stable;
-        scrollbar-width: thin;
-
-        // For firefox
-        @supports (-moz-appearance: none) {
-            scrollbar-color: transparent transparent;
-            scrollbar-width: thin;
+      overflow: auto;
+      .side-nav-item {
+        .active-highlight {
+          border-top-left-radius: 0rem;
+          border-bottom-left-radius: 0rem;
         }
-
-        &::-webkit-scrollbar {
-            background-color: transparent; /*make scrollbar space invisible */
-            width: inherit;
-            display: none;
-            visibility: hidden;
-            background: transparent;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: transparent; /*makes it invisible when not hovering*/
-        }
-
-        &:hover {
-            scrollbar-width: thin;
-            overflow-y: auto;
-
-            // For firefox
-            @supports (-moz-appearance: none) {
-                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0);
-            }
-
-            &::-webkit-scrollbar-thumb {
-                visibility: visible;
-                background-color: rgba(255, 255, 255, 0.3); /*On hover, it will turn grey*/
-            }
-        }
-
-        .side-nav-item:first {
-            border-top-left-radius: var(--side-nav-border-radius);
-            border-top-right-radius: var(--side-nav-border-radius);
-        }
-    }
-}
-
-.sidenav-bottom {
-    position: absolute;
-    bottom: 0;
-    width: 190px;
-    font-size: 12px;
-    transition: width var(--side-nav-openclose-transition);
-    z-index: 999;
-    left: 10px;
-
-    .donate {
-        .side-nav-item {
-            width: 100%;
-            padding: 0 80px;
-            justify-content: center;
-            align-items: center;
-
-            &:hover {
-                background-color: unset !important;
-                color: white !important;
-
-                i {
-                    color: var(--side-nav-item-closed-color) !important;
-
-                    &:hover {
-                        color: white !important;
-                    }
-                }
-            }
-
-            span {
-                flex-grow: unset !important;
-                min-width: unset !important;
-
-                div {
-                    min-width: unset !important;
-
-                    i {
-                        font-size: 1rem !important;
-                    }
-                }
-            }
-
-            &.closed {
-                span {
-                    &.phone-hidden {
-                        div {
-                            width: 100%;
-                        }
-                    }
-
-                    .side-nav-text {
-                        div {
-                            width: 0;
-                        }
-                    }
-                }
-            }
-        }
+      }
     }
 
-    &.closed {
-        width: 45px;
-        overflow-x: hidden;
-        overflow-y: auto;
-
-        .side-nav-item {
-            width: 100%;
-            padding: 0;
-            display: block;
-            line-height: 40px;
-            text-align: center;
-
-            &:hover {
-                background-color: unset;
-            }
-        }
+    .side-nav-item {
+      padding: 0;
     }
-}
-
-@media (max-width: $grid-breakpoints-lg) {
-    .side-nav-container {
-        padding: 10px 0;
-        width: 55vw;
-        background-color: var(--side-nav-mobile-bg-color);
-        height: 100dvh;
-        position: fixed;
-        margin: 0;
-        left: 0;
-        top: 0;
-        transition: width var(--side-nav-openclose-transition);
-        z-index: 1050;
-        overflow-y: auto;
-        border: var(--side-nav-mobile-border);
-
-        &.no-donate {
-            height: 100dvh;
-        }
-
-        &.closed {
-            width: 0;
-            overflow: hidden;
-            box-shadow: none;
-        }
-
-        .side-nav {
-            overflow: auto;
-        }
-
-        .side-nav-item {
-            padding: 0;
-        }
-
-        .side-nav-item:first {
-            border-top-left-radius: var(--side-nav-border-radius);
-            border-top-right-radius: var(--side-nav-border-radius);
-        }
-    }
+  }
 
     .sidenav-bottom {
         display: none;
         &.closed {
-            left: 10px;
+            left: 0.625rem;
         }
     }
 
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc((var(--vh) * 100) - var(--nav-mobile-offset));
+        height: 100vh;
         position: absolute;
         left: 0;
-        top: var(--nav-mobile-offset);
-        z-index: 998;
+        top: 0;
+        z-index: 1041;
 
         &.closed {
             display: none;
@@ -230,8 +391,8 @@
 }
 
 .btn-close {
-    margin-top: -28px;
+    margin-top: -1.75rem;
     font-size: 0.8rem;
     position: absolute;
-    right: 16px;
+    right: 1rem;
 }

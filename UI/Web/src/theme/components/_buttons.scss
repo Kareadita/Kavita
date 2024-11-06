@@ -37,7 +37,20 @@
     box-shadow: inset 0px -2px 0px 0px var(--btn-secondary-outline-text-color);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+  }
+}
 
+.btn-actions {
+  color: var(--btn-fa-icon-color);
+  border-radius: var(--btn-actions-border-radius);
+
+  &:hover {
+    background-color: var(--btn-actions-hover-bg);
+  }
+
+  &:active, &:focus {
+    background-color: rgb(255 255 255 / 28%) !important;
+    border-color: transparent !important;
   }
 }
 
@@ -45,7 +58,7 @@
   filter: var(--btn-icon-filter) !important;
 }
 
-.btn-primary:disabled, .btn-primary.disabled {
+.btn-primary:disabled, .btn-primary.disabled, .btn-tertiary.disabled {
   background-color: var(--btn-disabled-bg-color);
   color: var(--btn-disabled-text-color);
   border-color: var(--btn-disabled-border-color);
