@@ -68,11 +68,11 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("pdf")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult> GetPdf(int chapterId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey"])]
+    public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
-        var chapter = await _cacheService.Ensure(chapterId);
+        var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
 
         // Validate the user has access to the PDF

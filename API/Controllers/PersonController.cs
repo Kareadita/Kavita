@@ -6,6 +6,8 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Tasks.Metadata;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Nager.ArticleNumber;
@@ -18,12 +20,19 @@ public class PersonController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
     private readonly IMapper _mapper;
+    private readonly ICoverDbService _coverDbService;
+    private readonly IImageService _imageService;
+    private readonly IEventHub _eventHub;
 
-    public PersonController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper)
+    public PersonController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper,
+        ICoverDbService coverDbService, IImageService imageService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _mapper = mapper;
+        _coverDbService = coverDbService;
+        _imageService = imageService;
+        _eventHub = eventHub;
     }
 
 
@@ -65,8 +74,17 @@ public class PersonController : BaseApiController
         var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id);
         if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
-        dto.Description ??= string.Empty;
-        person.Description = dto.Description;
+        if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-required"));
+
+
+        // Validate the name is unique
+        if (dto.Name != person.Name && !(await _unitOfWork.PersonRepository.IsNameUnique(dto.Name)))
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
+        }
+
+        person.Name = dto.Name?.Trim();
+        person.Description = dto.Description ?? string.Empty;
         person.CoverImageLocked = dto.CoverImageLocked;
 
         if (dto.MalId is > 0)
@@ -94,6 +112,26 @@ public class PersonController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok(_mapper.Map<PersonDto>(person));
+    }
+
+    [HttpPost("fetch-cover")]
+    public async Task<ActionResult<string>> DownloadCoverImage([FromQuery] int personId)
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
+        if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
+
+        var personImage = await _coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
+
+        if (string.IsNullOrEmpty(personImage)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+        person.CoverImage = personImage;
+        _imageService.UpdateColorScape(person);
+        _unitOfWork.PersonRepository.Update(person);
+        await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
+
+
+        return Ok(personImage);
     }
 
     /// <summary>

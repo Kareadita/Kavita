@@ -43,4 +43,6 @@ public class ReadingListItemDto
     /// The chapter summary
     /// </summary>
     public string? Summary { get; set; }
+
+    public bool IsSpecial { get; set; }
 }

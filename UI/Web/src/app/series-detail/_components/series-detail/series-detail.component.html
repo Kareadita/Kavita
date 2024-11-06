@@ -187,7 +187,7 @@
                   <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
                           <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
                         } @else {
@@ -214,7 +214,7 @@
                 @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
                   <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead +  + '_volumes') {
                         <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
@@ -235,7 +235,7 @@
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
                   <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
@@ -256,7 +256,7 @@
                 @defer (when activeTabId === TabID.Specials; prefetch on idle) {
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
                         <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
                       }
                     </div>
@@ -338,7 +338,15 @@
               <a ngbNavLink>{{t(TabID.Details)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags" [webLinks]="WebLinks"></app-details-tab>
+                  <app-details-tab [metadata]="seriesMetadata"
+                                   [genres]="seriesMetadata.genres"
+                                   [tags]="seriesMetadata.tags"
+                                   [webLinks]="WebLinks"
+                                   [readingTime]="series"
+                                   [releaseYear]="seriesMetadata.releaseYear"
+                                   [language]="seriesMetadata.language"
+                                   [format]="series.format">
+                  </app-details-tab>
                 }
               </ng-template>
             </li>

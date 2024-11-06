@@ -515,7 +515,7 @@ export class EditSeriesModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, description: '', coverImageLocked: false };
+      return {id: 0, name: title, description: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
 
     return personSettings;
@@ -551,6 +551,7 @@ export class EditSeriesModalComponent implements OnInit {
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
     const nameFieldsDirty = this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty;
     const nameFieldLockChanged = this.series.nameLocked !== this.initSeries.nameLocked || this.series.sortNameLocked !== this.initSeries.sortNameLocked || this.series.localizedNameLocked !== this.initSeries.localizedNameLocked;
+
     if (nameFieldsDirty || nameFieldLockChanged || this.coverImageReset) {
       model.nameLocked = this.series.nameLocked;
       model.sortNameLocked = this.series.sortNameLocked;

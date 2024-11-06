@@ -10,6 +10,7 @@ import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/person/browse-person";
 import {Chapter} from "../_models/chapter";
 import {StandaloneChapter} from "../_models/standalone-chapter";
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root'
@@ -49,5 +50,9 @@ export class PersonService {
         return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowsePerson[]>;
       })
     );
+  }
+
+  downloadCover(personId: number) {
+    return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
   }
 }

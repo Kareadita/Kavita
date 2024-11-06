@@ -18,8 +18,8 @@
                     @if (editForm.get('name'); as formControl) {
                       <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
-                          <input id="name" class="form-control" formControlName="name" type="text" readonly
-                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                          <input id="name" class="form-control" formControlName="name" type="text"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
                           @if (formControl.errors; as errors) {
                             @if (errors.required) {
                               <div class="invalid-feedback">{{t('required-field')}}</div>
@@ -34,10 +34,10 @@
                 <div class="row g-0">
                   <div class="mb-3 col-md-6 col-xs-12 pe-2">
                     @if (editForm.get('malId'); as formControl) {
-                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('mal-tooltip')">
                         <ng-template #view>
                           <input id="mal-id" class="form-control" formControlName="malId" type="number"
-                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
                         </ng-template>
                       </app-setting-item>
                     }
@@ -45,10 +45,10 @@
 
                   <div class="mb-3 col-md-6 col-xs-12">
                     @if (editForm.get('aniListId'); as formControl) {
-                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('anilist-tooltip')">
                         <ng-template #view>
                           <input id="anilist-id" class="form-control" formControlName="aniListId" type="number"
-                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
                         </ng-template>
                       </app-setting-item>
                     }
@@ -58,10 +58,10 @@
                 <div class="row g-0">
                   <div class="mb-3 col-md-6 col-xs-12 pe-2">
                     @if (editForm.get('hardcoverId'); as formControl) {
-                      <app-setting-item [title]="t('hardcover-id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <app-setting-item [title]="t('hardcover-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('hardcover-tooltip')">
                         <ng-template #view>
                           <input id="hardcover-id" class="form-control" formControlName="hardcoverId" type="text"
-                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
                         </ng-template>
                       </app-setting-item>
                     }
@@ -69,10 +69,12 @@
 
                   <div class="mb-3 col-md-6 col-xs-12">
                     @if (editForm.get('asin'); as formControl) {
-                      <app-setting-item [title]="t('asin-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <app-setting-item [title]="t('asin-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('asin-tooltip')">
                         <ng-template #view>
                           <input id="asin" class="form-control" formControlName="asin" type="text"
-                                 [class.is-invalid]="formControl.invalid && formControl.touched">
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+
                         </ng-template>
                       </app-setting-item>
                     }
@@ -100,7 +102,11 @@
               <ng-template ngbNavContent>
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
+<!--                  {{t('cover-image-description-extra')}}-->
                 </p>
+
+<!--                <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">{{t('download-coversdb')}}</button>-->
+
                 <app-cover-image-chooser [(imageUrls)]="imageUrls"
                                          (imageUrlsChange)="handleUploadByUrl($event)"
                                          (imageSelected)="updateSelectedIndex($event)"

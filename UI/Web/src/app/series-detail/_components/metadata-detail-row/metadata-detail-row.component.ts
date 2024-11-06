@@ -19,6 +19,7 @@ import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
 import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
+import {PublisherFlipperComponent} from "../../../_single-modules/publisher-flipper/publisher-flipper.component";
 
 @Component({
   selector: 'app-metadata-detail-row',
@@ -33,7 +34,8 @@ import {SeriesFormatComponent} from "../../../shared/series-format/series-format
     ImageComponent,
     MangaFormatPipe,
     MangaFormatIconPipe,
-    SeriesFormatComponent
+    SeriesFormatComponent,
+    PublisherFlipperComponent
   ],
   templateUrl: './metadata-detail-row.component.html',
   styleUrl: './metadata-detail-row.component.scss',

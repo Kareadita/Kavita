@@ -1,32 +1,31 @@
 <ng-container *transloco="let t; read: 'cover-image-chooser'">
-  <div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
+  <div class="container-fluid" style="padding-left: 0; padding-right: 0">
     <form [formGroup]="form">
       <ngx-file-drop (onFileDrop)="dropped($event)"
                      (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false"
                      dropZoneClassName="file-upload" contentClassName="file-upload-zone">
         <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-          <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
-            <div class="mx-auto">
-              <div class="row g-0 mb-3">
-                <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
-              </div>
+          @if (mode === 'all') {
+            <div class="row g-0 mt-3 pb-3">
+              <div class="mx-auto">
+                <div class="row g-0 mb-3">
+                  <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                </div>
 
-              <div class="d-flex justify-content-center">
-                <div class="d-flex justify-content-evenly">
-                  <a class="pe-0" href="javascript:void(0)" (click)="changeMode('url')">
-                    <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
-                  </a>
-                  <span class="ps-1 pe-1">•</span>
-                  <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                  <span class="ps-1 pe-1">•</span>
-                  <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                <div class="d-flex justify-content-center">
+                  <div class="d-flex justify-content-evenly">
+                    <a class="pe-0" href="javascript:void(0)" (click)="changeMode('url')">
+                      <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
+                    </a>
+                    <span class="ps-1 pe-1">•</span>
+                    <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                    <span class="ps-1 pe-1">•</span>
+                    <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-
-          <ng-container *ngIf="mode === 'url'">
+          } @else if (mode === 'url') {
             <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
               <div class="input-group col-auto me-md-2" style="width: 83%">
                 <label class="input-group-text" for="load-image">{{t('url-label')}}</label>
@@ -42,9 +41,7 @@
                 <span class="phone-hidden">{{t('back')}}</span>
               </button>
             </div>
-
-          </ng-container>
-
+          }
         </ng-template>
       </ngx-file-drop>
 
@@ -54,28 +51,32 @@
     </form>
 
     <div class="row g-0 chooser" style="padding-top: 10px">
-      <div class="clickable col-auto"
-           *ngIf="showReset" tabindex="0" (click)="reset()"
-           [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
-        <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage"></app-image>
-        <ng-container *ngIf="showApplyButton">
-          <br>
-          <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
-        </ng-container>
+      @if (showReset) {
+        <div class="clickable col-auto" tabindex="0" (click)="reset()"
+             [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
+          <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage"></app-image>
+          @if (showApplyButton) {
+            <br>
+            <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
+          }
+        </div>
+      }
 
-      </div>
-      <div class="clickable col-auto"
-           *ngFor="let url of imageUrls; let idx = index;" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
-           [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
-        <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
-        <ng-container *ngIf="showApplyButton">
-          <br>
-          <button class="btn btn-primary" style="width: 100%;"
-                  (click)="applyImage(idx)">
-            {{appliedIndex === idx ? t('applied') : t('apply')}}
-          </button>
-        </ng-container>
-      </div>
+      @for (url of imageUrls; track url; let idx = $index) {
+        <div class="clickable col-auto" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
+             [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
+          <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
+          @if (showApplyButton) {
+            <br>
+            <button class="btn btn-primary" style="width: 100%;"
+                    (click)="applyImage(idx)">
+              {{appliedIndex === idx ? t('applied') : t('apply')}}
+            </button>
+          }
+        </div>
+      }
+
+
     </div>
 
   </div>

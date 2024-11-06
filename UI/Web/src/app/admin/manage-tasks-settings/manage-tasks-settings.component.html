@@ -8,7 +8,11 @@
           @if (settingsForm.get('taskScan'); as formControl) {
             <app-setting-item [title]="t('library-scan-label')" [subtitle]="t('library-scan-tooltip')">
               <ng-template #view>
-                {{t(formControl.value)}}
+                @if (formControl.value === customOption) {
+                  {{t(formControl.value)}} ({{settingsForm.get('taskScanCustom')?.value}})
+                } @else {
+                  {{t(formControl.value)}}
+                }
               </ng-template>
               <ng-template #edit>
 
@@ -26,8 +30,8 @@
                            [class.is-invalid]="settingsForm.get('taskScanCustom')?.invalid && settingsForm.get('taskScanCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
-                      <div id="task-scan-validations" class="invalid-feedback">
+                    @if (settingsForm.dirty || !settingsForm.untouched) {
+                      <div id="task-scan-validations" class="invalid-feedback" style="display: inline-block">
                         @if(settingsForm.get('taskScanCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
                         }
@@ -47,7 +51,11 @@
           @if (settingsForm.get('taskBackup'); as formControl) {
             <app-setting-item [title]="t('library-database-backup-label')" [subtitle]="t('library-database-backup-tooltip')">
               <ng-template #view>
-                {{t(formControl.value)}}
+                @if (formControl.value === customOption) {
+                  {{t(formControl.value)}} ({{settingsForm.get('taskBackupCustom')?.value}})
+                } @else {
+                  {{t(formControl.value)}}
+                }
               </ng-template>
               <ng-template #edit>
 
@@ -65,8 +73,8 @@
                            [class.is-invalid]="settingsForm.get('taskBackupCustom')?.invalid && settingsForm.get('taskBackupCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
-                      <div id="task-backup-validations" class="invalid-feedback">
+                    @if (settingsForm.dirty || !settingsForm.untouched) {
+                      <div id="task-backup-validations" class="invalid-feedback" style="display: inline-block">
                         @if(settingsForm.get('taskBackupCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
                         }
@@ -87,7 +95,11 @@
           @if (settingsForm.get('taskCleanup'); as formControl) {
             <app-setting-item [title]="t('cleanup-label')" [subtitle]="t('cleanup-tooltip')">
               <ng-template #view>
-                {{t(formControl.value)}}
+                @if (formControl.value === customOption) {
+                  {{t(formControl.value)}} ({{settingsForm.get('taskCleanupCustom')?.value}})
+                } @else {
+                  {{t(formControl.value)}}
+                }
               </ng-template>
               <ng-template #edit>
 
@@ -105,8 +117,8 @@
                            [class.is-invalid]="settingsForm.get('taskCleanupCustom')?.invalid && settingsForm.get('taskCleanupCustom')?.touched"
                            aria-describedby="task-scan-validations">
 
-                    @if (settingsForm.dirty || settingsForm.touched) {
-                      <div id="task-cleanup-validations" class="invalid-feedback">
+                    @if (settingsForm.get('taskCleanupCustom')?.invalid) {
+                      <div id="task-cleanup-validations" class="invalid-feedback" style="display: inline-block">
                         @if(settingsForm.get('taskCleanupCustom')?.errors?.required) {
                           <div>{{t('required')}}</div>
                         }
@@ -122,10 +134,6 @@
           }
         </div>
       </ng-container>
-
-      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
-        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
-      </div>
 
       <div class="setting-section-break"></div>
 
@@ -151,7 +159,7 @@
         </tr>
         </thead>
         <tbody>
-          @for(task of recurringTasks$ | async; track task.lastExecutionUtc + task.cron; let idx = $index) {
+          @for(task of recurringTasks$ | async; track task; let idx = $index) {
             <tr>
               <td>
                 {{task.title | titlecase}}

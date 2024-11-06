@@ -613,7 +613,7 @@ public class ParseScannedFiles
         }
 
         // Remove or clear any scan results that now have no ParserInfos after merging
-        return scanResults.Where(sr => sr.ParserInfos.Any()).ToList();
+        return scanResults.Where(sr => sr.ParserInfos.Count > 0).ToList();
     }
 
     private static List<ParserInfo> GetRelevantInfos(List<ParserInfo> allInfos)
@@ -665,10 +665,11 @@ public class ParseScannedFiles
         }
     }
 
-    private void RemapSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, string localizedSeries, string nonLocalizedSeries)
+    private static void RemapSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, string localizedSeries, string nonLocalizedSeries)
     {
         // Find all infos that need to be remapped from the localized series to the non-localized series
-        var seriesToBeRemapped = allInfos.Where(i => i.Series.Equals(localizedSeries)).ToList();
+        var normalizedLocalizedSeries = localizedSeries.ToNormalized();
+        var seriesToBeRemapped = allInfos.Where(i => i.Series.ToNormalized().Equals(normalizedLocalizedSeries)).ToList();
 
         foreach (var infoNeedingMapping in seriesToBeRemapped)
         {

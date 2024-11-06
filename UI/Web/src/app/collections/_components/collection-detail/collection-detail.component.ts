@@ -1,4 +1,4 @@
-import {AsyncPipe, DatePipe, DOCUMENT, NgIf, NgStyle} from '@angular/common';
+import {AsyncPipe, DatePipe, DOCUMENT, NgStyle} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
@@ -60,6 +60,10 @@ import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {
+  SmartCollectionDrawerComponent
+} from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
 
 @Component({
   selector: 'app-collection-detail',
@@ -67,7 +71,10 @@ import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip, SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
+    BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
+    SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe,
+    PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -83,6 +90,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
+  private readonly offcanvasService = inject(NgbOffcanvas);
   private readonly titleService = inject(Title);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly actionService = inject(ActionService);
@@ -91,6 +99,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
+
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -327,6 +338,12 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly Breakpoint = Breakpoint;
+  openSyncDetailDrawer() {
+
+    const ref = this.offcanvasService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
+    ref.componentInstance.collection = this.collectionTag;
+    ref.componentInstance.series = this.series;
+  }
+
+
 }

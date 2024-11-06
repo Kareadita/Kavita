@@ -1,7 +1,9 @@
 import {
   AsyncPipe,
   DecimalPipe,
-  DOCUMENT, JsonPipe, Location,
+  DOCUMENT,
+  JsonPipe,
+  Location,
   NgClass,
   NgOptimizedImage,
   NgStyle,
@@ -35,19 +37,17 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
-  NgbOffcanvas,
   NgbProgressbar,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, forkJoin, Observable, of, shareReplay, tap} from 'rxjs';
+import {catchError, forkJoin, Observable, of, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
   EditSeriesModalCloseResult,
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
-import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
@@ -65,7 +65,6 @@ import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
-import {DeviceService} from 'src/app/_services/device.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -700,10 +699,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadSeries(seriesId: number, loadExternal: boolean = false) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
+      this.seriesMetadata = {...metadata};
       this.cdRef.markForCheck();
 
       if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
+
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
         if (date == null || date.expectedDate === null) {
           if (this.nextExpectedChapter !== undefined) {
@@ -716,7 +716,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.nextExpectedChapter = date;
         this.cdRef.markForCheck();
-      })
+      });
     });
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
@@ -850,7 +850,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   shouldShowStorylineTab() {
     if (this.libraryType === LibraryType.ComicVine) return false;
     // Edge case for bad pdf parse
-    if (this.libraryType === LibraryType.Book && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
 
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
       && (this.volumes.length > 0 || this.chapters.length > 0);

@@ -8,6 +8,8 @@ public class UpdatePersonDto
     public int Id { get; init; }
     [Required]
     public bool CoverImageLocked { get; set; }
+    [Required]
+    public string Name {get; set;}
     public string? Description { get; set; }
 
     public int? AniListId { get; set; }

@@ -197,5 +197,6 @@
     "sidenav-stream-doesnt-exist": "Strumień SideNav nie istnieje",
     "remove-from-want-to-read": "Wyczyść Chcesz przeczytać",
     "check-scrobbling-tokens": "Sprawdź tokeny Scrobblowania",
-    "invalid-email": "Adres e-mail użytkownika w pliku nie jest prawidłowy. Zobacz logi dla wszystkich linków."
+    "invalid-email": "Adres e-mail użytkownika w pliku nie jest prawidłowy. Zobacz logi dla wszystkich linków.",
+    "person-doesnt-exist": "Osoba nie istnieje"
 }

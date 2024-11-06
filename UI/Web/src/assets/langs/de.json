@@ -8,9 +8,9 @@
         "submit": "Anmelden"
     },
     "dashboard": {
-        "no-libraries": "Es sind noch keine Bibliotheken eingerichtet. Erstellen Sie einige in",
+        "no-libraries": "Es gibt noch keine Bibliotheken. Erstelle welche in",
         "server-settings-link": "Servereinstellungen",
-        "not-granted": "Sie haben keinen Zugang zu Bibliotheken erhalten.",
+        "not-granted": "Sie haben noch keinen Zugang zu Bibliotheken.",
         "on-deck-title": "Weiterlesen",
         "recently-updated-title": "Kürzlich aktualisierte Serien",
         "recently-added-title": "Neu hinzugefügte Serien",
@@ -30,7 +30,7 @@
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
-        "description": "Hier finden Sie alle Scrobble-Ereignisse, die mit Ihrem Konto verknüpft sind. Damit es Ereignisse gibt, müssen Sie einen aktiven Scrobble-Anbieter konfiguriert haben. Alle Ereignisse, die verarbeitet wurden, werden nach einem Monat gelöscht. Wenn es nicht verarbeitete Ereignisse gibt, können diese wahrscheinlich keine Übereinstimmungen im Vorfeld finden. Wenden Sie sich bitte an Ihren Administrator, damit diese korrigiert werden.",
+        "description": "Hier finden Sie alle Scrobble-Ereignisse, die mit Ihrem Konto verknüpft sind. Damit Ereignisse vorhanden sind, muss ein aktiver Scrobble-Anbieter konfiguriert sein. Alle verarbeiteten Ereignisse werden nach einem Monat gelöscht. Wenn es nicht verarbeitete Ereignisse gibt, ist es wahrscheinlich, dass diese keine Übereinstimmungen im Upstream bilden können. Bitte wenden Sie sich an Ihren Administrator, um sie korrigieren zu lassen.",
         "not-read-warning": "Die Upstream-Anbieter behalten immer die höchste Zahl",
         "filter-label": "{{common.filter}}",
         "created-header": "Erstellt",
@@ -819,7 +819,8 @@
         "donate-tooltip": "Abonniere Kavita+ um dies zu entfernen",
         "back": "Zurück",
         "more": "Mehr",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Autoren durchsuchen"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1006,7 +1007,8 @@
         "special": "Spezial",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "single-volume": "Einzelband"
     },
     "external-series-card": {
         "open-external": "Extern öffnen"
@@ -1032,7 +1034,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Name des Hosts",
-        "host-name-tooltip": "Domänenname (des Reverse Proxy). Wenn diese Option gesetzt ist, wird bei der E-Mail-Generierung immer dieser Name verwendet.",
+        "host-name-tooltip": "Domänenname (des Reverse Proxy). Erforderlich für die E-Mail-Funktionalität. Wenn kein Reverse Proxy, verwenden Sie eine beliebige Url.",
         "host-name-validation": "Der Hostname muss mit http(s) beginnen und darf nicht mit einem / enden",
         "sender-address-label": "Absender Adresse",
         "sender-address-tooltip": "Dies ist die E-Mail-Adresse, die der Empfänger sieht, wenn er die E-Mail erhält. Normalerweise ist dies die mit dem Konto verbundene E-Mail-Adresse.",
@@ -1245,7 +1247,10 @@
         "sync-themes-task-desc": "Heruntergeladene Designs mit Änderungen vom Upstream synchronisieren, wenn die Version übereinstimmt.",
         "sync-themes-success": "Die Synchronisierung der Themen wurde in die Warteschlange gestellt",
         "check-for-updates-task": "Suche nach Updates",
-        "check-for-updates-task-desc": "Schauen Sie nach, ob es vor Ihrer Version bereits Stable Releases gibt."
+        "check-for-updates-task-desc": "Schauen Sie nach, ob es vor Ihrer Version bereits Stable Releases gibt.",
+        "clean-up-task": "Allgemeine Bereinigung",
+        "clean-up-task-desc": "Führt nächtliche Bereinigungsaktivitäten auf dem Server durch. Kann sehr zeitaufwendig sein, sollte nicht bei aktiven Benutzern oder Scans ausgeführt werden. Läuft alle 24 Stunden.",
+        "clean-up-task-success": "Aufräumarbeiten abgeschlossen"
     },
     "manage-users": {
         "title": "Aktive Benutzer",
@@ -1639,7 +1644,8 @@
         "unit-reading-date": "Datum",
         "unit-average-rating": "Externes Rating von Kavita+, Prozent",
         "unit-reading-progress": "Prozentsatz",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-read-last": "Tage ab HEUTE"
     },
     "sort-field-pipe": {
         "sort-name": "Sort Name",
@@ -1870,7 +1876,8 @@
         "provided-by-label": "Zur Verfügung gestellt von"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Demnächst"
     },
     "server-stats": {
         "total-series-label": "Gesamte Serie",
@@ -2004,7 +2011,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Sammlung Tags",
         "colorist": "Kolorist",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formate",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2031,7 +2038,8 @@
         "file-path": "Datei-Pfad",
         "want-to-read": "Möchte ich lesen",
         "read-date": "Datum des Lesens",
-        "average-rating": "Durchschnittliche Bewertung"
+        "average-rating": "Durchschnittliche Bewertung",
+        "read-last": "Zuletzt gelesen"
     },
     "filter-comparison-pipe": {
         "begins-with": "Beginnt mit",
@@ -2165,7 +2173,8 @@
         "confirm-reset-server-settings": "Dadurch werden Ihre Einstellungen auf die Werte der Erstinstallation zurückgesetzt. Sind Sie sicher, dass Sie fortfahren möchten?",
         "must-select-library": "Mindestens eine Bibliothek muss ausgewählt werden",
         "bulk-scan": "Das Scannen mehrerer Bibliotheken wird linear durchgeführt. Je nach Größe der Bibliothek kann dies sehr lange dauern und nicht vollständig sein.",
-        "bulk-covers": "Das Aktualisieren von Titelseiten in mehreren Bibliotheken ist intensiv und kann lange dauern. Bist du sicher, dass du fortfahren willst?"
+        "bulk-covers": "Das Aktualisieren von Titelseiten in mehreren Bibliotheken ist intensiv und kann lange dauern. Bist du sicher, dass du fortfahren willst?",
+        "person-image-downloaded": "Personen Cover wurde heruntergeladen und angewendet."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2351,10 +2360,37 @@
         "book-nums": "Bücher",
         "issue-nums": "Ausgaben",
         "chapter-nums": "Kapitel",
-        "volume-nums": "Bände"
+        "volume-nums": "Bände",
+        "author-count": "{{num}} Autoren"
     },
     "confirm": {
         "alert": "Alarm",
         "confirm": "Bestätigen"
+    },
+    "person-detail": {
+        "all-roles": "Funktionen",
+        "known-for-title": "Bekannt für",
+        "individual-role-title": "Als eine {{role}}",
+        "browse-person-title": "Alle Werke von {{name}}",
+        "browse-person-by-role-title": "Alle Werke von {{name}} als {{role}}"
+    },
+    "browse-authors": {
+        "author-count": "{{num}} Personen",
+        "title": "Autoren & Schriftsteller durchsuchen"
+    },
+    "edit-person-modal": {
+        "title": "Details zu {{personName}}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "anilist-id-label": "AniList Id",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "hardcover-id-label": "Hardcover-ID",
+        "asin-label": "ASIN",
+        "role-label": "Funktion",
+        "mal-id-label": "MAL Id",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "description-label": "Beschreibung",
+        "cover-image-description-extra": "Alternativ kannst du ein Cover von CoversDB herunterladen, falls verfügbar.",
+        "download-coversdb": "Download von CoversDB"
     }
 }

@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "avantages premium",
         "kavita+-desc-part-3": "aujourd'hui !",
         "kavita+-requirement": "Kavita+ est conçu pour fonctionner uniquement avec la dernière version - 2 versions. Toute autre version est susceptible de ne pas fonctionner.",
-        "kavita+-releases": "Voir les versions"
+        "kavita+-releases": "Voir les versions",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "Copier",
@@ -819,7 +820,8 @@
         "donate-tooltip": "Vous pouvez supprimer ce message en vous abonnant à Kavita+",
         "back": "Retour",
         "more": "Plus",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "Parcourir les auteurs"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -957,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1006,7 +1013,9 @@
         "special": "Spécial",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "Volume unique"
     },
     "external-series-card": {
         "open-external": "Ouvrir à l'extérieur"
@@ -1032,7 +1041,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Nom d'hôte",
-        "host-name-tooltip": "Nom de domaine (du proxy inversé). Si défini, la génération d'e-mails l'utilisera toujours.",
+        "host-name-tooltip": "Nom de domaine (du Reverse Proxy). Nécessaire pour la fonctionnalité de messagerie. S'il n'y a pas de reverse proxy, utiliser n'importe quelle url.",
         "host-name-validation": "Le nom d'hôte doit commencer par http(s) et ne pas se terminer par /",
         "sender-address-label": "Adresse d’expéditeur",
         "sender-address-tooltip": "Il s'agit de l'adresse électronique que le destinataire verra lorsqu'il recevra l'e-mail. Il s'agit généralement de l'adresse électronique associée au compte.",
@@ -1245,7 +1254,10 @@
         "sync-themes-task-desc": "Synchroniser les thèmes téléchargés avec les modifications du dépôt d'origine si les versions correspondent.",
         "sync-themes-success": "La synchronisation des thèmes a été mise en file d'attente",
         "check-for-updates-task": "Rechercher des mises à jour",
-        "check-for-updates-task-desc": "Vérifier s'il y a des versions stables en avance sur votre version."
+        "check-for-updates-task-desc": "Vérifier s'il y a des versions stables en avance sur votre version.",
+        "clean-up-task": "Nettoyage général",
+        "clean-up-task-desc": "Effectue des activités de nettoyage nocturnes sur le serveur. Peut prendre beaucoup de temps, ne doit pas être exécuté lorsque des utilisateurs ou des analyses sont actifs. S'exécute toutes les 24 heures.",
+        "clean-up-task-success": "Nettoyage terminé"
     },
     "manage-users": {
         "title": "Utilisateurs actifs",
@@ -1522,7 +1534,8 @@
         "dry-run-step": "Simuler",
         "final-import-step": "Dernière étape",
         "comicvine-parsing-label": "Utiliser la correspondance des séries de Comic Vine",
-        "cbl-repo": "Vous trouverez de nombreuses listes de lecture dans la communauté <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
+        "cbl-repo": "Vous trouverez de nombreuses listes de lecture dans la communauté <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>.",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "Chargement......de PDF peut prendre plus de temps que prévu",
@@ -1639,7 +1652,8 @@
         "unit-reading-date": "Date",
         "unit-average-rating": "Notation externe de Kavita+, en pourcentage",
         "unit-reading-progress": "Pourcentage",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-read-last": "Jours à partir d'AUJOURD'HUI"
     },
     "sort-field-pipe": {
         "sort-name": "Nom",
@@ -1870,7 +1884,8 @@
         "provided-by-label": "Fourni par"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Prochainement"
     },
     "server-stats": {
         "total-series-label": "Nombre de séries",
@@ -1997,14 +2012,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Étiquettes de la collection",
         "colorist": "Coloriste",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Correcteur",
         "formats": "Formats",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2031,7 +2047,8 @@
         "file-path": "Chemin du fichier",
         "want-to-read": "À Lire",
         "read-date": "Date de lecture",
-        "average-rating": "Note moyenne"
+        "average-rating": "Note moyenne",
+        "read-last": "Dernièrement lu"
     },
     "filter-comparison-pipe": {
         "begins-with": "Commence par",
@@ -2165,7 +2182,8 @@
         "confirm-reset-server-settings": "Cette opération réinitialisera vos paramètres aux valeurs de la première installation. Êtes-vous sûr de vouloir continuer ?",
         "bulk-scan": "Balayer plusieurs bibliothèques sera réalisé l'une après l'autre. En fonction de la taille de la bibliothèque cela peut prendre beaucoup de temps ou même échouer.",
         "bulk-covers": "Rafraichir les couvertures pour plusieurs bibliothèques est lourd pour le serveur et peut prendre longtemps. Êtes vous sûr de vouloir continuer ?",
-        "must-select-library": "Au moins une bibliothèque doit être sélectionnée"
+        "must-select-library": "Au moins une bibliothèque doit être sélectionnée",
+        "person-image-downloaded": "La couverture de la personne a été téléchargée et appliquée."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",
@@ -2351,10 +2369,46 @@
         "book-nums": "Livres",
         "issue-nums": "Numéros",
         "chapter-nums": "Chapitres",
-        "volume-nums": "Volumes"
+        "volume-nums": "Volumes",
+        "author-count": "{{num}} Auteurs"
     },
     "confirm": {
         "alert": "Alerte",
         "confirm": "Confirmer"
+    },
+    "person-detail": {
+        "all-roles": "Roles",
+        "browse-person-by-role-title": "Toutes les œuvres de {{name}} en tant que {{role}}",
+        "known-for-title": "Connu pour",
+        "individual-role-title": "En tant que {{role}}",
+        "browse-person-title": "Toutes les œuvres de {{name}}"
+    },
+    "edit-person-modal": {
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "title": "Détails de {{personName}}",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "hardcover-id-label": "Hardcover Id",
+        "role-label": "Role",
+        "mal-id-label": "MAL Id",
+        "anilist-id-label": "AniList Id",
+        "asin-label": "ASIN",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "description-label": "Description",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "cover-image-description-extra": "Vous pouvez également télécharger une couverture à partir de CoversDB, si elle est disponible.",
+        "download-coversdb": "Télécharger à partir de CoversDB"
+    },
+    "browse-authors": {
+        "title": "Parcourir les auteurs et écrivains",
+        "author-count": "{{num}} Personnes",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     }
 }

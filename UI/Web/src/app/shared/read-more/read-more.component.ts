@@ -42,8 +42,10 @@ export class ReadMoreComponent implements OnChanges {
   }
 
   determineView() {
+    const text = this.text ? this.text.replace(/\n/g, '<br>') : '';
+
     if (!this.text || this.text.length <= this.maxLength) {
-        this.currentText = this.text;
+        this.currentText = text;
         this.isCollapsed = true;
         this.hideToggle = true;
         this.cdRef.markForCheck();
@@ -52,11 +54,11 @@ export class ReadMoreComponent implements OnChanges {
 
     this.hideToggle = false;
     if (this.isCollapsed) {
-      this.currentText = this.text.substring(0, this.maxLength);
+      this.currentText = text.substring(0, this.maxLength);
       this.currentText = this.currentText.substring(0, Math.min(this.currentText.length, this.currentText.lastIndexOf(' ')));
       this.currentText = this.currentText + '…';
     } else if (!this.isCollapsed)  {
-      this.currentText = this.text;
+      this.currentText = text;
     }
 
     this.cdRef.markForCheck();

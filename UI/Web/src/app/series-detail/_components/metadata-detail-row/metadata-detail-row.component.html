@@ -7,6 +7,8 @@
         <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
       </div>
     }
+<!--    TODO: Figure out if I can implement this animation (ROBBIE)-->
+<!--    <app-publisher-flipper [publishers]="entity.publishers"></app-publisher-flipper>-->
     <span class="me-2">
       <app-age-rating-image [rating]="ageRating"></app-age-rating-image>
     </span>

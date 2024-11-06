@@ -1,5 +1,43 @@
 <ng-container *transloco="let t; read: 'details-tab'">
 <div class="details pb-3">
+
+  @if (readingTime) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('read-time-title')}}</h4>
+      <div class="ms-3">
+        {{readingTime | readTime}}
+      </div>
+    </div>
+  }
+
+  @if (releaseYear) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('release-title')}}</h4>
+      <div class="ms-3">
+        {{releaseYear}}
+      </div>
+    </div>
+  }
+
+  @if (language) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('language-title')}}</h4>
+      <div class="ms-3">
+        {{language | languageName | async}}
+      </div>
+    </div>
+  }
+
+  <div class="mb-3 ms-1">
+    <h4 class="header">{{t('format-title')}}</h4>
+    <div class="ms-3">
+      <app-series-format [format]="format"></app-series-format> {{format | mangaFormat }}
+    </div>
+  </div>
+
+  <div class="setting-section-break" aria-hidden="true"></div>
+
+
   <div class="mb-3 ms-1">
     <h4 class="header">{{t('genres-title')}}</h4>
     <div class="ms-3">

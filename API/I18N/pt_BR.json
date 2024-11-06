@@ -179,7 +179,7 @@
     "unable-to-reset-k+": "Não foi possível redefinir a licença Kavita+ devido a um erro. Entre em contato com o suporte Kavita +",
     "send-to-unallowed": "Você não pode enviar para um dispositivo que não seja seu",
     "email-not-enabled": "O e-mail não está ativado neste servidor. Você não pode executar esta ação.",
-    "send-to-size-limit": "Os arquivos que você está tentando enviar são muito grandes para o seu e-mail",
+    "send-to-size-limit": "Os arquivos que você está tentando enviar são muito grandes para o seu provedor de e-mail",
     "check-updates": "Verificar por Atualizações",
     "license-check": "Verificar Licença",
     "process-scrobbling-events": "Eventos de Scrobbling de Processo",
@@ -197,5 +197,9 @@
     "error-import-stack": "Ocorreu um problema ao importar a pilha MAL",
     "collection-already-exists": "A coleção já existe",
     "generic-cover-person-save": "Não foi possível salvar a imagem da capa em Pessoa",
-    "generic-cover-volume-save": "Não foi possível salvar a imagem da capa no Volume"
+    "generic-cover-volume-save": "Não foi possível salvar a imagem da capa no Volume",
+    "person-doesnt-exist": "Pessoa não existe",
+    "person-image-doesnt-exist": "A pessoa não existe no CoversDB",
+    "person-name-required": "O nome da pessoa é obrigatório e não deve ser nulo",
+    "person-name-unique": "O nome da pessoa deve ser exclusivo"
 }

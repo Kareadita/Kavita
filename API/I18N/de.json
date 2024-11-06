@@ -179,7 +179,7 @@
     "email-not-enabled": "Der Mailversand ist auf diesem Server nicht aktiviert. Sie können diese Aktion nicht durchführen.",
     "invalid-email": "Die für den Benutzer hinterlegte E-Mail ist ungültig. Links finden Sie in den Logs.",
     "send-to-unallowed": "Sie können nicht an ein fremdes Gerät senden.",
-    "send-to-size-limit": "Die Datei(en), die Sie senden möchten, ist/sind zu groß für Ihren E-Mail-Service",
+    "send-to-size-limit": "Die Datei(en), die Sie zu senden versuchen, sind zu groß für Ihren E-Mail-Anbieter",
     "check-updates": "Updates überprüfen",
     "email-settings-invalid": "E-Mail-Einstellungen fehlen Informationen. Stellen Sie sicher, dass alle E-Mail-Einstellungen gespeichert sind.",
     "account-email-invalid": "Die für das Admin-Konto gespeicherte E-Mail ist nicht gültig. Test-E-Mail kann nicht gesendet werden.",
@@ -197,5 +197,9 @@
     "scan-libraries": "Bibliotheken scannen",
     "collection-already-exists": "Sammlung existiert schon",
     "generic-cover-volume-save": "Coverbild kann nicht auf Volume gespeichert werden",
-    "generic-cover-person-save": "Das Titelbild kann nicht zu dieser Person gespeichert werden"
+    "generic-cover-person-save": "Das Titelbild kann nicht zu dieser Person gespeichert werden",
+    "person-doesnt-exist": "Die Person existiert nicht",
+    "person-name-required": "Personenname ist erforderlich und darf nicht null sein",
+    "person-name-unique": "Der Name der Person muss eindeutig sein",
+    "person-image-doesnt-exist": "Die Person existiert nicht in CoversDB"
 }

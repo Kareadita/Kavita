@@ -58,16 +58,30 @@ public class ChapterController : BaseApiController
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
-        var vol = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
-        _unitOfWork.ChapterRepository.Remove(chapter);
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId, VolumeIncludes.Chapters);
+        if (vol == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
 
-        if (await _unitOfWork.CommitAsync())
+        // If there is only 1 chapter within the volume, then we need to remove the volume
+        var needToRemoveVolume = vol.Chapters.Count == 1;
+        if (needToRemoveVolume)
         {
-            await _eventHub.SendMessageAsync(MessageFactory.ChapterRemoved, MessageFactory.ChapterRemovedEvent(chapter.Id, vol.SeriesId), false);
-            return Ok(true);
+            _unitOfWork.VolumeRepository.Remove(vol);
+        }
+        else
+        {
+            _unitOfWork.ChapterRepository.Remove(chapter);
         }
 
-        return Ok(false);
+
+        if (!await _unitOfWork.CommitAsync()) return Ok(false);
+
+        await _eventHub.SendMessageAsync(MessageFactory.ChapterRemoved, MessageFactory.ChapterRemovedEvent(chapter.Id, vol.SeriesId), false);
+        if (needToRemoveVolume)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(chapter.VolumeId, vol.SeriesId), false);
+        }
+
+        return Ok(true);
     }
 
     /// <summary>

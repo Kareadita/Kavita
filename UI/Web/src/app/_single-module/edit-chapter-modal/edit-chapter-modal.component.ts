@@ -262,7 +262,7 @@ export class EditChapterModalComponent implements OnInit {
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     this.chapter.releaseDate = model.releaseDate;
-    this.chapter.ageRating = model.ageRating as AgeRating;
+    this.chapter.ageRating = parseInt(model.ageRating + '', 10) as AgeRating;
     this.chapter.genres = model.genres;
     this.chapter.tags = model.tags;
     this.chapter.sortOrder = model.sortOrder;
@@ -493,7 +493,7 @@ export class EditChapterModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false };
+      return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
 
     return personSettings;

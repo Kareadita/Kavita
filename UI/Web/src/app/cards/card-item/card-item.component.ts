@@ -47,6 +47,7 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {BrowsePerson} from "../../_models/person/browse-person";
+import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 
@@ -70,7 +71,8 @@ export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookma
     PromotedIconComponent,
     SeriesFormatComponent,
     DecimalPipe,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    CompactNumberPipe
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
@@ -257,6 +259,8 @@ export class CardItemComponent implements OnInit {
       }
 
       this.cdRef.markForCheck();
+    } else {
+      this.tooltipTitle = this.title;
     }
 
 

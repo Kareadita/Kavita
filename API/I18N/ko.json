@@ -177,7 +177,7 @@
     "recently-updated": "최근 업데이트됨",
     "browse-recently-updated": "최근 업데이트된 항목 탐색",
     "email-not-enabled": "이 서버에서는 이메일이 활성화되지 않았습니다. 이 작업을 수행할 수 없습니다.",
-    "send-to-size-limit": "보내려는 파일이 이메일로 전송하기에 너무 큽니다",
+    "send-to-size-limit": "보내려는 파일이 이메일 제공업체에 비해 너무 큽니다",
     "send-to-unallowed": "본인 소유가 아닌 장치로 보낼 수 없습니다",
     "unable-to-reset-k+": "오류로 인해 Kavita+ 라이센스를 재설정할 수 없습니다. Kavita+ 지원팀에 연락하세요",
     "check-updates": "업데이트 확인",
@@ -197,5 +197,9 @@
     "collection-already-exists": "컬렉션이 이미 존재합니다",
     "error-import-stack": "MAL 스택 가져오기 중 문제가 발생했습니다",
     "generic-cover-person-save": "인물에 커버 이미지를 저장할 수 없습니다",
-    "generic-cover-volume-save": "볼륨에 커버 이미지를 저장할 수 없습니다"
+    "generic-cover-volume-save": "볼륨에 커버 이미지를 저장할 수 없습니다",
+    "person-doesnt-exist": "사람이 존재하지 않습니다",
+    "person-name-required": "개인 이름은 필수 항목이며 null일 수 없습니다",
+    "person-name-unique": "개인 이름은 고유해야 합니다",
+    "person-image-doesnt-exist": "CoversDB에 사람이 존재하지 않습니다"
 }

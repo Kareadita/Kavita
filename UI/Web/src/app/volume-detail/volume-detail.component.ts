@@ -262,7 +262,6 @@ export class VolumeDetailComponent implements OnInit {
    * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
-  showDetailsTab: boolean = true;
   currentlyReadingChapter: Chapter | undefined = undefined;
 
   maxAgeRating: AgeRating = AgeRating.Unknown;
@@ -506,7 +505,6 @@ export class VolumeDetailComponent implements OnInit {
       this.setContinuePoint();
 
 
-      this.showDetailsTab = hasAnyCast(this.volumeCast) || (this.genres || []).length > 0 || (this.tags || []).length > 0;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -571,7 +569,7 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
-  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+  async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
         this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, _ => this.setContinuePoint());
@@ -587,6 +585,12 @@ export class VolumeDetailComponent implements OnInit {
         break;
       case(Action.IncognitoRead):
         this.readerService.readChapter(this.libraryId, this.seriesId, chapter, true);
+        break;
+      case(Action.Delete):
+        await this.actionService.deleteChapter(chapter.id, (res) => {
+          if (!res) return;
+          this.navigateToSeries();
+        });
         break;
       case (Action.SendTo):
         const device = (action._extra!.data as Device);

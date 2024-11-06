@@ -668,6 +668,7 @@
         "license-valid": "License is Valid",
         "license-not-valid": "License Not Valid",
         "loading": "{{common.loading}}",
+        "help-label": "{{common.help}}",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
@@ -1071,7 +1072,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
 
     "related-tab": {
@@ -1126,7 +1132,9 @@
         "special": "Special",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "Single Volume"
     },
 
     "external-series-card": {
@@ -1156,7 +1164,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Host Name",
-        "host-name-tooltip": "Domain Name (of Reverse Proxy). If set, email generation will always use this.",
+        "host-name-tooltip": "Domain Name (of Reverse Proxy). Required for email functionality. If no reverse proxy, use any url.",
         "host-name-validation": "Host name must start with http(s) and not end in /",
 
         "sender-address-label": "Sender Address",
@@ -1206,6 +1214,7 @@
         "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences",
         "bulk-action-label": "Bulk Action"
     },
+
 
     "copy-settings-from-library-modal": {
         "close": "{{common.close}}",
@@ -1456,6 +1465,7 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
         "last-sync-title": "Last Sync:",
+        "last-sync-tooltip": "Kavita syncs daily against upstream collection provider.",
         "source-url-title": "Source Url:",
         "total-series-title": "Total Series:",
         "missing-series-title": "Missing Series:"
@@ -1690,6 +1700,7 @@
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL Import",
+        "help-label": "{{common.help}}",
         "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
         "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists that have failed will not move to the next step. Fix the CBL files and retry.",
         "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
@@ -1831,7 +1842,8 @@
         "unit-reading-date": "Date",
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "0.0 - 5.0 Stars",
+        "unit-read-last": "Days from TODAY"
     },
 
     "sort-field-pipe": {
@@ -2013,13 +2025,19 @@
         "name-label": "{{edit-series-modal.name-label}}",
         "role-label": "Role",
         "mal-id-label": "MAL Id",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "anilist-id-label": "AniList Id",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "hardcover-id-label": "Hardcover Id",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Description",
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "save": "{{common.save}}"
+        "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
+        "save": "{{common.save}}",
+        "download-coversdb": "Download from CoversDB"
     },
 
     "day-breakdown": {
@@ -2097,7 +2115,8 @@
     },
 
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Upcoming"
     },
 
     "server-stats": {
@@ -2270,6 +2289,7 @@
         "file-path": "File Path",
         "want-to-read": "Want to Read",
         "read-date": "Reading Date",
+        "read-last": "Read Last",
         "average-rating": "Average Rating"
     },
 
@@ -2411,7 +2431,8 @@
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
         "must-select-library": "At least one library must be selected",
         "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
-        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?"
+        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?",
+        "person-image-downloaded": "Person cover was downloaded and applied."
     },
 
     "read-time-pipe": {

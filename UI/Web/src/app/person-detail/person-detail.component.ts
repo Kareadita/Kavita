@@ -4,14 +4,14 @@ import {
   Component, DestroyRef,
   ElementRef,
   Inject,
-  inject,
+  inject, OnInit,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
-import {Observable, switchMap, tap} from "rxjs";
+import {BehaviorSubject, EMPTY, Observable, switchMap, tap} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
-import {AsyncPipe, DOCUMENT, NgStyle} from "@angular/common";
+import {AsyncPipe, NgStyle} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
 import {ImageService} from "../_services/image.service";
 import {
@@ -80,7 +80,6 @@ export class PersonDetailComponent {
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
   personName!: string;
-  person$: Observable<Person> | null = null;
   person: Person | null = null;
   roles$: Observable<PersonRole[]> | null = null;
   roles: PersonRole[] | null = null;
@@ -89,42 +88,50 @@ export class PersonDetailComponent {
   filter: SeriesFilterV2 | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
+  private readonly personSubject = new BehaviorSubject<Person | null>(null);
+  protected readonly person$ = this.personSubject.asObservable();
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
-    this.route.paramMap.subscribe(_ => {
-      const personName = this.route.snapshot.paramMap.get('name');
-      if (personName === null || undefined) {
-        this.router.navigateByUrl('/home');
-        return;
-      }
+  constructor() {
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        const personName = params.get('name');
+        if (!personName) {
+          this.router.navigateByUrl('/home');
+          return EMPTY;
+        }
 
-      this.personName = personName;
+        this.personName = personName;
+        return this.personService.get(personName);
+      }),
+      tap(person => {
+        this.person = person;
+        this.personSubject.next(person); // emit the person data for subscribers
+        this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
 
+        // Fetch roles and process them
+        this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(
+          tap(roles => {
+            this.roles = roles;
+            this.filter = this.createFilter(roles);
+            this.chaptersByRole = {}; // Reset chaptersByRole for each person
 
-      this.person$ = this.personService.get(this.personName).pipe(tap(p => {
-        this.person = p;
-
-        this.themeService.setColorScape(this.person.primaryColor || '', this.person.secondaryColor);
-
-        this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(tap(roles => {
-          this.roles = roles;
-          this.filter = this.createFilter(roles);
-
-          for(let role of roles) {
-            this.chaptersByRole[role] = this.personService.getChaptersByRole(this.person!.id, role).pipe(takeUntilDestroyed(this.destroyRef));
-          }
-
-          this.cdRef.markForCheck();
-        }), takeUntilDestroyed(this.destroyRef));
-
-
-        this.works$ = this.personService.getSeriesMostKnownFor(this.person.id).pipe(
+            // Populate chapters by role
+            roles.forEach(role => {
+              this.chaptersByRole[role] = this.personService.getChaptersByRole(person.id, role)
+                .pipe(takeUntilDestroyed(this.destroyRef));
+            });
+            this.cdRef.markForCheck();
+          }),
           takeUntilDestroyed(this.destroyRef)
         );
 
-        this.cdRef.markForCheck();
-      }), takeUntilDestroyed(this.destroyRef));
-    });
+        // Fetch series known for this person
+        this.works$ = this.personService.getSeriesMostKnownFor(person.id).pipe(
+          takeUntilDestroyed(this.destroyRef)
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   createFilter(roles: PersonRole[]) {
@@ -154,13 +161,7 @@ export class PersonDetailComponent {
     };
 
 
-    if (this.person) {
-      loadPage(this.person).subscribe();
-    } else {
-      this.person$?.pipe(switchMap((p: Person) => {
-        return loadPage(p);
-      })).subscribe();
-    }
+    loadPage(this.person!).subscribe();
   }
 
   loadFilterByRole(role: PersonRole) {
@@ -191,7 +192,18 @@ export class PersonDetailComponent {
 
         ref.closed.subscribe(r => {
           if (r.success) {
+            const nameChanged = this.personName !== r.person.name;
             this.person = {...r.person};
+            this.personName = this.person!.name;
+
+            this.personSubject.next(this.person);
+
+            // Update the url to reflect the new name change
+            if (nameChanged) {
+              const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+              window.history.replaceState({}, '', `${baseUrl}/${encodeURIComponent(this.personName)}`);
+            }
+
             this.cdRef.markForCheck();
           }
         });

@@ -13,7 +13,7 @@ import {
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {PersonService} from "../../../_services/person.service";
-import { TranslocoDirective } from '@jsverse/transloco';
+import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {forkJoin} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
@@ -21,6 +21,7 @@ import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
+import {ToastrService} from "ngx-toastr";
 
 enum TabID {
   General = 'general-tab',
@@ -57,6 +58,7 @@ export class EditPersonModalComponent implements OnInit {
   private readonly personService = inject(PersonService);
   private readonly uploadService = inject(UploadService);
   protected readonly accountService = inject(AccountService);
+  protected readonly toastr = inject(ToastrService);
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
@@ -77,6 +79,7 @@ export class EditPersonModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   touchedCoverImage = false;
+  fetchDisabled: boolean = false;
 
   ngOnInit() {
     if (this.person) {
@@ -91,6 +94,8 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
 
       this.cdRef.markForCheck();
+    } else {
+      alert('no person')
     }
   }
 
@@ -154,6 +159,17 @@ export class EditPersonModalComponent implements OnInit {
     });
     this.touchedCoverImage = true;
     this.cdRef.markForCheck();
+  }
+
+  downloadCover() {
+    this.personService.downloadCover(this.person.id).subscribe(imgUrl => {
+      if (imgUrl) {
+        this.toastr.success(translate('toasts.person-image-downloaded'));
+        this.fetchDisabled = true;
+        this.imageUrls.push(imgUrl);
+        this.cdRef.markForCheck();
+      }
+    });
   }
 
 }

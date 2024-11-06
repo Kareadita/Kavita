@@ -107,15 +107,30 @@ public class ReadingListService : IReadingListService
 
         if (title != string.Empty) return title;
 
+        // item.ChapterNumber is Range
         if (item.ChapterNumber == Parser.DefaultChapter &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
         }
+        else if (item.IsSpecial &&
+                 (!string.IsNullOrEmpty(item.ChapterTitleName) || !string.IsNullOrEmpty(chapterNum)))
+        {
+            if (!string.IsNullOrEmpty(item.ChapterTitleName))
+            {
+                title = item.ChapterTitleName;
+            }
+            else
+            {
+                title = chapterNum;
+            }
+
+        }
         else
         {
             title = ReaderService.FormatChapterName(item.LibraryType, true, true) + chapterNum;
         }
+
         return title;
     }
 
@@ -609,10 +624,6 @@ public class ReadingListService : IReadingListService
 
     private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
     {
-        if (useComicLibraryMatching)
-        {
-            return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
-        }
         return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
     }
 

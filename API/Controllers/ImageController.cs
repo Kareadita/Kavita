@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
@@ -26,17 +27,19 @@ public class ImageController : BaseApiController
     private readonly IImageService _imageService;
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
+    private readonly ICoverDbService _coverDbService;
 
     /// <inheritdoc />
     public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
         IImageService imageService, ILocalizationService localizationService,
-        IReadingListService readingListService)
+        IReadingListService readingListService, ICoverDbService coverDbService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _imageService = imageService;
         _localizationService = localizationService;
         _readingListService = readingListService;
+        _coverDbService = coverDbService;
     }
 
     /// <summary>
@@ -230,7 +233,7 @@ public class ImageController : BaseApiController
             try
             {
                 domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory,
-                    await _imageService.DownloadFaviconAsync(url, encodeFormat));
+                    await _coverDbService.DownloadFaviconAsync(url, encodeFormat));
             }
             catch (Exception)
             {
@@ -270,7 +273,7 @@ public class ImageController : BaseApiController
             try
             {
                 domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.PublisherDirectory,
-                    await _imageService.DownloadPublisherImageAsync(publisherName, encodeFormat));
+                    await _coverDbService.DownloadPublisherImageAsync(publisherName, encodeFormat));
             }
             catch (Exception)
             {

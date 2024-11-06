@@ -125,7 +125,7 @@
         "background-color-label": "背景顏色",
         "auto-close-menu-label": "自動關閉選單",
         "show-screen-hints-label": "顯示螢幕提示",
-        "emulate-comic-book-label": "模仿漫畫",
+        "emulate-comic-book-label": "模擬漫畫書",
         "swipe-to-paginate-label": "滑動到分頁",
         "book-reader-settings-title": "書本閱讀器",
         "tap-to-paginate-label": "點擊翻頁",
@@ -353,7 +353,7 @@
     "top-readers": {
         "title": "熱門讀者",
         "time-selection-label": "時間",
-        "comics-label": "漫畫：{{value}}小時",
+        "comics-label": "美漫：{{value}}小時",
         "manga-label": "漫畫：{{value}}小時",
         "books-label": "書籍：{{value}}小時",
         "this-week": "{{time-periods.this-week}}",
@@ -465,11 +465,11 @@
         "annual": "年度"
     },
     "publication-status-pipe": {
-        "ongoing": "進行中",
-        "hiatus": "差距",
-        "completed": "完全的",
-        "cancelled": "取消",
-        "ended": "完結"
+        "ongoing": "連載中",
+        "hiatus": "暫停連載",
+        "completed": "完結",
+        "cancelled": "腰斬",
+        "ended": "已結束"
     },
     "person-role-pipe": {
         "artist": "畫家",
@@ -497,7 +497,7 @@
     },
     "library-type-pipe": {
         "book": "書籍",
-        "comic": "漫畫",
+        "comic": "美漫",
         "manga": "漫畫",
         "comicVine": "Comic Vine",
         "image": "圖片",
@@ -605,7 +605,8 @@
         "kavita+-desc-part-3": "今天！",
         "kavita+-releases": "查看版本",
         "kavita+-desc-part-1": "Kavita+ 是一項高級訂閱服務，可為此 Kavita 實例上的所有用戶解鎖功能。購買訂閱以解鎖 ",
-        "kavita+-requirement": "Kavita+ 僅與最新版本（最近的兩個版本）配合使用。任何不在此範圍內的版本可能無法正常運作。"
+        "kavita+-requirement": "Kavita+ 僅與最新版本（最近的兩個版本）配合使用。任何不在此範圍內的版本可能無法正常運作。",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "複製",
@@ -785,7 +786,8 @@
         "all-series": "所有系列",
         "more": "更多",
         "donate-tooltip": "您可以通過訂閱 Kavita+ 來移除這個",
-        "donate": "捐款"
+        "donate": "捐款",
+        "browse-authors": "瀏覽作者"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -907,7 +909,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -953,7 +960,9 @@
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "special": "特集"
+        "special": "特集",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "單卷"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
@@ -976,7 +985,7 @@
         "send-to-warning": "如果您希望“發送至裝置”功能正常運作，您必須完善電子郵件設定",
         "test": "測試",
         "host-name-label": "主機名稱",
-        "host-name-tooltip": "域名 Domain Name（反向代理）。如果配置，始終使用此域名生成電子郵件。",
+        "host-name-tooltip": "域名（使用反向代理的話）。此項為電子郵件功能所必需。如果沒有反向代理，請使用任意網址。",
         "host-name-validation": "主機名稱必須以 http(s) 開頭，且不能以 / 結尾",
         "host-tooltip": "您電子郵件伺服器的發送／SMTP地址",
         "host-label": "主機",
@@ -1164,7 +1173,10 @@
         "description-header": "描述",
         "clean-up-want-to-read-task": "清理“想讀”清單",
         "clean-up-want-to-read-task-success": "想讀清單已清理完成",
-        "cleanup-tooltip": "Kavita 要多久執行一次清理任務。這可能會佔用大量資源，通常應該在午夜進行"
+        "cleanup-tooltip": "Kavita 要多久執行一次清理任務。這可能會佔用大量資源，通常應該在午夜進行",
+        "clean-up-task": "一般清理",
+        "clean-up-task-success": "清理完成",
+        "clean-up-task-desc": "執行伺服器上的夜間清理任務。可能會消耗大量資源，建議不要在有活躍用戶或掃描時執行。每24小時運行一次。"
     },
     "manage-users": {
         "loading": "{{common.loading}}",
@@ -1424,7 +1436,8 @@
         "validate-cbl-step": "驗證CBL",
         "dry-run-step": "試運行",
         "next": "下一步",
-        "title": "CBL匯入"
+        "title": "CBL匯入",
+        "help-label": "{{common.help}}"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
@@ -1510,7 +1523,8 @@
         "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
         "unit-reading-date": "日期",
         "unit-reading-progress": "百分比",
-        "unit-average-rating": "Kavita+ 外部評分，百分比"
+        "unit-average-rating": "Kavita+ 外部評分，百分比",
+        "unit-read-last": "距今天"
     },
     "edit-series-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -1834,12 +1848,13 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "genres": "{{metadata-fields.genres-title}}",
         "release-year": "{{sort-field-pipe.release-year}}",
         "tags": "{{metadata-fields.tags-title}}",
@@ -1868,7 +1883,8 @@
         "languages": "語言",
         "path": "路徑",
         "libraries": "書庫",
-        "series-name": "系列名稱"
+        "series-name": "系列名稱",
+        "read-last": "最後閱讀"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -1973,7 +1989,8 @@
         "issue-num": "期",
         "add": "新增",
         "select-all": "全選",
-        "chapter-num": "章"
+        "chapter-num": "章",
+        "author-count": "{{num}}位作者"
     },
     "download-indicator": {
         "progress": "{{percentage}}%已下載"
@@ -2328,7 +2345,8 @@
         "no-data": "沒有資料"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "即將推出"
     },
     "confirm": {
         "alert": "警報",
@@ -2356,5 +2374,34 @@
         "password-validation": "密碼長度必須在 6 到 256 個字元之間",
         "required-field": "此欄位為必填",
         "year-validation": "這必須是一個有效的年份，大於 1000 且長度為 4 個字元"
+    },
+    "person-detail": {
+        "all-roles": "身份",
+        "known-for-title": "代表作品",
+        "individual-role-title": "作為{{role}}",
+        "browse-person-title": "{{name}}的所有作品",
+        "browse-person-by-role-title": "{{name}}作為{{role}}的所有作品"
+    },
+    "edit-person-modal": {
+        "save": "{{common.save}}",
+        "description-label": "描述",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "title": "{{personName}} 的詳細資料",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "身分",
+        "hardcover-id-label": "Hardcover Id",
+        "mal-id-label": "MAL Id",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "anilist-id-label": "AniList Id",
+        "asin-label": "ASIN",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}"
+    },
+    "browse-authors": {
+        "title": "瀏覽作者／作家",
+        "author-count": "{{num}} 人",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     }
 }

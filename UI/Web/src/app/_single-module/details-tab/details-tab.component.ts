@@ -3,18 +3,25 @@ import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/ca
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {IHasCast} from "../../_models/common/i-has-cast";
-import {Person, PersonRole} from "../../_models/metadata/person";
-import {Router} from "@angular/router";
+import {PersonRole} from "../../_models/metadata/person";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {Genre} from "../../_models/metadata/genre";
 import {Tag} from "../../_models/tag";
-import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ImageService} from "../../_services/image.service";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
+import {IHasReadingTime} from "../../_models/common/i-has-reading-time";
+import {ReadTimePipe} from "../../_pipes/read-time.pipe";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
+import {MangaFormat} from "../../_models/manga-format";
+import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
+import {LanguageNamePipe} from "../../_pipes/language-name.pipe";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-details-tab',
@@ -26,7 +33,13 @@ import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander
     TagBadgeComponent,
     ImageComponent,
     SafeHtmlPipe,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    ReadTimePipe,
+    SentenceCasePipe,
+    SeriesFormatComponent,
+    MangaFormatPipe,
+    LanguageNamePipe,
+    AsyncPipe
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
@@ -41,6 +54,10 @@ export class DetailsTabComponent {
   protected readonly FilterField = FilterField;
 
   @Input({required: true}) metadata!: IHasCast;
+  @Input() readingTime: IHasReadingTime | undefined;
+  @Input() language: string | undefined;
+  @Input() format: MangaFormat = MangaFormat.UNKNOWN;
+  @Input() releaseYear: number | undefined;
   @Input() genres: Array<Genre> = [];
   @Input() tags: Array<Tag> = [];
   @Input() webLinks: Array<string> = [];
@@ -50,4 +67,6 @@ export class DetailsTabComponent {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
+
+  protected readonly MangaFormat = MangaFormat;
 }

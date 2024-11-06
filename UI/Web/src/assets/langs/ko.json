@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "프리미엄 혜택",
         "kavita+-desc-part-3": "오늘!",
         "kavita+-requirement": "Kavita+는 최신 릴리스(2개 버전)에서만 작동하도록 설계되었습니다. 그 밖의 모든 것은 작동하지 않을 수 있습니다.",
-        "kavita+-releases": "릴리스 보기"
+        "kavita+-releases": "릴리스 보기",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -819,7 +820,8 @@
         "donate-tooltip": "Kavita+를 구독하여 제거할 수 있습니다",
         "back": "뒤로가기",
         "more": "더 보기",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-authors": "작가 찾아보기"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -957,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1006,7 +1013,9 @@
         "special": "스페셜",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "단일 볼륨"
     },
     "external-series-card": {
         "open-external": "외부 열기"
@@ -1032,7 +1041,7 @@
         "reset": "{{common.reset}}",
         "test": "테스트",
         "host-name-label": "호스트 이름",
-        "host-name-tooltip": "도메인 이름(역방향 프록시)을 설정하면 이메일 생성 시 항상 이것을 사용합니다.",
+        "host-name-tooltip": "도메인 이름(역방향 프록시의). 이메일 기능에 필요합니다. 역방향 프록시가 없으면 임의의 URL을 사용하십시오.",
         "host-name-validation": "호스트 이름은 http(s)로 시작하고 /로 끝나지 않아야 합니다",
         "sender-address-label": "송신자 주소",
         "sender-address-tooltip": "이는 수신자가 이메일을 받을 때 볼 수 있는 이메일 주소입니다. 일반적으로 계정과 연결된 이메일 주소입니다.",
@@ -1245,7 +1254,10 @@
         "sync-themes-task-desc": "버전이 일치하면 다운로드한 테마를 변경 사항과 동기화합니다.",
         "sync-themes-success": "테마 동기화가 대기 중입니다",
         "check-for-updates-task": "업데이트 확인",
-        "check-for-updates-task-desc": "버전보다 앞서 안정적인 릴리스가 있는지 확인하십시오."
+        "check-for-updates-task-desc": "버전보다 앞서 안정적인 릴리스가 있는지 확인하십시오.",
+        "clean-up-task-desc": "서버에서 야간 정리 작업을 수행합니다. 무거울 수 있으므로 활성 사용자나 스캔으로 실행하지 않는 것이 좋습니다. 24시간마다 실행됩니다.",
+        "clean-up-task": "일반 정리",
+        "clean-up-task-success": "정리 완료"
     },
     "manage-users": {
         "title": "활성 사용자",
@@ -1522,7 +1534,8 @@
         "dry-run-step": "모의 실행",
         "final-import-step": "마지막 단계",
         "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용",
-        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>보고</a>."
+        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>보고</a>.",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "로딩 중……PDF가 예상보다 오래 걸릴 수 있습니다",
@@ -1639,7 +1652,8 @@
         "unit-reading-date": "날짜",
         "unit-average-rating": "Kavita+ 외부 평점, 백분율",
         "unit-reading-progress": "퍼센트",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-read-last": "오늘부터의 일수"
     },
     "sort-field-pipe": {
         "sort-name": "정렬 이름",
@@ -1870,7 +1884,8 @@
         "provided-by-label": "제공자"
     },
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "예정"
     },
     "server-stats": {
         "total-series-label": "총 시리즈",
@@ -1997,14 +2012,15 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "컬렉션 태그",
         "colorist": "컬러리스트",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "편집자",
         "formats": "포맷",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2031,7 +2047,8 @@
         "file-path": "파일 경로",
         "want-to-read": "읽고 싶어요",
         "read-date": "읽은 날짜",
-        "average-rating": "평균 평점"
+        "average-rating": "평균 평점",
+        "read-last": "마지막으로 읽기"
     },
     "filter-comparison-pipe": {
         "begins-with": "시작",
@@ -2165,7 +2182,8 @@
         "confirm-reset-server-settings": "이렇게 하면 설정이 최초 설치 값으로 재설정됩니다. 계속하시겠습니까?",
         "must-select-library": "최소한 하나의 라이브러리를 선택해야 합니다",
         "bulk-scan": "여러 라이브러리를 스캔하는 것은 순차적으로 진행됩니다. 라이브러리 크기에 따라 시간이 오래 걸리거나 완료되지 않을 수 있습니다.",
-        "bulk-covers": "여러 라이브러리에서 커버를 새로 고침하는 것은 많은 리소스를 소모하며 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?"
+        "bulk-covers": "여러 라이브러리에서 커버를 새로 고침하는 것은 많은 리소스를 소모하며 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
+        "person-image-downloaded": "인물 표지를 다운로드하여 적용했습니다."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2351,10 +2369,46 @@
         "book-nums": "책",
         "issue-nums": "이슈",
         "chapter-nums": "챕터",
-        "volume-nums": "볼륨"
+        "volume-nums": "볼륨",
+        "author-count": "{{num}} 저자"
     },
     "confirm": {
         "alert": "경고",
         "confirm": "확인"
+    },
+    "browse-authors": {
+        "author-count": "{{num}} 사람",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "title": "저자 및 작가 찾아보기"
+    },
+    "person-detail": {
+        "known-for-title": "알려진",
+        "individual-role-title": "{{role}} 로서",
+        "browse-person-title": "{{name}}의 모든 작품",
+        "all-roles": "역할",
+        "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품"
+    },
+    "edit-person-modal": {
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "asin-label": "ASIN",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "cover-image-description-extra": "대안으로 가능한 경우 CoversDB에서 표지를 다운로드할 수 있습니다.",
+        "download-coversdb": "CoversDB에서 다운로드",
+        "title": "{{personName}} 세부정보",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "역할",
+        "anilist-id-label": "AniList Id",
+        "mal-id-label": "MAL Id",
+        "save": "{{common.save}}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "hardcover-id-label": "Hardcover Id",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "description-label": "설명"
     }
 }

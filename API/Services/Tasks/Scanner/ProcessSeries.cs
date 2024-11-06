@@ -722,77 +722,63 @@ public class ProcessSeries : IProcessSeries
         }
 
         RemoveChapters(volume, parsedInfos);
-
-        // // Update all the metadata on the Chapters
-        // foreach (var chapter in volume.Chapters)
-        // {
-        //     var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        //     if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
-        //     try
-        //     {
-        //         var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-        //         await UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "There was some issue when updating chapter's metadata");
-        //     }
-        // }
     }
 
     private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos)
     {
-        // Remove chapters that aren't in parsedInfos or have no files linked
+        // Chapters to remove after enumeration
+        var chaptersToRemove = new List<Chapter>();
+
         var existingChapters = volume.Chapters;
 
         // Extract the directories (without filenames) from parserInfos
         var parsedDirectories = parsedInfos
-            .Select(p => Path.GetDirectoryName(p.FullFilePath)) // Get directory path
+            .Select(p => Path.GetDirectoryName(p.FullFilePath))
             .Distinct()
             .ToList();
 
         foreach (var existingChapter in existingChapters)
         {
-            // Get the directories for the files in the current chapter
             var chapterFileDirectories = existingChapter.Files
-                .Select(f => Path.GetDirectoryName(f.FilePath)) // Get directory path minus the filename
+                .Select(f => Path.GetDirectoryName(f.FilePath))
                 .Distinct()
                 .ToList();
 
-            // Check if any of the chapter's file directories match the parsedDirectories
             var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
 
             if (hasMatchingDirectory)
             {
-                // Ensure we remove any files that no longer exist AND order the remaining files
                 existingChapter.Files = existingChapter.Files
                     .Where(f => parsedInfos.Any(p => Parser.Parser.NormalizePath(p.FullFilePath) == Parser.Parser.NormalizePath(f.FilePath)))
                     .OrderByNatural(f => f.FilePath)
                     .ToList();
 
-                // Update the chapter's page count after filtering the files
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
 
-                // If no files remain after filtering, remove the chapter
                 if (existingChapter.Files.Count != 0) continue;
 
                 _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
-                volume.Chapters.Remove(existingChapter);
+                chaptersToRemove.Add(existingChapter); // Mark chapter for removal
             }
             else
             {
-                // If there are no matching directories in the current scan, check if the files still exist on disk
                 var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
-
-                // If no files exist, remove the chapter
                 if (filesExist) continue;
+
                 _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
-                volume.Chapters.Remove(existingChapter);
+                chaptersToRemove.Add(existingChapter); // Mark chapter for removal
             }
         }
+
+        // Remove chapters after the loop to avoid modifying the collection during enumeration
+        foreach (var chapter in chaptersToRemove)
+        {
+            volume.Chapters.Remove(chapter);
+        }
     }
+
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {

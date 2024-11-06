@@ -83,7 +83,8 @@ public class ParsingTests
     [InlineData("-The Title", false, "The Title")]
     [InlineData("- The Title", false, "The Title")]
     [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
-    [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
+    [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)",
+        true, "Batman - Detective Comics - Rebirth Deluxe Edition Book 04")]
     [InlineData("Something - Full Color Edition", false, "Something - Full Color Edition")]
     [InlineData("Witchblade 089 (2005) (Bittertek-DCP) (Top Cow (Image Comics))", true, "Witchblade 089")]
     [InlineData("(C99) Kami-sama Hiroimashita. (SSSS.GRIDMAN)", false, "Kami-sama Hiroimashita.")]

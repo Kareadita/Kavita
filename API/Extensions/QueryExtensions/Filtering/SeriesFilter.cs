@@ -93,11 +93,9 @@ public static class SeriesFilter
     {
         if (rating < 0 || !condition || userId <= 0) return queryable;
 
-        // Users see rating as %, so they are likely to pass 10%. We need to turn that into the underlying float encoding
-        if (rating.IsNot(0f))
-        {
-            rating /= 100f;
-        }
+        // AppUserRating stores a 5-digit number.
+        rating = Math.Clamp(rating, 0f, 5f);
+
 
         switch (comparison)
         {
@@ -257,9 +255,9 @@ public static class SeriesFilter
             .Select(s => new
             {
                 Series = s,
-                Percentage = ((float) s.Progress
+                Percentage = s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100)
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100
             })
             .AsSplitQuery()
             .AsEnumerable();
@@ -353,6 +351,72 @@ public static class SeriesFilter
             case FilterComparison.MustContains:
             case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.AverageRating");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+
+        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        return queryable.Where(s => ids.Contains(s.Id));
+    }
+
+    /// <summary>
+    /// HasReadingDate but used to filter where last reading point was TODAY() - timeDeltaDays. This allows the user
+    /// to build smart filters "Haven't read in a month"
+    /// </summary>
+    public static IQueryable<Series> HasReadLast(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, int timeDeltaDays, int userId)
+    {
+        if (!condition || timeDeltaDays == 0) return queryable;
+
+        var subQuery = queryable
+            .Include(s => s.Progress)
+            .Where(s => s.Progress != null)
+            .Select(s => new
+            {
+                Series = s,
+                MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
+                    .Select(p => (DateTime?) p.LastModified)
+                    .DefaultIfEmpty()
+                    .Max()
+            })
+            .Where(s => s.MaxDate != null)
+            .AsSplitQuery()
+            .AsEnumerable();
+
+        var date = DateTime.Now.AddDays(-timeDeltaDays);
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate.Equals(date));
+                break;
+            case FilterComparison.IsAfter:
+            case FilterComparison.GreaterThan:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
+                break;
+            case FilterComparison.GreaterThanEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
+                break;
+            case FilterComparison.IsBefore:
+            case FilterComparison.LessThan:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
+                break;
+            case FilterComparison.LessThanEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
+                break;
+            case FilterComparison.NotEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && !s.MaxDate.Equals(date));
+                break;
+            case FilterComparison.Matches:
+            case FilterComparison.Contains:
+            case FilterComparison.NotContains:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
+                throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }

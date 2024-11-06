@@ -21,7 +21,7 @@ public interface IGenreRepository
     Task<IList<Genre>> GetAllGenresAsync();
     Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames);
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
-    Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null);
+    Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null, QueryContext context = QueryContext.None);
     Task<int> GetCountAsync();
     Task<GenreTagDto> GetRandomGenre();
     Task<GenreTagDto> GetGenreById(int id);
@@ -115,10 +115,10 @@ public class GenreRepository : IGenreRepository
     /// <param name="userId"></param>
     /// <param name="libraryIds"></param>
     /// <returns></returns>
-    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null)
+    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null, QueryContext context = QueryContext.None)
     {
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = await _context.Library.GetUserLibraries(userId, context).ToListAsync();
 
         if (libraryIds is {Count: > 0})
         {
