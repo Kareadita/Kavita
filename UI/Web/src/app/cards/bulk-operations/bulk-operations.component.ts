@@ -37,7 +37,14 @@ export class BulkOperationsComponent implements OnInit {
    * Modal mode means don't fix to the top
    */
   @Input() modalMode = false;
-  @Input() topOffset: number = 75;
+  /**
+   * On Series Detail this should be 12
+   */
+  @Input() marginLeft: number = 0;
+  /**
+   * On Series Detail this should be 12
+   */
+  @Input() marginRight: number = 8;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];

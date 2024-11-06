@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'series-detail'">
-  <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>
+  <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0"></app-bulk-operations>
 
   @if (series && seriesMetadata && libraryType !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>

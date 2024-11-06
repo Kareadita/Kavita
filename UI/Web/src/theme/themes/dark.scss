@@ -98,7 +98,6 @@
     --table-header-text-color: hsla(0,0%,100%,.9);
     --table-body-bg-color: hsla(0,0%,100%,.02);
     --table-body-text-color: hsla(0,0%,100%,.85);
-    --table-body-striped-bg-color: hsla(0,0%,100%,.25);
     --table-body-border: hidden;
     --table-body-striped-bg-color: var(--elevation-layer2);
 
@@ -380,7 +379,7 @@
     /* Bulk Selection */
     --bulk-selection-text-color: var(--navbar-text-color);
     --bulk-selection-highlight-text-color: var(--primary-color);
-    --bulk-selection-bg-color: rgba(0, 0, 0, 0.4);
+    --bulk-selection-bg-color: var(--elevation-layer11-dark);
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
