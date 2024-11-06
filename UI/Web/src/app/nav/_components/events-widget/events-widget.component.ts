@@ -72,8 +72,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
    */
   updateAvailable: boolean = false;
 
-  debugMode: boolean = false;
-
   protected readonly EVENTS = EVENTS;
 
 
