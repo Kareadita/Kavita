@@ -81,7 +81,7 @@
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
-    --nav-offset: 56px;
+    --nav-offset: 60px;
     --nav-mobile-offset: 55px;
 
     /* Should we render the series cover as background on mobile */
@@ -102,10 +102,11 @@
     --table-body-striped-bg-color: var(--elevation-layer2);
 
     /* Navbar */
-    --navbar-bg-color: var(--elevation-layer11-dark);
+    --navbar-bg-color: black;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
+    --navbar-header-margin: 0px; // 8px allows for the Plex navbar + --nav-offset: 56px;
 
     /* Inputs */
     --input-bg-color: #343a40;

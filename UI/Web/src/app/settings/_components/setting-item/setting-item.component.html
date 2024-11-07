@@ -6,10 +6,10 @@
           @if (labelId) {
             <label class="reset-label" [for]="labelId">{{title}}</label>
           } @else {
-          {{title}}
+            {{title}}
           }
           @if (titleExtraRef) {
-          <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
+            <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
           }
         </h6>
       </div>
@@ -20,21 +20,21 @@
         </button>
         }
         @if (titleActionsRef) {
-        <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
+          <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
         }
       </div>
     </div>
 
     @if (isEditMode) {
-    <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
+      <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
     } @else {
-    <span class="view-value" (click)="toggleEditMode()">
-      <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
-    </span>
+      <span class="view-value" (click)="toggleEditMode()">
+        <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
+      </span>
     }
 
     @if (subtitle) {
-    <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
     }
   </div>
 </ng-container>
