@@ -946,9 +946,7 @@ public class OpdsController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
-        // var chapters =
-        //     (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId))
-        //     .OrderBy(x => x.MinNumber, _chapterSortComparerDefaultLast);
+
         var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
@@ -1094,15 +1092,6 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private static FeedAuthor CreateAuthor(PersonDto person)
-    {
-        return new FeedAuthor()
-        {
-            Name = person.Name,
-            Uri = "http://opds-spec.org/author/" + person.Id
-        };
-    }
-
     private static FeedEntry CreateSeries(SearchResultDto searchResultDto, string apiKey, string prefix, string baseUrl)
     {
         return new FeedEntry()
@@ -1119,6 +1108,15 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                     $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}&apiKey={apiKey}")
             ]
+        };
+    }
+
+    private static FeedAuthor CreateAuthor(PersonDto person)
+    {
+        return new FeedAuthor()
+        {
+            Name = person.Name,
+            Uri = "http://opds-spec.org/author/" + person.Id
         };
     }
 

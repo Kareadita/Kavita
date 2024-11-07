@@ -612,6 +612,7 @@ public class LibraryController : BaseApiController
             library.AllowScrobbling = false;
         }
 
+
         _unitOfWork.LibraryRepository.Update(library);
     }
 

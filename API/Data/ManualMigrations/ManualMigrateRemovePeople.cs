@@ -28,7 +28,7 @@ public static class ManualMigrateRemovePeople
 
         logger.LogCritical("Running ManualMigrateRemovePeople migration - Please be patient, this may take some time. This is not an error");
 
-       context.Person.RemoveRange(context.Person);
+        context.Person.RemoveRange(context.Person);
 
         if (context.ChangeTracker.HasChanges())
         {
