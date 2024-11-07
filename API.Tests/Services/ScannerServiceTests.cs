@@ -130,6 +130,25 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
+
+    [Fact]
+    public async Task ScanLibrary_SeriesWithUnbalancedParenthesis()
+    {
+        const string testcase = "Scan Library Parses as ( - Manga.json";
+
+        var library = await GenerateScannerData(testcase);
+        var scanner = CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+
+        Assert.Equal("Mika-nee no Tanryoku Shidou - Mika s Guide to Self-Confidence (THE IDOLM@STE", series.Name);
+    }
+
     /// <summary>
     /// This is testing that if the first file is named A and has a localized name of B if all other files are named B, it should still group and name the series A
     /// </summary>

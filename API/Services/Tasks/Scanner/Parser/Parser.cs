@@ -271,7 +271,7 @@ public static class Parser
             RegexTimeout),
         //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
         new Regex(
-            @"(?<Series>.*)(\bc\d+\b)",
+            @"(?<Series>.*?)(?<!\()\bc\d+\b",
             MatchOptions, RegexTimeout),
         //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
         new Regex(
