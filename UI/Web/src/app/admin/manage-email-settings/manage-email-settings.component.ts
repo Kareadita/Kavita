@@ -8,7 +8,7 @@ import {
   NgbAlert,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ManageMediaIssuesComponent} from "../manage-media-issues/manage-media-issues.component";
@@ -17,6 +17,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -24,8 +25,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     styleUrls: ['./manage-email-settings.component.scss'],
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, AsyncPipe]
+  imports: [ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
+    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, AsyncPipe, CardActionablesComponent]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -125,27 +126,6 @@ export class ManageEmailSettingsComponent implements OnInit {
     return modelSettings;
   }
 
-  async saveSettings() {
-    const modelSettings = this.packData();
-
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings = settings;
-      this.resetForm();
-      this.toastr.success(translate('toasts.server-settings-updated'));
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
-  }
-
-  resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings = settings;
-      this.resetForm();
-      this.toastr.success(translate('toasts.server-settings-updated'));
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
-  }
 
   test() {
     this.settingsService.testEmailServerSettings().subscribe(res => {
