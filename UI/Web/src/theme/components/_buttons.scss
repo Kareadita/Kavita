@@ -40,6 +40,18 @@
   }
 }
 
+.btn-danger-outline {
+  color: var(--btn-danger-outline-text-color);
+  background-color: var(--btn-danger-outline-bg-color);
+  border-color: var(--btn-danger-outline-border-color);
+
+  &:hover {
+    color: var(--btn-danger-outline-hover-text-color);
+    background-color: var(--btn-danger-outline-hover-bg-color);
+    border-color: var(--btn-danger-outline-hover-border-color);
+  }
+}
+
 .btn-actions {
   color: var(--btn-fa-icon-color);
   border-radius: var(--btn-actions-border-radius);
