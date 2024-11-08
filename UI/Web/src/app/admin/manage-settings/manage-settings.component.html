@@ -1,4 +1,10 @@
 <ng-container *transloco="let t; read: 'manage-settings'">
+
+  <div class="position-relative">
+    <button type="button" class="btn btn-primary-outline position-absolute custom-position" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+  </div>
+
+
   <form [formGroup]="settingsForm">
     <div class="alert alert-warning" role="alert">
       <strong>{{t('notice')}}</strong> {{t('restart-required')}}
@@ -217,10 +223,8 @@
         @if(settingsForm.get('enableOpds'); as formControl) {
           <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
-                <div class="form-check form-switch">
-                  <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
-                </div>
+              <div class="form-check form-switch float-end">
+                <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -231,10 +235,8 @@
         @if(settingsForm.get('enableFolderWatching'); as formControl) {
           <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
             <ng-template #switch>
-              <div class="form-check form-switch">
-                <div class="form-check form-switch">
-                  <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
-                </div>
+              <div class="form-check form-switch float-end">
+                <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -245,10 +247,8 @@
         @if(settingsForm.get('allowStatCollection'); as formControl) {
           <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
             <ng-template #switch>
-              <div class="form-check form-switch">
-                <div class="form-check form-switch">
-                  <input id="stat-collection" type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
-                </div>
+              <div class="form-check form-switch float-end">
+                <input id="stat-collection" type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -315,10 +315,6 @@
         }
       </div>
     </ng-container>
-
-    <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mt-4">
-      <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
-    </div>
   </form>
 
 </ng-container>

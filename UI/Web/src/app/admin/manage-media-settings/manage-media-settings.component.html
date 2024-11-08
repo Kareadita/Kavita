@@ -1,11 +1,4 @@
 <ng-container *transloco="let t; read: 'manage-media-settings'">
-
-  <div class="position-relative">
-    <button class="btn btn-secondary-outline position-absolute custom-position" (click)="resetToDefaults()" [title]="t('reset-to-default')">
-      <span class="phone-hidden ms-1">{{t('reset-to-default')}}</span>
-    </button>
-  </div>
-
     <form [formGroup]="settingsForm">
       <div class="mb-4">
         <p>
