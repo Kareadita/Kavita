@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges
+} from '@angular/core';
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -23,7 +32,7 @@ const basePath = './assets/images/ratings/';
   styleUrl: './age-rating-image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgeRatingImageComponent implements OnInit {
+export class AgeRatingImageComponent implements OnInit, OnChanges {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
@@ -34,6 +43,14 @@ export class AgeRatingImageComponent implements OnInit {
   imageUrl: string = 'unknown-rating.png';
 
   ngOnInit() {
+    this.setImage();
+  }
+
+  ngOnChanges() {
+    this.setImage();
+  }
+
+  setImage() {
     switch (this.rating) {
       case AgeRating.Unknown:
         this.imageUrl = basePath + 'unknown-rating.png';
