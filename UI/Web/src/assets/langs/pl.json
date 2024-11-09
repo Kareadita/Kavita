@@ -303,7 +303,7 @@
         "token-set": "Token ustawiony",
         "generate": "Wygeneruj",
         "generic-instructions": "Wypełnij informacje o różnych usługach zewnętrznych, aby umożliwić Kavita+ interakcję z nimi.",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "Przy pierwszym użyciu należy kliknąć \"{{scrobbling-providers.generate}}\" poniżej, aby zezwolić Kavita+ na komunikację z {{service}}. Po autoryzacji programu należy skopiować i wkleić token w polu poniżej. W każdej chwili można ponownie wygenerować token.",
         "mal-instructions": "Kavita używa identyfikatora klienta MAL do uwierzytelniania. Utwórz nowego klienta dla Kavita i po zatwierdzeniu podaj identyfikator klienta i swoją nazwę użytkownika.",
         "scrobbling-applicable-label": "Scrobblowanie dotyczy",
         "token-input-label": "{{service}} Token trafia tutaj",
@@ -1939,7 +1939,7 @@
         "clear": "{{common.clear}}",
         "smart-filters-title": "Inteligentne filtry",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "Nie można zmieniać kolejności elementów metodą przeciągnij i upuść, gdy używany jest filtr. Użyj {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Tryb masowy"
     },

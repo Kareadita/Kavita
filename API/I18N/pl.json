@@ -198,5 +198,8 @@
     "remove-from-want-to-read": "Wyczyść Chcesz przeczytać",
     "check-scrobbling-tokens": "Sprawdź tokeny Scrobblowania",
     "invalid-email": "Adres e-mail użytkownika w pliku nie jest prawidłowy. Zobacz logi dla wszystkich linków.",
-    "person-doesnt-exist": "Osoba nie istnieje"
+    "person-doesnt-exist": "Osoba nie istnieje",
+    "person-name-required": "Nazwa osoby jest wymagana i nie może mieć wartości null",
+    "person-name-unique": "Nazwa osoby musi być unikatowa",
+    "person-image-doesnt-exist": "Osoba nie istnieje w CoversDB"
 }

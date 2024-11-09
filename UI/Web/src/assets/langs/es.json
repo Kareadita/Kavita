@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "ventajas premium",
         "kavita+-desc-part-3": "¡hoy!",
         "kavita+-requirement": "Kavita+ está diseñado para funcionar solo con la última versión - 2 versiones. Cualquier otra seguramente no funcione.",
-        "kavita+-releases": "Ver versiones"
+        "kavita+-releases": "Ver versiones",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -958,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1007,7 +1013,9 @@
         "special": "Especial",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "single-volume": "Volumen único",
+        "vol-num": "{{user-scrobble-history.volume-num}}"
     },
     "external-series-card": {
         "open-external": "Abrir externamente"
@@ -1304,7 +1312,8 @@
         "last-sync-title": "Última sincronización:",
         "source-url-title": "URL de origen:",
         "total-series-title": "Total de series:",
-        "missing-series-title": "Series perdidas:"
+        "missing-series-title": "Series perdidas:",
+        "last-sync-tooltip": "Kavita sincroniza diariamente con un proveedor de datos de colecciones."
     },
     "library-recommended": {
         "no-data": "Nada que ver aquí. Añade metadatos a tu biblioteca, lee algo o valora algo. Esta biblioteca puede que tenga las recomendaciones desactivadas.",
@@ -1526,7 +1535,8 @@
         "dry-run-step": "Prueba",
         "final-import-step": "Último paso",
         "comicvine-parsing-label": "Utilice la combinación de la serie Comic Vine",
-        "cbl-repo": "Puedes encontrar muchas listas de lectura en la comunidad en el <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repositorio</a>."
+        "cbl-repo": "Puedes encontrar muchas listas de lectura en la comunidad en el <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repositorio</a>.",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "Cargando……los PDF pueden ser más lentos de lo esperado",
@@ -1643,7 +1653,7 @@
         "unit-reading-date": "Fecha",
         "unit-average-rating": "Valoración externa de Kavita+, en porcentaje",
         "unit-reading-progress": "Portentaje",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0,0 - 5,0 estrellas",
         "unit-read-last": "Días desde HOY"
     },
     "sort-field-pipe": {
@@ -2038,7 +2048,8 @@
         "file-path": "Ruta del archivo",
         "want-to-read": "Quiero leer",
         "read-date": "Fecha de lectura",
-        "average-rating": "Valoración media"
+        "average-rating": "Valoración media",
+        "read-last": "Última lectura"
     },
     "filter-comparison-pipe": {
         "begins-with": "Comienza con",
@@ -2172,7 +2183,8 @@
         "confirm-reset-server-settings": "Esto restablecerá tu configuración a los valores de instalación. ¿Seguro que quieres continuar?",
         "must-select-library": "Debe seleccionarse al menos una biblioteca",
         "bulk-scan": "El escaneo de múltiples bibliotecas se hará linealmente. Esto puede llevar mucho tiempo y no completarse dependiendo del tamaño de la biblioteca.",
-        "bulk-covers": "Actualizar las carátulas de varias bibliotecas es una tarea intensiva y puede llevar mucho tiempo. ¿Estás seguro de que quieres continuar?"
+        "bulk-covers": "Actualizar las carátulas de varias bibliotecas es una tarea intensiva y puede llevar mucho tiempo. ¿Estás seguro de que quieres continuar?",
+        "person-image-downloaded": "La portada para la persona ha sido descargada y aplicada."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 hora",
@@ -2387,7 +2399,13 @@
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validations.required-field}}",
         "save": "{{common.save}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "cover-image-description-extra": "También puedes descargar una portada de CoversDB si está disponible.",
+        "download-coversdb": "Descargar de CoversDB",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}"
     },
     "browse-authors": {
         "title": "Buscar autores y escritores",

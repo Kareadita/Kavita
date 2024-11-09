@@ -1312,7 +1312,8 @@
         "last-sync-title": "Sioncronú Is Déanaí:",
         "source-url-title": "Url Foinseach:",
         "total-series-title": "Sraith Iomlán:",
-        "missing-series-title": "Sraith ar iarraidh:"
+        "missing-series-title": "Sraith ar iarraidh:",
+        "last-sync-tooltip": "Sioncrónaíonn Kavita go laethúil le soláthraí bailiúcháin réamhtheachtacha."
     },
     "library-recommended": {
         "no-data": "Níl aon rud le taispeáint anseo. Cuir roinnt meiteashonraí le do leabharlann, léigh rud éigin nó déan rud éigin a rátáil. D'fhéadfadh moltaí a bheith casta as an leabharlann seo freisin.",
@@ -1652,7 +1653,7 @@
         "unit-reading-date": "Dáta",
         "unit-average-rating": "Kavita+ rátáil sheachtrach, faoin gcéad",
         "unit-reading-progress": "Faoin gcéad",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 Réaltaí",
         "unit-read-last": "Laethanta ón lá INNIU"
     },
     "sort-field-pipe": {

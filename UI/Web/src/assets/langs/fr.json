@@ -304,7 +304,7 @@
         "token-set": "Jeton configuré",
         "generate": "Générer",
         "generic-instructions": "Renseignez les informations sur les différents services externes que vous avez pour permettre à Kavita+ d’interagir avec eux.",
-        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour autoriser Kavita+ à échanger avec {{service}}. Une fois le programme autorisé, vous pouvez copier-coller le Jeton dans le formulaire ci-dessous. Si besoin, vous pouvez regénérer votre Jeton à tout moment",
+        "instructions": "Les nouveaux utilisateurs doivent cliquer sur \"{{scrobbling-providers.generate}}\" ci-dessous pour autoriser Kavita+ à échanger avec {{service}}. Une fois le programme autorisé, vous pouvez copier-coller le Jeton dans le formulaire ci-dessous. Si besoin, vous pouvez regénérer votre Jeton à tout moment.",
         "mal-instructions": "Kavita utilise un identifiant client MAL pour l'authentification. Créez un nouveau client pour Kavita et une fois approuvé, fournissez l'identifiant du client et votre nom d'utilisateur.",
         "scrobbling-applicable-label": "Suivi d'activité (Scrobbling) possible",
         "token-input-label": "Mettre ici le token pour {{service}}",
@@ -1312,7 +1312,8 @@
         "last-sync-title": "Dernière synchro :",
         "source-url-title": "URL source :",
         "total-series-title": "Total de séries :",
-        "missing-series-title": "Séries manquantes :"
+        "missing-series-title": "Séries manquantes :",
+        "last-sync-tooltip": "Kavita se synchronise quotidiennement avec le fournisseur de collections en ligne."
     },
     "library-recommended": {
         "no-data": "Il n'y a rien à montrer ici. Ajoutez des métadonnées à votre bibliothèque, lisez quelque chose ou évaluez quelque chose. Il est possible que les recommandations soient désactivées dans cette bibliothèque.",
@@ -1652,7 +1653,7 @@
         "unit-reading-date": "Date",
         "unit-average-rating": "Notation externe de Kavita+, en pourcentage",
         "unit-reading-progress": "Pourcentage",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0,0 - 5,0 étoiles",
         "unit-read-last": "Jours à partir d'AUJOURD'HUI"
     },
     "sort-field-pipe": {

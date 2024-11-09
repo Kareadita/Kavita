@@ -1312,7 +1312,8 @@
         "last-sync-title": "上次同步：",
         "source-url-title": "来源网址：",
         "total-series-title": "总系列：",
-        "missing-series-title": "缺失系列："
+        "missing-series-title": "缺失系列：",
+        "last-sync-tooltip": "Kavita 每天与上游收藏提供商同步。"
     },
     "library-recommended": {
         "no-data": "没有要显示的内容。请给资料库添加一些元数据，阅读一些内容或对某些内容进行评价。也可能是资料库的推荐功能被关闭了。",
@@ -1652,7 +1653,7 @@
         "unit-reading-date": "日期",
         "unit-average-rating": "Kavita+ 外部评级，百分比",
         "unit-reading-progress": "百分比",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 星",
         "unit-read-last": "从今天起"
     },
     "sort-field-pipe": {

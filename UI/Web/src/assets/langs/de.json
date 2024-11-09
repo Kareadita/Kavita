@@ -1305,7 +1305,8 @@
         "last-sync-title": "Letzter Sync:",
         "source-url-title": "Quell-Url:",
         "total-series-title": "Totale Serie:",
-        "missing-series-title": "Fehlende Serien:"
+        "missing-series-title": "Fehlende Serien:",
+        "last-sync-tooltip": "Kavita synchronisiert täglich mit dem vorgelagerten Sammlungs Anbieter."
     },
     "library-recommended": {
         "no-data": "Hier gibt es nichts zu sehen. Fügen Sie Ihrer Bibliothek einige Metadaten hinzu, lesen oder bewerten Sie etwas. In dieser Bibliothek können auch die Empfehlungen ausgeschaltet sein.",
@@ -1644,7 +1645,7 @@
         "unit-reading-date": "Datum",
         "unit-average-rating": "Externes Rating von Kavita+, Prozent",
         "unit-reading-progress": "Prozentsatz",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 Sterne",
         "unit-read-last": "Tage ab HEUTE"
     },
     "sort-field-pipe": {
