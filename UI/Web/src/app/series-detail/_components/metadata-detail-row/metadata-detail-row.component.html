@@ -17,7 +17,7 @@
        <app-series-format [format]="mangaFormat" [useTitle]="false"></app-series-format>
     </span>
 
-    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
+    @if ((libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) && mangaFormat !== MangaFormat.PDF) {
       <span class="word-count me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
     } @else {
       <span class="word-count me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>

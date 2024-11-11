@@ -46,6 +46,8 @@ export class MetadataDetailRowComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   protected readonly LibraryType = LibraryType;
+  protected readonly FilterField = FilterField;
+  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) entity!: IHasCast;
   @Input({required: true}) readingTimeEntity!: IHasReadingTime;
@@ -59,7 +61,4 @@ export class MetadataDetailRowComponent {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
-
-
-  protected readonly FilterField = FilterField;
 }
