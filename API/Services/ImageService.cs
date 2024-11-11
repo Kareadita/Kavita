@@ -585,6 +585,7 @@ public class ImageService : IImageService
     /// <inheritdoc />
     public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
     {
+        // TODO: This code has no concept of cropping nor Thumbnail Size
         try
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);

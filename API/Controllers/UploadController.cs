@@ -490,8 +490,6 @@ public class UploadController : BaseApiController
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
-
-
         try
         {
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
