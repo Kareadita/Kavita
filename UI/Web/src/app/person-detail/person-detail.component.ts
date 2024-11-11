@@ -38,6 +38,7 @@ import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-m
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {ThemeService} from "../_services/theme.service";
+import {DefaultModalOptions} from "../_models/default-modal-options";
 
 @Component({
   selector: 'app-person-detail',
@@ -187,7 +188,7 @@ export class PersonDetailComponent {
   handleAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case(Action.Edit):
-        const ref = this.modalService.open(EditPersonModalComponent, {scrollable: true, size: 'lg', fullscreen: 'md'});
+        const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
         ref.componentInstance.person = this.person;
 
         ref.closed.subscribe(r => {

@@ -43,6 +43,7 @@ import {User} from "../../_models/user";
 import {ScrollService} from "../../_services/scroll.service";
 import {ReaderService} from "../../_services/reader.service";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {DefaultModalOptions} from "../../_models/default-modal-options";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -278,7 +279,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   openEditModal(data: Series) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = data;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       if (closeResult.success) {

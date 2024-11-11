@@ -26,6 +26,7 @@ import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
 import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
 import { NgClass, NgStyle, AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 @Component({
     selector: 'app-nav-events-toggle',
@@ -159,7 +160,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
     if (this.updateNotificationModalRef != null) { return; }
-    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, DefaultModalOptions);
     if (message.hasOwnProperty('body')) {
       this.updateNotificationModalRef.componentInstance.updateData = (message as NotificationProgressEvent).body as UpdateVersionEvent;
     } else {

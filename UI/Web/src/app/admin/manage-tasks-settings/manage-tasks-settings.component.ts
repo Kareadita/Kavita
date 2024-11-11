@@ -20,6 +20,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {ConfirmService} from "../../shared/confirm.service";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
+import {DefaultModalOptions} from "../../_models/default-modal-options";
 
 interface AdhocTask {
   name: string;
@@ -128,7 +129,7 @@ export class ManageTasksSettingsComponent implements OnInit {
           this.toastr.info(translate('toasts.no-updates'));
           return;
         }
-        const modalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+        const modalRef = this.modalService.open(UpdateNotificationModalComponent, DefaultModalOptions);
         modalRef.componentInstance.updateData = update;
       }
     },

@@ -83,6 +83,7 @@ import {PublicationStatusPipe} from "../_pipes/publication-status.pipe";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
+import {DefaultModalOptions} from "../_models/default-modal-options";
 
 enum TabID {
   Related = 'related-tab',
@@ -317,7 +318,7 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
     ref.componentInstance.chapter = this.chapter;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;

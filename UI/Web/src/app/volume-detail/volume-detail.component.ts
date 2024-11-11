@@ -88,6 +88,7 @@ import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
+import {DefaultModalOptions} from "../_models/default-modal-options";
 
 enum TabID {
 
@@ -527,7 +528,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    const ref = this.modalService.open(EditVolumeModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
     ref.componentInstance.volume = this.volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;
@@ -537,7 +538,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   openEditChapterModal(chapter: Chapter) {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
     ref.componentInstance.chapter = chapter;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;

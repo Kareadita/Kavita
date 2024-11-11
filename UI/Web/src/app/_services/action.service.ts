@@ -27,6 +27,7 @@ import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
+import {DefaultModalOptions} from "../_models/default-modal-options";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -121,7 +122,7 @@ export class ActionService {
   }
 
   editLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {size: 'xl', fullscreen: 'md'});
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, DefaultModalOptions);
       modalRef.componentInstance.library = library;
       modalRef.closed.subscribe((closeResult: {success: boolean, library: Library, coverImageUpdate: boolean}) => {
         if (callback) callback(library)

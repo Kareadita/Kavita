@@ -145,6 +145,7 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
+import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 
 enum TabID {
@@ -1041,7 +1042,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditChapter(chapter: Chapter) {
-    const ref = this.modalService.open(EditChapterModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
     ref.componentInstance.chapter = chapter;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.seriesId = this.series?.id;
@@ -1055,7 +1056,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditVolume(volume: Volume) {
-    const ref = this.modalService.open(EditVolumeModalComponent, { size: 'xl' });
+    const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
     ref.componentInstance.volume = volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.seriesId = this.series?.id;
@@ -1069,7 +1070,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
       if (closeResult.success) {
@@ -1088,7 +1089,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   openReviewModal() {
     const userReview = this.getUserReview();
 
-    const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+    const modalRef = this.modalService.open(ReviewSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = this.series;
     if (userReview.length > 0) {
       modalRef.componentInstance.review = userReview[0];

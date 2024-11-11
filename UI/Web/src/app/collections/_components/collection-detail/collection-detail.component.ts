@@ -64,6 +64,7 @@ import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/p
 import {
   SmartCollectionDrawerComponent
 } from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
+import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 @Component({
   selector: 'app-collection-detail',
@@ -330,7 +331,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditCollectionTagModal(collectionTag: UserCollection) {
-    const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
+    const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
     modalRef.componentInstance.tag = this.collectionTag;
     modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
       this.updateTag(this.collectionTag.id);
