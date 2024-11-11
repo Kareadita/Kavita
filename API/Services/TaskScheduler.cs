@@ -125,7 +125,7 @@ public class TaskScheduler : ITaskScheduler
         var nonCronOptions = new List<string>(["disabled", "daily", "weekly"]);
 
         var setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Value;
-        if (setting == null || (!nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
+        if (setting == null || (nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
         {
             _logger.LogError("Scan Task has invalid cron, defaulting to Daily");
             RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
@@ -141,7 +141,7 @@ public class TaskScheduler : ITaskScheduler
 
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
-        if (setting == null || (!nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
+        if (setting == null || (nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
         {
             _logger.LogError("Backup Task has invalid cron, defaulting to Daily");
             RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(),
@@ -161,7 +161,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup)).Value;
-        if (setting == null || (!nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
+        if (setting == null || (nonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting)))
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
             RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(),

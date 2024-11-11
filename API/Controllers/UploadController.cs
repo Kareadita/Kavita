@@ -490,23 +490,29 @@ public class UploadController : BaseApiController
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
-        // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
-        // See if we can do this all in memory without touching underlying system
-        if (string.IsNullOrEmpty(uploadFileDto.Url))
-        {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
-        }
+
 
         try
         {
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
             if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
-            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetPersonFormat(uploadFileDto.Id)}");
 
-            if (!string.IsNullOrEmpty(filePath))
+            if (!string.IsNullOrEmpty(uploadFileDto.Url))
             {
-                person.CoverImage = filePath;
-                person.CoverImageLocked = true;
+                var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetPersonFormat(uploadFileDto.Id)}");
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    person.CoverImage = filePath;
+                    person.CoverImageLocked = true;
+                    _imageService.UpdateColorScape(person);
+                    _unitOfWork.PersonRepository.Update(person);
+                }
+            }
+            else
+            {
+                person.CoverImage = string.Empty;
+                person.CoverImageLocked = false;
                 _imageService.UpdateColorScape(person);
                 _unitOfWork.PersonRepository.Update(person);
             }
