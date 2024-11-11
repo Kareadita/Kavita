@@ -334,7 +334,10 @@ public class SeriesService : ISeriesService
     private async Task HandlePeopleUpdateAsync(SeriesMetadata metadata, ICollection<PersonDto> peopleDtos, PersonRole role)
     {
         // Normalize all names from the DTOs
-        var normalizedNames = peopleDtos.Select(p => Parser.Normalize(p.Name)).ToList();
+        var normalizedNames = peopleDtos
+            .Select(p => Parser.Normalize(p.Name))
+            .Distinct()
+            .ToList();
 
         // Bulk select people who already exist in the database
         var existingPeople = await _unitOfWork.PersonRepository.GetPeopleByNames(normalizedNames);
