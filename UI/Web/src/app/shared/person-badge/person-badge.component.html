@@ -2,13 +2,16 @@
   <div class="tagbadge cursor clickable">
     <div class="d-flex flex-column">
       @if (HasCoverImage) {
-        <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}"
-                   classes="align-self-center text-center mb-2"
-                   [imageUrl]="ImageUrl"
-                   [errorImage]="imageService.noPersonImage">
-        </app-image>
+        <div class="mx-auto">
+          <app-image height="24px" width="24px" [styles]="{'background': 'none', 'max-height': '48px', 'height': '48px', 'width': '48px', 'border-radius': '50%'}"
+                     [imageUrl]="ImageUrl"
+                     [errorImage]="imageService.noPersonImage">
+          </app-image>
+        </div>
       } @else {
-        <i class="fas fa-user mx-auto" aria-hidden="true"></i>
+        <div style="background: none; max-height: 48px; height: 48px; width: 48px; border-radius: 50%" class="mx-auto">
+          <i class="fas fa-user" aria-hidden="true"></i>
+        </div>
       }
 
 
