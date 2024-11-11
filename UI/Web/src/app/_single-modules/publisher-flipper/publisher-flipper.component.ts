@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import {ImageComponent} from "../../shared/image/image.component";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {Person} from "../../_models/metadata/person";
@@ -19,7 +29,7 @@ const ANIMATION_TIME = 3000;
   styleUrl: './publisher-flipper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PublisherFlipperComponent implements OnInit, OnDestroy {
+export class PublisherFlipperComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
 
   protected readonly imageService = inject(ImageService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -36,14 +46,26 @@ export class PublisherFlipperComponent implements OnInit, OnDestroy {
   isFlipped = false;
   private intervalId: any;
 
-
   ngOnInit() {
     if (this.publishers.length > 0) {
       this.currentPublisher = this.publishers[0];
       this.nextPublisher = this.publishers[1] || this.publishers[0];
-      if (this.publishers.length > 1) {
-        this.startFlipping();
-      }
+    }
+  }
+
+  ngAfterViewInit() {
+    if (this.publishers.length > 1) {
+      this.startFlipping(); // Start flipping cycle once the view is initialized
+    }
+  }
+
+  ngAfterViewChecked() {
+    // This lifecycle hook will be called after Angular performs change detection in each cycle
+    if (this.isFlipped) {
+      // Only update publishers after the flip is complete
+      this.currentIndex = (this.currentIndex + 1) % this.publishers.length;
+      this.currentPublisher = this.publishers[this.currentIndex];
+      this.nextPublisher = this.publishers[(this.currentIndex + 1) % this.publishers.length];
     }
   }
 
@@ -55,22 +77,9 @@ export class PublisherFlipperComponent implements OnInit, OnDestroy {
 
   private startFlipping() {
     this.intervalId = setInterval(() => {
-      // First flip
-      this.isFlipped = true;
-      this.cdRef.markForCheck();
-
-      // Update content after flip animation completes
-      setTimeout(() => {
-        // Update indices and content
-        this.currentIndex = (this.currentIndex + 1) % this.publishers.length;
-        this.currentPublisher = this.publishers[this.currentIndex];
-        this.nextPublisher = this.publishers[(this.currentIndex + 1) % this.publishers.length];
-
-        // Reset flip
-        this.isFlipped = false;
-
-        this.cdRef.markForCheck();
-      }, ANIMATION_TIME); // Full transition time to ensure flip completes
+      // Toggle flip state, initiating the flip animation
+      this.isFlipped = !this.isFlipped;
+      this.cdRef.detectChanges(); // Explicitly detect changes to trigger re-render
     }, ANIMATION_TIME);
   }
 
