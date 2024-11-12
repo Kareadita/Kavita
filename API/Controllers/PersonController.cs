@@ -42,10 +42,15 @@ public class PersonController : BaseApiController
         return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
     }
 
+    /// <summary>
+    /// Returns all roles for a Person
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
     [HttpGet("roles")]
-    public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPersonByName(string name)
+    public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPersonByName(int personId)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(name, User.GetUserId()));
+        return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, User.GetUserId()));
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ public interface IPersonRepository
 
     Task<string> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
-    Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId);
+    Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
@@ -145,18 +145,28 @@ public class PersonRepository : IPersonRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(string name, int userId)
+    public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId)
     {
-        // TODO: This will need to check both series and chapters (in cases where komf only updates series)
-        var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        return await _context.Person
-            .Where(p => p.NormalizedName == normalized)
+        // Query roles from ChapterPeople
+        var chapterRoles = await _context.Person
+            .Where(p => p.Id == personId)
             .RestrictAgainstAgeRestriction(ageRating)
             .SelectMany(p => p.ChapterPeople.Select(cp => cp.Role))
             .Distinct()
             .ToListAsync();
+
+        // Query roles from SeriesMetadataPeople
+        var seriesRoles = await _context.Person
+            .Where(p => p.Id == personId)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .SelectMany(p => p.SeriesMetadataPeople.Select(smp => smp.Role))
+            .Distinct()
+            .ToListAsync();
+
+        // Combine and return distinct roles
+        return chapterRoles.Union(seriesRoles).Distinct();
     }
 
     public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)

@@ -29,8 +29,8 @@ export class PersonService {
     return this.httpClient.get<Person>(this.baseUrl + `person?name=${name}`);
   }
 
-  getRolesForPerson(name: string) {
-    return this.httpClient.get<Array<PersonRole>>(this.baseUrl + `person/roles?name=${name}`);
+  getRolesForPerson(personId: number) {
+    return this.httpClient.get<Array<PersonRole>>(this.baseUrl + `person/roles?personId=${personId}`);
   }
 
   getSeriesMostKnownFor(personId: number) {

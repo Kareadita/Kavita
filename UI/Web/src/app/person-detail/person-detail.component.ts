@@ -110,7 +110,7 @@ export class PersonDetailComponent {
         this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
 
         // Fetch roles and process them
-        this.roles$ = this.personService.getRolesForPerson(this.personName).pipe(
+        this.roles$ = this.personService.getRolesForPerson(this.person.id).pipe(
           tap(roles => {
             this.roles = roles;
             this.filter = this.createFilter(roles);
