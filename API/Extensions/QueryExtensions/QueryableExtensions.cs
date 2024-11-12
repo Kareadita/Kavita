@@ -79,7 +79,6 @@ public static class QueryableExtensions
             .Include(l => l.AppUsers)
             .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
             .IsRestricted(queryContext)
-            .AsNoTracking()
             .AsSplitQuery()
             .Select(lib => lib.Id);
     }
