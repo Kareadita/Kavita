@@ -259,8 +259,7 @@ public static class SeriesFilter
                     .Where(p => p != null && p.AppUserId == userId)
                     .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100
             })
-            .AsSplitQuery()
-            .AsEnumerable();
+            .AsSplitQuery();
 
         switch (comparison)
         {

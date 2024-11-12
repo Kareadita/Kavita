@@ -1046,8 +1046,6 @@ public class SeriesRepository : ISeriesRepository
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync();
 
-
-
         query ??= _context.Series
             .AsNoTracking();
 
@@ -1063,7 +1061,6 @@ public class SeriesRepository : ISeriesRepository
         query = ApplyLibraryFilter(filter, query);
 
         query = ApplyWantToReadFilter(filter, query, userId);
-
 
         query = await ApplyCollectionFilter(filter, query, userId, userRating);
 
@@ -1136,6 +1133,7 @@ public class SeriesRepository : ISeriesRepository
         var seriesIds = _context.AppUser.Where(u => u.Id == userId)
             .SelectMany(u => u.WantToRead)
             .Select(s => s.SeriesId);
+
         if (bool.Parse(wantToReadStmt.Value))
         {
             query = query.Where(s => seriesIds.Contains(s.Id));
@@ -1152,6 +1150,7 @@ public class SeriesRepository : ISeriesRepository
     {
         var filterIncludeLibs = new List<int>();
         var filterExcludeLibs = new List<int>();
+
         if (filter.Statements != null)
         {
             foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
@@ -1992,18 +1991,14 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter)
     {
-        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
-        var query = _context.AppUser
-            .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.Series.LibraryId))
-            .Select(w => w.Series)
+        var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.None);
+
+        var retSeries = query
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
 
-        var filteredQuery = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.None, query);
-
-        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IList<Series>> GetWantToReadForUserAsync(int userId)
