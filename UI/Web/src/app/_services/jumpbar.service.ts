@@ -16,7 +16,8 @@ export class JumpbarService {
 
 
   getResumeKey(key: string) {
-    if (this.resumeKeys.hasOwnProperty(key)) return this.resumeKeys[key];
+    const k = key.toUpperCase();
+    if (this.resumeKeys.hasOwnProperty(k)) return this.resumeKeys[k];
     return '';
   }
 
@@ -26,7 +27,8 @@ export class JumpbarService {
   }
 
   saveResumeKey(key: string, value: string) {
-    this.resumeKeys[key] = value;
+    const k = key.toUpperCase();
+    this.resumeKeys[k] = value;
   }
 
   saveResumePosition(url: string, value: number) {
@@ -75,9 +77,11 @@ export class JumpbarService {
 
   _removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
     const removedIndexes: Array<number> = [];
+
     for(let removal = 0; removal < numberOfRemovals; removal++) {
       let min = 100000000;
       let minIndex = -1;
+
       for(let i = 1; i < midPoint; i++) {
         if (jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
           min = jumpBarKeys[i].size;
@@ -101,7 +105,7 @@ export class JumpbarService {
    getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
     const keys: {[key: string]: number} = {};
     data.forEach(obj => {
-      let ch = keySelector(obj).charAt(0);
+      let ch = keySelector(obj).charAt(0).toUpperCase();
       if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
         ch = '#';
       }
@@ -111,10 +115,11 @@ export class JumpbarService {
       keys[ch] += 1;
     });
     return Object.keys(keys).map(k => {
+      k = k.toUpperCase();
       return {
         key: k,
         size: keys[k],
-        title: k.toUpperCase()
+        title: k
       }
     }).sort((a, b) => {
       if (a.key < b.key) return -1;
