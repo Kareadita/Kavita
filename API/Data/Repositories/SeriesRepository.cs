@@ -1991,7 +1991,19 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter)
     {
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var seriesIds = await _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.Series.LibraryId))
+            .Select(w => w.Series.Id)
+            .Distinct()
+            .ToListAsync();
+
         var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.None);
+
+        // Apply the Want to Read filtering
+        query = query.Where(s => seriesIds.Contains(s.Id));
 
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
