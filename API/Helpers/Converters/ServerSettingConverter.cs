@@ -64,7 +64,7 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.EnableFolderWatching = bool.Parse(row.Value);
                     break;
                 case ServerSettingKey.TotalLogs:
-                    destination.TotalLogs = int.Parse(row.Value);
+                    destination.TotalLogs = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.HostName:
                     destination.HostName = row.Value;
@@ -79,11 +79,6 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.OnDeckUpdateDays = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.CoverImageSize:
-                    // Somehow CoverImageSize can get set to 0, just fix that to avoid issues
-                    if (row.Value == "0")
-                    {
-                        row.Value = "1";
-                    }
                     destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
                     break;
                 case ServerSettingKey.EncodeMediaAs:
