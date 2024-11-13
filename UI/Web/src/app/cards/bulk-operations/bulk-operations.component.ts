@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
+  DestroyRef, HostListener,
   inject,
   Input,
   OnInit
@@ -14,6 +14,7 @@ import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
 import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {KEY_CODES} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-bulk-operations',
@@ -55,7 +56,19 @@ export class BulkOperationsComponent implements OnInit {
   public readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly Action = Action;
 
-  constructor() { }
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
+  }
 
   ngOnInit(): void {
     this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {

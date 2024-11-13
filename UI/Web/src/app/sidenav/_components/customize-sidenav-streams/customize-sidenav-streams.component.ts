@@ -108,22 +108,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         });
   }
 
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-      this.cdRef.markForCheck();
-    }
-  }
-
   constructor() {
 
     this.pageOperationsForm.get('accessibilityMode')?.valueChanges.pipe(

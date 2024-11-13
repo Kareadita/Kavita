@@ -29,12 +29,10 @@ import {FilterSettings} from '../metadata-filter/filter-settings';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {SentenceCasePipe} from '../_pipes/sentence-case.pipe';
 import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
 import {SeriesCardComponent} from '../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
 import {DecimalPipe} from '@angular/common';
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
@@ -52,8 +50,8 @@ import {debounceTime, ReplaySubject, tap} from "rxjs";
   styleUrls: ['./library-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent,
-    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent,
+    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
 
