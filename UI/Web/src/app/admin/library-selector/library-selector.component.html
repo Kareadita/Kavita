@@ -7,9 +7,9 @@
     <div class="col-auto">
       @if(!isLoading && allLibraries.length > 0) {
         <span class="form-check float-end">
-          <input id="select-all" type="checkbox" class="form-check-input"
+          <input id="lib--select-all" type="checkbox" class="form-check-input"
                  [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-          <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+          <label for="lib--select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
         </span>
       }
     </div>
