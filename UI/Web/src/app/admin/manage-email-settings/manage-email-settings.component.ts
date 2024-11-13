@@ -55,8 +55,8 @@ export class ManageEmailSettingsComponent implements OnInit {
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
+        debounceTime(300),
         distinctUntilChanged(),
-        debounceTime(100),
         filter(_ => this.settingsForm.valid),
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
@@ -65,7 +65,7 @@ export class ManageEmailSettingsComponent implements OnInit {
         }),
         tap(settings => {
           this.serverSettings = settings;
-          this.resetForm();
+          //this.resetForm();
           this.cdRef.markForCheck();
         })
       ).subscribe();
