@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -135,11 +135,8 @@ const BooleanComparisons = [
     FilterFieldPipe,
     FilterComparisonPipe,
     Select2Module,
-    NgTemplateOutlet,
-    TagBadgeComponent,
     NgbTooltip,
     TranslocoDirective,
-    NgbDatepicker,
     NgbInputDatepicker
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -207,9 +204,11 @@ export class MetadataFilterRowComponent implements OnInit {
     );
 
 
-    this.formGroup!.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
-      this.propagateFilterUpdate();
-    });
+    this.formGroup!.valueChanges.pipe(
+      distinctUntilChanged(),
+      tap(_ => this.propagateFilterUpdate()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
 
     this.loaded = true;
     this.cdRef.markForCheck();
@@ -336,13 +335,13 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
     if (StringFields.includes(inputVal)) {
-      const comps = [...StringComparisons];
+      let comps = [...StringComparisons];
 
       if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
-      this.validComparisons$.next(comps);
+      this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Text);
 
       if (this.loaded) {
@@ -362,7 +361,7 @@ export class MetadataFilterRowComponent implements OnInit {
         comps.push(FilterComparison.IsEmpty);
       }
 
-      this.validComparisons$.next(comps);
+      this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Number);
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
@@ -377,7 +376,7 @@ export class MetadataFilterRowComponent implements OnInit {
         comps.push(FilterComparison.IsEmpty);
       }
 
-      this.validComparisons$.next(comps);
+      this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Date);
 
       if (this.loaded) {
@@ -388,12 +387,13 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (BooleanFields.includes(inputVal)) {
-      const comps = [...DateComparisons];
+      let comps = [...DateComparisons];
       if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
-      this.validComparisons$.next(comps);
+
+      this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Boolean);
 
       if (this.loaded) {
@@ -415,7 +415,7 @@ export class MetadataFilterRowComponent implements OnInit {
         comps.push(FilterComparison.IsEmpty);
       }
 
-      this.validComparisons$.next(comps);
+      this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Dropdown);
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
