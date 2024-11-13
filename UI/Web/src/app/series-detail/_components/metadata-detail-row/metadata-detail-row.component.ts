@@ -15,9 +15,7 @@ import {ImageService} from "../../../_services/image.service";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
-import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {PublisherFlipperComponent} from "../../../_single-modules/publisher-flipper/publisher-flipper.component";
 
@@ -32,8 +30,6 @@ import {PublisherFlipperComponent} from "../../../_single-modules/publisher-flip
     NgbTooltip,
     TranslocoDirective,
     ImageComponent,
-    MangaFormatPipe,
-    MangaFormatIconPipe,
     SeriesFormatComponent,
     PublisherFlipperComponent
   ],

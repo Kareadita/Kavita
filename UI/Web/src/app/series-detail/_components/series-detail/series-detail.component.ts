@@ -1,11 +1,8 @@
 import {
   AsyncPipe,
-  DecimalPipe,
   DOCUMENT,
-  JsonPipe,
   Location,
   NgClass,
-  NgOptimizedImage,
   NgStyle,
   NgTemplateOutlet
 } from '@angular/common';
@@ -37,7 +34,6 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
-  NgbProgressbar,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
@@ -81,30 +77,20 @@ import {
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
-import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
-import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
-import {CardItemComponent} from '../../../cards/card-item/card-item.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
 import {ReviewCardComponent} from '../../../_single-module/review-card/review-card.component';
 import {CarouselReelComponent} from '../../../carousel/_components/carousel-reel/carousel-reel.component';
-import {ImageComponent} from '../../../shared/image/image.component';
-import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
-import {
-  SideNavCompanionBarComponent
-} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
 import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-expected-card.component";
-import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
-import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {
   EditChapterModalCloseResult,
@@ -116,23 +102,14 @@ import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.compon
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {AgeRating} from "../../../_models/metadata/age-rating";
-import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ExternalRatingComponent} from "../external-rating/external-rating.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
-import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
-import {AgeRatingImageComponent} from "../../../_single-modules/age-rating-image/age-rating-image.component";
-import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
-import {IconAndTitleComponent} from "../../../shared/icon-and-title/icon-and-title.component";
-import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
-import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {HourEstimateRange} from "../../../_models/series-detail/hour-estimate-range";
-import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../download-button/download-button.component";
@@ -142,8 +119,6 @@ import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
 import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-modules/related-tab/related-tab.component";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
-import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
-import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
@@ -171,16 +146,14 @@ interface StoryLineItem {
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle,
-    TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
+  imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
+    NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, CardItemComponent,
-    EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
-    LoadingComponent, DecimalPipe, TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-    NgClass, NgOptimizedImage, ProviderImagePipe, AsyncPipe, PersonBadgeComponent, DetailsTabComponent, ChapterCardComponent,
-    VolumeCardComponent, JsonPipe, AgeRatingPipe, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, ReadTimePipe,
-    RouterLink, TimeAgoPipe, AgeRatingImageComponent, CompactNumberPipe, IconAndTitleComponent, SafeHtmlPipe, BadgeExpanderComponent,
-    A11yClickDirective, ReadTimeLeftPipe, PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, SeriesFormatComponent, MangaFormatPipe, CoverImageComponent]
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
+    TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
+    NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
+    VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
