@@ -362,6 +362,7 @@ public class MetadataService : IMetadataService
             return;
         }
 
+        // TODO: Cache this because it's called a lot during scans
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
         var coverImageSize = settings.CoverImageSize;

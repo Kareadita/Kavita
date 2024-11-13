@@ -180,13 +180,6 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.CoverImageSize &&
-                updateSettingsDto.CoverImageSize + string.Empty != setting.Value)
-            {
-                setting.Value = updateSettingsDto.CoverImageSize + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;
@@ -260,9 +253,16 @@ public class SettingsController : BaseApiController
             }
 
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
-                updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
+                ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {
-                setting.Value = updateSettingsDto.EncodeMediaAs + string.Empty;
+                setting.Value = ((int)updateSettingsDto.EncodeMediaAs).ToString();
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.CoverImageSize &&
+                ((int)updateSettingsDto.CoverImageSize).ToString() != setting.Value)
+            {
+                setting.Value = ((int)updateSettingsDto.CoverImageSize).ToString();
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

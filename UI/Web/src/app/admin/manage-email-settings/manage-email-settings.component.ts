@@ -4,29 +4,20 @@ import {ToastrService} from 'ngx-toastr';
 import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {
-  NgbAlert,
-  NgbTooltip
-} from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
-import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {ManageMediaIssuesComponent} from "../manage-media-issues/manage-media-issues.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
-    selector: 'app-manage-email-settings',
-    templateUrl: './manage-email-settings.component.html',
-    styleUrls: ['./manage-email-settings.component.scss'],
-    standalone: true,
+  selector: 'app-manage-email-settings',
+  templateUrl: './manage-email-settings.component.html',
+  styleUrls: ['./manage-email-settings.component.scss'],
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe,
-    ManageMediaIssuesComponent, TitleCasePipe, NgbAlert, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, AsyncPipe, CardActionablesComponent]
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -65,7 +56,6 @@ export class ManageEmailSettingsComponent implements OnInit {
         }),
         tap(settings => {
           this.serverSettings = settings;
-          //this.resetForm();
           this.cdRef.markForCheck();
         })
       ).subscribe();
