@@ -1192,7 +1192,7 @@ public class SeriesRepository : ISeriesRepository
 
     private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query)
     {
-        if (filterDto.Statements == null || !filterDto.Statements.Any()) return query;
+        if (filterDto.Statements == null || filterDto.Statements.Count == 0) return query;
 
 
         var queries = filterDto.Statements

@@ -257,7 +257,7 @@ public static class SeriesFilter
                 Series = s,
                 Percentage = s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f
             })
             .AsSplitQuery();
 
@@ -267,13 +267,13 @@ public static class SeriesFilter
                 subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < FloatingPointTolerance);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.Percentage > readProgress);
+                subQuery = subQuery.Where(s => s.Percentage > readProgress  && Math.Abs(s.Percentage - 100f) > FloatingPointTolerance);
                 break;
             case FilterComparison.GreaterThanEqual:
                 subQuery = subQuery.Where(s => s.Percentage >= readProgress);
                 break;
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.Percentage < readProgress);
+                subQuery = subQuery.Where(s => s.Percentage < readProgress && Math.Abs(s.Percentage) > FloatingPointTolerance);
                 break;
             case FilterComparison.LessThanEqual:
                 subQuery = subQuery.Where(s => s.Percentage <= readProgress);
