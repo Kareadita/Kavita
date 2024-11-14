@@ -99,6 +99,7 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     public int GetNumberOfPages(string filePath, MangaFormat format)
     {
+
         switch (format)
         {
             case MangaFormat.Archive:
