@@ -1312,7 +1312,8 @@
         "last-sync-title": "마지막 동기화:",
         "source-url-title": "소스 URL:",
         "total-series-title": "총 시리즈:",
-        "missing-series-title": "누락된 시리즈:"
+        "missing-series-title": "누락된 시리즈:",
+        "last-sync-tooltip": "Kavita는 업스트림 컬렉션 공급자에 대해 매일 동기화합니다."
     },
     "library-recommended": {
         "no-data": "여기에 표시할 내용이 없습니다. 라이브러리에 일부 메타데이터를 추가하거나 무언가를 읽거나 평가하십시오. 이 라이브러리에는 권장 사항이 꺼져 있을 수도 있습니다.",
@@ -1652,7 +1653,7 @@
         "unit-reading-date": "날짜",
         "unit-average-rating": "Kavita+ 외부 평점, 백분율",
         "unit-reading-progress": "퍼센트",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 별",
         "unit-read-last": "오늘부터의 일수"
     },
     "sort-field-pipe": {

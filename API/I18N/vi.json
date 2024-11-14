@@ -57,7 +57,7 @@
     "invalid-path": "Đường dẫn không hợp lệ",
     "delete-library-while-scan": "Không thể xóa thư viện trong lúc đang quét kiểm tra sách. Xin đợi quá trình quét hoàn tất hoặc khởi động lại Kavita để xóa",
     "collection-already-exists": "Bộ sưu tập đã tồn tại",
-    "send-to-size-limit": "Tập tin bạn gửi vượt quá dung lượng phần mềm email cho phép",
+    "send-to-size-limit": "Tệp tin bạn đang cố gắng gửi quá lớn đối với nhà cung cấp email của bạn",
     "send-to-device-status": "Đang chuyển tập tin qua thiết bị",
     "invalid-filename": "Tên tập tin không hợp lệ",
     "library-name-exists": "Tên thư viện đã tồn tại. Xin chọn một tên có 1-0-2 trong nội bộ máy chủ này.",
@@ -198,5 +198,8 @@
     "series-doesnt-exist": "Series không tồn tại",
     "volume-doesnt-exist": "Tập không tồn tại",
     "perform-scan": "Vui lòng thực hiện quét trên Series này hoặc thư viện và thử lại",
-    "no-series-collection": "Không thể lấy được series cho Collection"
+    "no-series-collection": "Không thể lấy được series cho Collection",
+    "person-name-required": "Tên người là bắt buộc và không được để trống",
+    "person-name-unique": "Tên người phải là duy nhất",
+    "person-image-doesnt-exist": "Người không tồn tại trong CoversDB"
 }
