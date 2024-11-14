@@ -130,9 +130,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.FirstInstallVersion = row.Value;
                     break;
                 case ServerSettingKey.LicenseKey:
-                    break;
+                case ServerSettingKey.EnableAuthentication:
+                case ServerSettingKey.EmailServiceUrl:
+                case ServerSettingKey.ConvertBookmarkToWebP:
+                case ServerSettingKey.ConvertCoverToWebP:
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 
