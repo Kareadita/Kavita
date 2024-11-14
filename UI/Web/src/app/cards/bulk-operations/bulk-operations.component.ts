@@ -56,7 +56,7 @@ export class BulkOperationsComponent implements OnInit {
   public readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly Action = Action;
 
-  @HostListener('document:keydown', ['$event'])
+  @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = true;
