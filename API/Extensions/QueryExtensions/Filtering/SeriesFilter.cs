@@ -167,6 +167,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
     }
+
     public static IQueryable<Series> HasAverageReadTime(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, int avgReadTime)
     {
@@ -175,17 +176,17 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.NotEqual:
-                return queryable.Where(s => s.AvgHoursToRead != avgReadTime);
+                return queryable.WhereNotEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.Equal:
-                return queryable.Where(s => s.AvgHoursToRead == avgReadTime);
+                return queryable.WhereEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.GreaterThan:
-                return queryable.Where(s => s.AvgHoursToRead > avgReadTime);
+                return queryable.WhereGreaterThan(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.GreaterThanEqual:
-                return queryable.Where(s => s.AvgHoursToRead >= avgReadTime);
+                return queryable.WhereGreaterThanOrEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.LessThan:
-                return queryable.Where(s => s.AvgHoursToRead < avgReadTime);
+                return queryable.WhereLessThan(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.LessThanEqual:
-                return queryable.Where(s => s.AvgHoursToRead <= avgReadTime);
+                return queryable.WhereLessThanOrEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.Contains:
             case FilterComparison.Matches:
             case FilterComparison.NotContains:
@@ -264,22 +265,22 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < FloatingPointTolerance);
+                subQuery = subQuery.WhereEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.Percentage > readProgress  && Math.Abs(s.Percentage - 100f) > FloatingPointTolerance);
+                subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThanEqual:
-                subQuery = subQuery.Where(s => s.Percentage >= readProgress);
+                subQuery = subQuery.WhereGreaterThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.Percentage < readProgress && Math.Abs(s.Percentage) > FloatingPointTolerance);
+                subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThanEqual:
-                subQuery = subQuery.Where(s => s.Percentage <= readProgress);
+                subQuery = subQuery.WhereLessThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) > FloatingPointTolerance);
+                subQuery = subQuery.WhereNotEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.IsEmpty:
             case FilterComparison.Matches:
@@ -306,7 +307,6 @@ public static class SeriesFilter
     {
         if (!condition) return queryable;
 
-
         var subQuery = queryable
             .Where(s => s.ExternalSeriesMetadata != null)
             .Include(s => s.ExternalSeriesMetadata)
@@ -316,27 +316,27 @@ public static class SeriesFilter
                 AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
             })
             .AsSplitQuery()
-            .AsEnumerable();
+            .AsQueryable();
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) < FloatingPointTolerance);
+                subQuery = subQuery.WhereEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.AverageRating > rating);
+                subQuery = subQuery.WhereGreaterThan(s => s.AverageRating, rating);
                 break;
             case FilterComparison.GreaterThanEqual:
-                subQuery = subQuery.Where(s => s.AverageRating >= rating);
+                subQuery = subQuery.WhereGreaterThanOrEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.AverageRating < rating);
+                subQuery = subQuery.WhereLessThan(s => s.AverageRating, rating);
                 break;
             case FilterComparison.LessThanEqual:
-                subQuery = subQuery.Where(s => s.AverageRating <= rating);
+                subQuery = subQuery.WhereLessThanOrEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) > FloatingPointTolerance);
+                subQuery = subQuery.WhereNotEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:
