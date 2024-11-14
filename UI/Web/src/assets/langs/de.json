@@ -617,7 +617,8 @@
         "kavita+-desc-part-2": "Premiumleistungen",
         "kavita+-desc-part-3": "heute!",
         "kavita+-requirement": "Kavita+ ist so konzipiert, dass es nur mit der neuesten Version - 2 Versionen - funktioniert. Alles, was darüber hinausgeht, kann nicht funktionieren.",
-        "kavita+-releases": "Siehe Veröffentlichungen"
+        "kavita+-releases": "Siehe Veröffentlichungen",
+        "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
         "copy": "Kopieren",
@@ -958,7 +959,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1008,7 +1014,8 @@
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "Einzelband"
+        "single-volume": "Einzelband",
+        "vol-num": "{{user-scrobble-history.volume-num}}"
     },
     "external-series-card": {
         "open-external": "Extern öffnen"
@@ -1528,7 +1535,8 @@
         "dry-run-step": "Leerlauf",
         "final-import-step": "Letzter Schritt",
         "comicvine-parsing-label": "Comic Vine Series passend verwenden",
-        "cbl-repo": "Viele Leselisten finden Sie in der Community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
+        "cbl-repo": "Viele Leselisten finden Sie in der Community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>.",
+        "help-label": "{{common.help}}"
     },
     "pdf-reader": {
         "loading-message": "Das Laden von……PDFs kann länger dauern als erwartet",
@@ -2005,7 +2013,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2377,7 +2386,8 @@
     },
     "browse-authors": {
         "author-count": "{{num}} Personen",
-        "title": "Autoren & Schriftsteller durchsuchen"
+        "title": "Autoren & Schriftsteller durchsuchen",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
     "edit-person-modal": {
         "title": "Details zu {{personName}}",
@@ -2392,6 +2402,14 @@
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Beschreibung",
         "cover-image-description-extra": "Alternativ kannst du ein Cover von CoversDB herunterladen, falls verfügbar.",
-        "download-coversdb": "Download von CoversDB"
+        "download-coversdb": "Download von CoversDB",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "save": "{{common.save}}"
     }
 }

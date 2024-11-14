@@ -1073,7 +1073,8 @@
         "promote-tooltip": "Quảng bá có nghĩa là thẻ này có thể được thấy trên toàn bộ máy chủ, không chỉ dành cho người dùng quản trị. Tất cả các series có thẻ này vẫn sẽ bị giới hạn truy cập cho người dùng.",
         "summary-label": "Tóm Tắt",
         "name-validation": "Tên không được trùng lặp",
-        "name-label": "Tên"
+        "name-label": "Tên",
+        "last-sync-tooltip": "Kavita đồng bộ hóa hàng ngày với nhà cung cấp dịch vụ thu thập dữ liệu đầu nguồn."
     },
     "library-recommended": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1362,7 +1363,7 @@
         "unread": "Chưa Đọc"
     },
     "metadata-filter-row": {
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}",
+        "unit-user-rating": "0.0 - 5.0 Sao",
         "unit-reading-date": "Ngày",
         "unit-average-rating": "Xếp hạng bên ngoài của Kavita+, phần trăm",
         "unit-read-last": "ngày từ HÔM NAY",
@@ -2034,7 +2035,13 @@
         "save": "{{common.save}}",
         "loading": "{{common.loading}}",
         "general-tab": "{{edit-series-modal.general-tab}}",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}"
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "cover-image-description-extra": "Ngoài ra, bạn có thể tải xuống ảnh bìa từ CoversDB nếu có.",
+        "download-coversdb": "Tải xuống từ CoversDB"
     },
     "infinite-scroller": {
         "continuous-reading-next-chapter": "Chương Tiếp Theo",
@@ -2216,7 +2223,8 @@
         "generate-colorscape-queued": "Tác vụ tạo phối cảnh màu đã được lên lịch cho {{name}}",
         "entity-read": "{{name}} đã được đọc",
         "entity-unread": "{{name}} chưa được đọc",
-        "confirm-library-delete": "Bạn có chắc chắn muốn xóa thư viện {{name}} không? Bạn không thể hoàn tác hành động này."
+        "confirm-library-delete": "Bạn có chắc chắn muốn xóa thư viện {{name}} không? Bạn không thể hoàn tác hành động này.",
+        "person-image-downloaded": "Đã tải xuống và áp dụng bìa hồ sơ cá nhân."
     },
     "errors": {
         "error-code": "{{num}} Lỗi",
