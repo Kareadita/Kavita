@@ -119,6 +119,11 @@ public class PersonController : BaseApiController
         return Ok(_mapper.Map<PersonDto>(person));
     }
 
+    /// <summary>
+    /// Attempts to download the cover from CoversDB (Note: Not yet release in Kavita)
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
     [HttpPost("fetch-cover")]
     public async Task<ActionResult<string>> DownloadCoverImage([FromQuery] int personId)
     {
@@ -129,12 +134,12 @@ public class PersonController : BaseApiController
         var personImage = await _coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 
         if (string.IsNullOrEmpty(personImage)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+
         person.CoverImage = personImage;
         _imageService.UpdateColorScape(person);
         _unitOfWork.PersonRepository.Update(person);
         await _unitOfWork.CommitAsync();
         await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
-
 
         return Ok(personImage);
     }
@@ -150,6 +155,12 @@ public class PersonController : BaseApiController
         return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId));
     }
 
+    /// <summary>
+    /// Returns all individual chapters by role. Limited to 20 results.
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <param name="role"></param>
+    /// <returns></returns>
     [HttpGet("chapters-by-role")]
     public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {
