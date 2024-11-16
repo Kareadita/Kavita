@@ -213,9 +213,8 @@ public class ProcessSeries : IProcessSeries
             return;
         }
 
-        BackgroundJob.Enqueue(() =>
-            _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false, false));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate));
+        await _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false, false);
+        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
