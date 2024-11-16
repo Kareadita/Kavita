@@ -534,21 +534,21 @@ public static class SeriesFilter
         {
             case FilterComparison.Equal:
             case FilterComparison.Contains:
-                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.PersonId)));
+                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.PersonId) && p.Role == role));
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
-                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.PersonId)));
+                return queryable.Where(s => s.Metadata.People.All(p => !people.Contains(p.PersonId) || p.Role != role));
             case FilterComparison.MustContains:
-                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
                 {
                     queryable
                 };
-                queries.AddRange(people.Select(gId => queryable.Where(s => s.Metadata.People.Any(p => p.PersonId == gId))));
+                queries.AddRange(people.Select(personId =>
+                    queryable.Where(s => s.Metadata.People.Any(p => p.PersonId == personId && p.Role == role))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.IsEmpty:
-                // Check if there are no people with specific roles (e.g., Writer, Penciller, etc.)
+                // Ensure no person with the given role exists
                 return queryable.Where(s => s.Metadata.People.All(p => p.Role != role));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
