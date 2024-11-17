@@ -113,20 +113,6 @@ public static class QueryableExtensions
         return condition ? queryable.Where(predicate) : queryable;
     }
 
-    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, bool condition, Expression<Func<T, string>> propertySelector, string searchQuery)
-        where T : class
-    {
-        if (!condition || string.IsNullOrEmpty(searchQuery)) return queryable;
-
-        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), [typeof(DbFunctions), typeof(string), typeof(string)
-        ]);
-        var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
-        var searchExpression = Expression.Constant($"%{searchQuery}%");
-        var likeExpression = Expression.Call(method, Expression.Constant(dbFunctions), propertySelector.Body, searchExpression);
-        var lambda = Expression.Lambda<Func<T, bool>>(likeExpression, propertySelector.Parameters[0]);
-
-        return queryable.Where(lambda);
-    }
 
     public static IQueryable<T> WhereGreaterThan<T>(this IQueryable<T> source,
                                                     Expression<Func<T, float>> selector,
@@ -143,8 +129,7 @@ public static class QueryableExtensions
 
     public static IQueryable<T> WhereGreaterThanOrEqual<T>(this IQueryable<T> source,
                                                            Expression<Func<T, float>> selector,
-                                                           float value,
-                                                           float tolerance = DefaultTolerance)
+                                                           float value)
     {
         var parameter = selector.Parameters[0];
         var propertyAccess = selector.Body;
