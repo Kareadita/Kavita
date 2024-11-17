@@ -21,6 +21,10 @@ export class ChapterService {
     return this.httpClient.delete<boolean>(this.baseUrl + 'chapter?chapterId=' + chapterId);
   }
 
+  deleteMultipleChapters(seriesId: number, chapterIds: Array<number>) {
+    return this.httpClient.post<boolean>(this.baseUrl + `chapter/delete-multiple?seriesId=${seriesId}`, {chapterIds});
+  }
+
   updateChapter(chapter: Chapter) {
     return this.httpClient.post(this.baseUrl + 'chapter/update', chapter, TextResonse);
   }
