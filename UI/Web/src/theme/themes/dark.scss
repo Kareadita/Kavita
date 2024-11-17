@@ -105,6 +105,7 @@
     --navbar-bg-color: black;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
+    --navbar-border-radius: 0px; // 4px for Plex navbar
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
     --navbar-header-margin: 0px; // 8px allows for the Plex navbar + --nav-offset: 56px;
 
@@ -388,7 +389,7 @@
     /* Bulk Selection */
     --bulk-selection-text-color: var(--navbar-text-color);
     --bulk-selection-highlight-text-color: var(--primary-color);
-    --bulk-selection-bg-color: var(--elevation-layer11-dark);
+    --bulk-selection-bg-color: black;
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
