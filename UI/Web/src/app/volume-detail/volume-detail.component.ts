@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DecimalPipe, DOCUMENT, NgStyle, NgClass, DatePipe, Location} from "@angular/common";
+import {AsyncPipe, DOCUMENT, NgStyle, NgClass, Location} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -30,7 +30,6 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
-  NgbProgressbar,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
@@ -49,19 +48,13 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {Person} from "../_models/metadata/person";
-import {hasAnyCast, IHasCast} from "../_models/common/i-has-cast";
-import {ReadTimePipe} from "../_pipes/read-time.pipe";
-import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
+import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
-import {ImageComponent} from "../shared/image/image.component";
-import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
-import {DefaultValuePipe} from "../_pipes/default-value.pipe";
 import {
-  EditVolumeModalCloseResult,
   EditVolumeModalComponent
 } from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -69,8 +62,6 @@ import {Tag} from "../_models/tag";
 import {RelatedTabComponent} from "../_single-modules/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
-import {AgeRatingImageComponent} from "../_single-modules/age-rating-image/age-rating-image.component";
-import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {
   MetadataDetailRowComponent
@@ -85,8 +76,6 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
 import {Device} from "../_models/device/device";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
-import {DefaultDatePipe} from "../_pipes/default-date.pipe";
-import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 
@@ -145,32 +134,20 @@ interface VolumeCast extends IHasCast {
         NgbDropdownMenu,
         NgbDropdown,
         NgbDropdownToggle,
-        ReadTimePipe,
-        AgeRatingPipe,
         EntityTitleComponent,
         RouterLink,
-        NgbProgressbar,
-        DecimalPipe,
         NgbTooltip,
-        ImageComponent,
         NgStyle,
         NgClass,
         TranslocoDirective,
-        CardItemComponent,
         VirtualScrollerModule,
         ChapterCardComponent,
-        DefaultValuePipe,
         RelatedTabComponent,
-        AgeRatingImageComponent,
-        CompactNumberPipe,
         BadgeExpanderComponent,
         MetadataDetailRowComponent,
         DownloadButtonComponent,
         CardActionablesComponent,
         BulkOperationsComponent,
-        DatePipe,
-        DefaultDatePipe,
-        MangaFormatPipe,
         CoverImageComponent
     ],
   templateUrl: './volume-detail.component.html',
@@ -226,7 +203,7 @@ export class VolumeDetailComponent implements OnInit {
   volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
-  bulkActionCallback = async (action: ActionItem<Chapter>, data: any) => {
+  bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
     if (this.volume === null) {
       return;
     }
@@ -621,14 +598,14 @@ export class VolumeDetailComponent implements OnInit {
         });
         break;
       case Action.MarkAsRead:
-        this.actionService.markVolumeAsRead(this.seriesId, this.volume!, res => {
+        this.actionService.markVolumeAsRead(this.seriesId, this.volume!, _ => {
           this.volume!.pagesRead = this.volume!.pages;
           this.setContinuePoint();
           this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsUnread:
-        this.actionService.markVolumeAsUnread(this.seriesId, this.volume!, res => {
+        this.actionService.markVolumeAsUnread(this.seriesId, this.volume!, _ => {
           this.volume!.pagesRead = 0;
           this.setContinuePoint();
           this.cdRef.markForCheck();
