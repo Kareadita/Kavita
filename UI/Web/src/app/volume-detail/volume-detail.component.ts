@@ -234,9 +234,10 @@ export class VolumeDetailComponent implements OnInit {
         });
         break;
       case Action.SendTo:
-        // this.actionService.sendToDevice(selectedChapterIds, _, () => {
-        //
-        // });
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice(selectedChapterIds.map(c => c.id), device);
+        this.bulkSelectionService.deselectAll();
+        this.cdRef.markForCheck();
         break;
       case Action.Delete:
         await this.actionService.deleteMultipleChapters(this.seriesId, selectedChapterIds, () => {

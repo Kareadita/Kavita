@@ -349,9 +349,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
       case Action.SendTo:
-        // this.actionService.sendToDevice(selectedChapterIds, _, () => {
-        //
-        // });
+        const device = (action._extra!.data as Device);
+        this.actionService.sendToDevice(chapters.map(c => c.id), device);
+        this.bulkSelectionService.deselectAll();
+        this.cdRef.markForCheck();
         break;
       case Action.Delete:
         await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {

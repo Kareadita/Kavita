@@ -3,10 +3,12 @@
     <div class="d-flex flex-column">
       @if (HasCoverImage) {
         <div class="mx-auto">
-          <app-image height="24px" width="24px" [styles]="{'background': 'none', 'max-height': '48px', 'height': '48px', 'width': '48px', 'border-radius': '50%'}"
-                     [imageUrl]="ImageUrl"
-                     [errorImage]="imageService.noPersonImage">
-          </app-image>
+          <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">
+            <app-image height="24px" width="24px" [styles]="{'background': 'none', 'max-height': '48px', 'height': '48px', 'width': '48px', 'border-radius': '50%'}"
+                       [imageUrl]="ImageUrl"
+                       [errorImage]="imageService.noPersonImage">
+            </app-image>
+          </a>
         </div>
       } @else {
         <div style="background: none; max-height: 48px; height: 48px; width: 48px; border-radius: 50%" class="mx-auto">
