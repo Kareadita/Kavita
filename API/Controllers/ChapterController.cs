@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -13,6 +14,7 @@ using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
 namespace API.Controllers;
@@ -22,12 +24,14 @@ public class ChapterController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
     private readonly IEventHub _eventHub;
+    private readonly ILogger<ChapterController> _logger;
 
-    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub)
+    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _eventHub = eventHub;
+        _logger = logger;
     }
 
     /// <summary>
@@ -83,6 +87,83 @@ public class ChapterController : BaseApiController
 
         return Ok(true);
     }
+
+    /// <summary>
+    /// Deletes multiple chapters and any volumes with no leftover chapters
+    /// </summary>
+    /// <param name="seriesId">The ID of the series</param>
+    /// <param name="chapterIds">The IDs of the chapters to be deleted</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("delete-multiple")]
+    public async Task<ActionResult<bool>> DeleteMultipleChapters([FromQuery] int seriesId, DeleteChaptersDto dto)
+    {
+        try
+        {
+            var chapterIds = dto.ChapterIds;
+            if (chapterIds == null || chapterIds.Count == 0)
+            {
+                return BadRequest("ChapterIds required");
+            }
+
+            // Fetch all chapters to be deleted
+            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds)).ToList();
+
+            // Group chapters by their volume
+            var volumesToUpdate = chapters.GroupBy(c => c.VolumeId).ToList();
+            var removedVolumes = new List<int>();
+
+            foreach (var volumeGroup in volumesToUpdate)
+            {
+                var volumeId = volumeGroup.Key;
+                var chaptersToDelete = volumeGroup.ToList();
+
+                // Fetch the volume
+                var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
+                if (volume == null)
+                    return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+
+                // Check if all chapters in the volume are being deleted
+                var isVolumeToBeRemoved = volume.Chapters.Count == chaptersToDelete.Count;
+
+                if (isVolumeToBeRemoved)
+                {
+                    _unitOfWork.VolumeRepository.Remove(volume);
+                    removedVolumes.Add(volume.Id);
+                }
+                else
+                {
+                    // Remove only the specified chapters
+                    _unitOfWork.ChapterRepository.Remove(chaptersToDelete);
+                }
+            }
+
+            if (!await _unitOfWork.CommitAsync()) return Ok(false);
+
+            // Send events for removed chapters
+            foreach (var chapter in chapters)
+            {
+                await _eventHub.SendMessageAsync(MessageFactory.ChapterRemoved,
+                    MessageFactory.ChapterRemovedEvent(chapter.Id, seriesId), false);
+            }
+
+            // Send events for removed volumes
+            foreach (var volumeId in removedVolumes)
+            {
+                await _eventHub.SendMessageAsync(MessageFactory.VolumeRemoved,
+                    MessageFactory.VolumeRemovedEvent(volumeId, seriesId), false);
+            }
+
+            return Ok(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occured while deleting chapters");
+            return BadRequest(_localizationService.Translate(User.GetUserId(), "generic-error"));
+        }
+
+    }
+
 
     /// <summary>
     /// Update chapter metadata

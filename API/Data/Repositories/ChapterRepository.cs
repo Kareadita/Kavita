@@ -31,6 +31,7 @@ public interface IChapterRepository
 {
     void Update(Chapter chapter);
     void Remove(Chapter chapter);
+    void Remove(IList<Chapter> chapters);
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None);
     Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
@@ -66,6 +67,11 @@ public class ChapterRepository : IChapterRepository
     public void Remove(Chapter chapter)
     {
         _context.Chapter.Remove(chapter);
+    }
+
+    public void Remove(IList<Chapter> chapters)
+    {
+        _context.Chapter.RemoveRange(chapters);
     }
 
     public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None)

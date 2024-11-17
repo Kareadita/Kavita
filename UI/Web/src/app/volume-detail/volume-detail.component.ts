@@ -226,7 +226,7 @@ export class VolumeDetailComponent implements OnInit {
   volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
-  bulkActionCallback = (action: ActionItem<Chapter>, data: any) => {
+  bulkActionCallback = async (action: ActionItem<Chapter>, data: any) => {
     if (this.volume === null) {
       return;
     }
@@ -253,6 +253,18 @@ export class VolumeDetailComponent implements OnInit {
         this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
           this.bulkSelectionService.deselectAll();
           this.loadVolume();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.SendTo:
+        // this.actionService.sendToDevice(selectedChapterIds, _, () => {
+        //
+        // });
+        break;
+      case Action.Delete:
+        await this.actionService.deleteMultipleChapters(this.seriesId, selectedChapterIds, () => {
+          // No need to update the page as the backend will spam volume/chapter deletions
+          this.bulkSelectionService.deselectAll();
           this.cdRef.markForCheck();
         });
         break;

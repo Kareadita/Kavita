@@ -134,7 +134,7 @@ public class SeriesController : BaseApiController
         var username = User.GetUsername();
         _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
-        return Ok(await _seriesService.DeleteMultipleSeries(new[] {seriesId}));
+        return Ok(await _seriesService.DeleteMultipleSeries([seriesId]));
     }
 
     [Authorize(Policy = "RequireAdminRole")]
