@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -21,12 +22,15 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         };
     }
 
+    [Obsolete]
     public SeriesMetadataBuilder WithCollectionTag(CollectionTag tag)
     {
         _seriesMetadata.CollectionTags ??= new List<CollectionTag>();
         _seriesMetadata.CollectionTags.Add(tag);
         return this;
     }
+
+    [Obsolete]
     public SeriesMetadataBuilder WithCollectionTags(IList<CollectionTag> tags)
     {
         if (tags == null) return this;
@@ -34,6 +38,7 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.CollectionTags = tags;
         return this;
     }
+
     public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status)
     {
         _seriesMetadata.PublicationStatus = status;
@@ -56,6 +61,12 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             SeriesMetadata = _seriesMetadata,
         });
 
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithLanguage(string languageCode)
+    {
+        _seriesMetadata.Language = languageCode;
         return this;
     }
 }

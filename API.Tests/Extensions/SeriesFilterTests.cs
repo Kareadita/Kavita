@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
@@ -21,9 +23,11 @@ namespace API.Tests.Extensions;
 
 public class SeriesFilterTests : AbstractDbTest
 {
-    protected override Task ResetDb()
+    protected override async Task ResetDb()
     {
-        return Task.CompletedTask;
+        _context.Series.RemoveRange(_context.Series);
+        _context.AppUser.RemoveRange(_context.AppUser);
+        await _context.SaveChangesAsync();
     }
 
     #region HasProgress
@@ -170,15 +174,180 @@ public class SeriesFilterTests : AbstractDbTest
         Assert.Contains(queryResult, s => s.Name == "Partial");
         Assert.Contains(queryResult, s => s.Name == "Full");
     }
+
+    [Fact]
+    public async Task HasProgress_LessThan100_WithProgress99_99_ShouldReturnSeries()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("AlmostFull").WithPages(100)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(100).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>());
+
+        // Set progress to 99.99% (99/100 pages read)
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var chapter = series.Volumes.First().Chapters.First();
+
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = chapter.Id,
+            LibraryId = 1,
+            SeriesId = series.Id,
+            PageNum = 99,
+            VolumeId = chapter.VolumeId
+        }, user.Id));
+
+        // Query series with progress < 100%
+        var queryResult = await _context.Series.HasReadingProgress(true, FilterComparison.LessThan, 100, user.Id)
+            .ToListAsync();
+
+        Assert.Single(queryResult);
+        Assert.Equal("AlmostFull", queryResult.First().Name);
+    }
     #endregion
 
     #region HasLanguage
 
-    [Fact]
-    public async Task HasLanguage_Works()
+    private async Task<AppUser> SetupHasLanguage()
     {
-        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.Contains, new List<string>() { }).ToListAsync();
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("English").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithLanguage("en").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("French").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithLanguage("fr").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Spanish").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithLanguage("es").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
 
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasLanguage_Equal_Works()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.Equal, ["en"]).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("en", foundSeries[0].Metadata.Language);
+    }
+
+    [Fact]
+    public async Task HasLanguage_NotEqual_Works()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.NotEqual, ["en"]).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.DoesNotContain(foundSeries, s => s.Metadata.Language == "en");
+    }
+
+    [Fact]
+    public async Task HasLanguage_Contains_Works()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.Contains, ["en", "fr"]).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Metadata.Language == "en");
+        Assert.Contains(foundSeries, s => s.Metadata.Language == "fr");
+    }
+
+    [Fact]
+    public async Task HasLanguage_NotContains_Works()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.NotContains, ["en", "fr"]).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("es", foundSeries[0].Metadata.Language);
+    }
+
+    [Fact]
+    public async Task HasLanguage_MustContains_Works()
+    {
+        await SetupHasLanguage();
+
+        // Since "MustContains" matches all the provided languages, no series should match in this case.
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.MustContains, ["en", "fr"]).ToListAsync();
+        Assert.Empty(foundSeries);
+
+        // Single language should work.
+        foundSeries = await _context.Series.HasLanguage(true, FilterComparison.MustContains, ["en"]).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("en", foundSeries[0].Metadata.Language);
+    }
+
+    [Fact]
+    public async Task HasLanguage_Matches_Works()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.Matches, ["e"]).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains("en", foundSeries.Select(s => s.Metadata.Language));
+        Assert.Contains("es", foundSeries.Select(s => s.Metadata.Language));
+    }
+
+    [Fact]
+    public async Task HasLanguage_DisabledCondition_ReturnsAll()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(false, FilterComparison.Equal, ["en"]).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasLanguage_EmptyLanguageList_ReturnsAll()
+    {
+        await SetupHasLanguage();
+
+        var foundSeries = await _context.Series.HasLanguage(true, FilterComparison.Equal, new List<string>()).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasLanguage_UnsupportedComparison_ThrowsException()
+    {
+        await SetupHasLanguage();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await _context.Series.HasLanguage(true, FilterComparison.GreaterThan, ["en"]).ToListAsync();
+        });
     }
 
     #endregion

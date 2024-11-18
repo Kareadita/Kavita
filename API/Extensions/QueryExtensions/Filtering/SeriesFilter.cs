@@ -256,9 +256,9 @@ public static class SeriesFilter
             .Select(s => new
             {
                 Series = s,
-                Percentage = s.Progress
+                Percentage = ((float) s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f)
             })
             .AsSplitQuery();
 
@@ -268,12 +268,14 @@ public static class SeriesFilter
                 subQuery = subQuery.WhereEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
+                //subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
+                subQuery = subQuery.Where(s => s.Percentage > readProgress);
                 break;
             case FilterComparison.GreaterThanEqual:
                 subQuery = subQuery.WhereGreaterThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThan:
+                //subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
                 subQuery = subQuery.Where(s => s.Percentage < readProgress);
                 break;
             case FilterComparison.LessThanEqual:
