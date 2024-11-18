@@ -98,4 +98,12 @@ public class SeriesBuilder : IEntityBuilder<Series>
         _series.Metadata.PublicationStatus = status;
         return this;
     }
+
+    public SeriesBuilder WithExternalMetadata(ExternalSeriesMetadata metadata)
+    {
+        _series.ExternalSeriesMetadata = metadata;
+        return this;
+    }
+
+
 }

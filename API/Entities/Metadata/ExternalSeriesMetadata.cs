@@ -21,7 +21,7 @@ public class ExternalSeriesMetadata
     public ICollection<ExternalRecommendation> ExternalRecommendations { get; set; } = null!;
 
     /// <summary>
-    /// Average External Rating. -1 means not set
+    /// Average External Rating. -1 means not set, 0 - 100
     /// </summary>
     public int AverageExternalRating { get; set; } = 0;
 

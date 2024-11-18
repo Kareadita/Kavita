@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Progress;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
-using AutoMapper;
-using Hangfire;
+using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -351,4 +348,145 @@ public class SeriesFilterTests : AbstractDbTest
     }
 
     #endregion
+
+    #region HasAverageRating
+
+    private async Task<AppUser> SetupHasAverageRating()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("None").WithPages(10)
+                .WithExternalMetadata(new ExternalSeriesMetadataBuilder().WithAverageExternalRating(-1).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Partial").WithPages(10)
+                .WithExternalMetadata(new ExternalSeriesMetadataBuilder().WithAverageExternalRating(50).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Full").WithPages(10)
+                .WithExternalMetadata(new ExternalSeriesMetadataBuilder().WithAverageExternalRating(100).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasAverageRating_Equal_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.Equal, 100).ToListAsync();
+        Assert.Single(series);
+        Assert.Equal("Full", series[0].Name);
+    }
+
+    [Fact]
+    public async Task HasAverageRating_GreaterThan_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.GreaterThan, 50).ToListAsync();
+        Assert.Single(series);
+        Assert.Equal("Full", series[0].Name);
+    }
+
+    [Fact]
+    public async Task HasAverageRating_GreaterThanEqual_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.GreaterThanEqual, 50).ToListAsync();
+        Assert.Equal(2, series.Count);
+        Assert.Contains(series, s => s.Name == "Partial");
+        Assert.Contains(series, s => s.Name == "Full");
+    }
+
+    [Fact]
+    public async Task HasAverageRating_LessThan_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.LessThan, 50).ToListAsync();
+        Assert.Single(series);
+        Assert.Equal("None", series[0].Name);
+    }
+
+    [Fact]
+    public async Task HasAverageRating_LessThanEqual_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.LessThanEqual, 50).ToListAsync();
+        Assert.Equal(2, series.Count);
+        Assert.Contains(series, s => s.Name == "None");
+        Assert.Contains(series, s => s.Name == "Partial");
+    }
+
+    [Fact]
+    public async Task HasAverageRating_NotEqual_Works()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.NotEqual, 100).ToListAsync();
+        Assert.Equal(2, series.Count);
+        Assert.DoesNotContain(series, s => s.Name == "Full");
+    }
+
+    [Fact]
+    public async Task HasAverageRating_ConditionFalse_ReturnsAll()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(false, FilterComparison.Equal, 100).ToListAsync();
+        Assert.Equal(3, series.Count);
+    }
+
+    [Fact]
+    public async Task HasAverageRating_NotSet_IsHandled()
+    {
+        await SetupHasAverageRating();
+
+        var series = await _context.Series.HasAverageRating(true, FilterComparison.Equal, -1).ToListAsync();
+        Assert.Single(series);
+        Assert.Equal("None", series[0].Name);
+    }
+
+    [Fact]
+    public async Task HasAverageRating_ThrowsForInvalidComparison()
+    {
+        await SetupHasAverageRating();
+
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await _context.Series.HasAverageRating(true, FilterComparison.Contains, 50).ToListAsync();
+        });
+    }
+
+    [Fact]
+    public async Task HasAverageRating_ThrowsForOutOfRangeComparison()
+    {
+        await SetupHasAverageRating();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await _context.Series.HasAverageRating(true, (FilterComparison)999, 50).ToListAsync();
+        });
+    }
+
+    #endregion
+
 }
