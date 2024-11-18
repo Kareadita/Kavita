@@ -75,4 +75,10 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.ReleaseYear = year;
         return this;
     }
+
+    public SeriesMetadataBuilder WithSummary(string summary)
+    {
+        _seriesMetadata.Summary = summary;
+        return this;
+    }
 }

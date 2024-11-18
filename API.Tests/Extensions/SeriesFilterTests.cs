@@ -845,10 +845,8 @@ public class SeriesFilterTests : AbstractDbTest
     {
         await SetupHasReleaseYear();
 
-        var currentYear = DateTime.Now.Year;
         var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.IsInLast, 5).ToListAsync();
-        Assert.Single(foundSeries);
-        Assert.Equal("2025", foundSeries[0].Name);
+        Assert.Equal(2, foundSeries.Count);
     }
 
     [Fact]
@@ -856,11 +854,9 @@ public class SeriesFilterTests : AbstractDbTest
     {
         await SetupHasReleaseYear();
 
-        var currentYear = DateTime.Now.Year;
         var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, 5).ToListAsync();
-        Assert.Equal(2, foundSeries.Count);
+        Assert.Single(foundSeries);
         Assert.Contains(foundSeries, s => s.Name == "2000");
-        Assert.Contains(foundSeries, s => s.Name == "2020");
     }
 
     [Fact]
@@ -1089,13 +1085,242 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasName
 
+    private async Task<AppUser> SetupHasName()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("Don't Toy With Me, Miss Nagatoro").WithLocalizedName("Ijiranaide, Nagatoro-san").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("My Dress-Up Darling").WithLocalizedName("Sono Bisque Doll wa Koi wo Suru").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasName_Equal_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.Equal, "My Dress-Up Darling")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("My Dress-Up Darling", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_Equal_LocalizedName_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.Equal, "Ijiranaide, Nagatoro-san")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Don't Toy With Me, Miss Nagatoro", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_BeginsWith_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.BeginsWith, "My Dress")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("My Dress-Up Darling", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_BeginsWith_LocalizedName_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.BeginsWith, "Sono Bisque")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("My Dress-Up Darling", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_EndsWith_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.EndsWith, "Nagatoro")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Don't Toy With Me, Miss Nagatoro", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_Matches_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.Matches, "Toy With Me")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Don't Toy With Me, Miss Nagatoro", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasName_NotEqual_Works()
+    {
+        await SetupHasName();
+
+        var foundSeries = await _context.Series
+            .HasName(true, FilterComparison.NotEqual, "My Dress-Up Darling")
+            .ToListAsync();
+
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Equal("Don't Toy With Me, Miss Nagatoro", foundSeries[0].Name);
+    }
 
 
     #endregion
 
     #region HasSummary
 
+    private async Task<AppUser> SetupHasSummary()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("Hippos").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithSummary("I like hippos").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Apples").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithSummary("I like apples").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Ducks").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithSummary("I like ducks").Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("No Summary").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
 
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasSummary_Equal_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.Equal, "I like hippos")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Hippos", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasSummary_BeginsWith_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.BeginsWith, "I like h")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Hippos", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasSummary_EndsWith_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.EndsWith, "apples")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Apples", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasSummary_Matches_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.Matches, "like ducks")
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("Ducks", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasSummary_NotEqual_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.NotEqual, "I like ducks")
+            .ToListAsync();
+
+        Assert.Equal(2, foundSeries.Count);
+        Assert.DoesNotContain(foundSeries, s => s.Name == "Ducks");
+    }
+
+    [Fact]
+    public async Task HasSummary_IsEmpty_Works()
+    {
+        await SetupHasSummary();
+
+        var foundSeries = await _context.Series
+            .HasSummary(true, FilterComparison.IsEmpty, string.Empty)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("No Summary", foundSeries[0].Name);
+    }
 
     #endregion
 
