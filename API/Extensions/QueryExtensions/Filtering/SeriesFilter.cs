@@ -14,6 +14,7 @@ namespace API.Extensions.QueryExtensions.Filtering;
 public static class SeriesFilter
 {
     private const float FloatingPointTolerance = 0.001f;
+
     public static IQueryable<Series> HasLanguage(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<string> languages)
     {

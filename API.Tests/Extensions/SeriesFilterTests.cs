@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Progress;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Builders;
 using API.Services;
@@ -489,4 +491,625 @@ public class SeriesFilterTests : AbstractDbTest
 
     #endregion
 
+    # region HasPublicationStatus
+
+    private async Task<AppUser> SetupHasPublicationStatus()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("Cancelled").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Cancelled).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("OnGoing").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.OnGoing).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Completed").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_Equal_Works()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("Cancelled", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_Contains_Works()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(true, FilterComparison.Contains, new List<PublicationStatus> { PublicationStatus.Cancelled, PublicationStatus.Completed }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "Cancelled");
+        Assert.Contains(foundSeries, s => s.Name == "Completed");
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_NotContains_Works()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(true, FilterComparison.NotContains, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "OnGoing");
+        Assert.Contains(foundSeries, s => s.Name == "Completed");
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_NotEqual_Works()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(true, FilterComparison.NotEqual, new List<PublicationStatus> { PublicationStatus.OnGoing }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "Cancelled");
+        Assert.Contains(foundSeries, s => s.Name == "Completed");
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_ConditionFalse_ReturnsAll()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(false, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_EmptyPubStatuses_ReturnsAll()
+    {
+        await SetupHasPublicationStatus();
+
+        var foundSeries = await _context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus>()).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_ThrowsForInvalidComparison()
+    {
+        await SetupHasPublicationStatus();
+
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await _context.Series.HasPublicationStatus(true, FilterComparison.BeginsWith, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        });
+    }
+
+    [Fact]
+    public async Task HasPublicationStatus_ThrowsForOutOfRangeComparison()
+    {
+        await SetupHasPublicationStatus();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await _context.Series.HasPublicationStatus(true, (FilterComparison)999, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        });
+    }
+    #endregion
+
+    #region HasAgeRating
+    private async Task<AppUser> SetupHasAgeRating()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("Unknown").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("G").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.G).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Mature").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Mature).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasAgeRating_Equal_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.Equal, [AgeRating.G]).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("G", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasAgeRating_Contains_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.Contains, new List<AgeRating> { AgeRating.G, AgeRating.Mature }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "G");
+        Assert.Contains(foundSeries, s => s.Name == "Mature");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_NotContains_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.NotContains, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "G");
+        Assert.Contains(foundSeries, s => s.Name == "Mature");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_NotEqual_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.NotEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "Unknown");
+        Assert.Contains(foundSeries, s => s.Name == "Mature");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_GreaterThan_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.GreaterThan, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "G");
+        Assert.Contains(foundSeries, s => s.Name == "Mature");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_GreaterThanEqual_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.GreaterThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "G");
+        Assert.Contains(foundSeries, s => s.Name == "Mature");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_LessThan_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.LessThan, new List<AgeRating> { AgeRating.Mature }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "Unknown");
+        Assert.Contains(foundSeries, s => s.Name == "G");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_LessThanEqual_Works()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.LessThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "Unknown");
+        Assert.Contains(foundSeries, s => s.Name == "G");
+    }
+
+    [Fact]
+    public async Task HasAgeRating_ConditionFalse_ReturnsAll()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(false, FilterComparison.Equal, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasAgeRating_EmptyRatings_ReturnsAll()
+    {
+        await SetupHasAgeRating();
+
+        var foundSeries = await _context.Series.HasAgeRating(true, FilterComparison.Equal, new List<AgeRating>()).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasAgeRating_ThrowsForInvalidComparison()
+    {
+        await SetupHasAgeRating();
+
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await _context.Series.HasAgeRating(true, FilterComparison.BeginsWith, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        });
+    }
+
+    [Fact]
+    public async Task HasAgeRating_ThrowsForOutOfRangeComparison()
+    {
+        await SetupHasAgeRating();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await _context.Series.HasAgeRating(true, (FilterComparison)999, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        });
+    }
+
+    #endregion
+
+    #region HasReleaseYear
+
+    private async Task<AppUser> SetupHasReleaseYear()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("2000").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(2000).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("2020").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(2020).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("2025").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(2025).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_Equal_Works()
+    {
+        await SetupHasReleaseYear();
+
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.Equal, 2020).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("2020", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_GreaterThan_Works()
+    {
+        await SetupHasReleaseYear();
+
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.GreaterThan, 2000).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "2020");
+        Assert.Contains(foundSeries, s => s.Name == "2025");
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_LessThan_Works()
+    {
+        await SetupHasReleaseYear();
+
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.LessThan, 2025).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "2000");
+        Assert.Contains(foundSeries, s => s.Name == "2020");
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_IsInLast_Works()
+    {
+        await SetupHasReleaseYear();
+
+        var currentYear = DateTime.Now.Year;
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.IsInLast, 5).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("2025", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_IsNotInLast_Works()
+    {
+        await SetupHasReleaseYear();
+
+        var currentYear = DateTime.Now.Year;
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, 5).ToListAsync();
+        Assert.Equal(2, foundSeries.Count);
+        Assert.Contains(foundSeries, s => s.Name == "2000");
+        Assert.Contains(foundSeries, s => s.Name == "2020");
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_ConditionFalse_ReturnsAll()
+    {
+        await SetupHasReleaseYear();
+
+        var foundSeries = await _context.Series.HasReleaseYear(false, FilterComparison.Equal, 2020).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_ReleaseYearNull_ReturnsAll()
+    {
+        await SetupHasReleaseYear();
+
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.Equal, null).ToListAsync();
+        Assert.Equal(3, foundSeries.Count);
+    }
+
+    [Fact]
+    public async Task HasReleaseYear_IsEmpty_Works()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("EmptyYear").WithPages(10)
+                .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(0).Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+        var foundSeries = await _context.Series.HasReleaseYear(true, FilterComparison.IsEmpty, 0).ToListAsync();
+        Assert.Single(foundSeries);
+        Assert.Equal("EmptyYear", foundSeries[0].Name);
+    }
+
+
+    #endregion
+
+    #region HasRating
+
+    private async Task<AppUser> SetupHasRating()
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("No Rating").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("0 Rating").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("4.5 Rating").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
+
+        _context.Users.Add(user);
+        _context.Library.Add(library);
+        await _context.SaveChangesAsync();
+
+
+        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
+            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>());
+
+        // Select 0 Rating
+        var zeroRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
+
+        Assert.True(await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = zeroRating.Id,
+            UserRating = 0
+        }));
+
+        // Select 4.5 Rating
+        var partialRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
+
+        Assert.True(await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = partialRating.Id,
+            UserRating = 4.5f
+        }));
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasRating_Equal_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.Equal, 4.5f, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("4.5 Rating", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasRating_GreaterThan_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.GreaterThan, 0, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("4.5 Rating", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasRating_LessThan_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.LessThan, 4.5f, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("0 Rating", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasRating_IsEmpty_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.IsEmpty, 0, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("No Rating", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasRating_GreaterThanEqual_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.GreaterThanEqual, 4.5f, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("4.5 Rating", foundSeries[0].Name);
+    }
+
+    [Fact]
+    public async Task HasRating_LessThanEqual_Works()
+    {
+        var user = await SetupHasRating();
+
+        var foundSeries = await _context.Series
+            .HasRating(true, FilterComparison.LessThanEqual, 0, user.Id)
+            .ToListAsync();
+
+        Assert.Single(foundSeries);
+        Assert.Equal("0 Rating", foundSeries[0].Name);
+    }
+
+    #endregion
+
+    #region HasAverageReadTime
+
+
+
+    #endregion
+
+    #region HasReadLast
+
+
+
+    #endregion
+
+    #region HasReadingDate
+
+
+
+    #endregion
+
+    #region HasTags
+
+
+
+    #endregion
+
+    #region HasPeople
+
+
+
+    #endregion
+
+    #region HasGenre
+
+
+
+    #endregion
+
+    #region HasFormat
+
+
+
+    #endregion
+
+    #region HasCollectionTags
+
+
+
+    #endregion
+
+    #region HasName
+
+
+
+    #endregion
+
+    #region HasSummary
+
+
+
+    #endregion
+
+
+    #region HasPath
+
+
+
+    #endregion
+
+
+    #region HasFilePath
+
+
+
+    #endregion
 }

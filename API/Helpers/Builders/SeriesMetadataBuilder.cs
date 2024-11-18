@@ -69,4 +69,10 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.Language = languageCode;
         return this;
     }
+
+    public SeriesMetadataBuilder WithReleaseYear(int year)
+    {
+        _seriesMetadata.ReleaseYear = year;
+        return this;
+    }
 }
