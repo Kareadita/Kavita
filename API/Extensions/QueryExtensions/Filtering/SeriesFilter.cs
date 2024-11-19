@@ -256,10 +256,11 @@ public static class SeriesFilter
             .Where(s => s.Progress != null)
             .Select(s => new
             {
-                Series = s,
-                Percentage = ((float) s.Progress
+                SeriesId = s.Id,
+                SeriesName = s.Name,
+                Percentage = s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f)
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f
             })
             .AsSplitQuery();
 
@@ -269,15 +270,15 @@ public static class SeriesFilter
                 subQuery = subQuery.WhereEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThan:
-                //subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
-                subQuery = subQuery.Where(s => s.Percentage > readProgress);
+                subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
+                //subQuery = subQuery.Where(s => s.Percentage > readProgress);
                 break;
             case FilterComparison.GreaterThanEqual:
                 subQuery = subQuery.WhereGreaterThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThan:
-                //subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
-                subQuery = subQuery.Where(s => s.Percentage < readProgress);
+                subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
+                //subQuery = subQuery.Where(s => s.Percentage < readProgress);
                 break;
             case FilterComparison.LessThanEqual:
                 subQuery = subQuery.WhereLessThanOrEqual(s => s.Percentage, readProgress);
@@ -301,7 +302,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId).ToList();
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -315,7 +316,8 @@ public static class SeriesFilter
             .Include(s => s.ExternalSeriesMetadata)
             .Select(s => new
             {
-                Series = s,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
                 AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
             })
             .AsSplitQuery()
@@ -357,7 +359,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId).ToList();
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -375,7 +377,8 @@ public static class SeriesFilter
             .Where(s => s.Progress != null)
             .Select(s => new
             {
-                Series = s,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
                 MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
                     .Select(p => (DateTime?) p.LastModified)
                     .DefaultIfEmpty()
@@ -423,7 +426,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId).ToList();
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -437,7 +440,8 @@ public static class SeriesFilter
             .Where(s => s.Progress != null)
             .Select(s => new
             {
-                Series = s,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
                 MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
                     .Select(p => (DateTime?) p.LastModified)
                     .DefaultIfEmpty()
@@ -483,7 +487,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId).ToList();
         return queryable.Where(s => ids.Contains(s.Id));
     }
 

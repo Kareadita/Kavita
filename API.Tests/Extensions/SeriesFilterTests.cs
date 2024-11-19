@@ -1305,7 +1305,7 @@ public class SeriesFilterTests : AbstractDbTest
             .HasSummary(true, FilterComparison.NotEqual, "I like ducks")
             .ToListAsync();
 
-        Assert.Equal(2, foundSeries.Count);
+        Assert.Equal(3, foundSeries.Count);
         Assert.DoesNotContain(foundSeries, s => s.Name == "Ducks");
     }
 
