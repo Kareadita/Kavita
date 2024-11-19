@@ -22,6 +22,6 @@ i.fa.nav {
 
 @media (max-width: $grid-breakpoints-lg) {
   .navbar {
-    margin: 8px 12px;
+    margin: var(--navbar-header-mobile-x-margin) var(--navbar-header-mobile-y-margin);
   }
 }
