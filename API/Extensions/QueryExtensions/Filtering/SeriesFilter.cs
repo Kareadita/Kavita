@@ -271,14 +271,12 @@ public static class SeriesFilter
                 break;
             case FilterComparison.GreaterThan:
                 subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
-                //subQuery = subQuery.Where(s => s.Percentage > readProgress);
                 break;
             case FilterComparison.GreaterThanEqual:
                 subQuery = subQuery.WhereGreaterThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThan:
                 subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
-                //subQuery = subQuery.Where(s => s.Percentage < readProgress);
                 break;
             case FilterComparison.LessThanEqual:
                 subQuery = subQuery.WhereLessThanOrEqual(s => s.Percentage, readProgress);
@@ -302,7 +300,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.SeriesId).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -359,7 +357,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.SeriesId).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -426,7 +424,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.SeriesId).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -487,7 +485,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.SeriesId).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 

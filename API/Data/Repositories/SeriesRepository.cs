@@ -696,7 +696,7 @@ public class SeriesRepository : ISeriesRepository
 
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsSplitQuery()
+            //.AsSplitQuery()
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
@@ -1065,8 +1065,9 @@ public class SeriesRepository : ISeriesRepository
         query = await ApplyCollectionFilter(filter, query, userId, userRating);
 
 
-        query = BuildFilterQuery(userId, filter, query);
 
+
+        query = BuildFilterQuery(userId, filter, query);
 
         query = query
             .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
@@ -1078,7 +1079,8 @@ public class SeriesRepository : ISeriesRepository
 
         return ApplyLimit(query
             .Sort(userId, filter.SortOptions)
-            .AsSplitQuery(), filter.LimitTo);
+            .AsSplitQuery()
+            , filter.LimitTo);
     }
 
     private async Task<IQueryable<Series>> ApplyCollectionFilter(FilterV2Dto filter, IQueryable<Series> query, int userId, AgeRestriction userRating)
