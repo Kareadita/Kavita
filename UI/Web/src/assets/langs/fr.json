@@ -2184,7 +2184,8 @@
         "bulk-scan": "Balayer plusieurs bibliothèques sera réalisé l'une après l'autre. En fonction de la taille de la bibliothèque cela peut prendre beaucoup de temps ou même échouer.",
         "bulk-covers": "Rafraichir les couvertures pour plusieurs bibliothèques est lourd pour le serveur et peut prendre longtemps. Êtes vous sûr de vouloir continuer ?",
         "must-select-library": "Au moins une bibliothèque doit être sélectionnée",
-        "person-image-downloaded": "La couverture de la personne a été téléchargée et appliquée."
+        "person-image-downloaded": "La couverture de la personne a été téléchargée et appliquée.",
+        "confirm-delete-multiple-chapters": "Etes-vous sûr de vouloir supprimer {{count}} chapitre/volume ? Cela ne modifiera pas les fichiers sur le disque."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",

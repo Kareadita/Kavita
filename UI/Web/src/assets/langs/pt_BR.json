@@ -2184,7 +2184,8 @@
         "must-select-library": "Pelo menos uma biblioteca deve ser selecionada",
         "bulk-covers": "A atualização de capas em diversas bibliotecas é intensa e pode levar muito tempo. Tem certeza de que deseja continuar?",
         "bulk-scan": "A verificação de múltiplas bibliotecas será feita linearmente. Isso pode levar muito tempo e não ser concluído dependendo do tamanho da biblioteca.",
-        "person-image-downloaded": "A capa da pessoa foi baixada e aplicada."
+        "person-image-downloaded": "A capa da pessoa foi baixada e aplicada.",
+        "confirm-delete-multiple-chapters": "Tem certeza de que deseja excluir {{count}} capítulos/volumes? Não modificará arquivos no disco."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",

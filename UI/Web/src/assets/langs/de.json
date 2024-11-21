@@ -2184,7 +2184,8 @@
         "must-select-library": "Mindestens eine Bibliothek muss ausgewählt werden",
         "bulk-scan": "Das Scannen mehrerer Bibliotheken wird linear durchgeführt. Je nach Größe der Bibliothek kann dies sehr lange dauern und nicht vollständig sein.",
         "bulk-covers": "Das Aktualisieren von Titelseiten in mehreren Bibliotheken ist intensiv und kann lange dauern. Bist du sicher, dass du fortfahren willst?",
-        "person-image-downloaded": "Personen Cover wurde heruntergeladen und angewendet."
+        "person-image-downloaded": "Personen Cover wurde heruntergeladen und angewendet.",
+        "confirm-delete-multiple-chapters": "Möchten Sie wirklich {{count}} Kapitel/Bände löschen? Dateien auf der Festplatte werden dadurch nicht verändert."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",

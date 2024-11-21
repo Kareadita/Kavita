@@ -2184,7 +2184,8 @@
         "bulk-covers": "Odświeżanie okładek w wielu bibliotekach jest obciążające i może zająć dużo czasu. Czy na pewno chcesz kontynuować?",
         "person-image-downloaded": "Obrazek osoby został pobrany i ustawiony.",
         "must-select-library": "Należy wybrać co najmniej jedną bibliotekę",
-        "stack-imported": "Zaimportowano Stacki"
+        "stack-imported": "Zaimportowano Stacki",
+        "confirm-delete-multiple-chapters": "Czy na pewno chcesz usunąć {{count}} rozdziałów/tomów? Nie spowoduje to modyfikacji plików na dysku."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 godzina",

@@ -2184,7 +2184,8 @@
         "bulk-scan": "Déanfar an iliomad leabharlann a scanadh go líneach. Seans go dtógfaidh sé seo go leor ama agus ní bheidh sé críochnaithe ag brath ar mhéid na leabharlainne.",
         "must-select-library": "Ní mór leabharlann amháin ar a laghad a roghnú",
         "bulk-covers": "Bíonn sé dian ar chlúdaigh athnuachana ar leabharlanna iolracha agus féadfaidh sé tamall fada a ghlacadh. An bhfuil tú cinnte gur mhaith leat leanúint ar aghaidh?",
-        "person-image-downloaded": "Rinneadh clúdach duine a íoslódáil agus a chur i bhfeidhm."
+        "person-image-downloaded": "Rinneadh clúdach duine a íoslódáil agus a chur i bhfeidhm.",
+        "confirm-delete-multiple-chapters": "An bhfuil tú cinnte gur mhaith leat {{count}} chaibidil/imleabhar a scriosadh? Ní athróidh sé comhaid ar diosca."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",

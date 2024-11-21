@@ -2184,7 +2184,8 @@
         "bulk-covers": "刷新多个资料库的封面是一项繁重的工作，可能需要很长时间。您确定要继续吗？",
         "must-select-library": "必须至少选择一个资料库",
         "bulk-scan": "扫描多个资料库将以线性方式进行。这可能需要很长时间，并且根据资料库的大小可能无法完成。",
-        "person-image-downloaded": "已下载并应用了人物封面。"
+        "person-image-downloaded": "已下载并应用了人物封面。",
+        "confirm-delete-multiple-chapters": "您确定要删除 {{count}} 章节/卷吗？它不会修改磁盘上的文件。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",

@@ -2184,7 +2184,8 @@
         "must-select-library": "Debe seleccionarse al menos una biblioteca",
         "bulk-scan": "El escaneo de múltiples bibliotecas se hará linealmente. Esto puede llevar mucho tiempo y no completarse dependiendo del tamaño de la biblioteca.",
         "bulk-covers": "Actualizar las carátulas de varias bibliotecas es una tarea intensiva y puede llevar mucho tiempo. ¿Estás seguro de que quieres continuar?",
-        "person-image-downloaded": "La portada para la persona ha sido descargada y aplicada."
+        "person-image-downloaded": "La portada para la persona ha sido descargada y aplicada.",
+        "confirm-delete-multiple-chapters": "¿Está seguro de que desea eliminar {{count}} capítulos o volúmenes? No se modificarán los archivos del disco."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 hora",

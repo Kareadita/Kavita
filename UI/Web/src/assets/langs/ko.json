@@ -1313,7 +1313,7 @@
         "source-url-title": "소스 URL:",
         "total-series-title": "총 시리즈:",
         "missing-series-title": "누락된 시리즈:",
-        "last-sync-tooltip": "Kavita는 업스트림 컬렉션 공급자에 대해 매일 동기화합니다."
+        "last-sync-tooltip": "Kavita는 업스트림 컬렉션 공급자와 매일 동기화합니다."
     },
     "library-recommended": {
         "no-data": "여기에 표시할 내용이 없습니다. 라이브러리에 일부 메타데이터를 추가하거나 무언가를 읽거나 평가하십시오. 이 라이브러리에는 권장 사항이 꺼져 있을 수도 있습니다.",
@@ -2184,7 +2184,8 @@
         "must-select-library": "최소한 하나의 라이브러리를 선택해야 합니다",
         "bulk-scan": "여러 라이브러리를 스캔하는 것은 순차적으로 진행됩니다. 라이브러리 크기에 따라 시간이 오래 걸리거나 완료되지 않을 수 있습니다.",
         "bulk-covers": "여러 라이브러리에서 커버를 새로 고침하는 것은 많은 리소스를 소모하며 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
-        "person-image-downloaded": "인물 표지를 다운로드하여 적용했습니다."
+        "person-image-downloaded": "인물 표지를 다운로드하여 적용했습니다.",
+        "confirm-delete-multiple-chapters": "{{count}}개의 챕터/볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
