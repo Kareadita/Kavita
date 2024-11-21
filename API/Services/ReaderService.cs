@@ -291,6 +291,7 @@ public class ReaderService : IReaderService
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
+            _logger.LogDebug("Saving Progress on Chapter {ChapterId} from Series {SeriesId} to {PageNum}", progressDto.ChapterId, progressDto.SeriesId, progressDto.PageNum);
             userProgress?.MarkModified();
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())

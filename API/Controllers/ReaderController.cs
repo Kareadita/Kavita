@@ -90,7 +90,7 @@ public class ReaderController : BaseApiController
         }
         catch (Exception)
         {
-            _cacheService.CleanupChapters(new []{ chapterId });
+            _cacheService.CleanupChapters([chapterId]);
             throw;
         }
     }
@@ -105,7 +105,8 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "page", "extractPdf", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "page", "extractPdf", "apiKey"
+    ])]
     [AllowAnonymous]
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
@@ -117,7 +118,7 @@ public class ReaderController : BaseApiController
         {
             var chapter = await _cacheService.Ensure(chapterId, extractPdf);
             if (chapter == null) return NoContent();
-            _logger.LogInformation("Fetching Page {PageNum} on Chapter {ChapterId}", page, chapterId);
+
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
                 return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
@@ -127,7 +128,7 @@ public class ReaderController : BaseApiController
         }
         catch (Exception)
         {
-            _cacheService.CleanupChapters(new []{ chapterId });
+            _cacheService.CleanupChapters([chapterId]);
             throw;
         }
     }
@@ -899,12 +900,8 @@ public class ReaderController : BaseApiController
     [HttpGet("all-chapter-progress")]
     public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
     {
-        if (User.IsInRole(PolicyConstants.AdminRole))
-        {
-            return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId));
-        }
-
-        return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, User.GetUserId()));
+        var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : User.GetUserId();
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
 
     }
 }

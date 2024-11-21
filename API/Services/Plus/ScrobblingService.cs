@@ -345,7 +345,7 @@ public class ScrobblingService : IScrobblingService
 
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
-            _logger.LogDebug("Added Scrobbling Read update on {SeriesName} with Userid {UserId} ", series.Name, userId);
+            _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {UserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
         }
         catch (Exception ex)
         {
