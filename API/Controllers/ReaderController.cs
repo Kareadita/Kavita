@@ -21,7 +21,6 @@ using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using MimeTypes;
 
 namespace API.Controllers;
@@ -141,7 +140,7 @@ public class ReaderController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("thumbnail")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
@@ -165,14 +164,14 @@ public class ReaderController : BaseApiController
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
     [HttpGet("bookmark-image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "page", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "page", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
-        if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return Unauthorized();
 
+        if (page < 0) page = 0;
         var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
         if (page > totalPages)
         {
@@ -189,7 +188,7 @@ public class ReaderController : BaseApiController
         }
         catch (Exception)
         {
-            _cacheService.CleanupBookmarks(new []{ seriesId });
+            _cacheService.CleanupBookmarks([seriesId]);
             throw;
         }
     }
@@ -203,12 +202,13 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf"></param>
     /// <returns></returns>
     [HttpGet("file-dimensions")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf"])]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
         if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
+
         return Ok(_cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId)));
     }
 
@@ -221,7 +221,8 @@ public class ReaderController : BaseApiController
     /// <param name="includeDimensions">Include file dimensions. Only useful for image based reading</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf", "includeDimensions"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf", "includeDimensions"
+    ])]
     public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
         if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
@@ -261,6 +262,7 @@ public class ReaderController : BaseApiController
         }
 
         if (info.ChapterTitle is {Length: > 0}) {
+            // TODO: Can we rework the logic of generating titles for the UI and instead calculate that in the DB?
             info.Title += " - " + info.ChapterTitle;
         }
 
@@ -292,7 +294,7 @@ public class ReaderController : BaseApiController
     /// <param name="includeDimensions">Include file dimensions (extra I/O). Defaults to true.</param>
     /// <returns></returns>
     [HttpGet("bookmark-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "includeDimensions"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "includeDimensions"])]
     public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId, bool includeDimensions = true)
     {
         var totalPages = await _cacheService.CacheBookmarkForSeries(User.GetUserId(), seriesId);
@@ -376,13 +378,10 @@ public class ReaderController : BaseApiController
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
 
-        if (await _unitOfWork.CommitAsync())
-        {
-            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
-            return Ok();
-        }
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
+        BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
+        return Ok();
     }
 
     /// <summary>
@@ -552,7 +551,7 @@ public class ReaderController : BaseApiController
     }
 
     /// <summary>
-    /// Save page against Chapter for logged in user
+    /// Save page against Chapter for authenticated user
     /// </summary>
     /// <param name="progressDto"></param>
     /// <returns></returns>
@@ -770,7 +769,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -788,7 +787,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -802,7 +801,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("time-left")]
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
     {
         var userId = User.GetUserId();
