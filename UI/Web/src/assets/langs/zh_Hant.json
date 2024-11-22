@@ -2110,7 +2110,8 @@
         "must-select-library": "必須至少選擇一個書庫",
         "bulk-scan": "掃描多個書庫將以線性方式進行，依照書庫的大小，這可能需要很長的時間也有可能無法完成。",
         "bulk-covers": "刷新多個書庫的封面，是一項繁重的工作，可能需要很長時間，您確定要繼續嗎？",
-        "person-image-downloaded": "个人资料被下载和应用."
+        "person-image-downloaded": "个人资料被下载和应用.",
+        "confirm-delete-multiple-chapters": "您確定要刪除 {{count}} 章/卷嗎？它不會修改磁碟上的檔案。"
     },
     "changelog": {
         "installed": "已安裝",
