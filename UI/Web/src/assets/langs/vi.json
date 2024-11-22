@@ -2224,7 +2224,8 @@
         "entity-read": "{{name}} đã được đọc",
         "entity-unread": "{{name}} chưa được đọc",
         "confirm-library-delete": "Bạn có chắc chắn muốn xóa thư viện {{name}} không? Bạn không thể hoàn tác hành động này.",
-        "person-image-downloaded": "Đã tải xuống và áp dụng bìa hồ sơ cá nhân."
+        "person-image-downloaded": "Đã tải xuống và áp dụng bìa hồ sơ cá nhân.",
+        "confirm-delete-multiple-chapters": "Bạn có chắc chắn muốn xóa {{count}} chương/tập không? Nó sẽ không sửa đổi các tập tin trên đĩa."
     },
     "errors": {
         "error-code": "{{num}} Lỗi",
