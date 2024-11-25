@@ -22,7 +22,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   selector: 'app-actionable-modal',
   standalone: true,
   imports: [
-    NgClass,
     TranslocoDirective
   ],
   templateUrl: './actionable-modal.component.html',
@@ -66,7 +65,8 @@ export class ActionableModalComponent implements OnInit {
             ...item,
             children: [], // Required as dynamic list is only one deep
             title: di.title,
-            _extra: di
+            _extra: di,
+            action: item.children[0].action // override action to be correct from child
           }));
         });
       } else {
