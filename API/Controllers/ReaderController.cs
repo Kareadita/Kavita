@@ -540,6 +540,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
     {
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, User.GetUserId());
+        _logger.LogDebug("Get Progress for {ChapterId} is {Pages}", chapterId, progress?.PageNum ?? 0);
+
         if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,
