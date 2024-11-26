@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using API.Entities.Interfaces;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
@@ -69,7 +70,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     {
         if (MinNumber.Is(MaxNumber))
         {
-            return $"{MinNumber}";
+            return MinNumber.ToString(CultureInfo.InvariantCulture);
         }
         return $"{MinNumber}-{MaxNumber}";
     }

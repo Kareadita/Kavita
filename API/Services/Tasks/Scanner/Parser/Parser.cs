@@ -1054,7 +1054,7 @@ public static partial class Parser
             }
 
             // Check if there is a range or not
-            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            if (NumberRangeRegex().IsMatch(range))
             {
 
                 var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
@@ -1081,7 +1081,7 @@ public static partial class Parser
             }
 
             // Check if there is a range or not
-            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            if (NumberRangeRegex().IsMatch(range))
             {
 
                 var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
@@ -1253,4 +1253,6 @@ public static partial class Parser
 
     [GeneratedRegex(SupportedExtensions)]
     private static partial Regex SupportedExtensionsRegex();
+    [GeneratedRegex(@"\d-{1}\d")]
+    private static partial Regex NumberRangeRegex();
 }
