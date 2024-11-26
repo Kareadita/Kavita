@@ -205,14 +205,14 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 
                 if (MinNumber.Is(0f) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
                 {
-                    return $"{Range}";
+                    return $"{Range.ToString(CultureInfo.InvariantCulture)}";
                 }
 
-                return $"{MinNumber}";
+                return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}";
 
             }
 
-            return $"{MinNumber}-{MaxNumber}";
+            return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
         }
         catch (Exception)
         {

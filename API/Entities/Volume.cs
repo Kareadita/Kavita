@@ -68,11 +68,12 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        if (MinNumber.Is(MaxNumber))
+        if (MinNumber.Equals(MaxNumber))
         {
             return MinNumber.ToString(CultureInfo.InvariantCulture);
         }
-        return $"{MinNumber}-{MaxNumber}";
+        
+        return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
     }
 
     public void ResetColorScape()
