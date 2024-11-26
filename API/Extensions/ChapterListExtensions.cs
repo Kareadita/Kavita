@@ -38,7 +38,7 @@ public static class ChapterListExtensions
         fakeChapter.UpdateFrom(info);
         return specialTreatment
              ? chapters.FirstOrDefault(c => c.Range == Parser.RemoveExtensionIfSupported(info.Filename) || c.Files.Select(f => Parser.NormalizePath(f.FilePath)).Contains(normalizedPath))
-             : chapters.FirstOrDefault(c => c.Range == fakeChapter.GetNumberTitle()); // BUG: TODO: On non-english locales, for floats, the range will be 20,5 but the NumberTitle will return 20.5
+             : chapters.FirstOrDefault(c => c.Range == fakeChapter.GetNumberTitle());
     }
 
     /// <summary>

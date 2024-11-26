@@ -10,7 +10,7 @@ using API.Extensions;
 namespace API.Services.Tasks.Scanner.Parser;
 #nullable enable
 
-public static class Parser
+public static partial class Parser
 {
     // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
     public const string DefaultChapter = "-100000"; // -2147483648
@@ -1244,10 +1244,13 @@ public static class Parser
     {
         if (string.IsNullOrEmpty(filename)) return filename;
 
-        if (Regex.IsMatch(filename, SupportedExtensions))
+        if (SupportedExtensionsRegex().IsMatch(filename))
         {
-            return Regex.Replace(filename, SupportedExtensions, string.Empty);
+            return SupportedExtensionsRegex().Replace(filename, string.Empty);
         }
         return filename;
     }
+
+    [GeneratedRegex(SupportedExtensions)]
+    private static partial Regex SupportedExtensionsRegex();
 }
