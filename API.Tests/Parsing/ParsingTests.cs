@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 
@@ -14,6 +15,16 @@ public class ParsingTests
         var a = float.Parse(s, CultureInfo.InvariantCulture);
         Assert.Equal(6.5f, a);
     }
+
+    // [Theory]
+    // [InlineData("de-DE")]
+    // [InlineData("en-US")]
+    // public void ShouldParse(string culture)
+    // {
+    //     var s = 6.5f + "";
+    //     var a = float.Parse(s, CultureInfo.CreateSpecificCulture(culture));
+    //     Assert.Equal(6.5f, a);
+    // }
 
     [Theory]
     [InlineData("Joe Shmo, Green Blue", "Joe Shmo, Green Blue")]

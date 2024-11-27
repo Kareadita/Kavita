@@ -20,6 +20,7 @@ using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -447,12 +448,58 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Deletes the library and all series within it.
+    /// </summary>
+    /// <remarks>This does not touch any files</remarks>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpDelete("delete")]
     public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
     {
+        _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, User.GetUsername());
+
+        try
+        {
+            return Ok(await DeleteLibrary(libraryId, User.GetUserId()));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Deletes multiple libraries and all series within it.
+    /// </summary>
+    /// <remarks>This does not touch any files</remarks>
+    /// <param name="libraryIds"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpDelete("delete-multiple")]
+    public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromQuery] List<int> libraryIds)
+    {
         var username = User.GetUsername();
-        _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, username);
+        _logger.LogInformation("Libraries {LibraryIds} are being deleted by {UserName}", libraryIds, username);
+
+        foreach (var libraryId in libraryIds)
+        {
+            try
+            {
+                await DeleteLibrary(libraryId, User.GetUserId());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        return Ok();
+    }
+
+    private async Task<bool> DeleteLibrary(int libraryId, int userId)
+    {
         var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
         var seriesIds = series.Select(x => x.Id).ToArray();
         var chapterIds =
@@ -463,16 +510,19 @@ public class LibraryController : BaseApiController
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "delete-library-while-scan"));
+                throw new KavitaException(await _localizationService.Translate(userId, "delete-library-while-scan"));
             }
 
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
+            if (library == null)
+            {
+                throw new KavitaException(await _localizationService.Translate(userId, "library-doesnt-exist"));
+            }
+
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
             // Aka SeriesRelation has an invalid foreign key
-            foreach (var s in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id,
-                         SeriesIncludes.Related))
+            foreach (var s in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id, SeriesIncludes.Related))
             {
                 s.Relations = new List<SeriesRelation>();
                 _unitOfWork.SeriesRepository.Update(s);
@@ -489,7 +539,7 @@ public class LibraryController : BaseApiController
 
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
             await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
-                MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
+                MessageFactory.SideNavUpdateEvent(userId), false);
 
             if (chapterIds.Any())
             {
@@ -508,13 +558,13 @@ public class LibraryController : BaseApiController
 
             await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
                 MessageFactory.LibraryModifiedEvent(libraryId, "delete"), false);
-            return Ok(true);
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was a critical issue. Please try again");
             await _unitOfWork.RollbackAsync();
-            return Ok(false);
+            return false;
         }
     }
 

@@ -2433,7 +2433,8 @@
         "must-select-library": "At least one library must be selected",
         "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
         "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?",
-        "person-image-downloaded": "Person cover was downloaded and applied."
+        "person-image-downloaded": "Person cover was downloaded and applied.",
+        "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?"
     },
 
     "read-time-pipe": {

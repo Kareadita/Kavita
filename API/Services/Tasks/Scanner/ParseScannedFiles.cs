@@ -818,11 +818,11 @@ public class ParseScannedFiles
                     chapter.IssueOrder = counter;
 
                     // Increment for next chapter (unless the next has a similar value, then add 0.1)
-                    if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
+                    if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, NumberStyles.Any, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
                     {
                         counter += 0.1f; // bump if same value as the previous issue
                     }
-                    prevIssue = $"{parsedChapter}";
+                    prevIssue = $"{parsedChapter.ToString(CultureInfo.InvariantCulture)}";
                 }
                 else
                 {

@@ -96,7 +96,7 @@
     <PackageReference Include="Serilog.Sinks.SignalR.Core" Version="0.1.2" />
     <PackageReference Include="SharpCompress" Version="0.38.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.3.0.106239">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

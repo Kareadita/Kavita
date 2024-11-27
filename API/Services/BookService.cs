@@ -885,7 +885,7 @@ public class BookService : IBookService
     }
 
     /// <summary>
-    /// Extracts a pdf into images to a target directory. Uses multi-threaded implementation since docnet is slow normally.
+    /// Extracts a pdf into images to a target directory. Uses multithreaded implementation since docnet is slow normally.
     /// </summary>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory"></param>

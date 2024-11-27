@@ -192,22 +192,32 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        if (MinNumber.Is(MaxNumber))
+        // BUG: TODO: On non-english locales, for floats, the range will be 20,5 but the NumberTitle will return 20.5
+        // Have I fixed this with TryParse CultureInvariant
+        try
         {
-            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+            if (MinNumber.Is(MaxNumber))
             {
-                return Parser.RemoveExtensionIfSupported(Title);
+                if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+                {
+                    return Parser.RemoveExtensionIfSupported(Title);
+                }
+
+                if (MinNumber.Is(0f) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
+                {
+                    return $"{Range.ToString(CultureInfo.InvariantCulture)}";
+                }
+
+                return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}";
+
             }
 
-            if (MinNumber.Is(0) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
-            {
-                return $"{Range}";
-            }
-
-            return $"{MinNumber}";
-
+            return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
         }
-        return $"{MinNumber}-{MaxNumber}";
+        catch (Exception)
+        {
+            return MinNumber.ToString(CultureInfo.InvariantCulture);
+        }
     }
 
     /// <summary>

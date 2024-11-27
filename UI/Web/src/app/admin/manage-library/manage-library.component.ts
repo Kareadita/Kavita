@@ -26,16 +26,13 @@ import {LibraryTypePipe} from '../../_pipes/library-type.pipe';
 import {RouterLink} from '@angular/router';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {AsyncPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {BehaviorSubject, Observable} from "rxjs";
+import {BehaviorSubject, catchError, Observable} from "rxjs";
 import {Select2Module} from "ng-select2-component";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {
@@ -50,8 +47,7 @@ import {FormControl, FormGroup} from "@angular/forms";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    AsyncPipe, DefaultValuePipe, LoadingComponent, TagBadgeComponent, TitleCasePipe, UtcToLocalTimePipe,
-    CardActionablesComponent, Select2Module, NgTemplateOutlet]
+    AsyncPipe, LoadingComponent, CardActionablesComponent, Select2Module, NgTemplateOutlet]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -242,6 +238,21 @@ export class ManageLibraryComponent implements OnInit {
           this.getLibraries();
           this.resetBulkMode();
         });
+        break;
+      case Action.Delete:
+        this.bulkMode = true;
+        this.cdRef.markForCheck();
+        const libIds = selected.map(l => l.id);
+        if (!await this.confirmService.confirm(translate('toasts.bulk-delete-libraries', {count: libIds.length}))) return;
+        this.libraryService.deleteMultiple(libIds)
+          .pipe(catchError((_, obs) => {
+            this.resetBulkMode();
+            return obs;
+          }))
+          .subscribe(() => {
+          this.getLibraries();
+          this.resetBulkMode();
+        })
         break;
       case Action.CopySettings:
         // Remove the source library from the list

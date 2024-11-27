@@ -708,7 +708,7 @@ public class DirectoryService : IDirectoryService
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         var directories = new List<string>();
 
-        var foundDirs = GetDirectories(folderPath);
+        var foundDirs = GetDirectories(folderPath, matcher);
         foreach (var foundDir in foundDirs)
         {
             directories.Add(foundDir);
