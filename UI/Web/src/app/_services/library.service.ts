@@ -125,6 +125,13 @@ export class LibraryService {
     return this.httpClient.delete(this.baseUrl + 'library/delete?libraryId=' + libraryId, {});
   }
 
+  deleteMultiple(libraryIds: Array<number>) {
+    if (libraryIds.length === 0) {
+      return of();
+    }
+    return this.httpClient.delete(this.baseUrl + 'library/delete-multiple?libraryIds=' + libraryIds.join(','), {});
+  }
+
   update(model: {name: string, folders: string[], id: number}) {
     return this.httpClient.post(this.baseUrl + 'library/update', model);
   }
