@@ -2,7 +2,10 @@
     "login": {
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "title": "Logga in till ditt konto",
+        "forgot-password": "Glömt lösenord?",
+        "submit": "Logga in"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -11,23 +14,52 @@
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "account-detail-title": "Kontodetaljer",
+        "saving": "Sparar…",
+        "update": "Uppdatera"
     },
     "user-scrobble-history": {
         "filter-label": "{{common.filter}}",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "type-header": "Typ",
+        "created-header": "Skapad",
+        "last-modified-header": "Senast ändrad",
+        "series-header": "Serier",
+        "volume-and-chapter-num": "Volym {{v}} Kapitel {{n}}",
+        "no-data": "Ingen data",
+        "volume-num": "Volym {{num}}",
+        "chapter-num": "Kapitel {{num}}",
+        "rating": "Betyg {{r}}",
+        "not-applicable": "Inte applicerbart",
+        "processed": "Processad",
+        "not-processed": "Inte processad",
+        "description": "Här hittar du all scrobble-aktivitet länkat till ditt konto. För att aktiviteter ska finnas måste du ha en aktiv scrobble-tjänst konfigurerad. All aktivitet som registrerats rensas efter en månad. Om några aktiviteter inte processats kan det bero på att de inte kan matchas. Kontakta din administratör för att få det åtgärdat.",
+        "data-header": "Data",
+        "title": "Scrobble-historik",
+        "not-read-warning": "Leverantör av tjänsten kommer alltid ha högst nummer",
+        "is-processed-header": "Är processad"
     },
     "review-series-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "title": "Redigera recension",
+        "review-label": "Recension",
+        "min-length": "Recension måste vara minst {{count}} tecken"
     },
     "review-card-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "external-mod": "(extern)",
+        "user-review": "{{username}}'s recension",
+        "go-to-review": "Gå till recension"
     },
     "want-to-read": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Vill läsa",
+        "no-items": "Det finns inget. Försök lägga till en serie.",
+        "no-items-filtered": "Ingenting matchar ditt nuvarande filter."
     },
     "user-preferences": {
         "account-tab": "{{tabs.account-tab}}",
@@ -38,7 +70,21 @@
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "prompt-on-download-label": "Fråga vid nedladdning",
+        "prompt-on-download-tooltip": "Fråga när nedladdning överstiger {{size}}MB i storlek",
+        "disable-animations-label": "Inaktivera animationer",
+        "title": "Användarsida",
+        "pref-description": "Detta är globala inställningar knutet till ditt konto.",
+        "success-toast": "Användarinställnignar uppdaterade",
+        "global-settings-title": "Global inställningar",
+        "page-layout-mode-label": "Sidlayout-läge",
+        "page-layout-mode-tooltip": "Visa som kort eller listvy på Seriedetaljer-sidan.",
+        "locale-label": "Plats",
+        "locale-tooltip": "Språket Kavita ska nyttja",
+        "blur-unread-summaries-label": "Censurera olästa sammanfattningar",
+        "blur-unread-summaries-tooltip": "Cencurera sammanfattningar på volymer eller kapitel som inte har någon läsprogress (för att undvika spoilers)",
+        "disable-animations-tooltip": "Inaktivera animationer på sidan. Användbart på e-ink-läsare."
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}"
@@ -668,5 +714,30 @@
     },
     "actionable": {
         "clear": "{{common.clear}}"
+    },
+    "dashboard": {
+        "recently-added-title": "Nyligen tillagda serier",
+        "more-in-genre-title": "Mer inom {{genre}}",
+        "server-settings-link": "Serverinställningar",
+        "no-libraries": "Det är inga bibliotek skapade än. Skapa några i",
+        "not-granted": "Du har inte fått rättigheter till något bibliotek.",
+        "on-deck-title": "På hyllan",
+        "recently-updated-title": "Nyligen uppdaterade serier"
+    },
+    "scrobble-event-type-pipe": {
+        "want-to-read-remove": "Vill läsa: Ta bort",
+        "review": "Uppdatera recension",
+        "chapter-read": "Läsprogress",
+        "score-updated": "Uppdatera Betyg",
+        "want-to-read-add": "Vill läsa: Lägg till"
+    },
+    "spoiler": {
+        "click-to-show": "Spoiler, klicka för att visa"
+    },
+    "review-card": {
+        "your-review": "Detta är din recension",
+        "external-review": "Extern recension",
+        "local-review": "Lokal recension",
+        "rating-percentage": "Betyg {{r}}%"
     }
 }
