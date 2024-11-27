@@ -92,7 +92,7 @@ public class ChapterController : BaseApiController
     /// Deletes multiple chapters and any volumes with no leftover chapters
     /// </summary>
     /// <param name="seriesId">The ID of the series</param>
-    /// <param name="chapterIds">The IDs of the chapters to be deleted</param>
+    /// <param name="dto">The IDs of the chapters to be deleted</param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("delete-multiple")]
@@ -255,7 +255,7 @@ public class ChapterController : BaseApiController
             // Update writers
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Writers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Writers.Select(p => p.Name).ToList(),
                 PersonRole.Writer,
                 _unitOfWork
             );
@@ -263,7 +263,7 @@ public class ChapterController : BaseApiController
             // Update characters
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Characters.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Characters.Select(p => p.Name).ToList(),
                 PersonRole.Character,
                 _unitOfWork
             );
@@ -271,7 +271,7 @@ public class ChapterController : BaseApiController
             // Update pencillers
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Pencillers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Pencillers.Select(p => p.Name).ToList(),
                 PersonRole.Penciller,
                 _unitOfWork
             );
@@ -279,7 +279,7 @@ public class ChapterController : BaseApiController
             // Update inkers
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Inkers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Inkers.Select(p => p.Name).ToList(),
                 PersonRole.Inker,
                 _unitOfWork
             );
@@ -287,7 +287,7 @@ public class ChapterController : BaseApiController
             // Update colorists
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Colorists.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Colorists.Select(p => p.Name).ToList(),
                 PersonRole.Colorist,
                 _unitOfWork
             );
@@ -295,7 +295,7 @@ public class ChapterController : BaseApiController
             // Update letterers
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Letterers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Letterers.Select(p => p.Name).ToList(),
                 PersonRole.Letterer,
                 _unitOfWork
             );
@@ -303,7 +303,7 @@ public class ChapterController : BaseApiController
             // Update cover artists
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.CoverArtists.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.CoverArtists.Select(p => p.Name).ToList(),
                 PersonRole.CoverArtist,
                 _unitOfWork
             );
@@ -311,7 +311,7 @@ public class ChapterController : BaseApiController
             // Update editors
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Editors.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Editors.Select(p => p.Name).ToList(),
                 PersonRole.Editor,
                 _unitOfWork
             );
@@ -319,7 +319,7 @@ public class ChapterController : BaseApiController
             // Update publishers
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Publishers.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Publishers.Select(p => p.Name).ToList(),
                 PersonRole.Publisher,
                 _unitOfWork
             );
@@ -327,7 +327,7 @@ public class ChapterController : BaseApiController
             // Update translators
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Translators.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Translators.Select(p => p.Name).ToList(),
                 PersonRole.Translator,
                 _unitOfWork
             );
@@ -335,7 +335,7 @@ public class ChapterController : BaseApiController
             // Update imprints
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Imprints.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Imprints.Select(p => p.Name).ToList(),
                 PersonRole.Imprint,
                 _unitOfWork
             );
@@ -343,7 +343,7 @@ public class ChapterController : BaseApiController
             // Update teams
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Teams.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Teams.Select(p => p.Name).ToList(),
                 PersonRole.Team,
                 _unitOfWork
             );
@@ -351,7 +351,7 @@ public class ChapterController : BaseApiController
             // Update locations
             await PersonHelper.UpdateChapterPeopleAsync(
                 chapter,
-                dto.Locations.Select(p => Parser.Normalize(p.Name)).ToList(),
+                dto.Locations.Select(p => p.Name).ToList(),
                 PersonRole.Location,
                 _unitOfWork
             );

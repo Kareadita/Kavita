@@ -343,7 +343,7 @@ public class SeriesService : ISeriesService
         var existingPeople = await _unitOfWork.PersonRepository.GetPeopleByNames(normalizedNames);
 
         // Use a dictionary for quick lookups
-        var existingPeopleDictionary = existingPeople.ToDictionary(p => p.NormalizedName, p => p);
+        var existingPeopleDictionary = existingPeople.DistinctBy(p => p.NormalizedName).ToDictionary(p => p.NormalizedName, p => p);
 
         // List to track people that will be added to the metadata
         var peopleToAdd = new List<Person>();
