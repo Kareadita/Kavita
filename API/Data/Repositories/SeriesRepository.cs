@@ -164,6 +164,7 @@ public interface ISeriesRepository
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
     Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId);
+    Task<int> GetCountAsync();
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -726,6 +727,10 @@ public class SeriesRepository : ISeriesRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<int> GetCountAsync()
+    {
+        return await _context.Series.CountAsync();
+    }
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {

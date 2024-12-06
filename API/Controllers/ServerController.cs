@@ -129,15 +129,6 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
-    /// <summary>
-    /// Returns non-sensitive information about the current system
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("server-info")]
-    public async Task<ActionResult<ServerInfoDto>> GetVersion()
-    {
-        return Ok(await _statsService.GetServerInfo());
-    }
 
     /// <summary>
     /// Returns non-sensitive information about the current system
@@ -145,7 +136,7 @@ public class ServerController : BaseApiController
     /// <remarks>This is just for the UI and is extremely lightweight</remarks>
     /// <returns></returns>
     [HttpGet("server-info-slim")]
-    public async Task<ActionResult<ServerInfoDto>> GetSlimVersion()
+    public async Task<ActionResult<ServerInfoSlimDto>> GetSlimVersion()
     {
         return Ok(await _statsService.GetServerInfoSlim());
     }
