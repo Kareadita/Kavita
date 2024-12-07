@@ -44,7 +44,7 @@ public class StatsService : IStatsService
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
-    private const string ApiUrl = "http://localhost:5001"; //"https://stats.kavitareader.com"
+    private const string ApiUrl = "https://stats.kavitareader.com";
     private const string ApiKey = "MsnvA2DfQqxSK5jh"; // It's not important this is public, just a way to keep bots from hitting the API willy nilly
 
     public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context,
