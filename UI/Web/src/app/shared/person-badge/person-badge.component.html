@@ -1,30 +1,26 @@
 @if (person !== undefined) {
-  <div class="tagbadge cursor clickable">
-    <div class="d-flex flex-column">
-      @if (HasCoverImage) {
-        <div class="mx-auto">
-          <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">
-            <app-image height="24px" width="24px" [styles]="{'background': 'none', 'max-height': '48px', 'height': '48px', 'width': '48px', 'border-radius': '50%'}"
-                       [imageUrl]="ImageUrl"
-                       [errorImage]="imageService.noPersonImage">
+  <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">
+    <div class="tagbadge cursor clickable">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="image-container d-flex align-items-center justify-content-center">
+          @if (HasCoverImage) {
+            <app-image
+                      objectFit="cover" 
+                      height="96px"
+                      width="96px"
+                      [imageUrl]="ImageUrl"
+                      [errorImage]="imageService.noPersonImage">
             </app-image>
-          </a>
+          } @else {
+              <i class="fas fa-user" aria-hidden="true"></i>
+          }
         </div>
-      } @else {
-        <div style="background: none; max-height: 48px; height: 48px; width: 48px; border-radius: 50%" class="mx-auto">
-          <i class="fas fa-user" aria-hidden="true"></i>
-        </div>
-      }
 
-
-      <div class="flex-grow-1 text-center mt-2">
-        @if (isStaff) {
+        <div class="flex-grow-1 text-center mt-2">
           <span class="mt-1 mb-0">{{person.name}}</span>
-        } @else {
-          <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">{{person.name}}</a>
-        }
+        </div>
       </div>
     </div>
-  </div>
+  </a>
 }
 

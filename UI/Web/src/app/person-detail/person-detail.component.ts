@@ -94,6 +94,10 @@ export class PersonDetailComponent {
   private readonly personSubject = new BehaviorSubject<Person | null>(null);
   protected readonly person$ = this.personSubject.asObservable();
 
+  get HasCoverImage() {
+    return (this.person as Person).coverImage;
+  }
+
   constructor() {
     this.route.paramMap.pipe(
       switchMap(params => {

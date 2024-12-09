@@ -1,18 +1,31 @@
+@import '../../../theme/_variables.scss';
+
 .tagbadge {
     background-color: var(--tagbadge-bg-color);
     transition: all .3s ease-out;
-    margin: 3px 5px 3px 0px;
-    padding: 2px 10px;
+    margin: 3px 10px 3px 0px;
     border-radius: 6px;
     font-size: .8rem;
     display: inline-block;
     cursor: pointer;
-    width: 120px;
+    width: 96px;
     word-break: break-word;
 
     i {
+        max-height: 48px;
+        height: 48px;
+        width: 48px;
         font-size: 2.96rem;
         font-weight: bold;
         cursor: pointer;
+    }
+
+    .image-container {
+        background: var(--card-bg-color);
+        max-height: 96px;
+        height: 96px;
+        width: 96px;
+        border-radius: 50%;
+        overflow: hidden;
     }
 }
