@@ -14,12 +14,12 @@ public interface IImage : IDisposable
     /// <summary>
     /// Gets the width of the image.
     /// </summary>
-    public int Width { get; }
+    public uint Width { get; }
 
     /// <summary>
     /// Gets the height of the image.
     /// </summary>
-    public int Height { get; }
+    public uint Height { get; }
 
     /// <summary>
     /// Creates a new instance of the image that is a copy of the current instance.
@@ -32,7 +32,7 @@ public interface IImage : IDisposable
     /// </summary>
     /// <param name="width">The new width of the image.</param>
     /// <param name="height">The new height of the image.</param>
-    void Resize(int width, int height);
+    void Resize(uint width, uint height);
 
     /// <summary>
     /// Crops the image to the specified region.
@@ -41,14 +41,14 @@ public interface IImage : IDisposable
     /// <param name="y">The y-coordinate of the top-left corner of the region.</param>
     /// <param name="width">The width of the region.</param>
     /// <param name="height">The height of the region.</param>
-    void Crop(int x, int y, int width, int height);
+    void Crop(int x, int y, uint width, uint height);
 
     /// <summary>
     /// Creates a thumbnail of the image with the specified width and height.
     /// </summary>
     /// <param name="width">The width of the thumbnail.</param>
     /// <param name="height">The height of the thumbnail.</param>
-    void Thumbnail(int width, int height);
+    void Thumbnail(uint width, uint height);
 
     /// <summary>
     /// Overlays another image onto the current image at the specified position.

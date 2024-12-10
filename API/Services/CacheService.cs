@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -108,8 +108,8 @@ public class CacheService : ICacheService
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = info.Value.Height,
-                    Width = info.Value.Width,
+                    Height = (int)info.Value.Height,
+                    Width = (int)info.Value.Width,
                     IsWide = info.Value.Width > info.Value.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Abstractions;
 using API.Entities.Enums;
@@ -68,8 +68,8 @@ public class ArchiveServiceBenchmark
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
         using var thumbnail2 = _imageFactory.Create(stream);
-        int width = 320;
-        int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
+        uint width = 320;
+        uint height = (uint)(thumbnail2.Height * (width / (double)thumbnail2.Width));
         thumbnail2.Thumbnail(width, height);
         thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.png"), EncodeFormat.PNG);
     }
@@ -82,8 +82,8 @@ public class ArchiveServiceBenchmark
 
         using var stream = new FileStream(SourceImage, FileMode.Open);
         using var thumbnail2 = _imageFactory.Create(stream);
-        int width = 320;
-        int height = (int)(thumbnail2.Height * (width / (double)thumbnail2.Width));
+        uint width = 320;
+        uint height = (uint)(thumbnail2.Height * (width / (double)thumbnail2.Width));
         thumbnail2.Thumbnail(width, height);
         thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, "imagesharp.webp"), EncodeFormat.PNG);
     }

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -173,8 +173,8 @@ public class ArchiveServiceTests
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
         using var thumbnail = imageService.ImageFactory.Create(Path.Join(testDirectory, expectedOutputFile));
-        int width = 320;
-        int height = (int)(thumbnail.Height * (width / (double)thumbnail.Width));
+        uint width = 320;
+        uint height = (uint)(thumbnail.Height * (width / (double)thumbnail.Width));
         thumbnail.Thumbnail(width, height);
         using MemoryStream stream = new MemoryStream();
         thumbnail.Save(stream, EncodeFormat.PNG);

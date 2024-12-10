@@ -25,7 +25,7 @@ public class ImageMagickImageFactory : IImageFactory
     }
 
     /// <inheritdoc/>
-    public IImage CreateFromBGRAByteArray(byte[] bgraByteArray, int width, int height)
+    public IImage CreateFromBGRAByteArray(byte[] bgraByteArray, uint width, uint height)
     {
         return ImageMagickImage.CreateFromBGRAByteArray(bgraByteArray, width, height);
     }
@@ -37,13 +37,13 @@ public class ImageMagickImageFactory : IImageFactory
     }
 
     /// <inheritdoc/>
-    public IImage Create(int width, int height, byte red = 0, byte green = 0, byte blue = 0)
+    public IImage Create(uint width, uint height, byte red = 0, byte green = 0, byte blue = 0)
     {
         return new ImageMagickImage(width, height, red, green, blue);
     }
 
     /// <inheritdoc/>
-    public (int Width, int Height)? GetDimensions(string filename)
+    public (uint Width, uint Height)? GetDimensions(string filename)
     {
         try
         {
@@ -65,15 +65,14 @@ public class ImageMagickImageFactory : IImageFactory
         // Resize the image to speed up processing
         im.Resize(new Percentage(percent));
         // Convert image to RGB array
-        float[] pixels = im.GetPixels().ToArray();
+        float[] pixels = ImageMagickImage.GetRGBAFloatImageDataFromImage(im);
         if (pixels == null)
             return new List<Vector3>();
-        float mul = 1F / 256F;
         var rgbPixels = new List<Vector3>();
         // Convert to list of Vector3 (RGB)
 
-        for (int x = 0; x < pixels.Length; x += im.ChannelCount)
-            rgbPixels.Add(new Vector3(pixels[x] * mul, pixels[x + 1] * mul, pixels[x + 2] * mul));
+        for (uint x = 0; x < pixels.Length; x += im.ChannelCount)
+            rgbPixels.Add(new Vector3(pixels[x], pixels[x + 1] , pixels[x + 2]));
         return rgbPixels;
     }
 }

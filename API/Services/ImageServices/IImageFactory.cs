@@ -32,7 +32,7 @@ public interface IImageFactory
     /// <param name="green">The green component of the color (default is 0).</param>
     /// <param name="blue">The blue component of the color (default is 0).</param>
     /// <returns>The created image.</returns>
-    IImage Create(int width, int height, byte red = 0, byte green = 0, byte blue = 0);
+    IImage Create(uint width, uint height, byte red = 0, byte green = 0, byte blue = 0);
 
     /// <summary>
     /// Creates an image from the specified base64 string.
@@ -48,14 +48,14 @@ public interface IImageFactory
     /// <param name="width">The width of the image.</param>
     /// <param name="height">The height of the image.</param>
     /// <returns>The created image.</returns>
-    IImage CreateFromBGRAByteArray(byte[] bgraByteArray, int width, int height);
+    IImage CreateFromBGRAByteArray(byte[] bgraByteArray, uint width, uint height);
 
     /// <summary>
     /// Gets the dimensions (width and height) of the specified image file.
     /// </summary>
     /// <param name="filename">The path to the image file.</param>
     /// <returns>The dimensions of the image file, or null if the dimensions cannot be determined.</returns>
-    (int Width, int Height)? GetDimensions(string filename);
+    (uint Width, uint Height)? GetDimensions(string filename);
 
     /// <summary>
     /// Gets the RGB pixels of the specified image file that is resized to a certain percentage.

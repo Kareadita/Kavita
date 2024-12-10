@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1276,8 +1276,8 @@ public class BookService : IBookService
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
-        var width = pageReader.GetPageWidth();
-        var height = pageReader.GetPageHeight();
+        var width = (uint)pageReader.GetPageWidth();
+        var height = (uint)pageReader.GetPageHeight();
         IImage image = _imageService.ImageFactory.CreateFromBGRAByteArray(rawBytes, width, height);
         stream.Seek(0, SeekOrigin.Begin);
         image.Save(stream, EncodeFormat.PNG);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -60,7 +60,7 @@ public interface IImageService
     /// <param name="encodeFormat">The encoding format to convert and save the image.</param>
     /// <param name="thumbnailWidth">The width of the thumbnail. Default is 320.</param>
     /// <returns>The file name with extension of the saved thumbnail image.</returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = 320);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, uint thumbnailWidth = 320);
 
     /// <summary>
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
@@ -160,15 +160,15 @@ public class ImageService : IImageService
     /// <summary>
     /// Width of the Thumbnail generation
     /// </summary>
-    private const int ThumbnailWidth = 320;
+    private const uint ThumbnailWidth = 320;
     /// <summary>
     /// Height of the Thumbnail generation
     /// </summary>
-    private const int ThumbnailHeight = 455;
+    private const uint ThumbnailHeight = 455;
     /// <summary>
     /// Width of a cover for Library
     /// </summary>
-    public const int LibraryThumbnailWidth = 32;
+    public const uint LibraryThumbnailWidth = 32;
 
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
@@ -246,7 +246,7 @@ public class ImageService : IImageService
     /// <param name="width">The width of the thumbnail.</param>
     /// <param name="height">The height of the thumbnail.</param>
     /// <returns>The thumbnail image.</returns>
-    public static IImage Thumbnail(IImage image, int width, int height)
+    public static IImage Thumbnail(IImage image, uint width, uint height)
     {
         try
         {
@@ -260,16 +260,16 @@ public class ImageService : IImageService
         {
             /* Swallow */
         }
-        var crop = SmartCrop.Crop(image, new SmartCrop.SmartCropOptions { Width = width, Height = height });
+        var crop = SmartCrop.Crop(image, new SmartCrop.SmartCropOptions { Width = (int)width, Height = (int)height });
         if (crop.TopCrop.Width != width && crop.TopCrop.Height != height)
         {
-            image.Crop(crop.TopCrop.X, crop.TopCrop.Y, crop.TopCrop.Width, crop.TopCrop.Height);
+            image.Crop(crop.TopCrop.X, crop.TopCrop.Y, (uint)crop.TopCrop.Width, (uint)crop.TopCrop.Height);
         }
         image.Thumbnail(width, height);
         return image;
     }
 
-    public static bool WillScaleWell(IImage sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
+    public static bool WillScaleWell(IImage sourceImage, uint targetWidth, uint targetHeight, double tolerance = 0.1)
     {
         // Calculate the aspect ratios
         var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
@@ -294,7 +294,7 @@ public class ImageService : IImageService
         return true; // Image will scale well
     }
 
-    private static bool IsLikelyWideImage(int width, int height)
+    private static bool IsLikelyWideImage(uint width, uint height)
     {
         var aspectRatio = (double) width / height;
         return aspectRatio > 1.25;
@@ -793,13 +793,13 @@ public class ImageService : IImageService
     }
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, uint thumbnailWidth = ThumbnailWidth)
     {
         try
         {
 
             using var thumbnail = _imageFactory.CreateFromBase64(encodedImage);
-            int thumbnailHeight = (int)(thumbnail.Height * ((double)thumbnailWidth / thumbnail.Width));
+            uint thumbnailHeight = (uint)(thumbnail.Height * ((double)thumbnailWidth / thumbnail.Width));
             thumbnail.Thumbnail(thumbnailWidth, thumbnailHeight);
             fileName += encodeFormat.GetExtension();
             thumbnail.Save(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName), encodeFormat);
@@ -927,7 +927,7 @@ public class ImageService : IImageService
         {
             if (!File.Exists(coverImages[i])) continue;
             var tile = _imageFactory.Create(coverImages[i]);
-            tile.Thumbnail(thumbnailWidth, thumbnailHeight);
+            tile.Thumbnail((uint)thumbnailWidth, (uint)thumbnailHeight);
 
             var row = i / cols;
             var col = i % cols;
@@ -940,7 +940,7 @@ public class ImageService : IImageService
                 x = (image.Width - thumbnailWidth) / 2;
                 y = thumbnailHeight;
             }
-            image.Composite(tile,x,y);
+            image.Composite(tile,(int)x,(int)y);
         }
 
         image.Save(dest, format);

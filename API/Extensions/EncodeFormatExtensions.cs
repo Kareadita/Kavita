@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using API.Entities.Enums;
 
 namespace API.Extensions;
@@ -18,7 +18,7 @@ public static class EncodeFormatExtensions
         };
     }
 
-    public static int DefaultQuality(this EncodeFormat encodeFormat)
+    public static uint DefaultQuality(this EncodeFormat encodeFormat)
     {
         return encodeFormat switch
         {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <AnalysisMode>Default</AnalysisMode>
@@ -10,6 +10,10 @@
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <Nullable>warnings</Nullable>
     <LangVersion>latestmajor</LangVersion>
+    <!--   <ImageMagickDepth>Q16HDRI</ImageMagickDepth> -->
+    <!--   <ImageMagickDepth>Q16</ImageMagickDepth> -->
+    <ImageMagickDepth>Q8</ImageMagickDepth>
+    <DefineConstants>$(DefineConstants);$(ImageMagickDepth)</DefineConstants>
   </PropertyGroup>
 
 <!--  <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">-->
@@ -56,8 +60,10 @@
   <ItemGroup>
       <PackageReference Include="AutoMapper" Version="13.0.1" />
       <PackageReference Include="CsvHelper" Version="33.0.1" />
-      <PackageReference Include="Magick.NET-Q16-HDRI-AnyCPU" Version="13.10.0" />
-      <PackageReference Include="MailKit" Version="4.7.1.1" />
+      <PackageReference Condition="$(DefineConstants.Contains('Q16HDRI'))" Include="Magick.NET-Q16-HDRI-AnyCPU" Version="14.2.0" />
+      <PackageReference Condition="'!$(DefineConstants.Contains(`Q16HDRI`))' And '$(DefineConstants.Contains(`Q16`))'" Include="Magick.NET-Q16-AnyCPU" Version="14.2.0" />
+      <PackageReference Condition="!$(DefineConstants.Contains('Q16'))" Include="Magick.NET-Q8-AnyCPU" Version="14.2.0" />
+    <PackageReference Include="MailKit" Version="4.7.1.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -194,6 +200,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Folder Include="Extensions\KavitaPlus\" />
+    <Folder Include="Services\ImageServices\NetVips\" />
     <None Include="I18N\**" />
   </ItemGroup>
 

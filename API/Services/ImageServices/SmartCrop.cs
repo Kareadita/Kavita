@@ -64,7 +64,7 @@ namespace API.Services.ImageServices
                     if (prescale < 1)
                     {
                         // Resample the image
-                        image.Resize((int)(image.Width * prescale), (int)(image.Height * prescale));
+                        image.Resize((uint)(image.Width * prescale), (uint)(image.Height * prescale));
                         options.CropWidth = (int)(options.CropWidth * prescale);
                         options.CropHeight = (int)(options.CropHeight * prescale);
                         foreach (Boost boost in options.Boosts)
@@ -492,8 +492,8 @@ namespace API.Services.ImageServices
 
             public ImageData(IImage image)
             {
-                Width = image.Width;
-                Height = image.Height;
+                Width = (int)image.Width;
+                Height = (int)image.Height;
                 Data = image.GetRGBAImageData();
             }
         }
