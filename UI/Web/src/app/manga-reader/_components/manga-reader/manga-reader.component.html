@@ -55,7 +55,7 @@
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
 
       @if (readerMode !== ReaderMode.Webtoon) {
-        <div (dblclick)="bookmarkPage($event)">
+        <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-canvas-renderer
             [readerSettings$]="readerSettings$"
             [image$]="currentImage$"
@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <div appDblClick (doubleClick)="bookmarkPage($event)">
+        <div appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-single-renderer [image$]="currentImage$"
                                [readerSettings$]="readerSettings$"
                                [bookmark$]="showBookmarkEffect$"
@@ -123,7 +123,7 @@
         </div>
       } @else {
         @if (!isLoading && !inSetup) {
-          <div class="webtoon-images">
+          <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
             <app-infinite-scroller [pageNum]="pageNum"
                                    [bufferPages]="5"
                                    [goToPage]="goToPageEvent"
