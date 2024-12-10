@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -58,6 +59,8 @@ public class ChapterController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult<bool>> DeleteChapter(int chapterId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));

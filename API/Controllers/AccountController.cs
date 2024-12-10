@@ -457,6 +457,7 @@ public class AccountController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
@@ -494,6 +495,7 @@ public class AccountController : BaseApiController
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (adminUser == null) return Unauthorized();
         if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
@@ -911,7 +913,6 @@ public class AccountController : BaseApiController
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
     {
-
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
         if (user == null)
@@ -1011,6 +1012,8 @@ public class AccountController : BaseApiController
             return BadRequest(
                 await _localizationService.Translate(user.Id, "user-migration-needed"));
         if (user.EmailConfirmed) return BadRequest(await _localizationService.Translate(user.Id, "user-already-confirmed"));
+
+        // TODO: If the target user is read only, we might want to just forgo this
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         user.ConfirmationToken = token;
