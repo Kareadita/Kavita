@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -33,7 +34,7 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.LoggingLevel = row.Value;
                     break;
                 case ServerSettingKey.Port:
-                    destination.Port = int.Parse(row.Value);
+                    destination.Port = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.IpAddresses:
                     destination.IpAddresses = row.Value;
@@ -53,11 +54,8 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.InstallVersion:
                     destination.InstallVersion = row.Value;
                     break;
-                case ServerSettingKey.EncodeMediaAs:
-                    destination.EncodeMediaAs = Enum.Parse<EncodeFormat>(row.Value);
-                    break;
                 case ServerSettingKey.TotalBackups:
-                    destination.TotalBackups = int.Parse(row.Value);
+                    destination.TotalBackups = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.InstallId:
                     destination.InstallId = row.Value;
@@ -66,33 +64,36 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.EnableFolderWatching = bool.Parse(row.Value);
                     break;
                 case ServerSettingKey.TotalLogs:
-                    destination.TotalLogs = int.Parse(row.Value);
+                    destination.TotalLogs = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.HostName:
                     destination.HostName = row.Value;
                     break;
                 case ServerSettingKey.CacheSize:
-                    destination.CacheSize = long.Parse(row.Value);
+                    destination.CacheSize = long.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.OnDeckProgressDays:
-                    destination.OnDeckProgressDays = int.Parse(row.Value);
+                    destination.OnDeckProgressDays = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.OnDeckUpdateDays:
-                    destination.OnDeckUpdateDays = int.Parse(row.Value);
+                    destination.OnDeckUpdateDays = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.CoverImageSize:
                     destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
+                    break;
+                case ServerSettingKey.EncodeMediaAs:
+                    destination.EncodeMediaAs = Enum.Parse<EncodeFormat>(row.Value);
                     break;
                 case ServerSettingKey.BackupDirectory:
                     destination.BookmarksDirectory = row.Value;
                     break;
                 case ServerSettingKey.EmailHost:
                     destination.SmtpConfig ??= new SmtpConfigDto();
-                    destination.SmtpConfig.Host = row.Value;
+                    destination.SmtpConfig.Host = row.Value ?? string.Empty;
                     break;
                 case ServerSettingKey.EmailPort:
                     destination.SmtpConfig ??= new SmtpConfigDto();
-                    destination.SmtpConfig.Port = string.IsNullOrEmpty(row.Value) ? 0 : int.Parse(row.Value);
+                    destination.SmtpConfig.Port = string.IsNullOrEmpty(row.Value) ? 0 : int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.EmailAuthPassword:
                     destination.SmtpConfig ??= new SmtpConfigDto();
@@ -116,17 +117,24 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.EmailSizeLimit:
                     destination.SmtpConfig ??= new SmtpConfigDto();
-                    destination.SmtpConfig.SizeLimit = int.Parse(row.Value);
+                    destination.SmtpConfig.SizeLimit = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.EmailCustomizedTemplates:
                     destination.SmtpConfig ??= new SmtpConfigDto();
                     destination.SmtpConfig.CustomizedTemplates = bool.Parse(row.Value);
                     break;
                 case ServerSettingKey.FirstInstallDate:
-                    destination.FirstInstallDate = DateTime.Parse(row.Value);
+                    destination.FirstInstallDate = DateTime.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
+                    break;
+                case ServerSettingKey.LicenseKey:
+                case ServerSettingKey.EnableAuthentication:
+                case ServerSettingKey.EmailServiceUrl:
+                case ServerSettingKey.ConvertBookmarkToWebP:
+                case ServerSettingKey.ConvertCoverToWebP:
+                default:
                     break;
             }
         }

@@ -21,24 +21,4 @@ public class BookParsingTests
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename, LibraryType.Book));
     }
-
-    // [Theory]
-    // [InlineData("@font-face{font-family:'syyskuu_repaleinen';src:url(data:font/opentype;base64,AAEAAAA", "@font-face{font-family:'syyskuu_repaleinen';src:url(data:font/opentype;base64,AAEAAAA")]
-    // [InlineData("@font-face{font-family:'syyskuu_repaleinen';src:url('fonts/font.css')", "@font-face{font-family:'syyskuu_repaleinen';src:url('TEST/fonts/font.css')")]
-    // public void ReplaceFontSrcUrl(string input, string expected)
-    // {
-    //     var apiBase = "TEST/";
-    //     var actual = API.Parser.Parser.FontSrcUrlRegex.Replace(input, "$1" + apiBase + "$2" + "$3");
-    //     Assert.Equal(expected, actual);
-    // }
-    //
-    // [Theory]
-    // [InlineData("@import url('font.css');", "@import url('TEST/font.css');")]
-    // public void ReplaceImportSrcUrl(string input, string expected)
-    // {
-    //     var apiBase = "TEST/";
-    //     var actual = API.Parser.Parser.CssImportUrlRegex.Replace(input, "$1" + apiBase + "$2" + "$3");
-    //     Assert.Equal(expected, actual);
-    // }
-
 }

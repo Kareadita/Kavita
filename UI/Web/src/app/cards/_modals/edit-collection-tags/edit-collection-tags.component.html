@@ -16,7 +16,7 @@
                 <label for="library-name" class="form-label">{{t('name-label')}}</label>
                 <input id="library-name" class="form-control" formControlName="title" type="text"
                        [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
-                @if (collectionTagForm.dirty || collectionTagForm.touched) {
+                @if (collectionTagForm.dirty || !collectionTagForm.untouched) {
                   <div id="inviteForm-validations" class="invalid-feedback">
                     @if (collectionTagForm.get('title')?.errors?.required) {
                       <div>{{t('required-field')}}</div>

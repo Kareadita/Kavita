@@ -20,7 +20,7 @@
 
 .widget-button--indicator {
   position: absolute;
-  top: 30px;
+  top: 24px;
   color: var(--event-widget-activity-bg-color);
 
   &.error {
@@ -79,6 +79,7 @@
 .dark-menu-item {
   &.update-available {
     cursor: pointer;
+    opacity: 1;
 
     i.fa {
       color: var(--primary-color) !important;

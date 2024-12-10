@@ -56,7 +56,7 @@ public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     }
 
     /// <summary>
-    /// Does this volume hold only specials?
+    /// Does this volume hold only specials
     /// </summary>
     /// <returns></returns>
     public bool IsSpecial()

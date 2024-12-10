@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CardItemComponent} from '../../cards/card-item/card-item.component';
 import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
-import {AsyncPipe, NgForOf, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
@@ -51,7 +51,7 @@ enum StreamId {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgForOf, NgTemplateOutlet, LoadingComponent],
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent],
 })
 export class DashboardComponent implements OnInit {
 
@@ -163,7 +163,7 @@ export class DashboardComponent implements OnInit {
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.MoreInGenre:
-            s.api = this.metadataService.getAllGenres().pipe(
+            s.api = this.metadataService.getAllGenres([], QueryContext.Dashboard).pipe(
                 map(genres => {
                   this.genre = genres[Math.floor(Math.random() * genres.length)];
                   return this.genre;
@@ -233,7 +233,7 @@ export class DashboardComponent implements OnInit {
 
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
-      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.LessThan, value: '100'});
+      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;

@@ -1,5 +1,9 @@
 // Global styles for the site. Keep this as small as possible
 
+html {
+  font-size: var(--html-font-size);
+}
+
 html, body { height: 100%; overflow: hidden; }
 body {
   margin: 0;

@@ -78,7 +78,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<bool> HasAccessToSeries(int userId, int seriesId);
-    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
+    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true);
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None);
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
@@ -283,10 +283,17 @@ public class UserRepository : IUserRepository
             .AnyAsync(s => s.Id == seriesId);
     }
 
-    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None)
+    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true)
     {
-        return await _context.AppUser
-            .Includes(includeFlags)
+        var query = _context.AppUser
+            .Includes(includeFlags);
+        if (track)
+        {
+            return await query.ToListAsync();
+        }
+
+        return await query
+            .AsNoTracking()
             .ToListAsync();
     }
 

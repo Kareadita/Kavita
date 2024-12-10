@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Extensions;
 using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common.EnvironmentInfo;
@@ -28,7 +29,7 @@ public static class MigrateChapterRange
             var chapters = await dataContext.Chapter.ToListAsync();
             foreach (var chapter in chapters)
             {
-                if (Parser.MinNumberFromRange(chapter.Range) == 0.0f)
+                if (Parser.MinNumberFromRange(chapter.Range).Is(0.0f))
                 {
                     chapter.Range = chapter.GetNumberTitle();
                 }

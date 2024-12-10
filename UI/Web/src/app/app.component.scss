@@ -1,4 +1,5 @@
 @import '../theme/variables';
+
 .content-wrapper {
     padding: 0 0 0 10px;
     height: calc(var(--vh)* 100 - var(--nav-offset));
@@ -6,7 +7,7 @@
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
-    margin-left: 60px;
+    margin-left: 45px;
     overflow-y: hidden;
     overflow-x: hidden;
     height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
@@ -55,7 +56,7 @@
 }
 
 .companion-bar-content {
-    margin-left: 190px;
+  margin-left: var(--side-nav-width);
 }
 
 @media (max-width: $grid-breakpoints-lg) {
@@ -82,7 +83,6 @@
         margin-left: 0;
         padding-left: 0;
         width: 100%;
-        padding: 10px 0 0;
         height: calc(var(--vh) * 100 - var(--nav-mobile-offset));
         scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
         scrollbar-width: thin;

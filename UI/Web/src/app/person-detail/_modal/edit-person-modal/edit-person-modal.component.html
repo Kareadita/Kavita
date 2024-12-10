@@ -1,0 +1,130 @@
+<ng-container *transloco="let t; read: 'edit-person-modal'">
+  @if (person !== undefined) {
+    <div class="modal-container">
+      <div class="modal-header">
+        <h4 class="modal-title">
+          {{t('title', {personName: this.person.name})}}</h4>
+        <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+      </div>
+      <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+        <form [formGroup]="editForm">
+          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+
+            <li [ngbNavItem]="TabID.General">
+              <a ngbNavLink>{{t(TabID.General)}}</a>
+              <ng-template ngbNavContent>
+                <div class="row g-0">
+                  <div class="mb-3">
+                    @if (editForm.get('name'); as formControl) {
+                      <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <input id="name" class="form-control" formControlName="name" type="text"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                          @if (formControl.errors; as errors) {
+                            @if (errors.required) {
+                              <div class="invalid-feedback">{{t('required-field')}}</div>
+                            }
+                          }
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3 col-md-6 col-xs-12 pe-2">
+                    @if (editForm.get('malId'); as formControl) {
+                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('mal-tooltip')">
+                        <ng-template #view>
+                          <input id="mal-id" class="form-control" formControlName="malId" type="number"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+
+                  <div class="mb-3 col-md-6 col-xs-12">
+                    @if (editForm.get('aniListId'); as formControl) {
+                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('anilist-tooltip')">
+                        <ng-template #view>
+                          <input id="anilist-id" class="form-control" formControlName="aniListId" type="number"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3 col-md-6 col-xs-12 pe-2">
+                    @if (editForm.get('hardcoverId'); as formControl) {
+                      <app-setting-item [title]="t('hardcover-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('hardcover-tooltip')">
+                        <ng-template #view>
+                          <input id="hardcover-id" class="form-control" formControlName="hardcoverId" type="text"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+
+                  <div class="mb-3 col-md-6 col-xs-12">
+                    @if (editForm.get('asin'); as formControl) {
+                      <app-setting-item [title]="t('asin-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('asin-tooltip')">
+                        <ng-template #view>
+                          <input id="asin" class="form-control" formControlName="asin" type="text"
+                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+                <div class="row g-0">
+                  <div class="mb-3" style="width: 100%">
+                    <app-setting-item [title]="t('description-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                      <ng-template #view>
+                        <div class="input-group">
+                          <textarea id="description" class="form-control" formControlName="description" rows="4"></textarea>
+                        </div>
+                      </ng-template>
+                    </app-setting-item>
+                  </div>
+                </div>
+
+              </ng-template>
+            </li>
+
+
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+              <ng-template ngbNavContent>
+                <p class="alert alert-primary" role="alert">
+                  {{t('cover-image-description')}}
+<!--                  {{t('cover-image-description-extra')}}-->
+                </p>
+
+<!--                <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">{{t('download-coversdb')}}</button>-->
+
+                <app-cover-image-chooser [(imageUrls)]="imageUrls"
+                                         (imageUrlsChange)="handleUploadByUrl($event)"
+                                         (imageSelected)="updateSelectedIndex($event)"
+                                         (selectedBase64Url)="updateSelectedImage($event)"
+                                         [showReset]="person.coverImageLocked"
+                                         (resetClicked)="handleReset()">
+                </app-cover-image-chooser>
+              </ng-template>
+            </li>
+          </ul>
+        </form>
+
+        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid" (click)="save()">{{t('save')}}</button>
+      </div>
+    </div>
+  }
+</ng-container>

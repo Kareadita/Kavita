@@ -1,8 +1,11 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
-  EventEmitter, HostListener, inject,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  HostListener,
+  inject,
   Input,
   OnChanges,
   OnInit,
@@ -18,7 +21,7 @@ import {SeriesService} from 'src/app/_services/series.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series-modal.component';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
-import {CommonModule} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
@@ -40,6 +43,7 @@ import {User} from "../../_models/user";
 import {ScrollService} from "../../_services/scroll.service";
 import {ReaderService} from "../../_services/reader.service";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {DefaultModalOptions} from "../../_models/default-modal-options";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -68,7 +72,9 @@ function deepClone(obj: any): any {
 @Component({
   selector: 'app-series-card',
   standalone: true,
-  imports: [CommonModule, CardItemComponent, RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent, EntityTitleComponent, FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective, SeriesFormatComponent],
+  imports: [CardItemComponent, RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent,
+    EntityTitleComponent, FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective,
+    SeriesFormatComponent, DecimalPipe],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -264,13 +270,16 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case Action.RemoveFromOnDeck:
         this.seriesService.removeFromOnDeck(series.id).subscribe(() => this.reload.emit(series.id));
         break;
+      case Action.Download:
+        this.downloadService.download('series', this.series);
+        break;
       default:
         break;
     }
   }
 
   openEditModal(data: Series) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = data;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       if (closeResult.success) {

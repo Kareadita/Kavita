@@ -55,7 +55,6 @@ public class ColorScapeController : BaseApiController
     }
 
 
-
     private ActionResult<ColorScapeDto> GetColorSpaceDto(IHasCoverImage entity)
     {
         if (entity == null) return Ok(ColorScapeDto.Empty);

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
-import {AgeRatingImageComponent} from "../../../_single-modules/age-rating-image/age-rating-image.component";
+import {AgeRatingImageComponent} from "../../../_single-module/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
@@ -15,10 +15,9 @@ import {ImageService} from "../../../_services/image.service";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
-import {MangaFormatIconPipe} from "../../../_pipes/manga-format-icon.pipe";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
+import {PublisherFlipperComponent} from "../../../_single-module/publisher-flipper/publisher-flipper.component";
 
 @Component({
   selector: 'app-metadata-detail-row',
@@ -31,9 +30,8 @@ import {SeriesFormatComponent} from "../../../shared/series-format/series-format
     NgbTooltip,
     TranslocoDirective,
     ImageComponent,
-    MangaFormatPipe,
-    MangaFormatIconPipe,
-    SeriesFormatComponent
+    SeriesFormatComponent,
+    PublisherFlipperComponent
   ],
   templateUrl: './metadata-detail-row.component.html',
   styleUrl: './metadata-detail-row.component.scss',
@@ -44,6 +42,8 @@ export class MetadataDetailRowComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   protected readonly LibraryType = LibraryType;
+  protected readonly FilterField = FilterField;
+  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) entity!: IHasCast;
   @Input({required: true}) readingTimeEntity!: IHasReadingTime;
@@ -57,7 +57,4 @@ export class MetadataDetailRowComponent {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
-
-
-  protected readonly FilterField = FilterField;
 }

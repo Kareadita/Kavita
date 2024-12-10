@@ -199,6 +199,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .Where(r => EF.Functions.Like(r.Name, series.Name) ||
                         EF.Functions.Like(r.Name, series.LocalizedName))
             .ToListAsync();
+
         foreach (var rec in recMatches)
         {
             rec.SeriesId = series.Id;

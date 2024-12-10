@@ -42,6 +42,7 @@ import {SeriesCardComponent} from "../../../cards/series-card/series-card.compon
 import {ActionService} from "../../../_services/action.service";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
+import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 
 @Component({
@@ -79,20 +80,6 @@ export class AllCollectionsComponent implements OnInit {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}_${item.owner}_${item.promoted}`;
   user!: User;
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
 
 
   constructor() {
@@ -153,7 +140,7 @@ export class AllCollectionsComponent implements OnInit {
         });
         break;
       case(Action.Edit):
-        const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
+        const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
         modalRef.componentInstance.tag = collectionTag;
         modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
           if (results.success) {

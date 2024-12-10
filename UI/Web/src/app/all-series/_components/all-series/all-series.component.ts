@@ -133,21 +133,6 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-
   updateFilter(data: FilterEvent) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;

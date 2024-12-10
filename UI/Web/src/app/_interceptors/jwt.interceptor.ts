@@ -1,10 +1,5 @@
 import {Injectable} from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import {Observable, switchMap} from 'rxjs';
 import { AccountService } from '../_services/account.service';
 import { take } from 'rxjs/operators';

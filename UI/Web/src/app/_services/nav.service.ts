@@ -1,7 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
 import {distinctUntilChanged, filter, ReplaySubject, take} from 'rxjs';
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";

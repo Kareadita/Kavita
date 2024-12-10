@@ -39,7 +39,7 @@ public interface ILibraryRepository
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName);
-    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
+    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
@@ -104,13 +104,16 @@ public class LibraryRepository : ILibraryRepository
     /// </summary>
     /// <param name="includes"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
+    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true)
     {
-        return await _context.Library
+        var query = _context.Library
             .Include(l => l.AppUsers)
             .Includes(includes)
-            .AsSplitQuery()
-            .ToListAsync();
+            .AsSplitQuery();
+
+        if (track) return await query.ToListAsync();
+
+        return await query.AsNoTracking().ToListAsync();
     }
 
     /// <summary>

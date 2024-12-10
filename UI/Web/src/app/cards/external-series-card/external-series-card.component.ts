@@ -25,6 +25,8 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExternalSeriesCardComponent {
+  private readonly offcanvasService = inject(NgbOffcanvas);
+
   @Input({required: true}) data!: ExternalSeries;
   /**
    * When clicking on the series, instead of opening, opens a preview drawer
@@ -32,8 +34,6 @@ export class ExternalSeriesCardComponent {
   @Input() previewOnClick: boolean = false;
   @ViewChild('link', {static: false}) link!: ElementRef<HTMLAnchorElement>;
 
-
-  private readonly offcanvasService = inject(NgbOffcanvas);
 
   handleClick() {
     if (this.previewOnClick) {

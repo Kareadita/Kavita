@@ -7,10 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
@@ -32,9 +36,8 @@ namespace API.Tests.Services;
 public class ScannerServiceTests : AbstractDbTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly ScannerHelper _scannerHelper;
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests");
-    private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/TestCases");
-    private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/1x1.png");
 
     public ScannerServiceTests(ITestOutputHelper testOutputHelper)
     {
@@ -42,6 +45,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Set up Hangfire to use in-memory storage for testing
         GlobalConfiguration.Configuration.UseInMemoryStorage();
+        _scannerHelper = new ScannerHelper(_unitOfWork, testOutputHelper);
     }
 
     protected override async Task ResetDb()
@@ -51,64 +55,13 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
     [Fact]
-    public void FindSeriesNotOnDisk_Should_Remove1()
-    {
-        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
-        //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
-
-        var existingSeries = new List<Series>
-        {
-            new SeriesBuilder("Darker Than Black")
-                .WithFormat(MangaFormat.Epub)
-
-                .WithVolume(new VolumeBuilder("1")
-                .WithName("1")
-                .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build()
-        };
-
-        Assert.Single(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
-    }
-
-    [Fact]
-    public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
-    {
-        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
-        ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
-
-        var existingSeries = new List<Series>
-        {
-            new SeriesBuilder("Cage of Eden")
-                .WithFormat(MangaFormat.Archive)
-
-                .WithVolume(new VolumeBuilder("1")
-                    .WithName("1")
-                    .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build(),
-            new SeriesBuilder("Darker Than Black")
-                .WithFormat(MangaFormat.Archive)
-                .WithVolume(new VolumeBuilder("1")
-                    .WithName("1")
-                    .Build())
-                .WithLocalizedName("Darker Than Black")
-                .Build(),
-        };
-
-        Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
-    }
-
-    [Fact]
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
         var testcase = "Publisher - ComicVine.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
@@ -118,177 +71,331 @@ public class ScannerServiceTests : AbstractDbTest
     public async Task ScanLibrary_ShouldCombineNestedFolder()
     {
         var testcase = "Series and Series-Series Combined - Manga.json";
-        var postLib = await GenerateScannerData(testcase);
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
-        Assert.Single(postLib.Series);
         Assert.Single(postLib.Series);
         Assert.Equal(2, postLib.Series.First().Volumes.Count);
     }
 
-    private async Task<Library> GenerateScannerData(string testcase)
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeries()
     {
-        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase));
-        _testOutputHelper.WriteLine($"Test Directory Path: {testDirectoryPath}");
-
-        var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
-
-        var library = new LibraryBuilder(publisher, type)
-            .WithFolders([new FolderPath() {Path = testDirectoryPath}])
-            .Build();
-
-        var admin = new AppUserBuilder("admin", "admin@kavita.com", Seed.DefaultThemes[0])
-            .WithLibrary(library)
-            .Build();
-
-        _unitOfWork.UserRepository.Add(admin); // Admin is needed for generating collections/reading lists
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        var mockReadingService = new MockReadingItemService(ds, Substitute.For<IBookService>());
-        var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
-            Substitute.For<IEventHub>(),
-            ds, Substitute.For<ICacheHelper>(), mockReadingService, Substitute.For<IFileService>(),
-            Substitute.For<IMetadataService>(),
-            Substitute.For<IWordCountAnalyzerService>(), Substitute.For<ICollectionTagService>(),
-            Substitute.For<IReadingListService>(),
-            Substitute.For<IExternalMetadataService>(), new TagManagerService(_unitOfWork, Substitute.For<ILogger<TagManagerService>>()));
-
-        var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
-            Substitute.For<IMetadataService>(),
-            Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
-            mockReadingService, processSeries, Substitute.For<IWordCountAnalyzerService>());
-
+        var testcase = "Flat Series - Manga.json";
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-
         var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        return postLib;
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+
+        // TODO: Trigger a deletion of ch 10
     }
 
-    private static (string Publisher, LibraryType Type) SplitPublisherAndLibraryType(string input)
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
     {
-        // Split the input string based on " - "
-        var parts = input.Split(" - ", StringSplitOptions.RemoveEmptyEntries);
+        var testcase = "Flat Series with Specials Folder - Manga.json";
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
-        if (parts.Length != 2)
-        {
-            throw new ArgumentException("Input must be in the format 'Publisher - LibraryType'");
-        }
-
-        var publisher = parts[0].Trim();
-        var libraryTypeString = parts[1].Trim();
-
-        // Try to parse the right-hand side as a LibraryType enum
-        if (!Enum.TryParse<LibraryType>(libraryTypeString, out var libraryType))
-        {
-            throw new ArgumentException($"'{libraryTypeString}' is not a valid LibraryType");
-        }
-
-        return (publisher, libraryType);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(4, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
-
-
-    private async Task<string> GenerateTestDirectory(string mapPath)
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecial()
     {
-        // Read the map file
-        var mapContent = await File.ReadAllTextAsync(mapPath);
+        const string testcase = "Flat Special - Manga.json";
 
-        // Deserialize the JSON content into a list of strings using System.Text.Json
-        var filePaths = JsonSerializer.Deserialize<List<string>>(mapContent);
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
-        // Create a test directory
-        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(mapPath));
-        if (Directory.Exists(testDirectory))
-        {
-            Directory.Delete(testDirectory, true);
-        }
-        Directory.CreateDirectory(testDirectory);
-
-        // Generate the files and folders
-        await Scaffold(testDirectory, filePaths);
-
-        return testDirectory;
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
 
-    private async Task Scaffold(string testDirectory, List<string> filePaths)
+    [Fact]
+    public async Task ScanLibrary_SeriesWithUnbalancedParenthesis()
     {
-        foreach (var relativePath in filePaths)
-        {
-            var fullPath = Path.Combine(testDirectory, relativePath);
-            var fileDir = Path.GetDirectoryName(fullPath);
+        const string testcase = "Scan Library Parses as ( - Manga.json";
 
-            // Create the directory if it doesn't exist
-            if (!Directory.Exists(fileDir))
-            {
-                Directory.CreateDirectory(fileDir);
-                Console.WriteLine($"Created directory: {fileDir}");
-            }
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
-            var ext = Path.GetExtension(fullPath).ToLower();
-            if (new[] { ".cbz", ".cbr", ".zip", ".rar" }.Contains(ext))
-            {
-                CreateMinimalCbz(fullPath, includeMetadata: true);
-            }
-            else
-            {
-                // Create an empty file
-                await File.Create(fullPath).DisposeAsync();
-                Console.WriteLine($"Created empty file: {fullPath}");
-            }
-        }
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+
+        Assert.Equal("Mika-nee no Tanryoku Shidou - Mika s Guide to Self-Confidence (THE IDOLM@STE", series.Name);
     }
 
-    private void CreateMinimalCbz(string filePath, bool includeMetadata)
+    /// <summary>
+    /// This is testing that if the first file is named A and has a localized name of B if all other files are named B, it should still group and name the series A
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_LocalizedSeries()
     {
-        var tempImagePath = _imagePath; // Assuming _imagePath is a valid path to the 1x1 image
+        const string testcase = "Series with Localized - Manga.json";
 
-        using (var archive = ZipFile.Open(filePath, ZipArchiveMode.Create))
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("My Dress-Up Darling v01.cbz", new ComicInfo()
         {
-            // Add the 1x1 image to the archive
-            archive.CreateEntryFromFile(tempImagePath, "1x1.png");
+            Series = "My Dress-Up Darling",
+            LocalizedSeries = "Sono Bisque Doll wa Koi wo Suru"
+        });
 
-            if (includeMetadata)
-            {
-                var comicInfo = GenerateComicInfo();
-                var entry = archive.CreateEntry("ComicInfo.xml");
-                using var entryStream = entry.Open();
-                using var writer = new StreamWriter(entryStream, Encoding.UTF8);
-                writer.Write(comicInfo);
-            }
-        }
-        Console.WriteLine($"Created minimal CBZ archive: {filePath} with{(includeMetadata ? "" : "out")} metadata.");
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
     }
 
-    private string GenerateComicInfo()
+    [Fact]
+    public async Task ScanLibrary_LocalizedSeries2()
     {
-        var comicInfo = new StringBuilder();
-        comicInfo.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
-        comicInfo.AppendLine("<ComicInfo>");
+        const string testcase = "Series with Localized 2 - Manga.json";
 
-        // People Tags
-        string[] people = { "Joe Shmo", "Tommy Two Hands"};
-        string[] genres = { /* Your list of genres here */ };
-
-        void AddRandomTag(string tagName, string[] choices)
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Immoral Guild v01.cbz", new ComicInfo()
         {
-            if (new Random().Next(0, 2) == 1) // 50% chance to include the tag
-            {
-                var selected = choices.OrderBy(x => Guid.NewGuid()).Take(new Random().Next(1, 5)).ToArray();
-                comicInfo.AppendLine($"  <{tagName}>{string.Join(", ", selected)}</{tagName}>");
-            }
-        }
+            Series = "Immoral Guild",
+            LocalizedSeries = "Futoku no Guild" // Filename has a capital N and localizedSeries has lowercase
+        });
 
-        foreach (var tag in new[] { "Writer", "Penciller", "Inker", "CoverArtist", "Publisher", "Character", "Imprint", "Colorist", "Letterer", "Editor", "Translator", "Team", "Location" })
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var s = postLib.Series.First();
+        Assert.Equal("Immoral Guild", s.Name);
+        Assert.Equal("Futoku no Guild", s.LocalizedName);
+        Assert.Equal(3, s.Volumes.Count);
+    }
+
+
+    /// <summary>
+    /// Special Keywords shouldn't be removed from the series name and thus these 2 should group
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_ExtraShouldNotAffect()
+    {
+        const string testcase = "Series with Extra - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Vol.01.cbz", new ComicInfo()
         {
-            AddRandomTag(tag, people);
-        }
+            Series = "The Novel's Extra",
+        });
 
-        AddRandomTag("Genre", genres);
-        comicInfo.AppendLine("</ComicInfo>");
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
-        return comicInfo.ToString();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var s = postLib.Series.First();
+        Assert.Equal("The Novel's Extra", s.Name);
+        Assert.Equal(2, s.Volumes.Count);
+    }
+
+
+    /// <summary>
+    /// Files under a folder with a SP marker should group into one issue
+    /// </summary>
+    /// <remarks>https://github.com/Kareadita/Kavita/issues/3299</remarks>
+    [Fact]
+    public async Task ScanLibrary_ImageSeries_SpecialGrouping()
+    {
+        const string testcase = "Image Series with SP Folder - Manga.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, postLib.Series.First().Volumes.Count);
+    }
+
+    /// <summary>
+    /// This test is currently disabled because the Image parser is unable to support multiple files mapping into one single Special.
+    /// https://github.com/Kareadita/Kavita/issues/3299
+    /// </summary>
+    public async Task ScanLibrary_ImageSeries_SpecialGrouping_NonEnglish()
+    {
+        const string testcase = "Image Series with SP Folder (Non English) - Image.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Equal(3, series.Volumes.Count);
+        var specialVolume = series.Volumes.FirstOrDefault(v => v.Name == Parser.SpecialVolume);
+        Assert.NotNull(specialVolume);
+        Assert.Single(specialVolume.Chapters);
+        Assert.True(specialVolume.Chapters.First().IsSpecial);
+        //Assert.Equal("葬送のフリーレン 公式ファンブック SP01", specialVolume.Chapters.First().Title);
+    }
+
+
+    [Fact]
+    public async Task ScanLibrary_PublishersInheritFromChapters()
+    {
+        const string testcase = "Flat Special - Manga.json";
+
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Uzaki-chan Wants to Hang Out! v01 (2019) (Digital) (danke-Empire).cbz", new ComicInfo()
+        {
+            Publisher = "Correct Publisher"
+        });
+        infos.Add("Uzaki-chan Wants to Hang Out! - 2022 New Years Special SP01.cbz", new ComicInfo()
+        {
+            Publisher = "Special Publisher"
+        });
+        infos.Add("Uzaki-chan Wants to Hang Out! - Ch. 103 - Kouhai and Control.cbz", new ComicInfo()
+        {
+            Publisher = "Chapter Publisher"
+        });
+
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var publishers = postLib.Series.First().Metadata.People
+            .Where(p => p.Role == PersonRole.Publisher);
+        Assert.Equal(3, publishers.Count());
+    }
+
+
+    /// <summary>
+    /// Tests that pdf parser handles the loose chapters correctly
+    /// https://github.com/Kareadita/Kavita/issues/3148
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_LooseChapters_Pdf()
+    {
+        const string testcase = "PDF Comic Chapters - Comic.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Equal(4, series.Volumes.First().Chapters.Count);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_LooseChapters_Pdf_LN()
+    {
+        const string testcase = "PDF Comic Chapters - LightNovel.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Equal(4, series.Volumes.First().Chapters.Count);
+    }
+
+    /// <summary>
+    /// This is the same as doing ScanFolder as the case where it can find the series is just ScanSeries
+    /// </summary>
+    [Fact]
+    public async Task ScanSeries_NewChapterInNestedFolder()
+    {
+        const string testcase = "Series with Localized - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("My Dress-Up Darling v01.cbz", new ComicInfo()
+        {
+            Series = "My Dress-Up Darling",
+            LocalizedSeries = "Sono Bisque Doll wa Koi wo Suru"
+        });
+
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+        Assert.Equal(3, series.Volumes.Count);
+
+        // Bootstrap a new file in the nested "Sono Bisque Doll wa Koi wo Suru" directory and perform a series scan
+        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(testcase));
+        await _scannerHelper.Scaffold(testDirectory, ["My Dress-Up Darling/Sono Bisque Doll wa Koi wo Suru ch 11.cbz"]);
+
+        // Now that a new file exists in the subdirectory, scan again
+        await scanner.ScanSeries(series.Id);
+        Assert.Single(postLib.Series);
+        Assert.Equal(3, series.Volumes.Count);
+        Assert.Equal(2, series.Volumes.First(v => v.MinNumber.Is(Parser.LooseLeafVolumeNumber)).Chapters.Count);
     }
 }

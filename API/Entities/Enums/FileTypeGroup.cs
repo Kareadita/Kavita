@@ -15,5 +15,4 @@ public enum FileTypeGroup
     Pdf = 3,
     [Description("Images")]
     Images = 4
-
 }

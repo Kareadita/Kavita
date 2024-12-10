@@ -2,6 +2,10 @@
     background-color: var(--progress-bg-color);
 }
 
+.progress-bar {
+  background-color: var(--progress-bar-color);
+}
+
 .progress-bar.text-bg-success {
     background-color: var(--progress-bar-color) !important;
 }

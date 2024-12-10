@@ -110,18 +110,18 @@ public class DeviceController : BaseApiController
     [HttpPost("send-to")]
     public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
     {
-        if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "ChapterIds"));
-        if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
+        var userId = User.GetUserId();
+        if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(userId, "greater-0", "ChapterIds"));
+        if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "DeviceId"));
 
         var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
+            return BadRequest(await _localizationService.Translate(userId, "send-to-kavita-email"));
 
         // // Validate that the device belongs to the user
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Devices);
-        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-unallowed"));
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Devices);
+        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await _localizationService.Translate(userId, "send-to-unallowed"));
 
-        var userId = User.GetUserId();
         await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
             MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                 "started"), userId);
@@ -145,26 +145,30 @@ public class DeviceController : BaseApiController
     }
 
 
-
+    /// <summary>
+    /// Attempts to send a whole series to a device.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("send-series-to")]
     public async Task<ActionResult> SendSeriesToDevice(SendSeriesToDeviceDto dto)
     {
-        if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "SeriesId"));
-        if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "DeviceId"));
+        var userId = User.GetUserId();
+        if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "SeriesId"));
+        if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "DeviceId"));
 
         var isEmailSetup = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
+            return BadRequest(await _localizationService.Translate(userId, "send-to-kavita-email"));
 
-        var userId = User.GetUserId();
         await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
+            MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                 "started"), userId);
 
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
                 SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
+        if (series == null) return BadRequest(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var chapterIds = series.Volumes.SelectMany(v => v.Chapters.Select(c => c.Id)).ToList();
         try
         {
@@ -173,16 +177,16 @@ public class DeviceController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(userId, ex.Message));
         }
         finally
         {
             await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
+                MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(userId, "send-to-device-status"),
                     "ended"), userId);
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-send-to"));
+        return BadRequest(await _localizationService.Translate(userId, "generic-send-to"));
     }
 
 }

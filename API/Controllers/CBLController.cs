@@ -44,6 +44,7 @@ public class CblController : BaseApiController
             var cblReadingList = await SaveAndLoadCblFile(cbl);
             var importSummary = await _readingListService.ValidateCblFile(userId, cblReadingList, useComicVineMatching);
             importSummary.FileName = cbl.FileName;
+
             return Ok(importSummary);
         }
         catch (ArgumentNullException)

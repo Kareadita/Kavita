@@ -50,7 +50,6 @@ export class EditUserComponent implements OnInit {
     this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required, Validators.email]));
     this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
 
-    this.userForm.get('email')?.disable();
     this.selectedRestriction = this.member.ageRestriction;
     this.cdRef.markForCheck();
   }

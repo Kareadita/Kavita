@@ -121,18 +121,18 @@ export class AppComponent implements OnInit {
     this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
 
     // Get the server version, compare vs localStorage, and if different bust locale cache
+    const versionKey = 'kavita--version';
     this.serverService.getVersion(user.apiKey).subscribe(version => {
-      const cachedVersion = localStorage.getItem('kavita--version');
+      const cachedVersion = localStorage.getItem(versionKey);
+      console.log('Kavita version: ', version, ' Running version: ', cachedVersion);
+
       if (cachedVersion == null || cachedVersion != version) {
         // Bust locale cache
-        localStorage.removeItem('@transloco/translations/timestamp');
-        localStorage.removeItem('@transloco/translations');
-        (this.translocoService as any).cache.delete(localStorage.getItem('kavita-locale') || 'en');
-        (this.translocoService as any).cache.clear();
-        localStorage.setItem('kavita--version', version);
+        this.bustLocaleCache();
+        localStorage.setItem(versionKey, version);
         location.reload();
       }
-      localStorage.setItem('kavita--version', version);
+      localStorage.setItem(versionKey, version);
     });
 
     // Every hour, have the UI check for an update. People seriously stay out of date
@@ -152,5 +152,13 @@ export class AppComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  private bustLocaleCache() {
+    localStorage.removeItem('@transloco/translations/timestamp');
+    localStorage.removeItem('@transloco/translations');
+    localStorage.removeItem('translocoLang');
+    (this.translocoService as any).cache.delete(localStorage.getItem('kavita-locale') || 'en');
+    (this.translocoService as any).cache.clear();
   }
 }

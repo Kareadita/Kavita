@@ -20,8 +20,26 @@ public class LibraryBuilder : IEntityBuilder<Library>
             Series = new List<Series>(),
             Folders = new List<FolderPath>(),
             AppUsers = new List<AppUser>(),
-            AllowScrobbling = type is LibraryType.LightNovel or LibraryType.Manga
+            AllowScrobbling = type is LibraryType.LightNovel or LibraryType.Manga,
+            LibraryFileTypes = new List<LibraryFileTypeGroup>()
         };
+
+        _library.LibraryFileTypes.Add(new LibraryFileTypeGroup()
+        {
+            FileTypeGroup = FileTypeGroup.Archive
+        });
+        _library.LibraryFileTypes.Add(new LibraryFileTypeGroup()
+        {
+            FileTypeGroup = FileTypeGroup.Epub
+        });
+        _library.LibraryFileTypes.Add(new LibraryFileTypeGroup()
+        {
+            FileTypeGroup = FileTypeGroup.Images
+        });
+        _library.LibraryFileTypes.Add(new LibraryFileTypeGroup()
+        {
+            FileTypeGroup = FileTypeGroup.Pdf
+        });
     }
 
     public LibraryBuilder(Library library)

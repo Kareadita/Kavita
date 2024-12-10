@@ -1,198 +1,154 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Helpers;
 #nullable enable
 
 public static class TagHelper
 {
-    public static void UpdateTag(Dictionary<string, Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
+
+    public static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, IUnitOfWork unitOfWork)
     {
-        foreach (var name in names)
+        // Normalize tag names once and store them in a hash set for quick lookups
+        var normalizedTagsToAdd = new HashSet<string>(tagNames.Select(t => t.ToNormalized()));
+        var existingTagsSet = new HashSet<string>(chapter.Tags.Select(t => t.NormalizedTitle));
+
+        var isModified = false;
+
+        // Remove tags that are no longer present in the new list
+        var tagsToRemove = chapter.Tags
+            .Where(t => !normalizedTagsToAdd.Contains(t.NormalizedTitle))
+            .ToList();
+
+        if (tagsToRemove.Any())
         {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
-            var normalizedName = name.ToNormalized();
-            allTags.TryGetValue(normalizedName, out var tag);
-
-            var added = tag == null;
-            if (tag == null)
+            foreach (var tagToRemove in tagsToRemove)
             {
-                tag = new TagBuilder(name).Build();
-                allTags.Add(normalizedName, tag);
+                chapter.Tags.Remove(tagToRemove);
             }
-
-            action(tag, added);
+            isModified = true;
         }
-    }
 
-    public static void KeepOnlySameTagBetweenLists(ICollection<Tag> existingTags, ICollection<Tag> removeAllExcept, Action<Tag>? action = null)
-    {
-        var existing = existingTags.ToList();
-        foreach (var genre in existing)
+        // Get all normalized titles for bulk lookup from the database
+        var existingTagTitles = await unitOfWork.DataContext.Tag
+            .Where(t => normalizedTagsToAdd.Contains(t.NormalizedTitle))
+            .ToDictionaryAsync(t => t.NormalizedTitle);
+
+        // Find missing tags that are not already in the database
+        var missingTags = normalizedTagsToAdd
+            .Where(nt => !existingTagTitles.ContainsKey(nt))
+            .Select(title => new TagBuilder(title).Build())
+            .ToList();
+
+        // Add missing tags to the database if any
+        if (missingTags.Count != 0)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle.Equals(g.NormalizedTitle));
-            if (existingPerson != null) continue;
-            existingTags.Remove(genre);
-            action?.Invoke(genre);
+            unitOfWork.DataContext.Tag.AddRange(missingTags);
+            await unitOfWork.CommitAsync();  // Commit once after adding missing tags to avoid multiple DB calls
+            isModified = true;
+
+            // Update the dictionary with newly inserted tags for easier lookup
+            foreach (var tag in missingTags)
+            {
+                existingTagTitles[tag.NormalizedTitle] = tag;
+            }
         }
 
+        // Add the new or existing tags to the chapter
+        foreach (var normalizedTitle in normalizedTagsToAdd)
+        {
+            var tag = existingTagTitles[normalizedTitle];
+
+            if (!existingTagsSet.Contains(normalizedTitle))
+            {
+                chapter.Tags.Add(tag);
+                isModified = true;
+            }
+        }
+
+        // Commit changes if modifications were made to the chapter's tags
+        if (isModified)
+        {
+            await unitOfWork.CommitAsync();
+        }
     }
 
     /// <summary>
-    /// Adds the tag to the list if it's not already in there. This will ignore the ExternalTag.
+    /// Returns a list of strings separated by ',', distinct by normalized names, already trimmed and empty entries removed.
     /// </summary>
-    /// <param name="metadataTags"></param>
-    /// <param name="tag"></param>
-    public static void AddTagIfNotExists(ICollection<Tag> metadataTags, Tag tag)
-    {
-        var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == tag.Title.ToNormalized());
-        if (existingGenre == null)
-        {
-            metadataTags.Add(tag);
-        }
-    }
-
-    public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
-    {
-        var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == tag.Title.ToNormalized());
-        if (existingGenre == null)
-        {
-            metadataTags.Add(tag);
-        }
-    }
-
+    /// <param name="comicInfoTagSeparatedByComma"></param>
+    /// <returns></returns>
     public static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
-        // TODO: Unit tests needed
+        // TODO: Refactor this into an Extension
         if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
             return ImmutableList<string>.Empty;
         }
 
-        return comicInfoTagSeparatedByComma.Split(",")
-            .Select(s => s.Trim())
+        return comicInfoTagSeparatedByComma.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .DistinctBy(Parser.Normalize)
             .ToList();
     }
 
 
-
-    /// <summary>
-    /// Remove tags on a list
-    /// </summary>
-    /// <remarks>Used to remove before we update/add new tags</remarks>
-    /// <param name="existingTags">Existing tags on Entity</param>
-    /// <param name="tags">Tags from metadata</param>
-    /// <param name="action">Callback which will be executed for each tag removed</param>
-    public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, Action<Tag>? action = null)
+    public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
     {
-        var normalizedTags = tags.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
-        foreach (var person in normalizedTags)
-        {
-            var existingTag = existingTags.FirstOrDefault(p => person.Equals(p.NormalizedTitle));
-            if (existingTag == null) continue;
-
-            existingTags.Remove(existingTag);
-            action?.Invoke(existingTag);
-        }
-
-    }
-
-    public static void UpdateTagList(ICollection<TagDto>? tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
-    {
-        if (tags == null) return;
+        if (existingDbTags == null) return;
 
         var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.Tags.ToList();
-        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
-        {
-            // Remove tag
-            series.Metadata.Tags.Remove(existing);
-            isModified = true;
-        }
 
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
-        {
-            var normalizedTitle = tagTitle.ToNormalized();
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
-            if (existingTag != null)
-            {
-                if (series.Metadata.Tags.All(t => t.NormalizedTitle != normalizedTitle))
-                {
+        // Convert tags and existing genres to hash sets for quick lookups by normalized title
+        var existingTagSet = new HashSet<string>(existingDbTags.Select(t => t.Title.ToNormalized()));
+        var dbTagSet = new HashSet<string>(series.Metadata.Tags.Select(g => g.NormalizedTitle));
 
-                    handleAdd(existingTag);
-                    isModified = true;
-                }
-            }
-            else
+        // Remove tags that are no longer present in the input tags
+        var existingTagsCopy = series.Metadata.Tags.ToList();  // Copy to avoid modifying collection while iterating
+        foreach (var existing in existingTagsCopy)
+        {
+            if (!existingTagSet.Contains(existing.NormalizedTitle)) // This correctly ensures removal of non-present tags
             {
-                // Add new tag
-                handleAdd(new TagBuilder(tagTitle).Build());
+                series.Metadata.Tags.Remove(existing);
                 isModified = true;
             }
         }
 
+        // Prepare a dictionary for quick lookup of genres from the `newTags` collection by normalized title
+        var allTagsDict = newTags.ToDictionary(t => t.NormalizedTitle);
+
+        // Add new tags from the input list
+        foreach (var tagDto in existingDbTags)
+        {
+            var normalizedTitle = tagDto.Title.ToNormalized();
+
+            if (dbTagSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
+
+            if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
+            {
+                handleAdd(existingTag);  // Add existing tag from allTagsDict
+            }
+            else
+            {
+                handleAdd(new TagBuilder(tagDto.Title).Build());  // Add new genre if not found
+            }
+            isModified = true;
+        }
+
+        // Call onModified if any changes were made
         if (isModified)
         {
             onModified();
         }
     }
 
-    public static void UpdateTagList(ICollection<TagDto>? tags, Chapter chapter, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
-    {
-        if (tags == null) return;
-
-        var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = chapter.Tags.ToList();
-        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
-        {
-            // Remove tag
-            chapter.Tags.Remove(existing);
-            isModified = true;
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
-        {
-            var normalizedTitle = tagTitle.ToNormalized();
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
-            if (existingTag != null)
-            {
-                if (chapter.Tags.All(t => t.NormalizedTitle != normalizedTitle))
-                {
-
-                    handleAdd(existingTag);
-                    isModified = true;
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(new TagBuilder(tagTitle).Build());
-                isModified = true;
-            }
-        }
-
-        if (isModified)
-        {
-            onModified();
-        }
-    }
 }
-
-#nullable disable

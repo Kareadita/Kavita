@@ -1,21 +1,19 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbCollapse, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
-import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-manage-external-sources',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent, FilterPipe],
+  imports: [FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent, FilterPipe],
   templateUrl: './manage-external-sources.component.html',
   styleUrls: ['./manage-external-sources.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

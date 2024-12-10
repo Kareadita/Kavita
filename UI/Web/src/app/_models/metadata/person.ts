@@ -1,3 +1,5 @@
+import {IHasCover} from "../common/i-has-cover";
+
 export enum PersonRole {
   Other = 1,
   Artist = 2,
@@ -16,8 +18,16 @@ export enum PersonRole {
   Location = 15
 }
 
-export interface Person {
-    id: number;
-    name: string;
-    role: PersonRole;
+export interface Person extends IHasCover {
+  id: number;
+  name: string;
+  description: string;
+  coverImage?: string;
+  coverImageLocked: boolean;
+  malId?: number;
+  aniListId?: number;
+  hardcoverId?: string;
+  asin?: string;
+  primaryColor: string;
+  secondaryColor: string;
 }

@@ -2,7 +2,7 @@
 
   <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText" [toggleOnViewClick]="false">
     <ng-template #view>
-        <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+      <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
 
       <div class="d-inline-flex">
         @if (hideData) {
@@ -18,7 +18,7 @@
     </ng-template>
     @if (showRefresh) {
       <ng-template #titleActions>
-          <button class="btn btn-danger-text" [ngbTooltip]="tipContent" (click)="refresh()">Reset</button>
+          <button class="btn btn-danger-outline" [ngbTooltip]="tipContent" (click)="refresh()">Reset</button>
       </ng-template>
     }
   </app-setting-item>

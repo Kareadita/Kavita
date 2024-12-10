@@ -60,6 +60,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime);
 }
+
 public class CollectionTagRepository : ICollectionTagRepository
 {
     private readonly DataContext _context;
@@ -195,8 +196,10 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(t => t.Id == tag.Id)
             .SelectMany(uc => uc.Items.Select(s => s.Metadata))
             .Select(sm => sm.AgeRating)
-            .MaxAsync();
-        tag.AgeRating = maxAgeRating;
+            .ToListAsync();
+
+
+        tag.AgeRating = maxAgeRating.Count != 0 ? maxAgeRating.Max() : AgeRating.Unknown;
         await _context.SaveChangesAsync();
     }
 
@@ -218,7 +221,6 @@ public class CollectionTagRepository : ICollectionTagRepository
             .AsSplitQuery()
             .ToListAsync();
     }
-
 
     public async Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None)
     {

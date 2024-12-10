@@ -1,0 +1,19 @@
+.main-container {
+  margin-top: 10px;
+  padding: 0 0 0 10px;
+
+  .person-badge {
+    background: var(--card-bg-color);
+    max-height: 200px;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+
+    i {
+      max-height: 128px;
+      height: 128px;
+      font-size: 8rem;
+    }
+  }
+}

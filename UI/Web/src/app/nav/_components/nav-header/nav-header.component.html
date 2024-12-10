@@ -9,12 +9,14 @@
         }
 
         <a class="navbar-brand dark-exempt" routerLink="/home" routerLinkActive="active">
-          <app-image width="28px" height="28px" imageUrl="assets/images/logo-32.png" classes="logo" />
-          <span class="d-none d-md-inline logo"> Kavita</span>
+          <app-image width="24px" height="24px" imageUrl="assets/images/logo-32.png" classes="logo-icon" />
+          <div class="d-none d-md-inline logo">
+            <span>Kavita</span>
+          </div>
         </a>
         <ul class="navbar-nav col me-auto">
           @if (accountService.currentUser$ | async; as user) {
-            <div class="nav-item">
+            <div class="nav-item search">
               <label for="nav-search" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
               <div class="ng-autocomplete">
                 <app-grouped-typeahead
@@ -108,15 +110,18 @@
                     </div>
                   </ng-template>
 
-                  <ng-template #personTemplate let-item>
-                    <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
-                      <div class="ms-1">
-
-                        <div [innerHTML]="item.name"></div>
-                        <div class="text-light fst-italic">{{item.role | personRole}}</div>
-                      </div>
-                    </div>
-                  </ng-template>
+              <ng-template #personTemplate let-item>
+                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item)">
+                  <div style="width: 24px" class="me-1">
+                    <app-image class="me-3 search-result"
+                               [styles]="{'background': 'none', 'max-height': '24px', 'height': '24px', 'width': '24px', 'border-radius': '50%'}"
+                               width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage"></app-image>
+                  </div>
+                  <div class="ms-1">
+                    <div>{{item.name}}</div>
+                  </div>
+                </div>
+              </ng-template>
 
                   <ng-template #genreTemplate let-item>
                     <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
@@ -158,8 +163,6 @@
           }
         </ul>
 
-
-        @if (!searchFocused) {
           @if((breakpoint$ | async)! > Breakpoint.Tablet) {
             @if (backToTopNeeded) {
               <div class="back-to-top">
@@ -203,7 +206,7 @@
               </div>
             }
           }
-        }
+        
 
       </div>
     </nav>

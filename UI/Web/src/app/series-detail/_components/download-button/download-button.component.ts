@@ -2,11 +2,9 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   Input,
   OnInit,
-  Output
 } from '@angular/core';
 import {AsyncPipe} from "@angular/common";
 import {Observable, shareReplay, tap} from "rxjs";

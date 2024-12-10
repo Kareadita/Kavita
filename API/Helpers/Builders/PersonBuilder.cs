@@ -11,15 +11,14 @@ public class PersonBuilder : IEntityBuilder<Person>
     private readonly Person _person;
     public Person Build() => _person;
 
-    public PersonBuilder(string name, PersonRole role)
+    public PersonBuilder(string name)
     {
         _person = new Person()
         {
             Name = name.Trim(),
             NormalizedName = name.ToNormalized(),
-            Role = role,
-            ChapterMetadatas = new List<Chapter>(),
-            SeriesMetadatas = new List<SeriesMetadata>()
+            SeriesMetadataPeople = new List<SeriesMetadataPeople>(),
+            ChapterPeople = new List<ChapterPeople>()
         };
     }
 
@@ -34,10 +33,10 @@ public class PersonBuilder : IEntityBuilder<Person>
         return this;
     }
 
-    public PersonBuilder WithSeriesMetadata(SeriesMetadata metadata)
+    public PersonBuilder WithSeriesMetadata(SeriesMetadataPeople seriesMetadataPeople)
     {
-        _person.SeriesMetadatas ??= new List<SeriesMetadata>();
-        _person.SeriesMetadatas.Add(metadata);
+        _person.SeriesMetadataPeople.Add(seriesMetadataPeople);
         return this;
     }
+
 }

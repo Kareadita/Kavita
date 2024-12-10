@@ -52,7 +52,7 @@ public class TachiyomiServiceTests
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>());
-        _tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), _readerService);
+        _tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<TachiyomiService>>(), _readerService);
 
     }
 

@@ -1,76 +1,90 @@
 <ng-container *transloco="let t; read: 'edit-user'">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h5 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h5>
-            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h5 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h5>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
-            </button>
-        </div>
-        <div class="modal-body scrollable-modal">
-
-            <form [formGroup]="userForm">
-              <h4>{{t('account-detail-title')}}</h4>
-              <div class="row g-0 mb-2">
-                  <div class="col-md-6 col-sm-12 pe-4">
-                      <div class="mb-3">
-                          <label for="username" class="form-label">{{t('username')}}</label>
-                          <input id="username" class="form-control" formControlName="username" type="text"
-                              [class.is-invalid]="userForm.get('username')?.invalid && userForm.get('username')?.touched" aria-describedby="username-validations">
-                          <div id="username-validations" class="invalid-feedback" *ngIf="userForm.dirty || userForm.touched">
-                              <div *ngIf="userForm.get('username')?.errors?.required">
-                                  {{t('required')}}
-                              </div>
-                            <div *ngIf="userForm.get('username')?.errors?.pattern">
-                                  {{t('username-pattern', {characters: allowedCharacters})}}
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="col-md-6 col-sm-12">
-                      <div class="mb-3" style="width:100%">
-                          <label for="email" class="form-label">{{t('email')}}</label>
-                          <input class="form-control" inputmode="email" type="email" id="email"
-                                 [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
-                                 formControlName="email" aria-describedby="email-validations">
-                          <div id="email-validations" class="invalid-feedback"
-                              *ngIf="userForm.dirty || userForm.touched">
-                              <div *ngIf="userForm.get('email')?.errors?.required">
-                                  {{t('required')}}
-                              </div>
-                              <div *ngIf="userForm.get('email')?.errors?.email">
-                                  {{t('not-valid-email')}}
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="row g-0 mb-3">
-                <div class="col-md-12">
-                  <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
-                </div>
-              </div>
-
-                <div class="row g-0 mb-3">
-                    <div class="col-md-6 pe-4">
-                        <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
-                    </div>
-
-                    <div class="col-md-6">
-                        <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
-                    </div>
-                </div>
-            </form>
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="close()">
-                {{t('cancel')}}
-            </button>
-            <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving || !userForm.valid">
-                <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span>{{isSaving ? t('saving') : t('update')}}</span>
-            </button>
-        </div>
+      </button>
     </div>
+
+    <div class="modal-body scrollable-modal">
+      <form [formGroup]="userForm">
+        <h4>{{t('account-detail-title')}}</h4>
+        <div class="row g-0 mb-2">
+            <div class="col-md-6 col-sm-12 pe-4">
+              @if(userForm.get('username'); as formControl) {
+                <div class="mb-3">
+                  <label for="username" class="form-label">{{t('username')}}</label>
+                  <input id="username" class="form-control" formControlName="username" type="text"
+                      [class.is-invalid]="formControl.invalid && !formControl.untouched" aria-describedby="username-validations">
+                  @if(formControl.dirty || !formControl.untouched) {
+                    <div id="username-validations" class="invalid-feedback">
+                      @if (formControl.errors; as errors) {
+                        <div>
+                          @if (errors.required) {
+                            {{t('required')}}
+                          } @else if (errors.pattern) {
+                            {{t('username-pattern', {characters: allowedCharacters})}}
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            <div class="col-md-6 col-sm-12">
+              @if(userForm.get('email'); as formControl) {
+                <div class="mb-3" style="width:100%">
+                  <label for="email" class="form-label">{{t('email')}}</label>
+                  <input id="email" class="form-control" formControlName="email" type="text"
+                         [class.is-invalid]="formControl.invalid && !formControl.untouched" aria-describedby="email-validations">
+                  @if(formControl.dirty || !formControl.untouched) {
+                    <div id="email-validations" class="invalid-feedback">
+                      @if (formControl.errors; as errors) {
+                        <div>
+                          @if (errors.required) {
+                            {{t('required')}}
+                          } @else if (errors.email) {
+                            {{t('not-valid-email')}}
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+        </div>
+
+        <div class="row g-0 mb-3">
+          <div class="col-md-12">
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
+          </div>
+        </div>
+
+          <div class="row g-0 mb-3">
+            <div class="col-md-6 pe-4">
+              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
+            </div>
+
+            <div class="col-md-6">
+              <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
+            </div>
+          </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">
+        {{t('cancel')}}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving || !userForm.valid">
+        @if (isSaving) {
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        }
+        <span>{{isSaving ? t('saving') : t('update')}}</span>
+      </button>
+    </div>
+  </div>
 </ng-container>

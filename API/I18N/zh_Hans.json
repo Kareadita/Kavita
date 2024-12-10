@@ -179,7 +179,7 @@
     "unable-to-reset-k+": "因为一些错误导致无法重置 Kavita+ 许可证。请联系 Kavita+ 支持人员",
     "email-not-enabled": "此服务器上未启用电子邮件。您无法执行此操作。",
     "send-to-unallowed": "您无法发送到不属于您的设备",
-    "send-to-size-limit": "您尝试发送的文件对于您的电子邮件来说太大",
+    "send-to-size-limit": "您尝试发送的文件对于您的电子邮件提供商来说太大",
     "process-scrobbling-events": "处理 Scrobbling 事件",
     "report-stats": "报告统计",
     "check-updates": "检查更新",
@@ -197,5 +197,9 @@
     "collection-already-exists": "收藏已存在",
     "error-import-stack": "导入 MAL stack 时出现问题",
     "generic-cover-volume-save": "无法将封面图片保存至卷",
-    "generic-cover-person-save": "无法将封面图片保存到人物"
+    "generic-cover-person-save": "无法将封面图片保存到人物",
+    "person-doesnt-exist": "人员不存在",
+    "person-name-required": "人员姓名为必填项，且不能为空",
+    "person-name-unique": "人名必须是唯一的",
+    "person-image-doesnt-exist": "CoversDB 中不存在此人"
 }
