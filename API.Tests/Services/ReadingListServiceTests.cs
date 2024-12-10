@@ -713,6 +713,9 @@ public class ReadingListServiceTests
         Assert.Equal("Issue #1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1", "1", "The Title")));
         Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1",  chapterTitleName: "The Title")));
         Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, chapterTitleName: "The Title")));
+        var dto = CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, chapterNumber: "The Special Title");
+        dto.IsSpecial = true;
+        Assert.Equal("The Special Title", ReadingListService.FormatTitle(dto));
 
         // Book Library & Archive
         Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1")));

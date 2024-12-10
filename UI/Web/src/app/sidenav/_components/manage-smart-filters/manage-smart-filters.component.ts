@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
 import {FilterService} from "../../../_services/filter.service";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -23,6 +23,8 @@ export class ManageSmartFiltersComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionService = inject(ActionService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
+
+  @Input() target: '_self' | '_blank' = '_blank';
 
   filters: Array<SmartFilter> = [];
   listForm: FormGroup = new FormGroup({

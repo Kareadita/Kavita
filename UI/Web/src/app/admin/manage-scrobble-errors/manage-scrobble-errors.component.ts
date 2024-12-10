@@ -29,6 +29,7 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {DefaultModalOptions} from "../../_models/default-modal-options";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
@@ -111,7 +112,7 @@ export class ManageScrobbleErrorsComponent implements OnInit {
 
   editSeries(seriesId: number) {
     this.seriesService.getSeries(seriesId).subscribe(series => {
-      const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
+      const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
       modalRef.componentInstance.series = series;
     });
   }

@@ -106,6 +106,9 @@ public class Program
 
                                 // v0.8.2
                                 await ManualMigrateSwitchToWal.Migrate(context, logger);
+
+                                // v0.8.4
+                                await ManualMigrateEncodeSettings.Migrate(context, logger);
                             }
                             catch (Exception ex)
                             {

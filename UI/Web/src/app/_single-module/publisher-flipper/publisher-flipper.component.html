@@ -1,0 +1,39 @@
+@if (publishers.length > 0) {
+  <div class="publisher-wrapper">
+    <div class="publisher-flipper" [class.is-flipped]="isFlipped">
+      <div class="publisher-side publisher-front">
+        <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
+          <app-image
+            [imageUrl]="imageService.getPublisherImage(currentPublisher!.name)"
+            [classes]="'me-2'"
+            [hideOnError]="true"
+            width="32px"
+            height="32px"
+            aria-hidden="true">
+          </app-image>
+          <div class="position-relative d-inline-block"
+               (click)="openPublisher(currentPublisher!.id)">
+            {{currentPublisher!.name}}
+          </div>
+        </div>
+      </div>
+      <div class="publisher-side publisher-back">
+        <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
+          <app-image
+            [imageUrl]="imageService.getPublisherImage(nextPublisher!.name)"
+            [classes]="'me-2'"
+            [hideOnError]="true"
+            width="32px"
+            height="32px"
+            aria-hidden="true">
+          </app-image>
+          <div class="position-relative d-inline-block"
+               (click)="openPublisher(nextPublisher!.id)">
+            {{nextPublisher!.name}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

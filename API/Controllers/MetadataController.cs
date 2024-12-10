@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
@@ -33,18 +34,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all genres</param>
     /// <returns></returns>
     [HttpGet("genres")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
-    public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds", "context"])]
+    public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds, QueryContext context = QueryContext.None)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
 
-        // NOTE: libraryIds isn't hooked up in the frontend
-        if (ids is {Count: > 0})
-        {
-            return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids));
-        }
-
-        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId()));
+        return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
     }
 
     /// <summary>
@@ -124,7 +119,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
@@ -148,7 +143,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <returns></returns>
     [HttpGet("languages")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new []{"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
@@ -171,20 +166,21 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
 
-
     /// <summary>
-    /// Returns summary for the chapter
+    /// Given a language code returns the display name
     /// </summary>
-    /// <param name="chapterId"></param>
+    /// <param name="code"></param>
     /// <returns></returns>
-    [HttpGet("chapter-summary")]
-    public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
+    [HttpGet("language-title")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["code"])]
+    public ActionResult<string?> GetLanguageTitle(string code)
     {
-        // TODO: This doesn't seem used anywhere
-        if (chapterId <= 0) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
-        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest(await localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
-        return Ok(chapter.Summary);
+        if (string.IsNullOrEmpty(code)) return BadRequest("Code must be provided");
+
+        return CultureInfo.GetCultures(CultureTypes.AllCultures)
+            .Where(l => code.Equals(l.IetfLanguageTag))
+            .Select(c => c.DisplayName)
+            .FirstOrDefault();
     }
 
     /// <summary>

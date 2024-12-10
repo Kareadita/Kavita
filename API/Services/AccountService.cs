@@ -95,12 +95,12 @@ public class AccountService : IAccountService
     public async Task<IEnumerable<ApiException>> ValidateEmail(string email)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
-        if (user == null) return Array.Empty<ApiException>();
+        if (user == null) return [];
 
-        return new List<ApiException>()
-        {
+        return
+        [
             new ApiException(400, "Email is already registered")
-        };
+        ];
     }
 
     /// <summary>

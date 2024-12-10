@@ -10,6 +10,7 @@ using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,9 @@ public abstract class AbstractDbTest
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
+
+        // Set up Hangfire to use in-memory storage for testing
+        GlobalConfiguration.Configuration.UseInMemoryStorage();
 
 
         _unitOfWork = new UnitOfWork(_context, mapper, null);

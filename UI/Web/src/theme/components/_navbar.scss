@@ -1,7 +1,14 @@
+@import '../variables';
+
 .navbar {
-    background-color: var(--navbar-bg-color);
-    color: var(--navbar-text-color);
-    z-index: 1040;
+  background-color: var(--navbar-bg-color);
+  color: var(--navbar-text-color);
+  z-index: 1040;
+  border-radius: var(--navbar-border-radius);
+  left: 0px;
+  margin: var(--navbar-header-margin);
+  padding: 0;
+  height: 3rem;
 }
 
 
@@ -11,4 +18,10 @@ i.fa.nav {
 
 .nav-tabs .nav-link.active::before {
   transform: scaleY(0);
+}
+
+@media (max-width: $grid-breakpoints-lg) {
+  .navbar {
+    margin: var(--navbar-header-mobile-x-margin) var(--navbar-header-mobile-y-margin);
+  }
 }

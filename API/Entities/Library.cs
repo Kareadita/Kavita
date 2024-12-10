@@ -44,9 +44,6 @@ public class Library : IEntityDate, IHasCoverImage
     public bool AllowScrobbling { get; set; } = true;
 
 
-
-
-
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

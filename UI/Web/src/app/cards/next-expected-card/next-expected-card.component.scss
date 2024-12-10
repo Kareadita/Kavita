@@ -1,22 +1,10 @@
 @use '../../../card-item-common';
 
-::ng-deep .extreme-blur {
-  filter: brightness(50%) blur(4px)
+:host ::ng-deep .extreme-blur {
+  filter: brightness(50%) blur(4px);
 }
 
-.overlay-information {
-  background-color: transparent;
+.card-title-container {
+  justify-content: center;
 }
 
-.upcoming-header {
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-
-.card-title  {
-  width: 146px;
-}
-
-.card-content {
-  font-size: 0.8rem;
-}

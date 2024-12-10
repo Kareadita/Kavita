@@ -3,47 +3,58 @@
     @if(debugMode) {
       <div class="fixed-top overlay">
         @for(img of cachedImages; track img.src) {
-          <ng-container *ngIf="this.readerService.imageUrlToPageNum(img.src) as imageNum">
+          @if (this.readerService.imageUrlToPageNum(img.src); as imageNum) {
             <span class="me-1" [ngClass]="{'current': imageNum === this.pageNum, 'loaded': img.complete}">{{this.readerService.imageUrlToPageNum(img.src)}}</span>
-          </ng-container>
+          }
         }
       </div>
     }
-    <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
-      <div style="display: flex; margin-top: 5px;">
-        <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
-          <i class="fa fa-arrow-left" aria-hidden="true"></i>
-          <span class="visually-hidden">{{t('back')}}</span>
-        </button>
+    @if (menuOpen) {
+      <div class="fixed-top overlay" [@slideFromTop]="menuOpen">
+        <div style="display: flex; margin-top: 5px;">
+          <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('back')}}</span>
+          </button>
 
-        <div>
-          <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span></div>
-          <div class="subtitle">
-            {{subtitle}} <span *ngIf="totalSeriesPages > 0">{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
+          <div>
+            <div style="font-weight: bold;">{{title}}
+              @if (incognitoMode) {
+                <span class="clickable" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span>
+              }
+            </div>
+            <div class="subtitle">
+              {{subtitle}}
+              @if (totalSeriesPages > 0) {
+                <span>{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
+              }
+            </div>
+          </div>
+
+          <div style="margin-left: auto; padding-right: 3%;">
+            <button class="btn btn-icon" title="Shortcuts" (click)="openShortcutModal()">
+              <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
+            </button>
+            @if (!bookmarkMode && hasBookmarkRights) {
+              <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                      title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
+                <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
+              </button>
+            }
           </div>
         </div>
-
-        <div style="margin-left: auto; padding-right: 3%;">
-          <button class="btn btn-icon" title="Shortcuts" (click)="openShortcutModal()">
-            <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
-          </button>
-          @if (!bookmarkMode && hasBookmarkRights) {
-            <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
-                    title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
-              <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
-            </button>
-          }
-        </div>
       </div>
-    </div>
+    }
+
+
     <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
 
-      <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
+      @if (readerMode !== ReaderMode.Webtoon) {
         <div (dblclick)="bookmarkPage($event)">
           <app-canvas-renderer
             [readerSettings$]="readerSettings$"
@@ -57,24 +68,28 @@
         <div class="pagination-area">
           <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
                [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
-            <div *ngIf="showClickOverlay">
-              <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
-                 [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
-            </div>
+            @if (showClickOverlay) {
+              <div>
+                <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                   [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
+              </div>
+            }
           </div>
           <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
                [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px',
                                 'max-height': MaxHeight}">
-            <div *ngIf="showClickOverlay">
-              <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
-                 [title]="t('next-page-tooltip')" aria-hidden="true"></i>
-            </div>
+            @if (showClickOverlay) {
+              <div>
+                <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                   [title]="t('next-page-tooltip')" aria-hidden="true"></i>
+              </div>
+            }
           </div>
         </div>
 
-        <div (dblclick)="bookmarkPage($event)">
+        <div appDblClick (doubleClick)="bookmarkPage($event)">
           <app-single-renderer [image$]="currentImage$"
                                [readerSettings$]="readerSettings$"
                                [bookmark$]="showBookmarkEffect$"
@@ -106,196 +121,200 @@
                                         [getPage]="getPageFn">
           </app-double-no-cover-renderer>
         </div>
-
-      </ng-container>
-
-      <ng-template #webtoon>
-        <div class="webtoon-images" *ngIf="!isLoading && !inSetup">
-          <app-infinite-scroller [pageNum]="pageNum"
-                                 [bufferPages]="5"
-                                 [goToPage]="goToPageEvent"
-                                 (pageNumberChange)="handleWebtoonPageChange($event)"
-                                 [totalPages]="maxPages"
-                                 [urlProvider]="getPageUrl"
-                                 (loadNextChapter)="loadNextChapter()"
-                                 (loadPrevChapter)="loadPrevChapter()"
-                                 [bookmarkPage]="showBookmarkEffectEvent"
-                                 [fullscreenToggled]="fullscreenEvent"
-                                 [readerSettings$]="readerSettings$">
-          </app-infinite-scroller>
-        </div>
-      </ng-template>
-
-
+      } @else {
+        @if (!isLoading && !inSetup) {
+          <div class="webtoon-images">
+            <app-infinite-scroller [pageNum]="pageNum"
+                                   [bufferPages]="5"
+                                   [goToPage]="goToPageEvent"
+                                   (pageNumberChange)="handleWebtoonPageChange($event)"
+                                   [totalPages]="maxPages"
+                                   [urlProvider]="getPageUrl"
+                                   (loadNextChapter)="loadNextChapter()"
+                                   (loadPrevChapter)="loadPrevChapter()"
+                                   [bookmarkPage]="showBookmarkEffectEvent"
+                                   [fullscreenToggled]="fullscreenEvent"
+                                   [readerSettings$]="readerSettings$">
+            </app-infinite-scroller>
+          </div>
+        }
+      }
     </div>
 
-    <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
-
-      <div class="mb-3" *ngIf="pageOptions !== undefined && pageOptions.ceil !== undefined">
-        <span class="visually-hidden" id="slider-info"></span>
-        <div class="row g-0">
-          <button class="btn btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" [title]="t('prev-chapter-tooltip')"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-          <button class="btn btn-icon col-2" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" [title]="t('first-page-tooltip')"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-          <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
-            <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
-          </div>
-          <ng-template #noSlider>
-            <div class="col custom-slider">
-              <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+    @if (menuOpen) {
+      <div class="fixed-bottom overlay"  [@slideFromBottom]="menuOpen">
+        @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
+          <div class="mb-3">
+            <span class="visually-hidden" id="slider-info"></span>
+            <div class="row g-0">
+              <button class="btn btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" [title]="t('prev-chapter-tooltip')"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+              <button class="btn btn-icon col-2" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" [title]="t('first-page-tooltip')"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+              @if (pageOptions.ceil > 0) {
+                <div class="col custom-slider">
+                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                </div>
+              } @else {
+                <div class="col custom-slider">
+                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                </div>
+              }
+              <button class="btn btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" [title]="t('last-page-tooltip')"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+              <button class="btn btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" [title]="t('next-chapter-tooltip')"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
-          </ng-template>
-          <button class="btn btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" [title]="t('last-page-tooltip')"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
-          <button class="btn btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" [title]="t('next-chapter-tooltip')"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+          </div>
+        }
+        <div class="row pt-4 ms-2 me-2 mb-2">
+          <div class="col">
+            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')">
+              <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
+              <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
+            </button>
+          </div>
+          <div class="col">
+            <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
+              <i class="fa {{this.readerMode | readerModeIcon}}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
+            </button>
+          </div>
+          <div class="col">
+            <button class="btn btn-icon" title="{{this.isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
+              <i class="fa {{this.isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{this.isFullscreen ? t('collapse') : t('fullscreen')}}</span>
+            </button>
+          </div>
+          <div class="col">
+            <button class="btn btn-icon" [title]="t('settings-tooltip')" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
+              <i class="fa fa-sliders-h" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('settings-tooltip')}}</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="row pt-4 ms-2 me-2 mb-2">
-        <div class="col">
-          <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')">
-            <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
-            <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
-          </button>
-        </div>
-        <div class="col">
-          <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
-            <i class="fa {{this.readerMode | readerModeIcon}}" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
-          </button>
-        </div>
-        <div class="col">
-          <button class="btn btn-icon" title="{{this.isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
-            <i class="fa {{this.isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
-            <span class="visually-hidden">{{this.isFullscreen ? t('collapse') : t('fullscreen')}}</span>
-          </button>
-        </div>
-        <div class="col">
-          <button class="btn btn-icon" [title]="t('settings-tooltip')" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
-            <i class="fa fa-sliders-h" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('settings-tooltip')}}</span>
-          </button>
-        </div>
-      </div>
-      <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
-        <form [formGroup]="generalSettingsForm">
-          <div class="row mb-2">
-            <div class="col-md-6 col-sm-12">
-              <label for="page-splitting" class="form-label">{{t('image-splitting-label')}}</label>&nbsp;
-              <div class="split fa fa-image">
-                <div class="{{SplitIconClass}}"></div>
+        @if (settingsOpen && generalSettingsForm) {
+          <div class="bottom-menu">
+            <form [formGroup]="generalSettingsForm">
+              <div class="row mb-2">
+                <div class="col-md-6 col-sm-12">
+                  <label for="page-splitting" class="form-label">{{t('image-splitting-label')}}</label>&nbsp;
+                  <div class="split fa fa-image">
+                    <div class="{{SplitIconClass}}"></div>
+                  </div>
+                  <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
+                    <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text}}</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                  <label for="page-fitting" class="form-label">{{t('image-scaling-label')}}</label>&nbsp;<i class="{{FittingOption | fittingIcon}}" aria-hidden="true"></i>
+                  <select class="form-control" id="page-fitting" formControlName="fittingOption">
+                    <option value="full-height">{{t('height')}}</option>
+                    <option value="full-width">{{t('width')}}</option>
+                    <option value="original">{{t('original')}}</option>
+                  </select>
+                </div>
               </div>
-              <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text}}</option>
-              </select>
-            </div>
 
-            <div class="col-md-6 col-sm-12">
-              <label for="page-fitting" class="form-label">{{t('image-scaling-label')}}</label>&nbsp;<i class="{{FittingOption | fittingIcon}}" aria-hidden="true"></i>
-              <select class="form-control" id="page-fitting" formControlName="fittingOption">
-                <option value="full-height">{{t('height')}}</option>
-                <option value="full-width">{{t('width')}}</option>
-                <option value="original">{{t('original')}}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row mb-2">
-            <div class="col-md-6 col-sm-12">
-              <label for="layout-mode" class="form-label">Layout Mode</label>&nbsp;
-              <ng-container [ngSwitch]="layoutMode">
-                <ng-container *ngSwitchCase="LayoutMode.Single">
-                  <div class="split-double">
+              <div class="row mb-2">
+                <div class="col-md-6 col-sm-12">
+                  <label for="layout-mode" class="form-label">Layout Mode</label>&nbsp;
+                  <ng-container [ngSwitch]="layoutMode">
+                    <ng-container *ngSwitchCase="LayoutMode.Single">
+                      <div class="split-double">
                     <span class="fa-stack fa-1x">
                         <i class="fa-regular fa-square-full fa-stack-2x"></i>
                         <i class="fa fa-image fa-stack-1x"></i>
                       </span>
-                  </div>
-                </ng-container>
-                <ng-container *ngSwitchCase="LayoutMode.Double">
-                  <div class="split-double">
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="LayoutMode.Double">
+                      <div class="split-double">
                     <span class="fa-stack fa-1x">
                         <i class="fa-regular fa-square-full fa-stack-2x"></i>
                         <i class="fab fa-1 fa-stack-1x"></i>
                     </span>
-                    <span class="fa-stack fa right">
+                        <span class="fa-stack fa right">
                       <i class="fa-regular fa-square-full fa-stack-2x"></i>
                       <i class="fab fa-2 fa-stack-1x"></i>
                     </span>
-                  </div>
-                </ng-container>
-                <ng-container *ngSwitchCase="LayoutMode.DoubleReversed">
-                  <div class="split-double">
+                      </div>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="LayoutMode.DoubleReversed">
+                      <div class="split-double">
                     <span class="fa-stack fa-1x">
                         <i class="fa-regular fa-square-full fa-stack-2x"></i>
                         <i class="fab fa-2 fa-stack-1x"></i>
                     </span>
-                    <span class="fa-stack fa right">
+                        <span class="fa-stack fa right">
                       <i class="fa-regular fa-square-full fa-stack-2x"></i>
                       <i class="fab fa-1 fa-stack-1x"></i>
                     </span>
-                  </div>
-                </ng-container>
-              </ng-container>
-              <select class="form-control" id="layout-mode" formControlName="layoutMode">
-                <option [value]="opt.value" *ngFor="let opt of layoutModesTranslated">{{opt.text}}</option>
-              </select>
-            </div>
-            <div class="col-md-3 col-sm-12">
-              <div class="mb-3">
-                <div class="mb-3">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" >
-                    <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
-                  </div>
+                      </div>
+                    </ng-container>
+                  </ng-container>
+                  <select class="form-control" id="layout-mode" formControlName="layoutMode">
+                    <option [value]="opt.value" *ngFor="let opt of layoutModesTranslated">{{opt.text}}</option>
+                  </select>
                 </div>
-              </div>
+                <div class="col-md-3 col-sm-12">
+                  <div class="mb-3">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" >
+                        <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
+                      </div>
+                    </div>
+                  </div>
 
-              <div class="mb-3">
-                <div class="mb-3">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" >
-                    <label class="form-check-label" for="swipe-to-paginate">{{t('swipe-enabled-label')}}</label>
+                  <div class="mb-3">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" >
+                        <label class="form-check-label" for="swipe-to-paginate">{{t('swipe-enabled-label')}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                  <div class="mb-3">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input">
+                        <label class="form-check-label" for="emulate-book">{{t('emulate-comic-book-label')}}</label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="col-md-3 col-sm-12">
-              <div class="mb-3">
-                <div class="mb-3">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input">
-                    <label class="form-check-label" for="emulate-book">{{t('emulate-comic-book-label')}}</label>
-                  </div>
+              <div class="row mb-2">
+                <div class="col-md-6 col-sm-12">
+                  <label for="darkness" class="form-label range-label">{{t('brightness-label')}}</label>
+                  <span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
+                  <input type="range" class="form-range" id="darkness"
+                         min="10" max="100" step="1" formControlName="darkness">
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                  <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:
+                    @if (widthOverrideLabel$ | async; as widthOverrideLabel) {
+                      {{ widthOverrideLabel ? widthOverrideLabel : t('off') }}
+                    }
+                    @else {
+                      {{t('off')}}
+                    }
+                  </label>
+                  <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
+                </div>
+
+
+                <div class="col-md-6 col-sm-12">
+                  <button class="btn btn-primary" (click)="savePref()">{{t('save-globally')}}</button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
-          <div class="row mb-2">
-            <div class="col-md-6 col-sm-12">
-              <label for="darkness" class="form-label range-label">{{t('brightness-label')}}</label>
-              <span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
-              <input type="range" class="form-range" id="darkness"
-                     min="10" max="100" step="1" formControlName="darkness">
-            </div>
-
-            <div class="col-md-6 col-sm-12">
-              <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:
-                @if (widthOverrideLabel$ | async; as widthOverrideLabel) {
-                  {{ widthOverrideLabel ? widthOverrideLabel : t('off') }}
-                  }
-                @else {
-                  {{t('off')}}
-                }
-              </label>
-              <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthSlider">
-            </div>
-
-
-            <div class="col-md-6 col-sm-12">
-              <button class="btn btn-primary" (click)="savePref()">{{t('save-globally')}}</button>
-            </div>
-          </div>
-        </form>
+        }
       </div>
-    </div>
+    }
+
   </div>
 
 </ng-container>

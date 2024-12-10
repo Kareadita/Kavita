@@ -163,6 +163,7 @@ public class SettingsController : BaseApiController
             bookmarkDirectory = _directoryService.BookmarkDirectory;
         }
 
+        var updateTask = false;
         foreach (var setting in currentSettings)
         {
             if (setting.Key == ServerSettingKey.OnDeckProgressDays &&
@@ -176,13 +177,6 @@ public class SettingsController : BaseApiController
                 updateSettingsDto.OnDeckUpdateDays + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.OnDeckUpdateDays + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.CoverImageSize &&
-                updateSettingsDto.CoverImageSize + string.Empty != setting.Value)
-            {
-                setting.Value = updateSettingsDto.CoverImageSize + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -204,7 +198,7 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            UpdateSchedulingSettings(setting, updateSettingsDto);
+            updateTask = updateTask || UpdateSchedulingSettings(setting, updateSettingsDto);
 
             UpdateEmailSettings(setting, updateSettingsDto);
 
@@ -259,9 +253,16 @@ public class SettingsController : BaseApiController
             }
 
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
-                updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
+                ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {
-                setting.Value = updateSettingsDto.EncodeMediaAs + string.Empty;
+                setting.Value = ((int)updateSettingsDto.EncodeMediaAs).ToString();
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.CoverImageSize &&
+                ((int)updateSettingsDto.CoverImageSize).ToString() != setting.Value)
+            {
+                setting.Value = ((int)updateSettingsDto.CoverImageSize).ToString();
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -348,6 +349,11 @@ public class SettingsController : BaseApiController
                 UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
             }
 
+            if (updateTask)
+            {
+                BackgroundJob.Enqueue(() => _taskScheduler.ScheduleTasks());
+            }
+
             if (updateSettingsDto.EnableFolderWatching)
             {
                 BackgroundJob.Enqueue(() => _libraryWatcher.StartWatching());
@@ -379,25 +385,31 @@ public class SettingsController : BaseApiController
         _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
     }
 
-    private void UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    private bool UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
         if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
         {
+            //if (updateSettingsDto.TotalBackup)
             setting.Value = updateSettingsDto.TaskBackup;
             _unitOfWork.SettingsRepository.Update(setting);
+
+            return true;
         }
 
         if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
         {
             setting.Value = updateSettingsDto.TaskScan;
             _unitOfWork.SettingsRepository.Update(setting);
+            return true;
         }
 
         if (setting.Key == ServerSettingKey.TaskCleanup && updateSettingsDto.TaskCleanup != setting.Value)
         {
             setting.Value = updateSettingsDto.TaskCleanup;
             _unitOfWork.SettingsRepository.Update(setting);
+            return true;
         }
+        return false;
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

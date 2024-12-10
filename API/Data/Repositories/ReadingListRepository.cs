@@ -122,8 +122,10 @@ public class ReadingListRepository : IReadingListRepository
     {
         return _context.ReadingListItem
             .Where(item => item.ReadingListId == readingListId)
-            .SelectMany(item => item.Chapter.People.Where(p => p.Role == PersonRole.Character))
-            .OrderBy(p => p.NormalizedName)
+            .SelectMany(item => item.Chapter.People)
+            .Where(p => p.Role == PersonRole.Character)
+            .OrderBy(p => p.Person.NormalizedName)
+            .Select(p => p.Person)
             .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
@@ -246,6 +248,7 @@ public class ReadingListRepository : IReadingListRepository
                 ChapterTitleName = chapter.TitleName,
                 FileSize = chapter.Files.Sum(f => f.Bytes),
                 chapter.Summary,
+                chapter.IsSpecial
 
             })
             .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -257,6 +260,7 @@ public class ReadingListRepository : IReadingListRepository
                 data.ChapterTitleName,
                 data.FileSize,
                 data.Summary,
+                data.IsSpecial,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
@@ -275,6 +279,7 @@ public class ReadingListRepository : IReadingListRepository
                     data.ChapterTitleName,
                     data.FileSize,
                     data.Summary,
+                    data.IsSpecial,
                     LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
                     LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
@@ -297,7 +302,8 @@ public class ReadingListRepository : IReadingListRepository
                 ChapterTitleName = data.ChapterTitleName,
                 LibraryName = data.LibraryName,
                 FileSize = data.FileSize,
-                Summary = data.Summary
+                Summary = data.Summary,
+                IsSpecial = data.IsSpecial
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)

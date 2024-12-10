@@ -16,6 +16,8 @@ namespace API.Extensions.QueryExtensions;
 
 public static class QueryableExtensions
 {
+    private const float DefaultTolerance = 0.001f;
+
     public static Task<AgeRestriction> GetUserAgeRestriction(this DbSet<AppUser> queryable, int userId)
     {
         if (userId < 1)
@@ -79,7 +81,6 @@ public static class QueryableExtensions
             .Include(l => l.AppUsers)
             .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
             .IsRestricted(queryContext)
-            .AsNoTracking()
             .AsSplitQuery()
             .Select(lib => lib.Id);
     }
@@ -112,18 +113,98 @@ public static class QueryableExtensions
         return condition ? queryable.Where(predicate) : queryable;
     }
 
-    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, bool condition, Expression<Func<T, string>> propertySelector, string searchQuery)
-        where T : class
+
+    public static IQueryable<T> WhereGreaterThan<T>(this IQueryable<T> source,
+                                                    Expression<Func<T, float>> selector,
+                                                    float value)
     {
-        if (!condition || string.IsNullOrEmpty(searchQuery)) return queryable;
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
 
-        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
-        var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
-        var searchExpression = Expression.Constant($"%{searchQuery}%");
-        var likeExpression = Expression.Call(method, Expression.Constant(dbFunctions), propertySelector.Body, searchExpression);
-        var lambda = Expression.Lambda<Func<T, bool>>(likeExpression, propertySelector.Parameters[0]);
+        var greaterThanExpression = Expression.GreaterThan(propertyAccess, Expression.Constant(value));
+        var lambda = Expression.Lambda<Func<T, bool>>(greaterThanExpression, parameter);
 
-        return queryable.Where(lambda);
+        return source.Where(lambda);
+    }
+
+    public static IQueryable<T> WhereGreaterThanOrEqual<T>(this IQueryable<T> source,
+                                                           Expression<Func<T, float>> selector,
+                                                           float value)
+    {
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
+
+        var greaterThanExpression = Expression.GreaterThanOrEqual(propertyAccess, Expression.Constant(value));
+        var lambda = Expression.Lambda<Func<T, bool>>(greaterThanExpression, parameter);
+
+        return source.Where(lambda);
+    }
+
+    public static IQueryable<T> WhereLessThan<T>(this IQueryable<T> source,
+                                                 Expression<Func<T, float>> selector,
+                                                 float value)
+    {
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
+
+        var lessThanExpression = Expression.LessThan(propertyAccess, Expression.Constant(value));
+        var lambda = Expression.Lambda<Func<T, bool>>(lessThanExpression, parameter);
+
+        return source.Where(lambda);
+    }
+
+    public static IQueryable<T> WhereLessThanOrEqual<T>(this IQueryable<T> source,
+                                                        Expression<Func<T, float>> selector,
+                                                        float value)
+    {
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
+
+        var lessThanOrEqualExpression = Expression.LessThanOrEqual(propertyAccess, Expression.Constant(value));
+        var lambda = Expression.Lambda<Func<T, bool>>(lessThanOrEqualExpression, parameter);
+
+        return source.Where(lambda);
+    }
+
+    public static IQueryable<T> WhereEqual<T>(this IQueryable<T> source,
+        Expression<Func<T, float>> selector,
+        float value,
+        float tolerance = DefaultTolerance)
+    {
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
+
+        // Absolute difference comparison: Math.Abs(propertyAccess - value) < tolerance
+        var difference = Expression.Subtract(propertyAccess, Expression.Constant(value));
+        var absoluteDifference = Expression.Condition(
+            Expression.LessThan(difference, Expression.Constant(0f)),
+            Expression.Negate(difference),
+            difference);
+
+        var toleranceExpression = Expression.LessThan(absoluteDifference, Expression.Constant(tolerance));
+        var lambda = Expression.Lambda<Func<T, bool>>(toleranceExpression, parameter);
+
+        return source.Where(lambda);
+    }
+
+    public static IQueryable<T> WhereNotEqual<T>(this IQueryable<T> source,
+        Expression<Func<T, float>> selector,
+        float value,
+        float tolerance = DefaultTolerance)
+    {
+        var parameter = selector.Parameters[0];
+        var propertyAccess = selector.Body;
+
+        var difference = Expression.Subtract(propertyAccess, Expression.Constant(value));
+        var absoluteDifference = Expression.Condition(
+            Expression.LessThan(difference, Expression.Constant(0f)),
+            Expression.Negate(difference),
+            difference);
+
+        var toleranceExpression = Expression.GreaterThan(absoluteDifference, Expression.Constant(tolerance));
+        var lambda = Expression.Lambda<Func<T, bool>>(toleranceExpression, parameter);
+
+        return source.Where(lambda);
     }
 
     /// <summary>

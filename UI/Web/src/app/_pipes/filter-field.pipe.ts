@@ -72,6 +72,8 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.want-to-read');
       case FilterField.ReadingDate:
         return translate('filter-field-pipe.read-date');
+        case FilterField.ReadLast:
+        return translate('filter-field-pipe.read-last');
       case FilterField.AverageRating:
         return translate('filter-field-pipe.average-rating');
       default:

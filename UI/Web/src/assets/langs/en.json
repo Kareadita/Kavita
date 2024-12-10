@@ -668,6 +668,7 @@
         "license-valid": "License is Valid",
         "license-not-valid": "License Not Valid",
         "loading": "{{common.loading}}",
+        "help-label": "{{common.help}}",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
@@ -901,6 +902,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
+        "browse-authors": "Browse Authors",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -909,6 +911,20 @@
         "back": "Back",
         "more": "More",
         "customize": "{{settings.customize}}"
+    },
+
+    "browse-authors": {
+        "title": "Browse Authors & Writers",
+        "author-count": "{{num}} People",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+
+    "person-detail": {
+        "known-for-title": "Known For",
+        "individual-role-title": "As a {{role}}",
+        "browse-person-title": "All Works of {{name}}",
+        "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
+        "all-roles": "Roles"
     },
 
     "library-settings-modal": {
@@ -1056,7 +1072,12 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
     },
 
     "related-tab": {
@@ -1111,7 +1132,9 @@
         "special": "Special",
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "single-volume": "Single Volume"
     },
 
     "external-series-card": {
@@ -1141,7 +1164,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Host Name",
-        "host-name-tooltip": "Domain Name (of Reverse Proxy). If set, email generation will always use this.",
+        "host-name-tooltip": "Domain Name (of Reverse Proxy). Required for email functionality. If no reverse proxy, use any url.",
         "host-name-validation": "Host name must start with http(s) and not end in /",
 
         "sender-address-label": "Sender Address",
@@ -1191,6 +1214,7 @@
         "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences",
         "bulk-action-label": "Bulk Action"
     },
+
 
     "copy-settings-from-library-modal": {
         "close": "{{common.close}}",
@@ -1366,6 +1390,10 @@
         "clean-up-want-to-read-task-desc": "Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.",
         "clean-up-want-to-read-task-success": "Want to Read has been cleaned up",
 
+        "clean-up-task": "General Cleanup",
+        "clean-up-task-desc": "Performs nightly cleanup activities on the server. Can be heavy, advised to not run with active users or scans. Runs every 24 hours.",
+        "clean-up-task-success": "Cleanup complete",
+
         "backup-database-task": "Backup Database",
         "backup-database-task-desc": "Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.",
         "backup-database-task-success": "A job to backup the database has been queued",
@@ -1437,6 +1465,7 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
         "last-sync-title": "Last Sync:",
+        "last-sync-tooltip": "Kavita syncs daily against upstream collection provider.",
         "source-url-title": "Source Url:",
         "total-series-title": "Total Series:",
         "missing-series-title": "Missing Series:"
@@ -1671,6 +1700,7 @@
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL Import",
+        "help-label": "{{common.help}}",
         "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
         "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists that have failed will not move to the next step. Fix the CBL files and retry.",
         "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
@@ -1812,7 +1842,8 @@
         "unit-reading-date": "Date",
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "0.0 - 5.0 Stars",
+        "unit-read-last": "Days from TODAY"
     },
 
     "sort-field-pipe": {
@@ -1985,6 +2016,30 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
 
+    "edit-person-modal": {
+        "title": "{{personName}} Details",
+        "general-tab": "{{edit-series-modal.general-tab}}",
+        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "role-label": "Role",
+        "mal-id-label": "MAL Id",
+        "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
+        "anilist-id-label": "AniList Id",
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "hardcover-id-label": "Hardcover Id",
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "asin-label": "ASIN",
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "description-label": "Description",
+        "required-field": "{{validations.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
+        "save": "{{common.save}}",
+        "download-coversdb": "Download from CoversDB"
+    },
+
     "day-breakdown": {
         "title": "Day Breakdown",
         "no-data": "No progress, get to reading",
@@ -2060,7 +2115,8 @@
     },
 
     "next-expected-card": {
-        "title": "~{{date}}"
+        "title": "~{{date}}",
+        "upcoming-title": "Upcoming"
     },
 
     "server-stats": {
@@ -2197,7 +2253,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-authors}}"
     },
 
     "filter-field-pipe": {
@@ -2205,7 +2262,7 @@
         "characters": "{{metadata-fields.characters-title}}",
         "collection-tags": "Collection Tags",
         "colorist": "Colorist",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "editor": "Editor",
         "formats": "Formats",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2232,6 +2289,7 @@
         "file-path": "File Path",
         "want-to-read": "Want to Read",
         "read-date": "Reading Date",
+        "read-last": "Read Last",
         "average-rating": "Average Rating"
     },
 
@@ -2339,6 +2397,7 @@
         "confirm-regen-covers": "Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don't want to perform a Scan instead?",
         "alert-long-running": "This is a long running process. Please give it the time to complete before invoking again.",
         "confirm-delete-multiple-series": "Are you sure you want to delete {{count}} series? It will not modify files on disk.",
+        "confirm-delete-multiple-chapters": "Are you sure you want to delete {{count}} chapter/volumes? It will not modify files on disk.",
         "confirm-delete-series": "Are you sure you want to delete this series? It will not modify files on disk.",
         "confirm-delete-chapter": "Are you sure you want to delete this chapter? It will not modify files on disk.",
         "confirm-delete-volume": "Are you sure you want to delete this volume? It will not modify files on disk.",
@@ -2373,7 +2432,9 @@
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
         "must-select-library": "At least one library must be selected",
         "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
-        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?"
+        "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?",
+        "person-image-downloaded": "Person cover was downloaded and applied.",
+        "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?"
     },
 
     "read-time-pipe": {
@@ -2555,6 +2616,7 @@
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
+        "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
 
         "book-num": "Book",

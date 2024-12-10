@@ -6,9 +6,9 @@
     <div class="col-auto">
       @if(selectedRoles.length > 0) {
         <span class="form-check float-end">
-          <input id="select-all" type="checkbox" class="form-check-input"
+          <input id="role--select-all" type="checkbox" class="form-check-input"
                  [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-          <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+          <label for="role--select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
         </span>
       }
     </div>

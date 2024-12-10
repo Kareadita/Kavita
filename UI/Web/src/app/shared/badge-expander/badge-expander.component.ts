@@ -4,8 +4,8 @@ import {
   Component,
   ContentChild, EventEmitter,
   inject,
-  Input,
-  OnInit, Output,
+  Input, OnChanges,
+  OnInit, Output, SimpleChanges,
   TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
@@ -20,7 +20,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
   styleUrls: ['./badge-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BadgeExpanderComponent implements OnInit {
+export class BadgeExpanderComponent implements OnInit, OnChanges {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -43,6 +43,11 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.visibleItems = this.items.slice(0, this.itemsTillExpander);
+    this.cdRef.markForCheck();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
     this.visibleItems = this.items.slice(0, this.itemsTillExpander);
     this.cdRef.markForCheck();
   }

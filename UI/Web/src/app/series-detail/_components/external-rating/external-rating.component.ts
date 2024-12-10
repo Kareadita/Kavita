@@ -10,7 +10,7 @@ import {
 import {SeriesService} from "../../../_services/series.service";
 import {Rating} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {NgbModal, NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbPopover} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {LibraryType} from "../../../_models/library/library";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
@@ -22,13 +22,13 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {ImageService} from "../../../_services/image.service";
 import {AsyncPipe, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
-import {InviteUserComponent} from "../../../admin/invite-user/invite-user.component";
 import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [ProviderImagePipe, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent, TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet],
+  imports: [ProviderImagePipe, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent,
+    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,3 +1,5 @@
+@import "../../../theme/variables";
+
 .blur-text {
   color: transparent;
   text-shadow: 0 0 5px var(--body-text-color);
@@ -8,5 +10,10 @@
 
   div {
     word-break: break-word;
+    max-width: 75ch;
+    
+    @media (max-width: $grid-breakpoints-sm) {
+      max-width: 50ch;
+    }
   }
 }

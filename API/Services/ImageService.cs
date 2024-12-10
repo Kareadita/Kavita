@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
@@ -102,22 +103,6 @@ public interface IImageService
     Task<bool> IsImage(string filePath);
 
     /// <summary>
-    /// Downloads the favicon from the specified URL and saves it to the output directory.
-    /// </summary>
-    /// <param name="url">The URL of the favicon.</param>
-    /// <param name="encodeFormat">The encoding format to convert and save the favicon.</param>
-    /// <returns>The file name with extension of the saved favicon.</returns>
-    Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
-
-    /// <summary>
-    /// Downloads the publisher image for the specified publisher name and saves it to the output directory.
-    /// </summary>
-    /// <param name="publisherName">The name of the publisher.</param>
-    /// <param name="encodeFormat">The encoding format to convert and save the publisher image.</param>
-    /// <returns>The file name with extension of the saved publisher image.</returns>
-    Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
-
-    /// <summary>
     /// Updates the color scape of an entity with a cover image.
     /// </summary>
     /// <param name="entity">The entity with a cover image.</param>
@@ -150,6 +135,11 @@ public interface IImageService
 public class ImageService : IImageService
 {
     public const string Name = "ImageService";
+    private readonly ILogger<ImageService> _logger;
+    private readonly IDirectoryService _directoryService;
+    private readonly IEasyCachingProviderFactory _cacheFactory;
+    private readonly IImageFactory _imageFactory;
+
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
@@ -170,22 +160,9 @@ public class ImageService : IImageService
     /// </summary>
     public const uint LibraryThumbnailWidth = 32;
 
-    private readonly ILogger<ImageService> _logger;
-    private readonly IDirectoryService _directoryService;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
-    private readonly IImageFactory _imageFactory;
 
-    private static readonly string[] ValidIconRelations = {
-        "icon",
-        "apple-touch-icon",
-        "apple-touch-icon-precomposed",
-        "apple-touch-icon icon-precomposed" // ComicVine has it combined
-    };
 
-    /// <summary>
-    /// A mapping of urls that need to get the icon from another url, due to strangeness (like app.plex.tv loading a black icon)
-    /// </summary>
-    private static readonly IDictionary<string, string> FaviconUrlMapper = new Dictionary<string, string>
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
         ["https://app.plex.tv"] = "https://plex.tv"
     };
@@ -386,113 +363,30 @@ public class ImageService : IImageService
 
         return Task.FromResult(false);
     }
-    /// <inheritdoc/>
-    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
-    {
-        // Parse the URL to get the domain (including subdomain)
-        var uri = new Uri(url);
-        var domain = uri.Host.Replace(Environment.NewLine, string.Empty);
-        var baseUrl = uri.Scheme + "://" + uri.Host;
 
 
-        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon);
-        var res = await provider.GetAsync<string>(baseUrl);
-        if (res.HasValue)
-        {
-            _logger.LogInformation("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", baseUrl);
-            throw new KavitaException($"Kavita has already tried to fetch from {baseUrl} and failed. Skipping duplicate check");
-        }
 
-        await provider.SetAsync(baseUrl, string.Empty, TimeSpan.FromDays(10));
-        if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
-        {
-            url = value;
-        }
-
-        var correctSizeLink = string.Empty;
-
-        try
-        {
-            var htmlContent = url.GetStringAsync().Result;
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(htmlContent);
-            var pngLinks = htmlDocument.DocumentNode.Descendants("link")
-                .Where(link => ValidIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
-                .Select(link => link.GetAttributeValue("href", string.Empty))
-                .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
-                .ToList();
-
-            correctSizeLink = (pngLinks?.Find(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error downloading favicon.png for {Domain}, will try fallback methods", domain);
-        }
-
-        try
-        {
-            if (string.IsNullOrEmpty(correctSizeLink))
-            {
-                correctSizeLink = await FallbackToKavitaReaderFavicon(baseUrl);
-            }
-            if (string.IsNullOrEmpty(correctSizeLink))
-            {
-                throw new KavitaException($"Could not grab favicon from {baseUrl}");
-            }
-
-            var finalUrl = correctSizeLink;
-
-            // If starts with //, it's coming usually from an offsite cdn
-            if (correctSizeLink.StartsWith("//"))
-            {
-                finalUrl = "https:" + correctSizeLink;
-            }
-            else if (!correctSizeLink.StartsWith(uri.Scheme))
-            {
-                finalUrl = Url.Combine(baseUrl, correctSizeLink);
-            }
-
-            _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
-            // Download the favicon.ico file using Flurl
-            var faviconStream = await finalUrl
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
+    private (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
 
             // Create the destination file path
-            using var image = _imageFactory.Create(faviconStream);
-            var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat);
-            _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
-            return filename;
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error downloading favicon for {Domain}", domain);
-            throw;
-        }
-    }
-    /// <inheritdoc/>
-    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat)
-    {
-        try
-        {
-            var publisherLink = await FallbackToKavitaReaderPublisher(publisherName);
-            if (string.IsNullOrEmpty(publisherLink))
-            {
-                throw new KavitaException($"Could not grab publisher image for {publisherName}");
-            }
-
-            var finalUrl = publisherLink;
-
-            _logger.LogTrace("Fetching publisher image from {Url}", finalUrl);
-            // Download the favicon.ico file using Flurl
-            var publisherStream = await finalUrl
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
-
-            // Create the destination file path
-            using var image = _imageFactory.Create(publisherStream);
+            using var image = Image.PngloadStream(publisherStream);
             var filename = GetPublisherFormat(publisherName, encodeFormat);
-            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat);
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+
+
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName);
             return filename;
         } catch (Exception ex)
@@ -502,7 +396,7 @@ public class ImageService : IImageService
         }
     }
 
-    private (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
+    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {
 
 
@@ -734,67 +628,12 @@ public class ImageService : IImageService
         return destination;
     }
 
-    private static async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
-    {
-        var correctSizeLink = string.Empty;
-        var allOverrides = await "https://www.kavitareader.com/assets/favicons/urls.txt".GetStringAsync();
-        if (!string.IsNullOrEmpty(allOverrides))
-        {
-            var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
-            var externalFile = allOverrides
-                .Split("\n")
-                .FirstOrDefault(url =>
-                    cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
-                    cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
-                    ));
 
-            if (string.IsNullOrEmpty(externalFile))
-            {
-                throw new KavitaException($"Could not grab favicon from {baseUrl}");
-            }
-
-            correctSizeLink = "https://www.kavitareader.com/assets/favicons/" + externalFile;
-        }
-
-        return correctSizeLink;
-    }
-
-    private static async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
-    {
-        var externalLink = string.Empty;
-        var allOverrides = await "https://www.kavitareader.com/assets/publishers/publishers.txt".GetStringAsync();
-        if (!string.IsNullOrEmpty(allOverrides))
-        {
-            var externalFile = allOverrides
-                .Split("\n")
-                .Select(publisherLine =>
-                {
-                    var tokens = publisherLine.Split("|");
-                    if (tokens.Length != 2) return null;
-                    var aliases = tokens[0];
-                    // Multiple publisher aliases are separated by #
-                    if (aliases.Split("#").Any(name => name.ToLowerInvariant().Trim().Equals(publisherName.ToLowerInvariant().Trim())))
-                    {
-                        return tokens[1];
-                    }
-                    return null;
-                })
-                .FirstOrDefault(url => !string.IsNullOrEmpty(url));
-
-            if (string.IsNullOrEmpty(externalFile))
-            {
-                throw new KavitaException($"Could not grab publisher image for {publisherName}");
-            }
-
-            externalLink = "https://www.kavitareader.com/assets/publishers/" + externalFile;
-        }
-
-        return externalLink;
-    }
 
     /// <inheritdoc />
     public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, uint thumbnailWidth = ThumbnailWidth)
     {
+        // TODO: This code has no concept of cropping nor Thumbnail Size
         try
         {
 
@@ -883,6 +722,16 @@ public class ImageService : IImageService
     public static string GetThumbnailFormat(int chapterId)
     {
         return $"thumbnail{chapterId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a person cover
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
+    public static string GetPersonFormat(int personId)
+    {
+        return $"person{personId}";
     }
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)

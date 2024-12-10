@@ -5,6 +5,7 @@
         <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
                   aria-hidden="true"></app-image>
         <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
+<!--        <app-publisher-flipper [publishers]="entity.publishers"></app-publisher-flipper>-->
       </div>
     }
     <span class="me-2">
@@ -15,7 +16,7 @@
        <app-series-format [format]="mangaFormat" [useTitle]="false"></app-series-format>
     </span>
 
-    @if (libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) {
+    @if ((libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) && mangaFormat !== MangaFormat.PDF) {
       <span class="word-count me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
     } @else {
       <span class="word-count me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>

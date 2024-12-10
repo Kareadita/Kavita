@@ -1,5 +1,7 @@
 .bulk-select-container {
-    position: absolute;
+    z-index: 1;
+    top: 0;
+    position: sticky;
 
     .bulk-select {
         background-color: var(--bulk-selection-bg-color);

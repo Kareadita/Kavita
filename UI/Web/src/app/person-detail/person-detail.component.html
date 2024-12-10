@@ -1,0 +1,107 @@
+<div class="main-container container-fluid">
+  <ng-container *transloco="let t; read: 'person-detail'">
+    @if (person$ | async; as person) {
+    <div #companionBar>
+      <app-side-nav-companion-bar>
+        <ng-container title>
+          <h2 class="title text-break">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            <span>{{person.name}}</span>
+          </h2>
+        </ng-container>
+      </app-side-nav-companion-bar>
+    </div>
+
+    <div class="main-container container-fluid pt-2 mb-5">
+      <div class="row mb-0 mb-xl-3 info-container">
+        @if (HasCoverImage) {
+          <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
+            <div class="person-badge">
+              <app-image
+                      objectFit="cover"
+                      height="200px"
+                      width="200px"
+                      [imageUrl]="imageService.getPersonImage(person.id)"
+                      [errorImage]="imageService.noPersonImage"></app-image>
+            </div>
+          </div>
+        } @else {
+          <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
+            <div class="person-badge d-flex align-items-center justify-content-center">
+              <i class="fas fa-user" aria-hidden="true"></i>
+            </div>
+          </div>
+        }
+
+        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
+          <div class="row g-0 mt-2">
+            <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
+
+            @if (roles$ | async; as roles) {
+              <div class="mt-1">
+                <h5>{{t('all-roles')}}</h5>
+                @for(role of roles; track role) {
+                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (works$ | async; as works) {
+      <div class="row mt-2">
+        <app-carousel-reel [items]="works" [title]="t('known-for-title')" (sectionClick)="loadFilterByPerson()">
+          <ng-template #carouselItem let-item>
+            <app-card-item [entity]="item"
+                           [imageUrl]="imageService.getSeriesCoverImage(item.id)"
+                           [title]="item.name"
+                           [suppressArchiveWarning]="true"
+                           (clicked)="navigateToSeries(item)">
+            </app-card-item>
+          </ng-template>
+        </app-carousel-reel>
+      </div>
+    }
+
+
+   <!-- Individual Works Carousel -->
+   @if (roles$ | async; as roles) {
+     @for(role of roles; track role) {
+       <div class="row mt-2">
+         <app-carousel-reel [items]="(chaptersByRole[role] | async)!" [title]="t('individual-role-title', {role: (role | personRole)})" (sectionClick)="loadFilterByRole(role)">
+           <ng-template #carouselItem let-item>
+             <app-chapter-card [chapter]="item" [libraryId]="item.libraryId" [libraryType]="item.libraryType" [seriesId]="item.seriesId">
+
+             </app-chapter-card>
+           </ng-template>
+         </app-carousel-reel>
+       </div>
+     }
+   }
+
+
+
+
+
+    <!-- Collaborated In Carousel -->
+    <div class="row mt-2">
+
+    </div>
+
+    <!-- Might be Interested In... -->
+    <div class="row pt-3">
+
+    </div>
+
+    <!-- External Series including Author -->
+    @if (accountService.hasValidLicense$ | async) {
+      <div class="row mt-2">
+
+      </div>
+    }
+
+  }
+  </ng-container>
+</div>

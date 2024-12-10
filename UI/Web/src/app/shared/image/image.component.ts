@@ -65,6 +65,10 @@ export class ImageComponent implements OnChanges {
    * If the image load fails, instead of showing an error image, hide the image (visibility)
    */
   @Input() hideOnError: boolean = false;
+  /**
+   * Sets the object-fit property of the image. Default is 'fill'.
+   */
+  @Input() objectFit: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down' = 'fill';
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
@@ -109,7 +113,8 @@ export class ImageComponent implements OnChanges {
     }
 
     if (this.classes != '') {
-      this.renderer.addClass(this.imgElem.nativeElement, this.classes);
+      const classTokens = this.classes.split(' ');
+      classTokens.forEach(cls => this.renderer.addClass(this.imgElem.nativeElement, cls));
     }
     this.cdRef.markForCheck();
   }

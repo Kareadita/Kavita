@@ -51,6 +51,10 @@ public enum FilterField
     AverageRating = 28,
     Imprint = 29,
     Team = 30,
-    Location = 31
+    Location = 31,
+    /// <summary>
+    /// Last time User Read
+    /// </summary>
+    ReadLast = 32,
 
 }

@@ -198,7 +198,7 @@
                               <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
                               <select class="form-select" id="publication-status" formControlName="publicationStatus">
                                 @for (opt of publicationStatuses; track opt.value) {
-                                  <option [value]="opt.value">{{opt.title | titlecase}}</option>
+                                  <option [value]="opt.value">{{opt.value | publicationStatus}}</option>
                                 }
                               </select>
                             </div>

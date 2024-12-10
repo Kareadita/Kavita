@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'series-detail'">
-  <app-bulk-operations [actionCallback]="bulkActionCallback" [topOffset]="56"></app-bulk-operations>
+  <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0"></app-bulk-operations>
 
   @if (series && seriesMetadata && libraryType !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
@@ -48,7 +48,7 @@
           </div>
 
           <div class="mt-3 mb-3">
-            <div class="row g-0">
+            <div class="row g-0" style="align-items: center;">
               <div class="col-auto">
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary-outline" (click)="read()">
@@ -72,7 +72,7 @@
               </div>
 
               <div class="col-auto ms-2">
-                <button class="btn btn-secondary-outline" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+                <button class="btn btn-actions" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
                   <span>
                       <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                   </span>
@@ -81,7 +81,7 @@
 
               @if (isAdmin) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
+                  <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                   </button>
                 </div>
@@ -89,19 +89,19 @@
 
               @if ((accountService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
               }
 
               <div class="col-auto ms-2 d-none d-md-block">
-                <div class="card-actions mt-2" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>
               </div>
 
-              <div class="col-auto ms-2 d-none d-md-block">
+              <div class="col-auto ms-2 d-none d-md-block btn-actions">
                 <app-download-button [download$]="download$" [entity]="series" entityType="series"></app-download-button>
               </div>
 
@@ -109,7 +109,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 585 : 200"></app-read-more>
+            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200"></app-read-more>
           </div>
 
           <div class="mt-2 upper-details">
@@ -122,7 +122,7 @@
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Writers, item.id)">{{item.name}}</a>
+                      <a routerLink="/person/{{item.name}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -187,7 +187,7 @@
                   <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
                           <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
                         } @else {
@@ -214,7 +214,7 @@
                 @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
                   <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead +  + '_volumes') {
                         <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
@@ -235,7 +235,7 @@
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
                   <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
@@ -256,7 +256,7 @@
                 @defer (when activeTabId === TabID.Specials; prefetch on idle) {
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
                         <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
                       }
                     </div>
@@ -338,7 +338,15 @@
               <a ngbNavLink>{{t(TabID.Details)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="seriesMetadata" [genres]="seriesMetadata.genres" [tags]="seriesMetadata.tags" [webLinks]="WebLinks"></app-details-tab>
+                  <app-details-tab [metadata]="seriesMetadata"
+                                   [genres]="seriesMetadata.genres"
+                                   [tags]="seriesMetadata.tags"
+                                   [webLinks]="WebLinks"
+                                   [readingTime]="series"
+                                   [releaseYear]="seriesMetadata.releaseYear"
+                                   [language]="seriesMetadata.language"
+                                   [format]="series.format">
+                  </app-details-tab>
                 }
               </ng-template>
             </li>

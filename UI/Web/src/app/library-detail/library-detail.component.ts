@@ -29,12 +29,10 @@ import {FilterSettings} from '../metadata-filter/filter-settings';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {SentenceCasePipe} from '../_pipes/sentence-case.pipe';
 import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
 import {SeriesCardComponent} from '../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
 import {DecimalPipe} from '@angular/common';
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
@@ -47,13 +45,13 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 
 @Component({
-    selector: 'app-library-detail',
-    templateUrl: './library-detail.component.html',
-    styleUrls: ['./library-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent,
-    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective, LoadingComponent]
+  selector: 'app-library-detail',
+  templateUrl: './library-detail.component.html',
+  styleUrls: ['./library-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent,
+    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
 
@@ -265,6 +263,14 @@ export class LibraryDetailComponent implements OnInit {
           case(Action.GenerateColorScape):
             await this.actionService.refreshLibraryMetadata(library, undefined, false);
             break;
+          case (Action.Delete):
+            await this.actionService.deleteLibrary(library, () => {
+              this.loadPageSource.next(true);
+            });
+            break;
+          case (Action.AnalyzeFiles):
+            await this.actionService.analyzeFiles(library);
+            break;
           case(Action.Edit):
             this.actionService.editLibrary(library);
             break;
@@ -321,11 +327,11 @@ export class LibraryDetailComponent implements OnInit {
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
-      this.series = series.result;
-      this.pagination = series.pagination;
-      this.loadingSeries = false;
-      this.cdRef.markForCheck();
-    });
+        this.series = series.result;
+        this.pagination = series.pagination;
+        this.loadingSeries = false;
+        this.cdRef.markForCheck();
+      });
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;

@@ -3,7 +3,9 @@
         <div class="row g-0">
             <div class="col-md-3 me-2 col-10 mb-2">
                 <select class="form-select me-2" formControlName="input">
-                    <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
+                  @for (field of availableFields; track field) {
+                    <option [value]="field">{{field | filterField}}</option>
+                  }
                 </select>
             </div>
 
@@ -16,19 +18,19 @@
             </div>
 
             <div class="col-md-4 col-10 mb-2">
-              @if (formGroup.get('comparison')?.value != FilterComparison.IsEmpty) {
-                <ng-container *ngIf="predicateType$ | async as predicateType">
-                  <ng-container [ngSwitch]="predicateType">
-                    <ng-container *ngSwitchCase="PredicateType.Text">
+              @if (formGroup.get('comparison')?.value !== FilterComparison.IsEmpty) {
+                @if (predicateType$ | async; as predicateType) {
+                  @switch (predicateType) {
+                    @case (PredicateType.Text) {
                       <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
-                    </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Number">
+                    }
+                    @case (PredicateType.Number) {
                       <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
-                    </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Boolean">
+                    }
+                    @case (PredicateType.Boolean) {
                       <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
-                    </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Date">
+                    }
+                    @case (PredicateType.Date) {
                       <div class="input-group">
                         <input
                           class="form-control"
@@ -42,27 +44,21 @@
                         />
                         <button class="btn btn-outline-secondary fa-solid fa-calendar-days" (click)="d.toggle()" type="button"></button>
                       </div>
-
-
-                    </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Dropdown">
-                      <ng-container *ngIf="dropdownOptions$ | async as opts">
-                        <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>
-                        <ng-template #dropdown let-options="options" let-multipleAllowed="multipleAllowed">
-                          <select2 [data]="options"
-                                   formControlName="filterValue"
-                                   [hideSelectedItems]="true"
-                                   [multiple]="multipleAllowed"
-                                   [infiniteScroll]="true"
-                                   [resettable]="true">
-                          </select2>
-                        </ng-template>
-                      </ng-container>
-                    </ng-container>
-                  </ng-container>
-                </ng-container>
+                    }
+                    @case (PredicateType.Dropdown) {
+                      @if (dropdownOptions$ | async; as opts) {
+                        <select2 [data]="opts"
+                                 formControlName="filterValue"
+                                 [hideSelectedItems]="true"
+                                 [multiple]="MultipleDropdownAllowed"
+                                 [infiniteScroll]="true"
+                                 [resettable]="true">
+                        </select2>
+                      }
+                    }
+                  }
+                }
               }
-
             </div>
 
             <div class="col pt-2 ms-2">

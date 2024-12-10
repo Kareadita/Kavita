@@ -13,7 +13,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, NgClass, NgFor, NgIf, NgStyle, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass, NgFor, NgStyle, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -30,7 +30,7 @@ import {
   take,
   tap
 } from 'rxjs';
-import {ChangeContext, LabelType, NgxSliderModule, Options} from 'ngx-slider-v2';
+import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
@@ -70,6 +70,7 @@ import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
+import {DblClickDirective} from "../../../_directives/dbl-click.directive";
 
 
 const PREFETCH_PAGES = 10;
@@ -123,10 +124,10 @@ enum KeyDirection {
         ])
     ],
     standalone: true,
-  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
+  imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
-    FullscreenIconPipe, TranslocoDirective, NgbProgressbar, PercentPipe, NgClass, AsyncPipe]
+    FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -1656,7 +1657,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Bookmarks the current page for the chapter
    */
-  bookmarkPage(event: MouseEvent | undefined = undefined) {
+  bookmarkPage(event: Event | undefined = undefined) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();

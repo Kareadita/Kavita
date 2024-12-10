@@ -11,7 +11,7 @@ using API.Extensions;
 namespace API.Services.Tasks.Scanner.Parser;
 #nullable enable
 
-public static class Parser
+public static partial class Parser
 {
     // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
     public const string DefaultChapter = "-100000"; // -2147483648
@@ -306,7 +306,7 @@ public static class Parser
             RegexTimeout),
         //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
         new Regex(
-            @"(?<Series>.*)(\bc\d+\b)",
+            @"(?<Series>.*?)(?<!\()\bc\d+\b",
             MatchOptions, RegexTimeout),
         //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
         new Regex(
@@ -749,8 +749,9 @@ public static class Parser
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static bool HasSpecialMarker(string filePath)
+    public static bool HasSpecialMarker(string? filePath)
     {
+        if (string.IsNullOrEmpty(filePath)) return false;
         return SpecialMarkerRegex.IsMatch(filePath);
     }
 
@@ -763,30 +764,19 @@ public static class Parser
 
     public static bool IsSpecial(string? filePath, LibraryType type)
     {
-        return type switch
-        {
-            LibraryType.Manga => IsMangaSpecial(filePath),
-            LibraryType.Comic => IsComicSpecial(filePath),
-            LibraryType.Book => IsMangaSpecial(filePath),
-            LibraryType.Image => IsMangaSpecial(filePath),
-            LibraryType.LightNovel => IsMangaSpecial(filePath),
-            LibraryType.ComicVine => IsComicSpecial(filePath),
-            _ => false
-        };
+        return HasSpecialMarker(filePath);
     }
 
     private static bool IsMangaSpecial(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath)) return false;
-        filePath = ReplaceUnderscores(filePath);
-        return MangaSpecialRegex.IsMatch(filePath);
+        return HasSpecialMarker(filePath);
     }
 
     private static bool IsComicSpecial(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath)) return false;
-        filePath = ReplaceUnderscores(filePath);
-        return ComicSpecialRegex.IsMatch(filePath);
+        return HasSpecialMarker(filePath);
     }
 
 
@@ -1004,25 +994,25 @@ public static class Parser
     /// <param name="isComic"></param>
     /// <returns></returns>
 
-    public static string CleanTitle(string title, bool isComic = false, bool replaceSpecials = true)
+    public static string CleanTitle(string title, bool isComic = false)
     {
 
         title = ReplaceUnderscores(title);
 
         title = RemoveEditionTagHolders(title);
 
-        if (replaceSpecials)
-        {
-            if (isComic)
-            {
-                title = RemoveComicSpecialTags(title);
-                title = RemoveEuropeanTags(title);
-            }
-            else
-            {
-                title = RemoveMangaSpecialTags(title);
-            }
-        }
+        // if (replaceSpecials)
+        // {
+        //     if (isComic)
+        //     {
+        //         title = RemoveComicSpecialTags(title);
+        //         title = RemoveEuropeanTags(title);
+        //     }
+        //     else
+        //     {
+        //         title = RemoveMangaSpecialTags(title);
+        //     }
+        // }
 
 
         title = title.Trim(SpacesAndSeparators);
@@ -1099,7 +1089,7 @@ public static class Parser
             }
 
             // Check if there is a range or not
-            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            if (NumberRangeRegex().IsMatch(range))
             {
 
                 var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
@@ -1126,7 +1116,7 @@ public static class Parser
             }
 
             // Check if there is a range or not
-            if (Regex.IsMatch(range, @"\d-{1}\d"))
+            if (NumberRangeRegex().IsMatch(range))
             {
 
                 var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
@@ -1289,10 +1279,15 @@ public static class Parser
     {
         if (string.IsNullOrEmpty(filename)) return filename;
 
-        if (Regex.IsMatch(filename, SupportedExtensions))
+        if (SupportedExtensionsRegex().IsMatch(filename))
         {
-            return Regex.Replace(filename, SupportedExtensions, string.Empty);
+            return SupportedExtensionsRegex().Replace(filename, string.Empty);
         }
         return filename;
     }
+
+    [GeneratedRegex(SupportedExtensions)]
+    private static partial Regex SupportedExtensionsRegex();
+    [GeneratedRegex(@"\d-{1}\d")]
+    private static partial Regex NumberRangeRegex();
 }

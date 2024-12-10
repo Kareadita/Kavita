@@ -39,7 +39,7 @@
 
       @if (count > 1) {
         <div class="count">
-          <span class="badge bg-primary">{{count}}</span>
+          <span class="badge bg-primary">{{count | compactNumber}}</span>
         </div>
       }
 
@@ -73,10 +73,12 @@
     </div>
     @if (title.length > 0 || actions.length > 0) {
       <div class="card-title-container">
-        <span class="card-format">
+        <span>
           @if (showFormat) {
-            <app-series-format [format]="format"></app-series-format>
-          }  
+            <span class="card-format">
+                <app-series-format [format]="format"></app-series-format>
+            </span>
+          }
         </span>
 
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
@@ -84,16 +86,15 @@
             <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
           }
           @if (linkUrl) {
-            <a class="dark-exempt btn-icon" href="javascript:void(0);" [routerLink]="linkUrl">{{title}}</a>
+            <a class="dark-exempt btn-icon" [routerLink]="linkUrl">{{title}}</a>
           } @else {
             {{title}}
           }
         </span>
+
         <span class="card-actions">
         @if (actions && actions.length > 0) {
-
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-
         }
         </span>
       </div>

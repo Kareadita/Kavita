@@ -134,7 +134,7 @@ public class SeriesController : BaseApiController
         var username = User.GetUsername();
         _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
-        return Ok(await _seriesService.DeleteMultipleSeries(new[] {seriesId}));
+        return Ok(await _seriesService.DeleteMultipleSeries([seriesId]));
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -344,7 +344,7 @@ public class SeriesController : BaseApiController
     /// <param name="libraryId"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    [Obsolete("User all-v2")]
+    [Obsolete("Use all-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = User.GetUserId();

@@ -46,7 +46,7 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
     styleUrls: ['./want-to-read.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, NgIf, DecimalPipe, TranslocoDirective]
+    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
 
@@ -143,20 +143,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   ngAfterContentChecked(): void {
     this.scrollService.setScrollContainer(this.scrollingBlock);
-  }
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
   }
 
   removeSeries(seriesId: number) {

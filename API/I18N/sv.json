@@ -35,7 +35,7 @@
     "generic-device-delete": "Det uppstod ett fel vid borttagning av enheten",
     "greater-0": "{0} måste vara större än 0",
     "send-to-kavita-email": "Skicka till enhet kan inte användas utan inställning av e-post",
-    "send-to-size-limit": "Filerna du försöker skicka är för stora för din e-post",
+    "send-to-size-limit": "Filerna du försöker skicka är för stora för din e-postleverantör",
     "generic-send-to": "Det uppstod ett fel vid sändningen av dina filer till enheten",
     "bookmarks-empty": "Bokmärken kan inte vara tomma",
     "series-doesnt-exist": "Serie saknas",
@@ -195,5 +195,11 @@
     "on-deck": "Fortsätt Läsa",
     "browse-on-deck": "Bläddra i Fortsätt Läsa",
     "dashboard-stream-doesnt-exist": "Dashboard Stream saknas",
-    "sidenav-stream-doesnt-exist": "SideNav Stream saknas"
+    "sidenav-stream-doesnt-exist": "SideNav Stream saknas",
+    "person-doesnt-exist": "Personen existerar inte",
+    "person-name-required": "Personnamn är obligatorisk",
+    "person-name-unique": "Personnamn måste vara unikt",
+    "person-image-doesnt-exist": "Personen existerar inte i CoversDB",
+    "generic-cover-person-save": "Kan inte spara omslagsbilden till Personen",
+    "generic-cover-volume-save": "Kan inte spara omslagsbilden till Volymen"
 }
