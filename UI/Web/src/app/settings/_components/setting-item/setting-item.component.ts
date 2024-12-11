@@ -11,7 +11,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
-import {AbstractControl, FormControl} from "@angular/forms";
 
 @Component({
   selector: 'app-setting-item',
@@ -37,7 +36,6 @@ export class SettingItemComponent {
   @Input() subtitle: string | undefined = undefined;
   @Input() labelId: string | undefined = undefined;
   @Input() toggleOnViewClick: boolean = true;
-  @Input() control: AbstractControl<any> | null = null;
   @Output() editMode = new EventEmitter<boolean>();
 
   /**
@@ -69,7 +67,6 @@ export class SettingItemComponent {
       .pipe(
         filter((event: Event) => {
           if (!this.toggleOnViewClick) return false;
-          if (this.control != null && this.control.invalid) return false;
 
           const mouseEvent = event as MouseEvent;
           const selection = window.getSelection();
@@ -89,7 +86,6 @@ export class SettingItemComponent {
 
     if (!this.toggleOnViewClick) return;
     if (!this.canEdit) return;
-    if (this.control != null && this.control.invalid) return;
 
     this.isEditMode = !this.isEditMode;
     this.editMode.emit(this.isEditMode);
