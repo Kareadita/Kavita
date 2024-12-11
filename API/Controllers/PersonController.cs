@@ -9,6 +9,7 @@ using API.Services;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nager.ArticleNumber;
 
@@ -72,6 +73,7 @@ public class PersonController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
+    [Authorize("AdminRequired")]
     [HttpPost("update")]
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {

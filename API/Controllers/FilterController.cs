@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Dashboard;
@@ -9,6 +10,7 @@ using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -21,10 +23,12 @@ namespace API.Controllers;
 public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILocalizationService _localizationService;
 
-    public FilterController(IUnitOfWork unitOfWork)
+    public FilterController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -37,6 +41,7 @@ public class FilterController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.SmartFilters);
         if (user == null) return Unauthorized();
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
         if (Seed.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -78,6 +83,8 @@ public class FilterController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+
         var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
         // This needs to delete any dashboard filters that have it too

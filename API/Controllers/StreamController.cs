@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Dashboard;
 using API.DTOs.SideNav;
@@ -19,11 +20,13 @@ public class StreamController : BaseApiController
 {
     private readonly IStreamService _streamService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILocalizationService _localizationService;
 
-    public StreamController(IStreamService streamService, IUnitOfWork unitOfWork)
+    public StreamController(IStreamService streamService, IUnitOfWork unitOfWork, ILocalizationService localizationService)
     {
         _streamService = streamService;
         _unitOfWork = unitOfWork;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -74,6 +77,7 @@ public class StreamController : BaseApiController
     [HttpPost("update-external-source")]
     public async Task<ActionResult<ExternalSourceDto>> UpdateExternalSource(ExternalSourceDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         // Check if a host and api key exists for the current user
         return Ok(await _streamService.UpdateExternalSource(User.GetUserId(), dto));
     }
@@ -86,7 +90,8 @@ public class StreamController : BaseApiController
     [HttpGet("external-source-exists")]
     public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name, string apiKey)
     {
-        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), host, name, apiKey));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), name, host, apiKey));
     }
 
     /// <summary>
@@ -97,6 +102,7 @@ public class StreamController : BaseApiController
     [HttpDelete("delete-external-source")]
     public async Task<ActionResult> ExternalSourceExists(int externalSourceId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.DeleteExternalSource(User.GetUserId(), externalSourceId);
         return Ok();
     }
@@ -110,6 +116,7 @@ public class StreamController : BaseApiController
     [HttpPost("add-dashboard-stream")]
     public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         return Ok(await _streamService.CreateDashboardStreamFromSmartFilter(User.GetUserId(), smartFilterId));
     }
 
@@ -121,6 +128,7 @@ public class StreamController : BaseApiController
     [HttpPost("update-dashboard-stream")]
     public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.UpdateDashboardStream(User.GetUserId(), dto);
         return Ok();
     }
@@ -133,6 +141,7 @@ public class StreamController : BaseApiController
     [HttpPost("update-dashboard-position")]
     public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateStreamPositionDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.UpdateDashboardStreamPosition(User.GetUserId(), dto);
         return Ok();
     }
@@ -146,6 +155,7 @@ public class StreamController : BaseApiController
     [HttpPost("add-sidenav-stream")]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNav([FromQuery] int smartFilterId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         return Ok(await _streamService.CreateSideNavStreamFromSmartFilter(User.GetUserId(), smartFilterId));
     }
 
@@ -157,6 +167,7 @@ public class StreamController : BaseApiController
     [HttpPost("add-sidenav-stream-from-external-source")]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNavFromExternalSource([FromQuery] int externalSourceId)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         return Ok(await _streamService.CreateSideNavStreamFromExternalSource(User.GetUserId(), externalSourceId));
     }
 
@@ -168,6 +179,7 @@ public class StreamController : BaseApiController
     [HttpPost("update-sidenav-stream")]
     public async Task<ActionResult> UpdateSideNavStream(SideNavStreamDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.UpdateSideNavStream(User.GetUserId(), dto);
         return Ok();
     }
@@ -180,6 +192,7 @@ public class StreamController : BaseApiController
     [HttpPost("update-sidenav-position")]
     public async Task<ActionResult> UpdateSideNavStreamPosition(UpdateStreamPositionDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.UpdateSideNavStreamPosition(User.GetUserId(), dto);
         return Ok();
     }
@@ -187,6 +200,7 @@ public class StreamController : BaseApiController
     [HttpPost("bulk-sidenav-stream-visibility")]
     public async Task<ActionResult> BulkUpdateSideNavStream(BulkUpdateSideNavStreamVisibilityDto dto)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _streamService.UpdateSideNavStreamBulk(User.GetUserId(), dto);
         return Ok();
     }

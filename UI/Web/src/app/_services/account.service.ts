@@ -15,6 +15,7 @@ import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
+import {CoverImageSize} from "../admin/_models/cover-image-size";
 
 export enum Role {
   Admin = 'Admin',
@@ -26,6 +27,17 @@ export enum Role {
   Login = 'Login',
   Promote = 'Promote',
 }
+
+export const allRoles = [
+  Role.Admin,
+  Role.ChangePassword,
+  Role.Bookmark,
+  Role.Download,
+  Role.ChangeRestriction,
+  Role.ReadOnly,
+  Role.Login,
+  Role.Promote,
+]
 
 @Injectable({
   providedIn: 'root'
@@ -91,14 +103,22 @@ export class AccountService {
     return true;
   }
 
-  hasAnyRole(user: User, roles: Array<Role>) {
+  hasAnyRole(user: User, roles: Array<Role>, restrictedRoles: Array<Role> = []) {
     if (!user || !user.roles) {
       return false;
     }
+
+    // If restricted roles are provided and the user has any of them, deny access
+    if (restrictedRoles.length > 0 && restrictedRoles.some(role => user.roles.includes(role))) {
+      return false;
+    }
+
+    // If roles are empty, allow access (no restrictions by roles)
     if (roles.length === 0) {
       return true;
     }
 
+    // Allow access if the user has any of the allowed roles
     return roles.some(role => user.roles.includes(role));
   }
 

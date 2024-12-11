@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -82,12 +83,20 @@ public class UsersController : BaseApiController
         return Ok(libs.Any(x => x.Id == libraryId));
     }
 
+    /// <summary>
+    /// Update the user preferences
+    /// </summary>
+    /// <remarks>If the user has ReadOnly role, they will not be able to perform this action</remarks>
+    /// <param name="preferencesDto"></param>
+    /// <returns></returns>
     [HttpPost("update-preferences")]
     public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+
         var existingPreferences = user!.UserPreferences;
 
         existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;

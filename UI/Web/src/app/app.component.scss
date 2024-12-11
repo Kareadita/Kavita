@@ -123,6 +123,7 @@
   filter: blur(20px);
   object-fit: contain;
   transform: scale(1.1);
+  mix-blend-mode: color;
 
   .background-area {
     position: absolute;

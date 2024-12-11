@@ -623,10 +623,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
-      if (event.detail > 1) return;
-      this.toggleMenu();
-    });
+    // fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
+    //   if (event.detail > 1) return;
+    //   this.toggleMenu();
+    // });
 
     fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
@@ -1663,6 +1663,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
     if (this.bookmarkMode) return;
+    if (!(this.accountService.hasBookmarkRole(this.user) || this.accountService.hasAdminRole(this.user))) return;
 
     const pageNum = this.pageNum;
     // if canvasRenderer and doubleRenderer is undefined, then we are in webtoon mode
