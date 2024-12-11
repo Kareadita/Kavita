@@ -87,14 +87,14 @@
             {{selectedTheme.name | sentenceCase}}
             <div class="float-end">
               @if (selectedTheme.isSiteTheme) {
-                @if (selectedTheme.name !== 'Dark') {
+                @if (selectedTheme.name !== 'Dark' && (canUseThemes$ | async)) {
                   <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
                 }
                 @if (hasAdmin$ | async) {
                   <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
                 }
                 <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
-              } @else {
+              } @else if (canUseThemes$ | async) {
                 <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
               }
             </div>

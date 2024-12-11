@@ -41,6 +41,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
   isViewMode: boolean = true;
+  canEdit: boolean = false;
 
 
   public get password() { return this.passwordChangeForm.get('password'); }
@@ -50,6 +51,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
       this.user = user;
+      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
       this.cdRef.markForCheck();
     });
 

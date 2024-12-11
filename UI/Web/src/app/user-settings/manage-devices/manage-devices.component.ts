@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   inject,
   OnInit
 } from '@angular/core';
@@ -20,6 +20,10 @@ import {SortableHeader} from "../../_single-module/table/_directives/sortable-he
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {EditDeviceModalComponent} from "../_modals/edit-device-modal/edit-device-modal.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map} from "rxjs";
+import {shareReplay} from "rxjs/operators";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
     selector: 'app-manage-devices',
@@ -33,15 +37,23 @@ import {DefaultModalOptions} from "../../_models/default-modal-options";
 export class ManageDevicesComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly deviceService = inject(DeviceService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
+  private readonly accountService = inject(AccountService);
 
   devices: Array<Device> = [];
   isEditingDevice: boolean = false;
   device: Device | undefined;
   hasEmailSetup = false;
+
+  isReadOnly$ = this.accountService.currentUser$.pipe(
+    takeUntilDestroyed(this.destroyRef),
+    map(c => c && this.accountService.hasReadOnlyRole(c)),
+    shareReplay({refCount: true, bufferSize: 1}),
+  );
 
   ngOnInit(): void {
     this.settingsService.isEmailSetup().subscribe(res => {

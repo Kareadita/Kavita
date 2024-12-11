@@ -73,6 +73,12 @@ export class ThemeManagerComponent {
     shareReplay({refCount: true, bufferSize: 1}),
   );
 
+  canUseThemes$ = this.accountService.currentUser$.pipe(
+    takeUntilDestroyed(this.destroyRef),
+    map(c => c && !this.accountService.hasReadOnlyRole(c)),
+    shareReplay({refCount: true, bufferSize: 1}),
+  );
+
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
   isUploadingTheme: boolean = false;

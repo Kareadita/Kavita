@@ -1663,6 +1663,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
     if (this.bookmarkMode) return;
+    if (!(this.accountService.hasBookmarkRole(this.user) || this.accountService.hasAdminRole(this.user))) return;
 
     const pageNum = this.pageNum;
     // if canvasRenderer and doubleRenderer is undefined, then we are in webtoon mode

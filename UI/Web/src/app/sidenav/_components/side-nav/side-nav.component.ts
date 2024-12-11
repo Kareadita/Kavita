@@ -66,6 +66,7 @@ export class SideNavComponent implements OnInit {
   }
   showAll: boolean = false;
   totalSize = 0;
+  isReadOnly = false;
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -146,6 +147,8 @@ export class SideNavComponent implements OnInit {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (!user) return;
+      this.isReadOnly = this.accountService.hasReadOnlyRole(user!);
+      this.cdRef.markForCheck();
       this.loadDataSubject.next();
     });
   }

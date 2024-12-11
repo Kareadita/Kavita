@@ -89,7 +89,9 @@ public class StatisticService : IStatisticService
 
         var lastActive = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .MaxAsync(p => p.LastModified);
+            .Select(p => p.LastModified)
+            .DefaultIfEmpty()
+            .MaxAsync();
 
 
         // First get the total pages per library
@@ -127,12 +129,23 @@ public class StatisticService : IStatisticService
 
         var earliestReadDate = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .MinAsync(p => p.Created);
+            .Select(p => p.Created)
+            .DefaultIfEmpty()
+            .MinAsync();
 
-        var timeDifference = DateTime.Now - earliestReadDate;
-        var deltaWeeks = (int)Math.Ceiling(timeDifference.TotalDays / 7);
+        if (earliestReadDate == DateTime.MinValue)
+        {
+            averageReadingTimePerWeek = 0;
+        }
+        else
+        {
+            var timeDifference = DateTime.Now - earliestReadDate;
+            var deltaWeeks = (int)Math.Ceiling(timeDifference.TotalDays / 7);
 
-        averageReadingTimePerWeek /= deltaWeeks;
+            averageReadingTimePerWeek /= deltaWeeks;
+        }
+
+
 
 
         return new UserReadStatistics()
