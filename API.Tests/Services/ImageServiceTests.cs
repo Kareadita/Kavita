@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -141,7 +141,7 @@ public class ImageServiceTests
         var factory = LoggerFactory.Create(builder => { builder.AddConsole(); });
         var logger = factory.CreateLogger<ImageService>();
 
-        ImageService service = new ImageService(logger, null, null, new ImageMagickImageFactory());
+        ImageService service = new ImageService(logger, null,  new ImageMagickImageFactory());
 
         // Step 3: Process each image
         foreach (var imagePath in imageFiles)

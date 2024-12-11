@@ -31,7 +31,7 @@ public class ArchiveServiceBenchmark
     public ArchiveServiceBenchmark()
     {
         _directoryService = new DirectoryService(null, new FileSystem());
-        _imageService = new ImageService(null, _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageFactory>());
+        _imageService = new ImageService(null, _directoryService,  Substitute.For<IImageFactory>());
         _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>());
         _imageFactory = new ImageMagickImageFactory();
     }

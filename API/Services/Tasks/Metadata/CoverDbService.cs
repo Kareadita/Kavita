@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.ImageServices;
 using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
@@ -15,7 +16,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NetVips;
+
 
 namespace API.Services.Tasks.Metadata;
 
@@ -33,6 +34,7 @@ public class CoverDbService : ICoverDbService
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly IHostEnvironment _env;
+    private readonly IImageFactory _imageFactory;
 
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
 
@@ -52,12 +54,13 @@ public class CoverDbService : ICoverDbService
     };
 
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
-        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env)
+        IEasyCachingProviderFactory cacheFactory, IImageFactory imageFactory, IHostEnvironment env)
     {
         _logger = logger;
         _directoryService = directoryService;
         _cacheFactory = cacheFactory;
         _env = env;
+        _imageFactory = imageFactory;
     }
 
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
@@ -134,24 +137,9 @@ public class CoverDbService : ICoverDbService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.PngloadStream(faviconStream);
+            using var image = _imageFactory.Create(faviconStream);
             var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
-
-
+            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename), encodeFormat);
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
             return filename;
         } catch (Exception ex)
@@ -178,24 +166,9 @@ public class CoverDbService : ICoverDbService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.NewFromStream(publisherStream);
+            using var image = _imageFactory.Create(publisherStream);
             var filename = ImageService.GetPublisherFormat(publisherName, encodeFormat);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
-
-
+            await image.SaveAsync(Path.Combine(_directoryService.PublisherDirectory, filename), encodeFormat);
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
             return filename;
         } catch (Exception ex)
@@ -233,23 +206,8 @@ public class CoverDbService : ICoverDbService
             var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
-
-            using var image = Image.NewFromStream(personStream);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(targetFile);
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(targetFile);
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(targetFile);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
-
+            using var image = _imageFactory.Create(personStream);
+            await image.SaveAsync(targetFile, encodeFormat);
             _logger.LogDebug("Person image for {PersonName} downloaded and saved successfully", person.Name);
 
             return filename;

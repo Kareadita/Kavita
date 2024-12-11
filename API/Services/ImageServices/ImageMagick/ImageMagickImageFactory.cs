@@ -71,7 +71,7 @@ public class ImageMagickImageFactory : IImageFactory
         var rgbPixels = new List<Vector3>();
         // Convert to list of Vector3 (RGB)
 
-        for (uint x = 0; x < pixels.Length; x += im.ChannelCount)
+        for (uint x = 0; x < pixels.Length; x += 4)
             rgbPixels.Add(new Vector3(pixels[x], pixels[x + 1] , pixels[x + 2]));
         return rgbPixels;
     }

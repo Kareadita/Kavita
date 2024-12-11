@@ -1279,15 +1279,15 @@ public static partial class Parser
     {
         if (string.IsNullOrEmpty(filename)) return filename;
 
-        if (SupportedExtensionsRegex().IsMatch(filename))
+        if (SupportedExtensionsRegex.IsMatch(filename))
         {
-            return SupportedExtensionsRegex().Replace(filename, string.Empty);
+            return SupportedExtensionsRegex.Replace(filename, string.Empty);
         }
         return filename;
     }
 
-    [GeneratedRegex(SupportedExtensions)]
-    private static partial Regex SupportedExtensionsRegex();
+    private static Regex SupportedExtensionsRegex = new Regex(SupportedExtensions, RegexOptions.Compiled);
+
     [GeneratedRegex(@"\d-{1}\d")]
     private static partial Regex NumberRangeRegex();
 }

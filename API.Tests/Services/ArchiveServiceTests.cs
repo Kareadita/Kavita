@@ -30,7 +30,7 @@ public class ArchiveServiceTests
     {
         _testOutputHelper = testOutputHelper;
         _archiveService = new ArchiveService(_logger, _directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageFactory>()),
+            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService,  Substitute.For<IImageFactory>()),
             Substitute.For<IMediaErrorService>());
     }
 
@@ -168,7 +168,7 @@ public class ArchiveServiceTests
     public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds, Substitute.For<IEasyCachingProviderFactory>(), new ImageMagickImageFactory());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds,  new ImageMagickImageFactory());
         var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
@@ -205,7 +205,7 @@ public class ArchiveServiceTests
     [InlineData("sorting.zip", "sorting.expected.png")]
     public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
     {
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IEasyCachingProviderFactory>(), Substitute.For<IImageFactory>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, Substitute.For<IImageFactory>());
         var archiveService =  Substitute.For<ArchiveService>(_logger,
             new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
             Substitute.For<IMediaErrorService>());

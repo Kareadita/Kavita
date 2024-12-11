@@ -19,12 +19,6 @@ using API.Entities.Interfaces;
 using API.Extensions;
 using API.Services.ImageServices;
 using API.Services.Tasks.Scanner.Parser;
-using EasyCaching.Core;
-using Flurl;
-using Flurl.Http;
-using HtmlAgilityPack;
-using Kavita.Common;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.Logging;
 
 
@@ -137,7 +131,6 @@ public class ImageService : IImageService
     public const string Name = "ImageService";
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly IImageFactory _imageFactory;
 
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
@@ -162,11 +155,6 @@ public class ImageService : IImageService
 
 
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
-    {
-        ["https://app.plex.tv"] = "https://plex.tv"
-    };
-
 
 
     private static NamedMonitor _lock = new NamedMonitor();
@@ -189,11 +177,10 @@ public class ImageService : IImageService
     /// <param name="directoryService">The directory service.</param>
     /// <param name="cacheFactory">The cache factory.</param>
     /// <param name="imageFactory">The image factory.</param>
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory, IImageFactory imageFactory)
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IImageFactory imageFactory)
     {
         _logger = logger;
         _directoryService = directoryService;
-        _cacheFactory = cacheFactory;
         _imageFactory = imageFactory;
     }
 
@@ -364,39 +351,7 @@ public class ImageService : IImageService
         return Task.FromResult(false);
     }
 
-
-
     private (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
-
-            // Create the destination file path
-            using var image = Image.PngloadStream(publisherStream);
-            var filename = GetPublisherFormat(publisherName, encodeFormat);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
-
-
-            _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName);
-            return filename;
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error downloading image for {PublisherName}", publisherName);
-            throw;
-        }
-    }
-
-    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {
 
 
