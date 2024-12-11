@@ -765,6 +765,8 @@ public class ProcessSeries : IProcessSeries
                 var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
                 if (filesExist) continue;
 
+                // If no files exist, remove the chapter
+                if (filesExist) continue;
                 _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
                     existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 chaptersToRemove.Add(existingChapter); // Mark chapter for removal
