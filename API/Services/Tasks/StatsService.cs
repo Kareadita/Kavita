@@ -60,8 +60,7 @@ public class StatsService : IStatsService
         _emailService = emailService;
         _cacheService = cacheService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(ApiUrl);
     }
 
     /// <summary>

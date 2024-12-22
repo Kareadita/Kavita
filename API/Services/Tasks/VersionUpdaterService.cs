@@ -75,10 +75,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         _eventHub = eventHub;
         _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
 
-        FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-        FlurlHttp.ConfigureClient(GithubAllReleasesUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);
+        FlurlConfiguration.ConfigureClientForUrl(GithubAllReleasesUrl);
     }
 
     /// <summary>
