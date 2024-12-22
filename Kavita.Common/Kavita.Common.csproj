@@ -5,6 +5,7 @@
         <Product>Kavita</Product>
         <AssemblyVersion>0.8.4.6</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
+        <InvariantGlobalization>true</InvariantGlobalization>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>
 
