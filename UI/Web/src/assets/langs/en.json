@@ -868,7 +868,8 @@
         "title": "Match {{seriesName}}",
         "description": "Enter an AniList/MAL url or an alternative series name to match against",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "no-results": "Unable to find a match. Try adding an Id or the url from a supported provider and retry."
     },
 
     "metadata-fields": {

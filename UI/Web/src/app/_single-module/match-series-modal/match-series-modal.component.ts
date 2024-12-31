@@ -9,6 +9,8 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {MatchSeriesResultItemComponent} from "../match-series-result-item/match-series-result-item.component";
 import {ExternalSeriesDetail} from "../../_models/series-detail/external-series-detail";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -16,7 +18,8 @@ import {ExternalSeriesDetail} from "../../_models/series-detail/external-series-
   imports: [
     TranslocoDirective,
     ImageComponent,
-    MatchSeriesResultItemComponent
+    MatchSeriesResultItemComponent,
+    LoadingComponent
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -30,7 +33,7 @@ export class MatchSeriesModalComponent implements OnInit {
   @Input({required: true}) series!: Series;
 
   formGroup = new FormGroup({});
-  matches: Array<ExternalSeriesDetail> = [];
+  matches: Array<ExternalSeriesMatch> = [];
   isLoading = true;
 
   ngOnInit() {
@@ -57,10 +60,15 @@ export class MatchSeriesModalComponent implements OnInit {
     this.modalService.close(true);
   }
 
-  selectMatch(item: ExternalSeriesDetail) {
+  selectMatch(item: ExternalSeriesMatch) {
 
+    const data = item.series;
+    data.tags = data.tags || [];
+    data.genres = data.genres || [];
 
-    this.save();
+    this.seriesService.updateMatch(this.series.id, data).subscribe(_ => {
+      this.save();
+    });
   }
 
 }

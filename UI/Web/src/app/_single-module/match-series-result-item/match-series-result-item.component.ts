@@ -11,13 +11,20 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {ExternalSeriesDetail} from "../../_models/series-detail/external-series-detail";
+import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
+import {PercentPipe} from "@angular/common";
+import {TranslocoPercentPipe} from "@jsverse/transloco-locale";
+import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 
 @Component({
   selector: 'app-match-series-result-item',
   standalone: true,
   imports: [
     ImageComponent,
-    SeriesFormatComponent
+    SeriesFormatComponent,
+    PercentPipe,
+    TranslocoPercentPipe,
+    ReadMoreComponent
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',
@@ -27,8 +34,8 @@ export class MatchSeriesResultItemComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input({required: true}) item!: ExternalSeriesDetail;
-  @Output() selected: EventEmitter<ExternalSeriesDetail> = new EventEmitter();
+  @Input({required: true}) item!: ExternalSeriesMatch;
+  @Output() selected: EventEmitter<ExternalSeriesMatch> = new EventEmitter();
 
   selectItem() {
     this.selected.emit(this.item);

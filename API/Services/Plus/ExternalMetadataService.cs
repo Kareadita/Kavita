@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Collection;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Matching;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -79,7 +80,8 @@ public interface IExternalMetadataService
     Task GetNewSeriesData(int seriesId, LibraryType libraryType);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
-    Task<IList<ExternalSeriesDetailDto>> MatchSeries(MatchSeriesDto dto);
+    Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
+    Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -229,7 +231,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task<IList<ExternalSeriesDetailDto>> MatchSeries(MatchSeriesDto dto)
+    public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto)
     {
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
@@ -259,14 +261,14 @@ public class ExternalMetadataService : IExternalMetadataService
             return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(matchRequest)
-                .ReceiveJson<IList<ExternalSeriesDetailDto>>();
+                .ReceiveJson<IList<ExternalSeriesMatchDto>>();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error happened during the request to Kavita+ API");
         }
 
-        return ArraySegment<ExternalSeriesDetailDto>.Empty;
+        return ArraySegment<ExternalSeriesMatchDto>.Empty;
     }
 
 
@@ -299,6 +301,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// Returns Series Detail data from Kavita+ - Review, Recs, Ratings
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
     /// <returns></returns>
     public async Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType)
     {
@@ -316,10 +319,34 @@ public class ExternalMetadataService : IExternalMetadataService
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId);
         }
 
+        var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId);
+        if (data == null) return _defaultReturn;
+
+        return await FetchExternalMetadataForSeries(seriesId, libraryType, data);
+    }
+
+    public async Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
+        if (series == null) return;
+
+        // Remove from Blacklist
+        await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+
+        // Refetch metadata with a Direct lookup
+        await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
+        {
+            AniListId = dto.AniListId,
+            MalId = dto.MALId,
+        });
+
+        _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, dto.Name);
+    }
+
+    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesDto data)
+    {
         try
         {
-            var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId);
-            if (data == null) return _defaultReturn;
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", data.SeriesName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
@@ -383,7 +410,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error happened during the request to Kavita+ API");
+            _logger.LogError(ex, "Unable to fetch external series metadata from Kavita+");
         }
 
         // Blacklist the series as it wasn't found in Kavita+

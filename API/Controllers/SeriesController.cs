@@ -9,6 +9,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Matching;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -622,13 +623,23 @@ public class SeriesController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("match")]
-    public async Task<ActionResult<IList<ExternalSeriesDetailDto>>> MatchSeries(MatchSeriesDto dto)
+    public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         if (dto.DontMatch)
         {
             // TODO: Figure out how to architect this
         }
         return Ok(await _externalMetadataService.MatchSeries(dto));
+    }
+
+    [HttpPost("update-match")]
+    public async Task<ActionResult> UpdateSeriesMatch(ExternalSeriesDetailDto dto, [FromQuery] int seriesId)
+    {
+        // 1. We need to undo the ExternalSeries link and create with a new one
+        // 2. We need to trigger Force Refresh so that the cache layers are updated
+        await _externalMetadataService.FixSeriesMatch(seriesId, dto);
+
+        return Ok();
     }
 
 }
