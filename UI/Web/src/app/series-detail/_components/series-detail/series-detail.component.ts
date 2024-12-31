@@ -585,6 +585,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         if (this.downloadInProgress) return;
         this.downloadSeries();
         break;
+      case Action.Match:
+        this.actionService.matchSeries(this.series, (refreshNeeded) => {});
+        break;
       case Action.SendTo:
         {
           const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]

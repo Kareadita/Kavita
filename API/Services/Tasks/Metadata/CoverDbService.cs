@@ -229,7 +229,7 @@ public class CoverDbService : ICoverDbService
 
 
             _logger.LogTrace("Fetching publisher image from {Url}", personImageLink.Sanitize());
-            // Download the publisher file using Flurl
+            // Download the file using Flurl
             var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
@@ -263,7 +263,7 @@ public class CoverDbService : ICoverDbService
 
     private async Task<string> GetCoverPersonImagePath(Person person)
     {
-        var tempFile = Path.Join(_directoryService.TempDirectory, "people.yml");
+        var tempFile = Path.Join(_directoryService.LongTermCacheDirectory, "people.yml");
 
         // Check if the file already exists and skip download in Development environment
         if (File.Exists(tempFile))
@@ -286,7 +286,7 @@ public class CoverDbService : ICoverDbService
         if (!File.Exists(tempFile))
         {
             var masterPeopleFile = await $"{NewHost}people/people.yml"
-                .DownloadFileAsync(_directoryService.TempDirectory);
+                .DownloadFileAsync(_directoryService.LongTermCacheDirectory);
 
             if (!File.Exists(tempFile) || string.IsNullOrEmpty(masterPeopleFile))
             {

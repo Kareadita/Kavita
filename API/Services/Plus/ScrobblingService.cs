@@ -229,7 +229,7 @@ public class ScrobblingService : IScrobblingService
             AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = GetMalId(series),
             AppUserId = userId,
-            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             ReviewBody = reviewBody,
             ReviewTitle = reviewTitle
         };
@@ -276,7 +276,7 @@ public class ScrobblingService : IScrobblingService
             AniListId = GetAniListId(series),
             MalId = GetMalId(series),
             AppUserId = userId,
-            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
@@ -284,13 +284,13 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {UserId}", series.Name, userId);
     }
 
-    private static long? GetMalId(Series series)
+    public static long? GetMalId(Series series)
     {
         var malId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite);
         return malId ?? series.ExternalSeriesMetadata.MalId;
     }
 
-    private static int? GetAniListId(Series series)
+    public static int? GetAniListId(Series series)
     {
         var aniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite);
         return aniListId ?? series.ExternalSeriesMetadata.AniListId;
@@ -339,7 +339,7 @@ public class ScrobblingService : IScrobblingService
                     (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
                 ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
-                Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+                Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             };
 
             _unitOfWork.ScrobbleRepository.Attach(evt);
@@ -374,7 +374,7 @@ public class ScrobblingService : IScrobblingService
             AniListId = GetAniListId(series),
             MalId = GetMalId(series),
             AppUserId = userId,
-            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();

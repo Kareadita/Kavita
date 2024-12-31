@@ -28,7 +28,7 @@ public class ScrobbleEvent : IEntityDate
     /// </summary>
     public string? ReviewBody { get; set; }
     public string? ReviewTitle { get; set; }
-    public required MediaFormat Format { get; set; }
+    public required PlusMediaFormat Format { get; set; }
     /// <summary>
     /// Depends on the ScrobbleEvent if filled in
     /// </summary>

@@ -21,6 +21,7 @@ import {Recommendation} from "../_models/series-detail/recommendation";
 import {ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
 import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapter";
 import {QueryContext} from "../_models/metadata/v2/query-context";
+import {ExternalSeries} from "../_models/series-detail/external-series";
 
 @Injectable({
   providedIn: 'root'
@@ -233,6 +234,10 @@ export class SeriesService {
 
   getNextExpectedChapterDate(seriesId: number) {
     return this.httpClient.get<NextExpectedChapter>(this.baseUrl + 'series/next-expected?seriesId=' + seriesId);
+  }
+
+  matchSeries(model: any) {
+    return this.httpClient.post<Array<ExternalSeriesDetail>>(this.baseUrl + 'series/match', model);
   }
 
 }

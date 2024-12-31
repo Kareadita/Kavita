@@ -32,6 +32,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// Fetches genres from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all genres</param>
+    /// <param name="context">Context from which this API was invoked</param>
     /// <returns></returns>
     [HttpGet("genres")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds", "context"])]

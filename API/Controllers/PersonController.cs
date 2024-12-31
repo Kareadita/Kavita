@@ -73,7 +73,7 @@ public class PersonController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize("AdminRequired")]
+    [Authorize("RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
@@ -135,7 +135,11 @@ public class PersonController : BaseApiController
 
         var personImage = await _coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 
-        if (string.IsNullOrEmpty(personImage)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+        if (string.IsNullOrEmpty(personImage))
+        {
+
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+        }
 
         person.CoverImage = personImage;
         _imageService.UpdateColorScape(person);

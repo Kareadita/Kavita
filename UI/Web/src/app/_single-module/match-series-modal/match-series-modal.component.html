@@ -1,0 +1,27 @@
+<ng-container *transloco="let t; read:'match-series-modal'">
+  <div>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">
+        {{t('title', {seriesName: series.name})}}
+      </h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+    <div class="modal-body scrollable-modal">
+      <p>{{t('description')}}</p>
+
+      <ul>
+        @for(item of matches; track item.name) {
+          <li>
+            <app-match-series-result-item [item]="item" (selected)="selectMatch($event)"></app-match-series-result-item>
+          </li>
+        }
+      </ul>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+      <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+    </div>
+  </div>
+</ng-container>
+

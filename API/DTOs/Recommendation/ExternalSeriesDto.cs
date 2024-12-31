@@ -12,4 +12,6 @@ public class ExternalSeriesDto
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
+
+
 }

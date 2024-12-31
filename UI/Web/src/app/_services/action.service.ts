@@ -26,6 +26,7 @@ import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -768,6 +769,16 @@ export class ActionService {
         callback();
       }
     });
+  }
+
+  matchSeries(series: Series, callback?: BooleanActionCallback) {
+   const ref = this.modalService.open(MatchSeriesModalComponent, {size: 'lg'});
+   ref.componentInstance.series = series;
+   ref.closed.subscribe(saved => {
+     if (callback) {
+       callback(saved);
+     }
+   });
   }
 
   async deleteFilter(filterId: number, callback?: BooleanActionCallback) {

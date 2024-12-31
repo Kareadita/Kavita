@@ -709,7 +709,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.Id == seriesId)
             .Select(series => new PlusSeriesDto()
             {
-                MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
+                PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
                 AltSeriesName = series.LocalizedName,
                 AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,

@@ -158,7 +158,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
 
                 // Search for existing series in the collection
-                var formats = GetMangaFormats(seriesInfo.PlusMediaFormat);
+                var formats = seriesInfo.PlusMediaFormat.GetMangaFormats();
                 var existingSeries = collection.Items.FirstOrDefault(s =>
                     (s.Name.ToNormalized() == normalizedSeriesName ||
                      s.NormalizedName == normalizedSeriesName ||
@@ -243,19 +243,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         }
     }
 
-    private static IList<MangaFormat> GetMangaFormats(MediaFormat? mediaFormat)
-    {
-        if (mediaFormat == null) return [MangaFormat.Archive];
-        return mediaFormat switch
-        {
-            MediaFormat.Manga => [MangaFormat.Archive, MangaFormat.Image],
-            MediaFormat.Comic => [MangaFormat.Archive],
-            MediaFormat.LightNovel => [MangaFormat.Epub, MangaFormat.Pdf],
-            MediaFormat.Book => [MangaFormat.Epub, MangaFormat.Pdf],
-            MediaFormat.Unknown => [MangaFormat.Archive],
-            _ => [MangaFormat.Archive]
-        };
-    }
+
 
     private static long GetStackId(string url)
     {

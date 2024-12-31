@@ -616,4 +616,19 @@ public class SeriesController : BaseApiController
         return Ok(await _seriesService.GetEstimatedChapterCreationDate(seriesId, userId));
     }
 
+    /// <summary>
+    /// Sends a request to Kavita+ API for all potential matches, sorted by relevance
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("match")]
+    public async Task<ActionResult<IList<ExternalSeriesDetailDto>>> MatchSeries(MatchSeriesDto dto)
+    {
+        if (dto.DontMatch)
+        {
+            // TODO: Figure out how to architect this
+        }
+        return Ok(await _externalMetadataService.MatchSeries(dto));
+    }
+
 }

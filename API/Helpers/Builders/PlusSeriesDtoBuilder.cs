@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Extensions;
 using API.Services.Plus;
 
 namespace API.Helpers.Builders;
@@ -19,7 +20,7 @@ public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesDto>
     {
         _seriesDto = new PlusSeriesDto()
         {
-            MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
+            PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesName = series.Name,
             AltSeriesName = series.LocalizedName,
             AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,

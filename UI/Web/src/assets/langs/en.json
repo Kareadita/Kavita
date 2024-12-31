@@ -864,6 +864,13 @@
         "publication-status-tooltip": "Publication Status"
     },
 
+    "match-series-modal": {
+        "title": "Match {{seriesName}}",
+        "description": "Enter an AniList/MAL url or an alternative series name to match against",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -2533,7 +2540,9 @@
         "multiple-selections": "Multiple Selections",
         "back-to": "Back to {{action}}",
         "title": "Actions",
-        "copy-settings": "Copy Settings From"
+        "copy-settings": "Copy Settings From",
+        "match": "Match",
+        "match-description": "Match Series with Kavita+ manually"
     },
 
     "preferences": {

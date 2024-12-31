@@ -1,0 +1,13 @@
+<div class="clickable" style="display: flex;padding: 5px;" (click)="selectItem()">
+  <div style="width: 24px" class="me-1">
+    @if (item.coverUrl) {
+      <app-image class="me-3 search-result" width="24px" [imageUrl]="item.coverUrl"></app-image>
+    }
+  </div>
+  <div class="ms-1">
+    {{item.name}}
+    <p>{{item.summary}}</p>
+    <!-- TODO: I might want to expose a Match rating -->
+  </div>
+
+</div>

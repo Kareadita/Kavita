@@ -112,7 +112,11 @@ export enum Action {
   /**
    * Copy settings from one entity to another
    */
-  CopySettings = 27
+  CopySettings = 27,
+  /**
+   * Match an entity with an upstream system
+   */
+  Match = 28
 }
 
 /**
@@ -463,6 +467,7 @@ export class ActionFactoryService {
             requiresAdmin: false,
             children: [],
           },
+
           // {
           //   action: Action.AddToScrobbleHold,
           //   title: 'add-to-scrobble-hold',
@@ -542,6 +547,14 @@ export class ActionFactoryService {
             children: [],
           },
         ],
+      },
+      {
+        action: Action.Match,
+        title: 'match',
+        description: 'match-tooltip',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
       },
       {
         action: Action.Download,

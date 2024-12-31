@@ -7,6 +7,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Collection;
+using API.DTOs.Metadata;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -36,7 +37,7 @@ internal class ExternalMetadataIdsDto
 
     public string? SeriesName { get; set; }
     public string? LocalizedSeriesName { get; set; }
-    public MediaFormat? PlusMediaFormat { get; set; } = MediaFormat.Unknown;
+    public PlusMediaFormat? PlusMediaFormat { get; set; } = DTOs.Scrobbling.PlusMediaFormat.Unknown;
 }
 
 internal class SeriesDetailPlusApiDto
@@ -46,6 +47,20 @@ internal class SeriesDetailPlusApiDto
     public IEnumerable<RatingDto> Ratings { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+}
+
+internal class MatchSeriesRequest
+{
+    public string SeriesName { get; set; }
+    public ICollection<string> AlternativeNames { get; set; }
+    public int Year { get; set; } = 0;
+    //public MangaFormat Format { get; set; }
+
+    public string Query { get; set; }
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
+    public string? HardcoverId { get; set; }
+    public PlusMediaFormat Format { get; set; }
 }
 
 public interface IExternalMetadataService
@@ -64,6 +79,7 @@ public interface IExternalMetadataService
     Task GetNewSeriesData(int seriesId, LibraryType libraryType);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
+    Task<IList<ExternalSeriesDetailDto>> MatchSeries(MatchSeriesDto dto);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -73,8 +89,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    public static readonly ImmutableArray<LibraryType> NonEligibleLibraryTypes = ImmutableArray.Create
-        (LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine);
+    public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
+        [LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Recommendations = null,
@@ -196,13 +212,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
             var result = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={user.MalUserName}")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .WithKavitaPlusHeaders(license)
                 .GetJsonAsync<IList<MalStackDto>>();
 
             if (result == null)
@@ -218,6 +228,48 @@ public class ExternalMetadataService : IExternalMetadataService
             return ArraySegment<MalStackDto>.Empty;
         }
     }
+
+    public async Task<IList<ExternalSeriesDetailDto>> MatchSeries(MatchSeriesDto dto)
+    {
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
+            SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata);
+
+        var potentialAnilistId = ScrobblingService.ExtractId<int?>(dto.Query, ScrobblingService.AniListWeblinkWebsite);
+        var potentialMalId = ScrobblingService.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
+
+        List<string> altNames = [series.LocalizedName, series.OriginalName];
+        if (potentialAnilistId == null && potentialMalId == null)
+        {
+            altNames.Add(dto.Query);
+        }
+        var matchRequest = new MatchSeriesRequest()
+        {
+            Format = series.Format == MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
+            Query = dto.Query,
+            SeriesName = series.Name,
+            AlternativeNames = altNames,
+            Year = series.Metadata.ReleaseYear,
+            AniListId = potentialAnilistId ?? ScrobblingService.GetAniListId(series),
+            MalId = potentialMalId ?? ScrobblingService.GetMalId(series),
+        };
+
+        try
+        {
+            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(matchRequest)
+                .ReceiveJson<IList<ExternalSeriesDetailDto>>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error happened during the request to Kavita+ API");
+        }
+
+        return ArraySegment<ExternalSeriesDetailDto>.Empty;
+    }
+
+
 
     /// <summary>
     /// Retrieves Metadata about a Recommended External Series
@@ -272,13 +324,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
             var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(data)
                 .ReceiveJson<SeriesDetailPlusApiDto>();
 
@@ -452,19 +498,14 @@ public class ExternalMetadataService : IExternalMetadataService
                 }
                 payload.SeriesName = series.Name;
                 payload.LocalizedSeriesName = series.LocalizedName;
-                payload.PlusMediaFormat = ConvertToMediaFormat(series.Library.Type, series.Format);
+                payload.PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
             }
 
         }
         try
         {
             return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
+                .WithKavitaPlusHeaders(license)
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
@@ -476,17 +517,5 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return null;
-    }
-
-    private static MediaFormat ConvertToMediaFormat(LibraryType libraryType, MangaFormat seriesFormat)
-    {
-        return libraryType switch
-        {
-            LibraryType.Manga => seriesFormat == MangaFormat.Epub ? MediaFormat.LightNovel : MediaFormat.Manga,
-            LibraryType.Comic => MediaFormat.Comic,
-            LibraryType.Book => MediaFormat.Book,
-            LibraryType.LightNovel => MediaFormat.LightNovel,
-            _ => MediaFormat.Unknown
-        };
     }
 }
