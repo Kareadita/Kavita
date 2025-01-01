@@ -8,7 +8,7 @@ public record PlusSeriesDto
     public string? MangaDexId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
-    public PlusMediaFormat PlusMediaFormat { get; set; }
+    public PlusMediaFormat MediaFormat { get; set; }
     /// <summary>
     /// Optional but can help with matching
     /// </summary>

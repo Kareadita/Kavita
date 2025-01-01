@@ -20,7 +20,7 @@ public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesDto>
     {
         _seriesDto = new PlusSeriesDto()
         {
-            PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesName = series.Name,
             AltSeriesName = series.LocalizedName,
             AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,

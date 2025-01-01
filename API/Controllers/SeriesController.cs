@@ -635,8 +635,6 @@ public class SeriesController : BaseApiController
     [HttpPost("update-match")]
     public async Task<ActionResult> UpdateSeriesMatch(ExternalSeriesDetailDto dto, [FromQuery] int seriesId)
     {
-        // 1. We need to undo the ExternalSeries link and create with a new one
-        // 2. We need to trigger Force Refresh so that the cache layers are updated
         await _externalMetadataService.FixSeriesMatch(seriesId, dto);
 
         return Ok();

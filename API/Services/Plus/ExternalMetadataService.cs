@@ -336,8 +336,10 @@ public class ExternalMetadataService : IExternalMetadataService
         // Refetch metadata with a Direct lookup
         await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
         {
+            SeriesName = dto.Name,
             AniListId = dto.AniListId,
             MalId = dto.MALId,
+            MediaFormat = dto.PlusMediaFormat,
         });
 
         _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, dto.Name);
