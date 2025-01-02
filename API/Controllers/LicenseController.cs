@@ -41,7 +41,7 @@ public class LicenseController(
     }
 
     /// <summary>
-    /// Has any license
+    /// Has any license registered with the instance. Does not check Kavita+ API
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
@@ -51,6 +51,18 @@ public class LicenseController(
     {
         return Ok(!string.IsNullOrEmpty(
             (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value));
+    }
+
+    /// <summary>
+    /// Asks Kavita+ for the latest license info
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("info")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
+    public async Task<ActionResult<DateTime?>> GetLicenseInfo()
+    {
+        return Ok(await licenseService.GetLicenseInfo());
     }
 
     [Authorize("RequireAdminRole")]

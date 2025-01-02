@@ -16,6 +16,7 @@ import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {CoverImageSize} from "../admin/_models/cover-image-size";
+import {LicenseInfo} from "../_models/kavitaplus/license-info";
 
 export enum Role {
   Admin = 'Admin',
@@ -160,6 +161,10 @@ export class AccountService {
 
   resetLicense(license: string, email: string) {
     return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
+  }
+
+  licenseInfo() {
+    return this.httpClient.get<LicenseInfo>(this.baseUrl + 'license/info');
   }
 
   hasValidLicense(forceCheck: boolean = false) {

@@ -29,6 +29,7 @@ public interface ILicenseService
     Task<bool> HasActiveLicense(bool forceCheck = false);
     Task<bool> HasActiveSubscription(string? license);
     Task<bool> ResetLicense(string license, string email);
+    Task<LicenseInfoDto?> GetLicenseInfo();
 }
 
 public class LicenseService(
@@ -282,5 +283,30 @@ public class LicenseService(
         }
 
         return false;
+    }
+
+    public async Task<LicenseInfoDto?> GetLicenseInfo()
+    {
+        try
+        {
+            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", encryptedLicense.Value)
+                .WithHeader("x-installId", HashUtil.ServerToken())
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .GetJsonAsync<LicenseInfoDto>();
+
+            return response;
+        }
+        catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return null;
     }
 }

@@ -1,6 +1,41 @@
 <ng-container *transloco="let t; read: 'license'">
-  <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
-  <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
+
+  <div class="container-fluid">
+    <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
+    <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
+
+    @if (licenseInfo) {
+      <div class="mb-3">
+        <h3>{{t('more-info-title')}}</h3>
+        <div class="row">
+          <div class="col-4">{{t('license-active-label')}}</div>
+          <div class="col">
+            @if (isChecking) {
+              {{null | defaultValue}}
+            } @else {
+              {{hasValidLicense}}
+            }
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-4">{{t('supported-version-label')}}</div>
+          <div class="col">
+            <i class="fas {{isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark'}}">
+              <span class="visually-hidden">{{isVersionValid ? 'Valid' : 'Invalid'}]</span>
+            </i>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-4">{{t('expiration-label')}}</div>
+          <div class="col">
+            {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+
 
   <form [formGroup]="formGroup">
     <div class="mt-2">
@@ -54,7 +89,7 @@
             <i class="fa fa-circle-info ms-1" aria-hidden="true" [ngbTooltip]="t('activate-discordId-tooltip')"></i>
             <a class="ms-1" [href]="WikiLink.KavitaPlusDiscordId" target="_blank" rel="noopener noreferrer">{{t('help-label')}}</a>
             <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off" [class.is-invalid]="formGroup.get('discordId')?.invalid && formGroup.get('discordId')?.touched"/>
-            @if (formGroup.dirty || formGroup.touched) {
+            @if (formGroup.dirty || !formGroup.untouched) {
               <div id="inviteForm-validations" class="invalid-feedback">
                 @if (formGroup.get('discordId')?.errors?.pattern) {
                   <div>

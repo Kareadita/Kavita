@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, inject,
+  Component, DestroyRef, inject,
   OnInit
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
@@ -15,6 +15,14 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {RouterLink} from "@angular/router";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AsyncPipe} from "@angular/common";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {of, shareReplay, switchMap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {LicenseInfo} from "../../_models/kavitaplus/license-info";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {ServerService} from "../../_services/server.service";
+import {filter, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-license',
@@ -22,14 +30,16 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, RouterLink, SettingItemComponent]
+  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, RouterLink, SettingItemComponent, AsyncPipe, DefaultValuePipe, UtcToLocalTimePipe]
 })
 export class LicenseComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
+  protected readonly serverService = inject(ServerService);
   protected readonly WikiLink = WikiLink;
 
   formGroup: FormGroup = new FormGroup({});
@@ -39,11 +49,12 @@ export class LicenseComponent implements OnInit {
   hasLicense: boolean = false;
   isChecking: boolean = true;
   isSaving: boolean = false;
+  licenseInfo: LicenseInfo | null = null;
+  version: string | null = null;
+  isVersionValid: boolean = false;
 
   buyLink = environment.buyLink;
   manageLink = environment.manageLink;
-
-
 
 
   ngOnInit(): void {
@@ -59,6 +70,25 @@ export class LicenseComponent implements OnInit {
       this.cdRef.markForCheck();
 
       if (this.hasLicense) {
+        // TODO: See if we can rewrite this to be less apis
+        this.accountService.currentUser$.pipe(
+          filter(user => !!user),
+          switchMap(user => this.serverService.getVersion(user.apiKey)),
+          tap(version => {
+            this.version = version;
+          }),
+          switchMap(v => this.serverService.getChangelog(2)),
+          takeUntilDestroyed(this.destroyRef),
+        ).subscribe(events => {
+          this.isVersionValid = events.filter(e => e.updateVersion === this.version).length > 0;
+          this.cdRef.markForCheck();
+        });
+
+        this.accountService.licenseInfo().subscribe(res => {
+          this.licenseInfo = res;
+          this.cdRef.markForCheck();
+        });
+
         this.accountService.hasValidLicense().subscribe(res => {
           this.hasValidLicense = res;
           this.isChecking = false;

@@ -695,6 +695,10 @@
         "license-not-valid": "License Not Valid",
         "loading": "{{common.loading}}",
         "help-label": "{{common.help}}",
+        "more-info-title": "More Info",
+        "license-active-label": "License Active",
+        "supported-version-label": "On Supported Kavita version",
+        "expiration-label": "Expiration",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
