@@ -40,6 +40,7 @@ import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component
 import {ThemeService} from "../_services/theme.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {ToastrService} from "ngx-toastr";
+import {LicenseService} from "../_services/license.service";
 
 @Component({
   selector: 'app-person-detail',
@@ -74,6 +75,7 @@ export class PersonDetailComponent {
   private readonly modalService = inject(NgbModal);
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
   private readonly themeService = inject(ThemeService);
   private readonly toastr = inject(ToastrService);
 

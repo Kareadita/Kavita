@@ -53,6 +53,7 @@ import {
   ImportMalCollectionComponent
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
 import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
+import {LicenseService} from "../../../_services/license.service";
 
 @Component({
   selector: 'app-settings',
@@ -105,6 +106,7 @@ export class SettingsComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
 
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly WikiLink = WikiLink;
@@ -128,7 +130,7 @@ export class SettingsComponent {
       this.cdRef.markForCheck();
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
         this.hasActiveLicense = true;
         this.cdRef.markForCheck();

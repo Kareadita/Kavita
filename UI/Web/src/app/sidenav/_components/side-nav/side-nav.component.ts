@@ -30,6 +30,7 @@ import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {WikiLink} from "../../../_models/wiki";
 import {SettingsTabId} from "../../preference-nav/preference-nav.component";
+import {LicenseService} from "../../../_services/license.service";
 
 @Component({
   selector: 'app-side-nav',
@@ -49,6 +50,7 @@ export class SideNavComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
   public readonly accountService = inject(AccountService);
+  public readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
 

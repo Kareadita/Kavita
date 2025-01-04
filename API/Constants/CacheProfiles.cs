@@ -12,6 +12,10 @@ public static class EasyCacheProfiles
     /// </summary>
     public const string License = "license";
     /// <summary>
+    /// License Information
+    /// </summary>
+    public const string LicenseInfo = "licenseInfo";
+    /// <summary>
     /// Cache the libraries on the server
     /// </summary>
     public const string Library = "library";

@@ -4,7 +4,7 @@ import {
   Component,
   ContentChild, ElementRef, EventEmitter, HostListener,
   inject,
-  Input, Output,
+  Input, OnChanges, Output, SimpleChange, SimpleChanges,
   TemplateRef
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -25,7 +25,7 @@ import {AbstractControl, FormControl} from "@angular/forms";
   styleUrl: './setting-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingItemComponent {
+export class SettingItemComponent implements OnChanges {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -83,6 +83,23 @@ export class SettingItemComponent {
         })
       )
       .subscribe();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.hasOwnProperty('isEditMode')) {
+      const change = changes.isEditMode as SimpleChange;
+      if (change.isFirstChange()) return;
+
+      if (!this.toggleOnViewClick) return;
+      if (!this.canEdit) return;
+      if (this.control != null && this.control.invalid) return;
+
+      console.log('isEditMode', this.isEditMode, 'currentValue', change.currentValue);
+      this.isEditMode = change.currentValue;
+      //this.editMode.emit(this.isEditMode);
+      this.cdRef.markForCheck();
+
+    }
   }
 
   toggleEditMode() {

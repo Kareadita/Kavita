@@ -20,6 +20,7 @@ import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {LicenseService} from "../../_services/license.service";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
@@ -55,6 +56,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly licenseService = inject(LicenseService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
@@ -70,7 +72,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   loaded: boolean = false;
 
   constructor() {
-    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
       if (this.hasValidLicense) {

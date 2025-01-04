@@ -1,50 +1,27 @@
 <ng-container *transloco="let t; read: 'license'">
 
-  <div class="container-fluid">
-    <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
-    <p>{{t('kavita+-requirement')}} <a [routerLink]="'/announcements'">{{t('kavita+-releases')}}</a></p>
-
-    @if (licenseInfo) {
-      <div class="mb-3">
-        <h3>{{t('more-info-title')}}</h3>
-        <div class="row">
-          <div class="col-4">{{t('license-active-label')}}</div>
-          <div class="col">
-            @if (isChecking) {
-              {{null | defaultValue}}
-            } @else {
-              {{hasValidLicense}}
-            }
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-4">{{t('supported-version-label')}}</div>
-          <div class="col">
-            <i class="fas {{isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark'}}">
-              <span class="visually-hidden">{{isVersionValid ? 'Valid' : 'Invalid'}]</span>
-            </i>
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col-4">{{t('expiration-label')}}</div>
-          <div class="col">
-            {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
-          </div>
-        </div>
-      </div>
-    }
+  <div class="position-relative">
+    <a class="position-absolute custom-position btn btn-primary-outline" [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">{{t('faq-title')}}</a>
   </div>
 
+  <div class="container-fluid">
+    <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}}</p>
+  </div>
 
+  @if (hasLicense) {
+    <div class="alert alert-warning">
+      {{t('reset-license-alert')}}
+    </div>
+  }
 
   <form [formGroup]="formGroup">
     <div class="mt-2">
-      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)">
+      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode">
         <ng-template #titleExtra>
-          <button class="btn btn-icon btn-sm" style="width: 58px" (click)="validateLicense()">
+          <button class="btn btn-icon btn-sm" (click)="validateLicense(true)">
             @if (isChecking) {
               <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
-            } @else {
+            } @else if (hasLicense) {
               <span>
                 <i class="fa-solid fa-refresh" tabindex="0" [ngbTooltip]="t('check')"></i>
               </span>
@@ -101,10 +78,10 @@
           </div>
 
           <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-            <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
-                    (click)="deleteLicense()">
-              {{t('activate-delete')}}
-            </button>
+<!--            <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"-->
+<!--                    (click)="deleteLicense()">-->
+<!--              {{t('activate-delete')}}-->
+<!--            </button>-->
             <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
                     [ngbTooltip]="t('activate-reset-tooltip')"
                     [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="resetLicense()">
@@ -141,4 +118,85 @@
     </div>
   </form>
 
+  <div class="setting-section-break"></div>
+
+  @if (hasLicense) {
+    <div class="row g-0 mt-3">
+      @if (licenseInfo) {
+        <h3 class="container-fluid">{{t('info-title')}}</h3>
+        <div class="mb-2">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('license-active-label')">
+            <ng-template #view>
+              @if (isChecking) {
+                {{null | defaultValue}}
+              } @else {
+                <i class="fas {{hasValidLicense ? 'fa-check-circle' : 'fa-circle-xmark'}}">
+                  <span class="visually-hidden">{{hasValidLicense ? t('valid') : t('invalid')}]</span>
+                </i>
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="mb-2">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
+            <ng-template #view>
+              <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark'}}">
+                <span class="visually-hidden">{{isVersionValid ? t('valid') : t('invalid')}]</span>
+              </i>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
+          <ng-template #view>
+            {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
+          </ng-template>
+        </app-setting-item>
+
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
+          <ng-template #view>
+            {{licenseInfo.totalMonthsSubbed | number}}
+          </ng-template>
+        </app-setting-item>
+
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
+          <ng-template #view>
+            <span (click)="toggleEmailShow()" class="col-12 clickable">
+              @if (showEmail) {
+                {{licenseInfo.registeredEmail}}
+              } @else {
+                ***************
+              }
+            </span>
+          </ng-template>
+        </app-setting-item>
+      }
+
+      <div class="setting-section-break"></div>
+
+      <!-- Actions around license -->
+      <h3 class="container-fluid">{{t('actions-title')}}</h3>
+
+      <div class="mt-2 mb-2">
+        <app-setting-button [subtitle]="t('delete-tooltip')">
+          <button type="button" class="flex-fill btn btn-danger mt-1" aria-describedby="license-key-header" (click)="deleteLicense()">
+            {{t('activate-delete')}}
+          </button>
+        </app-setting-button>
+      </div>
+
+      <!-- TODO: Check if we can make this hasLicense only -->
+      @if (hasLicense) {
+        <div class="mt-2 mb-2">
+          <app-setting-button [subtitle]="t('manage-tooltip')">
+            <a class="btn btn-primary btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+          </app-setting-button>
+        </div>
+      }
+
+    </div>
+
+<!--    <button class="btn btn-secondary" (click)="toggleViewMode()">Toggle View Mode</button>-->
+  }
 </ng-container>

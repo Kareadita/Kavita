@@ -2,7 +2,7 @@
   @if (accountService.currentUser$ | async; as user) {
     <div class="side-nav-container" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
     'hidden': (navService.sideNavVisibility$ | async) === false,
-    'no-donate': (accountService.hasValidLicense$ | async) === true}">
+    'no-donate': (licenseService.hasValidLicense$ | async) === true}">
       <div class="side-nav">
 
 
@@ -88,8 +88,8 @@
     }
 
     <div class="sidenav-bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
-        'hidden': (navService.sideNavVisibility$ | async) === false || (accountService.hasValidLicense$ | async) === true}">
-      @if ((accountService.hasValidLicense$ | async) === false) {
+        'hidden': (navService.sideNavVisibility$ | async) === false || (licenseService.hasValidLicense$ | async) === true}">
+      @if ((licenseService.hasValidLicense$ | async) === false) {
         <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                           [ngbTooltip]="t('donate-tooltip')"
                           [link]="WikiLink.Donation"

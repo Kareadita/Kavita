@@ -56,13 +56,14 @@ public class LicenseController(
     /// <summary>
     /// Asks Kavita+ for the latest license info
     /// </summary>
+    /// <param name="forceCheck">Force checking the API and skip the 8 hour cache</param>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpGet("info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
-    public async Task<ActionResult<DateTime?>> GetLicenseInfo()
+    public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
     {
-        return Ok(await licenseService.GetLicenseInfo());
+        return Ok(await licenseService.GetLicenseInfo(forceCheck));
     }
 
     [Authorize("RequireAdminRole")]
@@ -78,6 +79,7 @@ public class LicenseController(
         await taskScheduler.ScheduleKavitaPlusTasks();
         return Ok();
     }
+
 
     [Authorize("RequireAdminRole")]
     [HttpPost("reset")]

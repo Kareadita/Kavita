@@ -15,14 +15,20 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {RouterLink} from "@angular/router";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {AsyncPipe} from "@angular/common";
+import {AsyncPipe, DecimalPipe} from "@angular/common";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {of, shareReplay, switchMap} from "rxjs";
+import {of, shareReplay, startWith, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LicenseInfo} from "../../_models/kavitaplus/license-info";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ServerService} from "../../_services/server.service";
 import {filter, tap} from "rxjs/operators";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {Action} from "../../_services/action-factory.service";
+import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {ApiKeyComponent} from "../../user-settings/api-key/api-key.component";
+import {LicenseService} from "../../_services/license.service";
 
 @Component({
   selector: 'app-license',
@@ -30,7 +36,8 @@ import {filter, tap} from "rxjs/operators";
   styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, RouterLink, SettingItemComponent, AsyncPipe, DefaultValuePipe, UtcToLocalTimePipe]
+  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, ApiKeyComponent]
 })
 export class LicenseComponent implements OnInit {
 
@@ -39,19 +46,20 @@ export class LicenseComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
-  protected readonly serverService = inject(ServerService);
+  protected readonly licenseService = inject(LicenseService);
   protected readonly WikiLink = WikiLink;
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
+  isChecking: boolean = true;
+  isSaving: boolean = false;
+
+
 
   hasValidLicense: boolean = false;
   hasLicense: boolean = false;
-  isChecking: boolean = true;
-  isSaving: boolean = false;
   licenseInfo: LicenseInfo | null = null;
-  version: string | null = null;
-  isVersionValid: boolean = false;
+  showEmail: boolean = false;
 
   buyLink = environment.buyLink;
   manageLink = environment.manageLink;
@@ -62,40 +70,23 @@ export class LicenseComponent implements OnInit {
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
 
+    this.checkForLicense()
+      .pipe(
+        filter(hasLicense => hasLicense),
+        tap(hasLicense => console.log('hasLicense: ', hasLicense)),
+        switchMap(_ => this.validateLicense())
+      )
+      .subscribe();
+  }
+
+  private checkForLicense() {
     this.isChecking = true;
     this.cdRef.markForCheck();
-
-    this.accountService.hasAnyLicense().subscribe(res => {
+    return this.licenseService.hasAnyLicense().pipe(tap(res => {
       this.hasLicense = res;
+      this.isChecking = false;
       this.cdRef.markForCheck();
-
-      if (this.hasLicense) {
-        // TODO: See if we can rewrite this to be less apis
-        this.accountService.currentUser$.pipe(
-          filter(user => !!user),
-          switchMap(user => this.serverService.getVersion(user.apiKey)),
-          tap(version => {
-            this.version = version;
-          }),
-          switchMap(v => this.serverService.getChangelog(2)),
-          takeUntilDestroyed(this.destroyRef),
-        ).subscribe(events => {
-          this.isVersionValid = events.filter(e => e.updateVersion === this.version).length > 0;
-          this.cdRef.markForCheck();
-        });
-
-        this.accountService.licenseInfo().subscribe(res => {
-          this.licenseInfo = res;
-          this.cdRef.markForCheck();
-        });
-
-        this.accountService.hasValidLicense().subscribe(res => {
-          this.hasValidLicense = res;
-          this.isChecking = false;
-          this.cdRef.markForCheck();
-        });
-      }
-    });
+    }));
   }
 
 
@@ -109,9 +100,9 @@ export class LicenseComponent implements OnInit {
   saveForm() {
     this.isSaving = true;
     this.cdRef.markForCheck();
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim(), this.formGroup.get('discordId')!.value.trim())
+    this.licenseService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim(), this.formGroup.get('discordId')!.value.trim())
       .subscribe(() => {
-      this.accountService.hasValidLicense(true).subscribe(isValid => {
+      this.licenseService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
         if (!this.hasValidLicense) {
           this.toastr.info(translate('toasts.k+-license-saved'));
@@ -127,8 +118,14 @@ export class LicenseComponent implements OnInit {
     }, err => {
         this.isSaving = false;
         this.cdRef.markForCheck();
+        // TODO: If there is the already registered error, then prompt the user if they'd like to override their previous installation registration (aka reset then re-save)
+
         if (err.hasOwnProperty('error')) {
-          this.toastr.error(JSON.parse(err['error']));
+          if (err['error'][0] === '{') {
+            this.toastr.error(JSON.parse(err['error']));
+          } else {
+            this.toastr.error(err['error']);
+          }
         } else {
           this.toastr.error(translate('toasts.k+-error'));
         }
@@ -140,10 +137,13 @@ export class LicenseComponent implements OnInit {
       return;
     }
 
-    this.accountService.deleteLicense().subscribe(() => {
+    this.licenseService.deleteLicense().subscribe(() => {
       this.resetForm();
-      this.toggleViewMode();
-      this.validateLicense();
+      this.isViewMode = true;
+      this.licenseInfo = null;
+      this.hasLicense = false;
+      this.hasValidLicense = false;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -152,28 +152,42 @@ export class LicenseComponent implements OnInit {
       return;
     }
 
-    this.accountService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(() => {
+    this.licenseService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(() => {
       this.toastr.success(translate('toasts.k+-reset-key-success'));
     });
   }
 
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
-    this.resetForm();
-  }
+  validateLicense(forceCheck = false) {
+    return of().pipe(
+      startWith(null),
+      tap(_ => {
+        this.isChecking = true;
+        this.cdRef.markForCheck();
+      }),
+      switchMap(_ => this.licenseService.licenseInfo(forceCheck)),
+      tap(licenseInfo => {
+        this.licenseInfo = licenseInfo;
+        this.cdRef.markForCheck();
+      })
+    )
 
-  validateLicense() {
-    this.isChecking = true;
-    this.accountService.hasValidLicense(true).subscribe(res => {
-      this.hasValidLicense = res;
-      this.isChecking = false;
-      this.cdRef.markForCheck();
-    });
   }
 
   updateEditMode(mode: boolean) {
-    this.isViewMode = mode;
+    this.isViewMode = !mode;
+    this.cdRef.markForCheck();
+  }
+
+  toggleViewMode() {
+    this.isViewMode = !this.isViewMode;
+    console.log('edit mode: ', !this.isViewMode)
+    this.cdRef.markForCheck();
+    this.resetForm();
+  }
+
+  toggleEmailShow() {
+    this.showEmail = !this.showEmail;
     this.cdRef.markForCheck();
   }
 }

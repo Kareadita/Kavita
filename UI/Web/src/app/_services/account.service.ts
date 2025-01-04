@@ -17,6 +17,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {CoverImageSize} from "../admin/_models/cover-image-size";
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
+import {LicenseService} from "./license.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -46,6 +47,7 @@ export const allRoles = [
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly licenseService = inject(LicenseService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -61,11 +63,7 @@ export class AccountService {
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
 
-  private hasValidLicenseSource = new ReplaySubject<boolean>(1);
-  /**
-   * Does the user have an active license
-   */
-  public hasValidLicense$ = this.hasValidLicenseSource.asObservable();
+
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -155,44 +153,7 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  deleteLicense() {
-    return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
-  }
 
-  resetLicense(license: string, email: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
-  }
-
-  licenseInfo() {
-    return this.httpClient.get<LicenseInfo>(this.baseUrl + 'license/info');
-  }
-
-  hasValidLicense(forceCheck: boolean = false) {
-    console.log('hasValidLicense being called: ', forceCheck);
-    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
-      .pipe(
-        map(res => res === "true"),
-        tap(res => {
-          this.hasValidLicenseSource.next(res)
-        }),
-        catchError(error => {
-          this.hasValidLicenseSource.next(false);
-          return throwError(error); // Rethrow the error to propagate it further
-        })
-      );
-  }
-
-  hasAnyLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
-      .pipe(
-        map(res => res === "true"),
-      );
-  }
-
-  updateUserLicense(license: string, email: string, discordId?: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email, discordId}, TextResonse)
-    .pipe(map(res => res === "true"));
-  }
 
   login(model: {username: string, password: string, apiKey?: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
@@ -236,7 +197,7 @@ export class AccountService {
       // But that really messes everything up
       this.messageHub.stopHubConnection();
       this.messageHub.createHubConnection(this.currentUser);
-      this.hasValidLicense().subscribe();
+      this.licenseService.hasValidLicense().subscribe();
       this.startRefreshTokenTimer();
     }
   }

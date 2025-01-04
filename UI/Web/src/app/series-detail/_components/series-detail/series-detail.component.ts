@@ -120,6 +120,7 @@ import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {LicenseService} from "../../../_services/license.service";
 
 
 enum TabID {
@@ -164,6 +165,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);

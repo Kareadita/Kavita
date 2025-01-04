@@ -13,6 +13,7 @@ import {ScrobblingService} from "../../_services/scrobbling.service";
 import {User} from "../../_models/user";
 import {filter} from "rxjs/operators";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {LicenseService} from "../../_services/license.service";
 
 export enum SettingsTabId {
 
@@ -84,6 +85,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
   protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
   protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly serverService = inject(ServerService);
@@ -179,7 +181,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       this.navService.collapseSideNav(true);
     }
 
-    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (res) {
         this.hasActiveLicense = true;
         if (this.hasActiveLicense) {

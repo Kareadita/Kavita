@@ -62,6 +62,7 @@ import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
+import {LicenseService} from "../../../_services/license.service";
 
 enum TabID {
   General = 0,
@@ -134,6 +135,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
