@@ -268,12 +268,13 @@ public class LicenseService(
 
             // Fill out the ValidVersion
             var releases = await versionUpdaterService.GetAllReleases(3);
-            response.IsValidVersion = releases.Any(r => r.UpdateVersion == BuildInfo.Version.ToString());
+            response.IsValidVersion = releases.Where(r => !r.IsPrerelease)
+                .Any(r => r.UpdateVersion == BuildInfo.Version.ToString());
 
             response.HasLicense = hasLicense;
 
             // Cache if the license is valid here as well
-            var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.LicenseInfo);
+            var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout);
 
             // Cache the license info if IsActive and ExpirationDate > DateTime.UtcNow + 2

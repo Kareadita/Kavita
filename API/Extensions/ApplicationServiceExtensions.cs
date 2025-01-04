@@ -85,6 +85,7 @@ public static class ApplicationServiceExtensions
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory(EasyCacheProfiles.License);
+            options.UseInMemory(EasyCacheProfiles.LicenseInfo);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
 

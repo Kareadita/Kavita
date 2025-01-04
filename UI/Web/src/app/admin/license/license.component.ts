@@ -124,6 +124,7 @@ export class LicenseComponent implements OnInit {
           if (err['error'][0] === '{') {
             this.toastr.error(JSON.parse(err['error']));
           } else {
+
             this.toastr.error(err['error']);
           }
         } else {
@@ -168,6 +169,8 @@ export class LicenseComponent implements OnInit {
       switchMap(_ => this.licenseService.licenseInfo(forceCheck)),
       tap(licenseInfo => {
         this.licenseInfo = licenseInfo;
+        this.hasValidLicense = licenseInfo?.isActive || false;
+        this.isChecking = false;
         this.cdRef.markForCheck();
       })
     )

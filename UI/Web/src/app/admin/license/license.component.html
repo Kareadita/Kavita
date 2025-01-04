@@ -118,9 +118,11 @@
     </div>
   </form>
 
-  <div class="setting-section-break"></div>
+
 
   @if (hasLicense) {
+    <div class="setting-section-break"></div>
+
     <div class="row g-0 mt-3">
       @if (licenseInfo) {
         <h3 class="container-fluid">{{t('info-title')}}</h3>
@@ -130,7 +132,7 @@
               @if (isChecking) {
                 {{null | defaultValue}}
               } @else {
-                <i class="fas {{hasValidLicense ? 'fa-check-circle' : 'fa-circle-xmark'}}">
+                <i class="fas {{hasValidLicense ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
                   <span class="visually-hidden">{{hasValidLicense ? t('valid') : t('invalid')}]</span>
                 </i>
               }
@@ -141,24 +143,29 @@
         <div class="mb-2">
           <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
             <ng-template #view>
-              <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark'}}">
+              <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
                 <span class="visually-hidden">{{isVersionValid ? t('valid') : t('invalid')}]</span>
               </i>
             </ng-template>
           </app-setting-item>
         </div>
 
-        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
-          <ng-template #view>
-            {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
-          </ng-template>
-        </app-setting-item>
+        <div class="mb-2">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
+            <ng-template #view>
+              {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
+            </ng-template>
+          </app-setting-item>
+        </div>
 
-        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
-          <ng-template #view>
-            {{licenseInfo.totalMonthsSubbed | number}}
-          </ng-template>
-        </app-setting-item>
+        <div class="mb-2">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
+            <ng-template #view>
+              {{licenseInfo.totalMonthsSubbed | number}}
+            </ng-template>
+          </app-setting-item>
+        </div>
+
 
         <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
           <ng-template #view>
@@ -173,6 +180,7 @@
         </app-setting-item>
       }
 
+
       <div class="setting-section-break"></div>
 
       <!-- Actions around license -->
@@ -186,17 +194,12 @@
         </app-setting-button>
       </div>
 
-      <!-- TODO: Check if we can make this hasLicense only -->
-      @if (hasLicense) {
-        <div class="mt-2 mb-2">
-          <app-setting-button [subtitle]="t('manage-tooltip')">
-            <a class="btn btn-primary btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
-          </app-setting-button>
-        </div>
-      }
+      <div class="mt-2 mb-2">
+        <app-setting-button [subtitle]="t('manage-tooltip')">
+          <a class="btn btn-primary btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+        </app-setting-button>
+      </div>
 
     </div>
-
-<!--    <button class="btn btn-secondary" (click)="toggleViewMode()">Toggle View Mode</button>-->
   }
 </ng-container>

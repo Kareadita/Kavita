@@ -1,14 +1,19 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, map, ReplaySubject, tap, throwError} from "rxjs";
+import {catchError, map, of, ReplaySubject, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
 import { TextResonse } from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
+import {translate} from "@jsverse/transloco";
+import {ConfirmService} from "../shared/confirm.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LicenseService {
+  private readonly confirmService = inject(ConfirmService);
+  private readonly httpClient = inject(HttpClient);
+
   baseUrl = environment.apiUrl;
 
   private readonly hasValidLicenseSource = new ReplaySubject<boolean>(1);
@@ -17,7 +22,6 @@ export class LicenseService {
    */
   public readonly hasValidLicense$ = this.hasValidLicenseSource.asObservable();
 
-  constructor(private httpClient: HttpClient) {}
 
   /**
    * Delete the license from the server and update hasValidLicenseSource to false
