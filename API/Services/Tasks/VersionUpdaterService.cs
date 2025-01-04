@@ -339,16 +339,15 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return updateDtos;
     }
 
-    private async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
+    private static async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
     {
-        if (File.Exists(_cacheFilePath))
+        if (!File.Exists(_cacheFilePath)) return null;
+
+        var fileInfo = new FileInfo(_cacheFilePath);
+        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
         {
-            var fileInfo = new FileInfo(_cacheFilePath);
-            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
-            {
-                var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
-                return System.Text.Json.JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
-            }
+            var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
+            return System.Text.Json.JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
         }
 
         return null;

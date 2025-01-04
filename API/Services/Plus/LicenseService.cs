@@ -266,7 +266,7 @@ public class LicenseService(
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
                 .GetJsonAsync<LicenseInfoDto>();
 
-            // This indicates a mismatch on installid or no active subscription
+            // This indicates a mismatch on installId or no active subscription
             if (response == null) return null;
 
             // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes

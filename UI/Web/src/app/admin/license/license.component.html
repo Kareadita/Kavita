@@ -10,7 +10,7 @@
 
   <form [formGroup]="formGroup">
     <div class="mt-2">
-      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="licenseInfo?.hasLicense || false">
+      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="hasLicense">
         <ng-template #titleExtra>
           <button class="btn btn-icon btn-sm" (click)="loadLicenseInfo(true)">
             @if (isChecking) {
@@ -41,7 +41,7 @@
                 </i>
               }
             }
-            @if (hasLicense && !licenseInfo) {
+            @if (!isChecking && hasLicense && !licenseInfo) {
               <div><span class="error">{{t('license-mismatch')}}</span></div>
             }
 
@@ -140,8 +140,8 @@
       <div class="mb-2 col-md-6 col-sm-12">
         <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
           <ng-template #view>
-            <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
-              <span class="visually-hidden">{{isVersionValid ? t('valid') : t('invalid')}]</span>
+            <i class="fas {{licenseInfo.isValidVersion ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
+              <span class="visually-hidden">{{isValidVersion ? t('valid') : t('invalid')}]</span>
             </i>
           </ng-template>
         </app-setting-item>

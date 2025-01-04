@@ -204,7 +204,9 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(CheckScrobblingTokensId, () => _scrobblingService.CheckExternalAccessTokens(),
             Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
-        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.HasActiveLicense(true),
+
+        // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
+        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(true),
             LicenseService.Cron, RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every 4 hours)
