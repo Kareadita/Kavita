@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Account;
-using API.DTOs.License;
+using API.DTOs.KavitaPlus.License;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks;
@@ -188,6 +188,8 @@ public class LicenseService(
 
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         await provider.RemoveAsync(CacheKey);
+
+
     }
 
     public async Task AddLicense(string license, string email, string? discordId)

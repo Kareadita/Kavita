@@ -1,4 +1,4 @@
-﻿namespace API.DTOs.License;
+﻿namespace API.DTOs.KavitaPlus.License;
 
 public class ResetLicenseDto
 {

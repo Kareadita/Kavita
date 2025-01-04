@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Collection;
-using API.DTOs.Metadata;
+using API.DTOs.KavitaPlus.ExternalMetadata;
 using API.DTOs.Metadata.Matching;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
@@ -23,46 +21,13 @@ using AutoMapper;
 using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 #nullable enable
 
-/// <summary>
-/// Used for matching and fetching metadata on a series
-/// </summary>
-internal class ExternalMetadataIdsDto
-{
-    public long? MalId { get; set; }
-    public int? AniListId { get; set; }
 
-    public string? SeriesName { get; set; }
-    public string? LocalizedSeriesName { get; set; }
-    public PlusMediaFormat? PlusMediaFormat { get; set; } = DTOs.Scrobbling.PlusMediaFormat.Unknown;
-}
-
-internal class SeriesDetailPlusApiDto
-{
-    public IEnumerable<MediaRecommendationDto> Recommendations { get; set; }
-    public IEnumerable<UserReviewDto> Reviews { get; set; }
-    public IEnumerable<RatingDto> Ratings { get; set; }
-    public int? AniListId { get; set; }
-    public long? MalId { get; set; }
-}
-
-internal class MatchSeriesRequest
-{
-    public string SeriesName { get; set; }
-    public ICollection<string> AlternativeNames { get; set; }
-    public int Year { get; set; } = 0;
-    public string Query { get; set; }
-    public int? AniListId { get; set; }
-    public long? MalId { get; set; }
-    public string? HardcoverId { get; set; }
-    public PlusMediaFormat Format { get; set; }
-}
 
 public interface IExternalMetadataService
 {
@@ -250,7 +215,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             altNames.Add(dto.Query);
         }
-        var matchRequest = new MatchSeriesRequest()
+        var matchRequest = new MatchSeriesRequestDto()
         {
             Format = series.Format == MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
             Query = dto.Query,

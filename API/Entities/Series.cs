@@ -103,6 +103,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public int MaxHoursToRead { get; set; }
     public float AvgHoursToRead { get; set; }
 
+    /// <summary>
+    /// Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling.
+    /// </summary>
+    //public bool DoNotMatch { get; set; } // TODO
+
     public SeriesMetadata Metadata { get; set; } = null!;
     public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;
 

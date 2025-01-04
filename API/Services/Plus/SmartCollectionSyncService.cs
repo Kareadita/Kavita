@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.KavitaPlus.ExternalMetadata;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -20,7 +21,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Services.Plus;
 #nullable enable
 
-sealed class SeriesCollection
+internal sealed class SeriesCollection
 {
     public required IList<ExternalMetadataIdsDto> Series { get; set; }
     public required string Summary { get; set; }
@@ -258,13 +259,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var seriesForStack = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stack?stackId=" + stackId)
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
-            .WithHeader("x-license-key", license)
-            .WithHeader("x-installId", HashUtil.ServerToken())
-            .WithHeader("x-kavita-version", BuildInfo.Version)
-            .WithHeader("Content-Type", "application/json")
-            .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+            .WithKavitaPlusHeaders(license)
             .GetJsonAsync<SeriesCollection>();
 
         return seriesForStack;
