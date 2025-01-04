@@ -8,17 +8,11 @@
     <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}}</p>
   </div>
 
-  @if (hasLicense) {
-    <div class="alert alert-warning">
-      {{t('reset-license-alert')}}
-    </div>
-  }
-
   <form [formGroup]="formGroup">
     <div class="mt-2">
-      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode">
+      <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="licenseInfo?.hasLicense || false">
         <ng-template #titleExtra>
-          <button class="btn btn-icon btn-sm" (click)="validateLicense(true)">
+          <button class="btn btn-icon btn-sm" (click)="loadLicenseInfo(true)">
             @if (isChecking) {
               <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
             } @else if (hasLicense) {
@@ -37,7 +31,7 @@
                 <span class="visually-hidden">{{t('loading')}}</span>
               </div>
             } @else {
-              @if (hasValidLicense) {
+              @if (licenseInfo?.isActive) {
                 <i [ngbTooltip]="t('license-valid')" class="fa-solid fa-check-circle successful-validation ms-1">
                   <span class="visually-hidden">{{t('license-valid')}}</span>
                 </i>
@@ -47,6 +41,10 @@
                 </i>
               }
             }
+            @if (hasLicense && !licenseInfo) {
+              <div><span class="error">{{t('license-mismatch')}}</span></div>
+            }
+
           } @else {
             {{t('no-license-key')}}
           }
@@ -101,7 +99,7 @@
 
         <ng-template #titleActions>
           @if (hasLicense) {
-            @if (hasValidLicense) {
+            @if (licenseInfo?.isActive) {
               <a class="btn btn-primary-outline btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
             } @else {
               <a class="btn btn-primary-outline btn-sm me-1"
@@ -120,67 +118,64 @@
 
 
 
-  @if (hasLicense) {
+  @if (hasLicense && licenseInfo) {
     <div class="setting-section-break"></div>
 
     <div class="row g-0 mt-3">
-      @if (licenseInfo) {
-        <h3 class="container-fluid">{{t('info-title')}}</h3>
-        <div class="mb-2 col-md-6 col-sm-12">
-          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('license-active-label')">
-            <ng-template #view>
-              @if (isChecking) {
-                {{null | defaultValue}}
-              } @else {
-                <i class="fas {{hasValidLicense ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
-                  <span class="visually-hidden">{{hasValidLicense ? t('valid') : t('invalid')}]</span>
-                </i>
-              }
-            </ng-template>
-          </app-setting-item>
-        </div>
-
-        <div class="mb-2 col-md-6 col-sm-12">
-          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
-            <ng-template #view>
-              <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
-                <span class="visually-hidden">{{isVersionValid ? t('valid') : t('invalid')}]</span>
+      <h3 class="container-fluid">{{t('info-title')}}</h3>
+      <div class="mb-2 col-md-6 col-sm-12">
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('license-active-label')">
+          <ng-template #view>
+            @if (isChecking) {
+              {{null | defaultValue}}
+            } @else {
+              <i class="fas {{licenseInfo.isActive ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
+                <span class="visually-hidden">{{licenseInfo.isActive ? t('valid') : t('invalid')}]</span>
               </i>
-            </ng-template>
-          </app-setting-item>
-        </div>
+            }
+          </ng-template>
+        </app-setting-item>
+      </div>
 
-        <div class="mb-2 col-md-6 col-sm-12">
-          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
-            <ng-template #view>
-              {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
-            </ng-template>
-          </app-setting-item>
-        </div>
+      <div class="mb-2 col-md-6 col-sm-12">
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
+          <ng-template #view>
+            <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
+              <span class="visually-hidden">{{isVersionValid ? t('valid') : t('invalid')}]</span>
+            </i>
+          </ng-template>
+        </app-setting-item>
+      </div>
 
-        <div class="mb-2 col-md-6 col-sm-12">
-          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
-            <ng-template #view>
-              {{licenseInfo.totalMonthsSubbed | number}}
-            </ng-template>
-          </app-setting-item>
-        </div>
+      <div class="mb-2 col-md-6 col-sm-12">
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
+          <ng-template #view>
+            {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
+          </ng-template>
+        </app-setting-item>
+      </div>
 
-        <div class="col-md-6 col-sm-12">
-          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
-            <ng-template #view>
-              <span (click)="toggleEmailShow()" class="col-12 clickable">
-                @if (showEmail) {
-                  {{licenseInfo.registeredEmail}}
-                } @else {
-                  ***************
-                }
-              </span>
-            </ng-template>
-          </app-setting-item>
-        </div>
-      }
+      <div class="mb-2 col-md-6 col-sm-12">
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
+          <ng-template #view>
+            {{licenseInfo.totalMonthsSubbed | number}}
+          </ng-template>
+        </app-setting-item>
+      </div>
 
+      <div class="col-md-6 col-sm-12">
+        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
+          <ng-template #view>
+            <span (click)="toggleEmailShow()" class="col-12 clickable">
+              @if (showEmail) {
+                {{licenseInfo.registeredEmail}}
+              } @else {
+                ***************
+              }
+            </span>
+          </ng-template>
+        </app-setting-item>
+      </div>
 
       <div class="setting-section-break"></div>
 
@@ -200,7 +195,6 @@
           <a class="btn btn-primary btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
         </app-setting-button>
       </div>
-
     </div>
   }
 </ng-container>

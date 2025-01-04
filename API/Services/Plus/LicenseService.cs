@@ -266,10 +266,16 @@ public class LicenseService(
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
                 .GetJsonAsync<LicenseInfoDto>();
 
-            // Fill out the ValidVersion
-            var releases = await versionUpdaterService.GetAllReleases(3);
-            response.IsValidVersion = releases.Where(r => !r.IsPrerelease)
-                .Any(r => r.UpdateVersion == BuildInfo.Version.ToString());
+            // This indicates a mismatch on installid or no active subscription
+            if (response == null) return null;
+
+            // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes
+            var releases = await versionUpdaterService.GetAllReleases();
+            response.IsValidVersion = releases
+                .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
+                .Where(r => !r.IsPrerelease || BuildInfo.Version.IsWithinStableRelease(new Version(r.UpdateVersion))) // Ensure we don't take current nightlies within the current/last stable
+                .Take(3)
+                .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
 
             response.HasLicense = hasLicense;
 

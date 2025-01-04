@@ -389,7 +389,6 @@ public class SettingsController : BaseApiController
     {
         if (setting.Key == ServerSettingKey.TaskBackup && updateSettingsDto.TaskBackup != setting.Value)
         {
-            //if (updateSettingsDto.TotalBackup)
             setting.Value = updateSettingsDto.TaskBackup;
             _unitOfWork.SettingsRepository.Update(setting);
 

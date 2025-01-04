@@ -704,13 +704,17 @@
         "invalid-tooltip": "Invalid",
         "reset-label": "Reset",
         "reset-tooltip": "This will reset the server instance Kavita+ license is tied to. Requires Email and License Key",
-        "reset-license-alert": "If your Kavita license is not being registered, use Edit on License to Reset the license then re-register",
         "delete-label": "Remove License",
         "delete-tooltip": "This will remove the license from Kavita to stop Kavita from talking to Kavita+. Does not unsubscribe you. Use 'manage' first to cancel the subscription.",
         "manage-tooltip": "Update payment info, Cancel/Pause subscription, etc",
         "faq-title": "FAQ",
         "total-subbed-months-label": "Total Months Subscribed",
         "email-label": "Registered Email",
+
+        "license-mismatch": "License may be registered to another Kavita instance. Re-register to fix.",
+        "k+-license-overwrite": "License is registered to another Kavita instance. This can happen on re-installation and rarely due to system updates. Select overwrite to force this instance to register with Kavita+.",
+        "k+-already-registered-header": "License already registered",
+        "overwrite": "Overwrite",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",

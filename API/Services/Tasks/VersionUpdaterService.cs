@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Update;
+using API.Extensions;
 using API.SignalR;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
@@ -121,6 +122,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     IsDocker = true, // Nightlies are always Docker Only
                     IsReleaseEqual = IsVersionEqualToBuildVersion(Version.Parse(nightly.Version)),
                     IsReleaseNewer = true, // Since we already filtered these in GetNightlyReleases
+                    IsPrerelease = true, // All Nightlies are considered prerelease
                     Added = sections.TryGetValue("Added", out var added) ? added : [],
                     Changed = sections.TryGetValue("Changed", out var changed) ? changed : [],
                     Fixed = sections.TryGetValue("Fixed", out var bugfixes) ? bugfixes : [],
@@ -286,6 +288,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         var cachedReleases = await TryGetCachedReleases();
         if (cachedReleases != null)
         {
+            if (count > 0)
+            {
+                // NOTE: We may want to allow the admin to clear Github cache
+                return cachedReleases.Take(count).ToList();
+            }
+
             return cachedReleases;
         }
 
@@ -294,11 +302,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             .Where(d => d != null)
             .OrderByDescending(d => d!.PublishDate)
             .Select(d => d!);
-
-        if (count > 0)
-        {
-            query = query.Take(count);
-        }
 
         var updateDtos = query.ToList();
 
@@ -326,6 +329,11 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         if (updateDtos.Count > 0)
         {
             await CacheReleasesAsync(updateDtos);
+        }
+
+        if (count > 0)
+        {
+            return updateDtos.Take(count).ToList();
         }
 
         return updateDtos;
@@ -364,19 +372,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private static bool IsVersionEqualToBuildVersion(Version updateVersion)
     {
         return updateVersion == BuildInfo.Version || (updateVersion.Revision < 0 && BuildInfo.Version.Revision == 0 &&
-                                                      CompareWithoutRevision(BuildInfo.Version, updateVersion));
+                                                      BuildInfo.Version.CompareWithoutRevision(updateVersion));
     }
 
-    private static bool CompareWithoutRevision(Version v1, Version v2)
-    {
-        if (v1.Major != v2.Major)
-            return v1.Major == v2.Major;
-        if (v1.Minor != v2.Minor)
-            return v1.Minor == v2.Minor;
-        if (v1.Build != v2.Build)
-            return v1.Build == v2.Build;
-        return true;
-    }
 
     public async Task<int> GetNumberOfReleasesBehind()
     {
