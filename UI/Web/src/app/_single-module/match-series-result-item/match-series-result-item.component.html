@@ -1,15 +1,32 @@
-<div class="clickable" style="display: flex;padding: 5px;" (click)="selectItem()">
-  <div style="width: 24px" class="me-1">
-    @if (item.series.coverUrl) {
-      <app-image class="me-3 search-result" width="24px" [imageUrl]="item.series.coverUrl"></app-image>
-    }
-  </div>
-  <div class="ms-1">
-    {{item.series.name}}
-    @if (item.series.summary) {
-      <app-read-more [text]="item.series.summary" [showToggle]="false"></app-read-more>
-    }
-    ({{item.matchRating | translocoPercent}})
+<ng-container *transloco="let t; read:'match-series-result-item'">
+  <div class="d-flex p-1 clickable" (click)="selectItem()">
+    <div style="width: 32px" class="me-1">
+      @if (item.series.coverUrl) {
+        <app-image class="me-3 search-result" width="32px" [imageUrl]="item.series.coverUrl"></app-image>
+      }
+    </div>
+    <div class="ms-1">
+      <div>{{item.series.name}}</div>
+      <div class="text-muted">
+        @for(synm of item.series.synonyms; track synm; let last = $last) {
+          {{synm}}
+          @if (!last) {
+           <span>, </span>
+          }
+        }
+      </div>
+      @if (item.series.summary) {
+        <div>
+          <app-read-more [text]="item.series.summary" [showToggle]="false"></app-read-more>
+        </div>
+      }
+    </div>
   </div>
 
-</div>
+  <div class="d-flex p-1">
+    <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">More details</a></span>
+    <span class="me-1">{{t('volume-count', {num: item.series.volumeCount})}}</span>
+    <span class="me-1">{{t('chapter-count', {num: item.series.chapterCount})}}</span>
+    <span class="me-1">({{item.matchRating | translocoPercent}})</span>
+  </div>
+</ng-container>

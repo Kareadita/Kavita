@@ -123,6 +123,7 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 
 
+
 enum TabID {
   Related = 'related-tab',
   Specials = 'specials-tab',
@@ -588,7 +589,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.downloadSeries();
         break;
       case Action.Match:
-        this.actionService.matchSeries(this.series, (refreshNeeded) => {});
+        this.actionService.matchSeries(this.series, (refreshNeeded) => {
+          if (refreshNeeded) {
+            this.loadSeries(this.series.id, refreshNeeded);
+          }
+        });
         break;
       case Action.SendTo:
         {

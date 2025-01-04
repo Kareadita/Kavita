@@ -28,6 +28,7 @@ import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
 
+
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
 export type VolumeActionCallback = (volume: Volume) => void;

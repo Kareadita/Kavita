@@ -9,22 +9,20 @@ import {
 } from '@angular/core';
 import {ImageComponent} from "../../shared/image/image.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
-import {ExternalSeries} from "../../_models/series-detail/external-series";
-import {ExternalSeriesDetail} from "../../_models/series-detail/external-series-detail";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {PercentPipe} from "@angular/common";
 import {TranslocoPercentPipe} from "@jsverse/transloco-locale";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-match-series-result-item',
   standalone: true,
   imports: [
     ImageComponent,
-    SeriesFormatComponent,
-    PercentPipe,
     TranslocoPercentPipe,
-    ReadMoreComponent
+    ReadMoreComponent,
+    TranslocoDirective
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',

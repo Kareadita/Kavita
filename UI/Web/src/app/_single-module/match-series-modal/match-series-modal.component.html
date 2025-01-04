@@ -12,6 +12,7 @@
       <app-loading [loading]="isLoading"></app-loading>
       @for(item of matches; track item.series.name) {
         <app-match-series-result-item [item]="item" (selected)="selectMatch($event)"></app-match-series-result-item>
+        <div class="setting-section-break"></div>
       } @empty {
         @if (!isLoading) {
           {{t('no-results')}}

@@ -1,6 +1,4 @@
-using API.DTOs.Scrobbling;
-
-namespace API.DTOs.Metadata;
+namespace API.DTOs.Metadata.Matching;
 
 /// <summary>
 /// Used for matching a series with Kavita+ for metadata and scrobbling

@@ -3,21 +3,17 @@ import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@jsverse/transloco";
-import {ExternalSeries} from "../../_models/series-detail/external-series";
-import {ImageComponent} from "../../shared/image/image.component";
-import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {MatchSeriesResultItemComponent} from "../match-series-result-item/match-series-result-item.component";
-import {ExternalSeriesDetail} from "../../_models/series-detail/external-series-detail";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-match-series-modal',
   standalone: true,
   imports: [
     TranslocoDirective,
-    ImageComponent,
     MatchSeriesResultItemComponent,
     LoadingComponent
   ],
@@ -29,6 +25,7 @@ export class MatchSeriesModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly modalService = inject(NgbActiveModal);
+  private readonly toastr = inject(ToastrService);
 
   @Input({required: true}) series!: Series;
 
@@ -56,7 +53,7 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   save() {
-
+    this.toastr.success(translate('toasts.match-success'));
     this.modalService.close(true);
   }
 

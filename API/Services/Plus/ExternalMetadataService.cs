@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -17,6 +18,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
+using API.SignalR;
 using AutoMapper;
 using Flurl.Http;
 using Hangfire;
@@ -55,8 +57,6 @@ internal class MatchSeriesRequest
     public string SeriesName { get; set; }
     public ICollection<string> AlternativeNames { get; set; }
     public int Year { get; set; } = 0;
-    //public MangaFormat Format { get; set; }
-
     public string Query { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
@@ -90,6 +90,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly ILogger<ExternalMetadataService> _logger;
     private readonly IMapper _mapper;
     private readonly ILicenseService _licenseService;
+    private readonly IScrobblingService _scrobblingService;
+    private readonly IEventHub _eventHub;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
         [LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine];
@@ -102,12 +104,15 @@ public class ExternalMetadataService : IExternalMetadataService
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
 
-    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper, ILicenseService licenseService)
+    public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
+        ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
         _licenseService = licenseService;
+        _scrobblingService = scrobblingService;
+        _eventHub = eventHub;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -258,10 +263,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         try
         {
-            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
+            var results = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(matchRequest)
                 .ReceiveJson<IList<ExternalSeriesMatchDto>>();
+
+            // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
+            foreach (var result in results)
+            {
+                result.Series.Summary = CleanSummary(result.Series.Summary);
+            }
+
+            return results;
         }
         catch (Exception ex)
         {
@@ -269,6 +282,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return ArraySegment<ExternalSeriesMatchDto>.Empty;
+    }
+
+    private static string CleanSummary(string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            return string.Empty; // Return as is if null, empty, or whitespace.
+        }
+
+        return summary.Replace("<br/>", string.Empty);
     }
 
 
@@ -325,6 +348,11 @@ public class ExternalMetadataService : IExternalMetadataService
         return await FetchExternalMetadataForSeries(seriesId, libraryType, data);
     }
 
+    /// <summary>
+    /// This will override any sort of matching that was done prior and force it to be what the user Selected
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="dto"></param>
     public async Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
@@ -341,6 +369,17 @@ public class ExternalMetadataService : IExternalMetadataService
             MalId = dto.MALId,
             MediaFormat = dto.PlusMediaFormat,
         });
+
+        // Find all scrobble events and rewrite them to be the correct
+        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        _unitOfWork.ScrobbleRepository.Remove(events);
+        await _unitOfWork.CommitAsync();
+
+        // Regenerate all events for the series for all users
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
+        await _eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"), true);
+
 
         _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, dto.Name);
     }

@@ -891,6 +891,11 @@
         "no-results": "Unable to find a match. Try adding an Id or the url from a supported provider and retry."
     },
 
+    "match-series-result-item": {
+        "volume-count": "{{common.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}"
+    },
+
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -2487,7 +2492,8 @@
         "bulk-scan": "Scanning multiple libraries will be done linearly. This may take a long time and not complete depending on library size.",
         "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?",
         "person-image-downloaded": "Person cover was downloaded and applied.",
-        "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?"
+        "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
+        "match-success": "Series matched correctly"
     },
 
     "read-time-pipe": {
@@ -2673,6 +2679,7 @@
         "series-count": "{{num}} Series",
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
+        "chapter-count": "{{num}} Chapters",
 
         "book-num": "Book",
         "issue-hash-num": "Issue #",

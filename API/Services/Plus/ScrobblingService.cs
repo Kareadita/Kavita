@@ -54,6 +54,7 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
+    Task CreateEventsFromExistingHistoryForSeries(int seriesId = 0);
     Task ClearEventsForSeries(int userId, int seriesId);
 }
 
@@ -155,13 +156,7 @@ public class ScrobblingService : IScrobblingService
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license.Value)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .WithKavitaPlusHeaders(license.Value)
                 .GetStringAsync();
 
             return bool.Parse(response);
@@ -522,19 +517,19 @@ public class ScrobblingService : IScrobblingService
     }
 
     /// <summary>
-    /// This will back fill events from existing progress history, ratings, and want to read for users that have a valid license
+    /// This will backfill events from existing progress history, ratings, and want to read for users that have a valid license
     /// </summary>
     /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
     public async Task CreateEventsFromExistingHistory(int userId = 0)
     {
+        if (!await _licenseService.HasActiveLicense()) return;
+
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
             .Where(l => userId == 0 || userId == l.Id)
             .Select(u => u.Id);
-
-        if (!await _licenseService.HasActiveLicense()) return;
 
         foreach (var uId in userIds)
         {
@@ -552,12 +547,12 @@ public class ScrobblingService : IScrobblingService
                 await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
             }
 
-            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
-            foreach (var review in reviews)
-            {
-                if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
-                await ScrobbleReviewUpdate(uId, review.SeriesId, review.Tagline, review.Review);
-            }
+            // var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
+            // foreach (var review in reviews)
+            // {
+            //     if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
+            //     await ScrobbleReviewUpdate(uId, review.SeriesId, review.Tagline, review.Review);
+            // }
 
             var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
                 new UserParams(), new FilterDto()
@@ -577,7 +572,59 @@ public class ScrobblingService : IScrobblingService
                 if (series.PagesRead <= 0) continue; // Since we only scrobble when things are higher, we can
                 await ScrobbleReadingUpdate(uId, series.Id);
             }
+        }
+    }
 
+    public async Task CreateEventsFromExistingHistoryForSeries(int seriesId = 0)
+    {
+        if (!await _licenseService.HasActiveLicense()) return;
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) return;
+
+        _logger.LogInformation("Creating Scrobbling events for Series {SeriesName}", series.Name);
+
+        var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
+            .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
+
+        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
+            .Select(u => u.Id);
+
+        foreach (var uId in userIds)
+        {
+            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
+            foreach (var wtr in wantToRead)
+            {
+                if (!libAllowsScrobbling[wtr.LibraryId]) continue;
+                await ScrobbleWantToReadUpdate(uId, wtr.Id, true);
+            }
+
+            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId);
+            foreach (var rating in ratings)
+            {
+                if (!libAllowsScrobbling[rating.Series.LibraryId]) continue;
+                await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
+            }
+
+            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
+                new UserParams(), new FilterDto()
+                {
+                    ReadStatus = new ReadStatus()
+                    {
+                        Read = true,
+                        InProgress = true,
+                        NotRead = false
+                    },
+                    Libraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList(),
+                    SeriesNameQuery = series.Name
+                });
+
+            foreach (var seriesProgress in seriesWithProgress)
+            {
+                if (!libAllowsScrobbling[seriesProgress.LibraryId]) continue;
+                if (seriesProgress.PagesRead <= 0) continue; // Since we only scrobble when things are higher, we can
+                await ScrobbleReadingUpdate(uId, seriesProgress.Id);
+            }
         }
     }
 
