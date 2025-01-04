@@ -126,7 +126,7 @@
     <div class="row g-0 mt-3">
       @if (licenseInfo) {
         <h3 class="container-fluid">{{t('info-title')}}</h3>
-        <div class="mb-2">
+        <div class="mb-2 col-md-6 col-sm-12">
           <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('license-active-label')">
             <ng-template #view>
               @if (isChecking) {
@@ -140,7 +140,7 @@
           </app-setting-item>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-2 col-md-6 col-sm-12">
           <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supported-version-label')">
             <ng-template #view>
               <i class="fas {{licenseInfo.isVersionValid ? 'fa-check-circle' : 'fa-circle-xmark error'}}">
@@ -150,7 +150,7 @@
           </app-setting-item>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-2 col-md-6 col-sm-12">
           <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('expiration-label')">
             <ng-template #view>
               {{licenseInfo.expirationDate | utcToLocalTime | defaultValue}}
@@ -158,7 +158,7 @@
           </app-setting-item>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-2 col-md-6 col-sm-12">
           <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('total-subbed-months-label')">
             <ng-template #view>
               {{licenseInfo.totalMonthsSubbed | number}}
@@ -166,18 +166,19 @@
           </app-setting-item>
         </div>
 
-
-        <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
-          <ng-template #view>
-            <span (click)="toggleEmailShow()" class="col-12 clickable">
-              @if (showEmail) {
-                {{licenseInfo.registeredEmail}}
-              } @else {
-                ***************
-              }
-            </span>
-          </ng-template>
-        </app-setting-item>
+        <div class="col-md-6 col-sm-12">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('email-label')">
+            <ng-template #view>
+              <span (click)="toggleEmailShow()" class="col-12 clickable">
+                @if (showEmail) {
+                  {{licenseInfo.registeredEmail}}
+                } @else {
+                  ***************
+                }
+              </span>
+            </ng-template>
+          </app-setting-item>
+        </div>
       }
 
 
