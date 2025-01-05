@@ -43,7 +43,7 @@ public class LicenseService(
     : ILicenseService
 {
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
-    public const string Cron = "0 */4 * * *";
+    public const string Cron = "0 */9 * * *";
     private const string CacheKey = "license";
     private const string LicenseInfoCacheKey = "license-info";
 
