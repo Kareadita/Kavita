@@ -247,41 +247,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
     }
 
-    private async Task<int?> ExtractPRNumber(string version)
-    {
-        try
-        {
-            // Fetch recent commits from develop branch
-            var commits = await GithubBranchCommitsUrl
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .GetJsonAsync<IList<CommitInfo>>();
-
-            // Look for commit with version bump
-            var versionCommit = commits.FirstOrDefault(c =>
-                c.Commit.Message.Contains("Bump versions by dotnet-bump-version") ||
-                c.Commit.Message.Contains($"v{version}"));
-
-            if (versionCommit == null) return null;
-
-            // Find the merge commit just before the version bump
-            var mergeCommitIndex = commits.ToList().FindIndex(c => c.Sha == versionCommit.Sha) + 1;
-            if (mergeCommitIndex >= commits.Count) return null;
-
-            var mergeCommit = commits[mergeCommitIndex];
-
-            // PR merge commits have format "Merge pull request #1234 from ..."
-            var match = Regex.Match(mergeCommit.Commit.Message, @".+\s\(#(\d+)\)$");
-            return match.Success ? int.Parse(match.Groups[1].Value) : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to extract PR number for version {Version}", version);
-            return null;
-        }
-    }
-
-
     public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0)
     {
         // Attempt to fetch from cache

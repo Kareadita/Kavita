@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services.Tasks.Metadata;
+#nullable enable
 
 public interface ICoverDbService
 {
@@ -50,6 +51,10 @@ public class CoverDbService : ICoverDbService
     {
         ["https://app.plex.tv"] = "https://plex.tv"
     };
+    /// <summary>
+    /// Cache of the publisher/favicon list
+    /// </summary>
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(1);
 
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
         IEasyCachingProviderFactory cacheFactory, IHostEnvironment env)
@@ -307,12 +312,16 @@ public class CoverDbService : ICoverDbService
         return $"{NewHost}{coverAuthor.ImagePath}";
     }
 
-    private static async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
+    private async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
     {
+        const string urlsFileName = "publishers.txt";
         var correctSizeLink = string.Empty;
-        // TODO: Pull this down and store it in temp/ to save on requests
-        var allOverrides = await $"{NewHost}favicons/urls.txt"
-            .GetStringAsync();
+        var allOverrides = await GetCachedData(urlsFileName) ??
+                           await $"{NewHost}favicons/{urlsFileName}".GetStringAsync();
+
+        // Cache immediately
+        await CacheDataAsync(urlsFileName, allOverrides);
+
 
         if (!string.IsNullOrEmpty(allOverrides))
         {
@@ -335,11 +344,16 @@ public class CoverDbService : ICoverDbService
         return correctSizeLink;
     }
 
-    private static async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
+    private async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
     {
+        const string publisherFileName = "publishers.txt";
         var externalLink = string.Empty;
-        // TODO: Pull this down and store it in temp/ to save on requests
-        var allOverrides = await $"{NewHost}publishers/publishers.txt".GetStringAsync();
+        var allOverrides = await GetCachedData(publisherFileName) ??
+                           await $"{NewHost}publishers/{publisherFileName}".GetStringAsync();
+
+        // Cache immediately
+        await CacheDataAsync(publisherFileName, allOverrides);
+
 
         if (!string.IsNullOrEmpty(allOverrides))
         {
@@ -368,5 +382,36 @@ public class CoverDbService : ICoverDbService
         }
 
         return externalLink;
+    }
+
+    private async Task CacheDataAsync(string fileName, string? content)
+    {
+        if (content == null) return;
+
+        try
+        {
+            var filePath = _directoryService.FileSystem.Path.Join(_directoryService.LongTermCacheDirectory, fileName);
+            await File.WriteAllTextAsync(filePath, content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cache {FileName}", fileName);
+        }
+    }
+
+
+    private async Task<string?> GetCachedData(string cacheFile)
+    {
+        // Form the full file path:
+        var filePath = _directoryService.FileSystem.Path.Join(_directoryService.LongTermCacheDirectory, cacheFile);
+        if (!File.Exists(filePath)) return null;
+
+        var fileInfo = new FileInfo(filePath);
+        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
+        {
+            return await File.ReadAllTextAsync(filePath);
+        }
+
+        return null;
     }
 }

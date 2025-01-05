@@ -885,10 +885,15 @@
 
     "match-series-modal": {
         "title": "Match {{seriesName}}",
-        "description": "Enter an AniList/MAL url or an alternative series name to match against",
+        "description": "Select a match to rewire Kavita+ metadata and regenerate scrobble events. Don't Match can be used to restrict Kavita from matching metadata and scrobbling.",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "no-results": "Unable to find a match. Try adding an Id or the url from a supported provider and retry."
+        "no-results": "Unable to find a match. Try adding the url from a supported provider and retry.",
+        "query-label": "Query",
+        "query-tooltip": "Enter series name, AniList/MyAnimeList url. Urls will use a direct lookup.",
+        "dont-match-label": "Do not Match",
+        "dont-match-tooltip": "Opt this series from matching and scrobbling",
+        "search": "Search"
     },
 
     "match-series-result-item": {

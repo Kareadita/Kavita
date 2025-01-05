@@ -1,13 +1,15 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {MatchSeriesResultItemComponent} from "../match-series-result-item/match-series-result-item.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -15,7 +17,10 @@ import {ToastrService} from "ngx-toastr";
   imports: [
     TranslocoDirective,
     MatchSeriesResultItemComponent,
-    LoadingComponent
+    LoadingComponent,
+    ReactiveFormsModule,
+    SettingItemComponent,
+    SettingSwitchComponent
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -35,16 +40,24 @@ export class MatchSeriesModalComponent implements OnInit {
 
   ngOnInit() {
     this.formGroup.addControl('query', new FormControl('', []));
-    this.formGroup.addControl('dontMatch', new FormControl(false, []));
+    this.formGroup.addControl('dontMatch', new FormControl(this.series?.dontMatch || false, []));
+
+    this.search();
+  }
+
+  search() {
+    this.isLoading = true;
+    this.cdRef.markForCheck();
 
     const model: any = this.formGroup.value;
     model.seriesId = this.series.id;
 
+    if (this.series.dontMatch) return;
 
     this.seriesService.matchSeries(model).subscribe(results => {
       this.isLoading = false;
       this.matches = results;
-      this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
     });
   }
 

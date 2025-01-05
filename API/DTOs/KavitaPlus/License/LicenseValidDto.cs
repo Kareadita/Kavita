@@ -1,4 +1,4 @@
-﻿namespace API.DTOs.Account;
+﻿namespace API.DTOs.KavitaPlus.License;
 
 public class LicenseValidDto
 {
