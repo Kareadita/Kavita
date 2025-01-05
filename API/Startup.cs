@@ -277,6 +277,9 @@ public class Startup
                     await MigrateDuplicateDarkTheme.Migrate(dataContext, logger);
                     await ManualMigrateUnscrobbleBookLibraries.Migrate(dataContext, logger);
 
+                    // v0.8.5
+                    await ManualMigrateBlacklistTableToSeries.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();

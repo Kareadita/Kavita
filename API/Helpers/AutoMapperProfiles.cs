@@ -10,6 +10,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Device;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Progress;
@@ -32,6 +33,7 @@ using API.Helpers.Converters;
 using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
+using ExternalSeriesMetadata = API.Entities.Metadata.ExternalSeriesMetadata;
 using MediaError = API.Entities.MediaError;
 using PublicationStatus = API.Entities.Enums.PublicationStatus;
 using SiteTheme = API.Entities.SiteTheme;
@@ -334,6 +336,13 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
+        CreateMap<Series, ManageMatchSeriesDto>()
+            .ForMember(dest => dest.Series,
+                opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.IsMatched,
+                opt => opt.MapFrom(src => src.ExternalSeriesMetadata != null))
+            .ForMember(dest => dest.ValidUntilUtc,
+                opt => opt.MapFrom(src => src.ExternalSeriesMetadata.ValidUntilUtc));
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();

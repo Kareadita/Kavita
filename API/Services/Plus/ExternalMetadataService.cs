@@ -131,7 +131,9 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!IsPlusEligible(libraryType)) return;
 
         // Remove from Blacklist if applicable
-        await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        series!.IsBlacklisted = false;
+        _unitOfWork.SeriesRepository.Update(series);
 
         var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (metadata == null) return;
@@ -324,7 +326,8 @@ public class ExternalMetadataService : IExternalMetadataService
         if (series == null) return;
 
         // Remove from Blacklist
-        await _unitOfWork.ExternalSeriesMetadataRepository.RemoveFromBlacklist(seriesId);
+        series!.IsBlacklisted = false;
+        _unitOfWork.SeriesRepository.Update(series);
 
         // Refetch metadata with a Direct lookup
         await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
@@ -351,10 +354,13 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesDto data)
     {
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) return _defaultReturn;
+
         try
         {
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", data.SeriesName);
-
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
             var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
                 .WithKavitaPlusHeaders(license)
@@ -363,7 +369,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Clear out existing results
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+
             var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series!);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
@@ -420,7 +426,8 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         // Blacklist the series as it wasn't found in Kavita+
-        await _unitOfWork.ExternalSeriesMetadataRepository.CreateBlacklistedSeries(seriesId);
+        series.IsBlacklisted = true;
+        await _unitOfWork.CommitAsync();
 
         return _defaultReturn;
     }

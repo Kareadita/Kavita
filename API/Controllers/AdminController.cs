@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using API.Data;
 using API.Data.ManualMigrations;
+using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -13,10 +16,12 @@ namespace API.Controllers;
 public class AdminController : BaseApiController
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AdminController(UserManager<AppUser> userManager)
+    public AdminController(UserManager<AppUser> userManager, IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250105133817_SeriesDontMatch")]
-    partial class SeriesDontMatch
+    [Migration("20250105180131_SeriesDontMatchAndBlacklist")]
+    partial class SeriesDontMatchAndBlacklist
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1876,6 +1876,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Format")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsBlacklisted")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastChapterAdded")

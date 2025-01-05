@@ -1875,6 +1875,9 @@ namespace API.Data.Migrations
                     b.Property<int>("Format")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsBlacklisted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastChapterAdded")
                         .HasColumnType("TEXT");
 

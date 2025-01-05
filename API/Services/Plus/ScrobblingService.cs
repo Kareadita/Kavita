@@ -468,7 +468,9 @@ public class ScrobblingService : IScrobblingService
                             LibraryId = evt.LibraryId,
                             SeriesId = evt.SeriesId
                         });
-                        await _unitOfWork.ExternalSeriesMetadataRepository.CreateBlacklistedSeries(evt.SeriesId, false);
+                        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId);
+                        series!.IsBlacklisted = true;
+                        _unitOfWork.SeriesRepository.Update(series);
                     }
 
                     evt.IsErrored = true;
@@ -496,7 +498,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (FlurlHttpException  ex)
         {
-            _logger.LogError("Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
+            _logger.LogError(ex, "Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
             if (ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
             {
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))

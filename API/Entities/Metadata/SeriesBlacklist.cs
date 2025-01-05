@@ -8,7 +8,8 @@ namespace API.Entities.Metadata;
 public class SeriesBlacklist
 {
     public int Id { get; set; }
+    public DateTime LastChecked { get; set; } = DateTime.UtcNow;
+
     public int SeriesId { get; set; }
     public Series Series { get; set; }
-    public DateTime LastChecked { get; set; } = DateTime.UtcNow;
 }

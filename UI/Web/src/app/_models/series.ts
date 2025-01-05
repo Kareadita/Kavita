@@ -75,4 +75,8 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
    * Kavita+ only. Will not perform any matching from Kavita+
    */
   dontMatch: boolean;
+  /**
+   * Kavita+ only. Did this series not match and won't without manual match
+   */
+  isBlacklisted: boolean;
 }

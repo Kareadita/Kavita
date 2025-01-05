@@ -11,7 +11,6 @@ import {ConfirmService} from "../shared/confirm.service";
   providedIn: 'root'
 })
 export class LicenseService {
-  private readonly confirmService = inject(ConfirmService);
   private readonly httpClient = inject(HttpClient);
 
   baseUrl = environment.apiUrl;
