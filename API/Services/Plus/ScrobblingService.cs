@@ -378,7 +378,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
-        //if (series.DoNotMatch) return false; // TODO
+        if (series.DontMatch) return true;
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
             _logger.LogInformation("Series {SeriesName} is on UserId {UserId}'s hold list. Not scrobbling", series.Name,

@@ -23,7 +23,7 @@ public class ExternalSeriesMetadata
     /// <summary>
     /// Average External Rating. -1 means not set, 0 - 100
     /// </summary>
-    public int AverageExternalRating { get; set; } = 0;
+    public int AverageExternalRating { get; set; } = -1;
 
     public int AniListId { get; set; }
     public long MalId { get; set; }

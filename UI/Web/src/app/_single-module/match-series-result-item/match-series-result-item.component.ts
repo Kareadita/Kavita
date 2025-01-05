@@ -14,6 +14,7 @@ import {PercentPipe} from "@angular/common";
 import {TranslocoPercentPipe} from "@jsverse/transloco-locale";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {PlusMediaFormatPipe} from "../../_pipes/plus-media-format.pipe";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -22,7 +23,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
     ImageComponent,
     TranslocoPercentPipe,
     ReadMoreComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    PlusMediaFormatPipe
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',

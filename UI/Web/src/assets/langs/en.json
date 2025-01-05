@@ -897,8 +897,10 @@
     },
 
     "match-series-result-item": {
-        "volume-count": "{{common.volume-count}}",
-        "chapter-count": "{{common.chapter-count}}"
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "releasing": "Releasing",
+        "details": "View page"
     },
 
     "metadata-fields": {

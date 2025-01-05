@@ -106,7 +106,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <summary>
     /// Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling.
     /// </summary>
-    //public bool DoNotMatch { get; set; } // TODO
+    public bool DontMatch { get; set; }
 
     public SeriesMetadata Metadata { get; set; } = null!;
     public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;
