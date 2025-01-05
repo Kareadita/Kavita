@@ -38,7 +38,9 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds", "context"])]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds, QueryContext context = QueryContext.None)
     {
-        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(int.Parse)
+            .ToList();
 
         return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
     }

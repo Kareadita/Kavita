@@ -16,7 +16,7 @@
               <ng-template #view>
                 <div class="input-group">
                   @if (formGroup.get('query'); as formControl) {
-                    <input id="query" class="form-control" formControlName="name" type="text"
+                    <input id="query" class="form-control" formControlName="query" type="text"
                            [class.is-invalid]="formControl.invalid && !formControl.untouched">
                     @if (formControl.errors) {
                       @if (formControl.errors.required) {
