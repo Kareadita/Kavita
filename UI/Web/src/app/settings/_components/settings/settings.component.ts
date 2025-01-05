@@ -12,17 +12,12 @@ import {
 import {
   ManageUserPreferencesComponent
 } from "../../../user-settings/manga-user-preferences/manage-user-preferences.component";
-import {NgbNav, NgbNavContent, NgbNavLinkBase} from "@ng-bootstrap/ng-bootstrap";
-import {ActivatedRoute, Router, RouterLink} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {
   SideNavCompanionBarComponent
 } from "../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-manager.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
-import {
-  UserScrobbleHistoryComponent
-} from "../../../_single-module/user-scrobble-history/user-scrobble-history.component";
 import {UserStatsComponent} from "../../../statistics/_components/user-stats/user-stats.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {AsyncPipe} from "@angular/common";
@@ -40,10 +35,6 @@ import {ServerStatsComponent} from "../../../statistics/_components/server-stats
 import {SettingFragmentPipe} from "../../../_pipes/setting-fragment.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
-import {
-    KavitaplusMetadataBreakdownStatsComponent
-} from "../../../statistics/_components/kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
-import {ManageKavitaplusComponent} from "../../../admin/manage-kavitaplus/manage-kavitaplus.component";
 import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
 import {ManageMediaIssuesComponent} from "../../../admin/manage-media-issues/manage-media-issues.component";
 import {
@@ -54,6 +45,7 @@ import {
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
 import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
 import {LicenseService} from "../../../_services/license.service";
+import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-metadata/manage-matched-metadata.component";
 
 @Component({
   selector: 'app-settings',
@@ -66,15 +58,9 @@ import {LicenseService} from "../../../_services/license.service";
     ManageOpdsComponent,
     ManageScrobblingProvidersComponent,
     ManageUserPreferencesComponent,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLinkBase,
-    RouterLink,
     SideNavCompanionBarComponent,
     ThemeManagerComponent,
     TranslocoDirective,
-    ScrobblingHoldsComponent,
-    UserScrobbleHistoryComponent,
     UserStatsComponent,
     AsyncPipe,
     LicenseComponent,
@@ -87,13 +73,12 @@ import {LicenseService} from "../../../_services/license.service";
     ManageUsersComponent,
     ServerStatsComponent,
     SettingFragmentPipe,
-    KavitaplusMetadataBreakdownStatsComponent,
-    ManageKavitaplusComponent,
     ManageScrobblingComponent,
     ManageMediaIssuesComponent,
     ManageCustomizationComponent,
     ImportMalCollectionComponent,
-    ImportCblComponent
+    ImportCblComponent,
+    ManageMatchedMetadataComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

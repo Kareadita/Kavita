@@ -733,6 +733,10 @@
         "kavita+-requirement": "Kavita+ is designed to work only with the latest 3 releases. Anything outside of that is subject to not functioning."
     },
 
+    "manage-matched-metadata": {
+
+    },
+
     "book-line-overlay": {
         "copy": "Copy",
         "bookmark": "Bookmark",
@@ -1563,7 +1567,8 @@
         "admin-tasks": "Tasks",
         "admin-statistics": "Statistics",
         "admin-system": "System",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "License",
+        "admin-matched-metadata": "Matched Metadata",
         "account": "Account",
         "preferences": "Preferences",
         "clients": "API Key / OPDS",

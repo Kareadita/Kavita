@@ -31,6 +31,7 @@ export enum SettingsTabId {
   // Kavita+
   KavitaPlus = 'admin-kavitaplus',
   MALStackImport = 'mal-stack-import',
+  MatchedMetadata = 'admin-matched-metadata',
 
   // Non-Admin
   Account = 'account',
@@ -155,6 +156,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       title: 'kavitaplus-section-title',
       children: [
         new SideNavItem(SettingsTabId.KavitaPlus, [Role.Admin]),
+        new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]),
       ]
     }
   ];
