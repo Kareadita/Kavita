@@ -5,18 +5,13 @@
 
   <form [formGroup]="filterGroup">
     <div class="row g-0">
-      <div class="col-auto">
+      <div class="col-auto ms-auto">
         <label for="match-filter">Match State</label>
         <select class="form-select" formControlName="matchState" id="match-filter">
           @for(state of allMatchStates; track state) {
             <option [value]="state">{{state | matchStateOption}}</option>
           }
         </select>
-      </div>
-
-      <div class="col-auto ms-2">
-        <!-- Note that this is rate limited -->
-        <button class="btn btn-secondary mt-4">Trigger Auto-Match</button>
       </div>
     </div>
   </form>
