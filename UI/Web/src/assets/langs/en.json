@@ -738,9 +738,12 @@
         "description": "All applicable Series that can be matched with External Metadata reside here.",
         "status-header": "Status",
         "series-name-header": "Series",
+        "valid-until-header": "Next Refresh",
         "matched-status-label": "Matched",
         "unmatched-status-label": "Not Matched",
         "blacklist-status-label": "Needs Manual Match",
+        "all-status-label": "All",
+        "dont-match-label": "Don't Match",
         "no-data": "{{common.no-data}}"
     },
 

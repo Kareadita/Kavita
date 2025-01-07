@@ -338,11 +338,14 @@ public class AutoMapperProfiles : Profile
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
         CreateMap<Series, ManageMatchSeriesDto>()
             .ForMember(dest => dest.Series,
-                opt => opt.MapFrom(src => src))
+                opt =>
+                    opt.MapFrom(src => src))
             .ForMember(dest => dest.IsMatched,
-                opt => opt.MapFrom(src => src.ExternalSeriesMetadata != null))
+                opt =>
+                    opt.MapFrom(src => src.ExternalSeriesMetadata != null && src.ExternalSeriesMetadata.AniListId != 0 && src.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue))
             .ForMember(dest => dest.ValidUntilUtc,
-                opt => opt.MapFrom(src => src.ExternalSeriesMetadata.ValidUntilUtc));
+                opt =>
+                    opt.MapFrom(src => src.ExternalSeriesMetadata.ValidUntilUtc));
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();

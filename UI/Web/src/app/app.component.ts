@@ -25,6 +25,7 @@ import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
 import {TranslocoService} from "@jsverse/transloco";
 import {User} from "./_models/user";
 import {VersionService} from "./_services/version.service";
+import {LicenseService} from "./_services/license.service";
 
 @Component({
     selector: 'app-root',
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly translocoService = inject(TranslocoService);
   private readonly versionService = inject(VersionService); // Needs to be injected to run background job
+  private readonly licenseService = inject(LicenseService);
 
   protected readonly Breakpoint = Breakpoint;
 
@@ -122,5 +124,6 @@ export class AppComponent implements OnInit {
     // Bootstrap anything that's needed
     this.themeService.getThemes().subscribe();
     this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
+    this.licenseService.licenseInfo().subscribe();
   }
 }

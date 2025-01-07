@@ -87,6 +87,9 @@
                 <app-license></app-license>
               </div>
             }
+          }
+
+          @defer (when fragment === SettingsTabId.MatchedMetadata; prefetch on idle) {
             @if (fragment === SettingsTabId.MatchedMetadata) {
               <div class="scale col-md-12">
                 <app-manage-matched-metadata></app-manage-matched-metadata>

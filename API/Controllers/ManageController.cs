@@ -30,11 +30,11 @@ public class ManageController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
-    [HttpGet("series-metadata")]
-    public async Task<ActionResult<IList<ManageMatchSeriesDto>>> SeriesMetadata()
+    [HttpPost("series-metadata")]
+    public async Task<ActionResult<IList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter)
     {
         if (!await _licenseService.HasActiveLicense()) return Ok(Array.Empty<SeriesDto>());
-        // Need the series, Need the external match
-        return Ok(await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries());
+
+        return Ok(await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter));
     }
 }

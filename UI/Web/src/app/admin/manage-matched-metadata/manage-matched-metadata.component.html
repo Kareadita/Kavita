@@ -3,31 +3,48 @@
   <h4>{{t('title')}}</h4>
   <p>{{t('description')}}</p>
 
-  <!-- Note that this is rate limited -->
-  <button class="btn btn-secondary">Try matching all unmatched</button>
+  <form [formGroup]="filterGroup">
+    <div class="row g-0">
+      <div class="col-auto">
+        <label for="match-filter">Match State</label>
+        <select class="form-select" formControlName="matchState" id="match-filter">
+          @for(state of allMatchStates; track state) {
+            <option [value]="state">{{state | matchStateOption}}</option>
+          }
+        </select>
+      </div>
 
-  <!-- Some filter or something to show: Unmatched only, Matched only, Blacklisted Only -->
+      <div class="col-auto ms-2">
+        <!-- Note that this is rate limited -->
+        <button class="btn btn-secondary mt-4">Trigger Auto-Match</button>
+      </div>
+    </div>
+  </form>
+
+
 
   <div class="table-responsive-md">
-    <table class="table table-striped table-sm">
-      <thead #header>
-      <tr>
-        <!-- Series Image -->
-        <th scope="col"></th>
+    <virtual-scroller #scroll [items]="data">
+      <table class="table table-striped table-sm">
+        <thead #header>
+        <tr>
+          <!-- Series Image -->
+          <th scope="col"></th>
 
-        <th scope="col">
-          {{t('series-name-header')}}
-        </th>
-        <th scope="col">
-          {{t('status-header')}}
-        </th>
-        <!-- Actions header -->
-        <th scope="col"></th>
-      </tr>
-      </thead>
-      <tbody>
-        <virtual-scroller #scroll [items]="data" [bufferAmount]="1">
-
+          <th scope="col">
+            {{t('series-name-header')}}
+          </th>
+          <th scope="col">
+            {{t('status-header')}}
+          </th>
+          <th scope="col">
+            {{t('valid-until-header')}}
+          </th>
+          <!-- Actions header -->
+          <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody #container>
           @for(item of scroll.viewPortItems; track item; let index = $index) {
             <tr>
               <td>
@@ -39,8 +56,17 @@
               <td>
                 @if (item.series.isBlacklisted) {
                   {{t('blacklist-status-label')}}
+                } @else if (item.series.dontMatch) {
+                  {{t('dont-match-status-label')}}
                 } @else {
                   {{item.isMatched ? t('matched-status-label') : t('unmatched-status-label') }}
+                }
+              </td>
+              <td>
+                @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
+                  {{null | defaultValue}}
+                } @else {
+                  {{item.validUntilUtc | utcToLocalTime}}
                 }
               </td>
               <td>
@@ -54,9 +80,8 @@
               <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
             }
           }
-
-        </virtual-scroller>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </virtual-scroller>
   </div>
 </ng-container>

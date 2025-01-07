@@ -37,7 +37,7 @@ public interface IExternalSeriesMetadataRepository
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit);
-    Task<IList<ManageMatchSeriesDto>> GetAllSeries();
+    Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository
@@ -221,12 +221,14 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ToListAsync();
     }
 
-    public async Task<IList<ManageMatchSeriesDto>> GetAllSeries()
+    public async Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter)
     {
         return await _context.Series
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
-            .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
-            .OrderByDescending(s => s.NormalizedName)
+            //.Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
+            .FilterMatchState(filter.MatchStateOption)
+            //.WhereNameLike(filter.SearchTerm)
+            .OrderBy(s => s.NormalizedName)
             .ProjectTo<ManageMatchSeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
