@@ -96,7 +96,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
     /// data in the DB non-stale and fetched.
     /// </summary>
-    /// <remarks>To avoid blasting Kavita+ API, this only processes a few records. The goal is to slowly build </remarks>
+    /// <remarks>To avoid blasting Kavita+ API, this only processes 25 records. The goal is to slowly build out/refresh the data</remarks>
     /// <returns></returns>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]

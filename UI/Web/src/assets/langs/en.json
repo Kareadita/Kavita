@@ -735,7 +735,7 @@
 
     "manage-matched-metadata": {
         "title": "Matched Metadata",
-        "description": "All applicable Series that can be matched with External Metadata reside here.",
+        "description": "All applicable Series that can be matched with External Metadata reside here. Kavita will prefetch or refresh series metadata, 50 series per 24 hours daily.",
         "status-header": "Status",
         "series-name-header": "Series",
         "valid-until-header": "Next Refresh",

@@ -221,8 +221,9 @@ public class TaskScheduler : ITaskScheduler
             () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 4)),
             RecurringJobOptions);
 
+        // This shouldn't be so close to fetching data due to Rate limit concerns
         RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
-            () => _smartCollectionSyncService.Sync(), Cron.Daily(Rnd.Next(1, 4)),
+            () => _smartCollectionSyncService.Sync(), Cron.Daily(Rnd.Next(6, 10)),
             RecurringJobOptions);
     }
 
