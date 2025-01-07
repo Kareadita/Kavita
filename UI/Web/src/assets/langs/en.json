@@ -1579,6 +1579,7 @@
         "admin-system": "System",
         "admin-kavitaplus": "License",
         "admin-matched-metadata": "Matched Metadata",
+        "admin-manage-tokens": "Manage User Tokens",
         "account": "Account",
         "preferences": "Preferences",
         "clients": "API Key / OPDS",

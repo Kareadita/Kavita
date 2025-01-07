@@ -26,9 +26,6 @@ import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {
-  KavitaplusMetadataBreakdownStatsComponent
-} from "../kavitaplus-metadata-breakdown-stats/kavitaplus-metadata-breakdown-stats.component";
 import {AccountService} from "../../../_services/account.service";
 
 @Component({
@@ -39,7 +36,7 @@ import {AccountService} from "../../../_services/account.service";
     standalone: true,
   imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
     PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
-    CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective, KavitaplusMetadataBreakdownStatsComponent]
+    CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
 })
 export class ServerStatsComponent {
 

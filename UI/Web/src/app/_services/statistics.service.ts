@@ -134,8 +134,4 @@ export class StatisticsService {
   getDayBreakdown( userId = 0) {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
-
-  getKavitaPlusMetadataBreakdown() {
-    return this.httpClient.get<KavitaPlusMetadataBreakdown>(this.baseUrl + 'stats/kavitaplus-metadata-breakdown');
-  }
 }
