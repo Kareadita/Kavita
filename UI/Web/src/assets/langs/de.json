@@ -2054,7 +2054,7 @@
     "filter-comparison-pipe": {
         "begins-with": "Beginnt mit",
         "contains": "Enthält",
-        "equal": "Gleichberechtigt",
+        "equal": "Ist gleich",
         "greater-than": "Größer als",
         "greater-than-or-equal": "Größer als oder gleich",
         "less-than": "Weniger als",
