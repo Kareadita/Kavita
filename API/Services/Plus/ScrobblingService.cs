@@ -65,6 +65,7 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
+    private readonly IEmailService _emailService;
 
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
@@ -100,13 +101,14 @@ public class ScrobblingService : IScrobblingService
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
-        ILicenseService licenseService, ILocalizationService localizationService)
+        ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _logger = logger;
         _licenseService = licenseService;
         _localizationService = localizationService;
+        _emailService = emailService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -125,8 +127,13 @@ public class ScrobblingService : IScrobblingService
         {
             if (string.IsNullOrEmpty(user.AniListAccessToken) || !TokenService.HasTokenExpired(user.AniListAccessToken)) continue;
             _logger.LogInformation("User {UserName}'s AniList token has expired! They need to regenerate it for scrobbling to work", user.UserName);
+
+            // Send a event to them
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
+
+            // Send an email to remind them
+            await _emailService.SendTokenExpiredEmail(user.Id, JwtHelper.GetTokenExpiry(user.AniListAccessToken), ScrobbleProvider.AniList);
         }
     }
 

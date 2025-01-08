@@ -29,19 +29,11 @@ export class ManageUserTokensComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
-  private readonly settingService = inject(SettingsService);
-  private readonly confirmService = inject(ConfirmService);
 
   isLoading = true;
-  isEmailSetup = false;
   users: UserTokenInfo[] = [];
 
   ngOnInit() {
-
-    this.settingService.isEmailSetup().subscribe(isEmailSetup => {
-      this.isEmailSetup = isEmailSetup;
-      this.cdRef.markForCheck();
-    });
     this.loadData();
   }
 
@@ -55,9 +47,4 @@ export class ManageUserTokensComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
-
-  sendEmail(item: UserTokenInfo) {
-
-  }
-
 }

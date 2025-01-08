@@ -13,8 +13,6 @@
         <th scope="col">
           {{t('mal-header')}}
         </th>
-        <!-- Actions header -->
-        <th scope="col">{{t('actions-header')}}</th>
       </tr>
       </thead>
       <tbody #container>
@@ -36,12 +34,6 @@
               } @else {
                 {{null | defaultValue}}
               }
-            </td>
-            <td>
-              <button class="btn btn-secondary" [disabled]="!isEmailSetup" (click)="sendEmail(item)">
-                <i class="fa fa-share-from-square" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('actions-header')}}</span>
-              </button>
             </td>
           </tr>
         } @empty {
