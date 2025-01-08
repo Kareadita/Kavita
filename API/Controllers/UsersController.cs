@@ -5,8 +5,10 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.KavitaPlus.Account;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -23,14 +25,16 @@ public class UsersController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly ILicenseService _licenseService;
 
     public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _licenseService = licenseService;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -172,5 +176,19 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<IEnumerable<string>>> GetUserNames()
     {
         return Ok((await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(u => u.UserName));
+    }
+
+    /// <summary>
+    /// Returns all users with tokens registered and their token information. Does not send the tokens.
+    /// </summary>
+    /// <remarks>Kavita+ only</remarks>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("tokens")]
+    public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
+    {
+        if (!await _licenseService.HasActiveLicense()) return Unauthorized();
+
+        return Ok((await _unitOfWork.UserRepository.GetUserTokenInfo()));
     }
 }

@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
+using API.DTOs.KavitaPlus.Account;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -15,6 +16,7 @@ using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -96,6 +98,7 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
     Task<IList<AppUserSideNavStream>> GetDashboardStreamsByIds(IList<int> streamIds);
+    Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
 }
 
 public class UserRepository : IUserRepository
@@ -488,6 +491,31 @@ public class UserRepository : IUserRepository
         return await _context.AppUserSideNavStream
             .Where(d => streamIds.Contains(d.Id))
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo()
+    {
+        var users = await _context.AppUser
+            .Select(u => new
+            {
+                u.Id,
+                u.UserName,
+                u.AniListAccessToken, // JWT Token
+                u.MalAccessToken // JWT Token
+            })
+            .ToListAsync();
+
+        var userTokenInfos = users.Select(user => new UserTokenInfo
+        {
+            UserId = user.Id,
+            Username = user.UserName,
+            IsAniListTokenSet = !string.IsNullOrEmpty(user.AniListAccessToken),
+            AniListValidUntilUtc = JwtHelper.GetTokenExpiry(user.AniListAccessToken),
+            IsAniListTokenValid = JwtHelper.IsTokenValid(user.AniListAccessToken),
+            IsMalTokenSet = !string.IsNullOrEmpty(user.MalAccessToken),
+        });
+
+        return userTokenInfos;
     }
 
 

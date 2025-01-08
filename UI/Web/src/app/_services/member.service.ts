@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Member } from '../_models/auth/member';
+import {UserTokenInfo} from "../_models/kavitaplus/user-token-info";
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,10 @@ export class MemberService {
 
   getMemberNames() {
     return this.httpClient.get<string[]>(this.baseUrl + 'users/names');
+  }
+
+  getUserTokenInfo() {
+    return this.httpClient.get<UserTokenInfo[]>(this.baseUrl + 'users/tokens');
   }
 
   adminExists() {
@@ -37,11 +42,11 @@ export class MemberService {
   }
 
   addSeriesToWantToRead(seriesIds: Array<number>) {
-    return this.httpClient.post<Array<Member>>(this.baseUrl + 'want-to-read/add-series', {seriesIds});
+    return this.httpClient.post(this.baseUrl + 'want-to-read/add-series', {seriesIds});
   }
 
   removeSeriesToWantToRead(seriesIds: Array<number>) {
-    return this.httpClient.post<Array<Member>>(this.baseUrl + 'want-to-read/remove-series', {seriesIds});
+    return this.httpClient.post(this.baseUrl + 'want-to-read/remove-series', {seriesIds});
   }
 
   getMember() {

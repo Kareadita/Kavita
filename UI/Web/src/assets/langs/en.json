@@ -747,6 +747,16 @@
         "no-data": "{{common.no-data}}"
     },
 
+    "manage-user-tokens": {
+        "description": "Users that have access tokens may need resetting occasionally. Send them a nudge if their token is expired. Requires Email to be setup.",
+        "username-header": "Username",
+        "anilist-header": "AniList",
+        "mal-header": "MAL",
+        "actions-header": "Send Expiration Email",
+        "token-set-label": "Token Set",
+        "no-data": "{{common.no-data}}"
+    },
+
     "book-line-overlay": {
         "copy": "Copy",
         "bookmark": "Bookmark",

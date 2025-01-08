@@ -46,6 +46,7 @@ import {
 import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
 import {LicenseService} from "../../../_services/license.service";
 import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-metadata/manage-matched-metadata.component";
+import {ManageUserTokensComponent} from "../../../admin/manage-user-tokens/manage-user-tokens.component";
 
 @Component({
   selector: 'app-settings',
@@ -78,7 +79,8 @@ import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-meta
     ManageCustomizationComponent,
     ImportMalCollectionComponent,
     ImportCblComponent,
-    ManageMatchedMetadataComponent
+    ManageMatchedMetadataComponent,
+    ManageUserTokensComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

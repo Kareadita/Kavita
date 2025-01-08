@@ -96,6 +96,14 @@
               </div>
             }
           }
+
+          @defer (when fragment === SettingsTabId.ManageUserTokens; prefetch on idle) {
+            @if (fragment === SettingsTabId.ManageUserTokens) {
+              <div class="scale col-md-12">
+                <app-manage-user-tokens></app-manage-user-tokens>
+              </div>
+            }
+          }
         }
 
 
