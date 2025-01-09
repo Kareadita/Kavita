@@ -15,6 +15,7 @@ using API.Errors;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;

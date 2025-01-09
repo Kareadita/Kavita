@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
 using API.Entities;
+using API.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -143,12 +144,6 @@ public class TokenService : ITokenService
 
     public static bool HasTokenExpired(string? token)
     {
-        if (string.IsNullOrEmpty(token)) return true;
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenContent = tokenHandler.ReadJwtToken(token);
-        var validToUtc = tokenContent.ValidTo.ToUniversalTime();
-
-        return validToUtc < DateTime.UtcNow;
+        return !JwtHelper.IsTokenValid(token);
     }
 }

@@ -125,15 +125,24 @@ public class ScrobblingService : IScrobblingService
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
-            if (string.IsNullOrEmpty(user.AniListAccessToken) || !TokenService.HasTokenExpired(user.AniListAccessToken)) continue;
-            _logger.LogInformation("User {UserName}'s AniList token has expired! They need to regenerate it for scrobbling to work", user.UserName);
+            if (string.IsNullOrEmpty(user.AniListAccessToken)) continue;
+
+            // If the token is expiring within 5 days, email them
+            if (JwtHelper.GetTokenExpiry(user.AniListAccessToken) <= DateTime.UtcNow.AddDays(5))
+            {
+                await _emailService.SendTokenExpiredEmail(user.Id, ScrobbleProvider.AniList);
+            }
+
+            if (JwtHelper.IsTokenValid(user.AniListAccessToken)) continue;
+
+            _logger.LogInformation("User {UserName}'s AniList token has expired or is expiring in a few days! They need to regenerate it for scrobbling to work", user.UserName);
 
             // Send a event to them
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
 
             // Send an email to remind them
-            await _emailService.SendTokenExpiredEmail(user.Id, JwtHelper.GetTokenExpiry(user.AniListAccessToken), ScrobbleProvider.AniList);
+
         }
     }
 

@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using System.Web;
 using API.Data;
 using API.DTOs.Email;
+using API.Services.Plus;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
@@ -43,6 +45,8 @@ public interface IEmailService
 
     Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email,
         bool withHost = true);
+
+    Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider);
 }
 
 public class EmailService : IEmailService
@@ -155,9 +159,9 @@ public class EmailService : IEmailService
     /// </summary>
     /// <param name="email"></param>
     /// <returns></returns>
-    public bool IsValidEmail(string email)
+    public bool IsValidEmail(string? email)
     {
-        return new EmailAddressAttribute().IsValid(email);
+        return !string.IsNullOrEmpty(email) && new EmailAddressAttribute().IsValid(email);
     }
 
     public async Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true)
@@ -178,6 +182,35 @@ public class EmailService : IEmailService
         if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
         return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}"
             .Replace("//", "/");
+    }
+
+    public async Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetupForSendToDevice()) return false;
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{UserName}}", user.UserName!),
+            new ("{{Provider}}", provider.ToDescription()),
+            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("Kavita - Your {Provider} token has expired and scrobbling events have stopped", placeholders),
+            Body = UpdatePlaceHolders(await GetEmailBody("TokenExpiration"), placeholders),
+            Preheader = UpdatePlaceHolders("Kavita - Your {Provider} token has expired and scrobbling events have stopped", placeholders),
+            ToEmails = new List<string>()
+            {
+                user.Email
+            }
+        };
+
+        await SendEmail(emailOptions);
+
+        return true;
     }
 
     /// <summary>
@@ -222,7 +255,7 @@ public class EmailService : IEmailService
         {
             Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
             Body = UpdatePlaceHolders(await GetEmailBody("EmailPasswordReset"), placeholders),
-            Preheader = "A password reset has been requested",
+            Preheader = "Email confirmation is required for continued access. Click the button to confirm your email.",
             ToEmails = new List<string>()
             {
                 dto.EmailAddress
@@ -302,9 +335,12 @@ public class EmailService : IEmailService
 
         ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault;
 
+
         try
         {
             await smtpClient.SendAsync(email);
+
+
         }
         catch (Exception ex)
         {
@@ -314,6 +350,10 @@ public class EmailService : IEmailService
         finally
         {
             await smtpClient.DisconnectAsync(true);
+
+
+            // Update EmailHistory
+
         }
     }
 
