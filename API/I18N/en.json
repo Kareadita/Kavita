@@ -207,6 +207,7 @@
     "reading-list-name-exists": "A reading list of this name already exists",
     "user-no-access-library-from-series": "User does not have access to the library this series belongs to",
     "series-restricted-age-restriction": "User is not allowed to view this series due to age restrictions",
+    "kavitaplus-restricted": "This is restricted to Kavita+ only",
 
     "volume-num": "Volume {0}",
     "book-num": "Book {0}",

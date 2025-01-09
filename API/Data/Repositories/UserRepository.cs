@@ -99,6 +99,7 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
     Task<IList<AppUserSideNavStream>> GetDashboardStreamsByIds(IList<int> streamIds);
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
+    Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
 }
 
 public class UserRepository : IUserRepository
@@ -516,6 +517,18 @@ public class UserRepository : IUserRepository
         });
 
         return userTokenInfos;
+    }
+
+    /// <summary>
+    /// Returns the first user with a device email matching
+    /// </summary>
+    /// <param name="deviceEmail"></param>
+    /// <returns></returns>
+    public async Task<AppUser> GetUserByDeviceEmail(string deviceEmail)
+    {
+        return await _context.AppUser
+            .Where(u => u.Devices.Any(d => d.EmailAddress == deviceEmail))
+            .FirstOrDefaultAsync();
     }
 
 

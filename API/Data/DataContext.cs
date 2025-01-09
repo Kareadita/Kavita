@@ -68,6 +68,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
     public DbSet<ChapterPeople> ChapterPeople { get; set; } = null!;
     public DbSet<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = null!;
+    public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

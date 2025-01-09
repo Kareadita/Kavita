@@ -187,7 +187,7 @@ public class UsersController : BaseApiController
     [HttpGet("tokens")]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {
-        if (!await _licenseService.HasActiveLicense()) return Unauthorized();
+        if (!await _licenseService.HasActiveLicense()) return BadRequest(_localizationService.Translate(User.GetUserId(), "kavitaplus-restricted"));
 
         return Ok((await _unitOfWork.UserRepository.GetUserTokenInfo()));
     }

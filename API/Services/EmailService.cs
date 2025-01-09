@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using API.Data;
 using API.DTOs.Email;
+using API.Entities;
 using API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
@@ -31,6 +32,8 @@ internal class EmailOptionsDto
     /// Filenames to attach
     /// </summary>
     public IList<string>? Attachments { get; set; }
+    public int? ToUserId { get; set; }
+    public required string Template { get; set; }
 }
 
 public interface IEmailService
@@ -47,6 +50,7 @@ public interface IEmailService
         bool withHost = true);
 
     Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider);
+    Task<bool> SendTokenExpiringSoonEmail(int userId, ScrobbleProvider provider);
 }
 
 public class EmailService : IEmailService
@@ -59,6 +63,14 @@ public class EmailService : IEmailService
 
     private const string TemplatePath = @"{0}.html";
     private const string LocalHost = "localhost:4200";
+
+    public const string SendToDeviceTemplate = "SendToDevice";
+    public const string EmailTestTemplate = "EmailTest";
+    public const string EmailChangeTemplate = "EmailChange";
+    public const string TokenExpirationTemplate = "TokenExpiration";
+    public const string TokenExpiringSoonTemplate = "TokenExpiringSoon";
+    public const string EmailConfirmTemplate = "EmailConfirm";
+    public const string EmailPasswordResetTemplate = "EmailPasswordReset";
 
     public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService,
         IHostEnvironment environment, ILocalizationService localizationService)
@@ -108,12 +120,13 @@ public class EmailService : IEmailService
             var emailOptions = new EmailOptionsDto()
             {
                 Subject = "Kavita - Email Test",
-                Body = UpdatePlaceHolders(await GetEmailBody("EmailTest"), placeholders),
+                Template = EmailTestTemplate,
+                Body = UpdatePlaceHolders(await GetEmailBody(EmailTestTemplate), placeholders),
                 Preheader = "Kavita - Email Test",
                 ToEmails = new List<string>()
                 {
                     adminEmail
-                }
+                },
             };
 
             await SendEmail(emailOptions);
@@ -143,7 +156,8 @@ public class EmailService : IEmailService
         var emailOptions = new EmailOptionsDto()
         {
             Subject = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
-            Body = UpdatePlaceHolders(await GetEmailBody("EmailChange"), placeholders),
+            Template = EmailChangeTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(EmailChangeTemplate), placeholders),
             Preheader = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
             ToEmails = new List<string>()
             {
@@ -188,7 +202,7 @@ public class EmailService : IEmailService
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetupForSendToDevice()) return false;
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
 
         var placeholders = new List<KeyValuePair<string, string>>
         {
@@ -199,9 +213,40 @@ public class EmailService : IEmailService
 
         var emailOptions = new EmailOptionsDto()
         {
-            Subject = UpdatePlaceHolders("Kavita - Your {Provider} token has expired and scrobbling events have stopped", placeholders),
-            Body = UpdatePlaceHolders(await GetEmailBody("TokenExpiration"), placeholders),
-            Preheader = UpdatePlaceHolders("Kavita - Your {Provider} token has expired and scrobbling events have stopped", placeholders),
+            Subject = UpdatePlaceHolders("Kavita - Your {{Provider}} token has expired and scrobbling events have stopped", placeholders),
+            Template = TokenExpirationTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpirationTemplate), placeholders),
+            Preheader = UpdatePlaceHolders("Kavita - Your {{Provider}} token has expired and scrobbling events have stopped", placeholders),
+            ToEmails = new List<string>()
+            {
+                user.Email
+            }
+        };
+
+        await SendEmail(emailOptions);
+
+        return true;
+    }
+
+    public async Task<bool> SendTokenExpiringSoonEmail(int userId, ScrobbleProvider provider)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{UserName}}", user.UserName!),
+            new ("{{Provider}}", provider.ToDescription()),
+            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("Kavita - Your {{Provider}} token will expire soon!", placeholders),
+            Template = TokenExpiringSoonTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpiringSoonTemplate), placeholders),
+            Preheader = UpdatePlaceHolders("Kavita - Your {{Provider}} token will expire soon!", placeholders),
             ToEmails = new List<string>()
             {
                 user.Email
@@ -228,7 +273,8 @@ public class EmailService : IEmailService
         var emailOptions = new EmailOptionsDto()
         {
             Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
-            Body = UpdatePlaceHolders(await GetEmailBody("EmailConfirm"), placeholders),
+            Template = EmailConfirmTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(EmailConfirmTemplate), placeholders),
             Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
             ToEmails = new List<string>()
             {
@@ -254,7 +300,8 @@ public class EmailService : IEmailService
         var emailOptions = new EmailOptionsDto()
         {
             Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
-            Body = UpdatePlaceHolders(await GetEmailBody("EmailPasswordReset"), placeholders),
+            Template = EmailPasswordResetTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(EmailPasswordResetTemplate), placeholders),
             Preheader = "Email confirmation is required for continued access. Click the button to confirm your email.",
             ToEmails = new List<string>()
             {
@@ -275,11 +322,9 @@ public class EmailService : IEmailService
         {
             Subject = "Send file from Kavita",
             Preheader = "File(s) sent from Kavita",
-            ToEmails = new List<string>()
-            {
-                data.DestinationEmail
-            },
-            Body = await GetEmailBody("SendToDevice"),
+            ToEmails = [data.DestinationEmail],
+            Template = SendToDeviceTemplate,
+            Body = await GetEmailBody(SendToDeviceTemplate),
             Attachments = data.FilePaths.ToList()
         };
 
@@ -335,26 +380,64 @@ public class EmailService : IEmailService
 
         ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault;
 
+        var emailAddress = userEmailOptions.ToEmails[0];
+        AppUser? user;
+        if (userEmailOptions.Template == SendToDeviceTemplate)
+        {
+            user = await _unitOfWork.UserRepository.GetUserByDeviceEmail(emailAddress);
+        }
+        else
+        {
+            user = await _unitOfWork.UserRepository.GetUserByEmailAsync(emailAddress);
+        }
+
 
         try
         {
             await smtpClient.SendAsync(email);
-
-
+            if (user != null)
+            {
+                await LogEmailHistory(user.Id, userEmailOptions.Template, userEmailOptions.Subject, userEmailOptions.Body, "Sent");
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an issue sending the email");
+
+            if (user != null)
+            {
+                await LogEmailHistory(user.Id, userEmailOptions.Template, userEmailOptions.Subject, userEmailOptions.Body, "Failed", ex.Message);
+            }
+            _logger.LogError("Could not find user on file for email, {Template} email was not sent and not recorded into history table", userEmailOptions.Template);
+
             throw;
         }
         finally
         {
             await smtpClient.DisconnectAsync(true);
 
-
-            // Update EmailHistory
-
         }
+    }
+
+    /// <summary>
+    /// Logs email history for the specified user.
+    /// </summary>
+    private async Task LogEmailHistory(int appUserId, string emailTemplate, string subject, string body, string deliveryStatus, string? errorMessage = null)
+    {
+        var emailHistory = new EmailHistory
+        {
+            AppUserId = appUserId,
+            EmailTemplate = emailTemplate,
+            Sent = deliveryStatus == "Sent",
+            Body = body,
+            Subject = subject,
+            SendDate = DateTime.UtcNow,
+            DeliveryStatus = deliveryStatus,
+            ErrorMessage = errorMessage
+        };
+
+        _unitOfWork.DataContext.EmailHistory.Add(emailHistory);
+        await _unitOfWork.CommitAsync();
     }
 
     private async Task<string> GetTemplatePath(string templateName)

@@ -20,6 +20,7 @@ using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
@@ -127,24 +128,73 @@ public class ScrobblingService : IScrobblingService
         {
             if (string.IsNullOrEmpty(user.AniListAccessToken)) continue;
 
-            // If the token is expiring within 5 days, email them
-            if (JwtHelper.GetTokenExpiry(user.AniListAccessToken) <= DateTime.UtcNow.AddDays(5))
+            var tokenExpiry = JwtHelper.GetTokenExpiry(user.AniListAccessToken);
+
+            // Send early reminder 5 days before token expiry
+            if (await ShouldSendEarlyReminder(user.Id, tokenExpiry))
+            {
+                await _emailService.SendTokenExpiringSoonEmail(user.Id, ScrobbleProvider.AniList);
+            }
+
+            // Send expiration notification after token expiry
+            if (await ShouldSendExpirationReminder(user.Id, tokenExpiry))
             {
                 await _emailService.SendTokenExpiredEmail(user.Id, ScrobbleProvider.AniList);
             }
 
+            // Check token validity
             if (JwtHelper.IsTokenValid(user.AniListAccessToken)) continue;
 
-            _logger.LogInformation("User {UserName}'s AniList token has expired or is expiring in a few days! They need to regenerate it for scrobbling to work", user.UserName);
+            _logger.LogInformation(
+                "User {UserName}'s AniList token has expired or is expiring in a few days! They need to regenerate it for scrobbling to work",
+                user.UserName);
 
-            // Send a event to them
-            await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
-                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
-
-            // Send an email to remind them
+            // Notify user via event
+            await _eventHub.SendMessageToAsync(
+                MessageFactory.ScrobblingKeyExpired,
+                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList),
+                user.Id);
 
         }
     }
+
+    /// <summary>
+    /// Checks if an early reminder email should be sent.
+    /// </summary>
+    private async Task<bool> ShouldSendEarlyReminder(int userId, DateTime tokenExpiry)
+    {
+        var earlyReminderDate = tokenExpiry.AddDays(-5);
+        if (earlyReminderDate <= DateTime.UtcNow)
+        {
+            var hasAlreadySentReminder = await _unitOfWork.DataContext.EmailHistory
+                .AnyAsync(h => h.AppUserId == userId && h.Sent &&
+                               h.EmailTemplate == EmailService.TokenExpiringSoonTemplate &&
+                               h.SendDate >= earlyReminderDate);
+
+            return !hasAlreadySentReminder;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if an expiration notification email should be sent.
+    /// </summary>
+    private async Task<bool> ShouldSendExpirationReminder(int userId, DateTime tokenExpiry)
+    {
+        if (tokenExpiry <= DateTime.UtcNow)
+        {
+            var hasAlreadySentExpirationEmail = await _unitOfWork.DataContext.EmailHistory
+                .AnyAsync(h => h.AppUserId == userId && h.Sent &&
+                               h.EmailTemplate == EmailService.TokenExpirationTemplate &&
+                               h.SendDate >= tokenExpiry);
+
+            return !hasAlreadySentExpirationEmail;
+        }
+
+        return false;
+    }
+
 
     public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider)
     {
@@ -921,7 +971,7 @@ public class ScrobblingService : IScrobblingService
             {
                 if (ex.Message.Contains("Access token is invalid"))
                 {
-                    _logger.LogCritical("Access Token for UserId: {UserId} needs to be rotated to continue scrobbling", evt.AppUser.Id);
+                    _logger.LogCritical("Access Token for UserId: {UserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
                     evt.IsErrored = true;
                     evt.ErrorDetails = AccessTokenErrorMessage;
                     _unitOfWork.ScrobbleRepository.Update(evt);
