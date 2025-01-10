@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmButton } from './_models/confirm-button';
 import { ConfirmConfig } from './_models/confirm-config';
@@ -9,15 +9,15 @@ import {TranslocoDirective} from "@jsverse/transloco";
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, SafeHtmlPipe, TranslocoDirective],
+  imports: [SafeHtmlPipe, TranslocoDirective],
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss']
 })
 export class ConfirmDialogComponent implements OnInit {
 
-  config!: ConfirmConfig;
+  protected readonly modal = inject(NgbActiveModal);
 
-  constructor(public modal: NgbActiveModal) {}
+  config!: ConfirmConfig;
 
   ngOnInit(): void {
     if (this.config) {

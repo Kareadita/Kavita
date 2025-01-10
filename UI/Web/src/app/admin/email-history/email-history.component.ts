@@ -14,7 +14,6 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
     TranslocoDirective,
     VirtualScrollerModule,
     UtcToLocalTimePipe,
-    DefaultValuePipe,
     LoadingComponent
   ],
   templateUrl: './email-history.component.html',

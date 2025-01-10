@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -107,7 +108,7 @@ public class LicenseController(
         try
         {
             await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
-            await taskScheduler.ScheduleKavitaPlusTasks();
+            BackgroundJob.Schedule(() => taskScheduler.ScheduleKavitaPlusTasks(), TimeSpan.FromHours(24));
         }
         catch (Exception ex)
         {

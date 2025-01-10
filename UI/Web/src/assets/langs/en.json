@@ -716,6 +716,9 @@
         "k+-already-registered-header": "License already registered",
         "overwrite": "Overwrite",
 
+        "k+-unlocked": "Kavita+ unlocked!",
+        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read in 24 hours. Take this time to ensure any series you don't want synced have a hold on them.",
+
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
         "activate-email-label": "{{common.email}}",
@@ -2418,7 +2421,10 @@
 
     "confirm": {
         "alert": "Alert",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "info": "Info",
+        "cancel": "{{common.cancel}}",
+        "ok": "Ok"
     },
 
     "toasts": {
@@ -2471,7 +2477,6 @@
         "email-sent": "Email sent to {{email}}",
         "email-not-sent": "Email on file is not a valid email and can not be sent. A link has been dumped in logs. The admin can provide this link to complete flow.",
         "k+-license-saved": "License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.",
-        "k+-unlocked": "Kavita+ unlocked!",
         "k+-error": "There was an error when activating your license. Please try again.",
         "k+-delete-key": "This will only delete Kavita's license key and allow a buy link to show. <b>This will not cancel your subscription!</b> Use Manage to cancel your subscription first.",
         "k+-reset-key": "This will invalidate a previous registration using your license and allow you to re-register a Kavita instance.",

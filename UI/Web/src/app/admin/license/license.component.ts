@@ -16,7 +16,7 @@ import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DecimalPipe} from "@angular/common";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {of, startWith, switchMap} from "rxjs";
+import {switchMap} from "rxjs";
 import {LicenseInfo} from "../../_models/kavitaplus/license-info";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {filter, tap} from "rxjs/operators";
@@ -62,7 +62,10 @@ export class LicenseComponent implements OnInit {
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
 
-    this.loadLicenseInfo().subscribe();
+    this.loadLicenseInfo().subscribe(async () => {
+      await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'))
+    });
+
   }
 
   loadLicenseInfo(forceCheck = false) {
@@ -109,9 +112,9 @@ export class LicenseComponent implements OnInit {
         this.isViewMode = true;
         this.isSaving = false;
         this.cdRef.markForCheck();
-        this.loadLicenseInfo().subscribe(info => {
+        this.loadLicenseInfo().subscribe(async (info) => {
           if (info?.isActive && !hadActiveLicenseBefore) {
-            this.toastr.success(translate('toasts.k+-unlocked'));
+            await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'));
           } else {
             this.toastr.info(translate('toasts.k+-license-saved'));
           }
