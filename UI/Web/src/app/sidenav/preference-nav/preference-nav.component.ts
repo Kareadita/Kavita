@@ -27,9 +27,10 @@ export enum SettingsTabId {
   Tasks = 'admin-tasks',
   Statistics = 'admin-statistics',
   MediaIssues = 'admin-media-issues',
+  EmailHistory = 'admin-email-history',
 
   // Kavita+
-  KavitaPlus = 'admin-kavitaplus',
+  KavitaPlusLicense = 'admin-kavitaplus',
   MALStackImport = 'mal-stack-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
@@ -151,12 +152,13 @@ export class PreferenceNavComponent implements AfterViewInit {
               }
             })
           )),
+        new SideNavItem(SettingsTabId.EmailHistory, [Role.Admin]),
       ]
     },
     {
       title: 'kavitaplus-section-title',
       children: [
-        new SideNavItem(SettingsTabId.KavitaPlus, [Role.Admin]),
+        new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin]),
         new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]),
         new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]),
       ]

@@ -57,6 +57,14 @@
             }
           }
 
+          @defer (when fragment === SettingsTabId.EmailHistory; prefetch on idle) {
+            @if (fragment === SettingsTabId.EmailHistory) {
+              <div class="scale col-md-12">
+                <app-email-history></app-email-history>
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.System; prefetch on idle) {
             @if (fragment === SettingsTabId.System) {
               <div class="scale col-md-12">
@@ -81,8 +89,8 @@
             }
           }
 
-          @defer (when fragment === SettingsTabId.KavitaPlus; prefetch on idle) {
-            @if (fragment === SettingsTabId.KavitaPlus) {
+          @defer (when fragment === SettingsTabId.KavitaPlusLicense; prefetch on idle) {
+            @if (fragment === SettingsTabId.KavitaPlusLicense) {
               <div class="scale col-md-12">
                 <app-license></app-license>
               </div>

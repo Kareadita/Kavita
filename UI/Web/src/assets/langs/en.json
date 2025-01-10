@@ -42,7 +42,7 @@
         "series-header": "Series",
         "data-header": "Data",
         "is-processed-header": "Is Processed",
-        "no-data": "No Data",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
         "volume-num": "Volume {{num}}",
         "chapter-num": "Chapter {{num}}",
@@ -353,7 +353,7 @@
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "Add {{item}}…",
-        "no-data": "No data",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", type to add a custom item"
     },
 
@@ -753,7 +753,8 @@
         "anilist-header": "AniList",
         "mal-header": "MAL",
         "token-set-label": "Token Set",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "expires-label": "Expires: {{date}}"
     },
 
     "book-line-overlay": {
@@ -1229,6 +1230,17 @@
         "open-external": "Open External"
     },
 
+    "email-history": {
+        "description": "Here you can find all emails sent from Kavita and to which user.",
+        "template-header": "Template",
+        "date-header": "Send Date",
+        "user-header": "Sent To",
+        "sent-header": "Successful",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "Sent",
+        "not-sent-tooltip": "Not Sent"
+    },
+
 
     "manage-media-issues": {
         "description-part-1": "This table contains issues found during scan or reading of your media. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
@@ -1238,7 +1250,7 @@
         "file-header": "File",
         "comment-header": "Comment",
         "created-header": "Created",
-        "no-data": "No Data"
+        "no-data": "{{common.no-data}}"
     },
 
     "manage-email-settings": {
@@ -1575,7 +1587,7 @@
         "server-section-title": "Server",
         "info-section-title": "Info",
         "import-section-title": "Import",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "General",
         "admin-users": "Users",
         "admin-libraries": "Libraries",
@@ -1586,6 +1598,7 @@
         "admin-tasks": "Tasks",
         "admin-statistics": "Statistics",
         "admin-system": "System",
+        "admin-email-history": "Email History",
         "admin-kavitaplus": "License",
         "admin-matched-metadata": "Matched Metadata",
         "admin-manage-tokens": "Manage User Tokens",
@@ -2140,7 +2153,7 @@
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Kavita+ Metadata Breakdown",
         "description": "Kavita fetches metadata (ratings, reviews, recommendations, etc) slowly over time for eligible series.",
-        "no-data": "No data",
+        "no-data": "{{common.no-data}}",
         "errored-series-label": "Errored Series",
         "completed-series-label": "Completed Series",
         "complete": "All Series have metadata"
@@ -2712,6 +2725,7 @@
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
+        "no-data": "No Data",
 
         "book-num": "Book",
         "issue-hash-num": "Issue #",

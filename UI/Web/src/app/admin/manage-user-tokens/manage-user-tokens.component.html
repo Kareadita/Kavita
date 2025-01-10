@@ -1,49 +1,51 @@
 <ng-container *transloco="let t; read:'manage-user-tokens'">
-  <p>{{t('description')}}</p>
-  <div class="table-responsive-md">
-    <table class="table table-striped table-sm">
-      <thead #header>
-      <tr>
-        <th scope="col">
-          {{t('username-header')}}
-        </th>
-        <th scope="col">
-          {{t('anilist-header')}}
-        </th>
-        <th scope="col">
-          {{t('mal-header')}}
-        </th>
-      </tr>
-      </thead>
-      <tbody #container>
-        @for(item of users; track item; let index = $index) {
-          <tr>
-            <td>
-              {{item.username}}
-            </td>
-            <td>
-              @if (item.isAniListTokenSet) {
-                {{t('token-set-label')}} <span class="text-muted ms-1">Expires: {{item.aniListValidUntilUtc | utcToLocalTime}}</span>
-              } @else {
-                {{null | defaultValue}}
-              }
-            </td>
-            <td>
-              @if (item.isMalTokenSet) {
-                {{t('token-set-label')}}
-              } @else {
-                {{null | defaultValue}}
-              }
-            </td>
-          </tr>
-        } @empty {
-          @if (isLoading) {
-            <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
-          } @else {
-            <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+  <div class="container-fluid">
+    <p>{{t('description')}}</p>
+    <div class="table-responsive-md">
+      <table class="table table-striped table-sm">
+        <thead #header>
+        <tr>
+          <th scope="col">
+            {{t('username-header')}}
+          </th>
+          <th scope="col">
+            {{t('anilist-header')}}
+          </th>
+          <th scope="col">
+            {{t('mal-header')}}
+          </th>
+        </tr>
+        </thead>
+        <tbody #container>
+          @for(item of users; track item; let index = $index) {
+            <tr>
+              <td>
+                {{item.username}}
+              </td>
+              <td>
+                @if (item.isAniListTokenSet) {
+                  {{t('token-set-label')}} <span class="text-muted ms-1">{{t('expires-label', {date: item.aniListValidUntilUtc | utcToLocalTime})}}</span>
+                } @else {
+                  {{null | defaultValue}}
+                }
+              </td>
+              <td>
+                @if (item.isMalTokenSet) {
+                  {{t('token-set-label')}}
+                } @else {
+                  {{null | defaultValue}}
+                }
+              </td>
+            </tr>
+          } @empty {
+            @if (isLoading) {
+              <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+            } @else {
+              <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+            }
           }
-        }
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </div>
 </ng-container>

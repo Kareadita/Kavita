@@ -764,6 +764,12 @@ public class OpdsController : BaseApiController
         return CreateXmlResult(SerializeXml(feed));
     }
 
+    /// <summary>
+    /// OPDS Search endpoint
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="query"></param>
+    /// <returns></returns>
     [HttpGet("{apiKey}/series")]
     [Produces("application/xml")]
     public async Task<IActionResult> SearchSeries(string apiKey, [FromQuery] string query)
@@ -781,20 +787,21 @@ public class OpdsController : BaseApiController
         query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
-        if (!libraries.Any()) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
+        if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin, libraries.Select(l => l.Id).ToArray(), query);
+        var searchResults = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin,
+            libraries.Select(l => l.Id).ToArray(), query, includeChapterAndFiles: false);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);
         SetFeedId(feed, "search-series");
-        foreach (var seriesDto in series.Series)
+        foreach (var seriesDto in searchResults.Series)
         {
             feed.Entries.Add(CreateSeries(seriesDto, apiKey, prefix, baseUrl));
         }
 
-        foreach (var collection in series.Collections)
+        foreach (var collection in searchResults.Collections)
         {
             feed.Entries.Add(new FeedEntry()
             {
@@ -813,7 +820,7 @@ public class OpdsController : BaseApiController
             });
         }
 
-        foreach (var readingListDto in series.ReadingLists)
+        foreach (var readingListDto in searchResults.ReadingLists)
         {
             feed.Entries.Add(new FeedEntry()
             {
@@ -827,6 +834,7 @@ public class OpdsController : BaseApiController
             });
         }
 
+        // TODO: Search should allow Chapters/Files and more
 
         return CreateXmlResult(SerializeXml(feed));
     }

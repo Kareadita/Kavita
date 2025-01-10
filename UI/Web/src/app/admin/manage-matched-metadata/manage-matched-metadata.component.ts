@@ -100,6 +100,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
     return this.manageService.getAllKavitaPlusSeries(filter).pipe(tap(data => {
       this.data = data;
+      this.isLoading = false;
       this.cdRef.markForCheck();
     }));
   }

@@ -1,0 +1,56 @@
+<ng-container *transloco="let t; read:'email-history'">
+  <p>{{t('description')}}</p>
+
+  <div class="table-responsive-md">
+    <table class="table table-striped table-sm">
+      <thead #header>
+      <tr>
+        <th scope="col">
+          {{t('template-header')}}
+        </th>
+        <th scope="col">
+          {{t('date-header')}}
+        </th>
+        <th scope="col">
+          {{t('user-header')}}
+        </th>
+        <th scope="col">
+          {{t('sent-header')}}
+        </th>
+      </tr>
+      </thead>
+      <tbody #container>
+        @for(item of data; track item; let index = $index) {
+          <tr>
+            <td>
+              {{item.emailTemplate}}
+            </td>
+            <td>
+              {{item.sendDate | utcToLocalTime}}
+            </td>
+            <td>
+              {{item.toUserName}}
+            </td>
+            <td>
+              @if (item.sent) {
+                <i class="fa-solid fa-check-circle successful-validation ms-1">
+                  <span class="visually-hidden">{{t('sent-tooltip')}}</span>
+                </i>
+              } @else {
+                <i class="error fa-solid fa-exclamation-circle ms-1">
+                  <span class="visually-hidden">{{t('not-sent-tooltip')}}</span>
+                </i>
+              }
+            </td>
+          </tr>
+        } @empty {
+          @if (isLoading) {
+            <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+          } @else {
+            <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-container>

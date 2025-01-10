@@ -17,9 +17,8 @@
 
 
   <div class="table-responsive-md">
-    <virtual-scroller #scroll [items]="data">
-      <table class="table table-striped table-sm">
-        <thead #header>
+    <table class="table table-striped table-sm">
+      <thead #header>
         <tr>
           <!-- Series Image -->
           <th scope="col"></th>
@@ -36,45 +35,44 @@
           <!-- Actions header -->
           <th scope="col"></th>
         </tr>
-        </thead>
-        <tbody #container>
-          @for(item of scroll.viewPortItems; track item; let index = $index) {
-            <tr>
-              <td>
-                <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"></app-image>
-              </td>
-              <td>
-                <a [href]="'/library/' + item.series.libraryId + '/series/' + item.series.id" target="_blank">{{item.series.name}}</a>
-              </td>
-              <td>
-                @if (item.series.isBlacklisted) {
-                  {{t('blacklist-status-label')}}
-                } @else if (item.series.dontMatch) {
-                  {{t('dont-match-status-label')}}
-                } @else {
-                  {{item.isMatched ? t('matched-status-label') : t('unmatched-status-label') }}
-                }
-              </td>
-              <td>
-                @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
-                  {{null | defaultValue}}
-                } @else {
-                  {{item.validUntilUtc | utcToLocalTime}}
-                }
-              </td>
-              <td>
-                <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, item.series)"></app-card-actionables>
-              </td>
-            </tr>
-          } @empty {
-            @if (isLoading) {
-              <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
-            } @else {
-              <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
-            }
+      </thead>
+      <tbody #container>
+        @for(item of data; track item; let index = $index) {
+          <tr>
+            <td>
+              <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"></app-image>
+            </td>
+            <td>
+              <a [href]="'/library/' + item.series.libraryId + '/series/' + item.series.id" target="_blank">{{item.series.name}}</a>
+            </td>
+            <td>
+              @if (item.series.isBlacklisted) {
+                {{t('blacklist-status-label')}}
+              } @else if (item.series.dontMatch) {
+                {{t('dont-match-status-label')}}
+              } @else {
+                {{item.isMatched ? t('matched-status-label') : t('unmatched-status-label') }}
+              }
+            </td>
+            <td>
+              @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
+                {{null | defaultValue}}
+              } @else {
+                {{item.validUntilUtc | utcToLocalTime}}
+              }
+            </td>
+            <td>
+              <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, item.series)"></app-card-actionables>
+            </td>
+          </tr>
+        } @empty {
+          @if (isLoading) {
+            <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+          } @else {
+            <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
           }
-        </tbody>
-      </table>
-    </virtual-scroller>
+        }
+      </tbody>
+    </table>
   </div>
 </ng-container>

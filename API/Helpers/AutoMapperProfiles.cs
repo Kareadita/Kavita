@@ -8,6 +8,7 @@ using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
+using API.DTOs.Email;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.KavitaPlus.Manage;
@@ -33,6 +34,7 @@ using API.Helpers.Converters;
 using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
+using EmailHistory = API.Entities.EmailHistory;
 using ExternalSeriesMetadata = API.Entities.Metadata.ExternalSeriesMetadata;
 using MediaError = API.Entities.MediaError;
 using PublicationStatus = API.Entities.Enums.PublicationStatus;
@@ -349,6 +351,8 @@ public class AutoMapperProfiles : Profile
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();
+        CreateMap<EmailHistory, EmailHistoryDto>()
+            .ForMember(dest => dest.ToUserName, opt => opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<Chapter, StandaloneChapterDto>()
             .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Volume.SeriesId))
