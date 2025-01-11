@@ -15,12 +15,17 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {tap} from "rxjs";
+import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
 
 @Component({
   selector: 'app-user-holds',
   standalone: true,
-  imports: [ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody,
-    NgbAccordionItem, NgbAccordionHeader, TranslocoDirective, AsyncPipe, ImageComponent],
+  imports: [TranslocoDirective, AsyncPipe, ImageComponent, UtcToLocalTimePipe, CardActionablesComponent, DefaultValuePipe, LoadingComponent],
   templateUrl: './scrobbling-holds.component.html',
   styleUrls: ['./scrobbling-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,5 +35,24 @@ export class ScrobblingHoldsComponent {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
-  holds$ = this.scrobblingService.getHolds().pipe(takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+  isLoading = true;
+  data: Array<ScrobbleHold> = [];
+
+  constructor() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.scrobblingService.getHolds().subscribe(data => {
+      this.data = data;
+      this.isLoading = false;
+      this.cdRef.markForCheck();
+    })
+  }
+
+  removeHold(hold: ScrobbleHold) {
+    this.scrobblingService.removeHold(hold.seriesId).subscribe(_ => {
+      this.loadData();
+    });
+  }
 }

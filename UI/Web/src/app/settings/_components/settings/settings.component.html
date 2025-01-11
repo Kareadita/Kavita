@@ -114,6 +114,22 @@
           }
         }
 
+        @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
+          @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
+            <div class="scale col-md-12">
+              <app-manage-scrobling></app-manage-scrobling>
+            </div>
+          }
+        }
+
+        @defer (when fragment === SettingsTabId.ScrobblingHolds; prefetch on idle) {
+          @if(hasActiveLicense && fragment === SettingsTabId.ScrobblingHolds) {
+            <div class="scale col-md-12">
+              <app-user-holds></app-user-holds>
+            </div>
+          }
+        }
+
 
         @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
           @if (fragment === SettingsTabId.Account) {
@@ -185,13 +201,6 @@
           }
         }
 
-        @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
-            <div class="scale col-md-12">
-              <app-manage-scrobling></app-manage-scrobling>
-            </div>
-          }
-        }
 
         @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
           @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {

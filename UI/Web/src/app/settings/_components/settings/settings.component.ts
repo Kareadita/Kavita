@@ -48,6 +48,7 @@ import {LicenseService} from "../../../_services/license.service";
 import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-metadata/manage-matched-metadata.component";
 import {ManageUserTokensComponent} from "../../../admin/manage-user-tokens/manage-user-tokens.component";
 import {EmailHistoryComponent} from "../../../admin/email-history/email-history.component";
+import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
 
 @Component({
   selector: 'app-settings',
@@ -82,7 +83,8 @@ import {EmailHistoryComponent} from "../../../admin/email-history/email-history.
     ImportCblComponent,
     ManageMatchedMetadataComponent,
     ManageUserTokensComponent,
-    EmailHistoryComponent
+    EmailHistoryComponent,
+    ScrobblingHoldsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

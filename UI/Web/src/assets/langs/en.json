@@ -191,8 +191,12 @@
 
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events.",
-        "no-data": "{{typeahead.no-data}}"
+        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger scrobbling.",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
+
     },
 
     "theme-manager": {
@@ -717,7 +721,7 @@
         "overwrite": "Overwrite",
 
         "k+-unlocked": "Kavita+ unlocked!",
-        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read once you register your Scrobbling Providers under account. Take some time to ensure your place scrobbling holds for any series you don't want to scrobble.",
+        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read once you register your Scrobbling Providers under account. Take some time to ensure you place scrobbling holds for any series you don't want to scrobble.",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",
@@ -1605,6 +1609,7 @@
         "admin-kavitaplus": "License",
         "admin-matched-metadata": "Matched Metadata",
         "admin-manage-tokens": "Manage User Tokens",
+        "scrobble-holds": "Scrobble Holds",
         "account": "Account",
         "preferences": "Preferences",
         "clients": "API Key / OPDS",

@@ -43,6 +43,7 @@ export enum SettingsTabId {
   Devices = 'devices',
   UserStats = 'user-stats',
   Scrobbling = 'scrobbling',
+  ScrobblingHolds = 'scrobble-holds',
   Customize = 'customize',
   CBLImport = 'cbl-import'
 }
@@ -158,9 +159,8 @@ export class PreferenceNavComponent implements AfterViewInit {
     {
       title: 'kavitaplus-section-title',
       children: [
-        new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin]),
-        new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]),
-        new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]),
+        new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin])
+        // All other sections added dynamically
       ]
     }
   ];
@@ -191,7 +191,21 @@ export class PreferenceNavComponent implements AfterViewInit {
       if (res) {
         this.hasActiveLicense = true;
         if (this.hasActiveLicense) {
+
+          // Add Scrobble Holds into Account item
+          const accountSection = this.sections[0];
+          if (accountSection.children.filter(c => c.fragment === SettingsTabId.ScrobblingHolds).length === 0) {
+            accountSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, [])
+            );
+          }
+
+
+
           if (this.sections[4].children.length === 1) {
+            this.sections[4].children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]));
+            this.sections[4].children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
+
+            // Scrobbling History needs to be per-user and allow admin to view all
             this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
                 this.accountService.currentUser$.pipe(
                   take(1),
