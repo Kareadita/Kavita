@@ -527,6 +527,7 @@ public class ScrobblingService : IScrobblingService
                     _logger.LogInformation("Kavita+ was unable to match the series");
                     if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                     {
+                        // TODO: Instead of creating a scrobble error, handle this with Managed Metadata
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                         {
                             Comment = UnknownSeriesErrorMessage,

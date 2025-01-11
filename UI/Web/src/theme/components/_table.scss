@@ -45,5 +45,29 @@ th[sortable].desc:after {
   --bs-table-bg: var(--table-body-striped-bg-color);
 }
 
+.ngx-datatable.bootstrap {
+
+  thead {
+    color: var(--table-header-text-color);
+    background-color: var(--table-header-bg-color);
+  }
+
+  .datatable-row-wrapper {
+    border-style: var(--table-body-border);
+  }
+}
+
+.datatable-body-row.datatable-row-even {
+  border-style: var(--table-body-border);
+  background-color: var(--table-body-striped-bg-color);
+}
+
+.datatable-footer .disabled {
+  .datatable-icon-left, .datatable-icon-right, .datatable-icon-skip, .datatable-icon-prev {
+    color: var(--table-header-text-color-disabled);
+  }
+}
+
+
 
 

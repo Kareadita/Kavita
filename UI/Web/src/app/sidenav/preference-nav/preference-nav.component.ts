@@ -192,11 +192,11 @@ export class PreferenceNavComponent implements AfterViewInit {
       if (res) {
         const kavitaPlusSection = this.sections[4];
         if (kavitaPlusSection.children.length === 1) {
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]));
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
 
           // Scrobbling History needs to be per-user and allow admin to view all
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
             this.accountService.currentUser$.pipe(
               take(1),

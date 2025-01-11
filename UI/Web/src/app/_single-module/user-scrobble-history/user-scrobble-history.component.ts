@@ -4,11 +4,11 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
-import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult, Pagination} from "../../_models/pagination";
-import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
+import {SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -16,17 +16,30 @@ import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
+import {ColumnMode, NgxDatatableModule, SortType} from "@siemens/ngx-datatable";
+import {JsonPipe} from "@angular/common";
+
+export interface DataTablePage {
+  pageNumber: number,
+  size: number,
+  totalElements: number,
+  totalPages: number
+}
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule,
-    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip],
+  imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserScrobbleHistoryComponent implements OnInit {
+
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
+  protected readonly ColumnMode = ColumnMode;
 
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -34,14 +47,22 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly ScrobbleEventType = ScrobbleEventType;
 
-  pagination: Pagination | undefined;
+  isLoading: boolean = true;
   events: Array<ScrobbleEvent> = [];
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])
   });
+  pageInfo: DataTablePage = {
+    pageNumber: 0,
+    size: 15,
+    totalElements: 0,
+    totalPages: 0
+  }
 
   ngOnInit() {
-    this.loadPage({column: 'createdUtc', direction: 'desc'});
+
+    this.onPageChange({offset: 0});
+    //this.loadPage({column: 'createdUtc', direction: 'desc'});
 
     this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
       if (hasExpired) {
@@ -55,38 +76,67 @@ export class UserScrobbleHistoryComponent implements OnInit {
     })
   }
 
-  onPageChange(pageNum: number) {
-    let prevPage = 0;
-    if (this.pagination) {
-      prevPage = this.pagination.currentPage;
-      this.pagination.currentPage = pageNum;
-    }
-    if (prevPage !== pageNum) {
-      this.loadPage();
+  //pageNum: number
+  onPageChange(pageInfo: any) {
+    console.log(pageInfo);
+    const pageChanged = this.pageInfo.pageNumber !== pageInfo.offset;
+    this.pageInfo.pageNumber = pageInfo.offset;
+    this.cdRef.markForCheck();
+
+    this.loadPage();
+    if (pageChanged) {
+
     }
 
+
+    // let prevPage = 0;
+    // if (this.pageInfo) {
+    //   //prevPage = this.pagination.currentPage;
+    //   prevPage = this.pageInfo.pageNumber;
+    //   //this.pagination.currentPage = pageInfo.pageNumber;
+    //   this.pageInfo.pageNumber = pageInfo.offset;
+    // }
+    //
+    // this.pageInfo = pageInfo;
+    // if (prevPage !== pageInfo.offset) {
+    //   this.loadPage();
+    // }
   }
 
-  updateSort(sortEvent: SortEvent<ScrobbleEvent>) {
-    this.loadPage(sortEvent);
+  // sortEvent: SortEvent<ScrobbleEvent>
+  updateSort(data: any) {
+    this.loadPage({column: data.column.prop, direction: data.newValue});
   }
 
   loadPage(sortEvent?: SortEvent<ScrobbleEvent>) {
-    if (sortEvent && this.pagination) {
-      this.pagination.currentPage = 1;
+    if (sortEvent && this.pageInfo) {
+      this.pageInfo.pageNumber = 1;
       this.cdRef.markForCheck();
     }
-    const page = this.pagination?.currentPage || 0;
-    const pageSize = this.pagination?.itemsPerPage || 0;
+    // const page = this.pagination?.currentPage || 0;
+    // const pageSize = this.pagination?.itemsPerPage || 0;
+
+    const page = (this.pageInfo?.pageNumber || 0) + 1;
+    const pageSize = this.pageInfo?.size || 0;
     const isDescending = sortEvent?.direction === 'desc';
     const field = this.mapSortColumnField(sortEvent?.column);
     const query = this.formGroup.get('filter')?.value;
 
+    this.isLoading = true;
+    this.cdRef.markForCheck();
+
+    console.log('load page with: ', {query, field, isDescending, page, pageSize})
     this.scrobblingService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {
       this.events = result.result;
-      this.pagination = result.pagination;
+      //this.pagination = result.pagination;
+
+      this.pageInfo.totalPages = result.pagination.totalPages - 1; // ngx-datatable is 0 based, Kavita is 1 based
+      this.pageInfo.size = result.pagination.itemsPerPage;
+      this.pageInfo.totalElements = result.pagination.totalItems;
+      //this.pageInfo.pageNumber = result.pagination.currentPage;
+      this.isLoading = false;
       this.cdRef.markForCheck();
     });
   }
@@ -100,8 +150,4 @@ export class UserScrobbleHistoryComponent implements OnInit {
     }
     return ScrobbleEventSortField.None;
   }
-
-
-    protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
 }
