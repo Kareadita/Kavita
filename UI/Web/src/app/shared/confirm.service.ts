@@ -18,20 +18,20 @@ export class ConfirmService {
 
   constructor(private modalService: NgbModal) {
     this.defaultConfirm.buttons = [
-      {text: translate('confirm.cancel'), type: 'secondary'},
-      {text: translate('confirm.confirm'), type: 'primary'},
+      {text: 'confirm.cancel', type: 'secondary'},
+      {text: 'confirm.confirm', type: 'primary'},
     ];
 
     this.defaultAlert._type = 'alert';
-    this.defaultAlert.header = translate('confirm.alert');
+    this.defaultAlert.header = 'confirm.alert';
     this.defaultAlert.buttons = [
-      {text: translate('confirm.ok'), type: 'primary'}
+      {text: 'confirm.ok', type: 'primary'}
     ];
 
     this.defaultInfo.buttons = [
-      {text: translate('confirm.ok'), type: 'primary'}
+      {text: 'confirm.ok', type: 'primary'}
     ];
-    this.defaultInfo.header = translate('confirm.info');
+    this.defaultInfo.header = 'confirm.info';
     this.defaultInfo._type = 'info';
   }
 
@@ -45,7 +45,7 @@ export class ConfirmService {
 
       if (content !== undefined && config === undefined) {
         config = this.defaultConfirm;
-        config.header = translate('confirm.confirm');
+        config.header = 'confirm.confirm';
         config.content = content;
       }
       if (content !== undefined && content !== '' && config!.content === '') {
@@ -100,7 +100,7 @@ export class ConfirmService {
 
       if (content !== undefined && config === undefined) {
         config = this.defaultAlert;
-        config.header = translate('confirm.alert');
+        config.header = 'confirm.alert';
         config.content = content;
       }
 

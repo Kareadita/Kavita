@@ -62,9 +62,7 @@ export class LicenseComponent implements OnInit {
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
 
-    this.loadLicenseInfo().subscribe(async () => {
-      await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'))
-    });
+    this.loadLicenseInfo().subscribe();
 
   }
 

@@ -717,7 +717,7 @@
         "overwrite": "Overwrite",
 
         "k+-unlocked": "Kavita+ unlocked!",
-        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read in 24 hours. Take this time to ensure any series you don't want synced have a hold on them.",
+        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read once you register your Scrobbling Providers under account. Take some time to ensure your place scrobbling holds for any series you don't want to scrobble.",
 
         "activate-description": "Enter the License Key and Email used to register with Stripe",
         "activate-license-label": "License Key",

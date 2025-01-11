@@ -5,11 +5,12 @@ import { ConfirmConfig } from './_models/confirm-config';
 import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [SafeHtmlPipe, TranslocoDirective],
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe],
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss']
 })
