@@ -88,6 +88,7 @@ public class ScrobblingController : BaseApiController
 
         if (isNewToken)
         {
+            _logger.LogInformation("Generating scrobble events from past reading progress for {UserName} since an AniList token has been added", user.UserName);
             BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(user.Id));
         }
 

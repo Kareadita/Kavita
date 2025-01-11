@@ -108,7 +108,7 @@ public class LicenseController(
         try
         {
             await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
-            BackgroundJob.Schedule(() => taskScheduler.ScheduleKavitaPlusTasks(), TimeSpan.FromHours(24));
+            await taskScheduler.ScheduleKavitaPlusTasks();
         }
         catch (Exception ex)
         {
