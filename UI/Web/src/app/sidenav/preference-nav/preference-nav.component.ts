@@ -188,46 +188,36 @@ export class PreferenceNavComponent implements AfterViewInit {
     }
 
     this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+      this.hasActiveLicense = res;
       if (res) {
-        this.hasActiveLicense = true;
-        if (this.hasActiveLicense) {
+        const kavitaPlusSection = this.sections[4];
+        if (kavitaPlusSection.children.length === 1) {
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]));
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
 
-          // Add Scrobble Holds into Account item
-          const accountSection = this.sections[0];
-          if (accountSection.children.filter(c => c.fragment === SettingsTabId.ScrobblingHolds).length === 0) {
-            accountSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, [])
-            );
-          }
+          // Scrobbling History needs to be per-user and allow admin to view all
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
+            this.accountService.currentUser$.pipe(
+              take(1),
+              switchMap(user => {
+                if (!user || !this.accountService.hasAdminRole(user)) {
+                  // If no user or user does not have the admin role, return an observable of -1
+                  return of(-1);
+                } else {
+                  return this.scrobbleService.getScrobbleErrors().pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    map(d => d.length),
+                    shareReplay({ bufferSize: 1, refCount: true })
+                  );
+                }
+              })
+            ))
+          );
+        }
 
-
-
-          if (this.sections[4].children.length === 1) {
-            this.sections[4].children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]));
-            this.sections[4].children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
-
-            // Scrobbling History needs to be per-user and allow admin to view all
-            this.sections[4].children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
-                this.accountService.currentUser$.pipe(
-                  take(1),
-                  switchMap(user => {
-                    if (!user || !this.accountService.hasAdminRole(user)) {
-                      // If no user or user does not have the admin role, return an observable of -1
-                      return of(-1);
-                    } else {
-                      return this.scrobbleService.getScrobbleErrors().pipe(
-                        takeUntilDestroyed(this.destroyRef),
-                        map(d => d.length),
-                        shareReplay({ bufferSize: 1, refCount: true })
-                      );
-                    }
-                  })
-                ))
-            );
-          }
-
-          if (this.sections[2].children.length === 1) {
-            this.sections[2].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
-          }
+        if (this.sections[2].children.length === 1) {
+          this.sections[2].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
         }
 
         this.scrollToActiveItem();
