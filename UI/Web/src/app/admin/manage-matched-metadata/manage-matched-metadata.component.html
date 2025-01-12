@@ -17,12 +17,14 @@
   <ngx-datatable
     class="bootstrap"
     [rows]="data"
-    [columnMode]="ColumnMode.force"
+    [loadingIndicator]="isLoading"
+    [columnMode]="ColumnMode.flex"
     rowHeight="auto"
+    [limit]="15"
     [footerHeight]="50"
   >
 
-    <ngx-datatable-column name="lastModifiedUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column name="lastModifiedUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-name-header')}}
       </ng-template>
@@ -33,7 +35,7 @@
     </ngx-datatable-column>
 
 
-    <ngx-datatable-column name="status" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column name="status" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('status-header')}}
       </ng-template>
@@ -48,7 +50,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column name="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('valid-until-header')}}
       </ng-template>
@@ -61,7 +63,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column name="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
       </ng-template>
       <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>

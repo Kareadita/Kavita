@@ -1,41 +1,27 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
-import {AsyncPipe} from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {ScrobblingService} from "../../_services/scrobbling.service";
-import {shareReplay} from "rxjs/operators";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
-
-import {
-  NgbAccordionBody,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem
-} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {LoadingComponent} from "../../shared/loading/loading.component";
-import {tap} from "rxjs";
 import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-user-holds',
   standalone: true,
-  imports: [TranslocoDirective, AsyncPipe, ImageComponent, UtcToLocalTimePipe, CardActionablesComponent, DefaultValuePipe, LoadingComponent, NgxDatatableModule],
+  imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule],
   templateUrl: './scrobbling-holds.component.html',
   styleUrls: ['./scrobbling-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrobblingHoldsComponent {
+  protected readonly ColumnMode = ColumnMode;
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrobblingService = inject(ScrobblingService);
-  private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
+
   isLoading = true;
   data: Array<ScrobbleHold> = [];
 
@@ -56,6 +42,4 @@ export class ScrobblingHoldsComponent {
       this.loadData();
     });
   }
-
-  protected readonly ColumnMode = ColumnMode;
 }

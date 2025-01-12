@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} f
 import {LicenseService} from "../../_services/license.service";
 import {Router} from "@angular/router";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -23,8 +22,6 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
-import {DataTablePage} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -33,7 +30,6 @@ import {DataTablePage} from "../../_single-module/user-scrobble-history/user-scr
         TranslocoDirective,
         ImageComponent,
         CardActionablesComponent,
-        LoadingComponent,
         VirtualScrollerModule,
         ReactiveFormsModule,
         Select2Module,
@@ -41,7 +37,6 @@ import {DataTablePage} from "../../_single-module/user-scrobble-history/user-scr
         UtcToLocalTimePipe,
         DefaultValuePipe,
         NgxDatatableModule,
-        ScrobbleEventTypePipe
     ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -67,12 +62,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
   filterGroup = new FormGroup({
     'matchState': new FormControl(MatchStateOption.Error, []),
   });
-  pageInfo: DataTablePage = {
-    pageNumber: 0,
-    size: 10,
-    totalElements: 0,
-    totalPages: 0
-  }
 
   ngOnInit() {
     this.licenseService.hasValidLicense$.subscribe(license => {
@@ -113,7 +102,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
     this.cdRef.markForCheck();
 
     return this.manageService.getAllKavitaPlusSeries(filter).pipe(tap(data => {
-      this.data = data;
+      this.data = [...data];
       this.isLoading = false;
       this.cdRef.markForCheck();
     }));

@@ -6,6 +6,8 @@
     [rows]="data"
     [columnMode]="ColumnMode.force"
     rowHeight="auto"
+    [loadingIndicator]="true"
+    [limit]="15"
     [footerHeight]="50"
   >
 
@@ -37,5 +39,5 @@
         <button class="btn btn-primary" (click)="removeHold(item)">{{t('delete-label')}}</button>
       </ng-template>
     </ngx-datatable-column>
-  </ngx-datatable>D
+  </ngx-datatable>
 </ng-container>

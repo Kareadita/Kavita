@@ -226,7 +226,6 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return await _context.Series
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .FilterMatchState(filter.MatchStateOption)
-            //.WhereNameLike(filter.SearchTerm)
             .OrderBy(s => s.NormalizedName)
             .ProjectTo<ManageMatchSeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

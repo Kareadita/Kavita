@@ -289,7 +289,7 @@ public static class QueryableExtensions
         {
             MatchStateOption.All => query,
             MatchStateOption.Matched => query.Where(s => s.ExternalSeriesMetadata != null),
-            MatchStateOption.NotMatched => query.Where(s => s.ExternalSeriesMetadata == null && !s.IsBlacklisted),
+            MatchStateOption.NotMatched => query.Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted),
             MatchStateOption.Error => query.Where(s => s.IsBlacklisted),
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => throw new ArgumentOutOfRangeException(nameof(stateOption), stateOption, null)
