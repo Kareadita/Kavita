@@ -171,6 +171,6 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <returns></returns>
     public bool WillScrobble()
     {
-        return !(IsBlacklisted || DontMatch);
+        return !IsBlacklisted && !DontMatch;
     }
 }
