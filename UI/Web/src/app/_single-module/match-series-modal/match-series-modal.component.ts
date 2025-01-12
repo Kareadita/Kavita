@@ -52,7 +52,7 @@ export class MatchSeriesModalComponent implements OnInit {
     const model: any = this.formGroup.value;
     model.seriesId = this.series.id;
 
-    if (this.series.dontMatch) return;
+    if (model.dontMatch) return;
 
     this.seriesService.matchSeries(model).subscribe(results => {
       this.isLoading = false;
@@ -66,12 +66,22 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   save() {
-    this.toastr.success(translate('toasts.match-success'));
-    this.modalService.close(true);
+
+    const model: any = this.formGroup.value;
+    model.seriesId = this.series.id;
+
+    // We need to update the dontMatch status
+    if (model.dontMatch) {
+      this.seriesService.updateDontMatch(this.series.id, model.dontMatch).subscribe(_ => {
+        this.modalService.close(true);
+      });
+    } else {
+      this.toastr.success(translate('toasts.match-success'));
+      this.modalService.close(true);
+    }
   }
 
   selectMatch(item: ExternalSeriesMatch) {
-
     const data = item.series;
     data.tags = data.tags || [];
     data.genres = data.genres || [];

@@ -32,7 +32,7 @@ namespace API.Services.Plus;
 public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
-    Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
+    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
     Task ForceKavitaPlusRefresh(int seriesId);
     Task FetchExternalDataTask();
     /// <summary>
@@ -47,6 +47,7 @@ public interface IExternalMetadataService
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
     Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto);
+    Task UpdateSeriesDontMatch(int seriesId, bool dontMatch);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -126,6 +127,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public async Task ForceKavitaPlusRefresh(int seriesId)
     {
+        // TODO: I think we can remove this now
         if (!await _licenseService.HasActiveLicense()) return;
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
         if (!IsPlusEligible(libraryType)) return;
@@ -203,6 +205,11 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
+    /// <summary>
+    /// Returns the match results for a Series from UI Flow
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto)
     {
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
@@ -213,10 +220,11 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialMalId = ScrobblingService.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
 
         List<string> altNames = [series.LocalizedName, series.OriginalName];
-        if (potentialAnilistId == null && potentialMalId == null)
+        if (potentialAnilistId == null && potentialMalId == null && !string.IsNullOrEmpty(dto.Query))
         {
             altNames.Add(dto.Query);
         }
+
         var matchRequest = new MatchSeriesRequestDto()
         {
             Format = series.Format == MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
@@ -293,15 +301,16 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
     /// <returns></returns>
-    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlus(int seriesId, LibraryType libraryType)
+    public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType)
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense()) return _defaultReturn;
 
-        // Check blacklist (bad matches)
-        if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(seriesId)) return _defaultReturn;
+        // Check blacklist (bad matches) or if there is a don't match
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null || !series.WillScrobble()) return _defaultReturn;
 
         var needsRefresh =
-            await _unitOfWork.ExternalSeriesMetadataRepository.ExternalSeriesMetadataNeedsRefresh(seriesId);
+            await _unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(seriesId);
 
         if (!needsRefresh)
         {
@@ -312,6 +321,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId);
         if (data == null) return _defaultReturn;
 
+        // Get from Kavita+ API the Full Series metadata with rec/rev and cache to ExternalMetadata tables
         return await FetchExternalMetadataForSeries(seriesId, libraryType, data);
     }
 
@@ -326,7 +336,8 @@ public class ExternalMetadataService : IExternalMetadataService
         if (series == null) return;
 
         // Remove from Blacklist
-        series!.IsBlacklisted = false;
+        series.IsBlacklisted = false;
+        series.DontMatch = false;
         _unitOfWork.SeriesRepository.Update(series);
 
         // Refetch metadata with a Direct lookup
@@ -346,12 +357,47 @@ public class ExternalMetadataService : IExternalMetadataService
         // Regenerate all events for the series for all users
         BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
         await _eventHub.SendMessageAsync(MessageFactory.Info,
-            MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"), true);
+            MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"));
 
 
         _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, dto.Name);
     }
 
+    /// <summary>
+    /// Sets a series to Dont Match and removes all previously cached
+    /// </summary>
+    /// <param name="seriesId"></param>
+    public async Task UpdateSeriesDontMatch(int seriesId, bool dontMatch)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata);
+        if (series == null) return;
+
+        _logger.LogInformation("User has asked Kavita to stop matching/scrobbling on {SeriesName}", series.Name);
+
+        series.DontMatch = dontMatch;
+
+        if (dontMatch)
+        {
+            // When we set as DontMatch, we will clear existing External Metadata
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series!);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(series.ExternalSeriesMetadata);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+        }
+
+        _unitOfWork.SeriesRepository.Update(series);
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Requests the full SeriesDetail (rec, review, metadata) data for a Series. Will save to ExternalMetadata tables.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
     private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesDto data)
     {
 
@@ -370,7 +416,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Clear out existing results
 
-            var externalSeriesMetadata = await GetExternalSeriesMetadataForSeries(seriesId, series!);
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series!);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
@@ -433,7 +479,13 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
-    private async Task<ExternalSeriesMetadata> GetExternalSeriesMetadataForSeries(int seriesId, Series series)
+    /// <summary>
+    /// Gets from DB or creates a new one with just SeriesId
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="series"></param>
+    /// <returns></returns>
+    private async Task<ExternalSeriesMetadata> GetOrCreateExternalSeriesMetadataForSeries(int seriesId, Series series)
     {
         var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
         if (externalSeriesMetadata != null) return externalSeriesMetadata;
@@ -546,7 +598,6 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
                 .WithKavitaPlusHeaders(license)
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
 

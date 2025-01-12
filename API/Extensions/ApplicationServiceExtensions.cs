@@ -74,6 +74,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
+        services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

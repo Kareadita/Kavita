@@ -16,8 +16,7 @@ import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
-import {ColumnMode, NgxDatatableModule, SortType} from "@siemens/ngx-datatable";
-import {JsonPipe} from "@angular/common";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -54,7 +53,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   });
   pageInfo: DataTablePage = {
     pageNumber: 0,
-    size: 15,
+    size: 10,
     totalElements: 0,
     totalPages: 0
   }

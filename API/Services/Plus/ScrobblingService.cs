@@ -348,13 +348,13 @@ public class ScrobblingService : IScrobblingService
     public static long? GetMalId(Series series)
     {
         var malId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite);
-        return malId ?? series.ExternalSeriesMetadata.MalId;
+        return malId ?? series.ExternalSeriesMetadata?.MalId;
     }
 
-    public static int? GetAniListId(Series series)
+    public static int? GetAniListId(Series seriesWithExternalMetadata)
     {
-        var aniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite);
-        return aniListId ?? series.ExternalSeriesMetadata.AniListId;
+        var aniListId = ExtractId<int?>(seriesWithExternalMetadata.Metadata.WebLinks, AniListWeblinkWebsite);
+        return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -464,13 +464,7 @@ public class ScrobblingService : IScrobblingService
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .WithKavitaPlusHeaders(license)
                 .GetStringAsync();
 
             return int.Parse(response);
@@ -488,13 +482,7 @@ public class ScrobblingService : IScrobblingService
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/update")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", HashUtil.ServerToken())
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(data)
                 .ReceiveJson<ScrobbleResponseDto>();
 

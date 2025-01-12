@@ -32,8 +32,8 @@ public interface IExternalSeriesMetadataRepository
     void Remove(IEnumerable<ExternalRecommendation>? recommendations);
     void Remove(ExternalSeriesMetadata metadata);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
-    Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId);
-    Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId);
+    Task<bool> NeedsDataRefresh(int seriesId);
+    Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId);
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task<IList<int>> GetAllSeriesIdsWithoutMetadata(int limit);
@@ -106,7 +106,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> ExternalSeriesMetadataNeedsRefresh(int seriesId)
+    public async Task<bool> NeedsDataRefresh(int seriesId)
     {
         var row = await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
@@ -114,7 +114,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
     }
 
-    public async Task<SeriesDetailPlusDto> GetSeriesDetailPlusDto(int seriesId)
+    public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId)
     {
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)

@@ -245,4 +245,8 @@ export class SeriesService {
     return this.httpClient.post<string>(this.baseUrl + 'series/update-match?seriesId=' + seriesId, series, TextResonse);
   }
 
+  updateDontMatch(seriesId: number, dontMatch: boolean) {
+    return this.httpClient.post<string>(this.baseUrl + `series/dont-match?seriesId=${seriesId}&dontMatch=${dontMatch}`, {}, TextResonse);
+  }
+
 }

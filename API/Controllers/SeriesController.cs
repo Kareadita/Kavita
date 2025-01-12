@@ -625,18 +625,33 @@ public class SeriesController : BaseApiController
     [HttpPost("match")]
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
-        if (dto.DontMatch)
-        {
-            // TODO: Figure out how to architect this
-        }
         return Ok(await _externalMetadataService.MatchSeries(dto));
     }
 
+    /// <summary>
+    /// This will perform the fix match
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     [HttpPost("update-match")]
     public async Task<ActionResult> UpdateSeriesMatch(ExternalSeriesDetailDto dto, [FromQuery] int seriesId)
     {
         await _externalMetadataService.FixSeriesMatch(seriesId, dto);
 
+        return Ok();
+    }
+
+    /// <summary>
+    /// When true, will not perform a match and will prevent Kavita from attempting to match/scrobble against this series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="dontMatch"></param>
+    /// <returns></returns>
+    [HttpPost("dont-match")]
+    public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)
+    {
+        await _externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch);
         return Ok();
     }
 

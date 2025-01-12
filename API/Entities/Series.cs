@@ -163,4 +163,14 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
     }
+
+    /// <summary>
+    /// Is this Series capable of Scrobbling
+    /// </summary>
+    /// <remarks>This includes if there is no Match/Manual Match needed, the series is blacklisted, or has a NoMatch</remarks>
+    /// <returns></returns>
+    public bool WillScrobble()
+    {
+        return !(IsBlacklisted || DontMatch);
+    }
 }

@@ -76,6 +76,8 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public string? MalAccessToken { get; set; }
 
+
+
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for
     /// </summary>
