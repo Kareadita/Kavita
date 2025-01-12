@@ -10,17 +10,23 @@ import {ServerService} from "../../_services/server.service";
 import {SettingsService} from "../settings.service";
 import {MessageHubService} from "../../_services/message-hub.service";
 import {ConfirmService} from "../../shared/confirm.service";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
   selector: 'app-manage-user-tokens',
   standalone: true,
-  imports: [
-    TranslocoDirective,
-    DefaultValuePipe,
-    LoadingComponent,
-    UtcToLocalTimePipe,
-    VirtualScrollerModule
-  ],
+    imports: [
+        TranslocoDirective,
+        DefaultValuePipe,
+        LoadingComponent,
+        UtcToLocalTimePipe,
+        VirtualScrollerModule,
+        CardActionablesComponent,
+        ImageComponent,
+        NgxDatatableModule
+    ],
   templateUrl: './manage-user-tokens.component.html',
   styleUrl: './manage-user-tokens.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -47,4 +53,6 @@ export class ManageUserTokensComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+    protected readonly ColumnMode = ColumnMode;
 }
