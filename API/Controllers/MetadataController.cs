@@ -192,12 +192,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpPost("force-refresh")]
-    public async Task<ActionResult> ForceRefresh(int seriesId)
-    {
-        await metadataService.ForceKavitaPlusRefresh(seriesId);
-        return Ok();
-    }
+    // [HttpPost("force-refresh")]
+    // public async Task<ActionResult> ForceRefresh(int seriesId)
+    // {
+    //     await metadataService.ForceKavitaPlusRefresh(seriesId);
+    //     return Ok();
+    // }
 
     /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page

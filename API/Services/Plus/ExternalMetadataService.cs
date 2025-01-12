@@ -33,7 +33,7 @@ public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
     Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
-    Task ForceKavitaPlusRefresh(int seriesId);
+    //Task ForceKavitaPlusRefresh(int seriesId);
     Task FetchExternalDataTask();
     /// <summary>
     /// This is an entry point and provides a level of protection against calling upstream API. Will only allow 100 new
@@ -125,24 +125,24 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public async Task ForceKavitaPlusRefresh(int seriesId)
-    {
-        // TODO: I think we can remove this now
-        if (!await _licenseService.HasActiveLicense()) return;
-        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
-        if (!IsPlusEligible(libraryType)) return;
-
-        // Remove from Blacklist if applicable
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-        series!.IsBlacklisted = false;
-        _unitOfWork.SeriesRepository.Update(series);
-
-        var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
-        if (metadata == null) return;
-
-        metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
-        await _unitOfWork.CommitAsync();
-    }
+    // public async Task ForceKavitaPlusRefresh(int seriesId)
+    // {
+    //     // TODO: I think we can remove this now
+    //     if (!await _licenseService.HasActiveLicense()) return;
+    //     var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+    //     if (!IsPlusEligible(libraryType)) return;
+    //
+    //     // Remove from Blacklist if applicable
+    //     var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+    //     series!.IsBlacklisted = false;
+    //     _unitOfWork.SeriesRepository.Update(series);
+    //
+    //     var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
+    //     if (metadata == null) return;
+    //
+    //     metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
+    //     await _unitOfWork.CommitAsync();
+    // }
 
     /// <summary>
     /// Fetches data from Kavita+
