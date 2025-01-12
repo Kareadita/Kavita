@@ -20,22 +20,29 @@ import {MatchStateOptionPipe} from "../../_pipes/match-state.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
+import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
+import {DataTablePage} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 @Component({
   selector: 'app-manage-matched-metadata',
   standalone: true,
-  imports: [
-    TranslocoDirective,
-    ImageComponent,
-    CardActionablesComponent,
-    LoadingComponent,
-    VirtualScrollerModule,
-    ReactiveFormsModule,
-    Select2Module,
-    MatchStateOptionPipe,
-    UtcToLocalTimePipe,
-    DefaultValuePipe
-  ],
+    imports: [
+        TranslocoDirective,
+        ImageComponent,
+        CardActionablesComponent,
+        LoadingComponent,
+        VirtualScrollerModule,
+        ReactiveFormsModule,
+        Select2Module,
+        MatchStateOptionPipe,
+        UtcToLocalTimePipe,
+        DefaultValuePipe,
+        NgxDatatableModule,
+        ScrobbleEventTypePipe
+    ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -60,6 +67,12 @@ export class ManageMatchedMetadataComponent implements OnInit {
   filterGroup = new FormGroup({
     'matchState': new FormControl(MatchStateOption.Error, []),
   });
+  pageInfo: DataTablePage = {
+    pageNumber: 0,
+    size: 10,
+    totalElements: 0,
+    totalPages: 0
+  }
 
   ngOnInit() {
     this.licenseService.hasValidLicense$.subscribe(license => {
@@ -87,6 +100,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
     });
   }
+
 
   loadData() {
     const filter: ManageMatchFilter = {
@@ -117,4 +131,9 @@ export class ManageMatchedMetadataComponent implements OnInit {
       this.loadData().subscribe();
     });
   }
+
+    protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
+    protected readonly ScrobbleEventType = ScrobbleEventType;
+    protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+    protected readonly ColumnMode = ColumnMode;
 }

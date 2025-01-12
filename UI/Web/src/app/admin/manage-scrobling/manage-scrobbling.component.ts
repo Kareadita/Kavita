@@ -13,7 +13,6 @@ import {
   imports: [
     ManageScrobbleErrorsComponent,
     AsyncPipe,
-    ScrobblingHoldsComponent,
     UserScrobbleHistoryComponent
   ],
   templateUrl: './manage-scrobbling.component.html',

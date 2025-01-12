@@ -46,11 +46,13 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly ScrobbleEventType = ScrobbleEventType;
 
-  isLoading: boolean = true;
-  events: Array<ScrobbleEvent> = [];
+
+
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])
   });
+  events: Array<ScrobbleEvent> = [];
+  isLoading: boolean = true;
   pageInfo: DataTablePage = {
     pageNumber: 0,
     size: 10,
@@ -75,34 +77,13 @@ export class UserScrobbleHistoryComponent implements OnInit {
     })
   }
 
-  //pageNum: number
   onPageChange(pageInfo: any) {
-    console.log(pageInfo);
-    const pageChanged = this.pageInfo.pageNumber !== pageInfo.offset;
     this.pageInfo.pageNumber = pageInfo.offset;
     this.cdRef.markForCheck();
 
     this.loadPage();
-    if (pageChanged) {
-
-    }
-
-
-    // let prevPage = 0;
-    // if (this.pageInfo) {
-    //   //prevPage = this.pagination.currentPage;
-    //   prevPage = this.pageInfo.pageNumber;
-    //   //this.pagination.currentPage = pageInfo.pageNumber;
-    //   this.pageInfo.pageNumber = pageInfo.offset;
-    // }
-    //
-    // this.pageInfo = pageInfo;
-    // if (prevPage !== pageInfo.offset) {
-    //   this.loadPage();
-    // }
   }
 
-  // sortEvent: SortEvent<ScrobbleEvent>
   updateSort(data: any) {
     this.loadPage({column: data.column.prop, direction: data.newValue});
   }
@@ -112,8 +93,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
       this.pageInfo.pageNumber = 1;
       this.cdRef.markForCheck();
     }
-    // const page = this.pagination?.currentPage || 0;
-    // const pageSize = this.pagination?.itemsPerPage || 0;
 
     const page = (this.pageInfo?.pageNumber || 0) + 1;
     const pageSize = this.pageInfo?.size || 0;
