@@ -21,11 +21,12 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {tap} from "rxjs";
 import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-user-holds',
   standalone: true,
-  imports: [TranslocoDirective, AsyncPipe, ImageComponent, UtcToLocalTimePipe, CardActionablesComponent, DefaultValuePipe, LoadingComponent],
+  imports: [TranslocoDirective, AsyncPipe, ImageComponent, UtcToLocalTimePipe, CardActionablesComponent, DefaultValuePipe, LoadingComponent, NgxDatatableModule],
   templateUrl: './scrobbling-holds.component.html',
   styleUrls: ['./scrobbling-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -55,4 +56,6 @@ export class ScrobblingHoldsComponent {
       this.loadData();
     });
   }
+
+  protected readonly ColumnMode = ColumnMode;
 }
