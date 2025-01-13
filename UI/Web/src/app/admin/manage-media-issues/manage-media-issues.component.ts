@@ -19,10 +19,11 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../_pipes/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
     selector: 'app-manage-media-issues',
@@ -30,7 +31,7 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
     styleUrls: ['./manage-media-issues.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, LoadingComponent, FilterPipe, SortableHeader, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe]
+    imports: [ReactiveFormsModule, LoadingComponent, FilterPipe, SortableHeader, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule]
 })
 export class ManageMediaIssuesComponent implements OnInit {
 
@@ -100,4 +101,6 @@ export class ManageMediaIssuesComponent implements OnInit {
     const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
+    protected readonly ColumnMode = ColumnMode;
+  protected readonly translate = translate;
 }

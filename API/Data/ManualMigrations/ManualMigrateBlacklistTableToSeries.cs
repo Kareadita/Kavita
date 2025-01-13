@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Metadata;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Data.ManualMigrations;
 
 /// <summary>
-/// v0.8.5 - Migrating Kavita+ BlacklistedSeries table to Series entity to streamline implementation
+/// v0.8.5 - Migrating Kavita+ BlacklistedSeries table to Series entity to streamline implementation and generate a "Needs Manual Match" entry for the Series
 /// </summary>
 public static class ManualMigrateBlacklistTableToSeries
 {
@@ -23,10 +24,14 @@ public static class ManualMigrateBlacklistTableToSeries
         logger.LogCritical("Running ManualMigrateBlacklistTableToSeries migration - Please be patient, this may take some time. This is not an error");
 
         // Get all series in the Blacklist table and set their IsBlacklist = true
-        var blacklistedSeries = await context.SeriesBlacklist.Select(s => s.Series).ToListAsync();
+        var blacklistedSeries = await context.SeriesBlacklist
+            .Include(s => s.Series.ExternalSeriesMetadata)
+            .Select(s => s.Series)
+            .ToListAsync();
         foreach (var series in blacklistedSeries)
         {
             series.IsBlacklisted = true;
+            series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() { SeriesId = series.Id };
             context.Series.Entry(series).State = EntityState.Modified;
         }
         // Remove everything in SeriesBlacklist (it will be removed in another migration)

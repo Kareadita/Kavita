@@ -6,6 +6,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EmailHistory} from "../../_models/email-history";
 import {EmailService} from "../../_services/email.service";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-email-history',
@@ -14,7 +15,9 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
     TranslocoDirective,
     VirtualScrollerModule,
     UtcToLocalTimePipe,
-    LoadingComponent
+    LoadingComponent,
+    DefaultValuePipe,
+    NgxDatatableModule
   ],
   templateUrl: './email-history.component.html',
   styleUrl: './email-history.component.scss',
@@ -34,4 +37,6 @@ export class EmailHistoryComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+  protected readonly ColumnMode = ColumnMode;
 }
