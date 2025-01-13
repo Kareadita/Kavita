@@ -288,7 +288,7 @@ public static class QueryableExtensions
         return stateOption switch
         {
             MatchStateOption.All => query,
-            MatchStateOption.Matched => query.Where(s => s.ExternalSeriesMetadata != null),
+            MatchStateOption.Matched => query.Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue && !s.IsBlacklisted),
             MatchStateOption.NotMatched => query.Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted),
             MatchStateOption.Error => query.Where(s => s.IsBlacklisted),
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),

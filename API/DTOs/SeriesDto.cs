@@ -67,6 +67,16 @@ public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     /// The last time the folder for this series was scanned
     /// </summary>
     public DateTime LastFolderScanned { get; set; }
+    #region KavitaPlus
+    /// <summary>
+    /// Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling.
+    /// </summary>
+    public bool DontMatch { get; set; }
+    /// <summary>
+    /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
+    /// </summary>
+    public bool IsBlacklisted { get; set; }
+    #endregion
 
     public string? CoverImage { get; set; }
     public string PrimaryColor { get; set; }

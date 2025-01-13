@@ -112,7 +112,6 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
     /// </summary>
     public bool IsBlacklisted { get; set; }
-
     #endregion
 
     public SeriesMetadata Metadata { get; set; } = null!;

@@ -10,6 +10,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Entities.Scrobble;
 using API.Extensions;
 using API.Helpers;
@@ -512,10 +513,18 @@ public class ScrobblingService : IScrobblingService
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
-                    _logger.LogInformation("Kavita+ was unable to match the series");
+                    _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
                     if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                     {
-                        // TODO: Instead of creating a scrobble error, handle this with Managed Metadata
+                        // Create a new ExternalMetadata entry to indicate that this is not matchable
+                        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
+                        if (series.ExternalSeriesMetadata == null)
+                        {
+                            series.ExternalSeriesMetadata = new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
+                        }
+                        series!.IsBlacklisted = true;
+                        _unitOfWork.SeriesRepository.Update(series);
+
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                         {
                             Comment = UnknownSeriesErrorMessage,
@@ -523,9 +532,7 @@ public class ScrobblingService : IScrobblingService
                             LibraryId = evt.LibraryId,
                             SeriesId = evt.SeriesId
                         });
-                        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId);
-                        series!.IsBlacklisted = true;
-                        _unitOfWork.SeriesRepository.Update(series);
+
                     }
 
                     evt.IsErrored = true;

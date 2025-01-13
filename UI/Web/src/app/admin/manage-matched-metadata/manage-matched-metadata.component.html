@@ -45,7 +45,12 @@
         } @else if (item.series.dontMatch) {
           {{t('dont-match-status-label')}}
         } @else {
-          {{item.isMatched ? t('matched-status-label') : t('unmatched-status-label') }}
+          @if (item.isMatched) {
+            {{t('matched-status-label')}}
+
+          } @else {
+            {{t('unmatched-status-label')}}
+          }
         }
       </ng-template>
     </ngx-datatable-column>

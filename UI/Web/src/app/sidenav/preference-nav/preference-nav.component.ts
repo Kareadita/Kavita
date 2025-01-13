@@ -2,9 +2,9 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, De
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
-import {AccountService, allRoles, Role} from "../../_services/account.service";
+import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
-import {ActivatedRoute, NavigationEnd, Router, RouterLink} from "@angular/router";
+import {ActivatedRoute, NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
 import {map, Observable, of, shareReplay, switchMap, take, tap} from "rxjs";
@@ -14,6 +14,8 @@ import {User} from "../../_models/user";
 import {filter} from "rxjs/operators";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {LicenseService} from "../../_services/license.service";
+import {ManageService} from "../../_services/manage.service";
+import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 
 export enum SettingsTabId {
 
@@ -96,6 +98,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly router = inject(Router);
   protected readonly utilityService = inject(UtilityService);
+  private readonly manageService = inject(ManageService);
   private readonly document = inject(DOCUMENT);
 
   hasActiveLicense = false;
@@ -178,6 +181,40 @@ export class PreferenceNavComponent implements AfterViewInit {
     }),
   );
 
+  private readonly matchedMetadataBadgeCount$ = this.accountService.currentUser$.pipe(
+    take(1),
+    switchMap(user => {
+      if (!user || !this.accountService.hasAdminRole(user)) {
+        // If no user or user does not have the admin role, return an observable of -1
+        return of(-1);
+      } else {
+        return this.manageService.getAllKavitaPlusSeries({
+          matchStateOption: MatchStateOption.Error,
+          searchTerm: ''
+        }).pipe(
+          takeUntilDestroyed(this.destroyRef),
+          map(d => d.length),
+          shareReplay({bufferSize: 1, refCount: true})
+        );
+      }
+    })
+  );
+
+  private readonly scrobblingErrorBadgeCount$ = this.accountService.currentUser$.pipe(
+    take(1),
+    switchMap(user => {
+      if (!user || !this.accountService.hasAdminRole(user)) {
+        // If no user or user does not have the admin role, return an observable of -1
+        return of(-1);
+      } else {
+        return this.scrobbleService.getScrobbleErrors().pipe(
+          takeUntilDestroyed(this.destroyRef),
+          map(d => d.length),
+          shareReplay({bufferSize: 1, refCount: true})
+        );
+      }
+    })
+  );
 
   constructor() {
     this.collapseSideNavOnMobileNav$.subscribe();
@@ -192,27 +229,14 @@ export class PreferenceNavComponent implements AfterViewInit {
       if (res) {
         const kavitaPlusSection = this.sections[4];
         if (kavitaPlusSection.children.length === 1) {
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin]));
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin],
+            this.matchedMetadataBadgeCount$
+          ));
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
 
           // Scrobbling History needs to be per-user and allow admin to view all
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Scrobbling, [],
-            this.accountService.currentUser$.pipe(
-              take(1),
-              switchMap(user => {
-                if (!user || !this.accountService.hasAdminRole(user)) {
-                  // If no user or user does not have the admin role, return an observable of -1
-                  return of(-1);
-                } else {
-                  return this.scrobbleService.getScrobbleErrors().pipe(
-                    takeUntilDestroyed(this.destroyRef),
-                    map(d => d.length),
-                    shareReplay({ bufferSize: 1, refCount: true })
-                  );
-                }
-              })
-            ))
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount$)
           );
         }
 
