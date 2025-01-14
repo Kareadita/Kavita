@@ -24,6 +24,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs";
 import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {AsyncPipe, TitleCasePipe} from "@angular/common";
 
 @Component({
     selector: 'app-manage-devices',
@@ -31,8 +33,8 @@ import {AccountService} from "../../_services/account.service";
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbCollapse, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, ScrobbleEventTypePipe, SortableHeader, UtcToLocalTimePipe]
+    imports: [NgbCollapse, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent,
+        DefaultValuePipe, ScrobbleEventTypePipe, SortableHeader, UtcToLocalTimePipe, AsyncPipe, NgxDatatableModule, TitleCasePipe]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -106,4 +108,5 @@ export class ManageDevicesComponent implements OnInit {
     });
   }
 
+    protected readonly ColumnMode = ColumnMode;
 }

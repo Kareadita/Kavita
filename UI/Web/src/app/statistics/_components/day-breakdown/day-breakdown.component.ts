@@ -7,7 +7,7 @@ import {PieDataItem} from '../../_models/pie-data-item';
 import {StatCount} from '../../_models/stat-count';
 import {DayOfWeekPipe} from '../../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {tap} from "rxjs/operators";
 
@@ -17,7 +17,7 @@ import {tap} from "rxjs/operators";
     styleUrls: ['./day-breakdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [BarChartModule, AsyncPipe, TranslocoDirective, NgForOf, NgIf]
+  imports: [BarChartModule, AsyncPipe, TranslocoDirective]
 })
 export class DayBreakdownComponent implements OnInit {
 

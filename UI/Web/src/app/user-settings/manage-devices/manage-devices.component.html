@@ -8,49 +8,58 @@
 
   <p>{{t('description')}}</p>
 
-  <div class="float-end">
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="devices"
+    [columnMode]="ColumnMode.flex"
+    rowHeight="auto"
+    [footerHeight]="50"
+    [limit]="15"
+  >
 
-  </div>
+    <ngx-datatable-column name="name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('name-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{ item.name }}
+      </ng-template>
+    </ngx-datatable-column>
 
-  <table class="table table-striped table-sm scrollable">
-    <thead>
-    <tr>
-      <th scope="col">
-        {{t('name-label')}}
-      </th>
-      <th scope="col">
-        {{t('email-label')}}
-      </th>
-      <th scope="col">
-        {{t('platform-label')}}
-      </th>
-      <th scope="col">
+
+    <ngx-datatable-column name="email" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('email-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        {{ item.emailAddress }}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="platform" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('platform-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{ item.platform | devicePlatform }}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
         {{t('actions-header')}}
-      </th>
-    </tr>
-    </thead>
-    <tbody>
-      @for(device of devices; track device.name + device.emailAddress + device.platform) {
-        <tr>
-          <td>{{ device.name }}</td>
-          <td>{{ device.emailAddress }}</td>
-          <td>{{ device.platform | devicePlatform }}</td>
-          <td>
-            <button class="btn btn-danger  me-2" (click)="deleteDevice(device)">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('delete')}}</span>
-            </button>
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('delete')}}</span>
+        </button>
 
-            <button class="btn btn-primary" (click)="editDevice(device)">
-              <i class="fa fa-pen" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('edit')}}</span>
-            </button>
-          </td>
-        </tr>
-      } @empty {
-        <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
-      }
-    </tbody>
-  </table>
-
+        <button class="btn btn-primary" (click)="editDevice(item)">
+          <i class="fa fa-pen" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('edit')}}</span>
+        </button>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
 </ng-container>

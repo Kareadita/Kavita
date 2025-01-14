@@ -14,7 +14,7 @@
   </form>
   <ngx-datatable
     class="bootstrap"
-    [rows]="data"
+    [rows]="data | filter: filterList"
     [columnMode]="ColumnMode.flex"
     rowHeight="auto"
     [footerHeight]="50"

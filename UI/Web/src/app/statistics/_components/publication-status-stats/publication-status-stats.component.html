@@ -17,6 +17,7 @@
     </div>
 
 
+
     <ng-container *ngIf="publicationStatues$ | async as statuses">
       <ng-container *ngIf="formControl.value; else tableLayout">
         <ngx-charts-advanced-pie-chart

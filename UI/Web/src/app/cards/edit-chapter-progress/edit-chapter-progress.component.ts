@@ -9,6 +9,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-edit-chapter-progress',
@@ -23,7 +24,8 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
     ReactiveFormsModule,
     SentenceCasePipe,
     DatePipe,
-    DefaultDatePipe
+    DefaultDatePipe,
+    NgxDatatableModule
   ],
   templateUrl: './edit-chapter-progress.component.html',
   styleUrl: './edit-chapter-progress.component.scss',
@@ -82,4 +84,5 @@ export class EditChapterProgressComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  protected readonly ColumnMode = ColumnMode;
 }

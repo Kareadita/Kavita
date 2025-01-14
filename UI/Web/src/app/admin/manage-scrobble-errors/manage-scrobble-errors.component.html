@@ -15,55 +15,53 @@
   </form>
 
 
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="data | filter: filterList"
+    [columnMode]="ColumnMode.flex"
+    rowHeight="auto"
+    [footerHeight]="50"
+    [limit]="15"
+  >
 
-
-  <table class="table table-striped table-sm">
-    <thead #header>
-    <tr>
-      <th scope="col" sortable="seriesId" (sort)="onSort($event)">
+    <ngx-datatable-column name="seriesId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+      <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-header')}}
-      </th>
-      <th scope="col" sortable="created" (sort)="onSort($event)">
-        {{t('created-header')}}
-      </th>
-      <th scope="col" sortable="comment" (sort)="onSort($event)">
-        {{t('comment-header')}}
-      </th>
-      <th scope="col">
-        {{t('edit-header')}}
-      </th>
-    </tr>
-    </thead>
-    <tbody #container>
-    @if (isLoading) {
-      <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
-    } @else {
-      @if(data | filter: filterList; as filteredData) {
-        @for(item of filteredData; track item.seriesId; let i = $index) {
-          <tr>
-            <td>
-              <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
-            </td>
-            <td>
-              {{item.createdUtc  | utcToLocalTime | defaultValue }}
-            </td>
-            <td>
-              {{item.comment}}
-            </td>
-            <td>
-              <button class="btn btn-icon primary-icon" (click)="editSeries(item.seriesId)">
-                <i class="fa fa-pen me-1" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('edit-item-alt', {seriesName: item.details})}}</span>
-              </button>
-            </td>
-          </tr>
-        }
-        @empty {
-          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
-        }
-      }
-    }
-    </tbody>
-  </table>
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
+      </ng-template>
+    </ngx-datatable-column>
 
+
+    <ngx-datatable-column name="created" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('created-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        {{item.createdUtc  | utcToLocalTime | defaultValue }}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="comment" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('comment-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.comment}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="edit" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('edit-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <button class="btn btn-icon primary-icon" (click)="editSeries(item.seriesId)">
+          <i class="fa fa-pen me-1" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('edit-item-alt', {seriesName: item.details})}}</span>
+        </button>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
 </ng-container>

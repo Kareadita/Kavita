@@ -1,4 +1,55 @@
 <ng-container *transloco="let t; read: 'edit-chapter-progress'">
+<!--  <ngx-datatable-->
+<!--    class="bootstrap"-->
+<!--    [rows]="items.controls"-->
+<!--    [columnMode]="ColumnMode.flex"-->
+<!--    rowHeight="auto"-->
+<!--    [footerHeight]="50"-->
+<!--    [limit]="15"-->
+<!--  >-->
+
+<!--    <ngx-datatable-column name="" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">-->
+<!--      <ng-template let-column="column" ngx-datatable-header-template>-->
+<!--        {{t('user-header')}}-->
+<!--      </ng-template>-->
+<!--      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>-->
+<!--        {{progressEvents[idx].userName | sentenceCase}}-->
+<!--      </ng-template>-->
+<!--    </ngx-datatable-column>-->
+
+
+<!--    <ngx-datatable-column name="" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">-->
+<!--      <ng-template let-column="column" ngx-datatable-header-template>-->
+<!--        {{t('page-read-header')}}-->
+<!--      </ng-template>-->
+<!--      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>-->
+<!--        @if(editMode[idx]) {-->
+<!--          <input type="number" formControlName="pagesRead" class="form-control" inputmode="numeric"/>-->
+<!--        } @else {-->
+<!--          {{progressEvents[idx].pagesRead}}-->
+<!--        }-->
+<!--      </ng-template>-->
+<!--    </ngx-datatable-column>-->
+
+<!--    <ngx-datatable-column name="" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">-->
+<!--      <ng-template let-column="column" ngx-datatable-header-template>-->
+<!--        {{t('date-created-header')}}-->
+<!--      </ng-template>-->
+<!--      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>-->
+<!--        {{progressEvents[idx].createdUtc | utcToLocalTime | date:'shortDate' | defaultDate}}-->
+<!--      </ng-template>-->
+<!--    </ngx-datatable-column>-->
+
+<!--    <ngx-datatable-column name="" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">-->
+<!--      <ng-template let-column="column" ngx-datatable-header-template>-->
+<!--        {{t('date-updated-header')}}-->
+<!--      </ng-template>-->
+<!--      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>-->
+<!--        {{progressEvents[idx].lastModifiedUtc | utcToLocalTime | date:'shortDate' | defaultDate}}-->
+<!--      </ng-template>-->
+<!--    </ngx-datatable-column>-->
+<!--  </ngx-datatable>-->
+
   <table class="table table-striped" [formGroup]="formGroup">
     <thead>
     <tr>

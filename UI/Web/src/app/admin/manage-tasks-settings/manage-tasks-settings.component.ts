@@ -3,15 +3,15 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {shareReplay, take} from 'rxjs/operators';
+import {shareReplay} from 'rxjs/operators';
 import {debounceTime, defer, distinctUntilChanged, filter, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
-import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -21,6 +21,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {ConfirmService} from "../../shared/confirm.service";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 interface AdhocTask {
   name: string;
@@ -36,14 +37,13 @@ interface AdhocTask {
   styleUrls: ['./manage-tasks-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe,
-    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent]
+    imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
+        TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent, NgxDatatableModule]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmService = inject(ConfirmService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
@@ -323,4 +323,5 @@ export class ManageTasksSettingsComponent implements OnInit {
   }
 
 
+    protected readonly ColumnMode = ColumnMode;
 }

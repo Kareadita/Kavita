@@ -30,11 +30,13 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {DevicePlatformPipe} from "../../_pipes/device-platform.pipe";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-    imports: [ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule, DefaultDatePipe, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe],
+  imports: [ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule, DefaultDatePipe, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, DevicePlatformPipe, NgxDatatableModule],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -118,4 +120,5 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   }
 
   protected readonly filter = filter;
+  protected readonly ColumnMode = ColumnMode;
 }
