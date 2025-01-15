@@ -349,7 +349,14 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "anilist-used-for": "AniList is used for scrobbling (syncing data) and want to read syncing.",
+        "mal-used-for": "MyAnimeList is used for Smart Collections and want to read syncing.",
+        "anilist-first-header": "AniList token saved",
+        "anilist-first-description": "Your AniList token is now setup. This token lasts for a year and Kavita will inform you before it expires to refresh it here. With this, Kavita will generate scrobble (sync) events from your reading history, want to read, and ratings. You can start this now or later. If you have any series that you do not want to be scrobbled select later and place a Scrobble Hold on them. You only need to run this task once. Afterwards, Kavita will handle the syncing for you.",
+        "anilist-first-later": "Later",
+        "anilist-first-now": "Now"
+
     },
 
     "typeahead": {

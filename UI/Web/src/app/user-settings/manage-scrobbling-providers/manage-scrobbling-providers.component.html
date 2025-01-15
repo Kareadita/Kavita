@@ -12,6 +12,7 @@
             <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode">
               <ng-template #edit>
                 <p>{{t('instructions', {service: ScrobbleProvider.AniList | scrobbleProviderName})}}</p>
+                <p class="text-muted">{{t('anilist-used-for')}}</p>
                 <div class="form-group mb-3">
                   <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
                   <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
@@ -32,6 +33,7 @@
               <ng-template #edit>
                 <span class="md-4">
                   <p>{{t('mal-instructions', {service: ScrobbleProvider.Mal | scrobbleProviderName})}}</p>
+                  <p class="text-muted">{{t('mal-used-for')}}</p>
                   <div class="form-group mb-3">
                     <label for="mal-token">{{t('mal-token-input-label')}}</label>
                     <input type="text" id="mal-token" class="form-control" formControlName="malClientId"/>

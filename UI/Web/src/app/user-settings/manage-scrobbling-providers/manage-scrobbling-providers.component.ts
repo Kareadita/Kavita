@@ -1,51 +1,29 @@
 import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {NgForOf, NgIf, NgOptimizedImage} from "@angular/common";
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse, NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
-  NgbCollapse,
-  NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Select2Module} from "ng-select2-component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ManageMediaIssuesComponent} from "../../admin/manage-media-issues/manage-media-issues.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../_services/license.service";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
   selector: 'app-manage-scrobbling-providers',
   standalone: true,
   imports: [
-    NgOptimizedImage,
-    NgbTooltip,
     ReactiveFormsModule,
     Select2Module,
     TranslocoDirective,
-    NgbCollapse,
-    ManageMediaIssuesComponent,
-    NgbAccordionBody,
-    NgbAccordionButton,
-    NgbAccordionCollapse,
-    NgbAccordionDirective,
-    NgbAccordionHeader,
-    NgbAccordionItem,
     LoadingComponent,
     ScrobbleProviderItemComponent,
     ScrobbleProviderNamePipe,
     SettingTitleComponent,
-    NgForOf,
-    NgIf,
-    SettingItemComponent,
   ],
   templateUrl: './manage-scrobbling-providers.component.html',
   styleUrl: './manage-scrobbling-providers.component.scss'
@@ -57,6 +35,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
+  private readonly confirmService = inject(ConfirmService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
@@ -112,7 +91,30 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   }
 
   saveAniListForm() {
-    this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(() => {
+    this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(async (isFirstToken) => {
+
+      if (isFirstToken) {
+        const result = await this.confirmService.confirm('', {
+          buttons: [
+            {text: translate('scrobbling-providers.anilist-first-later'), type: 'secondary'},
+            {text: translate('scrobbling-providers.anilist-first-now'), type: 'primary'},
+          ],
+          _type: 'confirm',
+          content: translate('scrobbling-providers.anilist-first-description'),
+          header: translate('scrobbling-providers.anilist-first-header'),
+          disableEscape: true
+        });
+        // false is Later, true is Now
+        if (result) {
+          this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
+            this.aniListToken = this.formGroup.get('aniListToken')!.value;
+            this.resetForm();
+            this.cdRef.markForCheck();
+          });
+          return;
+        }
+      }
+
       this.toastr.success(translate('toasts.anilist-token-updated'));
       this.aniListToken = this.formGroup.get('aniListToken')!.value;
       this.resetForm();

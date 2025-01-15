@@ -612,13 +612,6 @@ public class ScrobblingService : IScrobblingService
                 await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
             }
 
-            // var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
-            // foreach (var review in reviews)
-            // {
-            //     if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
-            //     await ScrobbleReviewUpdate(uId, review.SeriesId, review.Tagline, review.Review);
-            // }
-
             var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
                 new UserParams(), new FilterDto()
                 {

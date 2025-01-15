@@ -32,12 +32,20 @@ export class ScrobblingService {
       .pipe(map(r => r === "true"));
   }
 
+  /**
+   * Returns if the token was new or not
+   */
   updateAniListToken(token: string) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
+    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-anilist-token', {token}, TextResonse)
+      .pipe(map(r => r + '' === 'true'));
   }
 
+  /**
+   * Returns if the token was new or not
+   */
   updateMalToken(username: string, accessToken: string) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken});
+    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken}, TextResonse)
+      .pipe(map(r => r + '' === 'true'));
   }
 
   getAniListToken() {
@@ -86,5 +94,10 @@ export class ScrobblingService {
 
   removeHold(seriesId: number) {
     return this.httpClient.delete(this.baseUrl + 'scrobbling/remove-hold?seriesId=' + seriesId, TextResonse);
+  }
+
+  triggerScrobbleEventGeneration() {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/generate-scrobble-events', TextResonse);
+
   }
 }
