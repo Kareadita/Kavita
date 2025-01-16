@@ -19,7 +19,7 @@
 
     <ngx-datatable-column name="name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('name-header')}}
+        {{t('name-label')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
         {{ item.name }}
@@ -29,7 +29,7 @@
 
     <ngx-datatable-column name="email" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('email-header')}}
+        {{t('email-label')}}
       </ng-template>
       <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
         {{ item.emailAddress }}
@@ -38,7 +38,7 @@
 
     <ngx-datatable-column name="platform" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('platform-header')}}
+        {{t('platform-label')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
         {{ item.platform | devicePlatform }}
@@ -47,7 +47,6 @@
 
     <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('actions-header')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
         <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
