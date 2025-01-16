@@ -17,6 +17,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -28,8 +29,8 @@ export interface DataTablePage {
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule],
+    imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
+        DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, CardActionablesComponent],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -108,12 +109,10 @@ export class UserScrobbleHistoryComponent implements OnInit {
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {
       this.events = result.result;
-      //this.pagination = result.pagination;
 
       this.pageInfo.totalPages = result.pagination.totalPages - 1; // ngx-datatable is 0 based, Kavita is 1 based
       this.pageInfo.size = result.pagination.itemsPerPage;
       this.pageInfo.totalElements = result.pagination.totalItems;
-      //this.pageInfo.pageNumber = result.pagination.currentPage;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -127,5 +126,11 @@ export class UserScrobbleHistoryComponent implements OnInit {
       case 'seriesName': return ScrobbleEventSortField.Series;
     }
     return ScrobbleEventSortField.None;
+  }
+
+  generateScrobbleEvents() {
+    this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
+
+    });
   }
 }
