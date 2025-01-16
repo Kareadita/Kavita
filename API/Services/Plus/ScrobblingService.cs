@@ -589,8 +589,11 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null || string.IsNullOrEmpty(user.AniListAccessToken)) return;
+        if (userId != 0)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            if (user == null || string.IsNullOrEmpty(user.AniListAccessToken)) return;
+        }
 
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
