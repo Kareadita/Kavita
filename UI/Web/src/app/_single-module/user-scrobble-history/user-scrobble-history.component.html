@@ -6,6 +6,10 @@
     </button>
   </div>
 
+  @if (tokenExpired) {
+    <p class="alert alert-warning">{{t('token-expired')}}</p>
+  }
+
   <p>{{t('description')}}</p>
   <p class="fw-bold">{{t('not-read-warning')}}</p>
   <div class="row g-0 mb-2">

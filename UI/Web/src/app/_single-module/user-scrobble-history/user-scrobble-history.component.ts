@@ -48,7 +48,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   protected readonly ScrobbleEventType = ScrobbleEventType;
 
 
-
+  tokenExpired = false;
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])
   });
@@ -64,12 +64,9 @@ export class UserScrobbleHistoryComponent implements OnInit {
   ngOnInit() {
 
     this.onPageChange({offset: 0});
-    //this.loadPage({column: 'createdUtc', direction: 'desc'});
 
     this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-      if (hasExpired) {
-        this.toastr.error(translate('toasts.anilist-token-expired'));
-      }
+      this.tokenExpired = hasExpired;
       this.cdRef.markForCheck();
     });
 
