@@ -10,7 +10,6 @@
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <Nullable>warnings</Nullable>
     <LangVersion>latestmajor</LangVersion>
-    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
