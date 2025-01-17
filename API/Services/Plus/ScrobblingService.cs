@@ -1066,6 +1066,41 @@ public class ScrobblingService : IScrobblingService
         return default(T?);
     }
 
+    /// <summary>
+    /// Generate a URL from a given ID and website
+    /// </summary>
+    /// <typeparam name="T">Type of the ID (e.g., int, long, string)</typeparam>
+    /// <param name="id">The ID to embed in the URL</param>
+    /// <param name="website">The base website URL</param>
+    /// <returns>The generated URL or null if the website is not supported</returns>
+    public static string? GenerateUrl<T>(T id, string website)
+    {
+        if (!WeblinkExtractionMap.ContainsKey(website))
+        {
+            return null; // Unsupported website
+        }
+
+        if (id == null)
+        {
+            throw new ArgumentNullException(nameof(id), "ID cannot be null.");
+        }
+
+        // Ensure the type of the ID matches supported types
+        if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(string))
+        {
+            return $"{website}{id}";
+        }
+
+        throw new ArgumentException("Unsupported ID type. Supported types are int, long, and string.", nameof(id));
+    }
+
+    public static string CreateUrl(string url, long? id)
+    {
+        if (id is null or 0) return string.Empty;
+        return $"{url}{id}/";
+    }
+
+
     private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)
     {
         if (string.IsNullOrEmpty(user.AniListAccessToken)) return 0;
@@ -1092,9 +1127,4 @@ public class ScrobblingService : IScrobblingService
         return count;
     }
 
-    public static string CreateUrl(string url, long? id)
-    {
-        if (id is null or 0) return string.Empty;
-        return $"{url}{id}/";
-    }
 }

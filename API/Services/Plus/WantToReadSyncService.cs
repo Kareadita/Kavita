@@ -1,13 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
+using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Bcpg.Sig;
 
 namespace API.Services.Plus;
 
@@ -39,18 +45,57 @@ public class WantToReadSyncService : IWantToReadSyncService
 
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
-        var wantToReadSeries = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/want-to-read")
-            .WithKavitaPlusHeaders(license)
-            .GetJsonAsync<SeriesDetailPlusDto>();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead);
+        foreach (var user in users)
+        {
+            if (string.IsNullOrEmpty(user.MalUserName) && string.IsNullOrEmpty(user.AniListAccessToken)) continue;
 
-        // Match the series (like ScrobbleService does) to actual Kavita instances
+            try
+            {
+                _logger.LogInformation("Syncing want to read for user: {UserName}", user.UserName);
+                var wantToReadSeries =
+                    await (
+                            $"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/want-to-read?malUsername={user.MalUserName}&aniListToken={user.AniListAccessToken}")
+                        .WithKavitaPlusHeaders(license)
+                        .WithTimeout(
+                            TimeSpan.FromSeconds(120)) // Give extra time as MAL + AniList can result in a lot of data
+                        .GetJsonAsync<List<ExternalSeriesDetailDto>>();
 
-        // Remove existing Want to Read or any Series with full completion and Publisher status of Completed
+                // Match the series (note: There may be duplicates in the final result)
+                foreach (var unmatchedSeries in wantToReadSeries)
+                {
+                    var match = await _unitOfWork.SeriesRepository.MatchSeries(unmatchedSeries);
+                    if (match == null)
+                    {
+                        continue;
+                    }
 
-        // Save the left over entities
+                    // There is a match, add it
+                    user.WantToRead.Add(new AppUserWantToRead()
+                    {
+                        SeriesId = match.Id,
+                    });
+                    _logger.LogDebug("Added {MatchName} ({Format}) to Want to Read", match.Name, match.Format);
+                }
 
+                // Remove existing Want to Read that are duplicates
+                user.WantToRead = user.WantToRead.DistinctBy(d => d.SeriesId).ToList();
 
-        throw new System.NotImplementedException();
+                // TODO: Need to write in the history table the last sync time
+
+                // Save the left over entities
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.CommitAsync();
+
+                // Trigger CleanupService to cleanup any series in WantToRead that don't belong
+                RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception when processing want to read series sync for {User}", user.UserName);
+            }
+        }
+
     }
 
     // Allow syncing if there are any libraries that have an appropriate Provider, the user has the appropriate token, and the last Sync validates

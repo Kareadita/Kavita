@@ -22,6 +22,18 @@ public static class PlusMediaFormatExtensions
         };
     }
 
+    public static IEnumerable<LibraryType> ConvertToLibraryTypes(this PlusMediaFormat plusMediaFormat)
+    {
+        return plusMediaFormat switch
+        {
+            PlusMediaFormat.Manga => new[] { LibraryType.Manga, LibraryType.Image },
+            PlusMediaFormat.Comic => new[] { LibraryType.Comic, LibraryType.ComicVine },
+            PlusMediaFormat.LightNovel => new[] { LibraryType.LightNovel, LibraryType.Book, LibraryType.Manga },
+            _ => throw new ArgumentOutOfRangeException(nameof(plusMediaFormat), plusMediaFormat, null)
+        };
+    }
+
+
     public static IList<MangaFormat> GetMangaFormats(this PlusMediaFormat? mediaFormat)
     {
         if (mediaFormat == null) return [MangaFormat.Archive];

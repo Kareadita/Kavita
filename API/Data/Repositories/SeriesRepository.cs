@@ -15,6 +15,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -165,6 +166,7 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
     Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId);
     Task<int> GetCountAsync();
+    Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -2037,9 +2039,6 @@ public class SeriesRepository : ISeriesRepository
     /// Uses multiple names to find a match against a series. If not, returns null.
     /// </summary>
     /// <remarks>This does not restrict to the user at all. That is handled at the API level.</remarks>
-    /// <param name="userId"></param>
-    /// <param name="names"></param>
-    /// <returns></returns>
     public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
     {
         var libraryIds = await _context.Library
@@ -2070,6 +2069,47 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => libraryIds.Contains(s.Library.Id))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
+            .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
+    }
+
+    public async Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries)
+    {
+        var libraryIds = await _context.Library
+            .Where(lib => externalSeries.PlusMediaFormat.ConvertToLibraryTypes().Contains(lib.Type))
+            .Select(l => l.Id)
+            .ToListAsync();
+
+        var normalizedNames = (externalSeries.Synonyms ?? Enumerable.Empty<string>())
+            .Prepend(externalSeries.Name)
+            .Select(n => n.ToNormalized())
+            .ToList();
+
+        var aniListWebLink =
+            ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, externalSeries.AniListId);
+        var malWebLink =
+            ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, externalSeries.MALId);
+
+        Series? result = null;
+        if (!string.IsNullOrEmpty(aniListWebLink) || !string.IsNullOrEmpty(malWebLink))
+        {
+            result = await _context.Series
+                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
+                .Where(s => libraryIds.Contains(s.Library.Id))
+                .WhereIf(!string.IsNullOrEmpty(aniListWebLink), s => s.Metadata.WebLinks.Contains(aniListWebLink))
+                .WhereIf(!string.IsNullOrEmpty(malWebLink), s => s.Metadata.WebLinks.Contains(malWebLink))
+                .Include(s => s.Metadata)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
+        }
+
+        if (result != null) return result;
+
+        return await _context.Series
+            .Where(s => normalizedNames.Contains(s.NormalizedName) ||
+                        normalizedNames.Contains(s.NormalizedLocalizedName))
+            .Where(s => libraryIds.Contains(s.Library.Id))
+            .AsSplitQuery()
+            .Include(s => s.Metadata)
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
     }
 
