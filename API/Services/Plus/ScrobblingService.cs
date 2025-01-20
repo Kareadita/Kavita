@@ -314,6 +314,9 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
+
         _logger.LogInformation("Processing Scrobbling rating event for {UserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
@@ -364,6 +367,9 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
 
         _logger.LogInformation("Processing Scrobbling reading event for {UserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
@@ -420,6 +426,9 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
 
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
         _logger.LogInformation("Processing Scrobbling want-to-read event for {UserId} on {SeriesName}", userId, series.Name);
@@ -784,6 +793,7 @@ public class ScrobblingService : IScrobblingService
             .Concat(removeWantToRead.Select(r => r.AppUser))
             .Concat(ratingEvents.Select(r => r.AppUser))
             .Where(user => !string.IsNullOrEmpty(user.AniListAccessToken))
+            .Where(user => user.UserPreferences.AniListScrobblingEnabled) // TODO: Add more as we add more support
             .DistinctBy(u => u.Id)
             .ToList();
         foreach (var user in usersToScrobble)
@@ -891,8 +901,9 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogDebug("Processing Reading Events: {Count} / {Total}", progressCounter, totalProgress);
             progressCounter++;
+
             // Check if this media item can even be processed for this user
-            if (!DoesUserHaveProviderAndValid(evt))
+            if (!CanProcessScrobbleEvent(evt))
             {
                 continue;
             }
@@ -997,7 +1008,7 @@ public class ScrobblingService : IScrobblingService
     }
 
 
-    private static bool DoesUserHaveProviderAndValid(ScrobbleEvent readEvent)
+    private static bool CanProcessScrobbleEvent(ScrobbleEvent readEvent)
     {
         var userProviders = GetUserProviders(readEvent.AppUser);
         if (readEvent.Series.Library.Type == LibraryType.Manga && MangaProviders.Intersect(userProviders).Any())

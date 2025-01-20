@@ -35,7 +35,7 @@ import {
   NgbAccordionDirective, NgbAccordionHeader,
   NgbAccordionItem, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {AsyncPipe, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {ColorPickerModule} from "ngx-color-picker";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -53,26 +53,17 @@ import {PdfSpreadModePipe} from "../../_pipes/pdf-spread-mode.pipe";
 import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
 import {PdfScrollModeTypePipe} from "../../pdf-reader/_pipe/pdf-scroll-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
+import {LicenseService} from "../../_services/license.service";
 
 @Component({
   selector: 'app-manga-user-preferences',
   standalone: true,
   imports: [
     TranslocoDirective,
-    NgbAccordionDirective,
     ReactiveFormsModule,
-    NgbAccordionItem,
-    NgbAccordionCollapse,
-    NgbAccordionBody,
-    NgbAccordionHeader,
-    NgbAccordionButton,
-    NgbTooltip,
-    NgTemplateOutlet,
     TitleCasePipe,
     ColorPickerModule,
-    SettingTitleComponent,
     SettingItemComponent,
-    PageLayoutModePipe,
     SettingSwitchComponent,
     ReadingDirectionPipe,
     ScalingOptionPipe,
@@ -82,12 +73,10 @@ import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
     NgStyle,
     WritingStylePipe,
     BookPageLayoutModePipe,
-    PdfSpreadTypePipe,
-    PdfSpreadTypePipe,
     PdfSpreadModePipe,
     PdfThemePipe,
-    PdfScrollModeTypePipe,
-    PdfScrollModePipe
+    PdfScrollModePipe,
+    AsyncPipe
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -102,6 +91,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
+  protected readonly licenseService = inject(LicenseService);
 
   protected readonly readingDirections = readingDirections;
   protected readonly scalingOptions = scalingOptions;
@@ -199,6 +189,9 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
       this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale || 'en', []));
 
+      this.settingsForm.addControl('aniListScrobblingEnabled', new FormControl(this.user.preferences.aniListScrobblingEnabled || false, []));
+      this.settingsForm.addControl('wantToReadSync', new FormControl(this.user.preferences.wantToReadSync || false, []));
+
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
@@ -267,6 +260,9 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('locale')?.setValue(this.user.preferences.locale || 'en', {onlySelf: true, emitEvent: false});
+
+    this.settingsForm.get('aniListScrobblingEnabled')?.setValue(this.user.preferences.aniListScrobblingEnabled || false, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('wantToReadSync')?.setValue(this.user.preferences.wantToReadSync || false, {onlySelf: true, emitEvent: false});
   }
 
   packSettings(): Preferences {
@@ -303,6 +299,8 @@ export class ManageUserPreferencesComponent implements OnInit {
       pdfTheme: parseInt(modelSettings.pdfTheme, 10),
       pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
       pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
+      aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
+      wantToReadSync: modelSettings.wantToReadSync
     };
   }
 

@@ -12,4 +12,5 @@ public class SeriesDetailPlusDto
     public RecommendationDto? Recommendations { get; set; }
     public IEnumerable<UserReviewDto> Reviews { get; set; }
     public IEnumerable<RatingDto>? Ratings { get; set; }
+    public ExternalSeriesDetailDto? Series { get; set; }
 }

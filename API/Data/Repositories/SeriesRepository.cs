@@ -699,7 +699,6 @@ public class SeriesRepository : ISeriesRepository
 
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //.AsSplitQuery()
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);

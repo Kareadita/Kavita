@@ -52,6 +52,10 @@ export interface Preferences {
     collapseSeriesRelationships: boolean;
     shareReviews: boolean;
     locale: string;
+
+    // Kavita+
+    aniListScrobblingEnabled: boolean;
+    wantToReadSync: boolean;
 }
 
 export const readingDirections = [{text: 'left-to-right', value: ReadingDirection.LeftToRight}, {text: 'right-to-left', value: ReadingDirection.RightToLeft}];

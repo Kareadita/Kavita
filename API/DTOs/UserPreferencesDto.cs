@@ -175,5 +175,12 @@ public class UserPreferencesDto
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
 
-
+    /// <summary>
+    /// Kavita+: Should this account have Scrobbling enabled for AniList
+    /// </summary>
+    public bool AniListScrobblingEnabled { get; set; }
+    /// <summary>
+    /// Kavita+: Should this account have Want to Read Sync enabled
+    /// </summary>
+    public bool WantToReadSync { get; set; }
 }

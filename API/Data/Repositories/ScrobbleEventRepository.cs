@@ -79,6 +79,7 @@ public class ScrobbleRepository : IScrobbleRepository
             .Include(s => s.Series)
             .ThenInclude(s => s.Metadata)
             .Include(s => s.AppUser)
+            .ThenInclude(u => u.UserPreferences)
             .Where(s => s.ScrobbleEventType == type)
             .Where(s => s.IsProcessed == isProcessed)
             .AsSplitQuery()

@@ -33,7 +33,6 @@ public interface IExternalMetadataService
 {
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
     Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType);
-    //Task ForceKavitaPlusRefresh(int seriesId);
     Task FetchExternalDataTask();
     /// <summary>
     /// This is an entry point and provides a level of protection against calling upstream API. Will only allow 100 new
@@ -165,9 +164,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
         _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
         // Prefetch SeriesDetail data
-        await GetSeriesDetailPlus(seriesId, libraryType);
+        var metadata = await GetSeriesDetailPlus(seriesId, libraryType);
 
         // TODO: Fetch Series Metadata (Summary, etc)
+
+
+
 
     }
 
@@ -450,13 +452,19 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
+
+            // TODO: Basic Metadata goes here
+
+
+
             await _unitOfWork.CommitAsync();
 
             return new SeriesDetailPlusDto()
             {
                 Recommendations = recs,
                 Ratings = result.Ratings,
-                Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r))
+                Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r)),
+                Series = result.Series
             };
         }
         catch (FlurlHttpException ex)

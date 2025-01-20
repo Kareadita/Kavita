@@ -87,6 +87,37 @@
 
       <div class="setting-section-break"></div>
 
+
+      @if (licenseService.hasValidLicense$ | async) {
+        <h4 id="kavitaplus-heading" class="mt-3">{{t('kavitaplus-settings-title')}}</h4>
+
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('aniListScrobblingEnabled'); as formControl) {
+            <app-setting-switch [title]="t('anilist-scrobbling-label')" [subtitle]="t('anilist-scrobbling-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="setting-anilist-scrobbling" type="checkbox" class="form-check-input" formControlName="aniListScrobblingEnabled">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('wantToReadSync'); as formControl) {
+            <app-setting-switch [title]="t('want-to-read-sync-label')" [subtitle]="t('want-to-read-sync-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="setting-want-to-read-sync" type="checkbox" class="form-check-input" formControlName="wantToReadSync">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+        <div class="setting-section-break"></div>
+      }
+
+
       <h4 id="image-reader-heading" class="mt-3">{{t('image-reader-settings-title')}}</h4>
       <ng-container>
         <div class="row g-0 mt-4 mb-4">

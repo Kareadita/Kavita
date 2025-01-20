@@ -135,6 +135,14 @@ public class UsersController : BaseApiController
         existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
         existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
 
+        if (await _licenseService.HasActiveLicense())
+        {
+            existingPreferences.AniListScrobblingEnabled = preferencesDto.AniListScrobblingEnabled;
+            existingPreferences.WantToReadSync = preferencesDto.WantToReadSync;
+        }
+
+
+
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
             var theme = await _unitOfWork.SiteThemeRepository.GetTheme(preferencesDto.Theme!.Id);
@@ -146,6 +154,7 @@ public class UsersController : BaseApiController
         {
             existingPreferences.Locale = preferencesDto.Locale;
         }
+
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

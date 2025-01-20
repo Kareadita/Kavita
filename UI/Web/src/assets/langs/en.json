@@ -128,6 +128,12 @@
         "share-series-reviews-label": "Share Series Reviews",
         "share-series-reviews-tooltip": "Should Kavita include your reviews of Series for other users",
 
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "anilist-scrobbling-tooltip": "Allow Kavita to Scrobble (one-way sync) reading progress and ratings to AniList",
+        "want-to-read-sync-label": "Want To Read Sync",
+        "want-to-read-sync-tooltip": "Allow Kavita to add items to your Want to Read list based on AniList and MAL series in Pending readlist",
+
         "image-reader-settings-title": "Image Reader",
         "reading-direction-label": "Reading Direction",
         "reading-direction-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",

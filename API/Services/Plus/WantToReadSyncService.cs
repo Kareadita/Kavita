@@ -45,8 +45,8 @@ public class WantToReadSyncService : IWantToReadSyncService
 
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead);
-        foreach (var user in users)
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead | AppUserIncludes.UserPreferences);
+        foreach (var user in users.Where(u => u.UserPreferences.WantToReadSync))
         {
             if (string.IsNullOrEmpty(user.MalUserName) && string.IsNullOrEmpty(user.AniListAccessToken)) continue;
 

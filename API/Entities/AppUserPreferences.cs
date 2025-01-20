@@ -160,7 +160,21 @@ public class AppUserPreferences
     /// UI Site Global Setting: The language locale that should be used for the user
     /// </summary>
     public string Locale { get; set; }
+    #endregion
 
+    #region KavitaPlus
+    /// <summary>
+    /// Should this account have Scrobbling enabled for AniList
+    /// </summary>
+    public bool AniListScrobblingEnabled { get; set; }
+    /// <summary>
+    /// Should this account have Want to Read Sync enabled
+    /// </summary>
+    public bool WantToReadSync { get; set; }
+    /// <summary>
+    /// Should this account have Smart Collection Sync (if not, it will do a 1 time import)
+    /// </summary>
+    public bool SmartCollectionSync { get; set; }
     #endregion
 
     public AppUser AppUser { get; set; } = null!;
