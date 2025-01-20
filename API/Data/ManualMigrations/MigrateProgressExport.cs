@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.History;
 using API.Services;
 using CsvHelper;
 using CsvHelper.Configuration.Attributes;

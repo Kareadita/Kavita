@@ -217,7 +217,7 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
-            "0 */4 * * *", RecurringJobOptions);
+            "0 */1 * * *", RecurringJobOptions);
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
             Cron.Daily, RecurringJobOptions);
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace API.Entities;
+namespace API.Entities.History;
 
 /// <summary>
 /// This will track manual migrations so that I can use simple selects to check if a Manual Migration is needed

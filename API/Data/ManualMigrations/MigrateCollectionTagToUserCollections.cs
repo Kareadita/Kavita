@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.History;
 using API.Extensions.QueryExtensions;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
