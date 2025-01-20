@@ -636,7 +636,7 @@
         "installed": "Installed",
         "download": "Download",
         "nightly": "Nightly: {{version}}",
-        "available": "Available",
+        "available": "Available"
     },
 
     "changelog-update-item": {
