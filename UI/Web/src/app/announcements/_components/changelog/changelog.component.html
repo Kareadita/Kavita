@@ -1,11 +1,6 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; read: 'changelog'">
     <div class="changelog">
-      <p class="pb-2">
-        {{t('description', {installed: ''})}}
-        <span class="badge bg-secondary">{{t('installed')}}</span>
-        {{t('description-continued', {installed: ''})}}
-      </p>
 
       @for(update of updates; track update; let indx = $index) {
 
