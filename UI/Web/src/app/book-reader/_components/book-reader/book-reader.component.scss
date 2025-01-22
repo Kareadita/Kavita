@@ -40,6 +40,18 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "FastFontSerif";
+    src: url(../../../../assets/fonts/Fast_Font/Fast_Serif.woff2) format("woff2");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "FastFontSans";
+    src: url(../../../../assets/fonts/Fast_Font/Fast_Sans.woff2) format("woff2");
+    font-display: swap;
+}
+
 :root {
     --br-actionbar-button-text-color: #6c757d;
     --accordion-body-bg-color: black;
