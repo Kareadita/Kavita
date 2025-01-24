@@ -197,6 +197,7 @@
     <Content Include="EmailTemplates\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Folder Include="Data\ManualMigrations\v0.8.3\" />
     <Folder Include="Extensions\KavitaPlus\" />
     <None Include="I18N\**" />
   </ItemGroup>

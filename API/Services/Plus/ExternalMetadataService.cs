@@ -453,11 +453,20 @@ public class ExternalMetadataService : IExternalMetadataService
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
 
-            // TODO: Basic Metadata goes here
-
-
+            // If there is metadata and the user has metadata download turned on
+            var madeMetadataModification = false;
+            if (result.Series != null)
+            {
+                madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId);
+            }
 
             await _unitOfWork.CommitAsync();
+
+            if (madeMetadataModification)
+            {
+                // Inform the UI of the update
+                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
+            }
 
             return new SeriesDetailPlusDto()
             {
@@ -484,6 +493,46 @@ public class ExternalMetadataService : IExternalMetadataService
         await _unitOfWork.CommitAsync();
 
         return _defaultReturn;
+    }
+
+    private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
+    {
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        var madeModification = false;
+
+        if (!series.Metadata.SummaryLocked && string.IsNullOrEmpty(series.Metadata.Summary) && settings.EnableSummary)
+        {
+            series.Metadata.Summary = externalMetadata.Summary;
+        }
+
+        // Control: I need something that says "Shonen" type of thing, write destination (Genres/Tags)
+
+        // Control: Relations
+
+        // People (incl Characters) with Images
+
+        // Start Date (for first issue)
+
+
+        if (!series.Metadata.PublicationStatusLocked && settings.EnablePublicationStatus)
+        {
+            PublicationStatus status = PublicationStatus.OnGoing;
+            if (externalMetadata.VolumeCount == null && externalMetadata.ChapterCount == null)
+            {
+                status = PublicationStatus.OnGoing;
+            }
+            else
+            {
+                status = PublicationStatus.Ended;
+                // Check the counts vs what we have in Kavita to see if Completed/Ended
+                // TODO: need to write the query to do this
+            }
+            // Update the publication based on what Upstream says. Allowed combos: Ongoing -> Completed/Ended, Completed/Ended -> Ongoing
+        }
+
+        return madeModification;
     }
 
 

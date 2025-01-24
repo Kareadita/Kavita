@@ -480,7 +480,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesScanEvent = event.payload as ScanSeriesEvent;
         if (seriesScanEvent.seriesId === this.seriesId) {
-          //this.loadSeries(this.seriesId);
           this.loadPageSource.next(false);
         }
       } else if (event.event === EVENTS.CoverUpdate) {
@@ -491,7 +490,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
         if (removedEvent.seriesId !== this.seriesId) return;
-        //this.loadSeries(this.seriesId, false);
         this.loadPageSource.next(false);
       }
     });

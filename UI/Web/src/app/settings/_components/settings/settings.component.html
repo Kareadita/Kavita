@@ -122,6 +122,14 @@
           }
         }
 
+        @defer (when fragment === SettingsTabId.Metadata; prefetch on idle) {
+          @if(hasActiveLicense && fragment === SettingsTabId.Metadata) {
+            <div class="scale col-md-12">
+              <app-manage-metadata-settings></app-manage-metadata-settings>
+            </div>
+          }
+        }
+
         @defer (when fragment === SettingsTabId.ScrobblingHolds; prefetch on idle) {
           @if(hasActiveLicense && fragment === SettingsTabId.ScrobblingHolds) {
             <div class="scale col-md-12">

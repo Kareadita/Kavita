@@ -70,6 +70,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ChapterPeople> ChapterPeople { get; set; } = null!;
     public DbSet<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = null!;
     public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
+    public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -120,6 +121,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.Locale)
             .IsRequired(true)
             .HasDefaultValue("en");
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.AniListScrobblingEnabled)
+            .HasDefaultValue(true);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.WantToReadSync)
+            .HasDefaultValue(true);
 
         builder.Entity<Library>()
             .Property(b => b.AllowScrobbling)
@@ -189,6 +196,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithMany(p => p.SeriesMetadataPeople)
             .HasForeignKey(smp => smp.PersonId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MetadataSettings>()
+            .HasNoKey();
     }
 
     #nullable enable

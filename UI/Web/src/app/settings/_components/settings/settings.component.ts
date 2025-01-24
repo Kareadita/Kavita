@@ -49,6 +49,9 @@ import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-meta
 import {ManageUserTokensComponent} from "../../../admin/manage-user-tokens/manage-user-tokens.component";
 import {EmailHistoryComponent} from "../../../admin/email-history/email-history.component";
 import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
+import {
+  ManageMetadataSettingsComponent
+} from "../../../admin/manage-metadata-settings/manage-metadata-settings.component";
 
 @Component({
   selector: 'app-settings',
@@ -84,7 +87,8 @@ import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobb
     ManageMatchedMetadataComponent,
     ManageUserTokensComponent,
     EmailHistoryComponent,
-    ScrobblingHoldsComponent
+    ScrobblingHoldsComponent,
+    ManageMetadataSettingsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

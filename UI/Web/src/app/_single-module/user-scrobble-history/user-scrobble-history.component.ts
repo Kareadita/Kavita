@@ -18,6 +18,8 @@ import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
+import {AsyncPipe} from "@angular/common";
+import {AccountService} from "../../_services/account.service";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -29,8 +31,8 @@ export interface DataTablePage {
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-    imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-        DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, CardActionablesComponent],
+  imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, CardActionablesComponent, AsyncPipe],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,12 +42,14 @@ export class UserScrobbleHistoryComponent implements OnInit {
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
   protected readonly ColumnMode = ColumnMode;
+  protected readonly ScrobbleEventType = ScrobbleEventType;
 
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
-  protected readonly ScrobbleEventType = ScrobbleEventType;
+  protected readonly accountService = inject(AccountService);
+
 
 
   tokenExpired = false;

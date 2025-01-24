@@ -19,6 +19,7 @@ public interface ISettingsRepository
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
     void Remove(ServerSetting setting);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
+    Task<MetadataSettings> GetMetadataSettings();
 }
 public class SettingsRepository : ISettingsRepository
 {
@@ -46,6 +47,11 @@ public class SettingsRepository : ISettingsRepository
         return await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<MetadataSettings> GetMetadataSettings()
+    {
+        return await _context.MetadataSettings.FirstAsync();
     }
 
     public async Task<ServerSettingDto> GetSettingsDtoAsync()

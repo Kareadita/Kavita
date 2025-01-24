@@ -262,7 +262,6 @@ public static class Seed
             new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
             new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
             new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString()},
-
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

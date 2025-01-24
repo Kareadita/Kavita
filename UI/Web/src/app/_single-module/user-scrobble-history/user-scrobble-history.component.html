@@ -8,6 +8,8 @@
 
   @if (tokenExpired) {
     <p class="alert alert-warning">{{t('token-expired')}}</p>
+  } @else if (!(accountService.currentUser$ | async)!.preferences.aniListScrobblingEnabled) {
+    <p class="alert alert-warning">{{t('scrobbling-disabled')}}</p>
   }
 
   <p>{{t('description')}}</p>

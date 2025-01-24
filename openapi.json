@@ -15487,6 +15487,14 @@
             "description": "UI Site Global Setting: The language locale that should be used for the user",
             "nullable": true
           },
+          "aniListScrobblingEnabled": {
+            "type": "boolean",
+            "description": "Should this account have Scrobbling enabled for AniList"
+          },
+          "wantToReadSync": {
+            "type": "boolean",
+            "description": "Should this account have Want to Read Sync enabled"
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -24678,6 +24686,14 @@
             "type": "integer",
             "description": "PDF Reader: Spread Mode of the reader",
             "format": "int32"
+          },
+          "aniListScrobblingEnabled": {
+            "type": "boolean",
+            "description": "Kavita+: Should this account have Scrobbling enabled for AniList"
+          },
+          "wantToReadSync": {
+            "type": "boolean",
+            "description": "Kavita+: Should this account have Want to Read Sync enabled"
           }
         },
         "additionalProperties": false

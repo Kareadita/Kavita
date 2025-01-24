@@ -36,6 +36,7 @@ export enum SettingsTabId {
   MALStackImport = 'mal-stack-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
+  Metadata = 'admin-metadata',
 
   // Non-Admin
   Account = 'account',
@@ -233,6 +234,7 @@ export class PreferenceNavComponent implements AfterViewInit {
             this.matchedMetadataBadgeCount$
           ));
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
+          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Metadata, [Role.Admin]));
 
           // Scrobbling History needs to be per-user and allow admin to view all
           kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));

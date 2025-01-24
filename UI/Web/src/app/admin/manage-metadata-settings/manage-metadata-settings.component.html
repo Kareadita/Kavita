@@ -1,0 +1,63 @@
+<ng-container *transloco="let t; read:'manage-metadata-settings'">
+
+
+  <p>{{t('description')}}</p>
+  <form [formGroup]="settingsForm">
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('allowSummary'); as formControl) {
+        <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="summary" type="checkbox" class="form-check-input" formControlName="allowSummary">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('derivePublicationStatus'); as formControl) {
+        <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="derivePublicationStatus">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('allowRelations'); as formControl) {
+        <app-setting-switch [title]="t('allow-relations-label')" [subtitle]="t('allow-relations-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="allow-relations-status" type="checkbox" class="form-check-input" formControlName="allowRelations">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="setting-section-break"></div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('allowGenres'); as formControl) {
+        <app-setting-switch [title]="t('allow-genres-label')" [subtitle]="t('allow-genres-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="allow-genres-status" type="checkbox" class="form-check-input" formControlName="allowGenres">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+  </form>
+
+
+  <div class="setting-section-break"></div>
+
+
+</ng-container>
