@@ -4,6 +4,7 @@ import {map, of} from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
+import {MetadataSettings} from "./_models/metadata-settings";
 
 /**
  * Used only for the Test Email Service call
@@ -25,6 +26,13 @@ export class SettingsService {
 
   getServerSettings() {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
+  }
+
+  getMetadataSettings() {
+    return this.http.get<MetadataSettings>(this.baseUrl + 'settings/metadata-settings');
+  }
+  updateMetadataSettings(model: MetadataSettings) {
+    return this.http.post<MetadataSettings>(this.baseUrl + 'settings/metadata-settings', model);
   }
 
   updateServerSettings(model: ServerSettings) {

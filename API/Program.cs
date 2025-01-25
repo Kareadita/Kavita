@@ -129,6 +129,7 @@ public class Program
                 await Seed.SeedDefaultStreams(unitOfWork);
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
                 await Seed.SeedUserApiKeys(context);
+                await Seed.SeedMetadataSettings(context);
             }
             catch (Exception ex)
             {

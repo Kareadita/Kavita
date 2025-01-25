@@ -12,6 +12,7 @@ using API.DTOs.Email;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.KavitaPlus.Manage;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Progress;
@@ -359,5 +360,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.VolumeTitle, opt => opt.MapFrom(src => src.Volume.Name))
             .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
             .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
+
+        CreateMap<MetadataSettings, MetadataSettingsDto>();
+        CreateMap<MetadataFieldMapping, MetadataFieldMappingDto>();
     }
 }

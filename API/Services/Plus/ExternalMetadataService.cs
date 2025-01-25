@@ -497,7 +497,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
     {
-
+        return false;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         var madeModification = false;

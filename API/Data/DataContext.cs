@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
@@ -71,6 +73,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = null!;
     public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
+    public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -198,7 +201,26 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<MetadataSettings>()
-            .HasNoKey();
+            .Property(x => x.AgeRatingMappings)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<Dictionary<string, AgeRating>>(v, JsonSerializerOptions.Default)
+            );
+
+        // Ensure blacklist is stored as a JSON array
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.Blacklist)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default)
+            );
+
+        // Configure one-to-many relationship
+        builder.Entity<MetadataSettings>()
+            .HasMany(x => x.FieldMappings)
+            .WithOne(x => x.MetadataSettings)
+            .HasForeignKey(x => x.MetadataSettingsId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     #nullable enable

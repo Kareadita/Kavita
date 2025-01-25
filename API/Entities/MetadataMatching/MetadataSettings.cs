@@ -1,10 +1,14 @@
-﻿namespace API.Entities;
+﻿using System.Collections.Generic;
+using API.Entities.Enums;
+
+namespace API.Entities;
 
 /// <summary>
 /// Handles the metadata settings for Kavita+
 /// </summary>
 public class MetadataSettings
 {
+    public int Id { get; set; }
     /// <summary>
     /// If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed
     /// </summary>
@@ -30,8 +34,27 @@ public class MetadataSettings
     /// Allow Start date to be set within the Series
     /// </summary>
     public bool EnableStartDate { get; set; }
+    /// <summary>
+    /// Allow setting the Localized name
+    /// </summary>
+    public bool EnableLocalizedName { get; set; }
 
     // Need to handle the Genre/tags stuff
+    public bool EnableGenres { get; set; } = true;
+    public bool EnableTags { get; set; } = true;
 
+    /// <summary>
+    /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
+    /// </summary>
+    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }
 
+    /// <summary>
+    /// A list of rules that allow mapping a genre/tag to another genre/tag
+    /// </summary>
+    public List<MetadataFieldMapping> FieldMappings { get; set; }
+
+    /// <summary>
+    /// Do not allow any Genre/Tag in this list to be written to Kavita
+    /// </summary>
+    public List<string> Blacklist { get; set; }
 }

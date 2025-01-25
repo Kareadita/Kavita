@@ -266,7 +266,7 @@ public static class Seed
 
         foreach (var defaultSetting in DefaultSettings)
         {
-            var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
+            var existing = await context.ServerSetting.FirstOrDefaultAsync(s => s.Key == defaultSetting.Key);
             if (existing == null)
             {
                 await context.ServerSetting.AddAsync(defaultSetting);
@@ -286,6 +286,30 @@ public static class Seed
             DirectoryService.BackupDirectory + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheSize).Value =
             Configuration.CacheSize + string.Empty;
+        await context.SaveChangesAsync();
+
+    }
+
+    public static async Task SeedMetadataSettings(DataContext context)
+    {
+        await context.Database.EnsureCreatedAsync();
+
+        var existing = await context.MetadataSettings.FirstOrDefaultAsync();
+        if (existing == null)
+        {
+            existing = new MetadataSettings()
+            {
+                Enabled = true,
+                EnablePeople = true,
+                EnableRelationships = true,
+                EnableSummary = true,
+                EnablePublicationStatus = true,
+                EnableStartDate = true
+            };
+            await context.MetadataSettings.AddAsync(existing);
+        }
+
+
         await context.SaveChangesAsync();
 
     }

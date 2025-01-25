@@ -11959,6 +11959,81 @@
         }
       }
     },
+    "/api/Settings/metadata-settings": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataSettingsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataSettingsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataSettingsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/{userId}/read": {
       "get": {
         "tags": [
@@ -19806,6 +19881,130 @@
         },
         "additionalProperties": false,
         "description": "Represents a member of a Kavita server."
+      },
+      "MetadataFieldMappingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceType": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "destinationType": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceValue": {
+            "type": "string",
+            "description": "The string in the source",
+            "nullable": true
+          },
+          "destinationValue": {
+            "type": "string",
+            "description": "Write the string as this in the Destination (can also just be the Source)",
+            "nullable": true
+          },
+          "excludeFromSource": {
+            "type": "boolean",
+            "description": "If true, the tag will be Moved over vs Copied over"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetadataSettingsDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed"
+          },
+          "enableSummary": {
+            "type": "boolean",
+            "description": "Allow the Summary to be written"
+          },
+          "enablePublicationStatus": {
+            "type": "boolean",
+            "description": "Allow Publication status to be derived and updated"
+          },
+          "enableRelationships": {
+            "type": "boolean",
+            "description": "Allow Relationships between series to be set"
+          },
+          "enablePeople": {
+            "type": "boolean",
+            "description": "Allow People to be created (including downloading images)"
+          },
+          "enableStartDate": {
+            "type": "boolean",
+            "description": "Allow Start date to be set within the Series"
+          },
+          "enableLocalizedName": {
+            "type": "boolean",
+            "description": "Allow setting the Localized name"
+          },
+          "enableGenres": {
+            "type": "boolean"
+          },
+          "enableTags": {
+            "type": "boolean"
+          },
+          "ageRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
+            },
+            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
+            "nullable": true
+          },
+          "fieldMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldMappingDto"
+            },
+            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          },
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "MetadataTagDto": {
         "type": "object",

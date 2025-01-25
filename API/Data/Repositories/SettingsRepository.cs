@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -20,6 +22,7 @@ public interface ISettingsRepository
     void Remove(ServerSetting setting);
     Task<ExternalSeriesMetadata?> GetExternalSeriesMetadata(int seriesId);
     Task<MetadataSettings> GetMetadataSettings();
+    Task<MetadataSettingsDto> GetMetadataSettingDto();
 }
 public class SettingsRepository : ISettingsRepository
 {
@@ -52,6 +55,13 @@ public class SettingsRepository : ISettingsRepository
     public async Task<MetadataSettings> GetMetadataSettings()
     {
         return await _context.MetadataSettings.FirstAsync();
+    }
+
+    public async Task<MetadataSettingsDto> GetMetadataSettingDto()
+    {
+        return await _context.MetadataSettings
+            .ProjectTo<MetadataSettingsDto>(_mapper.ConfigurationProvider)
+            .FirstAsync();
     }
 
     public async Task<ServerSettingDto> GetSettingsDtoAsync()

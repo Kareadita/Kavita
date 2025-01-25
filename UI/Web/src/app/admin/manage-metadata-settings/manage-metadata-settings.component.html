@@ -5,11 +5,11 @@
   <form [formGroup]="settingsForm">
 
     <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('allowSummary'); as formControl) {
+      @if(settingsForm.get('enableSummary'); as formControl) {
         <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
           <ng-template #switch>
             <div class="form-check form-switch float-end">
-              <input id="summary" type="checkbox" class="form-check-input" formControlName="allowSummary">
+              <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -17,11 +17,11 @@
     </div>
 
     <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('derivePublicationStatus'); as formControl) {
+      @if(settingsForm.get('enablePublicationStatus'); as formControl) {
         <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
           <ng-template #switch>
             <div class="form-check form-switch float-end">
-              <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="derivePublicationStatus">
+              <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="enablePublicationStatus">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -29,11 +29,35 @@
     </div>
 
     <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('allowRelations'); as formControl) {
-        <app-setting-switch [title]="t('allow-relations-label')" [subtitle]="t('allow-relations-tooltip')">
+      @if(settingsForm.get('enableRelationships'); as formControl) {
+        <app-setting-switch [title]="t('enable-relations-label')" [subtitle]="t('enable-relations-tooltip')">
           <ng-template #switch>
             <div class="form-check form-switch float-end">
-              <input id="allow-relations-status" type="checkbox" class="form-check-input" formControlName="allowRelations">
+              <input id="enable-relations-status" type="checkbox" class="form-check-input" formControlName="enableRelationships">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('enablePeople'); as formControl) {
+        <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('enableStartDate'); as formControl) {
+        <app-setting-switch [title]="t('enable-start-date-label')" [subtitle]="t('enable-start-date-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="enable-start-date-status" type="checkbox" class="form-check-input" formControlName="enableStartDate">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -42,17 +66,65 @@
 
     <div class="setting-section-break"></div>
 
+    <!-- GenreAgeRatingMappings -->
+    <!-- accordion or collapse with button to add multiple rows of rules -->
+    <h4>{{t('age-rating-mapping-title')}}</h4>
+    <p>{{t('age-rating-mapping-description')}}</p>
+    <div class="row">
+
+    </div>
+
+
+
+    <div class="setting-section-break"></div>
+
     <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('allowGenres'); as formControl) {
-        <app-setting-switch [title]="t('allow-genres-label')" [subtitle]="t('allow-genres-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="allow-genres-status" type="checkbox" class="form-check-input" formControlName="allowGenres">
-            </div>
+     <div class="col-md-6">
+       @if(settingsForm.get('enableGenres'); as formControl) {
+         <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
+           <ng-template #switch>
+             <div class="form-check form-switch float-end">
+               <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
+             </div>
+           </ng-template>
+         </app-setting-switch>
+       }
+     </div>
+     <div class="col-md-6">
+       @if(settingsForm.get('enableTags'); as formControl) {
+         <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
+           <ng-template #switch>
+             <div class="form-check form-switch float-end">
+               <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
+             </div>
+           </ng-template>
+         </app-setting-switch>
+       }
+     </div>
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('blacklist'); as formControl) {
+        <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
+          <ng-template #view>
+            @for(opt of (formControl.value || '').split(','); track opt) {
+              <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+            } @empty {
+              {{null | defaultValue}}
+            }
+          </ng-template>s
+          <ng-template #edit>
+            <textarea rows="3" id="blacklist" class="form-control"  formControlName="blacklist"></textarea>
           </ng-template>
-        </app-setting-switch>
+        </app-setting-item>
       }
     </div>
+
+    <div class="setting-section-break"></div>
+
+    <!-- Field Mapping Table -->
+
+
 
   </form>
 

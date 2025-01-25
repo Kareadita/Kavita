@@ -1,0 +1,57 @@
+﻿using System.Collections.Generic;
+using API.Entities;
+using API.Entities.Enums;
+
+namespace API.DTOs.KavitaPlus.Metadata;
+
+public class MetadataSettingsDto
+{
+    /// <summary>
+    /// If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Allow the Summary to be written
+    /// </summary>
+    public bool EnableSummary { get; set; }
+    /// <summary>
+    /// Allow Publication status to be derived and updated
+    /// </summary>
+    public bool EnablePublicationStatus { get; set; }
+    /// <summary>
+    /// Allow Relationships between series to be set
+    /// </summary>
+    public bool EnableRelationships { get; set; }
+    /// <summary>
+    /// Allow People to be created (including downloading images)
+    /// </summary>
+    public bool EnablePeople { get; set; }
+    /// <summary>
+    /// Allow Start date to be set within the Series
+    /// </summary>
+    public bool EnableStartDate { get; set; }
+    /// <summary>
+    /// Allow setting the Localized name
+    /// </summary>
+    public bool EnableLocalizedName { get; set; }
+
+    // Need to handle the Genre/tags stuff
+    public bool EnableGenres { get; set; } = true;
+    public bool EnableTags { get; set; } = true;
+
+    /// <summary>
+    /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
+    /// </summary>
+    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }
+
+    /// <summary>
+    /// A list of rules that allow mapping a genre/tag to another genre/tag
+    /// </summary>
+    public List<MetadataFieldMappingDto> FieldMappings { get; set; }
+
+    /// <summary>
+    /// Do not allow any Genre/Tag in this list to be written to Kavita
+    /// </summary>
+    public List<string> Blacklist { get; set; }
+}

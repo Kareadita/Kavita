@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250122120552_KavitaPlusUserAndMetadataSettings")]
+    [Migration("20250125182413_KavitaPlusUserAndMetadataSettings")]
     partial class KavitaPlusUserAndMetadataSettings
     {
         /// <inheritdoc />
@@ -1607,8 +1607,55 @@ namespace API.Data.Migrations
                     b.ToTable("SeriesRelation");
                 });
 
+            modelBuilder.Entity("API.Entities.MetadataFieldMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DestinationType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DestinationValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ExcludeFromSource")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MetadataSettingsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SourceType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SourceValue")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MetadataSettingsId");
+
+                    b.ToTable("MetadataFieldMapping");
+                });
+
             modelBuilder.Entity("API.Entities.MetadataSettings", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AgeRatingMappings")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Blacklist")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EnableGenres")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EnableLocalizedName")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("EnablePeople")
                         .HasColumnType("INTEGER");
 
@@ -1624,8 +1671,13 @@ namespace API.Data.Migrations
                     b.Property<bool>("EnableSummary")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EnableTags")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
 
                     b.ToTable("MetadataSettings");
                 });
@@ -2860,6 +2912,17 @@ namespace API.Data.Migrations
                     b.Navigation("TargetSeries");
                 });
 
+            modelBuilder.Entity("API.Entities.MetadataFieldMapping", b =>
+                {
+                    b.HasOne("API.Entities.MetadataSettings", "MetadataSettings")
+                        .WithMany("FieldMappings")
+                        .HasForeignKey("MetadataSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MetadataSettings");
+                });
+
             modelBuilder.Entity("API.Entities.ReadingList", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -3257,6 +3320,11 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Metadata.SeriesMetadata", b =>
                 {
                     b.Navigation("People");
+                });
+
+            modelBuilder.Entity("API.Entities.MetadataSettings", b =>
+                {
+                    b.Navigation("FieldMappings");
                 });
 
             modelBuilder.Entity("API.Entities.Person", b =>

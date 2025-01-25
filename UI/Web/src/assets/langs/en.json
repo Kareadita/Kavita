@@ -781,15 +781,24 @@
     "manage-metadata-settings": {
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "summary-label": "Summary",
-        "summary-tooltip": "Allow Summary to be written when the field is unlocked",
+        "summary-tooltip": "Allow Summary to be written when the field is unlocked.",
         "derive-publication-status-label": "Publication Status",
-        "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts",
-        "allow-relations-label": "Relationships",
-        "allow-relations-tooltip": "Allow Series Relationships to be <b>ADDED</b>",
-        "allow-genres-label": "Genres",
-        "allow-genres-tooltip": "Allow Series Genres to be written",
-        "blacklist-label": "Genre/Tag Removal List",
-        "blacklist-tooltip": "Anything in this list will be removed from both Genre and Tag processing. This is a place to add genres/tags you <b>do not</b> want written"
+        "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
+        "enable-relations-label": "Relationships",
+        "enable-relations-tooltip": "Allow Series Relationships to be <b>ADDED</b>.",
+        "enable-people-label": "People",
+        "enable-people-tooltip": "Allow People (Characters, Writers, etc) to be <b>ADDED</b>. All people include images.",
+        "enable-start-date-label": "Start Date",
+        "enable-start-date-tooltip": "Allow Start Date of Series to be written to the Series",
+        "enable-genres-label": "Genres",
+        "enable-genres-tooltip": "Allow Series Genres to be written.",
+        "enable-tags-label": "Tags",
+        "enable-tags-tooltip": "Allow Series Tags to be written.",
+        "blacklist-label": "Blacklist Genres/Tags",
+        "blacklist-tooltip": "Anything in this list will be removed from both Genre and Tag processing. This is a place to add genres/tags you <b>do not</b> want written. Ensure they are comma-separated.",
+        "age-rating-mapping-title": "Age Rating Mapping",
+        "age-rating-mapping-description": "Any strings on the left if found in either Genre or Tags will set the Age Rating on the Series."
+
     },
 
     "book-line-overlay": {
