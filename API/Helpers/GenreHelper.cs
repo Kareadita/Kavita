@@ -74,12 +74,18 @@ public static class GenreHelper
     public static void UpdateGenreList(ICollection<GenreTagDto>? existingGenres, Series series,
         IReadOnlyCollection<Genre> newGenres, Action<Genre> handleAdd, Action onModified)
     {
+        UpdateGenreList(existingGenres.DefaultIfEmpty().Select(t => t.Title).ToList(), series, newGenres, handleAdd, onModified);
+    }
+
+    public static void UpdateGenreList(ICollection<string>? existingGenres, Series series,
+        IReadOnlyCollection<Genre> newGenres, Action<Genre> handleAdd, Action onModified)
+    {
         if (existingGenres == null) return;
 
         var isModified = false;
 
         // Convert tags and existing genres to hash sets for quick lookups by normalized title
-        var tagSet = new HashSet<string>(existingGenres.Select(t => t.Title.ToNormalized()));
+        var tagSet = new HashSet<string>(existingGenres.Select(t => t.ToNormalized()));
         var genreSet = new HashSet<string>(series.Metadata.Genres.Select(g => g.NormalizedTitle));
 
         // Remove tags that are no longer present in the input tags
@@ -99,7 +105,7 @@ public static class GenreHelper
         // Add new tags from the input list
         foreach (var tagDto in existingGenres)
         {
-            var normalizedTitle = tagDto.Title.ToNormalized();
+            var normalizedTitle = tagDto.ToNormalized();
 
             if (genreSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
 
@@ -109,7 +115,7 @@ public static class GenreHelper
             }
             else
             {
-                handleAdd(new GenreBuilder(tagDto.Title).Build());  // Add new genre if not found
+                handleAdd(new GenreBuilder(tagDto).Build());  // Add new genre if not found
             }
             isModified = true;
         }

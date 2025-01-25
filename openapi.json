@@ -11964,6 +11964,7 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Get the metadata settings for Kavita+ users.",
         "responses": {
           "200": {
             "description": "OK",
@@ -11991,7 +11992,9 @@
         "tags": [
           "Settings"
         ],
+        "summary": "Update the metadata settings for Kavita+ users",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {

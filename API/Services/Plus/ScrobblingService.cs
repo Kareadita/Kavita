@@ -56,7 +56,7 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
-    Task CreateEventsFromExistingHistoryForSeries(int seriesId = 0);
+    Task CreateEventsFromExistingHistoryForSeries(int seriesId);
     Task ClearEventsForSeries(int userId, int seriesId);
 }
 
@@ -648,12 +648,14 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
-    public async Task CreateEventsFromExistingHistoryForSeries(int seriesId = 0)
+    public async Task CreateEventsFromExistingHistoryForSeries(int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) return;
+
+        // TODO: BUG: This isn't performing just SeriesId
 
         _logger.LogInformation("Creating Scrobbling events for Series {SeriesName}", series.Name);
 

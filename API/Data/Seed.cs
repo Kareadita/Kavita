@@ -304,7 +304,10 @@ public static class Seed
                 EnableRelationships = true,
                 EnableSummary = true,
                 EnablePublicationStatus = true,
-                EnableStartDate = true
+                EnableStartDate = true,
+                EnableTags = false,
+                EnableGenres = true,
+                EnableLocalizedName = false
             };
             await context.MetadataSettings.AddAsync(existing);
         }

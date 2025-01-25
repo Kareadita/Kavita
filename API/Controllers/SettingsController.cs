@@ -536,6 +536,10 @@ public class SettingsController : BaseApiController
         return Ok(await _emailService.SendTestEmail(user!.Email));
     }
 
+    /// <summary>
+    /// Get the metadata settings for Kavita+ users.
+    /// </summary>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("metadata-settings")]
     public async Task<ActionResult<MetadataSettingsDto>> GetMetadataSettings()
@@ -544,11 +548,15 @@ public class SettingsController : BaseApiController
 
     }
 
+    /// <summary>
+    /// Update the metadata settings for Kavita+ users
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("metadata-settings")]
     public async Task<ActionResult<MetadataSettingsDto>> UpdateMetadataSettings(MetadataSettingsDto dto)
     {
-
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         existingMetadataSetting.Enabled = dto.Enabled;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;

@@ -7,6 +7,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Collection;
 using API.DTOs.KavitaPlus.ExternalMetadata;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata.Matching;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
@@ -16,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using AutoMapper;
 using Flurl.Http;
@@ -119,29 +121,6 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
 
-    /// <summary>
-    /// Removes from Blacklist and Invalidates the cache
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    // public async Task ForceKavitaPlusRefresh(int seriesId)
-    // {
-    //     // TODO: I think we can remove this now
-    //     if (!await _licenseService.HasActiveLicense()) return;
-    //     var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
-    //     if (!IsPlusEligible(libraryType)) return;
-    //
-    //     // Remove from Blacklist if applicable
-    //     var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-    //     series!.IsBlacklisted = false;
-    //     _unitOfWork.SeriesRepository.Update(series);
-    //
-    //     var metadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
-    //     if (metadata == null) return;
-    //
-    //     metadata.ValidUntilUtc = DateTime.UtcNow.Subtract(_externalSeriesMetadataCache);
-    //     await _unitOfWork.CommitAsync();
-    // }
 
     /// <summary>
     /// Fetches data from Kavita+
@@ -497,27 +476,117 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
     {
-        return false;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
-        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        if (series == null) return false;
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
         var madeModification = false;
 
         if (!series.Metadata.SummaryLocked && string.IsNullOrEmpty(series.Metadata.Summary) && settings.EnableSummary)
         {
             series.Metadata.Summary = externalMetadata.Summary;
+            madeModification = true;
         }
 
-        // Control: I need something that says "Shonen" type of thing, write destination (Genres/Tags)
+        var processedGenres = new List<string>();
+        var processedTags = new List<string>();
 
-        // Control: Relations
+        // Process Genres
+        if (externalMetadata.Genres != null)
+        {
+            foreach (var genre in externalMetadata.Genres.Where(g => !settings.Blacklist.Contains(g)))
+            {
+                // Apply field mappings
+                var mappedGenre = ApplyFieldMapping(genre, MetadataFieldType.Genre, settings.FieldMappings);
+                if (mappedGenre != null)
+                {
+                    processedGenres.Add(mappedGenre);
+                }
+            }
 
-        // People (incl Characters) with Images
+            // Strip blacklisted items from processedGenres
+            processedGenres = processedGenres.Distinct().Where(g => !settings.Blacklist.Contains(g)).ToList();
 
-        // Start Date (for first issue)
+            if (settings.EnableGenres && processedGenres.Count > 0)
+            {
+                _logger.LogDebug("Found {GenreCount} for {SeriesName}", processedGenres.Count, series.Name);
+                var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
+                series.Metadata.Genres ??= [];
+                GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
+                {
+                    series.Metadata.Genres.Add(genre);
+                    madeModification = true;
+                }, () => series.Metadata.GenresLocked = true);
+            }
+
+        }
+
+        // Process Tags
+        if (externalMetadata.Tags != null)
+        {
+            foreach (var tag in externalMetadata.Tags.Select(t => t.Name))
+            {
+                // Apply field mappings
+                var mappedTag = ApplyFieldMapping(tag, MetadataFieldType.Tag, settings.FieldMappings);
+                if (mappedTag != null)
+                {
+                    processedTags.Add(mappedTag);
+                }
+            }
+
+            // Strip blacklisted items from processedTags
+            processedTags = processedTags.Distinct().Where(g => !settings.Blacklist.Contains(g)).ToList();
+
+            // Set the tags for the series and ensure they are in the DB
+            if (settings.EnableTags && processedTags.Count > 0)
+            {
+                _logger.LogDebug("Found {TagCount} for {SeriesName}", processedTags.Count, series.Name);
+                var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
+                    .ToList();
+                series.Metadata.Tags ??= [];
+                TagHelper.UpdateTagList(processedTags, series, allTags, tag =>
+                {
+                    series.Metadata.Tags.Add(tag);
+                    madeModification = true;
+                }, () => series.Metadata.TagsLocked = true);
+            }
+        }
+
+        // Determine Age Rating
+        var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
+        if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
+        {
+            _logger.LogDebug("{SeriesName} has {AgeRating}", series.Name, ageRating);
+            series.Metadata.AgeRating = ageRating;
+            madeModification = true;
+        }
+
+        if (settings.EnablePeople)
+        {
+            series.Metadata.People ??= new List<SeriesMetadataPeople>();
+
+            var writers = externalMetadata.Staff
+                .Where(s => s.Role == "Author")
+                .Select(w => new PersonDto()
+                {
+                    Name = w.Name,
+                    AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListWeblinkWebsite),
+                    Description = w.Description,
+                }).ToList();
+
+            if (!series.Metadata.WriterLocked && writers.Count > 0)
+            {
+                await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
+                // TODO: Download the image and save it
+                madeModification = true;
+
+            }
+        }
 
 
         if (!series.Metadata.PublicationStatusLocked && settings.EnablePublicationStatus)
         {
+            // TODO: Implement
             PublicationStatus status = PublicationStatus.OnGoing;
             if (externalMetadata.VolumeCount == null && externalMetadata.ChapterCount == null)
             {
@@ -530,9 +599,33 @@ public class ExternalMetadataService : IExternalMetadataService
                 // TODO: need to write the query to do this
             }
             // Update the publication based on what Upstream says. Allowed combos: Ongoing -> Completed/Ended, Completed/Ended -> Ongoing
+            madeModification = true;
         }
 
         return madeModification;
+    }
+
+    private static string? ApplyFieldMapping(string value, MetadataFieldType sourceType, List<MetadataFieldMappingDto> mappings)
+    {
+        // Find matching mapping
+        var mapping = mappings
+            .FirstOrDefault(m =>
+                m.SourceType == sourceType &&
+                m.SourceValue.Equals(value, StringComparison.OrdinalIgnoreCase));
+
+        if (mapping == null) return value;
+
+        // If mapping exists, return destination or source value
+        return mapping.DestinationValue ?? (mapping.ExcludeFromSource ? null : value);
+    }
+
+    private static AgeRating DetermineAgeRating(IEnumerable<string> values, Dictionary<string, AgeRating> mappings)
+    {
+        // Find highest age rating from mappings
+        return values
+            .Select(v => mappings.TryGetValue(v, out var mapping) ? mapping : AgeRating.Unknown)
+            .DefaultIfEmpty(AgeRating.Unknown)
+            .Max();
     }
 
 
