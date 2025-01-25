@@ -8,11 +8,12 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {SettingsService} from "../settings.service";
 import {debounceTime, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs/operators";
+import {filter, map} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
+import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-settings";
 
 
 @Component({
@@ -33,6 +34,8 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 
+  protected readonly MetadataFieldType = MetadataFieldType;
+
   private readonly settingService = inject(SettingsService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -42,6 +45,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   ageRatings: Array<AgeRatingDto> = [];
   ageRatingMappings = this.fb.array([]);
+  fieldMappings = this.fb.array([]);
 
 
   ngOnInit(): void {
@@ -52,6 +56,8 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
 
     this.settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);
+    this.settingsForm.addControl('fieldMappings', this.fieldMappings);
+
     this.settingService.getMetadataSettings().subscribe(settings => {
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
@@ -63,9 +69,17 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
+
+
       if (settings.ageRatingMappings) {
         Object.entries(settings.ageRatingMappings).forEach(([str, rating]) => {
           this.addAgeRatingMapping(str, rating);
+        });
+      }
+
+      if (settings.fieldMappings) {
+        settings.fieldMappings.forEach(mapping => {
+          this.addFieldMapping(mapping);
         });
       }
 
@@ -83,7 +97,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
   }
 
-  packData() {
+  packData(withFieldMappings: boolean = true) {
     const model = this.settingsForm.value;
 
     // Convert FormArray to dictionary
@@ -97,10 +111,24 @@ export class ManageMetadataSettingsComponent implements OnInit {
       return acc;
     }, {});
 
+    const fieldMappings = this.fieldMappings.controls.map((control) => {
+      const value = control.value as MetadataFieldMapping;
+
+      return {
+        id: value.id,
+        sourceType: parseInt(value.sourceType + '', 10),
+        destinationType: parseInt(value.destinationType + '', 10),
+        sourceValue: value.sourceValue,
+        destinationValue: value.destinationValue,
+        excludeFromSource: value.excludeFromSource
+      }
+    }).filter(m => m.sourceValue.length > 0);
+
     // Translate blacklist string -> Array<string>
     return {
       ...model,
       ageRatingMappings,
+      fieldMappings: withFieldMappings ? fieldMappings : [],
       blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim())
     }
   }
@@ -116,6 +144,33 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
   removeAgeRatingMappingRow(index: number) {
     this.ageRatingMappings.removeAt(index);
+  }
+
+  addFieldMapping(mapping: MetadataFieldMapping | null = null) {
+    const mappingGroup = this.fb.group({
+      id: [mapping?.id || 0],
+      sourceType: [mapping?.sourceType || MetadataFieldType.Genre, Validators.required],
+      destinationType: [mapping?.destinationType || MetadataFieldType.Genre, Validators.required],
+      sourceValue: [mapping?.sourceValue || '', Validators.required],
+      destinationValue: [mapping?.destinationValue || ''],
+      excludeFromSource: [mapping?.excludeFromSource || false]
+    });
+
+    // Autofill destination value if empty when source value loses focus
+    mappingGroup.get('sourceValue')?.valueChanges
+      .pipe(
+        filter(() => !mappingGroup.get('destinationValue')?.value)
+      )
+      .subscribe(sourceValue => {
+        mappingGroup.get('destinationValue')?.setValue(sourceValue);
+      });
+
+    //@ts-ignore
+    this.fieldMappings.push(mappingGroup);
+  }
+
+  removeFieldMappingRow(index: number) {
+    this.fieldMappings.removeAt(index);
   }
 
 

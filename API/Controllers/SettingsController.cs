@@ -561,13 +561,17 @@ public class SettingsController : BaseApiController
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
-        existingMetadataSetting.Blacklist = dto.Blacklist ?? [];
+        existingMetadataSetting.Blacklist = dto.Blacklist.DistinctBy(d => d.ToNormalized()).ToList() ?? [];
 
         // Handle Field Mappings
         if (dto.FieldMappings != null)
         {
             // Clear existing mappings
+            existingMetadataSetting.FieldMappings ??= [];
+            _unitOfWork.SettingsRepository.RemoveRange(existingMetadataSetting.FieldMappings);
+
             existingMetadataSetting.FieldMappings.Clear();
+
 
             // Add new mappings
             foreach (var mappingDto in dto.FieldMappings)

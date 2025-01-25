@@ -67,37 +67,8 @@
     <div class="setting-section-break"></div>
 
     <!-- GenreAgeRatingMappings -->
-    <!-- accordion or collapse with button to add multiple rows of rules -->
     <h4>{{t('age-rating-mapping-title')}}</h4>
     <p>{{t('age-rating-mapping-description')}}</p>
-    <div class="row">
-
-    </div>
-
-<!--    <div class="row">-->
-<!--      <div class="col-md-4">-->
-<!--        <input type="text" class="form-control" autocomplete="off" />-->
-<!--      </div>-->
-<!--      <div class="col-md-2">-->
-<!--        <i class="fa fa-arrow-right" aria-hidden="true"></i>-->
-<!--      </div>-->
-<!--      <div class="col-md-4">-->
-<!--        <select class="form-select">-->
-<!--          @for (ageRating of ageRatings; track ageRating) {-->
-<!--            <option [value]="ageRating.value">{{ageRating.value | ageRating}}</option>-->
-<!--          }-->
-<!--        </select>-->
-<!--      </div>-->
-<!--      <div class="col-md-2">-->
-<!--        <button class="btn btn-icon" (click)="removeAgeRatingMappingRow()">-->
-<!--          <i class="fa fa-trash-alt" aria-hidden="true"></i>-->
-<!--        </button>-->
-
-<!--        <button class="btn btn-icon" (click)="addNewAgeRatingMapping()">-->
-<!--          <i class="fa fa-plus" aria-hidden="true"></i>-->
-<!--        </button>-->
-<!--      </div>-->
-<!--    </div>-->
 
     <div formArrayName="ageRatingMappings">
       @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
@@ -126,13 +97,12 @@
       }
 
       <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
-        <i class="fa fa-plus" aria-hidden="true"></i> Add Mapping
+        <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
       </button>
     </div>
 
-
-
     <div class="setting-section-break"></div>
+
 
     <div class="row g-0 mt-4 mb-4">
      <div class="col-md-6">
@@ -179,13 +149,52 @@
     <div class="setting-section-break"></div>
 
     <!-- Field Mapping Table -->
+    <h4>{{t('field-mapping-title')}}</h4>
+    <p>{{t('field-mapping-description')}}</p>
+    <div formArrayName="fieldMappings">
+      @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
+        <div [formGroupName]="i" class="row mb-2">
+          <div class="col-md-2">
+            <select class="form-select" formControlName="sourceType">
+              <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
+              <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input type="text" class="form-control" formControlName="sourceValue"
+                   placeholder="Source genre/tag" />
+          </div>
+          <div class="col-md-2">
+            <select class="form-select" formControlName="destinationType">
+              <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
+              <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input type="text" class="form-control" formControlName="destinationValue"
+                   placeholder="Destination genre/tag" />
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
+                     formControlName="excludeFromSource">
+              <label [for]="'remove-source-tag-' + i" class="form-check-label">
+                {{t('remove-source-tag-label')}}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-icon" (click)="removeFieldMappingRow(i)">
+              <i class="fa fa-trash-alt" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      }
 
-
+      <button class="btn btn-secondary float-end" (click)="addFieldMapping()">
+        <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
+      </button>
+    </div>
 
   </form>
-
-
-  <div class="setting-section-break"></div>
-
-
 </ng-container>

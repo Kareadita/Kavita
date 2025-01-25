@@ -797,8 +797,14 @@
         "blacklist-label": "Blacklist Genres/Tags",
         "blacklist-tooltip": "Anything in this list will be removed from both Genre and Tag processing. This is a place to add genres/tags you <b>do not</b> want written. Ensure they are comma-separated.",
         "age-rating-mapping-title": "Age Rating Mapping",
-        "age-rating-mapping-description": "Any strings on the left if found in either Genre or Tags will set the Age Rating on the Series."
-
+        "age-rating-mapping-description": "Any strings on the left if found in either Genre or Tags will set the Age Rating on the Series.",
+        "genre": "Genre",
+        "tag": "Tag",
+        "remove-source-tag-label": "Remove Source Tag",
+        "add-field-mapping-label": "Add Field Mapping",
+        "add-age-rating-mapping-label": "Add Age Rating Mapping",
+        "field-mapping-title": "Field Mapping",
+        "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Only applicable when Genre/Tag are enabled to be written."
     },
 
     "book-line-overlay": {

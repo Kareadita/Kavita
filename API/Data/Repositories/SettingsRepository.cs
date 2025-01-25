@@ -16,6 +16,8 @@ namespace API.Data.Repositories;
 public interface ISettingsRepository
 {
     void Update(ServerSetting settings);
+    void Update(MetadataSettings settings);
+    void RemoveRange(List<MetadataFieldMapping> fieldMappings);
     Task<ServerSettingDto> GetSettingsDtoAsync();
     Task<ServerSetting> GetSettingAsync(ServerSettingKey key);
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
@@ -40,6 +42,16 @@ public class SettingsRepository : ISettingsRepository
         _context.Entry(settings).State = EntityState.Modified;
     }
 
+    public void Update(MetadataSettings settings)
+    {
+        _context.Entry(settings).State = EntityState.Modified;
+    }
+
+    public void RemoveRange(List<MetadataFieldMapping> fieldMappings)
+    {
+        _context.MetadataFieldMapping.RemoveRange(fieldMappings);
+    }
+
     public void Remove(ServerSetting setting)
     {
         _context.Remove(setting);
@@ -54,12 +66,15 @@ public class SettingsRepository : ISettingsRepository
 
     public async Task<MetadataSettings> GetMetadataSettings()
     {
-        return await _context.MetadataSettings.FirstAsync();
+        return await _context.MetadataSettings
+            .Include(m => m.FieldMappings)
+            .FirstAsync();
     }
 
     public async Task<MetadataSettingsDto> GetMetadataSettingDto()
     {
         return await _context.MetadataSettings
+            .Include(m => m.FieldMappings)
             .ProjectTo<MetadataSettingsDto>(_mapper.ConfigurationProvider)
             .FirstAsync();
     }
