@@ -74,6 +74,62 @@
 
     </div>
 
+<!--    <div class="row">-->
+<!--      <div class="col-md-4">-->
+<!--        <input type="text" class="form-control" autocomplete="off" />-->
+<!--      </div>-->
+<!--      <div class="col-md-2">-->
+<!--        <i class="fa fa-arrow-right" aria-hidden="true"></i>-->
+<!--      </div>-->
+<!--      <div class="col-md-4">-->
+<!--        <select class="form-select">-->
+<!--          @for (ageRating of ageRatings; track ageRating) {-->
+<!--            <option [value]="ageRating.value">{{ageRating.value | ageRating}}</option>-->
+<!--          }-->
+<!--        </select>-->
+<!--      </div>-->
+<!--      <div class="col-md-2">-->
+<!--        <button class="btn btn-icon" (click)="removeAgeRatingMappingRow()">-->
+<!--          <i class="fa fa-trash-alt" aria-hidden="true"></i>-->
+<!--        </button>-->
+
+<!--        <button class="btn btn-icon" (click)="addNewAgeRatingMapping()">-->
+<!--          <i class="fa fa-plus" aria-hidden="true"></i>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <div formArrayName="ageRatingMappings">
+      @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
+        <div [formGroupName]="i" class="row mb-2">
+          <div class="col-md-4">
+            <input type="text" class="form-control" formControlName="str" autocomplete="off" />
+          </div>
+          <div class="col-md-2">
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" formControlName="rating">
+              @for (ageRating of ageRatings; track ageRating.value) {
+                <option [value]="ageRating.value">
+                  {{ageRating.value | ageRating}}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
+              <i class="fa fa-trash-alt" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      }
+
+      <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
+        <i class="fa fa-plus" aria-hidden="true"></i> Add Mapping
+      </button>
+    </div>
+
 
 
     <div class="setting-section-break"></div>
