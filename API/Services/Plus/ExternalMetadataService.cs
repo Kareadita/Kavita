@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using AutoMapper;
@@ -47,7 +48,7 @@ public interface IExternalMetadataService
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
-    Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto);
+    Task FixSeriesMatch(int seriesId, int anilistId);
     Task UpdateSeriesDontMatch(int seriesId, bool dontMatch);
 }
 
@@ -59,6 +60,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly ILicenseService _licenseService;
     private readonly IScrobblingService _scrobblingService;
     private readonly IEventHub _eventHub;
+    private readonly ICoverDbService _coverDbService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
         [LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine];
@@ -72,7 +74,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
-        ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub)
+        ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -80,6 +82,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _licenseService = licenseService;
         _scrobblingService = scrobblingService;
         _eventHub = eventHub;
+        _coverDbService = coverDbService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -311,7 +314,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="dto"></param>
-    public async Task FixSeriesMatch(int seriesId, ExternalSeriesDetailDto dto)
+    public async Task FixSeriesMatch(int seriesId, int anilistId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
         if (series == null) return;
@@ -322,12 +325,9 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.SeriesRepository.Update(series);
 
         // Refetch metadata with a Direct lookup
-        await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
+        var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
         {
-            SeriesName = dto.Name,
-            AniListId = dto.AniListId,
-            MalId = dto.MALId,
-            MediaFormat = dto.PlusMediaFormat,
+            AniListId = anilistId,
         });
 
         // Find all scrobble events and rewrite them to be the correct
@@ -341,7 +341,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"));
 
 
-        _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, dto.Name);
+        _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, metadata.Series.Name);
     }
 
     /// <summary>
@@ -488,6 +488,12 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
+        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue)
+        {
+            series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
+            madeModification = true;
+        }
+
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
 
@@ -565,8 +571,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             series.Metadata.People ??= new List<SeriesMetadataPeople>();
 
+            // Roles: Character Design, Story, Art
             var writers = externalMetadata.Staff
-                .Where(s => s.Role == "Author")
+                .Where(s => s.Role == "Story")
                 .Select(w => new PersonDto()
                 {
                     Name = w.Name,
@@ -579,7 +586,40 @@ public class ExternalMetadataService : IExternalMetadataService
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
                 // TODO: Download the image and save it
                 madeModification = true;
+            }
 
+            var artists = externalMetadata.Staff
+                .Where(s => s.Role == "Art")
+                .Select(w => new PersonDto()
+                {
+                    Name = w.Name,
+                    AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListWeblinkWebsite),
+                    Description = w.Description,
+                }).ToList();
+
+            if (!series.Metadata.CoverArtistLocked && artists.Count > 0)
+            {
+                await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
+                // TODO: Download the image and save it
+                madeModification = true;
+            }
+
+            if (externalMetadata.Characters != null)
+            {
+                var characters = externalMetadata.Characters
+                    .Select(w => new PersonDto()
+                    {
+                        Name = w.Name,
+                        AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListWeblinkWebsite),
+                        Description = w.Description,
+                    }).ToList();
+
+                if (!series.Metadata.CharacterLocked && characters.Count > 0)
+                {
+                    await SeriesService.HandlePeopleUpdateAsync(series.Metadata, characters, PersonRole.Character, _unitOfWork);
+                    // TODO: Download the image and save it
+                    madeModification = true;
+                }
             }
         }
 

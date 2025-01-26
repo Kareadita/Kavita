@@ -425,7 +425,7 @@ public class ScrobblingService : IScrobblingService
         if (!await _licenseService.HasActiveLicense()) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
-        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null || !series.Library.AllowScrobbling) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
@@ -652,53 +652,53 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-        if (series == null) return;
-
-        // TODO: BUG: This isn't performing just SeriesId
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
+        if (series == null || !series.Library.AllowScrobbling) return;
 
         _logger.LogInformation("Creating Scrobbling events for Series {SeriesName}", series.Name);
-
-        var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
-            .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
             .Select(u => u.Id);
 
         foreach (var uId in userIds)
         {
+            // Handle "Want to Read" updates specific to the series
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
-            foreach (var wtr in wantToRead)
+            foreach (var wtr in wantToRead.Where(wtr => wtr.Id == seriesId))
             {
-                if (!libAllowsScrobbling[wtr.LibraryId]) continue;
                 await ScrobbleWantToReadUpdate(uId, wtr.Id, true);
             }
 
+            // Handle ratings specific to the series
             var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId);
-            foreach (var rating in ratings)
+            foreach (var rating in ratings.Where(rating => rating.SeriesId == seriesId))
             {
-                if (!libAllowsScrobbling[rating.Series.LibraryId]) continue;
                 await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
             }
 
-            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
-                new UserParams(), new FilterDto()
+            // Handle progress updates for the specific series
+            var seriesProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(
+                series.LibraryId,
+                uId,
+                new UserParams(),
+                new FilterDto
                 {
-                    ReadStatus = new ReadStatus()
+                    ReadStatus = new ReadStatus
                     {
                         Read = true,
                         InProgress = true,
                         NotRead = false
                     },
-                    Libraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList(),
+                    Libraries = new List<int> { series.LibraryId },
                     SeriesNameQuery = series.Name
                 });
 
-            foreach (var seriesProgress in seriesWithProgress)
+            foreach (var progress in seriesProgress.Where(progress => progress.Id == seriesId))
             {
-                if (!libAllowsScrobbling[seriesProgress.LibraryId]) continue;
-                if (seriesProgress.PagesRead <= 0) continue; // Since we only scrobble when things are higher, we can
-                await ScrobbleReadingUpdate(uId, seriesProgress.Id);
+                if (progress.PagesRead > 0)
+                {
+                    await ScrobbleReadingUpdate(uId, progress.Id);
+                }
             }
         }
     }

@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Scrobbling;
 using API.Services.Plus;
 
 namespace API.DTOs.Recommendation;
 #nullable enable
 
+/// <summary>
+/// This is AniListSeries
+/// </summary>
 public class ExternalSeriesDetailDto
 {
     public string Name { get; set; }
@@ -21,4 +26,14 @@ public class ExternalSeriesDetailDto
     public int? VolumeCount { get; set; }
     public int? ChapterCount { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
+
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public int AverageScore { get; set; }
+    public int Chapters { get; set; }
+    public int Volumes { get; set; }
+    public IList<SeriesRelationship>? Relations { get; set; }
+    public IList<SeriesCharacter>? Characters { get; set; }
+
+
 }

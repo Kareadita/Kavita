@@ -361,7 +361,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
             .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
 
-        CreateMap<MetadataSettings, MetadataSettingsDto>();
+        CreateMap<MetadataSettings, MetadataSettingsDto>()
+            .ForMember(dest => dest.Blacklist, opt => opt.MapFrom(src => src.Blacklist ?? new List<string>()));
         CreateMap<MetadataFieldMapping, MetadataFieldMappingDto>();
+
     }
 }

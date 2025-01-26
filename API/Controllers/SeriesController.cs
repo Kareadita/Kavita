@@ -631,13 +631,13 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// This will perform the fix match
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="aniListId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("update-match")]
-    public async Task<ActionResult> UpdateSeriesMatch(ExternalSeriesDetailDto dto, [FromQuery] int seriesId)
+    public async Task<ActionResult> UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId)
     {
-        await _externalMetadataService.FixSeriesMatch(seriesId, dto);
+        await _externalMetadataService.FixSeriesMatch(seriesId, aniListId);
 
         return Ok();
     }

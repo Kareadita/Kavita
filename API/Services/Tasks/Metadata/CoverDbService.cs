@@ -25,6 +25,7 @@ public interface ICoverDbService
     Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
+    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
 }
 
 
@@ -225,6 +226,34 @@ public class CoverDbService : ICoverDbService
             {
                 throw new KavitaException($"Could not grab person image for {person.Name}");
             }
+            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink);
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Attempts to download the Person cover image from a Url
+    /// </summary>
+    /// <param name="person"></param>
+    /// <param name="encodeFormat"></param>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url)
+    {
+        try
+        {
+            var personImageLink = await GetCoverPersonImagePath(person);
+            if (string.IsNullOrEmpty(personImageLink))
+            {
+                throw new KavitaException($"Could not grab person image for {person.Name}");
+            }
+
 
             // Create the destination file path
             var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
@@ -233,7 +262,7 @@ public class CoverDbService : ICoverDbService
             // Ensure if file exists, we delete to overwrite
 
 
-            _logger.LogTrace("Fetching publisher image from {Url}", personImageLink.Sanitize());
+            _logger.LogTrace("Fetching person image from {Url}", personImageLink.Sanitize());
             // Download the file using Flurl
             var personStream = await personImageLink
                 .AllowHttpStatus("2xx,304")

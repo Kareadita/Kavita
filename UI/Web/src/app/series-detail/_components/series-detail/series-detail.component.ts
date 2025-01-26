@@ -749,6 +749,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
               .filter(action => action.action !== Action.Edit);
 
+      this.licenseService.hasValidLicense$.subscribe(hasLic => {
+        if (!hasLic) {
+          this.seriesActions = this.seriesActions.filter(action => action.action !== Action.Match);
+          this.cdRef.markForCheck();
+        }
+      });
+
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relationShips = relations;

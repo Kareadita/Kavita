@@ -41,6 +41,11 @@ public class MetadataSettingsDto
     public bool EnableTags { get; set; } = true;
 
     /// <summary>
+    /// For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names.
+    /// </summary>
+    public bool FirstLastPeopleNaming { get; set; }
+
+    /// <summary>
     /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
     /// </summary>
     public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }

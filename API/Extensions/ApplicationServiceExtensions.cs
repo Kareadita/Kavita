@@ -12,6 +12,7 @@ using API.SignalR.Presence;
 using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -113,6 +114,8 @@ public static class ApplicationServiceExtensions
             });
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging();
+            options.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
     }
 }

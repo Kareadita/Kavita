@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace API.Data;
 
@@ -74,7 +75,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
-
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
