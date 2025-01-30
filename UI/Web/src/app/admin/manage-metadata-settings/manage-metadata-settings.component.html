@@ -41,18 +41,6 @@
     </div>
 
     <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enablePeople'); as formControl) {
-        <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
       @if(settingsForm.get('enableStartDate'); as formControl) {
         <app-setting-switch [title]="t('enable-start-date-label')" [subtitle]="t('enable-start-date-tooltip')">
           <ng-template #switch>
@@ -99,6 +87,29 @@
       <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
         <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
       </button>
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @if(settingsForm.get('enablePeople'); as formControl) {
+        <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
+      @for(role of personRoles; track role; let i = $index) {
+        <div class="col-md-6">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" [formControlName]="i" [id]="'role-' + role">
+            <label class="form-check-label" [for]="'role-' + role">{{ role | personRole }}</label>
+          </div>
+        </div>
+      }
     </div>
 
     <div class="setting-section-break"></div>

@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -14,6 +14,8 @@ import {AgeRating} from "../../_models/metadata/age-rating";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-settings";
+import {PersonRole} from "../../_models/metadata/person";
+import {PersonRolePipe} from "../../_pipes/person-role.pipe";
 
 
 @Component({
@@ -26,7 +28,8 @@ import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-setti
     SettingItemComponent,
     DefaultValuePipe,
     TagBadgeComponent,
-    AgeRatingPipe
+    AgeRatingPipe,
+    PersonRolePipe
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -46,6 +49,11 @@ export class ManageMetadataSettingsComponent implements OnInit {
   ageRatings: Array<AgeRatingDto> = [];
   ageRatingMappings = this.fb.array([]);
   fieldMappings = this.fb.array([]);
+  personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
+
+  get personRolesArray(): FormArray {
+    return this.settingsForm.get('personRoles') as FormArray;
+  }
 
 
   ngOnInit(): void {
@@ -69,6 +77,11 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
+      this.settingsForm.addControl('personRoles', this.fb.array(
+        this.personRoles.map(role =>
+          this.fb.control((settings.personRoles || [true, true, true]).includes(role))
+        )
+      ));
 
 
       if (settings.ageRatingMappings) {

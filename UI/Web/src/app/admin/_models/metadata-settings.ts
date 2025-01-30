@@ -1,4 +1,5 @@
 import {AgeRating} from "../../_models/metadata/age-rating";
+import {PersonRole} from "../../_models/metadata/person";
 
 export enum MetadataFieldType {
   Genre = 0,
@@ -24,7 +25,9 @@ export interface MetadataSettings {
   enableLocalizedName: boolean;
   enableGenres: boolean;
   enableTags: boolean;
+  firstLastPeopleNaming: boolean;
   ageRatingMappings: Map<string, AgeRating>;
   fieldMappings: Array<MetadataFieldMapping>;
   blacklist: Array<string>;
+  personRoles: Array<PersonRole>;
 }

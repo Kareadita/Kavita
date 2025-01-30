@@ -1674,6 +1674,12 @@ namespace API.Data.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("FirstLastPeopleNaming")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("PersonRoles")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.ToTable("MetadataSettings");

@@ -59,4 +59,8 @@ public class MetadataSettingsDto
     /// Do not allow any Genre/Tag in this list to be written to Kavita
     /// </summary>
     public List<string> Blacklist { get; set; }
+    /// <summary>
+    /// Which Roles to allow metadata downloading for
+    /// </summary>
+    public List<PersonRole> PersonRoles { get; set; }
 }

@@ -46,7 +46,7 @@ public class MetadataSettings
     /// <summary>
     /// For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names.
     /// </summary>
-    //public bool FirstLastPeopleNaming { get; set; }
+    public bool FirstLastPeopleNaming { get; set; }
 
     /// <summary>
     /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
@@ -62,4 +62,9 @@ public class MetadataSettings
     /// Do not allow any Genre/Tag in this list to be written to Kavita
     /// </summary>
     public List<string> Blacklist { get; set; }
+
+    /// <summary>
+    /// Which Roles to allow metadata downloading for
+    /// </summary>
+    public List<PersonRole> PersonRoles { get; set; }
 }

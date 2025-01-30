@@ -587,7 +587,8 @@ public class ExternalMetadataService : IExternalMetadataService
                     Description = w.Description,
                 }).ToList();
 
-            if (!series.Metadata.WriterLocked && writers.Count > 0)
+            // TODO: PersonRoles can be a hashset
+            if (!series.Metadata.WriterLocked && writers.Count > 0 && settings.PersonRoles.Contains(PersonRole.Writer))
             {
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
                 // TODO: Download the image and save it
@@ -603,14 +604,14 @@ public class ExternalMetadataService : IExternalMetadataService
                     Description = w.Description,
                 }).ToList();
 
-            if (!series.Metadata.CoverArtistLocked && artists.Count > 0)
+            if (!series.Metadata.CoverArtistLocked && artists.Count > 0 &&  settings.PersonRoles.Contains(PersonRole.CoverArtist))
             {
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
                 // TODO: Download the image and save it
                 madeModification = true;
             }
 
-            if (externalMetadata.Characters != null)
+            if (externalMetadata.Characters != null && settings.PersonRoles.Contains(PersonRole.Character))
             {
                 var characters = externalMetadata.Characters
                     .Select(w => new PersonDto()
@@ -645,8 +646,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
         try
         {
-
-
             // Determine the expected total count based on local metadata
             series.Metadata.TotalCount = Math.Max(
                 chapters.Max(chapter => chapter.TotalCount),

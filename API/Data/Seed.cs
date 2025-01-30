@@ -307,7 +307,9 @@ public static class Seed
                 EnableStartDate = true,
                 EnableTags = false,
                 EnableGenres = true,
-                EnableLocalizedName = false
+                EnableLocalizedName = false,
+                FirstLastPeopleNaming = false,
+                PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]
             };
             await context.MetadataSettings.AddAsync(existing);
         }

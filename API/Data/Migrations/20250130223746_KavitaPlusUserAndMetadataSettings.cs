@@ -39,8 +39,10 @@ namespace API.Data.Migrations
                     EnableLocalizedName = table.Column<bool>(type: "INTEGER", nullable: false),
                     EnableGenres = table.Column<bool>(type: "INTEGER", nullable: false),
                     EnableTags = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FirstLastPeopleNaming = table.Column<bool>(type: "INTEGER", nullable: false),
                     AgeRatingMappings = table.Column<string>(type: "TEXT", nullable: true),
-                    Blacklist = table.Column<string>(type: "TEXT", nullable: true)
+                    Blacklist = table.Column<string>(type: "TEXT", nullable: true),
+                    PersonRoles = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
