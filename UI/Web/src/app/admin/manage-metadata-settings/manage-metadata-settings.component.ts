@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {SettingsService} from "../settings.service";
-import {debounceTime, switchMap, tap} from "rxjs";
+import {debounceTime, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, map} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
@@ -50,11 +50,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   ageRatingMappings = this.fb.array([]);
   fieldMappings = this.fb.array([]);
   personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
-
-  get personRolesArray(): FormArray {
-    return this.settingsForm.get('personRoles') as FormArray;
-  }
-
+  isLoaded = false;
 
   ngOnInit(): void {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -77,9 +73,12 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
-      this.settingsForm.addControl('personRoles', this.fb.array(
-        this.personRoles.map(role =>
-          this.fb.control((settings.personRoles || [true, true, true]).includes(role))
+      this.settingsForm.addControl('personRoles', this.fb.group(
+        Object.fromEntries(
+          this.personRoles.map((role, index) => [
+            `personRole_${index}`,
+            this.fb.control((settings.personRoles || this.personRoles).includes(role)),
+          ])
         )
       ));
 
@@ -96,6 +95,8 @@ export class ManageMetadataSettingsComponent implements OnInit {
         });
       }
 
+      console.log('form group: ', this.settingsForm);
+      this.isLoaded = true;
       this.cdRef.markForCheck();
 
 
@@ -142,7 +143,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
       ...model,
       ageRatingMappings,
       fieldMappings: withFieldMappings ? fieldMappings : [],
-      blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim())
+      blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim()),
+      personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
+        .filter(([_, value]) => value)
+        .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)])
     }
   }
 

@@ -2,210 +2,219 @@
 
 
   <p>{{t('description')}}</p>
-  <form [formGroup]="settingsForm">
+  @if (isLoaded) {
+    <form [formGroup]="settingsForm">
 
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enableSummary'); as formControl) {
-        <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableSummary'); as formControl) {
+          <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enablePublicationStatus'); as formControl) {
+          <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="enablePublicationStatus">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableRelationships'); as formControl) {
+          <app-setting-switch [title]="t('enable-relations-label')" [subtitle]="t('enable-relations-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-relations-status" type="checkbox" class="form-check-input" formControlName="enableRelationships">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableStartDate'); as formControl) {
+          <app-setting-switch [title]="t('enable-start-date-label')" [subtitle]="t('enable-start-date-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-start-date-status" type="checkbox" class="form-check-input" formControlName="enableStartDate">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <!-- GenreAgeRatingMappings -->
+      <h4>{{t('age-rating-mapping-title')}}</h4>
+      <p>{{t('age-rating-mapping-description')}}</p>
+
+      <div formArrayName="ageRatingMappings">
+        @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
+          <div [formGroupName]="i" class="row mb-2">
+            <div class="col-md-4">
+              <input type="text" class="form-control" formControlName="str" autocomplete="off" />
             </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enablePublicationStatus'); as formControl) {
-        <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="enablePublicationStatus">
+            <div class="col-md-2">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enableRelationships'); as formControl) {
-        <app-setting-switch [title]="t('enable-relations-label')" [subtitle]="t('enable-relations-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="enable-relations-status" type="checkbox" class="form-check-input" formControlName="enableRelationships">
+            <div class="col-md-4">
+              <select class="form-select" formControlName="rating">
+                @for (ageRating of ageRatings; track ageRating.value) {
+                  <option [value]="ageRating.value">
+                    {{ageRating.value | ageRating}}
+                  </option>
+                }
+              </select>
             </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enableStartDate'); as formControl) {
-        <app-setting-switch [title]="t('enable-start-date-label')" [subtitle]="t('enable-start-date-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="enable-start-date-status" type="checkbox" class="form-check-input" formControlName="enableStartDate">
+            <div class="col-md-2">
+              <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
+                <i class="fa fa-trash-alt" aria-hidden="true"></i>
+              </button>
             </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="setting-section-break"></div>
-
-    <!-- GenreAgeRatingMappings -->
-    <h4>{{t('age-rating-mapping-title')}}</h4>
-    <p>{{t('age-rating-mapping-description')}}</p>
-
-    <div formArrayName="ageRatingMappings">
-      @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
-        <div [formGroupName]="i" class="row mb-2">
-          <div class="col-md-4">
-            <input type="text" class="form-control" formControlName="str" autocomplete="off" />
           </div>
-          <div class="col-md-2">
-            <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          </div>
-          <div class="col-md-4">
-            <select class="form-select" formControlName="rating">
-              @for (ageRating of ageRatings; track ageRating.value) {
-                <option [value]="ageRating.value">
-                  {{ageRating.value | ageRating}}
-                </option>
-              }
-            </select>
-          </div>
-          <div class="col-md-2">
-            <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
-              <i class="fa fa-trash-alt" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      }
+        }
 
-      <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
-        <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
-      </button>
-    </div>
+        <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
+          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
+        </button>
+      </div>
 
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('enablePeople'); as formControl) {
-        <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
-          <ng-template #switch>
-            <div class="form-check form-switch float-end">
-              <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      }
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
-      @for(role of personRoles; track role; let i = $index) {
-        <div class="col-md-3">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" [formControlName]="i" [id]="'role-' + role">
-            <label class="form-check-label" [for]="'role-' + role">{{ role | personRole }}</label>
-          </div>
-        </div>
-      }
-    </div>
-
-    <div class="setting-section-break"></div>
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enablePeople'); as formControl) {
+          <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
 
 
-    <div class="row g-0 mt-4 mb-4">
-     <div class="col-md-6">
-       @if(settingsForm.get('enableGenres'); as formControl) {
-         <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
-           <ng-template #switch>
-             <div class="form-check form-switch float-end">
-               <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
-             </div>
-           </ng-template>
-         </app-setting-switch>
-       }
-     </div>
-     <div class="col-md-6">
-       @if(settingsForm.get('enableTags'); as formControl) {
-         <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
-           <ng-template #switch>
-             <div class="form-check form-switch float-end">
-               <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
-             </div>
-           </ng-template>
-         </app-setting-switch>
-       }
-     </div>
-    </div>
-
-    <div class="row g-0 mt-4 mb-4">
-      @if(settingsForm.get('blacklist'); as formControl) {
-        <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
-          <ng-template #view>
-            @for(opt of (formControl.value || '').split(','); track opt) {
-              <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-            } @empty {
-              {{null | defaultValue}}
+        @if (settingsForm.get('personRoles'); as formControl) {
+          <div class="row g-0 mt-4 mb-4" formArrayName="personRoles">
+            @for(role of personRoles; track role; let i = $index) {
+              <div class="col-md-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" [formControlName]="'personRole_' + i" [id]="'role-' + role">
+                  <label class="form-check-label" [for]="'role-' + role">{{ role | personRole }}</label>
+                </div>
+              </div>
             }
-          </ng-template>s
-          <ng-template #edit>
-            <textarea rows="3" id="blacklist" class="form-control"  formControlName="blacklist"></textarea>
-          </ng-template>
-        </app-setting-item>
-      }
-    </div>
+          </div>
+        }
 
-    <div class="setting-section-break"></div>
 
-    <!-- Field Mapping Table -->
-    <h4>{{t('field-mapping-title')}}</h4>
-    <p>{{t('field-mapping-description')}}</p>
-    <div formArrayName="fieldMappings">
-      @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
-        <div [formGroupName]="i" class="row mb-2">
-          <div class="col-md-2">
-            <select class="form-select" formControlName="sourceType">
-              <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
-              <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <input type="text" class="form-control" formControlName="sourceValue"
-                   placeholder="Source genre/tag" />
-          </div>
-          <div class="col-md-2">
-            <select class="form-select" formControlName="destinationType">
-              <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
-              <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <input type="text" class="form-control" formControlName="destinationValue"
-                   placeholder="Destination genre/tag" />
-          </div>
-          <div class="col-md-2">
-            <div class="form-check">
-              <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
-                     formControlName="excludeFromSource">
-              <label [for]="'remove-source-tag-' + i" class="form-check-label">
-                {{t('remove-source-tag-label')}}
-              </label>
+
+      <div class="setting-section-break"></div>
+
+
+      <div class="row g-0 mt-4 mb-4">
+        <div class="col-md-6">
+          @if(settingsForm.get('enableGenres'); as formControl) {
+            <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+        <div class="col-md-6">
+          @if(settingsForm.get('enableTags'); as formControl) {
+            <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('blacklist'); as formControl) {
+          <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
+            <ng-template #view>
+              @let val = (formControl.value || '').split(',');
+
+              @for(opt of val; track opt) {
+                <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+              } @empty {
+                {{null | defaultValue}}
+              }
+            </ng-template>s
+            <ng-template #edit>
+              <textarea rows="3" id="blacklist" class="form-control"  formControlName="blacklist"></textarea>
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <!-- Field Mapping Table -->
+      <h4>{{t('field-mapping-title')}}</h4>
+      <p>{{t('field-mapping-description')}}</p>
+      <div formArrayName="fieldMappings">
+        @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
+          <div [formGroupName]="i" class="row mb-2">
+            <div class="col-md-2">
+              <select class="form-select" formControlName="sourceType">
+                <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
+                <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <input type="text" class="form-control" formControlName="sourceValue"
+                     placeholder="Source genre/tag" />
+            </div>
+            <div class="col-md-2">
+              <select class="form-select" formControlName="destinationType">
+                <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
+                <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <input type="text" class="form-control" formControlName="destinationValue"
+                     placeholder="Destination genre/tag" />
+            </div>
+            <div class="col-md-2">
+              <div class="form-check">
+                <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
+                       formControlName="excludeFromSource">
+                <label [for]="'remove-source-tag-' + i" class="form-check-label">
+                  {{t('remove-source-tag-label')}}
+                </label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-icon" (click)="removeFieldMappingRow(i)">
+                <i class="fa fa-trash-alt" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
-          <div class="col-md-2">
-            <button class="btn btn-icon" (click)="removeFieldMappingRow(i)">
-              <i class="fa fa-trash-alt" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      }
+        }
 
-      <button class="btn btn-secondary float-end" (click)="addFieldMapping()">
-        <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
-      </button>
-    </div>
+        <button class="btn btn-secondary float-end" (click)="addFieldMapping()">
+          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
+        </button>
+      </div>
 
-  </form>
+    </form>
+  }
 </ng-container>

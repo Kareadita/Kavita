@@ -566,6 +566,7 @@ public class SettingsController : BaseApiController
         existingMetadataSetting.EnableStartDate = dto.EnableStartDate;
         existingMetadataSetting.EnableGenres = dto.EnableGenres;
         existingMetadataSetting.EnableTags = dto.EnableTags;
+        existingMetadataSetting.PersonRoles = dto.PersonRoles;
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
