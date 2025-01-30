@@ -103,7 +103,7 @@
 
     <div class="row g-0 mt-4 mb-4">
       @for(role of personRoles; track role; let i = $index) {
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="form-check">
             <input type="checkbox" class="form-check-input" [formControlName]="i" [id]="'role-' + role">
             <label class="form-check-label" [for]="'role-' + role">{{ role | personRole }}</label>
