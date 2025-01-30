@@ -1,6 +1,9 @@
 ﻿namespace API.DTOs.Scrobbling;
 
-public record PlusSeriesDto
+/// <summary>
+/// Represents information about a potential Series for Kavita+
+/// </summary>
+public record PlusSeriesRequestDto
 {
     public int? AniListId { get; set; }
     public long? MalId { get; set; }

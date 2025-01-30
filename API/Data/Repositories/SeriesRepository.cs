@@ -164,7 +164,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeck(int seriesId, int userId);
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
-    Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId);
+    Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId);
     Task<int> GetCountAsync();
     Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries);
 }
@@ -704,11 +704,11 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
 
-    public async Task<PlusSeriesDto?> GetPlusSeriesDto(int seriesId)
+    public async Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
-            .Select(series => new PlusSeriesDto()
+            .Select(series => new PlusSeriesRequestDto()
             {
                 MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,

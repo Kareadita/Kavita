@@ -325,9 +325,10 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.SeriesRepository.Update(series);
 
         // Refetch metadata with a Direct lookup
-        var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesDto()
+        var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesRequestDto()
         {
             AniListId = anilistId,
+            SeriesName = string.Empty // Required field
         });
 
         // Find all scrobble events and rewrite them to be the correct
@@ -379,7 +380,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <param name="data"></param>
     /// <returns></returns>
-    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesDto data)
+    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data)
     {
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
@@ -437,7 +438,12 @@ public class ExternalMetadataService : IExternalMetadataService
             if (result.Series != null)
             {
                 madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId);
+                if (madeMetadataModification)
+                {
+                    _unitOfWork.SeriesRepository.Update(series);
+                }
             }
+
 
             await _unitOfWork.CommitAsync();
 
@@ -515,7 +521,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (settings.EnableGenres && processedGenres.Count > 0)
             {
-                _logger.LogDebug("Found {GenreCount} for {SeriesName}", processedGenres.Count, series.Name);
+                _logger.LogDebug("Found {GenreCount} genres for {SeriesName}", processedGenres.Count, series.Name);
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
                 series.Metadata.Genres ??= [];
                 GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
@@ -546,7 +552,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Set the tags for the series and ensure they are in the DB
             if (settings.EnableTags && processedTags.Count > 0)
             {
-                _logger.LogDebug("Found {TagCount} for {SeriesName}", processedTags.Count, series.Name);
+                _logger.LogDebug("Found {TagCount} tags for {SeriesName}", processedTags.Count, series.Name);
                 var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
                     .ToList();
                 series.Metadata.Tags ??= [];
@@ -573,7 +579,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Roles: Character Design, Story, Art
             var writers = externalMetadata.Staff
-                .Where(s => s.Role == "Story")
+                .Where(s => s.Role is "Story" or "Story & Art")
                 .Select(w => new PersonDto()
                 {
                     Name = w.Name,
@@ -589,7 +595,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             var artists = externalMetadata.Staff
-                .Where(s => s.Role == "Art")
+                .Where(s => s.Role is "Art" or "Story & Art")
                 .Select(w => new PersonDto()
                 {
                     Name = w.Name,
@@ -626,20 +632,82 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!series.Metadata.PublicationStatusLocked && settings.EnablePublicationStatus)
         {
-            // TODO: Implement
-            PublicationStatus status = PublicationStatus.OnGoing;
-            if (externalMetadata.VolumeCount == null && externalMetadata.ChapterCount == null)
+            var chapters = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes.SelectMany(v => v.Chapters).ToList();
+            var wasChanged = DeterminePublicationStatus(series, chapters, externalMetadata);
+            madeModification = madeModification || wasChanged;
+        }
+
+        return madeModification;
+    }
+
+    private bool DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
+    {
+        var madeModification = false;
+        try
+        {
+
+
+            // Determine the expected total count based on local metadata
+            series.Metadata.TotalCount = Math.Max(
+                chapters.Max(chapter => chapter.TotalCount),
+                externalMetadata.Volumes > 0 ? externalMetadata.Volumes : externalMetadata.Chapters
+            );
+
+            // The actual number of count's defined across all chapter's metadata
+            series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
+
+            var nonSpecialVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber))
+                .ToList();
+
+            var maxVolume = (int)(nonSpecialVolumes.Count != 0 ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
+            var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+            if (series.Format == MangaFormat.Epub || series.Format == MangaFormat.Pdf && chapters.Count == 1)
             {
-                status = PublicationStatus.OnGoing;
+                series.Metadata.MaxCount = 1;
+            }
+            else if (series.Metadata.TotalCount <= 1 && chapters.Count == 1 && chapters[0].IsSpecial)
+            {
+                series.Metadata.MaxCount = series.Metadata.TotalCount;
+            }
+            else if ((maxChapter == Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) &&
+                     maxVolume <= series.Metadata.TotalCount)
+            {
+                series.Metadata.MaxCount = maxVolume;
+            }
+            else if (maxVolume == series.Metadata.TotalCount)
+            {
+                series.Metadata.MaxCount = maxVolume;
             }
             else
             {
-                status = PublicationStatus.Ended;
-                // Check the counts vs what we have in Kavita to see if Completed/Ended
-                // TODO: need to write the query to do this
+                series.Metadata.MaxCount = maxChapter;
             }
-            // Update the publication based on what Upstream says. Allowed combos: Ongoing -> Completed/Ended, Completed/Ended -> Ongoing
-            madeModification = true;
+
+            var status = PublicationStatus.OnGoing;
+
+            var hasExternalCounts = externalMetadata.Volumes > 0 || externalMetadata.Chapters > 0;
+
+            if (hasExternalCounts)
+            {
+                status = PublicationStatus.Ended;
+
+                // Check if all volumes/chapters match the total count
+                if (series.Metadata.MaxCount == series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
+                {
+                    status = PublicationStatus.Completed;
+                }
+
+                madeModification = true;
+            }
+
+            series.Metadata.PublicationStatus = status;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "There was an issue determining Publication Status");
+            series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
         }
 
         return madeModification;

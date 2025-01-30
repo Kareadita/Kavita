@@ -18218,16 +18218,6 @@
             "type": "string",
             "nullable": true
           },
-          "volumeCount": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "chapterCount": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
           "provider": {
             "enum": [
               0,

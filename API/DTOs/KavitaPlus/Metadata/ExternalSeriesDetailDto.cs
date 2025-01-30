@@ -23,8 +23,6 @@ public class ExternalSeriesDetailDto
     public IList<SeriesStaffDto> Staff { get; set; }
     public IList<MetadataTagDto> Tags { get; set; }
     public string? Summary { get; set; }
-    public int? VolumeCount { get; set; }
-    public int? ChapterCount { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
     public DateTime? StartDate { get; set; }
