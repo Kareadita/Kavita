@@ -4,6 +4,8 @@
 public class SeriesStaffDto
 {
     public required string Name { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public required string Url { get; set; }
     public required string Role { get; set; }
     public string? ImageUrl { get; set; }

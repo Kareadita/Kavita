@@ -577,6 +577,15 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             series.Metadata.People ??= new List<SeriesMetadataPeople>();
 
+            // Ensure all people are named correctly
+            externalMetadata.Staff = settings.FirstLastPeopleNaming
+                ? externalMetadata.Staff.Select(s =>
+                {
+                    s.Name = s.FirstName + " " + s.LastName;
+                    return s;
+                }).ToList()
+                : externalMetadata.Staff;
+
             // Roles: Character Design, Story, Art
             var writers = externalMetadata.Staff
                 .Where(s => s.Role is "Story" or "Story & Art")

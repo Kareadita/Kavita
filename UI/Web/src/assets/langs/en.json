@@ -804,7 +804,10 @@
         "add-field-mapping-label": "Add Field Mapping",
         "add-age-rating-mapping-label": "Add Age Rating Mapping",
         "field-mapping-title": "Field Mapping",
-        "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Only applicable when Genre/Tag are enabled to be written."
+        "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Only applicable when Genre/Tag are enabled to be written.",
+        "first-last-name-label": "First Last Naming",
+        "first-last-name-tooltip": "Ensure People's names are written First then Last",
+        "person-roles-label": "Roles"
     },
 
     "book-line-overlay": {

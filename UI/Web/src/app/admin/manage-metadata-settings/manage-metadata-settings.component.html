@@ -53,57 +53,35 @@
         }
       </div>
 
-      <div class="setting-section-break"></div>
+      @if(settingsForm.get('enablePeople'); as formControl) {
+        <div class="setting-section-break"></div>
 
-      <!-- GenreAgeRatingMappings -->
-      <h4>{{t('age-rating-mapping-title')}}</h4>
-      <p>{{t('age-rating-mapping-description')}}</p>
+        <div class="row g-0 mt-4 mb-4">
 
-      <div formArrayName="ageRatingMappings">
-        @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
-          <div [formGroupName]="i" class="row mb-2">
-            <div class="col-md-4">
-              <input type="text" class="form-control" formControlName="str" autocomplete="off" />
-            </div>
-            <div class="col-md-2">
-              <i class="fa fa-arrow-right" aria-hidden="true"></i>
-            </div>
-            <div class="col-md-4">
-              <select class="form-select" formControlName="rating">
-                @for (ageRating of ageRatings; track ageRating.value) {
-                  <option [value]="ageRating.value">
-                    {{ageRating.value | ageRating}}
-                  </option>
-                }
-              </select>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
-                <i class="fa fa-trash-alt" aria-hidden="true"></i>
-              </button>
-            </div>
+          <div class="col-6">
+            <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
+                </div>
+              </ng-template>
+            </app-setting-switch>
           </div>
-        }
 
-        <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
-          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
-        </button>
-      </div>
+          <div class="col-6">
+            <app-setting-switch [title]="t('first-last-name-label')" [subtitle]="t('first-last-name-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-first-last-name" type="checkbox" class="form-check-input" formControlName="firstLastPeopleNaming">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('enablePeople'); as formControl) {
-          <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
-      </div>
+        </div>
 
-
-        @if (settingsForm.get('personRoles'); as formControl) {
+        @if (settingsForm.get('personRoles')) {
+          <h5>{{t('person-roles-label')}}</h5>
           <div class="row g-0 mt-4 mb-4" formArrayName="personRoles">
             @for(role of personRoles; track role; let i = $index) {
               <div class="col-md-3">
@@ -115,6 +93,7 @@
             }
           </div>
         }
+      }
 
 
 
@@ -163,6 +142,42 @@
             </ng-template>
           </app-setting-item>
         }
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <h4>{{t('age-rating-mapping-title')}}</h4>
+      <p>{{t('age-rating-mapping-description')}}</p>
+
+      <div formArrayName="ageRatingMappings">
+        @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
+          <div [formGroupName]="i" class="row mb-2">
+            <div class="col-md-4">
+              <input type="text" class="form-control" formControlName="str" autocomplete="off" />
+            </div>
+            <div class="col-md-2">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </div>
+            <div class="col-md-4">
+              <select class="form-select" formControlName="rating">
+                @for (ageRating of ageRatings; track ageRating.value) {
+                  <option [value]="ageRating.value">
+                    {{ageRating.value | ageRating}}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
+                <i class="fa fa-trash-alt" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        }
+
+        <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
+          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
+        </button>
       </div>
 
       <div class="setting-section-break"></div>

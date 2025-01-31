@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -16,6 +16,7 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
+import {NgClass} from "@angular/common";
 
 
 @Component({
@@ -29,7 +30,8 @@ import {PersonRolePipe} from "../../_pipes/person-role.pipe";
     DefaultValuePipe,
     TagBadgeComponent,
     AgeRatingPipe,
-    PersonRolePipe
+    PersonRolePipe,
+    NgClass
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -73,6 +75,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
+      this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
           this.personRoles.map((role, index) => [
@@ -95,7 +98,27 @@ export class ManageMetadataSettingsComponent implements OnInit {
         });
       }
 
-      console.log('form group: ', this.settingsForm);
+      this.settingsForm.get('enablePeople')?.valueChanges.subscribe(enabled => {
+        const firstLastControl = this.settingsForm.get('firstLastPeopleNaming');
+        if (enabled) {
+          firstLastControl?.enable();
+        } else {
+          firstLastControl?.disable();
+        }
+      });
+
+      this.settingsForm.get('enablePeople')?.updateValueAndValidity();
+
+      // Disable personRoles checkboxes based on enablePeople state
+      this.settingsForm.get('enablePeople')?.valueChanges.subscribe(enabled => {
+        const personRolesArray = this.settingsForm.get('personRoles') as FormArray;
+        if (enabled) {
+          personRolesArray.enable();
+        } else {
+          personRolesArray.disable();
+        }
+      });
+
       this.isLoaded = true;
       this.cdRef.markForCheck();
 
