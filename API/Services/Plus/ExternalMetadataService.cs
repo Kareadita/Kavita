@@ -588,7 +588,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
         if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
         {
-            _logger.LogDebug("{SeriesName} has {AgeRating}", series.Name, ageRating);
             series.Metadata.AgeRating = ageRating;
             _unitOfWork.SeriesRepository.Update(series);
             madeModification = true;
