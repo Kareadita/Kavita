@@ -6,6 +6,18 @@
     <form [formGroup]="settingsForm">
 
       <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enabled'); as formControl) {
+          <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableSummary'); as formControl) {
           <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
             <ng-template #switch>

@@ -148,11 +148,6 @@ public class ExternalMetadataService : IExternalMetadataService
         // Prefetch SeriesDetail data
         var metadata = await GetSeriesDetailPlus(seriesId, libraryType);
 
-        // TODO: Fetch Series Metadata (Summary, etc)
-
-
-
-
     }
 
     public async Task<IList<MalStackDto>> GetStacksForUser(int userId)
@@ -404,7 +399,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Clear out existing results
-
             var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series!);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
@@ -489,9 +483,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
     {
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+        if (!settings.Enabled) return false;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) return false;
-        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
+        _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
 
         var madeModification = false;
 

@@ -780,14 +780,16 @@
 
     "manage-metadata-settings": {
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
+        "enabled-label": "Enable Metadata Download",
+        "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
         "summary-label": "Summary",
         "summary-tooltip": "Allow Summary to be written when the field is unlocked.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
-        "enable-relations-tooltip": "Allow Series Relationships to be <b>ADDED</b>.",
+        "enable-relations-tooltip": "Allow Series Relationships to be <b>added</b>.",
         "enable-people-label": "People",
-        "enable-people-tooltip": "Allow People (Characters, Writers, etc) to be <b>ADDED</b>. All people include images.",
+        "enable-people-tooltip": "Allow People (Characters, Writers, etc) to be <b>added</b>. All people include images.",
         "enable-start-date-label": "Start Date",
         "enable-start-date-tooltip": "Allow Start Date of Series to be written to the Series",
         "enable-genres-label": "Genres",

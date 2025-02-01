@@ -221,6 +221,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithOne(x => x.MetadataSettings)
             .HasForeignKey(x => x.MetadataSettingsId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.Enabled)
+            .HasDefaultValue(true);
     }
 
     #nullable enable

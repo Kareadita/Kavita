@@ -72,8 +72,8 @@ function deepClone(obj: any): any {
 @Component({
   selector: 'app-series-card',
   standalone: true,
-  imports: [CardItemComponent, RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent,
-    EntityTitleComponent, FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective,
+  imports: [RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent,
+    FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective,
     SeriesFormatComponent, DecimalPipe],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
@@ -244,6 +244,13 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         break;
       case(Action.Edit):
         this.openEditModal(series);
+        break;
+      case Action.Match:
+        this.actionService.matchSeries(this.series, (refreshNeeded) => {
+          if (refreshNeeded) {
+            this.reload.emit(series.id);
+          }
+        });
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series);

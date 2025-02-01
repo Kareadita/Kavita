@@ -64,6 +64,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     this.settingsForm.addControl('fieldMappings', this.fieldMappings);
 
     this.settingService.getMetadataSettings().subscribe(settings => {
+      this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
       this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
