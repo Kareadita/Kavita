@@ -497,7 +497,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!series.Metadata.SummaryLocked && string.IsNullOrEmpty(series.Metadata.Summary) && settings.EnableSummary)
         {
-            series.Metadata.Summary = externalMetadata.Summary;
+            series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
             madeModification = true;
         }
 
@@ -624,11 +624,11 @@ public class ExternalMetadataService : IExternalMetadataService
                 {
                     Name = w.Name,
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                    Description = w.Description,
+                    Description = CleanSummary(w.Description),
                 }).ToList();
 
 
-            // TODO: PersonRoles can be a hashset
+            // NOTE: PersonRoles can be a hashset
             if (!series.Metadata.WriterLocked && writers.Count > 0 && settings.PersonRoles.Contains(PersonRole.Writer))
             {
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
@@ -650,7 +650,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 {
                     Name = w.Name,
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                    Description = w.Description,
+                    Description = CleanSummary(w.Description),
                 }).ToList();
 
             if (!series.Metadata.CoverArtistLocked && artists.Count > 0 &&  settings.PersonRoles.Contains(PersonRole.CoverArtist))
@@ -673,8 +673,9 @@ public class ExternalMetadataService : IExternalMetadataService
                     {
                         Name = w.Name,
                         AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                        Description = w.Description,
+                        Description = CleanSummary(w.Description),
                     }).ToList();
+
 
                 if (!series.Metadata.CharacterLocked && characters.Count > 0)
                 {
