@@ -491,8 +491,9 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
         if (!settings.Enabled) return false;
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related);
         if (series == null) return false;
+        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
 
         _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
 
@@ -712,6 +713,32 @@ public class ExternalMetadataService : IExternalMetadataService
             var wasChanged = DeterminePublicationStatus(series, chapters, externalMetadata);
             _unitOfWork.SeriesRepository.Update(series);
             madeModification = madeModification || wasChanged;
+        }
+
+        if (settings.EnableRelationships && externalMetadata.Relations != null && defaultAdmin != null)
+        {
+
+            foreach (var relation in externalMetadata.Relations)
+            {
+                var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
+                    relation.SeriesName.NativeTitle,
+                    relation.SeriesName.PreferredTitle,
+                    relation.PlusMediaFormat.GetMangaFormats(),
+                    defaultAdmin.Id);
+
+                if (relatedSeries != null)
+                {
+                    // TODO: Need to check if an existing relation exists
+                    series.Relations.Add(new SeriesRelation
+                    {
+                        RelationKind = relation.Relation,
+                        TargetSeries = relatedSeries,
+                        TargetSeriesId = relatedSeries.Id,
+                        Series = series,
+                        SeriesId = series.Id
+                    });
+                }
+            }
         }
 
         return madeModification;

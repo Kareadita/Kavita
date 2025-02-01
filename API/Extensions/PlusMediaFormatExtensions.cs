@@ -33,18 +33,22 @@ public static class PlusMediaFormatExtensions
         };
     }
 
-
     public static IList<MangaFormat> GetMangaFormats(this PlusMediaFormat? mediaFormat)
     {
-        if (mediaFormat == null) return [MangaFormat.Archive];
+        return mediaFormat.HasValue ? mediaFormat.Value.GetMangaFormats() : [MangaFormat.Archive];
+    }
+
+    public static IList<MangaFormat> GetMangaFormats(this PlusMediaFormat mediaFormat)
+    {
         return mediaFormat switch
         {
             PlusMediaFormat.Manga => [MangaFormat.Archive, MangaFormat.Image],
             PlusMediaFormat.Comic => [MangaFormat.Archive],
             PlusMediaFormat.LightNovel => [MangaFormat.Epub, MangaFormat.Pdf],
             PlusMediaFormat.Book => [MangaFormat.Epub, MangaFormat.Pdf],
-            PlusMediaFormat.Unknown => [MangaFormat.Archive],
             _ => [MangaFormat.Archive]
         };
     }
+
+
 }
