@@ -481,6 +481,12 @@ public class ExternalMetadataService : IExternalMetadataService
         return _defaultReturn;
     }
 
+    /// <summary>
+    /// Given external metadata from Kavita+, write as much as possible to the Kavita series as possible
+    /// </summary>
+    /// <param name="externalMetadata"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
     {
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();

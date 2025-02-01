@@ -359,7 +359,14 @@ public class SeriesService : ISeriesService
             var normalizedPersonName = Parser.Normalize(personDto.Name);
 
             // Check if the person exists in the dictionary
-            if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out _)) continue; // If we ever want to update metadata for existing people, we'd do it here
+            if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out var p))
+            {
+                if (personDto.AniListId > 0 && p.AniListId <= 0 && p.AniListId != personDto.AniListId)
+                {
+                    p.AniListId = personDto.AniListId;
+                }
+                continue; // If we ever want to update metadata for existing people, we'd do it here
+            }
 
             // Person doesn't exist, so create a new one
             var newPerson = new Person
