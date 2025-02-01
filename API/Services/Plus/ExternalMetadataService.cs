@@ -344,8 +344,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // Regenerate all events for the series for all users
         BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
-        await _eventHub.SendMessageAsync(MessageFactory.Info,
-            MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"));
+        // await _eventHub.SendMessageAsync(MessageFactory.Info,
+        //     MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"));
 
 
         // Name can be null on Series even with a direct match
@@ -686,10 +686,10 @@ public class ExternalMetadataService : IExternalMetadataService
 
                     foreach (var character in externalMetadata.Characters)
                     {
-                        var aniListId = ScrobblingService.ExtractId<int>(character.Url, ScrobblingService.AniListStaffWebsite);
+                        var aniListId = ScrobblingService.ExtractId<int>(character.Url, ScrobblingService.AniListCharacterWebsite);
                         if (aniListId <= 0) continue;
                         var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
-                        if (person != null && !string.IsNullOrEmpty(character.ImageUrl))
+                        if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
                         {
                             await _coverDbService.SetPersonCoverImage(person, character.ImageUrl, false);
                         }
