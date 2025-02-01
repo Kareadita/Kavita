@@ -727,7 +727,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     defaultAdmin.Id);
 
                 // Skip if no related series found or series is the parent
-                if (relatedSeries == null || relatedSeries.Id == series.Id) continue;
+                if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
 
                 // Check if the relationship already exists
                 var relationshipExists = series.Relations.Any(r =>
