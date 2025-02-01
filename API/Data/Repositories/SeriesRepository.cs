@@ -146,7 +146,7 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
-    Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId);
+    Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None);
     public Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
         MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
@@ -1724,24 +1724,36 @@ public class SeriesRepository : ISeriesRepository
     #nullable enable
     }
 
-    public async Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId)
+    public async Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats,
+        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None)
     {
         var libraryIds = GetLibraryIdsForUser(userId);
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
 
-        return await _context.Series
+        var query = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format))
-            .Where(s =>
+            .Where(s => formats.Contains(s.Format));
+
+        if (aniListId.HasValue && aniListId.Value > 0)
+        {
+            // If AniList ID is provided, override name checks
+            query = query.Where(s => s.ExternalSeriesMetadata.AniListId == aniListId.Value);
+        }
+        else
+        {
+            // Otherwise, use name checks
+            query = query.Where(s =>
                 s.NormalizedName.Equals(normalizedSeries)
                 || s.NormalizedName.Equals(normalizedLocalized)
-
                 || s.NormalizedLocalizedName.Equals(normalizedSeries)
                 || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
-
                 || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
-            )
+            );
+        }
+
+        return await query
+            .Includes(includes)
             .FirstOrDefaultAsync();
     }
 

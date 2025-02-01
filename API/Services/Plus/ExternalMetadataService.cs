@@ -724,7 +724,9 @@ public class ExternalMetadataService : IExternalMetadataService
                     relation.SeriesName.NativeTitle,
                     relation.SeriesName.PreferredTitle,
                     relation.PlusMediaFormat.GetMangaFormats(),
-                    defaultAdmin.Id);
+                    defaultAdmin.Id,
+                    relation.AniListId,
+                    SeriesIncludes.Related);
 
                 // Skip if no related series found or series is the parent
                 if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;

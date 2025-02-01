@@ -7,7 +7,7 @@ namespace API.DTOs.KavitaPlus.Metadata;
 
 public class ALMediaTitle
 {
-    public string EnglishTitle { get; set; }
+    public string? EnglishTitle { get; set; }
     public string RomajiTitle { get; set; }
     public string NativeTitle { get; set; }
     public string PreferredTitle { get; set; }
