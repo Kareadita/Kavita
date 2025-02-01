@@ -8,6 +8,7 @@ using API.DTOs.Uploads;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
@@ -31,11 +32,12 @@ public class UploadController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
     private readonly ILocalizationService _localizationService;
+    private readonly ICoverDbService _coverDbService;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
         ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, ICoverDbService coverDbService)
     {
         _unitOfWork = unitOfWork;
         _imageService = imageService;
@@ -45,6 +47,7 @@ public class UploadController : BaseApiController
         _eventHub = eventHub;
         _readingListService = readingListService;
         _localizationService = localizationService;
+        _coverDbService = coverDbService;
     }
 
     /// <summary>
@@ -495,34 +498,8 @@ public class UploadController : BaseApiController
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
             if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
-            {
-                var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetPersonFormat(uploadFileDto.Id)}");
-
-                if (!string.IsNullOrEmpty(filePath))
-                {
-                    person.CoverImage = filePath;
-                    person.CoverImageLocked = true;
-                    _imageService.UpdateColorScape(person);
-                    _unitOfWork.PersonRepository.Update(person);
-                }
-            }
-            else
-            {
-                person.CoverImage = string.Empty;
-                person.CoverImageLocked = false;
-                _imageService.UpdateColorScape(person);
-                _unitOfWork.PersonRepository.Update(person);
-            }
-
-            if (_unitOfWork.HasChanges())
-            {
-                await _unitOfWork.CommitAsync();
-                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false);
-                return Ok();
-            }
-
+            await _coverDbService.SetPersonCoverImage(person, uploadFileDto.Url);
+            return Ok();
         }
         catch (Exception e)
         {

@@ -20026,6 +20026,14 @@
             "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
             "nullable": true
           },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only allow these Tags to be written to Kavita",
+            "nullable": true
+          },
           "personRoles": {
             "type": "array",
             "items": {

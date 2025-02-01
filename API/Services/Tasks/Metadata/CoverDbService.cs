@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.SignalR;
 using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
@@ -26,6 +28,7 @@ public interface ICoverDbService
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
+    Task SetPersonCoverImage(Person person, string url);
 }
 
 
@@ -35,6 +38,9 @@ public class CoverDbService : ICoverDbService
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly IHostEnvironment _env;
+    private readonly IImageService _imageService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEventHub _eventHub;
 
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
 
@@ -58,12 +64,16 @@ public class CoverDbService : ICoverDbService
     private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(1);
 
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
-        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env)
+        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env, IImageService imageService,
+        IUnitOfWork unitOfWork, IEventHub eventHub)
     {
         _logger = logger;
         _directoryService = directoryService;
         _cacheFactory = cacheFactory;
         _env = env;
+        _imageService = imageService;
+        _unitOfWork = unitOfWork;
+        _eventHub = eventHub;
     }
 
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
@@ -442,5 +452,45 @@ public class CoverDbService : ICoverDbService
         }
 
         return null;
+    }
+
+    public async Task SetPersonCoverImage(Person person, string url)
+    {
+        if (!string.IsNullOrEmpty(url))
+        {
+            var filePath = await CreateThumbnail(url, $"{ImageService.GetPersonFormat(person.Id)}");
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                person.CoverImage = filePath;
+                person.CoverImageLocked = true;
+                _imageService.UpdateColorScape(person);
+                _unitOfWork.PersonRepository.Update(person);
+            }
+        }
+        else
+        {
+            person.CoverImage = string.Empty;
+            person.CoverImageLocked = false;
+            _imageService.UpdateColorScape(person);
+            _unitOfWork.PersonRepository.Update(person);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false);
+        }
+    }
+
+    private async Task<string> CreateThumbnail(string url, string filename)
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var encodeFormat = settings.EncodeMediaAs;
+        var coverImageSize = settings.CoverImageSize;
+
+        return _imageService.CreateThumbnailFromBase64(url,
+            filename, encodeFormat, coverImageSize.GetDimensions().Width);
     }
 }

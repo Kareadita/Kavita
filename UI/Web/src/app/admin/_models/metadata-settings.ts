@@ -29,5 +29,6 @@ export interface MetadataSettings {
   ageRatingMappings: Map<string, AgeRating>;
   fieldMappings: Array<MetadataFieldMapping>;
   blacklist: Array<string>;
+  whitelist: Array<string>;
   personRoles: Array<PersonRole>;
 }

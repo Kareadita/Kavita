@@ -42,6 +42,7 @@ namespace API.Data.Migrations
                     FirstLastPeopleNaming = table.Column<bool>(type: "INTEGER", nullable: false),
                     AgeRatingMappings = table.Column<string>(type: "TEXT", nullable: true),
                     Blacklist = table.Column<string>(type: "TEXT", nullable: true),
+                    Whitelist = table.Column<string>(type: "TEXT", nullable: true),
                     PersonRoles = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250130223746_KavitaPlusUserAndMetadataSettings")]
+    [Migration("20250201143355_KavitaPlusUserAndMetadataSettings")]
     partial class KavitaPlusUserAndMetadataSettings
     {
         /// <inheritdoc />
@@ -1681,6 +1681,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("PersonRoles")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("Whitelist")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

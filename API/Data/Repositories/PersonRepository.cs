@@ -43,6 +43,7 @@ public interface IPersonRepository
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
     Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames);
+    Task<Person?> GetPersonByAniListId(int aniListId);
 }
 
 public class PersonRepository : IPersonRepository
@@ -261,6 +262,13 @@ public class PersonRepository : IPersonRepository
             .Where(p => normalizedNames.Contains(p.NormalizedName))
             .OrderBy(p => p.Name)
             .ToListAsync();
+    }
+
+    public async Task<Person?> GetPersonByAniListId(int aniListId)
+    {
+        return await _context.Person
+            .Where(p => p.AniListId == aniListId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<Person>> GetAllPeople()

@@ -31,7 +31,6 @@ import {NgClass} from "@angular/common";
     TagBadgeComponent,
     AgeRatingPipe,
     PersonRolePipe,
-    NgClass
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -75,6 +74,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
+      this.settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
@@ -167,6 +167,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       ageRatingMappings,
       fieldMappings: withFieldMappings ? fieldMappings : [],
       blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim()),
+      whitelist: (model.whitelist || '').split(',').map((item: string) => item.trim()),
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
         .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)])

@@ -60,6 +60,10 @@ public class MetadataSettingsDto
     /// </summary>
     public List<string> Blacklist { get; set; }
     /// <summary>
+    /// Only allow these Tags to be written to Kavita
+    /// </summary>
+    public List<string> Whitelist { get; set; }
+    /// <summary>
     /// Which Roles to allow metadata downloading for
     /// </summary>
     public List<PersonRole> PersonRoles { get; set; }

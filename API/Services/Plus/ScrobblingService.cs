@@ -73,6 +73,9 @@ public class ScrobblingService : IScrobblingService
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
     public const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
     public const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
+    public const string AniListStaffWebsite = "https://anilist.co/staff/";
+    public const string AniListCharacterWebsite = "https://anilist.co/character/";
+
 
     private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
@@ -80,6 +83,8 @@ public class ScrobblingService : IScrobblingService
         {MalWeblinkWebsite, 0},
         {GoogleBooksWeblinkWebsite, 0},
         {MangaDexWeblinkWebsite, 0},
+        {AniListStaffWebsite, 0},
+        {AniListCharacterWebsite, 0},
     };
 
     private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
@@ -1064,6 +1069,12 @@ public class ScrobblingService : IScrobblingService
             {
                 if (int.TryParse(value, out var intValue))
                     return (T)(object)intValue;
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                if (int.TryParse(value, out var intValue))
+                    return (T)(object)intValue;
+                return default;
             }
             else if (typeof(T) == typeof(long?))
             {

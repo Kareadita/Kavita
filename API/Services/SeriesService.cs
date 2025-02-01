@@ -14,6 +14,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
@@ -44,6 +45,7 @@ public interface ISeriesService
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
+
 }
 
 public class SeriesService : ISeriesService
@@ -54,6 +56,7 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IImageService _imageService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -63,7 +66,7 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService, IImageService imageService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -71,6 +74,7 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -355,13 +359,19 @@ public class SeriesService : ISeriesService
             var normalizedPersonName = Parser.Normalize(personDto.Name);
 
             // Check if the person exists in the dictionary
-            if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out _)) continue;
+            if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out _)) continue; // If we ever want to update metadata for existing people, we'd do it here
 
             // Person doesn't exist, so create a new one
             var newPerson = new Person
             {
                 Name = personDto.Name,
-                NormalizedName = normalizedPersonName
+                NormalizedName = normalizedPersonName,
+                AniListId = personDto.AniListId,
+                Description = personDto.Description,
+                Asin = personDto.Asin,
+                CoverImage = personDto.CoverImage,
+                MalId =  personDto.MalId,
+                HardcoverId = personDto.HardcoverId,
             };
 
             peopleToAdd.Add(newPerson);

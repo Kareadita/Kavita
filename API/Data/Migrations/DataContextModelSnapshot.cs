@@ -1680,6 +1680,9 @@ namespace API.Data.Migrations
                     b.PrimitiveCollection<string>("PersonRoles")
                         .HasColumnType("TEXT");
 
+                    b.PrimitiveCollection<string>("Whitelist")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.ToTable("MetadataSettings");
