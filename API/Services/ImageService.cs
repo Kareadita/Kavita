@@ -5,17 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using API.Constants;
 using API.DTOs;
-using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
-using EasyCaching.Core;
-using Flurl;
-using Flurl.Http;
-using HtmlAgilityPack;
-using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using SixLabors.ImageSharp.PixelFormats;
@@ -58,6 +51,7 @@ public interface IImageService
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
     string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+
     /// <summary>
     /// Converts the passed image to encoding and outputs it in the same directory
     /// </summary>
@@ -600,6 +594,7 @@ public class ImageService : IImageService
 
         return string.Empty;
     }
+
 
     /// <summary>
     /// Returns the name format for a chapter cover image

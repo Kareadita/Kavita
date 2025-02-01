@@ -691,7 +691,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
                         if (person != null && !string.IsNullOrEmpty(character.ImageUrl))
                         {
-                            await _coverDbService.SetPersonCoverImage(person, character.ImageUrl);
+                            await _coverDbService.SetPersonCoverImage(person, character.ImageUrl, false);
                         }
                     }
 
@@ -720,9 +720,9 @@ public class ExternalMetadataService : IExternalMetadataService
             var aniListId = ScrobblingService.ExtractId<int?>(staff.Url, ScrobblingService.AniListStaffWebsite);
             if (aniListId is null or <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
-            if (person != null && !string.IsNullOrEmpty(staff.ImageUrl))
+            if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
             {
-                await _coverDbService.SetPersonCoverImage(person, staff.ImageUrl);
+                await _coverDbService.SetPersonCoverImage(person, staff.ImageUrl, false);
             }
         }
     }

@@ -28,7 +28,7 @@ public interface ICoverDbService
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
-    Task SetPersonCoverImage(Person person, string url);
+    Task SetPersonCoverImage(Person person, string url, bool fromBase64 = true);
 }
 
 
@@ -265,34 +265,7 @@ public class CoverDbService : ICoverDbService
             }
 
 
-            // Create the destination file path
-            var filename = ImageService.GetPersonFormat(person.Id) + encodeFormat.GetExtension();
-            var targetFile = Path.Combine(_directoryService.CoverImageDirectory, filename);
-
-            // Ensure if file exists, we delete to overwrite
-
-
-            _logger.LogTrace("Fetching person image from {Url}", personImageLink.Sanitize());
-            // Download the file using Flurl
-            var personStream = await personImageLink
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
-
-            using var image = Image.NewFromStream(personStream);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(targetFile);
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(targetFile);
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(targetFile);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
+            var filename = await DownloadImageFromUrl(ImageService.GetPersonFormat(person.Id), encodeFormat, personImageLink);
 
             _logger.LogDebug("Person image for {PersonName} downloaded and saved successfully", person.Name);
 
@@ -303,6 +276,39 @@ public class CoverDbService : ICoverDbService
         }
 
         return null;
+    }
+
+    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url)
+    {
+        // Create the destination file path
+        var filename = filenameWithoutExtension + encodeFormat.GetExtension();
+        var targetFile = Path.Combine(_directoryService.CoverImageDirectory, filename);
+
+        // Ensure if file exists, we delete to overwrite
+
+        _logger.LogTrace("Fetching person image from {Url}", url.Sanitize());
+        // Download the file using Flurl
+        var personStream = await url
+            .AllowHttpStatus("2xx,304")
+            .GetStreamAsync();
+
+        using var image = Image.NewFromStream(personStream);
+        switch (encodeFormat)
+        {
+            case EncodeFormat.PNG:
+                image.Pngsave(targetFile);
+                break;
+            case EncodeFormat.WEBP:
+                image.Webpsave(targetFile);
+                break;
+            case EncodeFormat.AVIF:
+                image.Heifsave(targetFile);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+        }
+
+        return filename;
     }
 
     private async Task<string> GetCoverPersonImagePath(Person person)
@@ -454,11 +460,11 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-    public async Task SetPersonCoverImage(Person person, string url)
+    public async Task SetPersonCoverImage(Person person, string url, bool fromBase64 = true)
     {
         if (!string.IsNullOrEmpty(url))
         {
-            var filePath = await CreateThumbnail(url, $"{ImageService.GetPersonFormat(person.Id)}");
+            var filePath = await CreateThumbnail(url, $"{ImageService.GetPersonFormat(person.Id)}", fromBase64);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -484,13 +490,18 @@ public class CoverDbService : ICoverDbService
         }
     }
 
-    private async Task<string> CreateThumbnail(string url, string filename)
+    private async Task<string> CreateThumbnail(string url, string filename, bool fromBase64 = true)
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
         var coverImageSize = settings.CoverImageSize;
 
-        return _imageService.CreateThumbnailFromBase64(url,
-            filename, encodeFormat, coverImageSize.GetDimensions().Width);
+        if (fromBase64)
+        {
+            return _imageService.CreateThumbnailFromBase64(url,
+                filename, encodeFormat, coverImageSize.GetDimensions().Width);
+        }
+
+        return  await DownloadImageFromUrl(filename, encodeFormat, url);
     }
 }
