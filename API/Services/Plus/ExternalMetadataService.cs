@@ -726,22 +726,57 @@ public class ExternalMetadataService : IExternalMetadataService
                     relation.PlusMediaFormat.GetMangaFormats(),
                     defaultAdmin.Id);
 
-                if (relatedSeries != null)
+                // Skip if no related series found or series is the parent
+                if (relatedSeries == null || relatedSeries.Id == series.Id) continue;
+
+                // Check if the relationship already exists
+                var relationshipExists = series.Relations.Any(r =>
+                    r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
+
+                if (relationshipExists) continue;
+
+                series.Relations.Add(new SeriesRelation
                 {
-                    // TODO: Need to check if an existing relation exists
-                    series.Relations.Add(new SeriesRelation
+                    RelationKind = relation.Relation,
+                    TargetSeries = relatedSeries,
+                    TargetSeriesId = relatedSeries.Id,
+                    Series = series,
+                    SeriesId = series.Id
+                });
+
+                // Handle sequel/prequel: add reverse relationship
+                if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
+                {
+                    var reverseExists = relatedSeries.Relations.Any(r =>
+                        r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
+
+                    if (reverseExists) continue;
+
+                    relatedSeries.Relations.Add(new SeriesRelation
                     {
-                        RelationKind = relation.Relation,
-                        TargetSeries = relatedSeries,
-                        TargetSeriesId = relatedSeries.Id,
-                        Series = series,
-                        SeriesId = series.Id
+                        RelationKind = GetReverseRelation(relation.Relation),
+                        TargetSeries = series,
+                        TargetSeriesId = series.Id,
+                        Series = relatedSeries,
+                        SeriesId = relatedSeries.Id
                     });
                 }
+
+                madeModification = true;
             }
         }
 
         return madeModification;
+    }
+
+    private static RelationKind GetReverseRelation(RelationKind relation)
+    {
+        return relation switch
+        {
+            RelationKind.Prequel => RelationKind.Sequel,
+            RelationKind.Sequel => RelationKind.Prequel,
+            _ => relation // For other relationships, no reverse needed
+        };
     }
 
     private async Task DownloadAndSetCovers(List<SeriesStaffDto> people)
