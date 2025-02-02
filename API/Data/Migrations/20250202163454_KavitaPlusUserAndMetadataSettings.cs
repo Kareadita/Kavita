@@ -11,6 +11,13 @@ namespace API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
+                name: "AllowMetadataMatching",
+                table: "Library",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: true);
+
+            migrationBuilder.AddColumn<bool>(
                 name: "AniListScrobblingEnabled",
                 table: "AppUserPreferences",
                 type: "INTEGER",
@@ -30,7 +37,7 @@ namespace API.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
                     EnableSummary = table.Column<bool>(type: "INTEGER", nullable: false),
                     EnablePublicationStatus = table.Column<bool>(type: "INTEGER", nullable: false),
                     EnableRelationships = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -88,6 +95,10 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "MetadataSettings");
+
+            migrationBuilder.DropColumn(
+                name: "AllowMetadataMatching",
+                table: "Library");
 
             migrationBuilder.DropColumn(
                 name: "AniListScrobblingEnabled",

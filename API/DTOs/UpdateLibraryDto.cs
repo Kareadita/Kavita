@@ -26,6 +26,8 @@ public class UpdateLibraryDto
     public bool ManageReadingLists { get; init; }
     [Required]
     public bool AllowScrobbling { get; init; }
+    [Required]
+    public bool AllowMetadataMatching { get; init; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>

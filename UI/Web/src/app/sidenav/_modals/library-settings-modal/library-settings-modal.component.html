@@ -158,6 +158,16 @@
             </div>
 
             <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('allow-metadata-matching-label')" [subtitle]="t('allow-metadata-matching-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="metadata-matching" role="switch" formControlName="allowMetadataMatching" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
               <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
                 <ng-template #switch>
                   <div class="form-check form-switch float-end">

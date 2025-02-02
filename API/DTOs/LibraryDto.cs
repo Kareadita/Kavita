@@ -61,4 +61,10 @@ public class LibraryDto
     /// A set of globs that will exclude matching content from being scanned
     /// </summary>
     public ICollection<string> ExcludePatterns { get; set; }
+    /// <summary>
+    /// Allow any series within this Library to download metadata.
+    /// </summary>
+    /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
+    public bool AllowMetadataMatching { get; set; } = true;
 }

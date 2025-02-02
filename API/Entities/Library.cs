@@ -40,8 +40,14 @@ public class Library : IEntityDate, IHasCoverImage
     /// <summary>
     /// Should this library allow Scrobble events to emit from it
     /// </summary>
-    /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
     public bool AllowScrobbling { get; set; } = true;
+    /// <summary>
+    /// Allow any series within this Library to download metadata.
+    /// </summary>
+    /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
+    public bool AllowMetadataMatching { get; set; } = true;
 
 
     public DateTime Created { get; set; }

@@ -9,9 +9,6 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  NgbAccordionBody,
-  NgbAccordionButton, NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
   NgbActiveModal,
   NgbModal,
   NgbModalModule,
@@ -71,7 +68,7 @@ enum StepID {
   standalone: true,
   imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -116,6 +113,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
   });
 
@@ -153,7 +151,9 @@ export class LibrarySettingsModalComponent implements OnInit {
 
     if (this.library && !(this.library.type === LibraryType.Manga || this.library.type === LibraryType.LightNovel) ) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
+      this.libraryForm.get('allowMetadataMatching')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
+      this.libraryForm.get('allowMetadataMatching')?.disable();
     }
 
     this.libraryForm.get('name')?.valueChanges.pipe(
@@ -216,8 +216,10 @@ export class LibrarySettingsModalComponent implements OnInit {
         this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
         if (!this.IsKavitaPlusEligible) {
           this.libraryForm.get('allowScrobbling')?.disable();
+          this.libraryForm.get('allowMetadataMatching')?.disable();
         } else {
           this.libraryForm.get('allowScrobbling')?.enable();
+          this.libraryForm.get('allowMetadataMatching')?.enable();
         }
         this.cdRef.markForCheck();
       }),
@@ -237,6 +239,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
+      this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       for(let fileTypeGroup of allFileTypeGroup) {

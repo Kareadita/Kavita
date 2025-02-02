@@ -385,7 +385,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data)
     {
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
         if (series == null) return _defaultReturn;
 
         try
@@ -436,7 +436,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
-            if (result.Series != null)
+            if (result.Series != null && series.Library.AllowMetadataMatching)
             {
                 madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId);
                 if (madeMetadataModification)

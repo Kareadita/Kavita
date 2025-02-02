@@ -19215,6 +19215,10 @@
             "type": "boolean",
             "description": "Should this library allow Scrobble events to emit from it"
           },
+          "allowMetadataMatching": {
+            "type": "boolean",
+            "description": "Allow any series within this Library to download metadata."
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -19369,6 +19373,10 @@
             },
             "description": "A set of globs that will exclude matching content from being scanned",
             "nullable": true
+          },
+          "allowMetadataMatching": {
+            "type": "boolean",
+            "description": "Allow any series within this Library to download metadata."
           }
         },
         "additionalProperties": false
@@ -23978,6 +23986,7 @@
       },
       "UpdateLibraryDto": {
         "required": [
+          "allowMetadataMatching",
           "allowScrobbling",
           "excludePatterns",
           "fileGroupTypes",
@@ -24035,6 +24044,9 @@
             "type": "boolean"
           },
           "allowScrobbling": {
+            "type": "boolean"
+          },
+          "allowMetadataMatching": {
             "type": "boolean"
           },
           "fileGroupTypes": {

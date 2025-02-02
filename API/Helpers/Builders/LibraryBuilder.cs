@@ -104,7 +104,13 @@ public class LibraryBuilder : IEntityBuilder<Library>
         return this;
     }
 
-    public LibraryBuilder WIthAllowScrobbling(bool allowScrobbling)
+    public LibraryBuilder WithAllowMetadataMatching(bool allow)
+    {
+        _library.AllowMetadataMatching = allow;
+        return this;
+    }
+
+    public LibraryBuilder WithAllowScrobbling(bool allowScrobbling)
     {
         _library.AllowScrobbling = allowScrobbling;
         return this;
