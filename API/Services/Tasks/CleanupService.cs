@@ -201,10 +201,10 @@ public class CleanupService : ICleanupService
     /// </summary>
     public async Task CleanupBackups()
     {
-        var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalBackups;
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var dayThreshold = settings.TotalBackups;
         _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
-        var backupDirectory =
-            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;
+        var backupDirectory = settings.BookmarksDirectory;
         if (!_directoryService.Exists(backupDirectory)) return;
 
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));

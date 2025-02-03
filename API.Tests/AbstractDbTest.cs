@@ -71,7 +71,7 @@ public abstract class AbstractDbTest : IDisposable
     {
         try
         {
-            await _context.Database.MigrateAsync();
+            await _context.Database.EnsureCreatedAsync();
             var filesystem = CreateFileSystem();
 
             await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
@@ -90,13 +90,16 @@ public abstract class AbstractDbTest : IDisposable
 
             _context.ServerSetting.Update(setting);
 
-            await Seed.SeedMetadataSettings(_context);
 
             _context.Library.Add(new LibraryBuilder("Manga")
                 .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
                 .Build());
 
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
+
+            await Seed.SeedMetadataSettings(_context);
+
+            return true;
         }
         catch (Exception ex)
         {
