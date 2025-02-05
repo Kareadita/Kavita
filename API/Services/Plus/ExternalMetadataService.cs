@@ -592,7 +592,7 @@ public class ExternalMetadataService : IExternalMetadataService
         #region Age Rating
 
         // Determine Age Rating
-        var ageRating = DetermineAgeRating([.. processedGenres, .. processedTags], settings.AgeRatingMappings);
+        var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
         if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
         {
             series.Metadata.AgeRating = ageRating;
@@ -886,10 +886,10 @@ public class ExternalMetadataService : IExternalMetadataService
         return mapping.DestinationValue ?? (mapping.ExcludeFromSource ? null : value);
     }
 
-    private static AgeRating DetermineAgeRating(IList<string> values, Dictionary<string, AgeRating> mappings)
+    private static AgeRating DetermineAgeRating(IEnumerable<string> values, Dictionary<string, AgeRating> mappings)
     {
         // Find highest age rating from mappings
-        if (values.Count == 0) return AgeRating.Unknown;
+        mappings ??= new Dictionary<string, AgeRating>();
 
         return values
             .Select(v => mappings.TryGetValue(v, out var mapping) ? mapping : AgeRating.Unknown)

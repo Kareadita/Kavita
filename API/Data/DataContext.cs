@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -217,6 +218,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
                 v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default)
             );
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.Whitelist)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default)
+            );
 
         // Configure one-to-many relationship
         builder.Entity<MetadataSettings>()
@@ -224,6 +231,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .WithOne(x => x.MetadataSettings)
             .HasForeignKey(x => x.MetadataSettingsId)
             .OnDelete(DeleteBehavior.Cascade);
+
         builder.Entity<MetadataSettings>()
             .Property(b => b.Enabled)
             .HasDefaultValue(true);

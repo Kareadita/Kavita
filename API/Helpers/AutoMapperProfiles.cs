@@ -361,10 +361,14 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
             .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
 
+        CreateMap<MetadataFieldMapping, MetadataFieldMappingDto>();
+
         CreateMap<MetadataSettings, MetadataSettingsDto>()
             .ForMember(dest => dest.Blacklist, opt => opt.MapFrom(src => src.Blacklist ?? new List<string>()))
-            .ForMember(dest => dest.Whitelist, opt => opt.MapFrom(src => src.Whitelist ?? new List<string>()));
-        CreateMap<MetadataFieldMapping, MetadataFieldMappingDto>();
+            .ForMember(dest => dest.Whitelist, opt => opt.MapFrom(src => src.Whitelist ?? new List<string>()))
+            .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()));
+
+
 
     }
 }
