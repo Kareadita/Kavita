@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -245,7 +246,13 @@ public class ExternalMetadataService : IExternalMetadataService
             return string.Empty; // Return as is if null, empty, or whitespace.
         }
 
-        return summary.Replace("<br/>", string.Empty);
+        // Remove all variations of <br> tags (case-insensitive)
+        summary = Regex.Replace(summary, @"<br\s*/?>", " ", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Normalize whitespace (replace multiple spaces with a single space)
+        summary = Regex.Replace(summary, @"\s+", " ").Trim();
+
+        return summary;
     }
 
 
