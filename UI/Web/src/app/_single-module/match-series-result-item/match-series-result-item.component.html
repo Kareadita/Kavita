@@ -1,4 +1,5 @@
 <ng-container *transloco="let t; read:'match-series-result-item'">
+
   <div class="d-flex p-1 clickable" (click)="selectItem()">
     <div style="width: 32px" class="me-1">
       @if (item.series.coverUrl) {
@@ -11,7 +12,7 @@
         @for(synm of item.series.synonyms; track synm; let last = $last) {
           {{synm}}
           @if (!last) {
-           <span>, </span>
+            <span>, </span>
           }
         }
       </div>
@@ -23,16 +24,27 @@
     </div>
   </div>
 
-  <div class="d-flex p-1 justify-content-between">
-    <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
-    @if ((item.series.volumeCount || 0) > 0 || (item.series.chapterCount || 0) > 0) {
-      <span class="me-1">{{t('volume-count', {num: item.series.volumeCount})}}</span>
-      <span class="me-1">{{t('chapter-count', {num: item.series.chapterCount})}}</span>
-    } @else {
-      <span class="me-1">{{t('releasing')}}</span>
-    }
+  @if (isSelected) {
+    <div class="d-flex p-1 justify-content-center">
+      <app-loading [absolute]="false" [loading]="true"></app-loading>
+      <span class="ms-2">{{t('updating-metadata-status')}}</span>
+    </div>
+  } @else {
+    <div class="d-flex p-1 justify-content-between">
+      <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
+      @if ((item.series.volumeCount || 0) > 0 || (item.series.chapterCount || 0) > 0) {
+        <span class="me-1">{{t('volume-count', {num: item.series.volumeCount})}}</span>
+        <span class="me-1">{{t('chapter-count', {num: item.series.chapterCount})}}</span>
+      } @else {
+        <span class="me-1">{{t('releasing')}}</span>
+      }
 
-    <span class="me-1">{{item.series.plusMediaFormat | plusMediaFormat}}</span>
-    <span class="me-1">({{item.matchRating | translocoPercent}})</span>
-  </div>
+      <span class="me-1">{{item.series.plusMediaFormat | plusMediaFormat}}</span>
+      <span class="me-1">({{item.matchRating | translocoPercent}})</span>
+    </div>
+  }
+
+
+
+
 </ng-container>

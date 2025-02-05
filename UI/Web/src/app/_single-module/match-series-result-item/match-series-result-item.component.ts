@@ -15,6 +15,7 @@ import {TranslocoPercentPipe} from "@jsverse/transloco-locale";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {PlusMediaFormatPipe} from "../../_pipes/plus-media-format.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -24,7 +25,8 @@ import {PlusMediaFormatPipe} from "../../_pipes/plus-media-format.pipe";
     TranslocoPercentPipe,
     ReadMoreComponent,
     TranslocoDirective,
-    PlusMediaFormatPipe
+    PlusMediaFormatPipe,
+    LoadingComponent
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',
@@ -37,7 +39,13 @@ export class MatchSeriesResultItemComponent {
   @Input({required: true}) item!: ExternalSeriesMatch;
   @Output() selected: EventEmitter<ExternalSeriesMatch> = new EventEmitter();
 
+  isSelected = false;
+
   selectItem() {
+    if (this.isSelected) return;
+
+    this.isSelected = true;
+    this.cdRef.markForCheck();
     this.selected.emit(this.item);
   }
 

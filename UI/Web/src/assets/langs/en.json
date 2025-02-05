@@ -981,7 +981,8 @@
         "volume-count": "{{server-stats.volume-count}}",
         "chapter-count": "{{common.chapter-count}}",
         "releasing": "Releasing",
-        "details": "View page"
+        "details": "View page",
+        "updating-metadata-status": "Updating Metadata"
     },
 
     "metadata-fields": {
