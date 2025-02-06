@@ -103,9 +103,7 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     MangaFormatPipe,
     DefaultDatePipe,
     TimeAgoPipe,
-    TagBadgeComponent,
     PublicationStatusPipe,
-    NgbTooltip,
     BytesPipe,
     ImageComponent,
     NgbCollapse,
@@ -117,7 +115,6 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     EditListComponent,
     SettingButtonComponent,
     SettingItemComponent,
-    ReadTimePipe,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -654,6 +651,11 @@ export class EditSeriesModalComponent implements OnInit {
         break;
       case Action.Download:
         this.downloadService.download('series', this.series);
+        break;
+      case Action.Match:
+        this.actionService.matchSeries(this.series, _ => {
+          this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
+        });
         break;
     }
   }
