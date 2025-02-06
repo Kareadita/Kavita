@@ -345,10 +345,13 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => src))
             .ForMember(dest => dest.IsMatched,
                 opt =>
-                    opt.MapFrom(src => src.ExternalSeriesMetadata != null && src.ExternalSeriesMetadata.AniListId != 0 && src.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue))
+                    opt.MapFrom(src => src.ExternalSeriesMetadata != null && src.ExternalSeriesMetadata.AniListId != 0
+                                                                          && src.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue))
             .ForMember(dest => dest.ValidUntilUtc,
-                opt =>
-                    opt.MapFrom(src => src.ExternalSeriesMetadata.ValidUntilUtc));
+                opt => opt.MapFrom(src =>
+                    src.ExternalSeriesMetadata != null
+                        ? src.ExternalSeriesMetadata.ValidUntilUtc
+                        : DateTime.MinValue));
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();
