@@ -31,6 +31,7 @@ export class ManageLogsComponent implements OnInit, OnDestroy {
   constructor(private accountService: AccountService) { }
 
   ngOnInit(): void {
+    // TODO: Come back and implement this one day
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.hubConnection = new HubConnectionBuilder()

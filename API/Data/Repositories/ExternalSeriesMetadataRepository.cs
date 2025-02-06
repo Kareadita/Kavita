@@ -224,6 +224,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     public async Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter)
     {
         return await _context.Series
+            .Include(s => s.Library)
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .FilterMatchState(filter.MatchStateOption)
             .OrderBy(s => s.NormalizedName)

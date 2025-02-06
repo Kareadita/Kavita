@@ -2,7 +2,7 @@
   border-radius: 0.5rem;
 }
 
-.blog-content {
+:host ::ng-deep .blog-content {
   margin-bottom: 1.5rem;
   line-height: 1.6;
   word-wrap: break-word;

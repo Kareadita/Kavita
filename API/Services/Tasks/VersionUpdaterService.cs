@@ -114,6 +114,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
                 var nightlyDto = new UpdateNotificationDto
                 {
+                    // TODO: I should pass Title to the FE so that Nightly Release can be localized
                     UpdateTitle = $"Nightly Release {nightly.Version} - {prInfo.Title}",
                     UpdateVersion = nightly.Version,
                     CurrentVersion = dto.CurrentVersion,
@@ -446,7 +447,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         var sections = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var lines = body.Split('\n');
-        string currentSection = null;
+        string? currentSection = null;
 
         foreach (var line in lines)
         {

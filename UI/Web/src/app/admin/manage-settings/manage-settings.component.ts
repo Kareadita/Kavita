@@ -25,7 +25,7 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
   styleUrls: ['./manage-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet, PageLayoutModePipe, SettingItemComponent, SettingSwitchComponent, SafeHtmlPipe]
+  imports: [ReactiveFormsModule, TitleCasePipe, TranslocoModule, SettingItemComponent, SettingSwitchComponent]
 })
 export class ManageSettingsComponent implements OnInit {
 

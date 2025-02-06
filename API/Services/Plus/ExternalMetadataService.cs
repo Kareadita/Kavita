@@ -195,6 +195,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
             SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata);
+        if (series == null) return [];
 
         var potentialAnilistId = ScrobblingService.ExtractId<int?>(dto.Query, ScrobblingService.AniListWeblinkWebsite);
         var potentialMalId = ScrobblingService.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
@@ -591,6 +592,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         #region Age Rating
 
+        // TODO: Try-catchify all this code
         // Determine Age Rating
         var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
         if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)

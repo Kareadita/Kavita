@@ -27,4 +27,5 @@ export class ChangelogUpdateItemComponent {
   @Input({required:true}) update: UpdateVersionEvent | null = null;
   @Input() index: number = 0;
   @Input() showExtras: boolean = true;
+
 }
