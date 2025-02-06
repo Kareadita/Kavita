@@ -540,7 +540,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Strip blacklisted items from processedGenres
             processedGenres = processedGenres.Distinct().Where(g => !settings.Blacklist.Contains(g)).ToList();
 
-            if (settings.EnableGenres && processedGenres.Count > 0)
+            if (settings.EnableGenres && !series.Metadata.GenresLocked && processedGenres.Count > 0)
             {
                 _logger.LogDebug("Found {GenreCount} genres for {SeriesName}", processedGenres.Count, series.Name);
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
@@ -574,7 +574,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .ToList();
 
             // Set the tags for the series and ensure they are in the DB
-            if (settings.EnableTags && processedTags.Count > 0)
+            if (settings.EnableTags && !series.Metadata.TagsLocked && processedTags.Count > 0)
             {
                 _logger.LogDebug("Found {TagCount} tags for {SeriesName}", processedTags.Count, series.Name);
                 var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
@@ -592,16 +592,24 @@ public class ExternalMetadataService : IExternalMetadataService
 
         #region Age Rating
 
-        // TODO: Try-catchify all this code
-        // Determine Age Rating
-        var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
-        if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
+        if (!series.Metadata.AgeRatingLocked)
         {
-            series.Metadata.AgeRating = ageRating;
-            _unitOfWork.SeriesRepository.Update(series);
-            madeModification = true;
+            try
+            {
+                // Determine Age Rating
+                var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
+                if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
+                {
+                    series.Metadata.AgeRating = ageRating;
+                    _unitOfWork.SeriesRepository.Update(series);
+                    madeModification = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue determining Age Rating for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+            }
         }
-
         #endregion
 
         #region People

@@ -223,6 +223,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
 
     public async Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter)
     {
+        // BUG: Diesel had a weird bug from this, can't reproduce
         return await _context.Series
             .Include(s => s.Library)
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
