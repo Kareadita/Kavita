@@ -2677,7 +2677,7 @@
         "title": "Actions",
         "copy-settings": "Copy Settings From",
         "match": "Match",
-        "match-description": "Match Series with Kavita+ manually"
+        "match-tooltip": "Match Series with Kavita+ manually"
     },
 
     "preferences": {
