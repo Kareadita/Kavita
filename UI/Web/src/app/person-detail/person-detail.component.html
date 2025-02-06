@@ -7,6 +7,13 @@
           <h2 class="title text-break">
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{person.name}}</span>
+
+            @if (person.aniListId) {
+              <a class="ms-1" [href]="anilistUrl | safeUrl"  target="_blank" rel="noopener noreferrer">
+                <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(anilistUrl)"
+                           [errorImage]="imageService.errorWebLinkImage"></app-image>
+              </a>
+            }
           </h2>
         </ng-container>
       </app-side-nav-companion-bar>
@@ -45,6 +52,7 @@
                 }
               </div>
             }
+
           </div>
         </div>
       </div>

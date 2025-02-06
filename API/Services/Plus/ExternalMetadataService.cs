@@ -605,6 +605,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     .Concat(processedTags)
                     .Concat(series.Metadata.Genres.Select(g => g.Title))
                     .Concat(series.Metadata.Tags.Select(g => g.Title));
+
                 var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
                 if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
                 {

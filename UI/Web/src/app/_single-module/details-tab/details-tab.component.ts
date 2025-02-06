@@ -22,6 +22,7 @@ import {SeriesFormatComponent} from "../../shared/series-format/series-format.co
 import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {LanguageNamePipe} from "../../_pipes/language-name.pipe";
 import {AsyncPipe} from "@angular/common";
+import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-details-tab',
@@ -39,7 +40,8 @@ import {AsyncPipe} from "@angular/common";
     SeriesFormatComponent,
     MangaFormatPipe,
     LanguageNamePipe,
-    AsyncPipe
+    AsyncPipe,
+    SafeUrlPipe
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',

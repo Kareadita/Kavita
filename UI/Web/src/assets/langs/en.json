@@ -1072,7 +1072,8 @@
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
         "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
-        "all-roles": "Roles"
+        "all-roles": "Roles",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
 
     "library-settings-modal": {
