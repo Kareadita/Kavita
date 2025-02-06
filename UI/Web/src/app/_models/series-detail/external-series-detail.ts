@@ -37,6 +37,11 @@ export interface ExternalSeriesDetail {
   summary?: string;
   volumeCount?: number;
   chapterCount?: number;
+  /**
+   * These are duplicated with volumeCount based on where it's being invoked.
+   */
+  volumes?: number;
+  chapters?: number;
   staff: Array<SeriesStaff>;
   tags: Array<MetadataTagDto>;
   provider: ScrobbleProvider;

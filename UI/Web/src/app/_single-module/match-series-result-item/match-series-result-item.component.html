@@ -32,9 +32,9 @@
   } @else {
     <div class="d-flex p-1 justify-content-between">
       <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
-      @if ((item.series.volumeCount || 0) > 0 || (item.series.chapterCount || 0) > 0) {
-        <span class="me-1">{{t('volume-count', {num: item.series.volumeCount})}}</span>
-        <span class="me-1">{{t('chapter-count', {num: item.series.chapterCount})}}</span>
+      @if ((item.series.volumes || 0) > 0 || (item.series.chapters || 0) > 0) {
+        <span class="me-1">{{t('volume-count', {num: item.series.volumes})}}</span>
+        <span class="me-1">{{t('chapter-count', {num: item.series.chapters})}}</span>
       } @else {
         <span class="me-1">{{t('releasing')}}</span>
       }
