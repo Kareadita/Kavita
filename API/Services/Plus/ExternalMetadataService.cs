@@ -601,7 +601,11 @@ public class ExternalMetadataService : IExternalMetadataService
             try
             {
                 // Determine Age Rating
-                var ageRating = DetermineAgeRating(processedGenres.Concat(processedTags), settings.AgeRatingMappings);
+                var totalTags = processedGenres
+                    .Concat(processedTags)
+                    .Concat(series.Metadata.Genres.Select(g => g.Title))
+                    .Concat(series.Metadata.Tags.Select(g => g.Title));
+                var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
                 if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
                 {
                     series.Metadata.AgeRating = ageRating;
