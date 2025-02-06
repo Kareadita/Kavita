@@ -513,7 +513,7 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
-        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue)
+        if (settings.EnableStartDate && !series.Metadata.ReleaseYearLocked && externalMetadata.StartDate.HasValue)
         {
             series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
             madeModification = true;
@@ -949,6 +949,7 @@ public class ExternalMetadataService : IExternalMetadataService
         };
         series.ExternalSeriesMetadata = externalSeriesMetadata;
         _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
+
         return externalSeriesMetadata;
     }
 

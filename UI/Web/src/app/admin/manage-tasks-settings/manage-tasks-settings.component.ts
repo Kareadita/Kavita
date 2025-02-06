@@ -18,7 +18,6 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {ConfirmService} from "../../shared/confirm.service";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
@@ -38,7 +37,8 @@ interface AdhocTask {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
-        TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent, NgxDatatableModule]
+        TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent,
+      SettingButtonComponent, NgxDatatableModule]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 

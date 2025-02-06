@@ -308,7 +308,7 @@ public static class Seed
                 EnableTags = false,
                 EnableGenres = true,
                 EnableLocalizedName = false,
-                FirstLastPeopleNaming = false,
+                FirstLastPeopleNaming = true,
                 PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]
             };
             await context.MetadataSettings.AddAsync(existing);
