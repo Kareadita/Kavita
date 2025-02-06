@@ -527,7 +527,7 @@ public class ExternalMetadataService : IExternalMetadataService
         // Process Genres
         if (externalMetadata.Genres != null)
         {
-            foreach (var genre in externalMetadata.Genres.Where(g => !settings.Blacklist.Contains(g)))
+            foreach (var genre in externalMetadata.Genres)
             {
                 // Apply field mappings
                 var mappedGenre = ApplyFieldMapping(genre, MetadataFieldType.Genre, settings.FieldMappings);
@@ -538,7 +538,10 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             // Strip blacklisted items from processedGenres
-            processedGenres = processedGenres.Distinct().Where(g => !settings.Blacklist.Contains(g)).ToList();
+            processedGenres = processedGenres
+                .Distinct()
+                .Where(g => !settings.Blacklist.Contains(g))
+                .ToList();
 
             if (settings.EnableGenres && !series.Metadata.GenresLocked && processedGenres.Count > 0)
             {
@@ -568,7 +571,8 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             // Strip blacklisted items from processedTags
-            processedTags = processedTags.Distinct()
+            processedTags = processedTags
+                .Distinct()
                 .Where(g => !settings.Blacklist.Contains(g))
                 .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
                 .ToList();
@@ -616,7 +620,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (settings.EnablePeople)
         {
-            series.Metadata.People ??= new List<SeriesMetadataPeople>();
+            series.Metadata.People ??= [];
 
             // Ensure all people are named correctly
             externalMetadata.Staff = externalMetadata.Staff.Select(s =>
@@ -723,13 +727,27 @@ public class ExternalMetadataService : IExternalMetadataService
 
         #endregion
 
+        #region Publication Status
+
         if (!series.Metadata.PublicationStatusLocked && settings.EnablePublicationStatus)
         {
-            var chapters = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes.SelectMany(v => v.Chapters).ToList();
-            var wasChanged = DeterminePublicationStatus(series, chapters, externalMetadata);
-            _unitOfWork.SeriesRepository.Update(series);
-            madeModification = madeModification || wasChanged;
+            try
+            {
+                var chapters =
+                    (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes
+                    .SelectMany(v => v.Chapters).ToList();
+                var wasChanged = DeterminePublicationStatus(series, chapters, externalMetadata);
+                _unitOfWork.SeriesRepository.Update(series);
+                madeModification = madeModification || wasChanged;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue determining Publication Status for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+            }
         }
+        #endregion
+
+        #region Relationships
 
         if (settings.EnableRelationships && externalMetadata.Relations != null && defaultAdmin != null)
         {
@@ -783,6 +801,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 madeModification = true;
             }
         }
+        #endregion
 
         return madeModification;
     }
