@@ -654,7 +654,10 @@ public class ExternalMetadataService : IExternalMetadataService
                     Name = w.Name,
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                     Description = CleanSummary(w.Description),
-                }).ToList();
+                })
+                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => _mapper.Map<PersonDto>(p)))
+                .DistinctBy(p => Parser.Normalize(p.Name))
+                .ToList();
 
 
             // NOTE: PersonRoles can be a hashset
@@ -680,7 +683,10 @@ public class ExternalMetadataService : IExternalMetadataService
                     Name = w.Name,
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                     Description = CleanSummary(w.Description),
-                }).ToList();
+                })
+                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => _mapper.Map<PersonDto>(p)))
+                .DistinctBy(p => Parser.Normalize(p.Name))
+                .ToList();
 
             if (!series.Metadata.CoverArtistLocked && artists.Count > 0 &&  settings.PersonRoles.Contains(PersonRole.CoverArtist))
             {
@@ -703,7 +709,10 @@ public class ExternalMetadataService : IExternalMetadataService
                         Name = w.Name,
                         AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
                         Description = CleanSummary(w.Description),
-                    }).ToList();
+                    })
+                    .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Character).Select(p => _mapper.Map<PersonDto>(p)))
+                    .DistinctBy(p => Parser.Normalize(p.Name))
+                    .ToList();
 
 
                 if (!series.Metadata.CharacterLocked && characters.Count > 0)
