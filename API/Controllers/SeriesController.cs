@@ -19,6 +19,7 @@ using API.Helpers;
 using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -648,9 +649,9 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("update-match")]
-    public async Task<ActionResult> UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId)
     {
-        await _externalMetadataService.FixSeriesMatch(seriesId, aniListId);
+        BackgroundJob.Enqueue(() => _externalMetadataService.FixSeriesMatch(seriesId, aniListId));
 
         return Ok();
     }

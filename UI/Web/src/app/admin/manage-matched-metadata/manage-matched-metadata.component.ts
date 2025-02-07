@@ -20,6 +20,8 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
 import {AsyncPipe} from "@angular/common";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -49,6 +51,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   private readonly actionService = inject(ActionService);
   private readonly router = inject(Router);
   private readonly manageService = inject(ManageService);
+  private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly imageService = inject(ImageService);
 
@@ -66,6 +69,15 @@ export class ManageMatchedMetadataComponent implements OnInit {
         this.router.navigate(['/']);
         return;
       }
+
+      this.messageHub.messages$.subscribe(message => {
+        if (message.event !== EVENTS.ScanSeries) return;
+
+        const evt = message.payload as ScanSeriesEvent;
+        if (this.data.filter(d => d.series.id === evt.seriesId).length > 0) {
+          this.loadData();
+        }
+      });
 
       this.filterGroup.valueChanges.pipe(
         debounceTime(300),
