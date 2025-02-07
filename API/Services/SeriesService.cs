@@ -121,12 +121,6 @@ public class SeriesService : ISeriesService
             series.Metadata ??= new SeriesMetadataBuilder()
                 .Build();
 
-            if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
-            {
-                series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata.AgeRating;
-                series.Metadata.AgeRatingLocked = true;
-            }
-
             if (NumberHelper.IsValidYear(updateSeriesMetadataDto.SeriesMetadata.ReleaseYear) && series.Metadata.ReleaseYear != updateSeriesMetadataDto.SeriesMetadata.ReleaseYear)
             {
                 series.Metadata.ReleaseYear = updateSeriesMetadataDto.SeriesMetadata.ReleaseYear;
@@ -173,7 +167,7 @@ public class SeriesService : ISeriesService
                 updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
             {
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
-                series.Metadata.Genres ??= new List<Genre>();
+                series.Metadata.Genres ??= [];
                 GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, genre =>
                 {
                     series.Metadata.Genres.Add(genre);
@@ -190,7 +184,7 @@ public class SeriesService : ISeriesService
                 var allTags = (await _unitOfWork.TagRepository
                     .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title))))
                     .ToList();
-                series.Metadata.Tags ??= new List<Tag>();
+                series.Metadata.Tags ??= [];
                 TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, tag =>
                 {
                     series.Metadata.Tags.Add(tag);
@@ -198,7 +192,26 @@ public class SeriesService : ISeriesService
             }
             else
             {
-                series.Metadata.Tags = new List<Tag>();
+                series.Metadata.Tags = [];
+            }
+
+            if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata?.AgeRating)
+            {
+                series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata?.AgeRating ?? AgeRating.Unknown;
+                series.Metadata.AgeRatingLocked = true;
+            }
+            else
+            {
+                if (!series.Metadata.AgeRatingLocked)
+                {
+                    var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+                    var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
+                    var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, metadataSettings.AgeRatingMappings);
+                    if (updatedRating > series.Metadata.AgeRating)
+                    {
+                        series.Metadata.AgeRating = updatedRating;
+                    }
+                }
             }
 
             if (updateSeriesMetadataDto.SeriesMetadata != null)
