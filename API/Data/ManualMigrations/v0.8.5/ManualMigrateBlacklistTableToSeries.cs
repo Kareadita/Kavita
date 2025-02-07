@@ -29,10 +29,18 @@ public static class ManualMigrateBlacklistTableToSeries
             .Include(s => s.Series.ExternalSeriesMetadata)
             .Select(s => s.Series)
             .ToListAsync();
+
         foreach (var series in blacklistedSeries)
         {
             series.IsBlacklisted = true;
             series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() { SeriesId = series.Id };
+
+            if (series.ExternalSeriesMetadata.AniListId > 0)
+            {
+                series.IsBlacklisted = false;
+                logger.LogInformation("{SeriesName} was in Blacklist table, but has valid AniList Id, not blacklisting", series.Name);
+            }
+
             context.Series.Entry(series).State = EntityState.Modified;
         }
         // Remove everything in SeriesBlacklist (it will be removed in another migration)
