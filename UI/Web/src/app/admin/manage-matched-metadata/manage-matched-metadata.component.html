@@ -24,13 +24,22 @@
     [footerHeight]="50"
   >
 
-    <ngx-datatable-column name="lastModifiedUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+    <ngx-datatable-column name="series.name" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-name-header')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
         <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"></app-image>
         <a class="ms-2" [href]="'/library/' + item.series.libraryId + '/series/' + item.series.id" target="_blank">{{item.series.name}}</a>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column name="series.libraryId" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('library-name-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.series.libraryId | libraryName | async}}
       </ng-template>
     </ngx-datatable-column>
 
@@ -70,9 +79,13 @@
 
     <ngx-datatable-column name="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('actions-header')}}
       </ng-template>
       <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-        <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, item.series)"></app-card-actionables>
+        <button class="btn btn-icon" (click)="fixMatch(item.series)">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('match-alt', {seriesName: item.series.name})}}</span>
+        </button>
       </ng-template>
     </ngx-datatable-column>
 

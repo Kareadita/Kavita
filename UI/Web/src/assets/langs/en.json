@@ -759,14 +759,17 @@
         "description": "All applicable Series that can be matched with External Metadata reside here. Kavita will prefetch or refresh series metadata, 50 series per 24 hours daily.",
         "status-header": "Status",
         "series-name-header": "Series",
+        "library-name-header": "Library",
         "valid-until-header": "Next Refresh",
+        "actions-header": "Actions",
         "matched-status-label": "Matched",
         "unmatched-status-label": "Not Matched",
         "blacklist-status-label": "Needs Manual Match",
         "dont-match-status-label": "{{dont-match-label}}",
         "all-status-label": "All",
         "dont-match-label": "Don't Match",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "match-alt": "Match {{seriesName}}"
     },
 
     "manage-user-tokens": {

@@ -4,9 +4,7 @@ import {Router} from "@angular/router";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {Series} from "../../_models/series";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {ManageService} from "../../_services/manage.service";
 import {ManageMatchSeries} from "../../_models/kavitaplus/manage-match-series";
@@ -19,35 +17,35 @@ import {MatchStateOptionPipe} from "../../_pipes/match-state.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
-import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-manage-matched-metadata',
   standalone: true,
-    imports: [
-        TranslocoDirective,
-        ImageComponent,
-        CardActionablesComponent,
-        VirtualScrollerModule,
-        ReactiveFormsModule,
-        Select2Module,
-        MatchStateOptionPipe,
-        UtcToLocalTimePipe,
-        DefaultValuePipe,
-        NgxDatatableModule,
-    ],
+  imports: [
+    TranslocoDirective,
+    ImageComponent,
+    VirtualScrollerModule,
+    ReactiveFormsModule,
+    Select2Module,
+    MatchStateOptionPipe,
+    UtcToLocalTimePipe,
+    DefaultValuePipe,
+    NgxDatatableModule,
+    LibraryNamePipe,
+    AsyncPipe,
+  ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageMatchedMetadataComponent implements OnInit {
-  protected readonly MatchState = MatchStateOption;
+  protected readonly ColumnMode = ColumnMode;
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
 
   private readonly licenseService = inject(LicenseService);
-  private readonly actionFactory = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly router = inject(Router);
   private readonly manageService = inject(ManageService);
@@ -57,8 +55,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
   isLoading: boolean = true;
   data: Array<ManageMatchSeries> = [];
-  actions: Array<ActionItem<Series>> = this.actionFactory.getSeriesActions(this.fixMatch.bind(this))
-    .filter(item => item.action === Action.Match);
   filterGroup = new FormGroup({
     'matchState': new FormControl(MatchStateOption.Error, []),
   });
@@ -86,7 +82,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
       ).subscribe();
 
       this.loadData().subscribe();
-
     });
   }
 
@@ -108,21 +103,11 @@ export class ManageMatchedMetadataComponent implements OnInit {
     }));
   }
 
-  performAction(action: ActionItem<Series>, series: Series) {
-    if (action.callback) {
-      action.callback(action, series);
-    }
-  }
 
-  fixMatch(actionItem: ActionItem<Series>, series: Series) {
+  fixMatch(series: Series) {
     this.actionService.matchSeries(series, result => {
       if (!result) return;
       this.loadData().subscribe();
     });
   }
-
-    protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
-    protected readonly ScrobbleEventType = ScrobbleEventType;
-    protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-    protected readonly ColumnMode = ColumnMode;
 }
