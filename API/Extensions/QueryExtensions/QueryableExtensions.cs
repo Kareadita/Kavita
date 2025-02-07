@@ -293,7 +293,7 @@ public static class QueryableExtensions
                 .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue && !s.IsBlacklisted),
             MatchStateOption.NotMatched => query.
                 Include(s => s.ExternalSeriesMetadata)
-                .Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted),
+                .Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted && !s.DontMatch),
             MatchStateOption.Error => query.Where(s => s.IsBlacklisted),
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => query
