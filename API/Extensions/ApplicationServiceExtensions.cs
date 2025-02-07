@@ -90,6 +90,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
             options.UseInMemory(EasyCacheProfiles.License);
             options.UseInMemory(EasyCacheProfiles.LicenseInfo);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusMatchSeries);
         });
 
         services.AddMemoryCache(options =>

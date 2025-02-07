@@ -40,7 +40,9 @@ public class SeriesController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
     private readonly IEasyCachingProvider _externalSeriesCacheProvider;
+    private readonly IEasyCachingProvider _matchSeriesCacheProvider;
     private const string CacheKey = "externalSeriesData_";
+    private const string MatchSeriesCacheKey = "matchSeries_";
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
@@ -57,6 +59,7 @@ public class SeriesController : BaseApiController
         _externalMetadataService = externalMetadataService;
 
         _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
+        _matchSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusMatchSeries);
     }
 
     /// <summary>
@@ -625,7 +628,17 @@ public class SeriesController : BaseApiController
     [HttpPost("match")]
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
-        return Ok(await _externalMetadataService.MatchSeries(dto));
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
+        var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey);
+        if (results.HasValue)
+        {
+            return Ok(results.Value);
+        }
+
+        var ret = await _externalMetadataService.MatchSeries(dto);
+        await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(5));
+
+        return Ok(ret);
     }
 
     /// <summary>

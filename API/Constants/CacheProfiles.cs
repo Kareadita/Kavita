@@ -23,4 +23,8 @@ public static class EasyCacheProfiles
     /// External Series metadata for Kavita+ recommendation
     /// </summary>
     public const string KavitaPlusExternalSeries = "kavita+externalSeries";
+    /// <summary>
+    /// Match Series metadata for Kavita+ metadata download
+    /// </summary>
+    public const string KavitaPlusMatchSeries = "kavita+matchSeries";
 }

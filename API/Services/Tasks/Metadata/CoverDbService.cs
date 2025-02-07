@@ -28,7 +28,8 @@ public interface ICoverDbService
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
-    Task SetPersonCoverImage(Person person, string url, bool fromBase64 = true);
+    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true);
+    Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true);
 }
 
 
@@ -460,7 +461,8 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-    public async Task SetPersonCoverImage(Person person, string url, bool fromBase64 = true)
+
+    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -487,6 +489,42 @@ public class CoverDbService : ICoverDbService
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false);
+        }
+    }
+
+    /// <summary>
+    /// Sets the series cover by url
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="url"></param>
+    /// <param name="fromBase64"></param>
+    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true)
+    {
+        if (!string.IsNullOrEmpty(url))
+        {
+            var filePath = await CreateThumbnail(url, $"{ImageService.GetSeriesFormat(series.Id)}", fromBase64);
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                series.CoverImage = filePath;
+                series.CoverImageLocked = true;
+                _imageService.UpdateColorScape(series);
+                _unitOfWork.SeriesRepository.Update(series);
+            }
+        }
+        else
+        {
+            series.CoverImage = string.Empty;
+            series.CoverImageLocked = false;
+            _imageService.UpdateColorScape(series);
+            _unitOfWork.SeriesRepository.Update(series);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         }
     }
 

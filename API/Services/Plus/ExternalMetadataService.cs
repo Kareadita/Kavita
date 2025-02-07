@@ -147,7 +147,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
         // Prefetch SeriesDetail data
-        var metadata = await GetSeriesDetailPlus(seriesId, libraryType);
+        await GetSeriesDetailPlus(seriesId, libraryType);
 
     }
 
@@ -499,8 +499,10 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
         if (!settings.Enabled) return false;
+
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related);
         if (series == null) return false;
+
         var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
 
         _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
@@ -655,7 +657,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                     Description = CleanSummary(w.Description),
                 })
-                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => _mapper.Map<PersonDto>(p)))
+                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => _mapper.Map<PersonDto>(p.Person)))
                 .DistinctBy(p => Parser.Normalize(p.Name))
                 .ToList();
 
@@ -684,7 +686,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                     Description = CleanSummary(w.Description),
                 })
-                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => _mapper.Map<PersonDto>(p)))
+                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => _mapper.Map<PersonDto>(p.Person)))
                 .DistinctBy(p => Parser.Normalize(p.Name))
                 .ToList();
 
@@ -710,7 +712,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
                         Description = CleanSummary(w.Description),
                     })
-                    .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Character).Select(p => _mapper.Map<PersonDto>(p)))
+                    .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.Character).Select(p => _mapper.Map<PersonDto>(p.Person)))
                     .DistinctBy(p => Parser.Normalize(p.Name))
                     .ToList();
 
@@ -730,7 +732,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
                         if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
                         {
-                            await _coverDbService.SetPersonCoverImage(person, character.ImageUrl, false);
+                            await _coverDbService.SetPersonCoverByUrl(person, character.ImageUrl, false);
                         }
                     }
 
@@ -817,6 +819,18 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         #endregion
 
+        #region Series Cover
+
+        var downloadCoverImage = true;
+
+        // This must not allow cover image locked to be off after downloading, else it will call every time a match is hit
+        if (downloadCoverImage && !series.CoverImageLocked && !string.IsNullOrEmpty(externalMetadata.CoverUrl))
+        {
+            await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
+        }
+
+        #endregion
+
         return madeModification;
     }
 
@@ -830,6 +844,18 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
+    private async Task DownloadSeriesCovers(Series series, string coverUrl)
+    {
+        try
+        {
+            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception downloading cover image for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+        }
+    }
+
     private async Task DownloadAndSetCovers(List<SeriesStaffDto> people)
     {
         foreach (var staff in people)
@@ -839,7 +865,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
             if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
             {
-                await _coverDbService.SetPersonCoverImage(person, staff.ImageUrl, false);
+                await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false);
             }
         }
     }
