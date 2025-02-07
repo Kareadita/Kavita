@@ -211,7 +211,7 @@ public class ExternalMetadataService : IExternalMetadataService
             Format = series.Format == MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
             Query = dto.Query,
             SeriesName = series.Name,
-            AlternativeNames = altNames,
+            AlternativeNames = altNames, // NOTE: This has the seriesName already on it, probably not needed
             Year = series.Metadata.ReleaseYear,
             AniListId = potentialAnilistId ?? ScrobblingService.GetAniListId(series),
             MalId = potentialMalId ?? ScrobblingService.GetMalId(series),
@@ -955,7 +955,13 @@ public class ExternalMetadataService : IExternalMetadataService
         return mapping.DestinationValue ?? (mapping.ExcludeFromSource ? null : value);
     }
 
-    private static AgeRating DetermineAgeRating(IEnumerable<string> values, Dictionary<string, AgeRating> mappings)
+    /// <summary>
+    /// Returns the highest age rating from all tags/genres based on user-supplied mappings
+    /// </summary>
+    /// <param name="values">A combo of all tags/genres</param>
+    /// <param name="mappings"></param>
+    /// <returns></returns>
+    public static AgeRating DetermineAgeRating(IEnumerable<string> values, Dictionary<string, AgeRating> mappings)
     {
         // Find highest age rating from mappings
         mappings ??= new Dictionary<string, AgeRating>();
