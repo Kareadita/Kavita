@@ -5,7 +5,9 @@ export enum MetadataSettingField {
   Genres = 4,
   Tags = 5,
   LocalizedName = 6,
-  Covers = 7
+  Covers = 7,
+  AgeRating = 8,
+  People = 9
 }
 
 export const allMetadataSettingField = Object.keys(MetadataSettingField)

@@ -10,6 +10,10 @@ export class MetadataSettingFiledPipe implements PipeTransform {
 
   transform(value: MetadataSettingField): string {
     switch (value) {
+      case MetadataSettingField.AgeRating:
+        return translate('metadata-setting-field-pipe.age-rating');
+        case MetadataSettingField.People:
+        return translate('metadata-setting-field-pipe.people');
       case MetadataSettingField.Covers:
         return translate('metadata-setting-field-pipe.covers');
       case MetadataSettingField.Summary:

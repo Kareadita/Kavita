@@ -2625,6 +2625,8 @@
 
     "metadata-setting-field-pipe": {
         "covers": "Covers",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}",

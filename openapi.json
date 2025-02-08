@@ -20062,7 +20062,9 @@
                 4,
                 5,
                 6,
-                7
+                7,
+                8,
+                9
               ],
               "type": "integer",
               "description": "Represents which field that can be written to as an override when already locked",
