@@ -21753,6 +21753,15 @@
           "imageUrl": {
             "type": "string",
             "nullable": true
+          },
+          "role": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -22431,6 +22440,15 @@
           },
           "person": {
             "$ref": "#/components/schemas/Person"
+          },
+          "kavitaPlusConnection": {
+            "type": "boolean",
+            "description": "The source of this connection. If not Kavita, this implies Metadata Download linked this and it can be removed between matches"
+          },
+          "orderWeight": {
+            "type": "integer",
+            "description": "A weight that allows lower numbers to sort first",
+            "format": "int32"
           },
           "role": {
             "enum": [

@@ -560,6 +560,7 @@ public class SettingsController : BaseApiController
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         existingMetadataSetting.Enabled = dto.Enabled;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;
+        existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;
         existingMetadataSetting.EnableRelationships = dto.EnableRelationships;
         existingMetadataSetting.EnablePeople = dto.EnablePeople;

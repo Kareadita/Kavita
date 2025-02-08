@@ -175,7 +175,7 @@ public class SeriesService : ISeriesService
             }
             else
             {
-                series.Metadata.Genres = new List<Genre>();
+                series.Metadata.Genres = [];
             }
 
 
@@ -218,7 +218,7 @@ public class SeriesService : ISeriesService
             {
                 if (PersonHelper.HasAnyPeople(updateSeriesMetadataDto.SeriesMetadata))
                 {
-                    series.Metadata.People ??= new List<SeriesMetadataPeople>();
+                    series.Metadata.People ??= [];
 
                     // Writers
                     if (!series.Metadata.WriterLocked)
@@ -292,6 +292,12 @@ public class SeriesService : ISeriesService
                         await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Translators, PersonRole.Translator, _unitOfWork);
                     }
 
+                    // Characters
+                    if (!series.Metadata.CharacterLocked)
+                    {
+                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Characters, PersonRole.Character, _unitOfWork);
+                    }
+
                 }
 
                 series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
@@ -308,6 +314,7 @@ public class SeriesService : ISeriesService
                 series.Metadata.PencillerLocked = updateSeriesMetadataDto.SeriesMetadata.PencillerLocked;
                 series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
                 series.Metadata.TranslatorLocked = updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked;
+                series.Metadata.LocationLocked = updateSeriesMetadataDto.SeriesMetadata.LocationLocked;
                 series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked;
                 series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WriterLocked;
                 series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;

@@ -25,6 +25,7 @@ using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -40,6 +41,7 @@ public class SeriesController : BaseApiController
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
     private readonly IExternalMetadataService _externalMetadataService;
+    private readonly IHostEnvironment _environment;
     private readonly IEasyCachingProvider _externalSeriesCacheProvider;
     private readonly IEasyCachingProvider _matchSeriesCacheProvider;
     private const string CacheKey = "externalSeriesData_";
@@ -49,7 +51,7 @@ public class SeriesController : BaseApiController
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
         ISeriesService seriesService, ILicenseService licenseService,
         IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService,
-        IExternalMetadataService externalMetadataService)
+        IExternalMetadataService externalMetadataService, IHostEnvironment environment)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
@@ -58,6 +60,7 @@ public class SeriesController : BaseApiController
         _licenseService = licenseService;
         _localizationService = localizationService;
         _externalMetadataService = externalMetadataService;
+        _environment = environment;
 
         _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
         _matchSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusMatchSeries);
@@ -631,7 +634,7 @@ public class SeriesController : BaseApiController
     {
         var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
         var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey);
-        if (results.HasValue)
+        if (results.HasValue && !_environment.IsDevelopment())
         {
             return Ok(results.Value);
         }

@@ -11,6 +11,20 @@ namespace API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
+                name: "KavitaPlusConnection",
+                table: "SeriesMetadataPeople",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<int>(
+                name: "OrderWeight",
+                table: "SeriesMetadataPeople",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<bool>(
                 name: "EnableCoverImage",
                 table: "MetadataSettings",
                 type: "INTEGER",
@@ -27,6 +41,14 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "KavitaPlusConnection",
+                table: "SeriesMetadataPeople");
+
+            migrationBuilder.DropColumn(
+                name: "OrderWeight",
+                table: "SeriesMetadataPeople");
+
             migrationBuilder.DropColumn(
                 name: "EnableCoverImage",
                 table: "MetadataSettings");

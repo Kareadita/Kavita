@@ -204,6 +204,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasForeignKey(smp => smp.PersonId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Entity<SeriesMetadataPeople>()
+            .Property(b => b.OrderWeight)
+            .HasDefaultValue(0);
+
         builder.Entity<MetadataSettings>()
             .Property(x => x.AgeRatingMappings)
             .HasConversion(

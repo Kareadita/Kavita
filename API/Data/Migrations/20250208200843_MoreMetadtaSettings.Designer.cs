@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250208011004_MoreMetadtaSettings")]
+    [Migration("20250208200843_MoreMetadtaSettings")]
     partial class MoreMetadtaSettings
     {
         /// <inheritdoc />
@@ -2124,6 +2124,14 @@ namespace API.Data.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("KavitaPlusConnection")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderWeight")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.HasKey("SeriesMetadataId", "PersonId", "Role");
 

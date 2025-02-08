@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
+using NotImplementedException = System.NotImplementedException;
 
 namespace API.DTOs.KavitaPlus.Metadata;
 
@@ -86,5 +87,15 @@ public class MetadataSettingsDto
     public bool HasOverride(MetadataSettingField field)
     {
         return Overrides.Contains(field);
+    }
+
+    /// <summary>
+    /// If this Person role is allowed to be written
+    /// </summary>
+    /// <param name="character"></param>
+    /// <returns></returns>
+    public bool IsPersonAllowed(PersonRole character)
+    {
+        return PersonRoles.Contains(character);
     }
 }

@@ -121,8 +121,8 @@ public class AutoMapperProfiles : Profile
             // Map Characters
             .ForMember(dest => dest.Characters, opt => opt.MapFrom(src => src.People
                 .Where(cp => cp.Role == PersonRole.Character)
-                .Select(cp => cp.Person)
-                .OrderBy(p => p.NormalizedName)))
+                .OrderBy(cp => cp.OrderWeight)
+                .Select(cp => cp.Person)))
             // Map Pencillers
             .ForMember(dest => dest.Pencillers, opt => opt.MapFrom(src => src.People
                 .Where(cp => cp.Role == PersonRole.Penciller)
@@ -369,6 +369,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<MetadataSettings, MetadataSettingsDto>()
             .ForMember(dest => dest.Blacklist, opt => opt.MapFrom(src => src.Blacklist ?? new List<string>()))
             .ForMember(dest => dest.Whitelist, opt => opt.MapFrom(src => src.Whitelist ?? new List<string>()))
+            .ForMember(dest => dest.Overrides, opt => opt.MapFrom(src => src.Overrides ?? new List<MetadataSettingField>()))
             .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()));
 
 
