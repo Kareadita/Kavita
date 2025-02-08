@@ -527,14 +527,14 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         if (settings.EnableSummary && (!series.Metadata.SummaryLocked ||
-                                       settings.Overrides.Any(o => o == MetadataSettingField.Summary)))
+                                       settings.HasOverride(MetadataSettingField.Summary)))
         {
             series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
             madeModification = true;
         }
 
         if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (!series.Metadata.ReleaseYearLocked ||
-                settings.Overrides.Any(o => o == MetadataSettingField.StartDate)))
+                settings.HasOverride(MetadataSettingField.StartDate)))
         {
             series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
             madeModification = true;
@@ -565,7 +565,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .ToList();
 
             if (settings.EnableGenres && processedGenres.Count > 0 && (!series.Metadata.GenresLocked ||
-                    settings.Overrides.Any(o => o == MetadataSettingField.Genres)))
+                    settings.HasOverride(MetadataSettingField.Genres)))
             {
                 _logger.LogDebug("Found {GenreCount} genres for {SeriesName}", processedGenres.Count, series.Name);
                 var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
@@ -601,7 +601,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Set the tags for the series and ensure they are in the DB
             if (settings.EnableTags && processedTags.Count > 0 && (!series.Metadata.TagsLocked ||
-                    settings.Overrides.Any(o => o == MetadataSettingField.Tags)))
+                    settings.HasOverride(MetadataSettingField.Tags)))
             {
                 _logger.LogDebug("Found {TagCount} tags for {SeriesName}", processedTags.Count, series.Name);
                 var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
@@ -619,7 +619,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         #region Age Rating
 
-        if (!series.Metadata.AgeRatingLocked || settings.Overrides.Any(o => o == MetadataSettingField.AgeRating))
+        if (!series.Metadata.AgeRatingLocked || settings.HasOverride(MetadataSettingField.AgeRating))
         {
             try
             {
@@ -685,7 +685,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // NOTE: PersonRoles can be a hashset
             if (writers.Count > 0 && settings.PersonRoles.Contains(PersonRole.Writer) && (!series.Metadata.WriterLocked ||
-                    settings.Overrides.Any(o => o == MetadataSettingField.People)))
+                    settings.HasOverride(MetadataSettingField.People)))
             {
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
 
@@ -708,12 +708,13 @@ public class ExternalMetadataService : IExternalMetadataService
                     AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                     Description = CleanSummary(w.Description),
                 })
-                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => _mapper.Map<PersonDto>(p.Person)))
+                .Concat(series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist)
+                    .Select(p => _mapper.Map<PersonDto>(p.Person)))
                 .DistinctBy(p => Parser.Normalize(p.Name))
                 .ToList();
 
             if (artists.Count > 0 &&  settings.PersonRoles.Contains(PersonRole.CoverArtist) && (!series.Metadata.CoverArtistLocked ||
-                    settings.Overrides.Any(o => o == MetadataSettingField.People)))
+                    settings.HasOverride(MetadataSettingField.People)))
             {
                 await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
 
@@ -727,7 +728,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             if (externalMetadata.Characters != null && settings.PersonRoles.Contains(PersonRole.Character) && (!series.Metadata.CharacterLocked ||
-                    settings.Overrides.Any(o => o == MetadataSettingField.People)))
+                    settings.HasOverride(MetadataSettingField.People)))
             {
                 var characters = externalMetadata.Characters
                     .Select(w => new PersonDto()
@@ -770,7 +771,7 @@ public class ExternalMetadataService : IExternalMetadataService
         #region Publication Status
 
         if (settings.EnablePublicationStatus && (!series.Metadata.PublicationStatusLocked ||
-                settings.Overrides.Any(o => o == MetadataSettingField.PublicationStatus)))
+                settings.HasOverride(MetadataSettingField.PublicationStatus)))
         {
             try
             {
@@ -848,7 +849,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // This must not allow cover image locked to be off after downloading, else it will call every time a match is hit
         if (!string.IsNullOrEmpty(externalMetadata.CoverUrl) && (!series.CoverImageLocked ||
-                                                                  settings.Overrides.Any(o => o == MetadataSettingField.Covers)))
+                                                                  settings.HasOverride(MetadataSettingField.Covers)))
         {
             await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
         }

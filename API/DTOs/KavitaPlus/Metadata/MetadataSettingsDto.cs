@@ -76,4 +76,15 @@ public class MetadataSettingsDto
     /// Which Roles to allow metadata downloading for
     /// </summary>
     public List<PersonRole> PersonRoles { get; set; }
+
+
+    /// <summary>
+    /// Override list contains this field
+    /// </summary>
+    /// <param name="field"></param>
+    /// <returns></returns>
+    public bool HasOverride(MetadataSettingField field)
+    {
+        return Overrides.Contains(field);
+    }
 }
