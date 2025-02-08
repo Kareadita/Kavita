@@ -573,6 +573,7 @@ public class SettingsController : BaseApiController
 
         existingMetadataSetting.Blacklist = dto.Blacklist.DistinctBy(d => d.ToNormalized()).ToList() ?? [];
         existingMetadataSetting.Whitelist = dto.Whitelist.DistinctBy(d => d.ToNormalized()).ToList() ?? [];
+        existingMetadataSetting.Overrides = dto.Overrides.ToList() ?? [];
 
         // Handle Field Mappings
         if (dto.FieldMappings != null)

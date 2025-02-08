@@ -309,6 +309,7 @@ public static class Seed
                 EnableGenres = true,
                 EnableLocalizedName = false,
                 FirstLastPeopleNaming = true,
+                EnableCoverImage = true,
                 PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]
             };
             await context.MetadataSettings.AddAsync(existing);

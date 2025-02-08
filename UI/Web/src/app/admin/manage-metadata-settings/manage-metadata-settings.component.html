@@ -30,6 +30,18 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableLocalizedName'); as formControl) {
+          <app-setting-switch [title]="t('localized-name-label')" [subtitle]="t('localized-name-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="localized-name" type="checkbox" class="form-check-input" formControlName="enableLocalizedName">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enablePublicationStatus'); as formControl) {
           <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
             <ng-template #switch>
@@ -59,6 +71,18 @@
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="enable-start-date-status" type="checkbox" class="form-check-input" formControlName="enableStartDate">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableCoverImage'); as formControl) {
+          <app-setting-switch [title]="t('enable-cover-image-label')" [subtitle]="t('enable-cover-image-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-cover-image" type="checkbox" class="form-check-input" formControlName="enableCoverImage">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -183,13 +207,13 @@
       <div formArrayName="ageRatingMappings">
         @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
           <div [formGroupName]="i" class="row mb-2">
-            <div class="col-md-4">
+            <div class="col-md-4 d-flex align-items-center justify-content-center">
               <input type="text" class="form-control" formControlName="str" autocomplete="off" />
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-flex align-items-center justify-content-center">
               <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 d-flex align-items-center justify-content-center">
               <select class="form-select" formControlName="rating">
                 @for (ageRating of ageRatings; track ageRating.value) {
                   <option [value]="ageRating.value">
@@ -202,13 +226,21 @@
               <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
                 <i class="fa fa-trash-alt" aria-hidden="true"></i>
               </button>
+
+              @if($last) {
+                <button class="btn btn-icon" (click)="addAgeRatingMapping()">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+              }
             </div>
           </div>
+        } @empty {
+          <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
+            <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
+          </button>
         }
 
-        <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
-          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
-        </button>
+
       </div>
 
       <div class="setting-section-break"></div>
@@ -252,14 +284,38 @@
               <button class="btn btn-icon" (click)="removeFieldMappingRow(i)">
                 <i class="fa fa-trash-alt" aria-hidden="true"></i>
               </button>
+
+              @if ($last) {
+                <button class="btn btn-icon" (click)="addFieldMapping()">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+              }
             </div>
           </div>
+        } @empty {
+          <button class="btn btn-secondary" (click)="addFieldMapping()">
+            <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
+          </button>
         }
 
-        <button class="btn btn-secondary float-end" (click)="addFieldMapping()">
-          <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
-        </button>
       </div>
+
+      <div class="setting-section-break"></div>
+
+      @if (settingsForm.get('overrides')) {
+        <h5>{{t('overrides-label')}}</h5>
+        <p>{{t('overrides-description')}}</p>
+        <div class="row g-0 mt-4 mb-4" formArrayName="overrides">
+          @for(field of allMetadataSettingFields; track field; let i = $index) {
+            <div class="col-md-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" [formControlName]="'override_' + i" [id]="'override-' + field">
+                <label class="form-check-label" [for]="'override-' + field">{{ field | metadataSettingFiled }}</label>
+              </div>
+            </div>
+          }
+        </div>
+      }
 
     </form>
   }

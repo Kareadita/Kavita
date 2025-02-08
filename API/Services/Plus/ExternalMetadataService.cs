@@ -45,7 +45,7 @@ public interface IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
     /// <returns></returns>
-    Task GetNewSeriesData(int seriesId, LibraryType libraryType);
+    Task FetchSeriesMetadata(int seriesId, LibraryType libraryType);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
@@ -118,7 +118,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
-            await GetNewSeriesData(seriesId, libraryType);
+            await FetchSeriesMetadata(seriesId, libraryType);
             await Task.Delay(1500);
             count++;
         }
@@ -131,7 +131,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
-    public async Task GetNewSeriesData(int seriesId, LibraryType libraryType)
+    public async Task FetchSeriesMetadata(int seriesId, LibraryType libraryType)
     {
         if (!IsPlusEligible(libraryType)) return;
         if (!await _licenseService.HasActiveLicense()) return;
@@ -146,6 +146,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
+
         // Prefetch SeriesDetail data
         await GetSeriesDetailPlus(seriesId, libraryType);
 
@@ -509,7 +510,24 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var madeModification = false;
 
-        if (!series.Metadata.SummaryLocked && string.IsNullOrEmpty(series.Metadata.Summary) && settings.EnableSummary)
+        if (!series.LocalizedNameLocked && string.IsNullOrEmpty(series.LocalizedName) && settings.EnableLocalizedName)
+        {
+            // We need to make the best appropriate guess
+            if (externalMetadata.Name == series.Name)
+            {
+                // Choose closest (usually last) synonym
+                series.LocalizedName = externalMetadata.Synonyms.Last();
+            }
+            else
+            {
+                series.LocalizedName = externalMetadata.Name;
+            }
+
+            madeModification = true;
+        }
+
+        if (settings.EnableSummary && (!series.Metadata.SummaryLocked ||
+                                       settings.Overrides.Any(o => o == MetadataSettingField.Summary)))
         {
             series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
             madeModification = true;
@@ -833,6 +851,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         return madeModification;
     }
+
 
     private static RelationKind GetReverseRelation(RelationKind relation)
     {

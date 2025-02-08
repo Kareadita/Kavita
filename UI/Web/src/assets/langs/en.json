@@ -788,12 +788,16 @@
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
         "summary-label": "Summary",
         "summary-tooltip": "Allow Summary to be written when the field is unlocked.",
+        "localized-name-label": "Localized Series Name",
+        "localized-name-tooltip": "Allow Localized Name to be written when the field is unlocked. Kavita will attempt to make the best guess.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
         "enable-relations-tooltip": "Allow Series Relationships to be <b>added</b>.",
         "enable-people-label": "People",
         "enable-people-tooltip": "Allow People (Characters, Writers, etc) to be <b>added</b>. All people include images.",
+        "enable-cover-image-label": "Cover Image",
+        "enable-cover-image-tooltip": "Allow Kavita to write the cover image for the Series",
         "enable-start-date-label": "Start Date",
         "enable-start-date-tooltip": "Allow Start Date of Series to be written to the Series",
         "enable-genres-label": "Genres",
@@ -815,7 +819,10 @@
         "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Only applicable when Genre/Tag are enabled to be written.",
         "first-last-name-label": "First Last Naming",
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
-        "person-roles-label": "Roles"
+        "person-roles-label": "Roles",
+        "overrides-label": "Overrides",
+        "overrides-description": "Allow Kavita to write over locked fields"
+
     },
 
     "book-line-overlay": {
@@ -2615,6 +2622,17 @@
         "hour": "Hour",
         "hours": "Hours"
     },
+
+    "metadata-setting-field-pipe": {
+        "covers": "Covers",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
+    },
+
 
     "actionable": {
         "scan-library": "Scan Library",

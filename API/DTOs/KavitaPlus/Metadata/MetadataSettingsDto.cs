@@ -4,6 +4,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs.KavitaPlus.Metadata;
 
+
 public class MetadataSettingsDto
 {
     /// <summary>
@@ -35,6 +36,10 @@ public class MetadataSettingsDto
     /// Allow setting the Localized name
     /// </summary>
     public bool EnableLocalizedName { get; set; }
+    /// <summary>
+    /// Allow setting the cover image
+    /// </summary>
+    public bool EnableCoverImage { get; set; }
 
     // Need to handle the Genre/tags stuff
     public bool EnableGenres { get; set; } = true;
@@ -54,6 +59,10 @@ public class MetadataSettingsDto
     /// A list of rules that allow mapping a genre/tag to another genre/tag
     /// </summary>
     public List<MetadataFieldMappingDto> FieldMappings { get; set; }
+    /// <summary>
+    /// A list of overrides that will enable writing to locked fields
+    /// </summary>
+    public List<MetadataSettingField> Overrides { get; set; }
 
     /// <summary>
     /// Do not allow any Genre/Tag in this list to be written to Kavita

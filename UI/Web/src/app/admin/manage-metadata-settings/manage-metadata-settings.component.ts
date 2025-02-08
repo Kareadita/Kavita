@@ -17,6 +17,8 @@ import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-setti
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
 import {NgClass} from "@angular/common";
+import {allMetadataSettingField} from "../_models/metadata-setting-field";
+import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe";
 
 
 @Component({
@@ -31,6 +33,7 @@ import {NgClass} from "@angular/common";
     TagBadgeComponent,
     AgeRatingPipe,
     PersonRolePipe,
+    MetadataSettingFiledPipe,
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -52,6 +55,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   fieldMappings = this.fb.array([]);
   personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
   isLoaded = false;
+  allMetadataSettingFields = allMetadataSettingField;
 
   ngOnInit(): void {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -66,6 +70,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     this.settingService.getMetadataSettings().subscribe(settings => {
       this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
+      this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
       this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
       this.settingsForm.addControl('enableGenres', new FormControl(settings.enableGenres, []));
@@ -73,6 +78,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableRelationships', new FormControl(settings.enableRelationships, []));
       this.settingsForm.addControl('enablePeople', new FormControl(settings.enablePeople, []));
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
+      this.settingsForm.addControl('enableCoverImage', new FormControl(settings.enableCoverImage, []));
 
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
       this.settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
@@ -82,6 +88,15 @@ export class ManageMetadataSettingsComponent implements OnInit {
           this.personRoles.map((role, index) => [
             `personRole_${index}`,
             this.fb.control((settings.personRoles || this.personRoles).includes(role)),
+          ])
+        )
+      ));
+
+      this.settingsForm.addControl('overrides', this.fb.group(
+        Object.fromEntries(
+          this.allMetadataSettingFields.map((role, index) => [
+            `override_${index}`,
+            this.fb.control((settings.overrides || []).includes(role)),
           ])
         )
       ));
@@ -171,7 +186,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
       whitelist: (model.whitelist || '').split(',').map((item: string) => item.trim()),
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
-        .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)])
+        .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)]),
+      overrides: Object.entries(this.settingsForm.get('overrides')!.value)
+        .filter(([_, value]) => value)
+        .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)])
     }
   }
 

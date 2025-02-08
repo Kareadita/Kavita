@@ -20002,6 +20002,10 @@
             "type": "boolean",
             "description": "Allow setting the Localized name"
           },
+          "enableCoverImage": {
+            "type": "boolean",
+            "description": "Allow setting the cover image"
+          },
           "enableGenres": {
             "type": "boolean"
           },
@@ -20046,6 +20050,25 @@
               "$ref": "#/components/schemas/MetadataFieldMappingDto"
             },
             "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          },
+          "overrides": {
+            "type": "array",
+            "items": {
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "type": "integer",
+              "description": "Represents which field that can be written to as an override when already locked",
+              "format": "int32"
+            },
+            "description": "A list of overrides that will enable writing to locked fields",
             "nullable": true
           },
           "blacklist": {

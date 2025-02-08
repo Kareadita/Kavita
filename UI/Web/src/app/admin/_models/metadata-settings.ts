@@ -1,5 +1,6 @@
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {PersonRole} from "../../_models/metadata/person";
+import {MetadataSettingField} from "./metadata-setting-field";
 
 export enum MetadataFieldType {
   Genre = 0,
@@ -22,6 +23,7 @@ export interface MetadataSettings {
   enableRelationships: boolean;
   enablePeople: boolean;
   enableStartDate: boolean;
+  enableCoverImage: boolean;
   enableLocalizedName: boolean;
   enableGenres: boolean;
   enableTags: boolean;
@@ -31,4 +33,5 @@ export interface MetadataSettings {
   blacklist: Array<string>;
   whitelist: Array<string>;
   personRoles: Array<PersonRole>;
+  overrides: Array<MetadataSettingField>;
 }

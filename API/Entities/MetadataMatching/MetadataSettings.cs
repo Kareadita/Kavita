@@ -4,6 +4,20 @@ using API.Entities.Enums;
 namespace API.Entities;
 
 /// <summary>
+/// Represents which field that can be written to as an override when already locked
+/// </summary>
+public enum MetadataSettingField
+{
+    Summary = 1,
+    PublicationStatus = 2,
+    StartDate = 3,
+    Genres = 4,
+    Tags = 5,
+    LocalizedName = 6,
+    Covers = 7
+}
+
+/// <summary>
 /// Handles the metadata settings for Kavita+
 /// </summary>
 public class MetadataSettings
@@ -38,6 +52,10 @@ public class MetadataSettings
     /// Allow setting the Localized name
     /// </summary>
     public bool EnableLocalizedName { get; set; }
+    /// <summary>
+    /// Allow setting the cover image
+    /// </summary>
+    public bool EnableCoverImage { get; set; }
 
     // Need to handle the Genre/tags stuff
     public bool EnableGenres { get; set; } = true;
@@ -57,6 +75,11 @@ public class MetadataSettings
     /// A list of rules that allow mapping a genre/tag to another genre/tag
     /// </summary>
     public List<MetadataFieldMapping> FieldMappings { get; set; }
+
+    /// <summary>
+    /// A list of overrides that will enable writing to locked fields
+    /// </summary>
+    public List<MetadataSettingField> Overrides { get; set; }
 
     /// <summary>
     /// Do not allow any Genre/Tag in this list to be written to Kavita

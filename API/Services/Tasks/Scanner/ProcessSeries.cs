@@ -194,7 +194,7 @@ public class ProcessSeries : IProcessSeries
                 {
                     // See if any recommendations can link up to the series and pre-fetch external metadata for the series
                     BackgroundJob.Enqueue(() =>
-                        _externalMetadataService.GetNewSeriesData(series.Id, series.Library.Type));
+                        _externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type));
 
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
