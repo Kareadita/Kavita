@@ -32,6 +32,7 @@ your reading collection with your friends and family!
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support
+- Ability to download metadata (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
 
 
 ## Support

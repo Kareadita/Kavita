@@ -55,6 +55,11 @@ public class ServerInfoV3Dto
     /// </summary>
     /// <remarks>This pings a health check and does not capture any IP Information</remarks>
     public long TimeToPingKavitaStatsApi { get; set; }
+    /// <summary>
+    /// If using the downloading metadata feature
+    /// </summary>
+    /// <remarks>Kavita+ Only</remarks>
+    public bool MatchedMetadataEnabled { get; set; }
 
 
 

@@ -382,10 +382,12 @@ public class SeriesService : ISeriesService
             // Check if the person exists in the dictionary
             if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out var p))
             {
+                // TODO: Should I add more controls here to map back?
                 if (personDto.AniListId > 0 && p.AniListId <= 0 && p.AniListId != personDto.AniListId)
                 {
                     p.AniListId = personDto.AniListId;
                 }
+                p.Description = string.IsNullOrEmpty(p.Description) ? personDto.Description : p.Description;
                 continue; // If we ever want to update metadata for existing people, we'd do it here
             }
 

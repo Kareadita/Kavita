@@ -17,6 +17,7 @@ public static class Configuration
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static string KavitaPlusApiUrl = "https://plus.kavitareader.com";
+    public static string StatsApiUrl = "https://stats.kavitareader.com";
 
     public static int Port
     {
