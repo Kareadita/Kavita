@@ -512,7 +512,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var madeModification = false;
 
-        if (settings.EnableLocalizedName && (!series.LocalizedNameLocked || settings.HasOverride(MetadataSettingField.LocalizedName)))
+        if (settings.EnableLocalizedName && (settings.HasOverride(MetadataSettingField.LocalizedName)
+                                             || !series.LocalizedNameLocked && !string.IsNullOrWhiteSpace(series.LocalizedName)))
         {
             // We need to make the best appropriate guess
             if (externalMetadata.Name == series.Name)
@@ -529,7 +530,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         if (settings.EnableSummary && (settings.HasOverride(MetadataSettingField.Summary) ||
-                                       (!series.Metadata.SummaryLocked && !string.IsNullOrWhiteSpace(externalMetadata.Summary))))
+                                       (!series.Metadata.SummaryLocked && !string.IsNullOrWhiteSpace(series.Metadata.Summary))))
         {
             series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
             madeModification = true;
