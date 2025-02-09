@@ -24,7 +24,7 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
+        "invalid-email-warning": "A non-valid email will block some functionalities of Kavita",
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
         "update": "Update",
