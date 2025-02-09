@@ -214,6 +214,8 @@ export class LibrarySettingsModalComponent implements OnInit {
         }
 
         this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
+        this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsKavitaPlusEligible);
+
         if (!this.IsKavitaPlusEligible) {
           this.libraryForm.get('allowScrobbling')?.disable();
           this.libraryForm.get('allowMetadataMatching')?.disable();
@@ -238,10 +240,12 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
       this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
-      this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
-      this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching);
+      this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
+      this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsKavitaPlusEligible ? this.library.allowMetadataMatching : false);
       this.selectedFolders = this.library.folders;
+
       this.madeChanges = false;
+
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
       }
