@@ -24,7 +24,7 @@
     [limit]="15"
   >
 
-    <ngx-datatable-column name="seriesId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+    <ngx-datatable-column prop="seriesId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-header')}}
       </ng-template>
@@ -34,7 +34,7 @@
     </ngx-datatable-column>
 
 
-    <ngx-datatable-column name="created" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('created-header')}}
       </ng-template>
@@ -43,7 +43,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="comment" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="comment" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('comment-header')}}
       </ng-template>

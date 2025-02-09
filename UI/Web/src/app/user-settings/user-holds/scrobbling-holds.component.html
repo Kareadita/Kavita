@@ -11,7 +11,7 @@
     [footerHeight]="50"
   >
 
-    <ngx-datatable-column name="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-name-header')}}
       </ng-template>
@@ -22,7 +22,7 @@
     </ngx-datatable-column>
 
 
-    <ngx-datatable-column name="createdUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="createdUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('created-header')}}
       </ng-template>
@@ -31,7 +31,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
 
       </ng-template>

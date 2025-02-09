@@ -9,7 +9,7 @@
     [footerHeight]="50"
   >
 
-    <ngx-datatable-column name="emailTemplate" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="emailTemplate" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('template-header')}}
       </ng-template>
@@ -19,7 +19,7 @@
     </ngx-datatable-column>
 
 
-    <ngx-datatable-column name="sendDate" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="sendDate" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('date-header')}}
       </ng-template>
@@ -28,7 +28,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="toUserName" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="toUserName" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('user-header')}}
       </ng-template>
@@ -37,7 +37,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="sent" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="sent" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('sent-header')}}
       </ng-template>

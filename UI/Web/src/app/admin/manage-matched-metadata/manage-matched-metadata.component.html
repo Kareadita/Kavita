@@ -24,7 +24,7 @@
     [footerHeight]="50"
   >
 
-    <ngx-datatable-column name="series.name" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+    <ngx-datatable-column prop="series.name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-name-header')}}
       </ng-template>
@@ -34,7 +34,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="series.libraryId" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+    <ngx-datatable-column prop="series.libraryId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('library-name-header')}}
       </ng-template>
@@ -43,8 +43,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-
-    <ngx-datatable-column name="status" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="status" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('status-header')}}
       </ng-template>
@@ -64,20 +63,22 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-      <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('valid-until-header')}}
-      </ng-template>
-      <ng-template let-item="row" ngx-datatable-cell-template>
-        @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
-          {{null | defaultValue}}
-        } @else {
-          {{item.validUntilUtc | utcToLocalTime}}
-        }
-      </ng-template>
-    </ngx-datatable-column>
+    @if (filterGroup.get('matchState')?.value === MatchStateOption.Matched) {
+      <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('valid-until-header')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
+            {{null | defaultValue}}
+          } @else {
+            {{item.validUntilUtc | utcToLocalTime}}
+          }
+        </ng-template>
+      </ngx-datatable-column>
+    }
 
-    <ngx-datatable-column name="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('actions-header')}}
       </ng-template>

@@ -21,7 +21,7 @@
     [limit]="15"
   >
 
-    <ngx-datatable-column name="filePath" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+    <ngx-datatable-column prop="filePath" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('file-header')}}
       </ng-template>
@@ -31,7 +31,7 @@
     </ngx-datatable-column>
 
 
-    <ngx-datatable-column name="comment" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="comment" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('comment-header')}}
       </ng-template>
@@ -40,7 +40,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+    <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('created-header')}}
       </ng-template>

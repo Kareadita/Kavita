@@ -122,4 +122,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
       this.loadData().subscribe();
     });
   }
+
+  protected readonly MatchStateOption = MatchStateOption;
 }

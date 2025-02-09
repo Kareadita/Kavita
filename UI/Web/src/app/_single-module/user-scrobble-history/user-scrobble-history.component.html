@@ -37,7 +37,7 @@
     [limit]="pageInfo.size"
   >
 
-    <ngx-datatable-column name="lastModifiedUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="lastModifiedUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('last-modified-header')}}
       </ng-template>
@@ -46,7 +46,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="scrobbleEventType" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="scrobbleEventType" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('type-header')}}
       </ng-template>
@@ -55,7 +55,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('series-header')}}
       </ng-template>
@@ -64,7 +64,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="data" [sortable]="false" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="data" [sortable]="false" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('data-header')}}
       </ng-template>
@@ -98,7 +98,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column name="isPorcessed" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="isPorcessed" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('is-processed-header')}}
       </ng-template>

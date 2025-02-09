@@ -11,7 +11,7 @@
       [footerHeight]="50"
     >
 
-      <ngx-datatable-column name="username" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ngx-datatable-column prop="username" [sortable]="true" [draggable]="false" [resizeable]="false">
         <ng-template let-column="column" ngx-datatable-header-template>
           {{t('username-header')}}
         </ng-template>
@@ -21,7 +21,7 @@
       </ngx-datatable-column>
 
 
-      <ngx-datatable-column name="aniListValidUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+      <ngx-datatable-column prop="aniListValidUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
         <ng-template let-column="column" ngx-datatable-header-template>
           {{t('anilist-header')}}
         </ng-template>
@@ -34,7 +34,7 @@
         </ng-template>
       </ngx-datatable-column>
 
-      <ngx-datatable-column name="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+      <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
         <ng-template let-column="column" ngx-datatable-header-template>
           {{t('mal-header')}}
         </ng-template>

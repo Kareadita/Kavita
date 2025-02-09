@@ -160,7 +160,7 @@
           [limit]="15"
         >
 
-          <ngx-datatable-column name="title" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ngx-datatable-column prop="title" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
             <ng-template let-column="column" ngx-datatable-header-template>
               {{t('job-title-header')}}
             </ng-template>
@@ -170,7 +170,7 @@
           </ngx-datatable-column>
 
 
-          <ngx-datatable-column name="lastExecutionUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ngx-datatable-column prop="lastExecutionUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
             <ng-template let-column="column" ngx-datatable-header-template>
               {{t('last-executed-header')}}
             </ng-template>
@@ -179,7 +179,7 @@
             </ng-template>
           </ngx-datatable-column>
 
-          <ngx-datatable-column name="cron" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ngx-datatable-column prop="cron" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
             <ng-template let-column="column" ngx-datatable-header-template>
               {{t('cron-header')}}
             </ng-template>
