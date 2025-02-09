@@ -10,8 +10,8 @@
 
   div {
     word-break: break-word;
-    max-width: 75ch;
-    
+    max-width: 120ch;
+
     @media (max-width: $grid-breakpoints-sm) {
       max-width: 50ch;
     }
