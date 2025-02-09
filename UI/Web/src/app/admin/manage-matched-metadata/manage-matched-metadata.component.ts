@@ -45,6 +45,7 @@ import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
 })
 export class ManageMatchedMetadataComponent implements OnInit {
   protected readonly ColumnMode = ColumnMode;
+  protected readonly MatchStateOption = MatchStateOption;
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
 
   private readonly licenseService = inject(LicenseService);
@@ -119,9 +120,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
   fixMatch(series: Series) {
     this.actionService.matchSeries(series, result => {
       if (!result) return;
-      this.loadData().subscribe();
+      this.data = [...this.data.filter(s => s.series.id !== series.id)];
+      this.cdRef.markForCheck();
     });
   }
-
-  protected readonly MatchStateOption = MatchStateOption;
 }
