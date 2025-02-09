@@ -73,6 +73,7 @@ public class ExternalMetadataService : IExternalMetadataService
     };
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
+    static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService)
@@ -519,12 +520,22 @@ public class ExternalMetadataService : IExternalMetadataService
             if (externalMetadata.Name == series.Name)
             {
                 // Choose closest (usually last) synonym
-                series.LocalizedName = externalMetadata.Synonyms.Last();
+                var validSynonyms = externalMetadata.Synonyms
+                    .Where(IsRomanCharacters)
+                    .Where(s => s.ToNormalized() != series.Name.ToNormalized())
+                    .ToList();
+                if (validSynonyms.Count != 0)
+                {
+                    series.LocalizedName = validSynonyms[^1];
+                    series.LocalizedNameLocked = true;
+                }
             }
-            else
+            else if (IsRomanCharacters(externalMetadata.Name))
             {
                 series.LocalizedName = externalMetadata.Name;
+                series.LocalizedNameLocked = true;
             }
+
 
             madeModification = true;
         }
