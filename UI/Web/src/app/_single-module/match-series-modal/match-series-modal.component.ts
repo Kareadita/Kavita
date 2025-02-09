@@ -70,8 +70,10 @@ export class MatchSeriesModalComponent implements OnInit {
     const model: any = this.formGroup.value;
     model.seriesId = this.series.id;
 
+    const dontMatchChanged = this.series.dontMatch !== model.dontMatch;
+
     // We need to update the dontMatch status
-    if (model.dontMatch) {
+    if (dontMatchChanged) {
       this.seriesService.updateDontMatch(this.series.id, model.dontMatch).subscribe(_ => {
         this.modalService.close(true);
       });
