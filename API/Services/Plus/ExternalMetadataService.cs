@@ -528,15 +528,16 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
-        if (settings.EnableSummary && (!series.Metadata.SummaryLocked ||
-                                       settings.HasOverride(MetadataSettingField.Summary)))
+        if (settings.EnableSummary && (settings.HasOverride(MetadataSettingField.Summary) ||
+                                       (!series.Metadata.SummaryLocked && !string.IsNullOrWhiteSpace(externalMetadata.Summary))))
         {
             series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
             madeModification = true;
         }
 
-        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (!series.Metadata.ReleaseYearLocked ||
-                settings.HasOverride(MetadataSettingField.StartDate)))
+        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (settings.HasOverride(MetadataSettingField.StartDate) ||
+                                                                               (!series.Metadata.ReleaseYearLocked &&
+                                                                                   series.Metadata.ReleaseYear == 0)))
         {
             series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
             madeModification = true;
