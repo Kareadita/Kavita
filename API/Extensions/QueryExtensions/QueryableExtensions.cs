@@ -294,7 +294,7 @@ public static class QueryableExtensions
             MatchStateOption.NotMatched => query.
                 Include(s => s.ExternalSeriesMetadata)
                 .Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted && !s.DontMatch),
-            MatchStateOption.Error => query.Where(s => s.IsBlacklisted),
+            MatchStateOption.Error => query.Where(s => s.IsBlacklisted && !s.DontMatch),
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => query
         };
