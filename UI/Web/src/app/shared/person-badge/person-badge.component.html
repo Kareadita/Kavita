@@ -1,11 +1,11 @@
 @if (person !== undefined) {
-  <a class="btn btn-icon p-0" routerLink="/person/{{person.name}}">
+  <a class="btn btn-icon p-0" routerLink="/person/{{encodeURIComponent(person.name)}}">
     <div class="tagbadge cursor clickable">
       <div class="d-flex flex-column align-items-center justify-content-center">
         <div class="image-container d-flex align-items-center justify-content-center">
           @if (HasCoverImage) {
             <app-image
-                      objectFit="cover" 
+                      objectFit="cover"
                       height="96px"
                       width="96px"
                       [imageUrl]="ImageUrl"

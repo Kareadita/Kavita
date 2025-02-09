@@ -39,4 +39,6 @@ export class PersonBadgeComponent implements OnInit {
     this.staff = this.person as SeriesStaff;
     this.cdRef.markForCheck();
   }
+
+    protected readonly encodeURIComponent = encodeURIComponent;
 }

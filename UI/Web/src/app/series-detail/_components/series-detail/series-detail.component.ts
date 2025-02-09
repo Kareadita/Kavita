@@ -1173,4 +1173,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }, 10);
   }
+
+    protected readonly encodeURIComponent = encodeURIComponent;
 }
