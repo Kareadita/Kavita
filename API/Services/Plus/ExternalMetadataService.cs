@@ -109,7 +109,7 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task FetchExternalDataTask()
     {
         // Find all Series that are eligible and limit
-        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeriesIdsWithoutMetadata(25);
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25);
         if (ids.Count == 0) return;
 
         _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
