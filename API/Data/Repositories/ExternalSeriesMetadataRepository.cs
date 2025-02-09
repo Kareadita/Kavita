@@ -214,6 +214,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
         return await _context.Series
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
+            .Where(s => s.Library.AllowMetadataMatching)
             .OrderByDescending(s => s.Library.Type)
             .ThenBy(s => s.NormalizedName)
             .Select(s => s.Id)

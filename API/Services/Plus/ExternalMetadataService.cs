@@ -44,8 +44,8 @@ public interface IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
-    /// <returns></returns>
-    Task FetchSeriesMetadata(int seriesId, LibraryType libraryType);
+    /// <returns>If the fetch was made</returns>
+    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
@@ -118,9 +118,9 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
-            await FetchSeriesMetadata(seriesId, libraryType);
+            var success = await FetchSeriesMetadata(seriesId, libraryType);
+            if (success) count++;
             await Task.Delay(1500);
-            count++;
         }
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
@@ -131,10 +131,10 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
-    public async Task FetchSeriesMetadata(int seriesId, LibraryType libraryType)
+    public async Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType)
     {
-        if (!IsPlusEligible(libraryType)) return;
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!IsPlusEligible(libraryType)) return false;
+        if (!await _licenseService.HasActiveLicense()) return false;
 
         // Generate key based on seriesId and libraryType or any unique identifier for the request
         // Check if the request is allowed based on the rate limit
@@ -142,14 +142,14 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             // Request not allowed due to rate limit
             _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
-            return;
+            return false;
         }
 
         _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
 
         // Prefetch SeriesDetail data
         await GetSeriesDetailPlus(seriesId, libraryType);
-
+        return true;
     }
 
     public async Task<IList<MalStackDto>> GetStacksForUser(int userId)

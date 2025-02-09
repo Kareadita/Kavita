@@ -821,8 +821,7 @@
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
         "person-roles-label": "Roles",
         "overrides-label": "Overrides",
-        "overrides-description": "Allow Kavita to write over locked fields"
-
+        "overrides-description": "Allow Kavita to write over locked fields."
     },
 
     "book-line-overlay": {

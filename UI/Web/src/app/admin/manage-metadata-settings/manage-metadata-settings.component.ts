@@ -182,8 +182,8 @@ export class ManageMetadataSettingsComponent implements OnInit {
       ...model,
       ageRatingMappings,
       fieldMappings: withFieldMappings ? fieldMappings : [],
-      blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim()),
-      whitelist: (model.whitelist || '').split(',').map((item: string) => item.trim()),
+      blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0),
+      whitelist: (model.whitelist || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0),
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
         .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)]),
