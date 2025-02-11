@@ -230,7 +230,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
             foreach (var result in results)
             {
-                result.Series.Summary = CleanSummary(result.Series.Summary);
+                result.Series.Summary = StringHelper.SquashBreaklines(result.Series.Summary);
             }
 
             return results;
@@ -242,23 +242,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         return ArraySegment<ExternalSeriesMatchDto>.Empty;
     }
-
-    private static string? CleanSummary(string? summary)
-    {
-        if (string.IsNullOrWhiteSpace(summary))
-        {
-            return null; // Return as is if null, empty, or whitespace.
-        }
-
-        // Remove all variations of <br> tags (case-insensitive)
-        summary = Regex.Replace(summary, @"<br\s*/?>", " ", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        // Normalize whitespace (replace multiple spaces with a single space)
-        summary = Regex.Replace(summary, @"\s+", " ").Trim();
-
-        return summary;
-    }
-
 
 
     /// <summary>
@@ -350,9 +333,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // Regenerate all events for the series for all users
         BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
-        // await _eventHub.SendMessageAsync(MessageFactory.Info,
-        //     MessageFactory.InfoEvent($"Fix Match: {series.Name}", "Scrobble Events are regenerating with the new match"));
-
 
         // Name can be null on Series even with a direct match
         _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name, metadata.Series.Name);
@@ -374,7 +354,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (dontMatch)
         {
             // When we set as DontMatch, we will clear existing External Metadata
-            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series!);
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(series.ExternalSeriesMetadata);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
@@ -410,7 +390,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
             // Clear out existing results
-            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series!);
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
@@ -625,7 +605,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                Description = CleanSummary(w.Description),
+                Description = StringHelper.SquashBreaklines(w.Description),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Character)
@@ -704,7 +684,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = CleanSummary(w.Description),
+                Description = StringHelper.SquashBreaklines(w.Description),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.CoverArtist)
@@ -761,7 +741,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = CleanSummary(w.Description),
+                Description = StringHelper.SquashBreaklines(w.Description),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Writer)
@@ -1025,7 +1005,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
+        series.Metadata.Summary = StringHelper.SquashBreaklines(externalMetadata.Summary);
         return true;
     }
 

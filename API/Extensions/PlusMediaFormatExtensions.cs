@@ -26,9 +26,10 @@ public static class PlusMediaFormatExtensions
     {
         return plusMediaFormat switch
         {
-            PlusMediaFormat.Manga => new[] { LibraryType.Manga, LibraryType.Image },
-            PlusMediaFormat.Comic => new[] { LibraryType.Comic, LibraryType.ComicVine },
-            PlusMediaFormat.LightNovel => new[] { LibraryType.LightNovel, LibraryType.Book, LibraryType.Manga },
+            PlusMediaFormat.Manga => [LibraryType.Manga, LibraryType.Image],
+            PlusMediaFormat.Comic => [LibraryType.Comic, LibraryType.ComicVine],
+            PlusMediaFormat.LightNovel => [LibraryType.LightNovel, LibraryType.Book, LibraryType.Manga],
+            PlusMediaFormat.Book => [LibraryType.LightNovel, LibraryType.Book],
             _ => throw new ArgumentOutOfRangeException(nameof(plusMediaFormat), plusMediaFormat, null)
         };
     }
