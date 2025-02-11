@@ -896,7 +896,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Concat(series.Metadata.Tags.Select(g => g.Title));
 
             var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-            if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
+            if (series.Metadata.AgeRating <= ageRating)
             {
                 series.Metadata.AgeRating = ageRating;
                 return true;

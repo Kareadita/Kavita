@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data.Repositories;
 using API.DTOs.Recommendation;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers.Builders;
 using API.Services.Plus;
@@ -25,6 +27,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly ExternalMetadataService _externalMetadataService;
+    private readonly Dictionary<string, Genre> _genreLookup = new Dictionary<string, Genre>();
+    private readonly Dictionary<string, Tag> _tagLookup = new Dictionary<string, Tag>();
 
 
     public ExternalMetadataServiceTests(ITestOutputHelper testOutputHelper)
@@ -638,9 +642,203 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #region Publication Status
 
+
+
+
     #endregion
 
     #region Age Rating
+
+    [Fact]
+    public async Task AgeRating_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Age Rating";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+            {"H", AgeRating.R18Plus}, // Tag
+        };
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_ExistingHigher_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Age Rating";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Mature)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+            {"H", AgeRating.R18Plus}, // Tag
+        };
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Mature, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_ExistingLower_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Age Rating";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+            {"H", AgeRating.R18Plus}, // Tag
+        };
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_Existing_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Age Rating";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone, true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+            {"H", AgeRating.R18Plus}, // Tag
+        };
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Everyone, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_Existing_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Age Rating";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone, true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.Overrides = [MetadataSettingField.AgeRating];
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+            {"H", AgeRating.R18Plus}, // Tag
+        };
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
+    }
+
     #endregion
 
     #region Genres
@@ -670,6 +868,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     {
        _context.Series.RemoveRange(_context.Series);
        _context.AppUser.RemoveRange(_context.AppUser);
+       _context.Genre.RemoveRange(_context.Genre);
+       _context.Tag.RemoveRange(_context.Tag);
 
        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
        metadataSettings.Enabled = false;
@@ -687,6 +887,23 @@ public class ExternalMetadataServiceTests : AbstractDbTest
        await _context.SaveChangesAsync();
 
        _context.AppUser.Add(new AppUserBuilder("Joe", "Joe").WithRole(PolicyConstants.AdminRole).Build());
+
+       // Create a bunch of Genres for this test and store their string in _genreLookup
+       _genreLookup.Clear();
+       var g1 = new GenreBuilder("Action").Build();
+       var g2 = new GenreBuilder("Ecchi").Build();
+       _context.Genre.Add(g1);
+       _context.Genre.Add(g2);
+       _genreLookup.Add("Action", g1);
+       _genreLookup.Add("Ecchi", g2);
+
+       _tagLookup.Clear();
+       var t1 = new TagBuilder("H").Build();
+       var t2 = new TagBuilder("Boxing").Build();
+       _context.Genre.Add(g1);
+       _context.Genre.Add(g2);
+       _tagLookup.Add("H", t1);
+       _tagLookup.Add("Boxing", t2);
 
        await _context.SaveChangesAsync();
     }

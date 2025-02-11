@@ -45,9 +45,10 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
-    public SeriesMetadataBuilder WithAgeRating(AgeRating rating)
+    public SeriesMetadataBuilder WithAgeRating(AgeRating rating, bool lockState = false)
     {
         _seriesMetadata.AgeRating = rating;
+        _seriesMetadata.AgeRatingLocked = lockState;
         return this;
     }
 
