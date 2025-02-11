@@ -516,7 +516,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (settings.EnableSummary)
         {
-            madeModification = madeModification || UpdateSummary(series, settings, externalMetadata.Summary);
+            madeModification = UpdateSummary(series, settings, externalMetadata.Summary) || madeModification;
         }
 
 
@@ -528,32 +528,11 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
-        if (settings.EnableLocalizedName && (settings.HasOverride(MetadataSettingField.LocalizedName)
-                                             || !series.LocalizedNameLocked && !string.IsNullOrWhiteSpace(series.LocalizedName)))
+        if (settings.EnableLocalizedName)
         {
-            // We need to make the best appropriate guess
-            if (externalMetadata.Name == series.Name)
-            {
-                // Choose closest (usually last) synonym
-                var validSynonyms = externalMetadata.Synonyms
-                    .Where(IsRomanCharacters)
-                    .Where(s => s.ToNormalized() != series.Name.ToNormalized())
-                    .ToList();
-                if (validSynonyms.Count != 0)
-                {
-                    series.LocalizedName = validSynonyms[^1];
-                    series.LocalizedNameLocked = true;
-                }
-            }
-            else if (IsRomanCharacters(externalMetadata.Name))
-            {
-                series.LocalizedName = externalMetadata.Name;
-                series.LocalizedNameLocked = true;
-            }
-
-
-            madeModification = true;
+            madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
         }
+
 
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
@@ -915,6 +894,42 @@ public class ExternalMetadataService : IExternalMetadataService
         #endregion
 
         return madeModification;
+    }
+
+    private static bool UpdateLocalizedName(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    {
+        if (series.LocalizedNameLocked && !settings.HasOverride(MetadataSettingField.LocalizedName))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(series.LocalizedName) && !settings.HasOverride(MetadataSettingField.LocalizedName))
+        {
+            return false;
+        }
+
+        // We need to make the best appropriate guess
+        if (externalMetadata.Name == series.Name)
+        {
+            // Choose closest (usually last) synonym
+            var validSynonyms = externalMetadata.Synonyms
+                .Where(IsRomanCharacters)
+                .Where(s => s.ToNormalized() != series.Name.ToNormalized())
+                .ToList();
+
+            if (validSynonyms.Count == 0) return false;
+
+            series.LocalizedName = validSynonyms[^1];
+            series.LocalizedNameLocked = true;
+        }
+        else if (IsRomanCharacters(externalMetadata.Name))
+        {
+            series.LocalizedName = externalMetadata.Name;
+            series.LocalizedNameLocked = true;
+        }
+
+
+        return true;
     }
 
     private static bool UpdateSummary(Series series, MetadataSettingsDto settings, string? summary)

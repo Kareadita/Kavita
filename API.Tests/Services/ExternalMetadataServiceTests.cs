@@ -324,6 +324,181 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #endregion
 
+    #region LocalizedName
+
+    [Fact]
+    public async Task LocalizedName_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Kimchi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Existing_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedName("Localized Name here")
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Localized Name here", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Existing_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedName("Localized Name here", true)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Localized Name here", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Existing_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedName("Localized Name here", true)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Kimchi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_OnlyNonEnglishSynonyms_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    #endregion
+
 
     protected override async Task ResetDb()
     {

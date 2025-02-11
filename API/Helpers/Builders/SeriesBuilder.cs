@@ -21,11 +21,13 @@ public class SeriesBuilder : IEntityBuilder<Series>
         _series = new Series()
         {
             Name = name,
+
             LocalizedName = name.ToNormalized(),
+            NormalizedLocalizedName = name.ToNormalized(),
+
             OriginalName = name,
             SortName = name,
             NormalizedName = name.ToNormalized(),
-            NormalizedLocalizedName = name.ToNormalized(),
             Metadata = new SeriesMetadataBuilder()
                 .WithPublicationStatus(PublicationStatus.OnGoing)
                 .Build(),
@@ -39,14 +41,25 @@ public class SeriesBuilder : IEntityBuilder<Series>
     /// </summary>
     /// <param name="localizedName"></param>
     /// <returns></returns>
-    public SeriesBuilder WithLocalizedName(string localizedName)
+    public SeriesBuilder WithLocalizedName(string localizedName, bool lockStatus = false)
     {
+        // Why is this here?
         if (string.IsNullOrEmpty(localizedName))
         {
             localizedName = _series.Name;
         }
+
         _series.LocalizedName = localizedName;
         _series.NormalizedLocalizedName = localizedName.ToNormalized();
+        _series.LocalizedNameLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesBuilder WithLocalizedNameAllowEmpty(string localizedName, bool lockStatus = false)
+    {
+        _series.LocalizedName = localizedName;
+        _series.NormalizedLocalizedName = localizedName.ToNormalized();
+        _series.LocalizedNameLocked = lockStatus;
         return this;
     }
 
