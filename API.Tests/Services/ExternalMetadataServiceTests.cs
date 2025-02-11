@@ -499,6 +499,34 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #endregion
 
+    #region Publication Status
+    #endregion
+
+    #region Age Rating
+    #endregion
+
+    #region Genres
+    #endregion
+
+    #region Tags
+    #endregion
+
+    #region People - Writers/Artists
+    #endregion
+
+    #region People - Characters
+    #endregion
+
+    #region Series Cover
+    #endregion
+
+    #region Relationships
+    #endregion
+
+
+
+
+
 
     protected override async Task ResetDb()
     {

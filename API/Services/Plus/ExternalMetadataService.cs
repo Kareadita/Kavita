@@ -513,391 +513,468 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
 
         var madeModification = false;
-
-        if (settings.EnableSummary)
-        {
-            madeModification = UpdateSummary(series, settings, externalMetadata.Summary) || madeModification;
-        }
-
-
-        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (settings.HasOverride(MetadataSettingField.StartDate) ||
-                                                                               (!series.Metadata.ReleaseYearLocked &&
-                                                                                   series.Metadata.ReleaseYear == 0)))
-        {
-            series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
-            madeModification = true;
-        }
-
-        if (settings.EnableLocalizedName)
-        {
-            madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
-        }
-
-
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
 
-        #region Genres and Tags
+        madeModification = UpdateSummary(series, settings, externalMetadata) || madeModification;
+        madeModification = UpdateReleaseYear(series, settings, externalMetadata) || madeModification;
+        madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
+        madeModification = await UpdatePublicationStatus(series, settings, externalMetadata) || madeModification;
 
-        // Process Genres
-        if (externalMetadata.Genres != null)
+        madeModification = await UpdateGenres(series, settings, externalMetadata, processedGenres) || madeModification;
+        madeModification = await UpdateTags(series, settings, externalMetadata, processedTags) || madeModification;
+        madeModification = UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)) || madeModification;
+
+        var staff = externalMetadata.Staff.Select(s =>
         {
-            foreach (var genre in externalMetadata.Genres)
-            {
-                // Apply field mappings
-                var mappedGenre = ApplyFieldMapping(genre, MetadataFieldType.Genre, settings.FieldMappings);
-                if (mappedGenre != null)
-                {
-                    processedGenres.Add(mappedGenre);
-                }
-            }
+            s.Name = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}";
 
-            // Strip blacklisted items from processedGenres
-            processedGenres = processedGenres
-                .Distinct()
-                .Where(g => !settings.Blacklist.Contains(g))
-                .ToList();
+            return s;
+        }).ToList();
+        madeModification = await UpdateWriters(series, settings, staff) || madeModification;
+        madeModification = await UpdateArtists(series, settings, staff) || madeModification;
+        madeModification = await UpdateCharacters(series, settings, externalMetadata.Characters) || madeModification;
 
-            if (settings.EnableGenres && processedGenres.Count > 0 && (!series.Metadata.GenresLocked || settings.HasOverride(MetadataSettingField.Genres)))
-            {
-                _logger.LogDebug("Found {GenreCount} genres for {SeriesName}", processedGenres.Count, series.Name);
-                var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
-                series.Metadata.Genres ??= [];
-                GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
-                {
-                    series.Metadata.Genres.Add(genre);
-                    madeModification = true;
-                }, () => series.Metadata.GenresLocked = true);
-            }
+        madeModification = await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin) || madeModification;
 
-        }
-
-        // Process Tags
-        if (externalMetadata.Tags != null)
-        {
-            foreach (var tag in externalMetadata.Tags.Select(t => t.Name))
-            {
-                // Apply field mappings
-                var mappedTag = ApplyFieldMapping(tag, MetadataFieldType.Tag, settings.FieldMappings);
-                if (mappedTag != null)
-                {
-                    processedTags.Add(mappedTag);
-                }
-            }
-
-            // Strip blacklisted items from processedTags
-            processedTags = processedTags
-                .Distinct()
-                .Where(g => !settings.Blacklist.Contains(g))
-                .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
-                .ToList();
-
-            // Set the tags for the series and ensure they are in the DB
-            if (settings.EnableTags && processedTags.Count > 0 && (!series.Metadata.TagsLocked || settings.HasOverride(MetadataSettingField.Tags)))
-            {
-                _logger.LogDebug("Found {TagCount} tags for {SeriesName}", processedTags.Count, series.Name);
-                var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
-                    .ToList();
-                series.Metadata.Tags ??= [];
-                TagHelper.UpdateTagList(processedTags, series, allTags, tag =>
-                {
-                    series.Metadata.Tags.Add(tag);
-                    madeModification = true;
-                }, () => series.Metadata.TagsLocked = true);
-            }
-        }
-
-        #endregion
-
-        #region Age Rating
-
-        if (!series.Metadata.AgeRatingLocked || settings.HasOverride(MetadataSettingField.AgeRating))
-        {
-            try
-            {
-                // Determine Age Rating
-                var totalTags = processedGenres
-                    .Concat(processedTags)
-                    .Concat(series.Metadata.Genres.Select(g => g.Title))
-                    .Concat(series.Metadata.Tags.Select(g => g.Title));
-
-                var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-                if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
-                {
-                    series.Metadata.AgeRating = ageRating;
-                    _unitOfWork.SeriesRepository.Update(series);
-                    madeModification = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an issue determining Age Rating for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
-            }
-        }
-        #endregion
-
-        #region People
-
-        if (settings.EnablePeople)
-        {
-            series.Metadata.People ??= [];
-
-            // Ensure all people are named correctly
-            externalMetadata.Staff = externalMetadata.Staff.Select(s =>
-            {
-                if (settings.FirstLastPeopleNaming)
-                {
-                    s.Name = s.FirstName + " " + s.LastName;
-                }
-                else
-                {
-                    s.Name = s.LastName + " " + s.FirstName;
-                }
-
-                return s;
-            }).ToList();
-
-            // Roles: Character Design, Story, Art
-
-            var upstreamWriters = externalMetadata.Staff
-                .Where(s => s.Role is "Story" or "Story & Art")
-                .ToList();
-
-            var writers = upstreamWriters
-                .Select(w => new PersonDto()
-                {
-                    Name = w.Name,
-                    AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                    Description = CleanSummary(w.Description),
-                })
-                .Concat(series.Metadata.People
-                    .Where(p => p.Role == PersonRole.Writer)
-                    .Where(p => !p.KavitaPlusConnection)
-                    .Select(p => _mapper.Map<PersonDto>(p.Person))
-                )
-                .DistinctBy(p => Parser.Normalize(p.Name))
-                .ToList();
-
-
-            // NOTE: PersonRoles can be a hashset
-            if (writers.Count > 0 && settings.IsPersonAllowed(PersonRole.Writer) && (!series.Metadata.WriterLocked || settings.HasOverride(MetadataSettingField.People)))
-            {
-                await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
-
-                foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.Writer))
-                {
-                    var meta = upstreamWriters.FirstOrDefault(c => c.Name == person.Person.Name);
-                    person.OrderWeight = 0;
-                    if (meta != null)
-                    {
-                        person.KavitaPlusConnection = true;
-                    }
-                }
-
-                _unitOfWork.SeriesRepository.Update(series);
-                await _unitOfWork.CommitAsync();
-
-                await DownloadAndSetCovers(upstreamWriters);
-
-                madeModification = true;
-            }
-
-            var upstreamArtists = externalMetadata.Staff
-                .Where(s => s.Role is "Art" or "Story & Art")
-                .ToList();
-
-            var artists = upstreamArtists
-                .Select(w => new PersonDto()
-                {
-                    Name = w.Name,
-                    AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                    Description = CleanSummary(w.Description),
-                })
-                .Concat(series.Metadata.People
-                    .Where(p => p.Role == PersonRole.CoverArtist)
-                    .Where(p => !p.KavitaPlusConnection)
-                    .Select(p => _mapper.Map<PersonDto>(p.Person))
-                )
-                .DistinctBy(p => Parser.Normalize(p.Name))
-                .ToList();
-
-            if (artists.Count > 0 &&  settings.IsPersonAllowed(PersonRole.CoverArtist) && (!series.Metadata.CoverArtistLocked || settings.HasOverride(MetadataSettingField.People)))
-            {
-                await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
-                foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist))
-                {
-                    var meta = upstreamArtists.FirstOrDefault(c => c.Name == person.Person.Name);
-                    person.OrderWeight = 0;
-                    if (meta != null)
-                    {
-                        person.KavitaPlusConnection = true;
-                    }
-                }
-
-                // Download the image and save it
-                _unitOfWork.SeriesRepository.Update(series);
-                await _unitOfWork.CommitAsync();
-
-                await DownloadAndSetCovers(upstreamArtists);
-
-                madeModification = true;
-            }
-
-            if (externalMetadata.Characters != null && settings.IsPersonAllowed(PersonRole.Character) && (!series.Metadata.CharacterLocked ||
-                    settings.HasOverride(MetadataSettingField.People)))
-            {
-                var characters = externalMetadata.Characters
-                    .Select(w => new PersonDto()
-                    {
-                        Name = w.Name,
-                        AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                        Description = CleanSummary(w.Description),
-                    })
-                    .Concat(series.Metadata.People
-                        .Where(p => p.Role == PersonRole.Character)
-                        // Need to ensure existing people are retained, but we overwrite anything from a bad match
-                        .Where(p => !p.KavitaPlusConnection)
-                        .Select(p => _mapper.Map<PersonDto>(p.Person))
-                    )
-                    .DistinctBy(p => Parser.Normalize(p.Name))
-                    .ToList();
-
-
-                if (characters.Count > 0)
-                {
-                    await SeriesService.HandlePeopleUpdateAsync(series.Metadata, characters, PersonRole.Character, _unitOfWork);
-                    foreach (var spPerson in series.Metadata.People.Where(p => p.Role == PersonRole.Character))
-                    {
-                        // Set a sort order based on their role
-                        var characterMeta = externalMetadata.Characters?.FirstOrDefault(c => c.Name == spPerson.Person.Name);
-                        spPerson.OrderWeight = 0;
-                        if (characterMeta != null)
-                        {
-                            spPerson.KavitaPlusConnection = true;
-
-                            spPerson.OrderWeight = characterMeta.Role switch
-                            {
-                                CharacterRole.Main => 0,
-                                CharacterRole.Supporting => 1,
-                                CharacterRole.Background => 2,
-                                _ => 99 // Default for unknown roles
-                            };
-                        }
-                    }
-
-                    // Download the image and save it
-                    _unitOfWork.SeriesRepository.Update(series);
-                    await _unitOfWork.CommitAsync();
-
-                    foreach (var character in externalMetadata.Characters ?? [])
-                    {
-                        var aniListId = ScrobblingService.ExtractId<int>(character.Url, ScrobblingService.AniListCharacterWebsite);
-                        if (aniListId <= 0) continue;
-                        var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
-                        if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
-                        {
-                            await _coverDbService.SetPersonCoverByUrl(person, character.ImageUrl, false);
-                        }
-                    }
-
-                    madeModification = true;
-                }
-            }
-        }
-
-        #endregion
-
-        #region Publication Status
-
-        if (settings.EnablePublicationStatus && (!series.Metadata.PublicationStatusLocked ||
-                settings.HasOverride(MetadataSettingField.PublicationStatus)))
-        {
-            try
-            {
-                var chapters =
-                    (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes
-                    .SelectMany(v => v.Chapters).ToList();
-                var wasChanged = DeterminePublicationStatus(series, chapters, externalMetadata);
-                _unitOfWork.SeriesRepository.Update(series);
-                madeModification = madeModification || wasChanged;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an issue determining Publication Status for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
-            }
-        }
-        #endregion
-
-        #region Relationships
-
-        if (settings.EnableRelationships && externalMetadata.Relations != null && defaultAdmin != null)
-        {
-            foreach (var relation in externalMetadata.Relations)
-            {
-                var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
-                    relation.SeriesName.NativeTitle,
-                    relation.SeriesName.PreferredTitle,
-                    relation.PlusMediaFormat.GetMangaFormats(),
-                    defaultAdmin.Id,
-                    relation.AniListId,
-                    SeriesIncludes.Related);
-
-                // Skip if no related series found or series is the parent
-                if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
-
-                // Check if the relationship already exists
-                var relationshipExists = series.Relations.Any(r =>
-                    r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
-
-                if (relationshipExists) continue;
-
-                series.Relations.Add(new SeriesRelation
-                {
-                    RelationKind = relation.Relation,
-                    TargetSeries = relatedSeries,
-                    TargetSeriesId = relatedSeries.Id,
-                    Series = series,
-                    SeriesId = series.Id
-                });
-
-                // Handle sequel/prequel: add reverse relationship
-                if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
-                {
-                    var reverseExists = relatedSeries.Relations.Any(r =>
-                        r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
-
-                    if (reverseExists) continue;
-
-                    relatedSeries.Relations.Add(new SeriesRelation
-                    {
-                        RelationKind = GetReverseRelation(relation.Relation),
-                        TargetSeries = series,
-                        TargetSeriesId = series.Id,
-                        Series = relatedSeries,
-                        SeriesId = relatedSeries.Id
-                    });
-                }
-
-                madeModification = true;
-            }
-        }
-        #endregion
-
-        #region Series Cover
-
-        // This must not allow cover image locked to be off after downloading, else it will call every time a match is hit
-        if (!string.IsNullOrEmpty(externalMetadata.CoverUrl) && (!series.CoverImageLocked || settings.HasOverride(MetadataSettingField.Covers)))
-        {
-            await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
-        }
-
-        #endregion
+        // MUST be last as this will commit
+        madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
         return madeModification;
     }
 
+    private async Task<bool> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
+    {
+        if (!settings.EnableRelationships) return false;
+
+        if (externalMetadataRelations == null || externalMetadataRelations.Count == 0 || defaultAdmin == null)
+        {
+            return false;
+        }
+
+        foreach (var relation in externalMetadataRelations)
+        {
+            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
+                relation.SeriesName.NativeTitle,
+                relation.SeriesName.PreferredTitle,
+                relation.PlusMediaFormat.GetMangaFormats(),
+                defaultAdmin.Id,
+                relation.AniListId,
+                SeriesIncludes.Related);
+
+            // Skip if no related series found or series is the parent
+            if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
+
+            // Check if the relationship already exists
+            var relationshipExists = series.Relations.Any(r =>
+                r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
+
+            if (relationshipExists) continue;
+
+            series.Relations.Add(new SeriesRelation
+            {
+                RelationKind = relation.Relation,
+                TargetSeries = relatedSeries,
+                TargetSeriesId = relatedSeries.Id,
+                Series = series,
+                SeriesId = series.Id
+            });
+
+            // Handle sequel/prequel: add reverse relationship
+            if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
+            {
+                var reverseExists = relatedSeries.Relations.Any(r =>
+                    r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
+
+                if (reverseExists) continue;
+
+                relatedSeries.Relations.Add(new SeriesRelation
+                {
+                    RelationKind = GetReverseRelation(relation.Relation),
+                    TargetSeries = series,
+                    TargetSeriesId = series.Id,
+                    Series = relatedSeries,
+                    SeriesId = relatedSeries.Id
+                });
+            }
+        }
+
+        return true;
+    }
+
+    private async Task<bool> UpdateCharacters(Series series, MetadataSettingsDto settings, IList<SeriesCharacter>? externalCharacters)
+    {
+        if (!settings.EnablePeople) return false;
+
+        if (externalCharacters == null || externalCharacters.Count == 0) return false;
+
+        if (series.Metadata.CharacterLocked && !settings.HasOverride(MetadataSettingField.People))
+        {
+            return false;
+        }
+
+        if (!settings.IsPersonAllowed(PersonRole.Character))
+        {
+            return false;
+        }
+
+        series.Metadata.People ??= [];
+
+        var characters = externalCharacters
+            .Select(w => new PersonDto()
+            {
+                Name = w.Name,
+                AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
+                Description = CleanSummary(w.Description),
+            })
+            .Concat(series.Metadata.People
+                .Where(p => p.Role == PersonRole.Character)
+                // Need to ensure existing people are retained, but we overwrite anything from a bad match
+                .Where(p => !p.KavitaPlusConnection)
+                .Select(p => _mapper.Map<PersonDto>(p.Person))
+            )
+            .DistinctBy(p => Parser.Normalize(p.Name))
+            .ToList();
+
+        if (characters.Count == 0) return false;
+        await SeriesService.HandlePeopleUpdateAsync(series.Metadata, characters, PersonRole.Character, _unitOfWork);
+        foreach (var spPerson in series.Metadata.People.Where(p => p.Role == PersonRole.Character))
+        {
+            // Set a sort order based on their role
+            var characterMeta = externalCharacters.FirstOrDefault(c => c.Name == spPerson.Person.Name);
+            spPerson.OrderWeight = 0;
+
+            if (characterMeta != null)
+            {
+                spPerson.KavitaPlusConnection = true;
+
+                spPerson.OrderWeight = characterMeta.Role switch
+                {
+                    CharacterRole.Main => 0,
+                    CharacterRole.Supporting => 1,
+                    CharacterRole.Background => 2,
+                    _ => 99 // Default for unknown roles
+                };
+            }
+        }
+
+        // Download the image and save it
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync();
+
+        foreach (var character in externalCharacters)
+        {
+            var aniListId = ScrobblingService.ExtractId<int>(character.Url, ScrobblingService.AniListCharacterWebsite);
+            if (aniListId <= 0) continue;
+            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
+            if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
+            {
+                await _coverDbService.SetPersonCoverByUrl(person, character.ImageUrl, false);
+            }
+        }
+
+
+        return true;
+    }
+
+    private async Task<bool> UpdateArtists(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
+    {
+        if (!settings.EnablePeople) return false;
+
+
+        var upstreamArtists = staff
+            .Where(s => s.Role is "Art" or "Story & Art")
+            .ToList();
+
+        if (upstreamArtists.Count == 0) return false;
+
+        if (series.Metadata.CoverArtistLocked && !settings.HasOverride(MetadataSettingField.People))
+        {
+            return false;
+        }
+
+        if (!settings.IsPersonAllowed(PersonRole.CoverArtist))
+        {
+            return false;
+        }
+
+        series.Metadata.People ??= [];
+        var artists = upstreamArtists
+            .Select(w => new PersonDto()
+            {
+                Name = w.Name,
+                AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
+                Description = CleanSummary(w.Description),
+            })
+            .Concat(series.Metadata.People
+                .Where(p => p.Role == PersonRole.CoverArtist)
+                .Where(p => !p.KavitaPlusConnection)
+                .Select(p => _mapper.Map<PersonDto>(p.Person))
+            )
+            .DistinctBy(p => Parser.Normalize(p.Name))
+            .ToList();
+
+        await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
+
+        foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist))
+        {
+            var meta = upstreamArtists.FirstOrDefault(c => c.Name == person.Person.Name);
+            person.OrderWeight = 0;
+            if (meta != null)
+            {
+                person.KavitaPlusConnection = true;
+            }
+        }
+
+        // Download the image and save it
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync();
+
+        await DownloadAndSetCovers(upstreamArtists);
+
+        return true;
+    }
+
+    private async Task<bool> UpdateWriters(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
+    {
+        if (!settings.EnablePeople) return false;
+
+        var upstreamWriters = staff
+            .Where(s => s.Role is "Story" or "Story & Art")
+            .ToList();
+
+        if (upstreamWriters.Count == 0) return false;
+
+        if (series.Metadata.WriterLocked && !settings.HasOverride(MetadataSettingField.People))
+        {
+            return false;
+        }
+
+        if (!settings.IsPersonAllowed(PersonRole.Writer))
+        {
+            return false;
+        }
+
+        series.Metadata.People ??= [];
+        var writers = upstreamWriters
+            .Select(w => new PersonDto()
+            {
+                Name = w.Name,
+                AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
+                Description = CleanSummary(w.Description),
+            })
+            .Concat(series.Metadata.People
+                .Where(p => p.Role == PersonRole.Writer)
+                .Where(p => !p.KavitaPlusConnection)
+                .Select(p => _mapper.Map<PersonDto>(p.Person))
+            )
+            .DistinctBy(p => Parser.Normalize(p.Name))
+            .ToList();
+
+
+        await SeriesService.HandlePeopleUpdateAsync(series.Metadata, writers, PersonRole.Writer, _unitOfWork);
+
+        foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.Writer))
+        {
+            var meta = upstreamWriters.FirstOrDefault(c => c.Name == person.Person.Name);
+            person.OrderWeight = 0;
+            if (meta != null)
+            {
+                person.KavitaPlusConnection = true;
+            }
+        }
+
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync();
+
+        await DownloadAndSetCovers(upstreamWriters);
+
+        return true;
+    }
+
+    private async Task<bool> UpdateTags(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedTags)
+    {
+        if (externalMetadata.Tags == null || externalMetadata.Tags.Count == 0) return false;
+
+        foreach (var tag in externalMetadata.Tags.Select(t => t.Name))
+        {
+            // Apply field mappings
+            var mappedTag = ApplyFieldMapping(tag, MetadataFieldType.Tag, settings.FieldMappings);
+            if (mappedTag != null)
+            {
+                processedTags.Add(mappedTag);
+            }
+        }
+
+        // Strip blacklisted items from processedTags
+        processedTags = processedTags
+            .Distinct()
+            .Where(g => !settings.Blacklist.Contains(g))
+            .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
+            .ToList();
+
+        if (!settings.EnableTags || processedTags.Count == 0) return false;
+
+        if (series.Metadata.TagsLocked && !settings.HasOverride(MetadataSettingField.Tags))
+        {
+            return false;
+        }
+
+        _logger.LogDebug("Found {TagCount} tags for {SeriesName}", processedTags.Count, series.Name);
+        var madeModification = false;
+        var allTags = (await _unitOfWork.TagRepository.GetAllTagsByNameAsync(processedTags.Select(Parser.Normalize)))
+            .ToList();
+        series.Metadata.Tags ??= [];
+
+        TagHelper.UpdateTagList(processedTags, series, allTags, tag =>
+        {
+            series.Metadata.Tags.Add(tag);
+            madeModification = true;
+        }, () => series.Metadata.TagsLocked = true);
+
+        return madeModification;
+    }
+
+    private async Task<bool> UpdateGenres(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedGenres)
+    {
+        if (externalMetadata.Genres == null || externalMetadata.Genres.Count == 0) return false;
+
+        foreach (var genre in externalMetadata.Genres)
+        {
+            // Apply field mappings
+            var mappedGenre = ApplyFieldMapping(genre, MetadataFieldType.Genre, settings.FieldMappings);
+            if (mappedGenre != null)
+            {
+                processedGenres.Add(mappedGenre);
+            }
+        }
+
+        // Strip blacklisted items from processedGenres
+        processedGenres = processedGenres
+            .Distinct()
+            .Where(g => !settings.Blacklist.Contains(g))
+            .ToList();
+
+        if (!settings.EnableGenres || processedGenres.Count == 0) return false;
+
+        if (series.Metadata.GenresLocked && !settings.HasOverride(MetadataSettingField.Genres))
+        {
+            return false;
+        }
+
+        _logger.LogDebug("Found {GenreCount} genres for {SeriesName}", processedGenres.Count, series.Name);
+        var madeModification = false;
+        var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
+        series.Metadata.Genres ??= [];
+
+        GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
+        {
+            series.Metadata.Genres.Add(genre);
+            madeModification = true;
+        }, () => series.Metadata.GenresLocked = true);
+
+        return madeModification;
+    }
+
+    private async Task<bool> UpdatePublicationStatus(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    {
+        if (!settings.EnablePublicationStatus) return false;
+
+        if (series.Metadata.PublicationStatusLocked && !settings.HasOverride(MetadataSettingField.PublicationStatus))
+        {
+            return false;
+        }
+
+        try
+        {
+            var chapters =
+                (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes
+                .SelectMany(v => v.Chapters).ToList();
+            return DeterminePublicationStatus(series, chapters, externalMetadata);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue determining Publication Status for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+        }
+
+        return false;
+    }
+
+    private bool UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
+    {
+
+        if (series.Metadata.AgeRatingLocked && !settings.HasOverride(MetadataSettingField.AgeRating))
+        {
+            return false;
+        }
+
+        try
+        {
+            // Determine Age Rating
+            var totalTags = allExternalTags
+                .Concat(series.Metadata.Genres.Select(g => g.Title))
+                .Concat(series.Metadata.Tags.Select(g => g.Title));
+
+            var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
+            if (!series.Metadata.AgeRatingLocked && series.Metadata.AgeRating <= ageRating)
+            {
+                series.Metadata.AgeRating = ageRating;
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue determining Age Rating for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> UpdateCoverImage(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    {
+        if (!settings.EnableCoverImage) return false;
+
+        if (string.IsNullOrEmpty(externalMetadata.CoverUrl)) return false;
+
+        if (series.CoverImageLocked && !settings.HasOverride(MetadataSettingField.Covers))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(externalMetadata.CoverUrl) && !settings.HasOverride(MetadataSettingField.Covers))
+        {
+            return false;
+        }
+
+        await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
+        return true;
+    }
+
+
+    private static bool UpdateReleaseYear(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    {
+        if (!settings.EnableStartDate) return false;
+
+        if (!externalMetadata.StartDate.HasValue) return false;
+
+        if (series.Metadata.ReleaseYearLocked && !settings.HasOverride(MetadataSettingField.StartDate))
+        {
+            return false;
+        }
+
+        if (series.Metadata.ReleaseYear != 0 && !settings.HasOverride(MetadataSettingField.StartDate))
+        {
+            return false;
+        }
+
+        series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
+        return true;
+    }
+
     private static bool UpdateLocalizedName(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
+        if (!settings.EnableLocalizedName) return false;
+
         if (series.LocalizedNameLocked && !settings.HasOverride(MetadataSettingField.LocalizedName))
         {
             return false;
@@ -932,8 +1009,12 @@ public class ExternalMetadataService : IExternalMetadataService
         return true;
     }
 
-    private static bool UpdateSummary(Series series, MetadataSettingsDto settings, string? summary)
+    private static bool UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
+        if (!settings.EnableSummary) return false;
+
+        if (string.IsNullOrEmpty(externalMetadata.Summary)) return false;
+
         if (series.Metadata.SummaryLocked && !settings.HasOverride(MetadataSettingField.Summary))
         {
             return false;
@@ -944,7 +1025,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        series.Metadata.Summary = CleanSummary(summary);
+        series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
         return true;
     }
 
