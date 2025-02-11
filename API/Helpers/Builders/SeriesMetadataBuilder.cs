@@ -70,15 +70,17 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
-    public SeriesMetadataBuilder WithReleaseYear(int year)
+    public SeriesMetadataBuilder WithReleaseYear(int year, bool lockStatus = false)
     {
         _seriesMetadata.ReleaseYear = year;
+        _seriesMetadata.ReleaseYearLocked = lockStatus;
         return this;
     }
 
-    public SeriesMetadataBuilder WithSummary(string summary)
+    public SeriesMetadataBuilder WithSummary(string summary, bool lockStatus = false)
     {
         _seriesMetadata.Summary = summary;
+        _seriesMetadata.SummaryLocked = lockStatus;
         return this;
     }
 }

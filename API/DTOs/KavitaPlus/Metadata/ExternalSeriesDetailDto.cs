@@ -15,7 +15,7 @@ public class ExternalSeriesDetailDto
     public string Name { get; set; }
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
-    public IList<string> Synonyms { get; set; }
+    public IList<string> Synonyms { get; set; } = [];
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }
     public string? CoverUrl { get; set; }
@@ -30,8 +30,8 @@ public class ExternalSeriesDetailDto
     public int AverageScore { get; set; }
     public int Chapters { get; set; }
     public int Volumes { get; set; }
-    public IList<SeriesRelationship>? Relations { get; set; }
-    public IList<SeriesCharacter>? Characters { get; set; }
+    public IList<SeriesRelationship>? Relations { get; set; } = [];
+    public IList<SeriesCharacter>? Characters { get; set; } = [];
 
 
 }

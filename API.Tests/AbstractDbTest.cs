@@ -26,6 +26,7 @@ public abstract class AbstractDbTest : IDisposable
     protected readonly DbConnection _connection;
     protected readonly DataContext _context;
     protected readonly IUnitOfWork _unitOfWork;
+    protected readonly IMapper _mapper;
 
 
     protected const string CacheDirectory = "C:/kavita/config/cache/";
@@ -53,10 +54,10 @@ public abstract class AbstractDbTest : IDisposable
         Task.Run(SeedDb).GetAwaiter().GetResult();
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
+        _mapper = config.CreateMapper();
 
         GlobalConfiguration.Configuration.UseInMemoryStorage();
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
+        _unitOfWork = new UnitOfWork(_context, _mapper, null);
     }
 
     private static DbConnection CreateInMemoryDatabase()

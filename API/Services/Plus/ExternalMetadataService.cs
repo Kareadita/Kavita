@@ -51,6 +51,7 @@ public interface IExternalMetadataService
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
     Task FixSeriesMatch(int seriesId, int anilistId);
     Task UpdateSeriesDontMatch(int seriesId, bool dontMatch);
+    Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -242,11 +243,11 @@ public class ExternalMetadataService : IExternalMetadataService
         return ArraySegment<ExternalSeriesMatchDto>.Empty;
     }
 
-    private static string CleanSummary(string? summary)
+    private static string? CleanSummary(string? summary)
     {
         if (string.IsNullOrWhiteSpace(summary))
         {
-            return string.Empty; // Return as is if null, empty, or whitespace.
+            return null; // Return as is if null, empty, or whitespace.
         }
 
         // Remove all variations of <br> tags (case-insensitive)
@@ -499,7 +500,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="externalMetadata"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    private async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
+    public async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId)
     {
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
         if (!settings.Enabled) return false;
@@ -512,6 +513,20 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
 
         var madeModification = false;
+
+        if (settings.EnableSummary)
+        {
+            madeModification = madeModification || UpdateSummary(series, settings, externalMetadata.Summary);
+        }
+
+
+        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (settings.HasOverride(MetadataSettingField.StartDate) ||
+                                                                               (!series.Metadata.ReleaseYearLocked &&
+                                                                                   series.Metadata.ReleaseYear == 0)))
+        {
+            series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
+            madeModification = true;
+        }
 
         if (settings.EnableLocalizedName && (settings.HasOverride(MetadataSettingField.LocalizedName)
                                              || !series.LocalizedNameLocked && !string.IsNullOrWhiteSpace(series.LocalizedName)))
@@ -537,21 +552,6 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
 
-            madeModification = true;
-        }
-
-        if (settings.EnableSummary && (settings.HasOverride(MetadataSettingField.Summary) ||
-                                       (!series.Metadata.SummaryLocked && !string.IsNullOrWhiteSpace(series.Metadata.Summary))))
-        {
-            series.Metadata.Summary = CleanSummary(externalMetadata.Summary);
-            madeModification = true;
-        }
-
-        if (settings.EnableStartDate && externalMetadata.StartDate.HasValue && (settings.HasOverride(MetadataSettingField.StartDate) ||
-                                                                               (!series.Metadata.ReleaseYearLocked &&
-                                                                                   series.Metadata.ReleaseYear == 0)))
-        {
-            series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
             madeModification = true;
         }
 
@@ -915,6 +915,22 @@ public class ExternalMetadataService : IExternalMetadataService
         #endregion
 
         return madeModification;
+    }
+
+    private static bool UpdateSummary(Series series, MetadataSettingsDto settings, string? summary)
+    {
+        if (series.Metadata.SummaryLocked && !settings.HasOverride(MetadataSettingField.Summary))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(series.Metadata.Summary) && !settings.HasOverride(MetadataSettingField.Summary))
+        {
+            return false;
+        }
+
+        series.Metadata.Summary = CleanSummary(summary);
+        return true;
     }
 
 

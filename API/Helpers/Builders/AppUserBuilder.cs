@@ -61,4 +61,10 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
         return this;
     }
 
+    public AppUserBuilder WithRole(string role)
+    {
+        _appUser.UserRoles ??= new List<AppUserRole>();
+        _appUser.UserRoles.Add(new AppUserRole() {Role = new AppRole() {Name = role}});
+        return this;
+    }
 }
