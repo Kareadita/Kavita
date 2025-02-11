@@ -505,7 +505,7 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateTags(series, settings, externalMetadata, processedTags) || madeModification;
         madeModification = UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)) || madeModification;
 
-        var staff = externalMetadata.Staff.Select(s =>
+        var staff = (externalMetadata.Staff ?? []).Select(s =>
         {
             s.Name = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}";
 
