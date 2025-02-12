@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data.Repositories;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
+using YamlDotNet.Serialization;
 
 namespace API.Tests.Services;
 
@@ -261,7 +263,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     #region Release Year
 
     [Fact]
-    public async Task ReleaseYear_NoExisting_Off_Modification()
+    public async Task ReleaseYear_NoExisting_Off_NoModification()
     {
         await ResetDb();
 
@@ -642,6 +644,241 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #region Publication Status
 
+    [Fact]
+    public async Task PublicationStatus_NoExisting_Off_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = false;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.OnGoing, postSeries.Metadata.PublicationStatus);
+    }
+
+    [Fact]
+    public async Task PublicationStatus_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
+    }
+
+    [Fact]
+    public async Task PublicationStatus_Existing_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPublicationStatus(PublicationStatus.Hiatus)
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
+    }
+
+    [Fact]
+    public async Task PublicationStatus_Existing_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPublicationStatus(PublicationStatus.Hiatus, true)
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.Hiatus, postSeries.Metadata.PublicationStatus);
+    }
+
+    [Fact]
+    public async Task PublicationStatus_Existing_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPublicationStatus(PublicationStatus.Hiatus, true)
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        metadataSettings.Overrides = [MetadataSettingField.PublicationStatus];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
+    }
+
+    [Fact]
+    public async Task PublicationStatus_Existing_CorrectState_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Publication Status";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPublicationStatus(PublicationStatus.Hiatus)
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Volumes = 2
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(PublicationStatus.Ended, postSeries.Metadata.PublicationStatus);
+    }
 
 
 
@@ -842,6 +1079,176 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     #endregion
 
     #region Genres
+
+    [Fact]
+    public async Task Genres_NoExisting_Off_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = false;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal([], postSeries.Metadata.Genres);
+    }
+
+    [Fact]
+    public async Task Genres_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task Genres_Existing_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithGenre(_genreLookup["Action"])
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task Genres_Existing_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithGenre(_genreLookup["Action"], true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Action"], postSeries.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task Genres_Existing_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithGenre(_genreLookup["Action"], true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
+    }
+
     #endregion
 
     #region Tags
@@ -859,6 +1266,313 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     #region Relationships
     #endregion
 
+    #region Blacklist
+
+    // Blacklist Genre
+
+    // Blacklist Tag
+
+    // Field Map then Blacklist Genre
+
+    // Field Map then Blacklist Tag
+
+    #endregion
+
+    #region Whitelist
+
+    // Whitelist Tag
+
+    // Field Map then Whitelist Tag
+
+
+    #endregion
+
+    #region Field Mapping
+
+    [Fact]
+    public async Task FieldMap_GenreToGenre_KeepSource_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres];
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Genre,
+            SourceValue = "Ecchi",
+            DestinationType = MetadataFieldType.Genre,
+            DestinationValue = "Fanservice",
+            ExcludeFromSource = false
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(
+            new[] { "Ecchi", "Fanservice" }.OrderBy(s => s),
+            postSeries.Metadata.Genres.Select(g => g.Title).OrderBy(s => s)
+        );
+    }
+
+    [Fact]
+    public async Task FieldMap_GenreToGenre_RemoveSource_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres];
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Genre,
+            SourceValue = "Ecchi",
+            DestinationType = MetadataFieldType.Genre,
+            DestinationValue = "Fanservice",
+            ExcludeFromSource = true
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Fanservice"], postSeries.Metadata.Genres.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task FieldMap_TagToTag_KeepSource_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tag Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Tag,
+            SourceValue = "Ecchi",
+            DestinationType = MetadataFieldType.Tag,
+            DestinationValue = "Fanservice",
+            ExcludeFromSource = false
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Ecchi"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(
+            new[] { "Ecchi", "Fanservice" }.OrderBy(s => s),
+            postSeries.Metadata.Tags.Select(g => g.Title).OrderBy(s => s)
+        );
+    }
+
+    [Fact]
+    public async Task Tags_Existing_FieldMap_RemoveSource_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tag Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres];
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Tag,
+            SourceValue = "Ecchi",
+            DestinationType = MetadataFieldType.Tag,
+            DestinationValue = "Fanservice",
+            ExcludeFromSource = true
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Ecchi"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Fanservice"], postSeries.Metadata.Tags.Select(g => g.Title));
+    }
+
+    [Fact]
+    public async Task FieldMap_GenreToTag_KeepSource_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres, MetadataSettingField.Tags];
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Genre,
+            SourceValue = "Ecchi",
+            DestinationType = MetadataFieldType.Tag,
+            DestinationValue = "Fanservice",
+            ExcludeFromSource = false
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(
+            new[] {"Ecchi"}.OrderBy(s => s),
+            postSeries.Metadata.Genres.Select(g => g.Title).OrderBy(s => s)
+        );
+        Assert.Equal(
+            new[] {"Fanservice"}.OrderBy(s => s),
+            postSeries.Metadata.Tags.Select(g => g.Title).OrderBy(s => s)
+        );
+    }
+
+
+
+    [Fact]
+    public async Task FieldMap_GenreToGenre_RemoveSource_NoExternalGenre_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Genres Field Mapping";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithGenre(_genreLookup["Action"])
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Overrides = [MetadataSettingField.Genres, MetadataSettingField.Tags];
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Genre,
+            SourceValue = "Action",
+            DestinationType = MetadataFieldType.Genre,
+            DestinationValue = "Adventure",
+            ExcludeFromSource = true
+
+        }];
+
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(
+            new[] {"Action"}.OrderBy(s => s),
+            postSeries.Metadata.Genres.Select(g => g.Title).OrderBy(s => s)
+        );
+    }
+
+    #endregion
 
 
 

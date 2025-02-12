@@ -501,6 +501,9 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
         madeModification = await UpdatePublicationStatus(series, settings, externalMetadata) || madeModification;
 
+        // Apply field mappings
+        GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
+
         madeModification = await UpdateGenres(series, settings, externalMetadata, processedGenres) || madeModification;
         madeModification = await UpdateTags(series, settings, externalMetadata, processedTags) || madeModification;
         madeModification = UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)) || madeModification;
@@ -521,6 +524,36 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
         return madeModification;
+    }
+
+    private static void GenerateGenreAndTagLists(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings,
+        ref List<string> processedTags, ref List<string> processedGenres)
+    {
+        externalMetadata.Tags ??= [];
+        externalMetadata.Genres ??= [];
+
+        var mappings = ApplyFieldMappings(externalMetadata.Tags.Select(t => t.Name), MetadataFieldType.Tag, settings.FieldMappings);
+        if (mappings.TryGetValue(MetadataFieldType.Tag, out var tagsToTags))
+        {
+            processedTags.AddRange(tagsToTags);
+        }
+        if (mappings.TryGetValue(MetadataFieldType.Genre, out var tagsToGenres))
+        {
+            processedGenres.AddRange(tagsToGenres);
+        }
+
+        mappings = ApplyFieldMappings(externalMetadata.Genres, MetadataFieldType.Genre, settings.FieldMappings);
+        if (mappings.TryGetValue(MetadataFieldType.Tag, out var genresToTags))
+        {
+            processedTags.AddRange(genresToTags);
+        }
+        if (mappings.TryGetValue(MetadataFieldType.Genre, out var genresToGenres))
+        {
+            processedGenres.AddRange(genresToGenres);
+        }
+
+        processedTags = ApplyBlackWhiteList(settings, MetadataFieldType.Tag, processedTags);
+        processedGenres = ApplyBlackWhiteList(settings, MetadataFieldType.Genre, processedGenres);
     }
 
     private async Task<bool> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
@@ -774,24 +807,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task<bool> UpdateTags(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedTags)
     {
-        if (externalMetadata.Tags == null || externalMetadata.Tags.Count == 0) return false;
-
-        foreach (var tag in externalMetadata.Tags.Select(t => t.Name))
-        {
-            // Apply field mappings
-            var mappedTag = ApplyFieldMapping(tag, MetadataFieldType.Tag, settings.FieldMappings);
-            if (mappedTag != null)
-            {
-                processedTags.Add(mappedTag);
-            }
-        }
-
-        // Strip blacklisted items from processedTags
-        processedTags = processedTags
-            .Distinct()
-            .Where(g => !settings.Blacklist.Contains(g))
-            .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
-            .ToList();
+        externalMetadata.Tags ??= [];
 
         if (!settings.EnableTags || processedTags.Count == 0) return false;
 
@@ -815,25 +831,24 @@ public class ExternalMetadataService : IExternalMetadataService
         return madeModification;
     }
 
+    private static List<string> ApplyBlackWhiteList(MetadataSettingsDto settings, MetadataFieldType fieldType, List<string> processedStrings)
+    {
+        return fieldType switch
+        {
+            MetadataFieldType.Genre => processedStrings.Distinct()
+                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
+                .ToList(),
+            MetadataFieldType.Tag => processedStrings.Distinct()
+                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
+                .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
+                .ToList(),
+            _ => throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, null)
+        };
+    }
+
     private async Task<bool> UpdateGenres(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedGenres)
     {
-        if (externalMetadata.Genres == null || externalMetadata.Genres.Count == 0) return false;
-
-        foreach (var genre in externalMetadata.Genres)
-        {
-            // Apply field mappings
-            var mappedGenre = ApplyFieldMapping(genre, MetadataFieldType.Genre, settings.FieldMappings);
-            if (mappedGenre != null)
-            {
-                processedGenres.Add(mappedGenre);
-            }
-        }
-
-        // Strip blacklisted items from processedGenres
-        processedGenres = processedGenres
-            .Distinct()
-            .Where(g => !settings.Blacklist.Contains(g))
-            .ToList();
+        externalMetadata.Genres ??= [];
 
         if (!settings.EnableGenres || processedGenres.Count == 0) return false;
 
@@ -846,12 +861,19 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
         var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresByNamesAsync(processedGenres.Select(Parser.Normalize))).ToList();
         series.Metadata.Genres ??= [];
+        var exisitingGenres = series.Metadata.Genres;
 
         GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
         {
             series.Metadata.Genres.Add(genre);
             madeModification = true;
         }, () => series.Metadata.GenresLocked = true);
+
+        foreach (var genre in exisitingGenres)
+        {
+            if (series.Metadata.Genres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle) != null) continue;
+            series.Metadata.Genres.Add(genre);
+        }
 
         return madeModification;
     }
@@ -870,7 +892,10 @@ public class ExternalMetadataService : IExternalMetadataService
             var chapters =
                 (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Chapters))!.Volumes
                 .SelectMany(v => v.Chapters).ToList();
-            return DeterminePublicationStatus(series, chapters, externalMetadata);
+            var status = DeterminePublicationStatus(series, chapters, externalMetadata);
+
+            series.Metadata.PublicationStatus = status;
+            return true;
         }
         catch (Exception ex)
         {
@@ -1046,9 +1071,8 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    private bool DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
+    private PublicationStatus DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
     {
-        var madeModification = false;
         try
         {
             // Determine the expected total count based on local metadata
@@ -1102,34 +1126,60 @@ public class ExternalMetadataService : IExternalMetadataService
                 {
                     status = PublicationStatus.Completed;
                 }
-
-                madeModification = true;
             }
 
-            series.Metadata.PublicationStatus = status;
+            return status;
         }
         catch (Exception ex)
         {
             _logger.LogCritical(ex, "There was an issue determining Publication Status");
-            series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
         }
 
-        return madeModification;
+        return PublicationStatus.OnGoing;
     }
 
-    private static string? ApplyFieldMapping(string value, MetadataFieldType sourceType, List<MetadataFieldMappingDto> mappings)
+    private static Dictionary<MetadataFieldType, List<string>> ApplyFieldMappings(IEnumerable<string> values, MetadataFieldType sourceType, List<MetadataFieldMappingDto> mappings)
     {
-        // Find matching mapping
-        var mapping = mappings
-            .FirstOrDefault(m =>
+        var result = new Dictionary<MetadataFieldType, List<string>>();
+
+        foreach (var field in Enum.GetValues<MetadataFieldType>())
+        {
+            result[field] = [];
+        }
+
+        foreach (var value in values)
+        {
+            var mapping = mappings.FirstOrDefault(m =>
                 m.SourceType == sourceType &&
                 m.SourceValue.Equals(value, StringComparison.OrdinalIgnoreCase));
 
-        if (mapping == null) return value;
+            if (mapping != null && !string.IsNullOrWhiteSpace(mapping.DestinationValue))
+            {
+                var targetType = mapping.DestinationType;
 
-        // If mapping exists, return destination or source value
-        return mapping.DestinationValue ?? (mapping.ExcludeFromSource ? null : value);
+                if (!mapping.ExcludeFromSource)
+                {
+                    result[sourceType].Add(mapping.SourceValue);
+                }
+
+                result[targetType].Add(mapping.DestinationValue);
+            }
+            else
+            {
+                // If no mapping, keep the original value
+                result[sourceType].Add(value);
+            }
+        }
+
+        // Ensure distinct
+        foreach (var key in result.Keys)
+        {
+            result[key] = result[key].Distinct().ToList();
+        }
+
+        return result;
     }
+
 
     /// <summary>
     /// Returns the highest age rating from all tags/genres based on user-supplied mappings

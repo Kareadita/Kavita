@@ -39,9 +39,10 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
-    public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status)
+    public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status, bool lockState = false)
     {
         _seriesMetadata.PublicationStatus = status;
+        _seriesMetadata.PublicationStatusLocked = lockState;
         return this;
     }
 
@@ -82,6 +83,21 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
     {
         _seriesMetadata.Summary = summary;
         _seriesMetadata.SummaryLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithGenre(Genre genre, bool lockStatus = false)
+    {
+        _seriesMetadata.Genres ??= [];
+        _seriesMetadata.Genres.Add(genre);
+        _seriesMetadata.GenresLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithGenres(List<Genre> genres, bool lockStatus = false)
+    {
+        _seriesMetadata.Genres = genres;
+        _seriesMetadata.GenresLocked = lockStatus;
         return this;
     }
 }
