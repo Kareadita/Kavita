@@ -1252,6 +1252,142 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     #endregion
 
     #region Tags
+
+    [Fact]
+    public async Task Tags_NoExisting_Off_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = false;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal([], postSeries.Metadata.Tags);
+    }
+
+    [Fact]
+    public async Task Tags_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task Tags_Existing_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithTag(_tagLookup["H"], true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["H"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task Tags_Existing_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithTag(_tagLookup["H"], true)
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Overrides = [MetadataSettingField.Tags];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
     #endregion
 
     #region People - Writers/Artists

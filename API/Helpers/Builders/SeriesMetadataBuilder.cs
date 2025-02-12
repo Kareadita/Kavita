@@ -100,4 +100,12 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.GenresLocked = lockStatus;
         return this;
     }
+
+    public SeriesMetadataBuilder WithTag(Tag tag, bool lockStatus = false)
+    {
+        _seriesMetadata.Tags ??= [];
+        _seriesMetadata.Tags.Add(tag);
+        _seriesMetadata.TagsLocked = lockStatus;
+        return this;
+    }
 }
