@@ -1761,7 +1761,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
                 .WithPerson(_personLookup["Johnny Twowheeler"], PersonRole.Character)
                 .Build())
             .Build();
-        series.Metadata.WriterLocked = true;
+        series.Metadata.CharacterLocked = true;
         _context.Series.Attach(series);
         await _context.SaveChangesAsync();
 
@@ -1984,7 +1984,76 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #region Blacklist
 
-    // Blacklist Genre
+    [Fact]
+    public async Task Blacklist_Genres()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Blacklist Genres";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.Blacklist = ["Sports", "Action"];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Boxing", "Sports", "Action"],
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[] {"Boxing"}.OrderBy(s => s), postSeries.Metadata.Genres.Select(t => t.Title).OrderBy(s => s));
+    }
+
+
+    [Fact]
+    public async Task Blacklist_Tags()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Blacklist Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.Blacklist = ["Sports", "Action"];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Sports"}, new MetadataTagDto() {Name = "Action"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[] {"Boxing"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
+    }
 
     // Blacklist Tag
 
@@ -2072,9 +2141,6 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.NotNull(postSeries);
         Assert.Equal(new[] {"Sports", "Action"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
     }
-
-    // Field Map then Whitelist Tag
-
 
     #endregion
 
