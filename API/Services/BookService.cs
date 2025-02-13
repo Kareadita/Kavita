@@ -71,7 +71,7 @@ public class BookService : IBookService
     private static readonly RecyclableMemoryStreamManager StreamManager = new ();
     private const string CssScopeClass = ".book-content";
     private const string BookApiUrl = "book-resources?file=";
-    private readonly PdfMetadataExtractor _pdfMetadataExtractor;
+    private readonly PdfComicInfoExtractor _pdfComicInfoExtractor;
 
     public static readonly EpubReaderOptions BookReaderOptions = new()
     {
@@ -88,7 +88,7 @@ public class BookService : IBookService
         _directoryService = directoryService;
         _imageService = imageService;
         _mediaErrorService = mediaErrorService;
-        _pdfMetadataExtractor = new PdfMetadataExtractor(_logger, _mediaErrorService);
+        _pdfComicInfoExtractor = new PdfComicInfoExtractor(_logger, _mediaErrorService);
     }
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -592,7 +592,7 @@ public class BookService : IBookService
 
         if (Parser.IsPdf(filePath))
         {
-            return _pdfMetadataExtractor.GetComicInfo(filePath);
+            return _pdfComicInfoExtractor.GetComicInfo(filePath);
         }
         else
         {

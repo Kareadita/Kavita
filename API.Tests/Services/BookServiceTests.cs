@@ -93,11 +93,34 @@ public class BookServiceTests
     }
 
     [Fact]
-    public void MissingPDFMetadata()
+    public void ShouldUsePDFInfoDict()
     {
-        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService");
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Books/PDFs");
         var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
         var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Rollo at Work", comicInfo.Title);
+        Assert.Equal("Jacob Abbott", comicInfo.Writer);
+        Assert.Equal(2008, comicInfo.Year);
+    }
+
+    [Fact]
+    public void ShouldHandleIndirectPDFObjects()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "indirect.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal(2018, comicInfo.Year);
+        Assert.Equal(8, comicInfo.Month);
+    }
+
+    [Fact]
+    public void FailGracefullyWithEncryptedPDF()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "encrypted.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
         Assert.Null(comicInfo);
-      }
+    }
 }
