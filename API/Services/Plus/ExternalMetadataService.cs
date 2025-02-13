@@ -438,8 +438,11 @@ public class ExternalMetadataService : IExternalMetadataService
                 }
             }
 
-
-            await _unitOfWork.CommitAsync();
+            // WriteExternalMetadataToSeries will commit but not always
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+            }
 
             if (madeMetadataModification)
             {
@@ -565,11 +568,12 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
+        var relatedSeriesDict = new Dictionary<int, Series>();
         foreach (var relation in externalMetadataRelations)
         {
+            var names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle};
             var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
-                relation.SeriesName.NativeTitle,
-                relation.SeriesName.PreferredTitle,
+                names,
                 relation.PlusMediaFormat.GetMangaFormats(),
                 defaultAdmin.Id,
                 relation.AniListId,
@@ -578,20 +582,68 @@ public class ExternalMetadataService : IExternalMetadataService
             // Skip if no related series found or series is the parent
             if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
 
+            if (relatedSeries != null && relatedSeries.Id != series.Id && relation.Relation != RelationKind.Parent)
+            {
+                relatedSeriesDict[relatedSeries.Id] = relatedSeries;
+            }
+
+            // // Check if the relationship already exists
+            // var relationshipExists = series.Relations.Any(r =>
+            //     r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
+            //
+            // if (relationshipExists) continue;
+            //
+            // series.Relations.Add(new SeriesRelation
+            // {
+            //     RelationKind = relation.Relation,
+            //     TargetSeries = relatedSeries,
+            //     TargetSeriesId = relatedSeries.Id,
+            // });
+            //
+            // _unitOfWork.SeriesRepository.Attach(series);
+            //
+            // // Handle sequel/prequel: add reverse relationship
+            // if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
+            // {
+            //     var reverseExists = relatedSeries.Relations.Any(r =>
+            //         r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
+            //
+            //     if (reverseExists) continue;
+            //
+            //     relatedSeries.Relations.Add(new SeriesRelation
+            //     {
+            //         RelationKind = GetReverseRelation(relation.Relation),
+            //         TargetSeries = series,
+            //         TargetSeriesId = series.Id,
+            //         Series = relatedSeries,
+            //         SeriesId = relatedSeries.Id
+            //     });
+            // }
+        }
+
+        // Process relationships
+        foreach (var relation in externalMetadataRelations)
+        {
+            var relatedSeries = relatedSeriesDict.GetValueOrDefault(
+                relatedSeriesDict.Keys.FirstOrDefault(k =>
+                    relatedSeriesDict[k].Name == relation.SeriesName.PreferredTitle ||
+                    relatedSeriesDict[k].Name == relation.SeriesName.NativeTitle));
+
+            if (relatedSeries == null) continue;
+
             // Check if the relationship already exists
             var relationshipExists = series.Relations.Any(r =>
                 r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
 
             if (relationshipExists) continue;
 
-            series.Relations.Add(new SeriesRelation
+            // Add new relationship
+            var newRelation = new SeriesRelation
             {
                 RelationKind = relation.Relation,
-                TargetSeries = relatedSeries,
-                TargetSeriesId = relatedSeries.Id,
-                Series = series,
-                SeriesId = series.Id
-            });
+                TargetSeriesId = relatedSeries.Id
+            };
+            series.Relations.Add(newRelation);
 
             // Handle sequel/prequel: add reverse relationship
             if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
@@ -599,17 +651,21 @@ public class ExternalMetadataService : IExternalMetadataService
                 var reverseExists = relatedSeries.Relations.Any(r =>
                     r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
 
-                if (reverseExists) continue;
-
-                relatedSeries.Relations.Add(new SeriesRelation
+                if (!reverseExists)
                 {
-                    RelationKind = GetReverseRelation(relation.Relation),
-                    TargetSeries = series,
-                    TargetSeriesId = series.Id,
-                    Series = relatedSeries,
-                    SeriesId = relatedSeries.Id
-                });
+                    var reverseRelation = new SeriesRelation
+                    {
+                        RelationKind = GetReverseRelation(relation.Relation),
+                        TargetSeriesId = series.Id
+                    };
+                    relatedSeries.Relations.Add(reverseRelation);
+                }
             }
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
         }
 
         return true;

@@ -119,4 +119,16 @@ public class SeriesBuilder : IEntityBuilder<Series>
     }
 
 
+    public SeriesBuilder WithRelationship(int targetSeriesId, RelationKind kind)
+    {
+        _series.Relations ??= [];
+        _series.Relations.Add(new SeriesRelation()
+        {
+            SeriesId = _series.Id,
+            RelationKind = kind,
+            TargetSeriesId = targetSeriesId
+        });
+
+        return this;
+    }
 }

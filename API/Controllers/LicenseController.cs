@@ -64,7 +64,14 @@ public class LicenseController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
     {
-        return Ok(await licenseService.GetLicenseInfo(forceCheck));
+        try
+        {
+            return Ok(await licenseService.GetLicenseInfo(forceCheck));
+        }
+        catch (Exception)
+        {
+            return Ok(null);
+        }
     }
 
     [Authorize("RequireAdminRole")]

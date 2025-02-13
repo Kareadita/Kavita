@@ -43,6 +43,7 @@ public abstract class AbstractDbTest : IDisposable
     {
         var contextOptions = new DbContextOptionsBuilder<DataContext>()
             .UseSqlite(CreateInMemoryDatabase())
+            .EnableSensitiveDataLogging()
             .Options;
 
         _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
@@ -93,6 +94,7 @@ public abstract class AbstractDbTest : IDisposable
 
 
             _context.Library.Add(new LibraryBuilder("Manga")
+                .WithAllowMetadataMatching(true)
                 .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
                 .Build());
 

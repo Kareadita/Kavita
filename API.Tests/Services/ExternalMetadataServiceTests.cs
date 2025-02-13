@@ -7,6 +7,7 @@ using API.Constants;
 using API.Data.Repositories;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Recommendation;
+using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -15,6 +16,7 @@ using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -1974,7 +1976,245 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #region Relationships
 
+    // Not enabled
+
     // Non-Sequel
+
+    [Fact]
+    public async Task Relationships_NonSequel()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Relationships Side Story";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Side Story - Target")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .WithExternalMetadata(new ExternalSeriesMetadata()
+            {
+                AniListId = 10
+            })
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.SideStory,
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = series2.Name,
+                    EnglishTitle = null,
+                    NativeTitle = series2.Name,
+                    RomajiTitle = series2.Name,
+                },
+                AniListId = 10,
+                PlusMediaFormat = PlusMediaFormat.Manga
+            }]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Single(sourceSeries.Relations);
+        Assert.Equal(series2.Name, sourceSeries.Relations.First().TargetSeries.Name);
+    }
+
+    [Fact]
+    public async Task Relationships_NonSequel_LocalizedName()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Relationships Side Story";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Side Story - Target")
+            .WithLibraryId(1)
+            .WithLocalizedName("School bus")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.SideStory,
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = "School bus",
+                    EnglishTitle = null,
+                    NativeTitle = series2.Name,
+                    RomajiTitle = series2.Name,
+                },
+                AniListId = 10,
+                PlusMediaFormat = PlusMediaFormat.Manga
+            }]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Single(sourceSeries.Relations);
+        Assert.Equal(series2.Name, sourceSeries.Relations.First().TargetSeries.Name);
+    }
+
+    // Non-Sequel with no match due to Format difference
+    [Fact]
+    public async Task Relationships_NonSequel_FormatDifference()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Relationships Side Story";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Side Story - Target")
+            .WithLibraryId(1)
+            .WithLocalizedName("School bus")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.SideStory,
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = "School bus",
+                    EnglishTitle = null,
+                    NativeTitle = series2.Name,
+                    RomajiTitle = series2.Name,
+                },
+                AniListId = 10,
+                PlusMediaFormat = PlusMediaFormat.Book
+            }]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Empty(sourceSeries.Relations);
+    }
+
+    // Non-Sequel existing relationship with new link, both exist
+    [Fact]
+    public async Task Relationships_NonSequel_ExistingLink_DifferentType()
+    {
+        await ResetDb();
+
+        var existingRelationshipSeries = new SeriesBuilder("Existing")
+            .WithLibraryId(1)
+            .Build();
+        _context.Series.Attach(existingRelationshipSeries);
+        await _context.SaveChangesAsync();
+
+        const string seriesName = "Test - Relationships Side Story";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithRelationship(existingRelationshipSeries.Id, RelationKind.Annual)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Side Story - Target")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .WithExternalMetadata(new ExternalSeriesMetadata()
+            {
+                AniListId = 10
+            })
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.SideStory,
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = series2.Name,
+                    EnglishTitle = null,
+                    NativeTitle = series2.Name,
+                    RomajiTitle = series2.Name,
+                },
+                AniListId = 10,
+                PlusMediaFormat = PlusMediaFormat.Manga
+            }]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.Annual);
+        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.SideStory);
+    }
+
+
 
     // Sequel/Prequel
 
@@ -2433,8 +2673,6 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
 
 
-
-
     protected override async Task ResetDb()
     {
        _context.Series.RemoveRange(_context.Series);
@@ -2458,7 +2696,10 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
        await _context.SaveChangesAsync();
 
-       _context.AppUser.Add(new AppUserBuilder("Joe", "Joe").WithRole(PolicyConstants.AdminRole).Build());
+       _context.AppUser.Add(new AppUserBuilder("Joe", "Joe")
+           .WithRole(PolicyConstants.AdminRole)
+           .WithLibrary(await _context.Library.FirstAsync(l => l.Id == 1))
+           .Build());
 
        // Create a bunch of Genres for this test and store their string in _genreLookup
        _genreLookup.Clear();

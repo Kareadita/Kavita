@@ -124,6 +124,8 @@ export class AppComponent implements OnInit {
     // Bootstrap anything that's needed
     this.themeService.getThemes().subscribe();
     this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
-    this.licenseService.licenseInfo().subscribe();
+    if (this.accountService.hasAdminRole(user)) {
+      this.licenseService.licenseInfo().subscribe();
+    }
   }
 }
