@@ -31,6 +31,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     private readonly ExternalMetadataService _externalMetadataService;
     private readonly Dictionary<string, Genre> _genreLookup = new Dictionary<string, Genre>();
     private readonly Dictionary<string, Tag> _tagLookup = new Dictionary<string, Tag>();
+    private readonly Dictionary<string, Person> _personLookup = new Dictionary<string, Person>();
 
 
     public ExternalMetadataServiceTests(ITestOutputHelper testOutputHelper)
@@ -1391,6 +1392,291 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     #endregion
 
     #region People - Writers/Artists
+
+    [Fact]
+    public async Task People_Writer_NoExisting_Off_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = false;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal([], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer));
+    }
+
+    [Fact]
+    public async Task People_Writer_NoExisting_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["John Doe"], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Person.Name));
+    }
+
+    [Fact]
+    public async Task People_Writer_Locked_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(_personLookup["Johnny Twowheeler"], PersonRole.Writer)
+                .Build())
+            .Build();
+        series.Metadata.WriterLocked = true;
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+    }
+
+    [Fact]
+    public async Task People_Writer_Locked_Override_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(_personLookup["Johnny Twowheeler"], PersonRole.Writer)
+                .Build())
+            .Build();
+        series.Metadata.WriterLocked = true;
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        metadataSettings.Overrides = [MetadataSettingField.People];
+        metadataSettings.PersonRoles = [PersonRole.Writer];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"John Doe", "Johnny Twowheeler"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+        Assert.True( postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+            .FirstOrDefault(p => p.Person.Name == "John Doe")!.KavitaPlusConnection);
+    }
+
+    [Fact]
+    public async Task People_Writer_Locked_Override_ReverseNamingMatch_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(_personLookup["Johnny Twowheeler"], PersonRole.Writer)
+                .Build())
+            .Build();
+        series.Metadata.WriterLocked = true;
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = false;
+        metadataSettings.Overrides = [MetadataSettingField.People];
+        metadataSettings.PersonRoles = [PersonRole.Writer];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("Twowheeler", "Johnny", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+    }
+
+    [Fact]
+    public async Task People_Writer_Locked_Override_PersonRoleNotSet_NoModification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(_personLookup["Johnny Twowheeler"], PersonRole.Writer)
+                .Build())
+            .Build();
+        series.Metadata.WriterLocked = true;
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        metadataSettings.Overrides = [MetadataSettingField.People];
+        metadataSettings.PersonRoles = [];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+    }
+
+
+    [Fact]
+    public async Task People_Writer_OverrideReMatchDeletesOld_Modification()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Writer/Artists";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        metadataSettings.Overrides = [MetadataSettingField.People];
+        metadataSettings.PersonRoles = [PersonRole.Writer];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe", "Story")]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"John Doe"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("John", "Doe 2", "Story")]
+        }, 1);
+
+        postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[]{"John Doe 2"}.OrderBy(s => s),
+            postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer)
+                .Select(p => p.Person.Name)
+                .OrderBy(s => s));
+    }
+
     #endregion
 
     #region People - Characters
@@ -1720,6 +2006,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
        _context.AppUser.RemoveRange(_context.AppUser);
        _context.Genre.RemoveRange(_context.Genre);
        _context.Tag.RemoveRange(_context.Tag);
+       _context.Person.RemoveRange(_context.Person);
 
        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
        metadataSettings.Enabled = false;
@@ -1750,11 +2037,24 @@ public class ExternalMetadataServiceTests : AbstractDbTest
        _tagLookup.Clear();
        var t1 = new TagBuilder("H").Build();
        var t2 = new TagBuilder("Boxing").Build();
-       _context.Genre.Add(g1);
-       _context.Genre.Add(g2);
+       _context.Tag.Add(t1);
+       _context.Tag.Add(t2);
        _tagLookup.Add("H", t1);
        _tagLookup.Add("Boxing", t2);
 
+       _personLookup.Clear();
+       var p1 = new PersonBuilder("Johnny Twowheeler").Build();
+       var p2 = new PersonBuilder("Boxing").Build();
+       _context.Person.Add(p1);
+       _context.Person.Add(p2);
+       _personLookup.Add("Johnny Twowheeler", p1);
+       _personLookup.Add("Batman Robin", p2);
+
        await _context.SaveChangesAsync();
+    }
+
+    private static SeriesStaffDto CreateStaff(string first, string last, string role)
+    {
+        return new SeriesStaffDto() {Name = $"{first} {last}", Role = role, Url = "", FirstName = first, LastName = last};
     }
 }

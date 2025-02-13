@@ -62,7 +62,6 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             Person = person,
             SeriesMetadata = _seriesMetadata,
         });
-
         return this;
     }
 
