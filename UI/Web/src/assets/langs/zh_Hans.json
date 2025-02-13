@@ -22,11 +22,11 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "正在保存…",
         "update": "更新",
-        "account-detail-title": "帐户详细信息"
+        "account-detail-title": "帐户详细信息",
+        "invalid-email-warning": "无效的电子邮件将阻止 Kavita 的某些功能"
     },
     "user-scrobble-history": {
         "title": "Scrobble历史",
@@ -39,7 +39,7 @@
         "series-header": "系列",
         "data-header": "数据",
         "is-processed-header": "已处理",
-        "no-data": "没有数据",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "{{v}} 卷 {{n}} 章节",
         "volume-num": "卷 {{num}}",
         "chapter-num": "章节 {{num}}",
@@ -47,7 +47,10 @@
         "not-applicable": "不适用",
         "processed": "已处理",
         "not-processed": "尚未处理",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "token-expired": "您的 AniList 令牌已过期！除非您在“帐户”页面续订，否则不会处理 Scrobbling 事件。",
+        "generate-scrobble-events": "回填事件",
+        "scrobbling-disabled": "您的帐户设置中已禁用 Scrobbling。"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "阅读进度",
@@ -88,7 +91,7 @@
     },
     "user-preferences": {
         "title": "用户面板",
-        "pref-description": "这些是绑定到您帐户的全局设置",
+        "pref-description": "这些是与您的帐户绑定的全局设置。",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -107,7 +110,7 @@
         "prompt-on-download-label": "下载时提示",
         "prompt-on-download-tooltip": "当下载大小超过 {{size}}MB 时提示",
         "disable-animations-label": "关闭动画",
-        "disable-animations-tooltip": "关闭站点中的动画效果。适用于电子墨水阅读器",
+        "disable-animations-tooltip": "关闭网站中的动画。适用于电子墨水阅读器。",
         "collapse-series-relationships-label": "折叠系列的关联",
         "collapse-series-relationships-tooltip": "是否显示没有关联的系列或者前传",
         "share-series-reviews-label": "分享系列评论",
@@ -116,7 +119,7 @@
         "reading-direction-label": "阅读方向",
         "reading-direction-tooltip": "单击方向移动到下一页。从右到左意味着您单击屏幕左侧以移至下一页。",
         "scaling-option-label": "缩放选项",
-        "scaling-option-tooltip": "图片在屏幕上的缩放方式",
+        "scaling-option-tooltip": "图片在屏幕上的缩放方式。",
         "page-splitting-label": "页面分割",
         "page-splitting-tooltip": "如何分割全宽图像（即左右图像合并）",
         "reading-mode-label": "阅读模式",
@@ -168,12 +171,20 @@
         "clients-api-key-label": "API 密钥",
         "clients-opds-url-tooltip": "查看受支持的 OPDS 客户端列表： ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "anilist-scrobbling-tooltip": "允许 Kavita 将阅读进度和评分 Scrobble（单向同步）到 AniList",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "want-to-read-sync-label": "想要阅读同步",
+        "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中"
     },
     "user-holds": {
         "title": "刮削暂停",
         "description": "这是一个由用户自主管理的系列列表，这些系列的信息不会发送给Scrobble服务提供商。您可以随时移除某个系列，下一次Scrobble事件（阅读进度、评分、想读状态）将触发事件。",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "delete-label": "{{common.remove}}",
+        "created-header": "{{manage-media-issues.created-header}}"
     },
     "theme-manager": {
         "title": "主题管理器",
@@ -186,7 +197,7 @@
         "downloadable": "可下载",
         "apply": "{{common.apply}}",
         "applied": "应用",
-        "active-theme": "活动",
+        "active-theme": "已激活",
         "updated-toastr": "网站默认值已更新为{{name}}",
         "scan-queued": "网站主题扫描已进入队列",
         "delete": "{{common.delete}}",
@@ -225,7 +236,7 @@
         "platform-label": "平台",
         "email-label": "电子邮件",
         "name-label": "名称",
-        "email-setup-alert": "想要将文件发送到您的设备？请先让您的管理员设置电子邮件设置！",
+        "email-setup-alert": "想要将文件发送到您的设备？请先联系管理员配置电子邮件设置！",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -256,7 +267,7 @@
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密码必须一致",
-        "permission-error": "您无权更改密码，请与服务器管理员联系。"
+        "permission-error": "您无权更改密码，请联系管理员。"
     },
     "change-email": {
         "email-title": "电子邮件",
@@ -270,7 +281,7 @@
         "invite-url-label": "邀请链接",
         "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
         "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。",
-        "permission-error": "您无权更改电子邮件，请与服务器管理员联系。",
+        "permission-error": "您无权更改电子邮件，请联系管理员。",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
@@ -299,28 +310,34 @@
         "title": "Scrobbling服务提供商",
         "requires": "此功能需要一个有效的{{product}}许可证",
         "token-valid": "令牌有效",
-        "token-expired": "Token已过期",
-        "no-token-set": "未设置Token",
-        "token-set": "设置Token",
+        "token-expired": "令牌已过期",
+        "no-token-set": "未设置令牌",
+        "token-set": "设置令牌",
         "generate": "生成",
         "generic-instructions": "填写有关不同外部服务的信息，您必须允许 Kavita+ 与它们交互。",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "首次使用的用户应点击下面的“{{scrobbling-providers.generate}}”以允许 Kavita+ 与 {{service}} 对话。授权程序后，请复制并粘贴令牌到下面的输入中。您可以随时重新生成令牌。",
         "mal-instructions": "Kavita 使用 MAL 客户端 ID 进行身份验证。为 Kavita 创建一个新客户，一旦获得批准，请提供客户 ID 和您的用户名。",
         "scrobbling-applicable-label": "Scrobbling 适用",
-        "token-input-label": "{{service}} Token在这里填写",
+        "token-input-label": "{{service}} 令牌在这里填写",
         "mal-token-input-label": "MAL 客户端 ID",
         "mal-username-input-label": "MAL 用户名",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "anilist-first-description": "您的 AniList 令牌现已设置完毕。此令牌有效期为一年，Kavita 会在令牌到期前通知您在此处刷新令牌。借助此令牌，Kavita 将从您的阅读历史、想要阅读的内容和评分中生成 scrobble（同步）事件。您可以立即或稍后开始此操作。如果您有任何不想被 scrobbled 的系列，请选择稍后并对其设置 Scrobble Hold。您只需运行此任务一次。之后，Kavita 将为您处理同步。<br/> 如果您选择“稍后”，您可以在 Scrobbling 页面上找到该按钮。",
+        "anilist-used-for": "AniList 用于 scrobbling（同步数据）并想要读取同步。",
+        "mal-used-for": "MyAnimeList 用于智能收藏并希望读取同步。",
+        "anilist-first-header": "AniList 令牌已保存",
+        "anilist-first-later": "之后",
+        "anilist-first-now": "现在"
     },
     "typeahead": {
         "locked-field": "字段已锁定",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "添加 {{item}}…",
-        "no-data": "无数据",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", 输入以添加自定义项目"
     },
     "generic-list-modal": {
@@ -561,10 +578,7 @@
         "installed": "已安装",
         "download": "下载",
         "nightly": "每晚： {{version}}",
-        "published-label": "出版： ",
-        "available": "可用",
-        "description": "如果您没有看到{{installed}}",
-        "description-continued": "标签，您正在使用的是夜间版本。只有主要版本才会显示为可用。当您使用的是该稳定版的夜间版本时，将显示夜间标签。"
+        "available": "可用"
     },
     "invite-user": {
         "title": "邀请用户",
@@ -610,15 +624,35 @@
         "activate-discordId-tooltip": "将您的 Discord 帐户与 Kavita+ 关联。这使您可以访问隐藏的渠道来帮助塑造 Kavita。",
         "discord-validation": "这不是有效的 Discord 用户 ID。您的用户 ID 不是您的 Discord 用户名。",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "重置许可证",
         "activate-reset-tooltip": "使用您的许可证使之前的注册失效。需要许可证和电子邮件",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "Kavita+ 是一项高级订阅服务，可为此 Kavita 实例上的所有用户解锁功能。购买订阅即可解锁 ",
         "kavita+-desc-part-2": "优质福利",
         "kavita+-desc-part-3": "今天！",
-        "kavita+-requirement": "Kavita+ 仅兼容Kavita最新的2个版本。其他任何版本均无法正常使用。",
-        "kavita+-releases": "查看发布",
-        "help-label": "{{common.help}}"
+        "kavita+-requirement": "Kavita+ 设计为仅适用于最新的 3 个版本。除此之外的任何东西都可能无法发挥作用。",
+        "help-label": "{{common.help}}",
+        "delete-tooltip": "这将删除 Kavita 的许可证，以阻止 Kavita 与 Kavita+ 对话。不会取消您的订阅。请先使用“管理”取消订阅。",
+        "k+-license-overwrite": "许可证已注册到另一个 Kavita 实例。这种情况可能发生在重新安装时，很少由于系统更新而发生。选择覆盖以强制此实例注册到 Kavita+。",
+        "info-title": "许可证信息",
+        "actions-title": "活动",
+        "license-active-label": "许可证有效",
+        "supported-version-label": "支持的 Kavita 版本",
+        "expiration-label": "到期",
+        "valid-tooltip": "有效的",
+        "invalid-tooltip": "无效的",
+        "reset-label": "重置",
+        "reset-tooltip": "这将重置与 Kavita+ 许可证绑定的服务器实例。需要电子邮件和许可证密钥",
+        "delete-label": "删除许可证",
+        "manage-tooltip": "更新付款信息、取消/暂停订阅等",
+        "faq-title": "常问问题",
+        "total-subbed-months-label": "订阅总月数",
+        "email-label": "注册邮箱",
+        "license-mismatch": "许可证可能已注册到另一个 Kavita 实例。请重新注册以解决问题。",
+        "k+-already-registered-header": "许可证已经注册",
+        "overwrite": "覆盖",
+        "k+-unlocked": "Kavita+ 已解锁！",
+        "k+-unlocked-description": "欢迎来到 Kavita+！一旦您在帐户下注册了 Scrobbling 提供商，Kavita 就会根据您的进度、评分和阅读意愿生成 scrobble 事件。花点时间确保您为不想 scrobble 的任何系列设置了 scrobbling 保留。"
     },
     "book-line-overlay": {
         "copy": "复制",
@@ -872,7 +906,9 @@
         "file-type-group-tooltip": "Kavita 应该扫描哪些类型的文件。例如，档案将包含所有 cb*、zip、rar 等文件。",
         "exclude-patterns-label": "排除模式",
         "exclude-patterns-tooltip": "配置一组模式（Glob语法），Kavita 将在扫描目录时匹配这些模式，并将其从扫描程序结果中排除。",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-label": "允许元数据匹配",
+        "allow-metadata-matching-tooltip": "Kavita 是否应下载此库中系列的元数据。仅当服务器具有有效的 Kavita+ 订阅时才会发生这种情况。"
     },
     "file-type-group-pipe": {
         "archive": "档案",
@@ -1028,7 +1064,7 @@
         "file-header": "文件",
         "comment-header": "评论",
         "created-header": "创建",
-        "no-data": "无数据"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "为了使用 Kavita 的某些功能（例如“发送到设备”），必须设置电子邮件提供商。其他功能（例如“忘记密码”）需要管理员干预，无需设置电子邮件。",
@@ -1329,7 +1365,7 @@
         "server-section-title": "服务器",
         "info-section-title": "信息",
         "import-section-title": "导入",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "常规",
         "admin-users": "用户",
         "admin-libraries": "资料库",
@@ -1340,7 +1376,7 @@
         "admin-tasks": "任务",
         "admin-statistics": "统计数据",
         "admin-system": "系统",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "许可证",
         "account": "账户",
         "preferences": "首选项",
         "clients": "API 密钥 / OPDS",
@@ -1350,7 +1386,12 @@
         "theme": "主题",
         "customize": "自定义",
         "cbl-import": "CBL 阅读列表",
-        "mal-stack-import": "MAL Stack"
+        "mal-stack-import": "MAL Stack",
+        "admin-manage-tokens": "管理用户令牌",
+        "admin-email-history": "电子邮件历史记录",
+        "admin-matched-metadata": "匹配的元数据",
+        "scrobble-holds": "Scrobble 持有",
+        "admin-metadata": "管理元数据"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1826,7 +1867,7 @@
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Kavita+ 元数据分析",
         "description": "Kavita 会随着时间的推移，缓慢的获取符合条件的系列元数据（评分、评论、推荐等）。",
-        "no-data": "无数据",
+        "no-data": "{{common.no-data}}",
         "errored-series-label": "错误系列",
         "completed-series-label": "已完成系列",
         "complete": "所有系列都有元数据"
@@ -1972,7 +2013,7 @@
         "clear": "{{common.clear}}",
         "smart-filters-title": "智能筛选",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "存在筛选器时，您无法通过拖放重新排序项目。使用 {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "批量模式"
     },
@@ -2120,9 +2161,8 @@
         "email-sent": "已发送邮件到{{email}}",
         "email-not-sent": "存档的电子邮件不是有效的电子邮件，无法发送。链接已转储到日志中。管理员可以提供此链接来完成流程。",
         "k+-license-saved": "许可密钥已保存，但不是有效的。点击检查以重新验证订阅。首次注册可能需要一分钟来传播。",
-        "k+-unlocked": "Kavita+已解锁！",
         "k+-error": "激活许可证时出现错误，请重试。",
-        "k+-delete-key": "这将只删除Kavita的许可密钥并显示购买链接。这不会取消您的订阅！请仅在得到支持团队指示时使用此选项！",
+        "k+-delete-key": "这只会删除 Kavita 的许可证密钥并允许显示购买链接。 <b>这不会取消您的订阅！</b>首先使用“管理”取消您的订阅。",
         "k+-reset-key": "这将使用您之前的许可证进行的注册无效，并允许您重新注册 Kavita 实例。",
         "k+-reset-key-success": "您的许可证尚未注册。使用“编辑”按钮重新注册您的实例并重新激活 Kavita+",
         "library-deleted": "已移除资料库 {{name}}",
@@ -2138,7 +2178,7 @@
         "password-updated": "密码已更新",
         "forced-scan-queued": "已开始强制扫描{{name}}",
         "library-created": "资料库创建成功。已开始扫描。",
-        "anilist-token-updated": "已更新AniList令牌",
+        "anilist-token-updated": "AniList 令牌已更新",
         "age-restriction-updated": "年龄限制已更新",
         "email-sent-to-no-existing": "现有电子邮件无效。链接已转储到日志中。向管理员询问链接以完成电子邮件更改。",
         "email-sent-to": "已向您的旧电子邮件地址发送确认邮件。",
@@ -2162,7 +2202,7 @@
         "smart-filter-deleted": "智能筛选器已删除",
         "smart-filter-updated": "已创建/已更新智能筛选器",
         "external-source-already-exists": "已经存在具有相同名称、主机、API密匙的外部源",
-        "anilist-token-expired": "您的 AniList 令牌已过期。在您在“用户设置”>“帐户”中重新生成之前，Scrobbling 将不再处理",
+        "anilist-token-expired": "您的 AniList 令牌已过期。Scrobbling 将不再处理，直到您在“用户设置”>“帐户”中重新生成它",
         "collection-tag-deleted": "收藏标签已删除",
         "force-kavita+-refresh-success": "Kavita+ 外部元数据已失效",
         "collection-not-owned": "您没有该收藏",
@@ -2185,7 +2225,9 @@
         "must-select-library": "必须至少选择一个资料库",
         "bulk-scan": "扫描多个资料库将以线性方式进行。这可能需要很长时间，并且根据资料库的大小可能无法完成。",
         "person-image-downloaded": "已下载并应用了人物封面。",
-        "confirm-delete-multiple-chapters": "您确定要删除 {{count}} 章节/卷吗？它不会修改磁盘上的文件。"
+        "confirm-delete-multiple-chapters": "您确定要删除 {{count}} 章节/卷吗？它不会修改磁盘上的文件。",
+        "bulk-delete-libraries": "您确定要删除 {{count}} 个资料库吗？",
+        "match-success": "系列匹配正确"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2255,7 +2297,9 @@
         "multiple-selections": "多项选择",
         "back-to": "返回到 {{action}}",
         "title": "活动",
-        "copy-settings": "复制设置"
+        "copy-settings": "复制设置",
+        "match": "匹配",
+        "match-tooltip": "使用 Kavita+ 手动匹配系列"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2372,11 +2416,16 @@
         "issue-nums": "期",
         "chapter-nums": "章节",
         "volume-nums": "卷",
-        "author-count": "{{num}} 作者"
+        "author-count": "{{num}} 作者",
+        "chapter-count": "{{num}} 章",
+        "no-data": "无数据"
     },
     "confirm": {
         "confirm": "确认",
-        "alert": "警告"
+        "alert": "警告",
+        "info": "信息",
+        "cancel": "{{common.cancel}}",
+        "ok": "确定"
     },
     "edit-person-modal": {
         "mal-id-label": "MAL Id",
@@ -2406,11 +2455,144 @@
         "known-for-title": "代表作品",
         "individual-role-title": "作为 {{role}}",
         "browse-person-title": "{{name}} 的全部作品",
-        "browse-person-by-role-title": "{{name}} 作为 {{role}} 的所有作品"
+        "browse-person-by-role-title": "{{name}} 作为 {{role}} 的所有作品",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "browse-authors": {
         "author-count": "{{num}} 人",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "title": "浏览作者和作家"
+    },
+    "match-series-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "title": "匹配 {{seriesName}}",
+        "description": "选择一个匹配项来重新连接 Kavita+ 元数据并重新生成 scrobble 事件。 不匹配可用于限制 Kavita 匹配元数据和乱序。",
+        "no-results": "无法找到匹配项。尝试添加来自受支持的提供商的 URL，然后重试。",
+        "query-label": "询问",
+        "query-tooltip": "输入系列名称、AniList/MyAnimeList url。 URL 将使用直接查找。",
+        "dont-match-label": "不匹配",
+        "dont-match-tooltip": "从匹配和 scrobbling 中选择该系列",
+        "search": "搜索"
+    },
+    "manage-matched-metadata": {
+        "matched-status-label": "匹配的",
+        "title": "匹配的元数据",
+        "description": "所有可与外部元数据匹配的适用系列都驻留在此处。Kavita 将预取或刷新系列元数据，每天 24 小时 50 个系列。",
+        "status-header": "状态",
+        "series-name-header": "系列",
+        "unmatched-status-label": "不匹配",
+        "blacklist-status-label": "需要手动匹配",
+        "all-status-label": "全部",
+        "valid-until-header": "下次刷新",
+        "dont-match-label": "不匹配",
+        "no-data": "{{common.no-data}}",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "library-name-header": "资料库",
+        "actions-header": "活动",
+        "match-alt": "匹配 {{seriesName}}"
+    },
+    "changelog-update-item": {
+        "removed": "已移除",
+        "theme": "主题",
+        "installed": "{{changelog.installed}}",
+        "api": "API",
+        "published-label": "已发布: ",
+        "download": "下载",
+        "added": "添加时间",
+        "changed": "已更改",
+        "fixed": "固定",
+        "developer": "开发人员"
+    },
+    "new-version-modal": {
+        "title": "Kavita 已更新！",
+        "description": "Kavita 有新版本可用。刷新即可更新。",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}",
+        "refresh": "刷新"
+    },
+    "manage-user-tokens": {
+        "description": "拥有 scrobbling 令牌的用户有时可能需要更新。如果设置了电子邮件并且他们有有效的电子邮件，Kavita 将自动向他们发送电子邮件。",
+        "username-header": "用户名",
+        "anilist-header": "AniList",
+        "mal-header": "MAL",
+        "token-set-label": "设置令牌",
+        "no-data": "{{common.no-data}}",
+        "expires-label": "到期时间：{{date}}"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "releasing": "释放",
+        "details": "查看页面",
+        "updating-metadata-status": "更新元数据"
+    },
+    "email-history": {
+        "description": "在这里您可以找到从 Kavita 发送的所有电子邮件以及发送给哪个用户。",
+        "template-header": "模板",
+        "date-header": "发送日期",
+        "user-header": "发送到",
+        "sent-header": "成功",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "发送",
+        "not-sent-tooltip": "未发送"
+    },
+    "manage-metadata-settings": {
+        "remove-source-tag-label": "移除源标签",
+        "enable-tags-tooltip": "允许写入系列标签。",
+        "summary-tooltip": "允许在字段解锁时写入内容简介。",
+        "genre": "类型",
+        "derive-publication-status-label": "出版状态",
+        "blacklist-tooltip": "此列表中的所有内容都将从类型和标签处理中删除。这是添加您<b>不想</b>写入的类型/标签的地方。确保它们以逗号分隔。",
+        "tag": "标签",
+        "enable-tags-label": "标签",
+        "blacklist-label": "黑名单类型/标签",
+        "description": "Kavita+ 能够下载并将一些有限的元数据写入数据库。此页面允许您切换范围内的内容。",
+        "enabled-label": "启用元数据下载",
+        "enabled-tooltip": "允许 Kavita 下载元数据并写入其数据库。",
+        "summary-label": "内容简介",
+        "derive-publication-status-tooltip": "允许根据总章节/卷数得出出版状态。",
+        "enable-relations-tooltip": "允许<b>添加</b>系列关系。",
+        "enable-relations-label": "关系",
+        "enable-people-label": "创作人员",
+        "enable-people-tooltip": "允许<b>添加</b>人物（角色、作家等）。所有人物均包含图像。",
+        "enable-start-date-label": "开始日期",
+        "enable-start-date-tooltip": "允许将系列的开始日期写入系列",
+        "enable-genres-label": "类型",
+        "enable-genres-tooltip": "允许编写系列类型。",
+        "whitelist-label": "白名单标签",
+        "whitelist-tooltip": "仅允许为<b>标签</b>写入此列表中的字符串。确保它们以逗号分隔。",
+        "age-rating-mapping-title": "年龄分级映射",
+        "age-rating-mapping-description": "如果在类型或标签中找到左侧的任何字符串，则会设置该系列的年龄分级。",
+        "add-field-mapping-label": "添加字段映射",
+        "add-age-rating-mapping-label": "添加年龄分级映射",
+        "field-mapping-title": "字段映射",
+        "field-mapping-description": "为在类型/标签字段中找到的某些字符串设置规则，并将其映射到类型/标签中的新字符串，并可选择将其从源列表中删除。仅适用于类型/标签可写入的情况。",
+        "first-last-name-label": "首命名",
+        "first-last-name-tooltip": "确保人们的名字写在前面，然后是姓氏",
+        "person-roles-label": "角色",
+        "localized-name-label": "本地化系列名称",
+        "localized-name-tooltip": "允许在字段解锁时写入本地化名称。Kavita 将尝试做出最佳猜测。",
+        "enable-cover-image-label": "封面图片",
+        "enable-cover-image-tooltip": "允许 Kavita 为该系列撰写封面图片",
+        "overrides-label": "覆盖",
+        "overrides-description": "允许 Kavita 覆盖锁定的字段。"
+    },
+    "metadata-setting-field-pipe": {
+        "covers": "封面",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}"
     }
 }

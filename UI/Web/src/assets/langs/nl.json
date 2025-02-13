@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Opslaan…",
         "update": "Update"
@@ -500,10 +499,7 @@
     "changelog": {
         "installed": "Geïnstalleerd",
         "download": "Download",
-        "published-label": "Gepubliceerd: ",
-        "available": "Beschikbaar",
-        "description": "Als je geen {{installed}} ziet",
-        "description-continued": "tag, je bent op een nightly release. Alleen hoofdversies worden weergegeven als beschikbaar."
+        "available": "Beschikbaar"
     },
     "invite-user": {
         "title": "Gebruiker uitnodigen",

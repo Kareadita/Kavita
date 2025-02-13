@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "저장중…",
         "update": "업데이트",
@@ -561,10 +560,7 @@
         "installed": "설치됨",
         "download": "다운로드",
         "nightly": "야간: {{version}}",
-        "published-label": "게시됨: ",
-        "available": "사용 가능",
-        "description": "{{installed}}가 표시되지 않는 경우",
-        "description-continued": "태그, 당신은 나이틀리 릴리스에 있습니다. 사용 가능한 것은 주요 버전만 표시됩니다. 해당 안정 버전의 나이틀리 릴리스에 대한 나이틀리 태그가 표시됩니다."
+        "available": "사용 가능"
     },
     "invite-user": {
         "title": "사용자 초대",
@@ -617,7 +613,6 @@
         "kavita+-desc-part-2": "프리미엄 혜택",
         "kavita+-desc-part-3": "오늘!",
         "kavita+-requirement": "Kavita+는 최신 릴리스(2개 버전)에서만 작동하도록 설계되었습니다. 그 밖의 모든 것은 작동하지 않을 수 있습니다.",
-        "kavita+-releases": "릴리스 보기",
         "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
@@ -2120,7 +2115,6 @@
         "email-sent": "{{email}}에 이메일 전송",
         "email-not-sent": "파일에 있는 이메일이 유효한 이메일이 아니므로 보낼 수 없습니다. 로그에 링크가 기록되었습니다. 관리자는 이 링크를 제공하여 프로세스를 완료할 수 있습니다.",
         "k+-license-saved": "라이선스 키가 저장되었지만 유효하지 않습니다. 가입을 재확인하려면 확인을 클릭하십시오. 처음 등록하는 경우 전파하는 데 1분 정도 걸릴 수 있습니다.",
-        "k+-unlocked": "Kavita+ 잠금 해제!",
         "k+-error": "라이선스를 활성화하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
         "k+-delete-key": "이렇게 하면 Kavita의 라이선스 키만 삭제되고 구매 링크가 표시됩니다. 이것은 구독을 취소하지 않습니다! 지원팀에서 지시하는 경우에만 사용하세요!",
         "k+-reset-key": "이렇게 하면 라이선스를 사용한 이전 등록이 무효화되고 Kavita 인스턴스를 다시 등록할 수 있습니다.",

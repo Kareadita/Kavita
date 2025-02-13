@@ -178,7 +178,7 @@
     "unable-to-reset-k+": "Aufgrund eines Fehlers konnte die Kavita+ Lizenz nicht zurückgesetzt werden. Kontaktieren Sie den Kavita+ Support",
     "email-not-enabled": "Der Mailversand ist auf diesem Server nicht aktiviert. Sie können diese Aktion nicht durchführen.",
     "invalid-email": "Die für den Benutzer hinterlegte E-Mail ist ungültig. Links finden Sie in den Logs.",
-    "send-to-unallowed": "Sie können nicht an ein Gerät senden, das nicht Ihnen gehört.",
+    "send-to-unallowed": "Sie können nicht an ein Gerät senden, das nicht Ihnen gehört",
     "send-to-size-limit": "Die Datei(en), die Sie zu senden versuchen, sind zu groß für Ihren E-Mail-Anbieter",
     "check-updates": "Updates überprüfen",
     "email-settings-invalid": "E-Mail-Einstellungen fehlen Informationen. Stellen Sie sicher, dass alle E-Mail-Einstellungen gespeichert sind.",
@@ -201,5 +201,7 @@
     "person-doesnt-exist": "Die Person existiert nicht",
     "person-name-required": "Personenname ist erforderlich und darf nicht null sein",
     "person-name-unique": "Der Name der Person muss eindeutig sein",
-    "person-image-doesnt-exist": "Die Person existiert nicht in CoversDB"
+    "person-image-doesnt-exist": "Die Person existiert nicht in CoversDB",
+    "email-taken": "E-Mail bereits in Gebrauch",
+    "kavitaplus-restricted": "Dies ist nur auf Kavita+ beschränkt"
 }

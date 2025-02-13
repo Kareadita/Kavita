@@ -1,6 +1,6 @@
 {
     "login": {
-        "title": "登入您的賬戶",
+        "title": "登入您的帳戶",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "儲存…",
         "update": "更新",
@@ -603,7 +602,6 @@
         "discord-validation": "這不是有效的 Discord 用戶 ID。您的用戶 ID 不是您的 Discord 用戶名。",
         "kavita+-desc-part-2": "高級福利",
         "kavita+-desc-part-3": "今天！",
-        "kavita+-releases": "查看版本",
         "kavita+-desc-part-1": "Kavita+ 是一項高級訂閱服務，可為此 Kavita 實例上的所有用戶解鎖功能。購買訂閱以解鎖 ",
         "kavita+-requirement": "Kavita+ 僅與最新版本（最近的兩個版本）配合使用。任何不在此範圍內的版本可能無法正常運作。",
         "help-label": "{{common.help}}"
@@ -1232,7 +1230,7 @@
         "promote-tooltip": "推廣意味著該標籤可以在伺服器範圍內被看到，而不僅限於管理員用戶。所有擁有此標籤的系列仍將受到用戶訪問限制。",
         "promote-label": "推廣",
         "title": "編輯 {{collectionName}} 收藏",
-        "last-sync-tooltip": "Kavita syncs 日复一日,反对上游收集者."
+        "last-sync-tooltip": "Kavita 每天都會與上游内容提供商同步資料。"
     },
     "library-recommended": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2027,7 +2025,6 @@
         "k+-license-saved": "授權密鑰已保存，但目前尚未生效。點擊檢查以重新驗證訂閱資訊，首次註冊可能需要一些時間。",
         "theme-missing": "當前主題已不存在，請刷新頁面。",
         "email-not-sent": "記錄的電子郵件不是有效的電子郵件，無法發送。相關連結已記錄在日誌中。管理員可以提供此連結以完成流程。",
-        "k+-unlocked": "Kavita+ 已解鎖！",
         "k+-reset-key": "這會使之前您授權的註冊無效，並允許您重新註冊 Kavita。",
         "k+-reset-key-success": "您的授權已取消註冊。請使用編輯按鈕重新註冊您的實例並重新啟用 Kavita+",
         "forced-scan-queued": "已開始強制掃描{{name}}",
@@ -2110,16 +2107,14 @@
         "must-select-library": "必須至少選擇一個書庫",
         "bulk-scan": "掃描多個書庫將以線性方式進行，依照書庫的大小，這可能需要很長的時間也有可能無法完成。",
         "bulk-covers": "刷新多個書庫的封面，是一項繁重的工作，可能需要很長時間，您確定要繼續嗎？",
-        "person-image-downloaded": "个人资料被下载和应用.",
-        "confirm-delete-multiple-chapters": "您確定要刪除 {{count}} 章/卷嗎？它不會修改磁碟上的檔案。"
+        "person-image-downloaded": "已下載人物封面並套用。",
+        "confirm-delete-multiple-chapters": "您確定要刪除 {{count}} 章節／卷嗎？這不會修改硬碟上的檔案。",
+        "bulk-delete-libraries": "您確定要刪除 {{count}} 個書庫嗎？"
     },
     "changelog": {
         "installed": "已安裝",
         "available": "可用",
-        "description": "如果您沒有看到 {{installed}}",
-        "description-continued": "標籤：您當前正在使用夜間版本。只有主要版本會顯示為可用。當您使用該穩定版本的夜間版本時，會顯示夜間標籤。",
         "download": "下載",
-        "published-label": "已發佈： ",
         "nightly": "夜間版本： {{version}}"
     },
     "table-of-contents": {
@@ -2406,7 +2401,7 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "download-coversdb": "從 CoversDB 下載",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "cover-image-description-extra": "或者,你可以从覆盖面下载一个封面。 如果有的话,可资利用的亚洲开发银行."
+        "cover-image-description-extra": "或者，您可以從 CoversDB 下載封面（如果有）。"
     },
     "browse-authors": {
         "title": "瀏覽作者／作家",

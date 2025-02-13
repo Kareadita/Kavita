@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Zapisuję…",
         "update": "Aktualizacja",
@@ -561,10 +560,7 @@
         "installed": "Zainstalowane",
         "download": "Pobrane",
         "nightly": "Nightly: {{version}}",
-        "published-label": "Opublikowano: ",
-        "available": "Dostępne",
-        "description": "Jeśli nie widzisz {{installed}}",
-        "description-continued": "oznacza, że korzystasz z wersji nightly. Tylko główne wersje będą wyświetlane jako dostępne. Tag nightly będzie wyświetlany podczas korzystania z wersji nightly."
+        "available": "Dostępne"
     },
     "invite-user": {
         "title": "Zaproś użytkownika",
@@ -617,7 +613,6 @@
         "kavita+-desc-part-2": "dodatkowe korzyści",
         "kavita+-desc-part-3": "dzisiaj!",
         "kavita+-requirement": "Kavita+ została zaprojektowana do pracy tylko z ostatnim 2 wersjami. Wszystko poza tym może nie działać.",
-        "kavita+-releases": "Zobacz wydania",
         "help-label": "{{common.help}}"
     },
     "book-line-overlay": {
@@ -2120,7 +2115,6 @@
         "email-sent": "Email wysłany do {{name}}",
         "email-not-sent": "Adres e-mail w pliku nie jest prawidłowy i nie można go wysłać. Link został zrzucony do logów. Administrator może podać ten link, aby zakończyć przepływ.",
         "k+-license-saved": "Klucz licencyjny został zapisany, ale jest nieważny. Kliknij sprawdź, aby ponownie zweryfikować subskrypcję. Propagacja rejestracji po raz pierwszy może potrwać kilka minut.",
-        "k+-unlocked": "Kavita+ odblokowana!",
         "k+-error": "Wystąpił błąd podczas aktywacji licencji. Spróbuj ponownie.",
         "k+-delete-key": "Spowoduje to jedynie usunięcie klucza licencyjnego Kavity i umożliwi wyświetlenie linku do zakupu. Nie spowoduje to anulowania subskrypcji! Używaj tej opcji tylko na polecenie pomocy technicznej!",
         "k+-reset-key": "To unieważni poprzednią rejestrację przy użyciu licencji i pozwoli na ponowną rejestrację instancji Kavita.",

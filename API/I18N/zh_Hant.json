@@ -173,7 +173,7 @@
     "send-to-unallowed": "您無法傳送到不是您自己的裝置",
     "email-settings-invalid": "電子郵件設定缺少資訊。請確保所有電子郵件設定已保存。",
     "collection-already-exists": "組合已存在",
-    "send-to-size-limit": "您嘗試發送的文件對於您的電子郵件提供者來說太大",
+    "send-to-size-limit": "您嘗試傳送的文件過大，無法通過您的電子郵件服務提供商發送",
     "external-sources": "外部來源",
     "dashboard-stream-doesnt-exist": "儀表板串流不存在",
     "unable-to-reset-k+": "發生錯誤，無法重置 Kavita+ 授權。請聯繫 Kavita+ 支援",
@@ -199,7 +199,7 @@
     "generic-cover-volume-save": "無法保存封面圖片",
     "generic-cover-person-save": "無法保存封面圖片",
     "person-doesnt-exist": "此人不存在",
-    "person-name-required": "个人姓名是必需的,不得取消",
-    "person-name-unique": "个人姓名必须是独特的",
+    "person-name-required": "名稱為必填欄位，且不得留空",
+    "person-name-unique": "名稱不得重複",
     "person-image-doesnt-exist": "CoversDB 中不存在此人"
 }

@@ -201,5 +201,7 @@
     "person-doesnt-exist": "人员不存在",
     "person-name-required": "人员姓名为必填项，且不能为空",
     "person-name-unique": "人名必须是唯一的",
-    "person-image-doesnt-exist": "CoversDB 中不存在此人"
+    "person-image-doesnt-exist": "CoversDB 中不存在此人",
+    "email-taken": "电子邮件已被使用",
+    "kavitaplus-restricted": "仅限 Kavita+"
 }

@@ -178,7 +178,7 @@
     "browse-recently-updated": "Sfoglia gli aggiornamenti recenti",
     "email-not-enabled": "L'email non è attivata in questo server. Non puoi compiere questa azione.",
     "send-to-unallowed": "Non puoi inviare ad un dispositivo non tuo",
-    "send-to-size-limit": "Il/I file che stai cercando di mandare sono troppo grandi per l'email",
+    "send-to-size-limit": "Il/I file che stai cercando di mandare sono troppo grandi per il tuo provider email",
     "unable-to-reset-k+": "Impossibile ripristinare la licenza Kavita+. Contatta il supporto Kavita+",
     "check-updates": "Controlla aggiornamenti",
     "license-check": "Controlla Licenza",
@@ -193,5 +193,11 @@
     "kavita+-data-refresh": "Aggiornamento dati Kavita+",
     "backup": "Backup",
     "account-email-invalid": "L'e-mail in archivio per l'account amministratore non è un'e-mail valida. Impossibile inviare e-mail di prova.",
-    "email-settings-invalid": "Informazioni mancanti nelle impoastazioni email. Assicurati che tutte le impostazioni email siano salvate."
+    "email-settings-invalid": "Informazioni mancanti nelle impoastazioni email. Assicurati che tutte le impostazioni email siano salvate.",
+    "person-doesnt-exist": "La persona non esiste",
+    "email-taken": "Email già in uso",
+    "person-name-required": "Il nome della persona è richiesto e non può essere null",
+    "person-name-unique": "Il nome della persona deve essere univoco",
+    "person-image-doesnt-exist": "La persona non esiste su CoversDB",
+    "collection-already-exists": "La collezione esiste già"
 }

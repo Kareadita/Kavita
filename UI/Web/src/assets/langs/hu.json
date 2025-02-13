@@ -1,6 +1,6 @@
 {
     "login": {
-        "title": "Bejelentkezés",
+        "title": "Jelentkezz be a fiókodba",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Mentés…",
         "update": "Frissítés"

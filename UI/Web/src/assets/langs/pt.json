@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "A Guardar…",
         "update": "Atualizar",
@@ -39,7 +38,7 @@
         "series-header": "Séries",
         "data-header": "Dados",
         "is-processed-header": "Processado",
-        "no-data": "Sem Dados",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Capítulo {{n}}",
         "volume-num": "Volume {{num}}",
         "chapter-num": "Capítulo {{num}}",
@@ -47,7 +46,8 @@
         "not-applicable": "Não Aplicável",
         "processed": "Processado",
         "not-processed": "Não Processado",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "token-expired": "O token do AniList expirou! Os eventos de scrobbling não serão processados até que o token seja refrescado na página Contas."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leitura Efetuada",
@@ -172,8 +172,11 @@
     },
     "user-holds": {
         "title": "Retenções de Scrobble",
-        "description": "Esta é uma lista de Séries, gerida por utilizador, que não será scrobbled para os fornecedores upstream. Pode eliminar uma série a qualquer momento e próximo evento de scrobble (progresso de leitura, classificação, estado de leituras futuras) irá despoletar eventos.",
-        "no-data": "{{typeahead.no-data}}"
+        "description": "Esta é uma lista de Séries, gerida por utilizador, que não será scrobbled para os provedores upstream. Pode eliminar uma série a qualquer momento e o próximo evento de scrobble (progresso de leitura, classificação, estado de leituras futuras) irá despoletar o processo de scrobbling.",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "title": "Gestor de Temas",
@@ -313,14 +316,20 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "mal-used-for": "O MyAnimeList é usado para Coleções Inteligentes e sincronização de leituras futuras.",
+        "anilist-used-for": "O AniList é usado para scrobbling (sincronização de dados) e sincronização das leituras futuras.",
+        "anilist-first-description": "O token do AniList está configurado. Este token tem a duração de um ano e o Kavita irá informá-lo antes da sua expiração para que o possa refrescar aqui. Com este token, o Kavita irá gerar eventos scrobble (sincronização) a partir da seu histórico de leituras, leituras futuras, e classificações. Pode começar isto agora ou mais tarde. Se tiver alguma série que não deseja que seja scrobbled, selecione-a mais tarde e escolha a opção Pausa de Scrobble. Esta tarefa só tem de ser executada uma vez. Depois disso, será o Kavita a gerir a sincronização.<br/> Se selecionar 'Mais Tarde', pode encontrar o botão na página de Scrobbling.",
+        "anilist-first-header": "Token do AniList gravado",
+        "anilist-first-later": "Mais Tarde",
+        "anilist-first-now": "Agora"
     },
     "typeahead": {
         "locked-field": "Campo bloqueado",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "Adicionar {{item}}…",
-        "no-data": "Sem dados",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", digite para adicionar um item personalizado"
     },
     "generic-list-modal": {
@@ -561,10 +570,7 @@
         "installed": "Instalado",
         "download": "Descarregar",
         "nightly": "Versão Diária: {{version}}",
-        "published-label": "Publicado: ",
-        "available": "Disponível",
-        "description": "Se não vir uma etiqueta {{installed}}",
-        "description-continued": "etiqueta, está num lançamento experimental. Apenas as versões principais serão exibidas como disponíveis. Uma etiqueta experimental será exibida todas as experimentais naquele estável."
+        "available": "Disponível"
     },
     "invite-user": {
         "title": "Convidar Utilizador",
@@ -610,15 +616,35 @@
         "activate-discordId-tooltip": "Associe a sua conta Discord com o Kavita+. Isto irá dar-lhe acesso a canais privados que são usados para definir os desenvolvimentos futuros do Kavita.",
         "discord-validation": "Este User Id do Discord não é válido. O seu user id não é o mesmo que o seu nome no Discord.",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "Reiniciar Licença",
         "activate-reset-tooltip": "Invalide um registro anterior usando sua licença. Requer licença e e-mail",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "O Kavita+ é um serviço de subscrição premium que desbloqueia funcionalidades para todos os utilizadores desta instância do Kavita. Compre uma subscrição para desbloquear ",
         "kavita+-desc-part-2": "benefícios premium",
         "kavita+-desc-part-3": "hoje!",
-        "kavita+-requirement": "O Kavita+ funciona apenas com a última versão e as 2 versões anteriores. Qualquer outra versão poderá não funcionar.",
-        "kavita+-releases": "Ver lançamentos",
-        "help-label": "{{common.help}}"
+        "kavita+-requirement": "O Kavita+ funciona apenas com a última versão e as 3 versões anteriores. Qualquer outra versão poderá não funcionar.",
+        "help-label": "{{common.help}}",
+        "info-title": "Informação da Licença",
+        "actions-title": "Ações",
+        "license-active-label": "Licença Ativa",
+        "supported-version-label": "Na versão Suportada do Kavita",
+        "expiration-label": "Data de Expiração",
+        "valid-tooltip": "Válida",
+        "invalid-tooltip": "Inválida",
+        "reset-label": "Restaurar",
+        "k+-unlocked-description": "Bem vindo ao Kavita+! O Kavita irá gerar eventos de scrobble a partir do seu progresso, classificações, e leituras futuras, assim que registar os seus Provedores de Scrobbling na sua conta. Certifique-se que as séries para as quais não deseja eventos de scobble têm a pausa de scrobbling ativada.",
+        "delete-label": "Remover Licença",
+        "delete-tooltip": "Isto irá remover a licença do Kavita para impedir que o Kavita comunique com o Kavita+. Não vai perder a subscrição. Use 'gerir' para cancelar a subscrição.",
+        "manage-tooltip": "Atualizar informação de pagamento, Cancelar/Pausar subscrição, etc",
+        "faq-title": "Dúvidas Frequentes",
+        "total-subbed-months-label": "Total de Meses Subscrito",
+        "email-label": "Email Registado",
+        "license-mismatch": "A licença pode estar registada noutra instância Kavita. Volte a registar para corrigir.",
+        "k+-already-registered-header": "Licença já registada",
+        "overwrite": "Substituir",
+        "k+-unlocked": "Kavita+ desbloqueado!",
+        "k+-license-overwrite": "A licença está registada noutra instância Kavita. Isto pode acontecer quando se reinstala e raramente acontece quando se fazem atualizações. Selecione substituir para forçar esta instância a registar-se com o Kavita+.",
+        "reset-tooltip": "A instância do servidor que está associada à licença Kavita+ será reiniciada. É necessário Email e Licença"
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -1028,7 +1054,7 @@
         "file-header": "Ficheiro",
         "comment-header": "Comentário",
         "created-header": "Criado",
-        "no-data": "Sem Dados"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Para poder usar algumas funcionalidades do Kavita, como Enviar para Dispositivo, tem de configurar um serviço de email. Outras funcionalidades, como Esqueceu a Password, requerem a intervenção do administrador se não tiver o Email configurado.",
@@ -1329,7 +1355,7 @@
         "server-section-title": "Servidor",
         "info-section-title": "Info",
         "import-section-title": "Importar",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "Geral",
         "admin-users": "Utilizadores",
         "admin-libraries": "Bibliotecas",
@@ -1340,7 +1366,7 @@
         "admin-tasks": "Tarefas",
         "admin-statistics": "Estatísticas",
         "admin-system": "Sistema",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "Licença",
         "account": "Conta",
         "preferences": "Preferências",
         "clients": "Chave API / OPDS",
@@ -1350,7 +1376,11 @@
         "theme": "Tema",
         "customize": "Personalizar",
         "cbl-import": "Lista de Leitura CBL",
-        "mal-stack-import": "Pilha MAL"
+        "mal-stack-import": "Pilha MAL",
+        "admin-email-history": "Histórico de Emails",
+        "admin-matched-metadata": "Metadados com Correspondência",
+        "admin-manage-tokens": "Gerir Tokens de Utilizador",
+        "scrobble-holds": "Pausas de Scrobble"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1826,7 +1856,7 @@
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Detalhamento de Metadados Kavita+",
         "description": "Kavita busca metadados (avaliações, comentários, recomendações, etc.) lentamente ao longo do tempo para séries elegíveis.",
-        "no-data": "Sem dados",
+        "no-data": "{{common.no-data}}",
         "errored-series-label": "Séries com erros",
         "completed-series-label": "Séries Concluídas",
         "complete": "Todas as séries possuem metadados"
@@ -2120,9 +2150,8 @@
         "email-sent": "Email enviado para {{email}}",
         "email-not-sent": "O email em ficheiro não é um email válido e não pode ser enviado. Foi colocado um link nos logs. O administrador pode disponibilizar este link para concluir o processo.",
         "k+-license-saved": "Licença guardada, mas não é válida. Carregue em \"check\" para atualizar a subscrição. O primeiro registo poderá levar algum tempo a propagar.",
-        "k+-unlocked": "Kavita+ desbloqueado!",
         "k+-error": "Ocorreu um erro ao ativar a licença. Por favor tente novamente.",
-        "k+-delete-key": "Isto apenas irá apagar a licença do Kavita e permitir que seja mostrado um link para comprar a licença. A sua subscrição não será cancelada! Use esta opção apenas quando assim indicado pelo suporte!",
+        "k+-delete-key": "Isto apenas irá apagar a licença do Kavita e permitir que seja mostrado um link para comprar a licença. <b>A sua subscrição não será cancelada!</b> Use a opção Gerir para cancelar a sua subscrição primeiro.",
         "k+-reset-key": "Isto irá invalidar um registo anterior com a sua licença e permitir voltar a registar uma instância Kavita.",
         "k+-reset-key-success": "A sua licença foi desassociada. Use o botão Editar para voltar a registar a sua instância e voltar a ativar o Kavita+",
         "library-deleted": "A biblioteca {{name}} foi removida",
@@ -2185,7 +2214,9 @@
         "bulk-scan": "A análise de bibliotecas é feita linearmente. Este processo pode demorar muito tempo e, dependendo do tamanho da biblioteca, não terminar.",
         "bulk-covers": "Refrescar as capas em múltiplas bibliotecas é um processo intensivo e pode demorar muito tempo. Tem a certeza que deseja continuar?",
         "person-image-downloaded": "A capa da pessoa foi descarregada e aplicada.",
-        "confirm-delete-multiple-chapters": "Tem a certeza de que pretende eliminar {{count}} capítulos/volumes? Este processo não irá modificar ficheiros em disco."
+        "confirm-delete-multiple-chapters": "Tem a certeza de que pretende eliminar {{count}} capítulos/volumes? Este processo não irá modificar ficheiros em disco.",
+        "bulk-delete-libraries": "Tem a certeza que deseja eliminar {{count}} bibliotecas?",
+        "match-success": "Séries correspondidas com sucesso"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2255,7 +2286,8 @@
         "multiple-selections": "Múltiplas Seleções",
         "back-to": "Voltar para {{action}}",
         "title": "Ações",
-        "copy-settings": "Copiar Definições De"
+        "copy-settings": "Copiar Definições De",
+        "match": "Correspondência"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2372,11 +2404,16 @@
         "issue-nums": "Números",
         "chapter-nums": "Capítulos",
         "volume-nums": "Volumes",
-        "author-count": "{{num}} Autores"
+        "author-count": "{{num}} Autores",
+        "chapter-count": "{{num}} Capítulos",
+        "no-data": "Sem Dados"
     },
     "confirm": {
         "alert": "Alerta",
-        "confirm": "Confirmar"
+        "confirm": "Confirmar",
+        "cancel": "{{common.cancel}}",
+        "info": "Informação",
+        "ok": "Ok"
     },
     "person-detail": {
         "all-roles": "Funções",
@@ -2412,5 +2449,77 @@
         "author-count": "{{num}} Pessoas",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "title": "Explorar Autores & Escritores"
+    },
+    "changelog-update-item": {
+        "fixed": "Corrigido",
+        "published-label": "Publicado: ",
+        "download": "Descarregar",
+        "added": "Adicionado",
+        "api": "API",
+        "changed": "Alterado",
+        "theme": "Tema",
+        "installed": "{{changelog.installed}}",
+        "removed": "Removido",
+        "developer": "Programador"
+    },
+    "match-series-modal": {
+        "search": "Pesquisa",
+        "query-tooltip": "Introduza o nome da série, e o url do AniList/MyAnimeList. Os Urls irão usar uma pesquisa direta.",
+        "save": "{{common.save}}",
+        "title": "Corresponder {{seriesName}}",
+        "close": "{{common.close}}",
+        "no-results": "Não foi possível encontrar uma correspondência. Tente adicionar o url de um provedor suportado e tente novamente.",
+        "query-label": "Consulta",
+        "dont-match-label": "Não fazer Correspondência",
+        "dont-match-tooltip": "Optar que esta série não tenha correspondências ou scrobbling"
+    },
+    "new-version-modal": {
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "refresh": "Refrescar",
+        "title": "O Kavita foi atualizado!",
+        "description": "Está disponível uma nova versão do Kavita. Refresque para atualizar.",
+        "fixed": "{{changelog.fixed}}",
+        "removed": "{{changelog.removed}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "details": "Ver página"
+    },
+    "email-history": {
+        "description": "Aqui pode encontrar todos os emails enviados pelo Kavita, e para que utilizadores.",
+        "no-data": "{{common.no-data}}",
+        "not-sent-tooltip": "Não Enviado",
+        "date-header": "Data de Envio",
+        "user-header": "Destinatário",
+        "sent-header": "Com Sucesso",
+        "sent-tooltip": "Enviado",
+        "template-header": "Template"
+    },
+    "manage-user-tokens": {
+        "no-data": "{{common.no-data}}",
+        "username-header": "Nome de Utilizador",
+        "description": "Os utilizadores que têm tokens de scrobbling, podem ter de os renovar ocasionalmente. O Kavita irá enviar um email automaticamente, se o email estiver configurado e for válido.",
+        "anilist-header": "AniList",
+        "mal-header": "MAL",
+        "expires-label": "Expira: {{date}}"
+    },
+    "manage-matched-metadata": {
+        "title": "Correspondência de Metadados",
+        "description": "Todas as Séries que possam ter correspondência com Metadados Externos aparecem aqui. O Kavita irá obter ou refrescar os metadados de 50 séries a cada 24 horas.",
+        "status-header": "Estado",
+        "series-name-header": "Séries",
+        "valid-until-header": "Próximo Refrescamento",
+        "matched-status-label": "Correspondente",
+        "unmatched-status-label": "Não Correspondente",
+        "blacklist-status-label": "Necessita Correspondência Manual",
+        "all-status-label": "Todos",
+        "dont-match-label": "Não Corresponde",
+        "no-data": "{{common.no-data}}"
     }
 }

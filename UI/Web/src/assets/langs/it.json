@@ -22,7 +22,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Salvataggio…",
         "update": "Aggiornamento",
@@ -561,10 +560,7 @@
         "installed": "Installato",
         "download": "Download",
         "nightly": "Nightly: {{version}}",
-        "published-label": "Pubblicato: ",
-        "available": "Disponibile",
-        "description": "Se non vedi un {{installed}}",
-        "description-continued": "tag, sei in una nightly release. Solo le versioni principali verranno visualizzate come disponibili. Un tag nightly verrà visualizzato quando si sta usando la versione nightly di questa stable."
+        "available": "Disponibile"
     },
     "invite-user": {
         "title": "Invita utente",
@@ -1951,9 +1947,8 @@
         "email-sent": "Email inviata a {{email}}",
         "email-not-sent": "L'email in archivio non è un'email valida e non può essere inviata. Un collegamento è stato inserito nei log. L'amministratore può fornire questo collegamento per completare il flusso.",
         "k+-license-saved": "Chiave di licenza salvata, ma non è valida. Fare clic su Controlla per riconvalidare l'abbonamento. La prima registrazione potrebbe richiedere un minuto per propagarsi.",
-        "k+-unlocked": "Kavita+ sbloccato!",
         "k+-error": "Si è verificato un errore durante l'attivazione della licenza. Per favore riprova.",
-        "k+-delete-key": "Ciò eliminerà solo la chiave di licenza di Kavita e consentirà la visualizzazione di un collegamento per l'acquisto. Questo non annullerà il tuo abbonamento! Usalo solo se indicato dal supporto!",
+        "k+-delete-key": "Ciò eliminerà solo la chiave di licenza di Kavita e consentirà la visualizzazione di un collegamento per l'acquisto. <b>Questo non annullerà il tuo abbonamento!</b> Usalo solo se indicato dal supporto!",
         "k+-reset-key": "Ciò scioglierà la tua chiave da un server e ti consentirà di registrare nuovamente un'istanza Kavita.",
         "k+-reset-key-success": "La tua licenza è stata annullata. Utilizza il pulsante Modifica per registrare nuovamente la tua istanza e riattivare Kavita+",
         "library-deleted": "La libreria {{name}} è stata rimossa",

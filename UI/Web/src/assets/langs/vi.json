@@ -13,7 +13,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "update": "Cập nhật",
         "saving": "Đang lưu…",
@@ -446,7 +445,6 @@
         "kavita+-desc-part-2": "lợi ích premium",
         "kavita+-desc-part-3": "hôm nay!",
         "kavita+-requirement": "Kavita+ được thiết kế để chỉ hoạt động với phiên bản mới nhất - 2 phiên bản. Bất kỳ phiên bản nào ngoài phiên bản đó đều không hoạt động.",
-        "kavita+-releases": "Xem bản phát hành",
         "activate-license-label": "License Key",
         "help-label": "{{common.help}}"
     },
@@ -1830,11 +1828,8 @@
         "lightNovel": "Light Novel"
     },
     "changelog": {
-        "description": "Nếu bạn không thấy {{installed}}",
-        "description-continued": "tag, bạn đang ở phiên bản nightly. Chỉ có các phiên bản chính mới hiển thị là available. Tag nightly sẽ hiển thị khi ở phiên bản nightly.",
         "installed": "Đã cài đặt",
         "download": "Tải Xuống",
-        "published-label": "Xuất bản: ",
         "available": "Khả dụng",
         "nightly": "Nightly: {{version}}"
     },
@@ -2196,7 +2191,6 @@
         "alert-bad-theme": "Có tệp CSS không hợp lệ hoặc không an toàn trong chủ đề. Vui lòng liên hệ với quản trị viên của bạn để sửa lỗi này. Chủ đề tối sẽ được đặt mặc định.",
         "confirm-download-size": "{{entityType}} là {{size}}. Bạn có chắc chắn muốn tiếp tục không?",
         "confirm-delete-theme": "Xóa chủ đề này sẽ xóa nó khỏi ổ đĩa. Bạn có thể lấy nó từ thư mục tạm thời trước khi xóa",
-        "k+-unlocked": "Kavita+ đã được mở khóa!",
         "k+-error": "Đã xảy ra lỗi khi kích hoạt giấy phép của bạn. Vui lòng thử lại.",
         "file-send-to": "Tệp đã được gửi qua Email đến {{name}}",
         "theme-missing": "Chủ đề đang hoạt động không còn tồn tại. Vui lòng làm mới trang.",

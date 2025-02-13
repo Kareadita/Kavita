@@ -13,7 +13,6 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "account-detail-title": "Kontodetaljer",
         "saving": "Sparar…",

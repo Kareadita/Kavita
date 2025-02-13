@@ -187,7 +187,7 @@
     "account-email-invalid": "Email v souboru účtu správce není platný email. Nelze poslat testovací email.",
     "email-settings-invalid": "Chybí informace o nastavení emailu. Ujistěte se, zda-li jsou uložena všechna nastavení.",
     "send-to-unallowed": "Nemůžete odeslat do zařízení které není vaše",
-    "send-to-size-limit": "Soubor(y) které se snažíte poslat jsou příliš velké pro vašeho email poskytovatele",
+    "send-to-size-limit": "Soubor(y) které se snažíte poslat jsou příliš velké pro vašeho poskytovatele emailu",
     "error-import-stack": "Při importu zásobníku MAL došlo k chybě",
     "collection-already-exists": "Kolekce již existuje",
     "generic-cover-person-save": "Nebylo možné uložit cover obrázek pro Osobu",
@@ -197,5 +197,11 @@
     "scan-libraries": "Skenovat Knihovny",
     "backup": "Záloha",
     "update-yearly-stats": "Aktualizovat roční statistiky",
-    "remove-from-want-to-read": "Vyčištění Chci si přečíst"
+    "remove-from-want-to-read": "Vyčištění Chci si přečíst",
+    "person-doesnt-exist": "Osoba neexistuje",
+    "person-name-required": "Jméno osoby je povinné a nesmí být prázdné",
+    "person-name-unique": "Jméno osoby musí být unikátní",
+    "person-image-doesnt-exist": "Osoba neexistuje v databázi CoversDB",
+    "email-taken": "Email je již používán",
+    "kavitaplus-restricted": "Toto je omezeno pouze na Kavita+"
 }

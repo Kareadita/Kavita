@@ -201,5 +201,7 @@
     "person-doesnt-exist": "No existe la persona",
     "person-name-required": "El nombre de la persona es obligatorio y no debe estar vacío",
     "person-name-unique": "El nombre de la persona debe ser único",
-    "person-image-doesnt-exist": "La persona no existe en CoversDB"
+    "person-image-doesnt-exist": "La persona no existe en CoversDB",
+    "email-taken": "El correo electrónico ya está en uso",
+    "kavitaplus-restricted": "Esto está restringido a Kavita+"
 }

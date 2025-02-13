@@ -201,5 +201,7 @@
     "person-doesnt-exist": "Níl duine ann",
     "person-name-required": "Tá ainm an duine ag teastáil agus ní féidir é a bheith ar neamhní",
     "person-name-unique": "Caithfidh ainm duine a bheith uathúil",
-    "person-image-doesnt-exist": "Níl an duine in CoversDB"
+    "person-image-doesnt-exist": "Níl an duine in CoversDB",
+    "email-taken": "Ríomhphost in úsáid cheana féin",
+    "kavitaplus-restricted": "Tá sé seo teoranta do Kavita+ amháin"
 }
