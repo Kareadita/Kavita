@@ -911,13 +911,6 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             throw new Exception("Expected obj keyword");
         }
 
-        token = _lexer.NextToken();
-
-        if (token.type != PdfLexer.TokenType.DictionaryStart)
-        {
-            throw new Exception("Expected dictionary");
-        }
-
         long length = -1;
         long size = -1;
         bool deflate = false;
@@ -928,186 +921,152 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
         Queue<XRefSection> sections = new();
         MetadataRef meta = new MetadataRef(-1, -1);
 
-        while (true)
-        {
-            token = _lexer.NextToken();
+        ParseDictionary(delegate(string key, PdfLexer.Token value) {
+            switch (key)
+            {
+                case "Type":
+                    if (value.type != PdfLexer.TokenType.Name || (string)value.value != "XRef")
+                    {
+                        throw new Exception("Expected /Type to be /XRef");
+                    }
 
-            if (token.type == PdfLexer.TokenType.DictionaryEnd)
-            {
-                break;
-            }
-            else if (token.type == PdfLexer.TokenType.Name)
-            {
-                switch ((string)token.value)
-                {
-                    case "Type":
+                    return true;
+
+                case "Length":
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected integer after /Length");
+                    }
+
+                    length = (long)value.value;
+
+                    return true;
+
+                case "Size":
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected integer after /Size");
+                    }
+
+                    size = (long)value.value;
+
+                    return true;
+
+                case "Prev":
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected offset after /Prev");
+                    }
+
+                    prev = (long)value.value;
+
+                    return true;
+
+                case "Index":
+                    if (value.type != PdfLexer.TokenType.ArrayStart)
+                    {
+                        throw new Exception("Expected array after /Index");
+                    }
+
+                    while (true)
+                    {
                         token = _lexer.NextToken();
 
-                        if (token.type != PdfLexer.TokenType.Name || (string)token.value != "XRef")
+                        if (token.type == PdfLexer.TokenType.ArrayEnd)
                         {
-                            throw new Exception("Expected /Type to be /XRef");
+                            break;
+                        }
+                        else if (token.type != PdfLexer.TokenType.Int)
+                        {
+                            throw new Exception("Expected integer in /Index array");
                         }
 
-                        break;
-
-                    case "Length":
+                        long first = (long)token.value;
                         token = _lexer.NextToken();
 
                         if (token.type != PdfLexer.TokenType.Int)
                         {
-                            throw new Exception("Expected integer after /Length");
+                            throw new Exception("Expected integer pair in /Index array");
                         }
 
-                        length = (long)token.value;
+                        long count = (long)token.value;
+                        sections.Enqueue(new XRefSection(first, count));
+                    }
 
-                        break;
+                    return true;
 
-                    case "Size":
+                case "W":
+                    if (value.type != PdfLexer.TokenType.ArrayStart)
+                    {
+                        throw new Exception("Expected array after /W");
+                    }
+
+                    long[] widths = new long[3];
+
+                    for (int i = 0; i < 3; ++i)
+                    {
                         token = _lexer.NextToken();
 
                         if (token.type != PdfLexer.TokenType.Int)
                         {
-                            throw new Exception("Expected integer after /Size");
+                            throw new Exception("Expected integer in /W array");
                         }
 
-                        size = (long)token.value;
+                        widths[i] = (long)token.value;
+                    }
 
-                        break;
+                    token = _lexer.NextToken();
 
-                    case "Prev":
-                        token = _lexer.NextToken();
+                    if (token.type != PdfLexer.TokenType.ArrayEnd)
+                    {
+                        throw new Exception("Unclosed array after /W");
+                    }
 
-                        if (token.type != PdfLexer.TokenType.Int)
-                        {
-                            throw new Exception("Expected offset after /Prev");
-                        }
+                    typeWidth = widths[0];
+                    offsetWidth = widths[1];
+                    generationWidth = widths[2];
 
-                        prev = (long)token.value;
+                    return true;
 
-                        break;
+                case "Filter":
+                    if (value.type != PdfLexer.TokenType.Name)
+                    {
+                        throw new Exception("Expected name after /Filter");
+                    }
 
-                    case "Index":
-                        token = _lexer.NextToken();
+                    if ((string)value.value != "FlateDecode")
+                    {
+                        throw new Exception("Unsupported filter, only FlateDecode is supported");
+                    }
 
-                        if (token.type != PdfLexer.TokenType.ArrayStart)
-                        {
-                            throw new Exception("Expected array after /Index");
-                        }
+                    deflate = true;
 
-                        while (true)
-                        {
-                            token = _lexer.NextToken();
+                    return true;
 
-                            if (token.type == PdfLexer.TokenType.ArrayEnd)
-                            {
-                                break;
-                            }
-                            else if (token.type != PdfLexer.TokenType.Int)
-                            {
-                                throw new Exception("Expected integer in /Index array");
-                            }
+                case "Root":
+                    if (value.type != PdfLexer.TokenType.ObjectRef)
+                    {
+                        throw new Exception("Expected object reference after /Root");
+                    }
 
-                            long first = (long)token.value;
-                            token = _lexer.NextToken();
+                    meta.root = (long)value.value;
 
-                            if (token.type != PdfLexer.TokenType.Int)
-                            {
-                                throw new Exception("Expected integer pair in /Index array");
-                            }
+                    return true;
 
-                            long count = (long)token.value;
-                            sections.Enqueue(new XRefSection(first, count));
-                        }
+                case "Info":
+                    if (value.type != PdfLexer.TokenType.ObjectRef)
+                    {
+                        throw new Exception("Expected object reference after /Info");
+                    }
 
-                        break;
+                    meta.info = (long)value.value;
 
-                    case "W":
-                        token = _lexer.NextToken();
+                    return true;
 
-                        if (token.type != PdfLexer.TokenType.ArrayStart)
-                        {
-                            throw new Exception("Expected array after /W");
-                        }
-
-                        long[] widths = new long[3];
-
-                        for (int i = 0; i < 3; ++i)
-                        {
-                            token = _lexer.NextToken();
-
-                            if (token.type != PdfLexer.TokenType.Int)
-                            {
-                                throw new Exception("Expected integer in /W array");
-                            }
-
-                            widths[i] = (long)token.value;
-                        }
-
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.ArrayEnd)
-                        {
-                            throw new Exception("Unclosed array after /W");
-                        }
-
-                        typeWidth = widths[0];
-                        offsetWidth = widths[1];
-                        generationWidth = widths[2];
-
-                        break;
-
-                    case "Filter":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Name)
-                        {
-                            throw new Exception("Expected name after /Filter");
-                        }
-
-                        if ((string)token.value != "FlateDecode")
-                        {
-                            throw new Exception("Unsupported filter, only FlateDecode is supported");
-                        }
-
-                        deflate = true;
-
-                        break;
-
-                    case "Root":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.ObjectRef)
-                        {
-                            throw new Exception("Expected object reference after /Root");
-                        }
-
-                        meta.root = (long)token.value;
-
-                        break;
-
-                    case "Info":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.ObjectRef)
-                        {
-                            throw new Exception("Expected object reference after /Info");
-                        }
-
-                        meta.info = (long)token.value;
-
-                        break;
-
-                    default:
-                        SkipValue();
-
-                        break;
-                }
+                default:
+                    return false;
             }
-            else
-            {
-                throw new Exception("Unexpected token in xref stream dictionary");
-            }
-        }
+        });
 
         token = _lexer.NextToken();
 
@@ -1201,91 +1160,67 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
         long xrefStm = -1;
 
         MetadataRef meta = new(-1, -1);
-        var token = _lexer.NextToken();
 
-        if (token.type != PdfLexer.TokenType.DictionaryStart)
+        ParseDictionary(delegate(string key, PdfLexer.Token value)
         {
-            throw new Exception("Expected trailer dictionary");
+            switch (key)
+            {
+                case "Root":
+                    if (value.type != PdfLexer.TokenType.ObjectRef)
+                    {
+                        throw new Exception("Expected object reference after /Root");
+                    }
+
+                    meta.root = (long)value.value;
+
+                    return true;
+                case "Prev":
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected offset after /Prev");
+                    }
+
+                    prev = (long)value.value;
+
+                    return true;
+                case "Info":
+                    if (value.type != PdfLexer.TokenType.ObjectRef)
+                    {
+                        throw new Exception("Expected object reference after /Info");
+                    }
+
+                    meta.info = (long)value.value;
+
+                    return true;
+                case "XRefStm":
+                    // Prefer encoded xref stream over xref table
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected offset after /XRefStm");
+                    }
+
+                    xrefStm = (long)value.value;
+
+                    return true;
+
+                case "Encrypt":
+                    throw new Exception("Encryption not supported");
+
+                default:
+                    return false;
+            }
+        });
+
+        PushMetadataRef(meta);
+
+        if (xrefStm != -1)
+        {
+            ReadXRefAndTrailer(xrefStm);
         }
 
-        while (true)
+        if (prev != -1)
         {
-            token = _lexer.NextToken();
-
-            if (token.type == PdfLexer.TokenType.DictionaryEnd)
-            {
-                PushMetadataRef(meta);
-
-                if (xrefStm != -1)
-                {
-                    ReadXRefAndTrailer(xrefStm);
-                }
-
-                if (prev != -1)
-                {
-                    ReadXRefAndTrailer(prev);
-                }
-
-                break;
-            }
-            else if (token.type == PdfLexer.TokenType.Name)
-            {
-                switch ((string)token.value)
-                {
-                    case "Root":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.ObjectRef)
-                        {
-                            throw new Exception("Expected object reference after /Root");
-                        }
-
-                        meta.root = (long)token.value;
-
-                        break;
-                    case "Prev":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Int)
-                        {
-                            throw new Exception("Expected offset after /Prev");
-                        }
-
-                        prev = (long)token.value;
-
-                        break;
-                    case "Info":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.ObjectRef)
-                        {
-                            throw new Exception("Expected object reference after /Info");
-                        }
-
-                        meta.info = (long)token.value;
-
-                        break;
-                    case "XRefStm":
-                        // Prefer encoded xref stream over xref table
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Int)
-                        {
-                            throw new Exception("Expected offset after /XRefStm");
-                        }
-
-                        xrefStm = (long)token.value;
-
-                        break;
-
-                    case "Encrypt":
-                        throw new Exception("Encryption not supported");
-
-                    default:
-                        SkipValue();
-                        break;
-                }
-            }
+            ReadXRefAndTrailer(prev);
         }
     }
 
@@ -1321,61 +1256,38 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             throw new Exception("Expected object header");
         }
 
-        token = _lexer.NextToken();
-
-        if (token.type != PdfLexer.TokenType.DictionaryStart)
-        {
-            throw new Exception("Expected info dictionary");
-        }
-
         Dictionary<String, long> indirectObjects = new();
 
-        while (true)
+        ParseDictionary(delegate(string key, PdfLexer.Token value)
         {
-            token = _lexer.NextToken();
-
-            if (token.type == PdfLexer.TokenType.DictionaryEnd)
+            switch (key)
             {
-                break;
-            }
-            else if (token.type == PdfLexer.TokenType.Name)
-            {
-                switch ((string)token.value)
-                {
-                    case "Title":
-                    case "Author":
-                    case "Subject":
-                    case "Keywords":
-                    case "Creator":
-                    case "Producer":
-                    case "CreationDate":
-                    case "ModDate":
-                        var value = _lexer.NextToken();
+                case "Title":
+                case "Author":
+                case "Subject":
+                case "Keywords":
+                case "Creator":
+                case "Producer":
+                case "CreationDate":
+                case "ModDate":
+                    if (value.type == PdfLexer.TokenType.ObjectRef) {
+                        indirectObjects[key] = (long)value.value;
+                    }
+                    else if (value.type != PdfLexer.TokenType.String)
+                    {
+                        throw new Exception("Expected string value");
+                    }
+                    else
+                    {
+                        _metadata[key] = (string)value.value;
+                    }
 
-                        if (value.type == PdfLexer.TokenType.ObjectRef) {
-                            indirectObjects[(string)token.value] = (long)value.value;
-                        }
-                        else if (value.type != PdfLexer.TokenType.String)
-                        {
-                            throw new Exception("Expected string value");
-                        }
-                        else
-                        {
-                            _metadata[(string)token.value] = (string)value.value;
-                        }
+                    return true;
 
-                        break;
-
-                    default:
-                        SkipValue();
-                        break;
-                }
+                default:
+                    return false;
             }
-            else
-            {
-                throw new Exception("Unexpected token in info dictionary");
-            }
-        }
+        });
 
         // Resolve indirectly referenced values
         foreach(var key in indirectObjects.Keys) {
@@ -1415,47 +1327,27 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             throw new Exception("Expected object header");
         }
 
-        token = _lexer.NextToken();
+        long meta = -1;
 
-        if (token.type != PdfLexer.TokenType.DictionaryStart)
+        ParseDictionary(delegate(string key, PdfLexer.Token value)
         {
-            throw new Exception("Expected root dictionary");
-        }
+            switch (key) {
+                case "Metadata":
+                    if (value.type != PdfLexer.TokenType.ObjectRef)
+                    {
+                        throw new Exception("Expected object number after /Metadata");
+                    }
 
-        while (true)
-        {
-            token = _lexer.NextToken();
+                    meta = (long)value.value;
 
-            if (token.type == PdfLexer.TokenType.DictionaryEnd)
-            {
-                break;
+                    return true;
+
+                default:
+                    return false;
             }
-            else if (token.type == PdfLexer.TokenType.Name)
-            {
-                switch ((string)token.value)
-                {
-                    case "Metadata":
-                        token = _lexer.NextToken();
+        });
 
-                        if (token.type != PdfLexer.TokenType.ObjectRef)
-                        {
-                            throw new Exception("Expected object number after /Metadata");
-                        }
-
-                        return (long)token.value;
-
-                    default:
-                        SkipValue();
-
-                        break;
-                }
-            }
-            else
-            {
-                throw new Exception("Unexpected token in document catalog");
-            }
-        }
-        return -1;
+        return meta;
     }
 
     private string? GetTextFromXmlNode(XmlDocument doc, XmlNamespaceManager ns, string path)
@@ -1503,91 +1395,60 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.ObjectStart)
         {
-            throw new Exception("Expected obj keyword");
-        }
-
-        token = _lexer.NextToken();
-
-        if (token.type != PdfLexer.TokenType.DictionaryStart)
-        {
-            throw new Exception("Expected dictionary");
+            throw new Exception("Expected object header");
         }
 
         long length = -1;
         bool deflate = false;
 
-        while (true)
+        ParseDictionary(delegate(string key, PdfLexer.Token value)
         {
-            token = _lexer.NextToken();
+            switch (key) {
+                case "Type":
+                    if (value.type != PdfLexer.TokenType.Name || (string)value.value != "Metadata")
+                    {
+                        throw new Exception("Expected /Type to be /Metadata");
+                    }
 
-            if (token.type == PdfLexer.TokenType.DictionaryEnd)
-            {
-                break;
+                    return true;
+
+                case "Subtype":
+                    if (value.type != PdfLexer.TokenType.Name || (string)value.value != "XML")
+                    {
+                        throw new Exception("Expected /Subtype to be /XML");
+                    }
+
+                    return true;
+
+                case "Length":
+                    if (value.type != PdfLexer.TokenType.Int)
+                    {
+                        throw new Exception("Expected integer after /Length");
+                    }
+
+                    length = (long)value.value;
+
+                    return true;
+
+                case "Filter":
+                    if (value.type != PdfLexer.TokenType.Name)
+                    {
+                        throw new Exception("Expected name after /Filter");
+                    }
+
+                    if ((string)value.value != "FlateDecode")
+                    {
+                        throw new Exception("Unsupported filter, only FlateDecode is supported");
+                    }
+
+                    deflate = true;
+
+                    return true;
+
+                default:
+                    return false;
             }
-            else if (token.type == PdfLexer.TokenType.Name)
-            {
-                switch ((string)token.value)
-                {
-                    case "Type":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Name || (string)token.value != "Metadata")
-                        {
-                            throw new Exception("Expected /Type to be /Metadata");
-                        }
-
-                        break;
-
-                    case "Subtype":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Name || (string)token.value != "XML")
-                        {
-                            throw new Exception("Expected /Subtype to be /XML");
-                        }
-
-                        break;
-
-                    case "Length":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Int)
-                        {
-                            throw new Exception("Expected integer after /Length");
-                        }
-
-                        length = (long)token.value;
-
-                        break;
-
-                    case "Filter":
-                        token = _lexer.NextToken();
-
-                        if (token.type != PdfLexer.TokenType.Name)
-                        {
-                            throw new Exception("Expected name after /Filter");
-                        }
-
-                        if ((string)token.value != "FlateDecode")
-                        {
-                            throw new Exception("Unsupported filter, only FlateDecode is supported");
-                        }
-
-                        deflate = true;
-
-                        break;
-
-                    default:
-                        SkipValue();
-
-                        break;
-                }
-            }
-            else
-            {
-                throw new Exception("Unexpected token in xref stream dictionary");
-            }
-        }
+        });
 
         token = _lexer.NextToken();
 
@@ -1643,6 +1504,40 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
         SetMetadata("TitleSort", GetTextFromXmlNode(metaDoc, ns, "//calibre:title_sort"));
         SetMetadata("Series", GetTextFromXmlNode(metaDoc, ns, "//calibre:series/rdf:value"));
         SetMetadata("Volume", GetTextFromXmlNode(metaDoc, ns, "//calibreSI:series_index"));
+    }
+
+    private delegate bool DictionaryHandler(string key, PdfLexer.Token value);
+
+    private void ParseDictionary(DictionaryHandler handler)
+    {
+        var token = _lexer.NextToken();
+
+        if (token.type != PdfLexer.TokenType.DictionaryStart)
+        {
+            throw new Exception("Expected dictionary");
+        }
+
+        while (true)
+        {
+            token = _lexer.NextToken();
+
+            if (token.type == PdfLexer.TokenType.DictionaryEnd)
+            {
+                return;
+            }
+            else if (token.type == PdfLexer.TokenType.Name)
+            {
+                var value = _lexer.NextToken();
+
+                if (!handler((string)token.value, value)) {
+                    SkipValue(value);
+                }
+            }
+            else
+            {
+                throw new Exception("Improper token in dictionary");
+            }
+        }
     }
 
     private void SkipValue(PdfLexer.Token? existingToken = null)
