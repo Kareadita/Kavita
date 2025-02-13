@@ -1996,7 +1996,82 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     #region Whitelist
 
-    // Whitelist Tag
+    [Fact]
+    public async Task Whitelist_Tags()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Whitelist Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Whitelist = ["Sports", "Action"];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Sports"}, new MetadataTagDto() {Name = "Action"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[] {"Sports", "Action"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
+    }
+
+    [Fact]
+    public async Task Whitelist_WithFieldMap_Tags()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - Whitelist Tags";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Tag,
+            SourceValue = "Boxing",
+            DestinationType = MetadataFieldType.Tag,
+            DestinationValue = "Sports",
+            ExcludeFromSource = false
+
+        }];
+        metadataSettings.Whitelist = ["Sports", "Action"];
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Action"}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(new[] {"Sports", "Action"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
+    }
 
     // Field Map then Whitelist Tag
 
