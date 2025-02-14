@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
-using API.Constants;
-using API.Controllers;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.CollectionTags;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
@@ -22,7 +17,6 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -56,7 +50,6 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
-    private readonly IImageService _imageService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -66,7 +59,7 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService, IImageService imageService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -74,7 +67,6 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
-        _imageService = imageService;
     }
 
     /// <summary>

@@ -2150,7 +2150,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
     // Non-Sequel existing relationship with new link, both exist
     [Fact]
-    public async Task Relationships_NonSequel_ExistingLink_DifferentType()
+    public async Task Relationships_NonSequel_ExistingLink_DifferentType_BothExist()
     {
         await ResetDb();
 
@@ -2189,6 +2189,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         _context.MetadataSettings.Update(metadataSettings);
         await _context.SaveChangesAsync();
 
+
         await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
@@ -2202,22 +2203,78 @@ public class ExternalMetadataServiceTests : AbstractDbTest
                     NativeTitle = series2.Name,
                     RomajiTitle = series2.Name,
                 },
-                AniListId = 10,
                 PlusMediaFormat = PlusMediaFormat.Manga
             }]
-        }, 1);
+        }, 2);
 
         // Repull Series and validate what is overwritten
-        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
+       var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
-        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.Annual);
-        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.SideStory);
+        Assert.Equal(seriesName, sourceSeries.Name);
+
+        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.Annual && r.TargetSeriesId == existingRelationshipSeries.Id);
+        Assert.Contains(sourceSeries.Relations, r => r.RelationKind == RelationKind.SideStory && r.TargetSeriesId == series2.Id);
     }
 
 
 
     // Sequel/Prequel
+    [Fact]
+    public async Task Relationships_Sequel_CreatesPrequel()
+    {
+        await ResetDb();
 
+        const string seriesName = "Test - Relationships Source";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Target")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.Sequel,
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = series2.Name,
+                    EnglishTitle = null,
+                    NativeTitle = series2.Name,
+                    RomajiTitle = series2.Name,
+                },
+                PlusMediaFormat = PlusMediaFormat.Manga
+            }]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var sourceSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Single(sourceSeries.Relations);
+        Assert.Equal(series2.Name, sourceSeries.Relations.First().TargetSeries.Name);
+
+        var sequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sequel);
+        Assert.Equal(seriesName, sequel.Relations.First().TargetSeries.Name);
+    }
 
 
     #endregion

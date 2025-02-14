@@ -932,11 +932,11 @@ public class SeriesFilterTests : AbstractDbTest
 
         var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>()
-            , Substitute.For<IImageService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>());
 
         // Select 0 Rating
         var zeroRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
+        Assert.NotNull(zeroRating);
 
         Assert.True(await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {

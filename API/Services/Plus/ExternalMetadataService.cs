@@ -522,8 +522,6 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateCharacters(series, settings, externalMetadata.Characters) || madeModification;
 
         madeModification = await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin) || madeModification;
-
-        // MUST be last as this will commit
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
         return madeModification;
@@ -582,43 +580,13 @@ public class ExternalMetadataService : IExternalMetadataService
             // Skip if no related series found or series is the parent
             if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
 
-            if (relatedSeries != null && relatedSeries.Id != series.Id && relation.Relation != RelationKind.Parent)
-            {
-                relatedSeriesDict[relatedSeries.Id] = relatedSeries;
-            }
+            // Check if the relationship already exists
+            var relationshipExists = series.Relations.Any(r =>
+                r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
 
-            // // Check if the relationship already exists
-            // var relationshipExists = series.Relations.Any(r =>
-            //     r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
-            //
-            // if (relationshipExists) continue;
-            //
-            // series.Relations.Add(new SeriesRelation
-            // {
-            //     RelationKind = relation.Relation,
-            //     TargetSeries = relatedSeries,
-            //     TargetSeriesId = relatedSeries.Id,
-            // });
-            //
-            // _unitOfWork.SeriesRepository.Attach(series);
-            //
-            // // Handle sequel/prequel: add reverse relationship
-            // if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
-            // {
-            //     var reverseExists = relatedSeries.Relations.Any(r =>
-            //         r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
-            //
-            //     if (reverseExists) continue;
-            //
-            //     relatedSeries.Relations.Add(new SeriesRelation
-            //     {
-            //         RelationKind = GetReverseRelation(relation.Relation),
-            //         TargetSeries = series,
-            //         TargetSeriesId = series.Id,
-            //         Series = relatedSeries,
-            //         SeriesId = relatedSeries.Id
-            //     });
-            // }
+            if (relationshipExists) continue;
+
+            relatedSeriesDict[relatedSeries.Id] = relatedSeries;
         }
 
         // Process relationships
@@ -631,17 +599,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (relatedSeries == null) continue;
 
-            // Check if the relationship already exists
-            var relationshipExists = series.Relations.Any(r =>
-                r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
-
-            if (relationshipExists) continue;
-
             // Add new relationship
             var newRelation = new SeriesRelation
             {
                 RelationKind = relation.Relation,
-                TargetSeriesId = relatedSeries.Id
+                TargetSeriesId = relatedSeries.Id,
+                SeriesId = series.Id,
             };
             series.Relations.Add(newRelation);
 
@@ -656,11 +619,15 @@ public class ExternalMetadataService : IExternalMetadataService
                     var reverseRelation = new SeriesRelation
                     {
                         RelationKind = GetReverseRelation(relation.Relation),
-                        TargetSeriesId = series.Id
+                        TargetSeriesId = series.Id,
+                        SeriesId = relatedSeries.Id,
                     };
                     relatedSeries.Relations.Add(reverseRelation);
+                    _unitOfWork.SeriesRepository.Attach(reverseRelation);
                 }
             }
+
+            _unitOfWork.SeriesRepository.Update(series);
         }
 
         if (_unitOfWork.HasChanges())

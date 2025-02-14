@@ -75,6 +75,7 @@ public interface ISeriesRepository
 {
     void Add(Series series);
     void Attach(Series series);
+    void Attach(SeriesRelation relation);
     void Update(Series series);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
@@ -196,6 +197,11 @@ public class SeriesRepository : ISeriesRepository
     public void Attach(Series series)
     {
         _context.Series.Attach(series);
+    }
+
+    public void Attach(SeriesRelation relation)
+    {
+        _context.SeriesRelation.Attach(relation);
     }
 
     public void Attach(ExternalSeriesMetadata metadata)
