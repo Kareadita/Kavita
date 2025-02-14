@@ -13,18 +13,30 @@ public static class StringHelper
     /// <returns></returns>
     public static string? SquashBreaklines(string? summary)
     {
-        // TODO: Test this as it's not reliable
         if (string.IsNullOrWhiteSpace(summary))
         {
-            return null; // Return as is if null, empty, or whitespace.
+            return null;
         }
 
-        // Remove all variations of <br> tags (case-insensitive)
-        summary = Regex.Replace(summary, @"<br\s*/?>", " ", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // First standardize all br tags to <br /> format
+        summary = Regex.Replace(summary, @"<br\s*/?>", "<br />", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        // Normalize whitespace (replace multiple spaces with a single space)
+        // Replace multiple consecutive br tags with a single br tag
+        summary = Regex.Replace(summary, @"(?:<br />\s*)+", "<br /> ", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Normalize remaining whitespace (replace multiple spaces with a single space)
         summary = Regex.Replace(summary, @"\s+", " ").Trim();
 
-        return summary;
+        return summary.Trim();
+    }
+
+    /// <summary>
+    /// Removes the (Source: MangaDex) type of tags at the end of descriptions from AL
+    /// </summary>
+    /// <param name="description"></param>
+    /// <returns></returns>
+    public static string? RemoveSourceInDescription(string? description)
+    {
+        return description?.Trim();
     }
 }
