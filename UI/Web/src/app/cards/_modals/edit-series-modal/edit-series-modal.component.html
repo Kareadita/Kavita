@@ -429,7 +429,7 @@
                   <div class="mb-3">
                     <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.teamLocked = true" [settings]="getPersonsSettings(PersonRole.Team)"
+                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="getPersonsSettings(PersonRole.Team)"
                                        [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
                                        (newItemAdded)="metadata.teamLocked = true">
                           <ng-template #badgeItem let-item let-position="idx">
