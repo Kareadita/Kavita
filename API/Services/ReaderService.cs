@@ -203,7 +203,7 @@ public class ReaderService : IReaderService
     /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    private static AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
         AppUserProgress? userProgress = null;
 
@@ -223,11 +223,12 @@ public class ReaderService : IReaderService
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
-                user.Progresses = new List<AppUserProgress>
-                {
-                    user.Progresses.First()
-                };
+                var highestProgress = progresses.Max(x => x.PagesRead);
+                var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
+                firstProgress.PagesRead = highestProgress;
+                user.Progresses = [firstProgress];
                 userProgress = user.Progresses.First();
+                _logger.LogInformation("Trying to save progress and multiple progress entries exist, deleting and rewriting with highest progress rate: {@Progress}", userProgress);
             }
         }
 
@@ -271,10 +272,6 @@ public class ReaderService : IReaderService
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
-                    Created = DateTime.Now,
-                    CreatedUtc = DateTime.UtcNow,
-                    LastModified = DateTime.Now,
-                    LastModifiedUtc = DateTime.UtcNow
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
