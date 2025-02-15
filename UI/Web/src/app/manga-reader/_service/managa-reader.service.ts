@@ -6,6 +6,7 @@ import { ChapterInfo } from '../_models/chapter-info';
 import { DimensionMap } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 import { BookmarkInfo } from 'src/app/_models/manga-reader/bookmark-info';
+import {ReaderMode} from "../../_models/preferences/reader-mode";
 
 @Injectable({
   providedIn: 'root'
@@ -150,6 +151,35 @@ export class ManagaReaderService {
     }
   }
 
+  /**
+   * If the page dimensions are all "webtoon-like", then reader mode will be converted for the user
+   */
+  shouldBeWebtoonMode() {
+    const pages = Object.values(this.pageDimensions);
+
+    let webtoonScore = 0;
+    pages.forEach(info => {
+      const aspectRatio = info.height / info.width;
+      let score = 0;
+
+      // Strong webtoon indicator: If aspect ratio is at least 2:1
+      if (aspectRatio >= 2) {
+        score += 1;
+      }
+
+      // Boost score if width is small (≤ 800px, common in webtoons)
+      if (info.width <= 800) {
+        score += 0.5; // Adjust weight as needed
+      }
+
+      webtoonScore += score;
+    });
+
+
+    // If at least 50% of the pages fit the webtoon criteria, switch to Webtoon mode.
+    return webtoonScore / pages.length >= 0.5;
+  }
+
 
   applyBookmarkEffect(elements: Array<Element | ElementRef>) {
     if (elements.length > 0) {
@@ -159,8 +189,5 @@ export class ManagaReaderService {
       }, 1000);
     }
   }
-
-
-
 
 }

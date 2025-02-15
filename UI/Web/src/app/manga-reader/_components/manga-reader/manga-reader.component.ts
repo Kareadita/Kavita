@@ -33,7 +33,7 @@ import {
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgbModal, NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -784,6 +784,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return pageNum;
   }
 
+  switchToWebtoonReaderIfPagesLikelyWebtoon() {
+    if (this.readerMode === ReaderMode.Webtoon) return;
+
+    if (this.mangaReaderService.shouldBeWebtoonMode()) {
+      this.readerMode = ReaderMode.Webtoon;
+      this.toastr.info(translate('manga-reader.webtoon-override'));
+      this.readerModeSubject.next(this.readerMode);
+      this.cdRef.markForCheck();
+    }
+  }
+
   disableDoubleRendererIfScreenTooSmall() {
     if (window.innerWidth > window.innerHeight) {
       this.generalSettingsForm.get('layoutMode')?.enable();
@@ -991,6 +1002,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.inSetup = false;
 
       this.disableDoubleRendererIfScreenTooSmall();
+      this.switchToWebtoonReaderIfPagesLikelyWebtoon();
 
 
       // From bookmarks, create map of pages to make lookup time O(1)

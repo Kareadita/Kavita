@@ -2613,7 +2613,8 @@
         "bulk-covers": "Refreshing covers on multiple libraries is intensive and can take a long time. Are you sure you want to continue?",
         "person-image-downloaded": "Person cover was downloaded and applied.",
         "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
-        "match-success": "Series matched correctly"
+        "match-success": "Series matched correctly",
+        "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon."
     },
 
     "read-time-pipe": {
