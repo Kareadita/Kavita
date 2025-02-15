@@ -9,7 +9,7 @@
 
       <div class="progress-banner">
         @if (series.pagesRead > 0 && series.pagesRead < series.pages && series.pages > 0 && series.pagesRead !== series.pages) {
-          <p ngbTooltip="{{((series.pagesRead / series.pages) * 100) | number:'1.0-1'}}%">
+          <p ngbTooltip="{{((series.pagesRead / series.pages) * 100) | number:'1.0-1'}}%" container="body">
             <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
           </p>
         }

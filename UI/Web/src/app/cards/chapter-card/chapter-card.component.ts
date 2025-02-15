@@ -49,8 +49,7 @@ import {ActionService} from "../../_services/action.service";
     EntityTitleComponent,
     CardActionablesComponent,
     RouterLink,
-    TranslocoDirective,
-    DefaultValuePipe
+    TranslocoDirective
   ],
   templateUrl: './chapter-card.component.html',
   styleUrl: './chapter-card.component.scss',
