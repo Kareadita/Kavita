@@ -8,12 +8,11 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  Inject,
   OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, NgClass, NgFor, NgStyle, NgSwitch, NgSwitchCase, PercentPipe} from '@angular/common';
+import {AsyncPipe, NgClass, NgStyle, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -126,7 +125,7 @@ enum KeyDirection {
     standalone: true,
   imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
-    NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
+    NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
     FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -275,7 +274,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     step: 1,
     boundPointerLabels: true,
     showSelectionBar: true,
-    translate: (value: number, label: LabelType) => {
+    translate: (_: number, label: LabelType) => {
       if (label == LabelType.Floor) {
         return 1 + '';
       } else if (label === LabelType.Ceil) {
@@ -467,7 +466,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
     this.cdRef.markForCheck();
