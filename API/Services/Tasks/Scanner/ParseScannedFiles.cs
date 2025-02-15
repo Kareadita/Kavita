@@ -674,6 +674,12 @@ public class ParseScannedFiles
 
     private static void RemapSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, string localizedSeries, string nonLocalizedSeries)
     {
+        // If the series names are identical, no remapping is needed (rare but valid)
+        if (localizedSeries.ToNormalized().Equals(nonLocalizedSeries.ToNormalized()))
+        {
+            return;
+        }
+
         // Find all infos that need to be remapped from the localized series to the non-localized series
         var normalizedLocalizedSeries = localizedSeries.ToNormalized();
         var seriesToBeRemapped = allInfos.Where(i => i.Series.ToNormalized().Equals(normalizedLocalizedSeries)).ToList();
