@@ -84,6 +84,12 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ret.Series = Parser.CleanTitle(fileName, type is LibraryType.Comic);
         }
 
+        // Pdfs may have .pdf in the series name, remove that
+        if (Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
+        {
+            ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
+        }
+
         // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
         if (ret.IsSpecial)
         {
