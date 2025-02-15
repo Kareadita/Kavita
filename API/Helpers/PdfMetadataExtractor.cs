@@ -1,3 +1,14 @@
+/// Parse PDF file and try to extract as much metadata as possible.
+/// Supports both text based XRef tables and compressed XRef streams (Deflate only).
+/// Supports both UTF-16 and PDFDocEncoding for strings.
+/// Lacks support for many PDF configurations that are theoretically possible, but should handle most common cases.
+
+// Contributed by https://github.com/microtherion
+
+// All references to the "PDF Spec" (section numbers, etc) refer to the
+// PDF 1.7 Specification a.k.a. PDF32000-1:2008
+// https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,12 +25,23 @@ using API.Services;
 namespace API.Helpers;
 #nullable enable
 
-//
-// Parse PDF file and try to extract as much metadata as possible.
-// Supports both text based XRef tables and compressed XRef streams (Deflate only).
-// Supports both UTF-16 and PDFDocEncoding for strings.
-// Lacks support for many PDF configurations that are theoretically possible, but should handle most common cases.
-//
+public class PdfMetadataExtractorException : Exception
+{
+    public PdfMetadataExtractorException()
+    {
+    }
+
+    public PdfMetadataExtractorException(string message)
+        : base(message)
+    {
+    }
+
+    public PdfMetadataExtractorException(string message, Exception inner)
+        : base(message, inner)
+    {
+    }
+}
+
 public interface IPdfMetadataExtractor
 {
     Dictionary<String, String> GetMetadata();
@@ -31,6 +53,8 @@ class PdfStringBuilder
     private bool _secondByte = false;
     private byte _prevByte = 0;
     private bool _isUnicode = false;
+
+    // PDFDocEncoding defined in PDF Spec D.1
 
     private readonly char[] _pdfDocMappingLow = new char[] {
         '\u02D8', '\u02C7', '\u02C6', '\u02D9', '\u02DD', '\u02DB', '\u02DA', '\u02DC',
@@ -67,8 +91,10 @@ class PdfStringBuilder
 
     public void AppendByte(byte b)
     {
+        // PDF Spec 7.9.2.1: Strings are either UTF-16BE or PDFDocEncoded
         if (_builder.Length == 0 && !_isUnicode)
         {
+            // Unicode strings are prefixed by a big endian BOM \uFEFF
             if (_secondByte)
             {
                 if (b == 0xFF)
@@ -223,7 +249,7 @@ class PdfLexer(Stream stream)
                     return ScanKeyword();
 
                 default:
-                    throw new Exception("Unexpected byte, got {LastByte()}");
+                    throw new PdfMetadataExtractorException("Unexpected byte, got {LastByte()}");
             }
         }
     }
@@ -267,13 +293,14 @@ class PdfLexer(Stream stream)
                     return;
 
                 default:
-                    throw new Exception("Unexpected character, expected newline, got {b}");
+                    throw new PdfMetadataExtractorException("Unexpected character, expected newline, got {b}");
             }
         }
     }
 
     public long GetXRefStart()
     {
+        // Look for the startxref element as per PDF Spec 7.5.5
         while (true)
         {
             byte b = NextByte();
@@ -328,7 +355,7 @@ class PdfLexer(Stream stream)
                         }
                         else
                         {
-                            throw new Exception("Expected integer after startxref keyword");
+                            throw new PdfMetadataExtractorException("Expected integer after startxref keyword");
                         }
                     }
 
@@ -342,11 +369,13 @@ class PdfLexer(Stream stream)
 
     public bool NextXRefEntry(ref long obj, ref int generation)
     {
+        // Cross-reference table entry as per PDF Spec 7.5.4
+
         WantLookahead(20);
 
         if (_valid - _pos < 20)
         {
-            throw new Exception("End of stream");
+            throw new PdfMetadataExtractorException("End of stream");
         }
 
         var inUse = true;
@@ -365,6 +394,10 @@ class PdfLexer(Stream stream)
 
     public Stream StreamObject(int length, bool deflate)
     {
+        // Read a stream object as per PDF Spec 7.3.8
+        // At the moment, we only accept uncompressed streams or the FlateDecode (PDF Spec 7.4.1) filter
+        // with no parameters. These cover the vast majority of streams we're interested in.
+
         var rawData = new MemoryStream();
 
         ExpectNewline();
@@ -413,7 +446,7 @@ class PdfLexer(Stream stream)
 
             if (_valid <= 0)
             {
-                throw new Exception("End of stream");
+                throw new PdfMetadataExtractorException("End of stream");
             }
         }
 
@@ -434,7 +467,7 @@ class PdfLexer(Stream stream)
     {
         if (NextByte() != expected)
         {
-            throw new Exception($"Unexpected character, expected {expected}");
+            throw new PdfMetadataExtractorException($"Unexpected character, expected {expected}");
         }
     }
 
@@ -506,7 +539,7 @@ class PdfLexer(Stream stream)
         }
         if (followedBySpace)
         {
-            // Look ahead to see if it's an object reference
+            // Look ahead to see if it's an object reference (PDF Spec 7.3.10)
             WantLookahead(32);
 
             var savedPos = _pos;
@@ -559,12 +592,14 @@ class PdfLexer(Stream stream)
                 return b - (byte)'A' + 10;
 
             default:
-                throw new Exception("Invalid hex digit, got {b}");
+                throw new PdfMetadataExtractorException("Invalid hex digit, got {b}");
         }
     }
 
     private Token ScanName()
     {
+        // PDF Spec 7.3.5
+
         StringBuilder sb = new StringBuilder();
         while (true)
         {
@@ -608,6 +643,8 @@ class PdfLexer(Stream stream)
 
     private Token ScanString()
     {
+        // PDF Spec 7.3.4.2
+
         PdfStringBuilder sb = new();
         int parenLevel = 1;
 
@@ -667,7 +704,7 @@ class PdfLexer(Stream stream)
 
                             if (b2 < '0' || b2 > '7' || b3 < '0' || b3 > '7')
                             {
-                                throw new Exception("Invalid octal escape, got {b1}{b2}{b3}");
+                                throw new PdfMetadataExtractorException("Invalid octal escape, got {b1}{b2}{b3}");
                             }
 
                             sb.AppendByte((byte)((b1 - '0') << 6 | (b2 - '0') << 3 | (b3 - '0')));
@@ -685,6 +722,8 @@ class PdfLexer(Stream stream)
 
     private Token ScanHexString()
     {
+        // PDF Spec 7.3.4.3
+
         PdfStringBuilder sb = new();
 
         while (true)
@@ -708,7 +747,7 @@ class PdfLexer(Stream stream)
                     return new Token(TokenType.String, sb.ToString());
 
                 default:
-                    throw new Exception("Invalid hex string, got {b}");
+                    throw new PdfMetadataExtractorException("Invalid hex string, got {b}");
             }
         }
     }
@@ -759,30 +798,6 @@ class PdfLexer(Stream stream)
 
 class PdfMetadataExtractor : IPdfMetadataExtractor
 {
-    public PdfMetadataExtractor(ILogger<BookService> logger, string filename)
-    {
-        Stopwatch timing = Stopwatch.StartNew();
-        _logger = logger;
-        _stream = File.OpenRead(filename);
-        _lexer = new PdfLexer(_stream);
-
-        ReadObjectOffsets();
-        long objOffsetTime = timing.ElapsedMilliseconds;
-
-        ReadMetadata(filename);
-        long metadataTime = timing.ElapsedMilliseconds - objOffsetTime;
-
-        LogMetadata(filename);
-        timing.Stop();
-
-        _logger.LogInformation("PDF {File}, object offsets {ObjOffsetTime} ms, metadata {MetadataTime} ms", filename, objOffsetTime, metadataTime);
-    }
-
-    public Dictionary<string, string> GetMetadata()
-    {
-        return _metadata;
-    }
-
     private readonly ILogger<BookService> _logger;
     private readonly PdfLexer _lexer;
     private readonly FileStream _stream;
@@ -803,18 +818,52 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
     private readonly Stack<MetadataRef> metadataRef = new();
 
+    private struct XRefSection
+    {
+        public long first;
+        public long count;
+
+        public XRefSection(long first, long count)
+        {
+            this.first = first;
+            this.count = count;
+        }
+    }
+
+    public PdfMetadataExtractor(ILogger<BookService> logger, string filename)
+    {
+        _logger = logger;
+        _stream = File.OpenRead(filename);
+        _lexer = new PdfLexer(_stream);
+
+        ReadObjectOffsets();
+        ReadMetadata(filename);
+
+        LogMetadata(filename);
+    }
+
+    public Dictionary<string, string> GetMetadata()
+    {
+        return _metadata;
+    }
+
     private void LogMetadata(string filename)
     {
-        _logger.LogDebug("Metadata for {Path}:", filename);
+       _logger.LogTrace("Metadata for {Path}:", filename);
 
         foreach (var entry in _metadata)
         {
-            _logger.LogDebug("   {Key:0,-5} : {Value:1}", entry.Key, entry.Value);
+            _logger.LogTrace("   {Key:0,-5} : {Value:1}", entry.Key, entry.Value);
         }
     }
 
     private void ReadObjectOffsets()
     {
+        // Look for file trailer (PDF Spec 7.5.5)
+        // Spec says trailer must be strictly at end of file.
+        // Adobe software accepts trailer within last 1K of EOF,
+        // but in practice, virtually all PDFs have trailer at end.
+
         _stream.Seek(-32, SeekOrigin.End);
 
         long xrefOffset = _lexer.GetXRefStart();
@@ -829,19 +878,22 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (!_lexer.TestByte((byte)'x'))
         {
+            // Cross-reference stream (PDF Spec 7.5.8)
+
             ReadXRefStream();
 
             return;
         }
 
+        // Cross-reference table (PDF Spec 7.5.4)
+
         var token = _lexer.NextToken();
 
         if (token.type != PdfLexer.TokenType.Keyword || (string)token.value != "xref")
         {
-            throw new Exception("Expected xref keyword");
+            throw new PdfMetadataExtractorException("Expected xref keyword");
         }
 
-        // Read xref entries
         while (true)
         {
             token = _lexer.NextToken();
@@ -853,7 +905,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
                 if (token.type != PdfLexer.TokenType.Int)
                 {
-                    throw new Exception("Expected number of objects in xref subsection");
+                    throw new PdfMetadataExtractorException("Expected number of objects in xref subsection");
                 }
 
                 long numObj = (long)token.value;
@@ -883,32 +935,22 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             }
             else
             {
-                throw new Exception("Unexpected token in xref");
+                throw new PdfMetadataExtractorException("Unexpected token in xref");
             }
         }
 
         ReadTrailerDictionary();
     }
 
-    private struct XRefSection
-    {
-        public long first;
-        public long count;
-
-        public XRefSection(long first, long count)
-        {
-            this.first = first;
-            this.count = count;
-        }
-    }
-
     private void ReadXRefStream()
     {
+        // Cross-reference stream (PDF Spec 7.5.8)
+
         var token = _lexer.NextToken();
 
         if (token.type != PdfLexer.TokenType.ObjectStart)
         {
-            throw new Exception("Expected obj keyword");
+            throw new PdfMetadataExtractorException("Expected obj keyword");
         }
 
         long length = -1;
@@ -921,13 +963,15 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
         Queue<XRefSection> sections = new();
         MetadataRef meta = new MetadataRef(-1, -1);
 
+        // Cross-reference stream dictionary (PDF Spec 7.5.8.2)
+
         ParseDictionary(delegate(string key, PdfLexer.Token value) {
             switch (key)
             {
                 case "Type":
                     if (value.type != PdfLexer.TokenType.Name || (string)value.value != "XRef")
                     {
-                        throw new Exception("Expected /Type to be /XRef");
+                        throw new PdfMetadataExtractorException("Expected /Type to be /XRef");
                     }
 
                     return true;
@@ -935,7 +979,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Length":
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected integer after /Length");
+                        throw new PdfMetadataExtractorException("Expected integer after /Length");
                     }
 
                     length = (long)value.value;
@@ -945,7 +989,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Size":
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected integer after /Size");
+                        throw new PdfMetadataExtractorException("Expected integer after /Size");
                     }
 
                     size = (long)value.value;
@@ -955,7 +999,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Prev":
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected offset after /Prev");
+                        throw new PdfMetadataExtractorException("Expected offset after /Prev");
                     }
 
                     prev = (long)value.value;
@@ -965,7 +1009,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Index":
                     if (value.type != PdfLexer.TokenType.ArrayStart)
                     {
-                        throw new Exception("Expected array after /Index");
+                        throw new PdfMetadataExtractorException("Expected array after /Index");
                     }
 
                     while (true)
@@ -978,7 +1022,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                         }
                         else if (token.type != PdfLexer.TokenType.Int)
                         {
-                            throw new Exception("Expected integer in /Index array");
+                            throw new PdfMetadataExtractorException("Expected integer in /Index array");
                         }
 
                         long first = (long)token.value;
@@ -986,7 +1030,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
                         if (token.type != PdfLexer.TokenType.Int)
                         {
-                            throw new Exception("Expected integer pair in /Index array");
+                            throw new PdfMetadataExtractorException("Expected integer pair in /Index array");
                         }
 
                         long count = (long)token.value;
@@ -998,7 +1042,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "W":
                     if (value.type != PdfLexer.TokenType.ArrayStart)
                     {
-                        throw new Exception("Expected array after /W");
+                        throw new PdfMetadataExtractorException("Expected array after /W");
                     }
 
                     long[] widths = new long[3];
@@ -1009,7 +1053,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
                         if (token.type != PdfLexer.TokenType.Int)
                         {
-                            throw new Exception("Expected integer in /W array");
+                            throw new PdfMetadataExtractorException("Expected integer in /W array");
                         }
 
                         widths[i] = (long)token.value;
@@ -1019,7 +1063,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
                     if (token.type != PdfLexer.TokenType.ArrayEnd)
                     {
-                        throw new Exception("Unclosed array after /W");
+                        throw new PdfMetadataExtractorException("Unclosed array after /W");
                     }
 
                     typeWidth = widths[0];
@@ -1031,12 +1075,12 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Filter":
                     if (value.type != PdfLexer.TokenType.Name)
                     {
-                        throw new Exception("Expected name after /Filter");
+                        throw new PdfMetadataExtractorException("Expected name after /Filter");
                     }
 
                     if ((string)value.value != "FlateDecode")
                     {
-                        throw new Exception("Unsupported filter, only FlateDecode is supported");
+                        throw new PdfMetadataExtractorException("Unsupported filter, only FlateDecode is supported");
                     }
 
                     deflate = true;
@@ -1046,7 +1090,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Root":
                     if (value.type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new Exception("Expected object reference after /Root");
+                        throw new PdfMetadataExtractorException("Expected object reference after /Root");
                     }
 
                     meta.root = (long)value.value;
@@ -1056,7 +1100,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Info":
                     if (value.type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new Exception("Expected object reference after /Info");
+                        throw new PdfMetadataExtractorException("Expected object reference after /Info");
                     }
 
                     meta.info = (long)value.value;
@@ -1072,7 +1116,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.StreamStart)
         {
-            throw new Exception("Expected xref stream after dictionary");
+            throw new PdfMetadataExtractorException("Expected xref stream after dictionary");
         }
 
         var stream = _lexer.StreamObject((int)length, deflate);
@@ -1155,7 +1199,8 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
     private void ReadTrailerDictionary()
     {
-        // Read trailer directory
+        // Read trailer directory (PDF Spec 7.5.5)
+
         long prev = -1;
         long xrefStm = -1;
 
@@ -1168,7 +1213,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Root":
                     if (value.type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new Exception("Expected object reference after /Root");
+                        throw new PdfMetadataExtractorException("Expected object reference after /Root");
                     }
 
                     meta.root = (long)value.value;
@@ -1177,7 +1222,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Prev":
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected offset after /Prev");
+                        throw new PdfMetadataExtractorException("Expected offset after /Prev");
                     }
 
                     prev = (long)value.value;
@@ -1186,7 +1231,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Info":
                     if (value.type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new Exception("Expected object reference after /Info");
+                        throw new PdfMetadataExtractorException("Expected object reference after /Info");
                     }
 
                     meta.info = (long)value.value;
@@ -1196,7 +1241,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                     // Prefer encoded xref stream over xref table
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected offset after /XRefStm");
+                        throw new PdfMetadataExtractorException("Expected offset after /XRefStm");
                     }
 
                     xrefStm = (long)value.value;
@@ -1204,7 +1249,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                     return true;
 
                 case "Encrypt":
-                    throw new Exception("Encryption not supported");
+                    throw new PdfMetadataExtractorException("Encryption not supported");
 
                 default:
                     return false;
@@ -1227,12 +1272,13 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
     private void ReadMetadata(string filename)
     {
         // We read potential metadata sources in backwards historical order, so
-        // we can overwrite to our hearts content
+        // we can overwrite to our heart's content
+
         while (metadataRef.Count > 0)
         {
             var meta = metadataRef.Pop();
 
-            _logger.LogDebug("DocumentCatalog for {Path}: {Root}, Info: {Info}", filename, meta.root, meta.info);
+            _logger.LogTrace("DocumentCatalog for {Path}: {Root}, Info: {Info}", filename, meta.root, meta.info);
 
             ReadMetadataFromInfo(meta.info);
             ReadMetadataFromXML(MetadataObjInObjectCatalog(meta.root));
@@ -1241,6 +1287,9 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
     private void ReadMetadataFromInfo(long infoObj)
     {
+        // Document information dictionary (PDF Spec 14.3.3)
+        // We treat this as less authoritative than the Metadata stream.
+
         if (infoObj < 1 || infoObj >= _objectOffsets.Length || _objectOffsets[infoObj] == 0)
         {
             return;
@@ -1253,7 +1302,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.ObjectStart)
         {
-            throw new Exception("Expected object header");
+            throw new PdfMetadataExtractorException("Expected object header");
         }
 
         Dictionary<String, long> indirectObjects = new();
@@ -1275,7 +1324,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                     }
                     else if (value.type != PdfLexer.TokenType.String)
                     {
-                        throw new Exception("Expected string value");
+                        throw new PdfMetadataExtractorException("Expected string value");
                     }
                     else
                     {
@@ -1297,13 +1346,13 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             token = _lexer.NextToken();
 
             if (token.type != PdfLexer.TokenType.ObjectStart) {
-                throw new Exception("Expected object here");
+                throw new PdfMetadataExtractorException("Expected object here");
             }
 
             token = _lexer.NextToken();
 
             if (token.type != PdfLexer.TokenType.String) {
-                throw new Exception("Expected string");
+                throw new PdfMetadataExtractorException("Expected string");
             }
 
             _metadata[key] = (string)token.value;
@@ -1312,6 +1361,8 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
     private long MetadataObjInObjectCatalog(long rootObj)
     {
+        // Look for /Metadata entry in document catalog (PDF Spec 7.7.2)
+
         if (rootObj < 1 || rootObj >= _objectOffsets.Length || _objectOffsets[rootObj] == 0)
         {
             return -1;
@@ -1324,7 +1375,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.ObjectStart)
         {
-            throw new Exception("Expected object header");
+            throw new PdfMetadataExtractorException("Expected object header");
         }
 
         long meta = -1;
@@ -1335,7 +1386,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Metadata":
                     if (value.type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new Exception("Expected object number after /Metadata");
+                        throw new PdfMetadataExtractorException("Expected object number after /Metadata");
                     }
 
                     meta = (long)value.value;
@@ -1349,6 +1400,10 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         return meta;
     }
+
+    // Obtain metadata from XMP stream object
+    // See XMP specification: https://developer.adobe.com/xmp/docs/XMPSpecifications/
+    // and Dublin Core: https://www.dublincore.org/specifications/dublin-core/
 
     private string? GetTextFromXmlNode(XmlDocument doc, XmlNamespaceManager ns, string path)
     {
@@ -1395,11 +1450,13 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.ObjectStart)
         {
-            throw new Exception("Expected object header");
+            throw new PdfMetadataExtractorException("Expected object header");
         }
 
         long length = -1;
         bool deflate = false;
+
+        // Metadata stream dictionary (PDF Spec 14.3.2)
 
         ParseDictionary(delegate(string key, PdfLexer.Token value)
         {
@@ -1407,7 +1464,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Type":
                     if (value.type != PdfLexer.TokenType.Name || (string)value.value != "Metadata")
                     {
-                        throw new Exception("Expected /Type to be /Metadata");
+                        throw new PdfMetadataExtractorException("Expected /Type to be /Metadata");
                     }
 
                     return true;
@@ -1415,7 +1472,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Subtype":
                     if (value.type != PdfLexer.TokenType.Name || (string)value.value != "XML")
                     {
-                        throw new Exception("Expected /Subtype to be /XML");
+                        throw new PdfMetadataExtractorException("Expected /Subtype to be /XML");
                     }
 
                     return true;
@@ -1423,7 +1480,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Length":
                     if (value.type != PdfLexer.TokenType.Int)
                     {
-                        throw new Exception("Expected integer after /Length");
+                        throw new PdfMetadataExtractorException("Expected integer after /Length");
                     }
 
                     length = (long)value.value;
@@ -1433,12 +1490,12 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Filter":
                     if (value.type != PdfLexer.TokenType.Name)
                     {
-                        throw new Exception("Expected name after /Filter");
+                        throw new PdfMetadataExtractorException("Expected name after /Filter");
                     }
 
                     if ((string)value.value != "FlateDecode")
                     {
-                        throw new Exception("Unsupported filter, only FlateDecode is supported");
+                        throw new PdfMetadataExtractorException("Unsupported filter, only FlateDecode is supported");
                     }
 
                     deflate = true;
@@ -1454,7 +1511,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.StreamStart)
         {
-            throw new Exception("Expected xref stream after dictionary");
+            throw new PdfMetadataExtractorException("Expected xref stream after dictionary");
         }
 
         var xmlStream = _lexer.StreamObject((int)length, deflate);
@@ -1464,7 +1521,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             var b = xmlStream.ReadByte();
 
             if (b < 0) {
-                throw new Exception("Reached EOF in XMP header");
+                throw new PdfMetadataExtractorException("Reached EOF in XMP header");
             }
 
             if (b == '?') {
@@ -1514,7 +1571,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         if (token.type != PdfLexer.TokenType.DictionaryStart)
         {
-            throw new Exception("Expected dictionary");
+            throw new PdfMetadataExtractorException("Expected dictionary");
         }
 
         while (true)
@@ -1535,7 +1592,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             }
             else
             {
-                throw new Exception("Improper token in dictionary");
+                throw new PdfMetadataExtractorException("Improper token in dictionary");
             }
         }
     }
@@ -1565,7 +1622,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 break;
 
             default:
-                throw new Exception("Unexpected token in SkipValue");
+                throw new PdfMetadataExtractorException("Unexpected token in SkipValue");
         }
     }
 
@@ -1596,7 +1653,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
             }
             else if (token.type != PdfLexer.TokenType.Name)
             {
-                throw new Exception("Expected name in dictionary");
+                throw new PdfMetadataExtractorException("Expected name in dictionary");
             }
 
             SkipValue();
