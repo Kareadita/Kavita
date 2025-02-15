@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.Data;
@@ -1363,9 +1364,40 @@ public class OpdsController : BaseApiController
     {
         if (feed == null) return string.Empty;
 
+        // Remove invalid XML characters from the feed object
+        SanitizeFeed(feed);
+
         using var sm = new StringWriter();
         _xmlSerializer.Serialize(sm, feed);
 
         return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
+    }
+
+    // Recursively sanitize all string properties in the object
+    private static void SanitizeFeed(object? obj)
+    {
+        if (obj == null) return;
+
+        var properties = obj.GetType().GetProperties();
+        foreach (var property in properties)
+        {
+            if (property.PropertyType == typeof(string) && property.CanWrite)
+            {
+                var value = (string?)property.GetValue(obj);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    property.SetValue(obj, RemoveInvalidXmlChars(value));
+                }
+            }
+            else if (property.PropertyType.IsClass) // Handle nested objects
+            {
+                SanitizeFeed(property.GetValue(obj));
+            }
+        }
+    }
+
+    private static string RemoveInvalidXmlChars(string input)
+    {
+        return new string(input.Where(XmlConvert.IsXmlChar).ToArray());
     }
 }
