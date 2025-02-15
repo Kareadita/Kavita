@@ -16,6 +16,7 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using YamlDotNet.Core;
 
 namespace API.Services;
 
@@ -354,6 +355,14 @@ public class ArchiveService : IArchiveService
             foreach (var path in files)
             {
                 var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
+
+                // Image series need different handling
+                if (Tasks.Scanner.Parser.Parser.IsImage(path))
+                {
+                    var parentDirectory = _directoryService.FileSystem.DirectoryInfo.New(path).Parent?.Name;
+                    tempPath = Path.Join(tempLocation, parentDirectory ?? _directoryService.FileSystem.FileInfo.New(path).Name);
+                }
+
                 progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
                 if (Tasks.Scanner.Parser.Parser.IsArchive(path))
                 {
