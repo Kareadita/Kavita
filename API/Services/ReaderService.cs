@@ -122,6 +122,7 @@ public class ReaderService : IReaderService
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) throw new KavitaException("series-doesnt-exist");
+
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -135,10 +136,6 @@ public class ReaderService : IReaderService
                     SeriesId = seriesId,
                     ChapterId = chapter.Id,
                     LibraryId = series.LibraryId,
-                    Created = DateTime.Now,
-                    CreatedUtc = DateTime.UtcNow,
-                    LastModified = DateTime.Now,
-                    LastModifiedUtc = DateTime.UtcNow
                 });
             }
             else
