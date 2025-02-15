@@ -37,7 +37,7 @@
         </div>
       }
 
-      @if (chapter.files.length > 1) {
+      @if (chapter.files.length > 1 && chapter.files[0].format !== MangaFormat.IMAGE) {
         <div class="count">
           <span class="badge bg-primary">{{chapter.files.length}}</span>
         </div>
