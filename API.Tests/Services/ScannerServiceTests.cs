@@ -502,4 +502,49 @@ public class ScannerServiceTests : AbstractDbTest
         var s = postLib.Series.First();
         Assert.Equal(2, s.Volumes.Count);
     }
+
+    [Fact]
+    public async Task ScanLibrary_MultipleRoots_MultipleScans_DataPersists()
+    {
+        const string testcase = "Multiple Roots - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+        var testDirectoryPath =
+            Path.Join(
+                Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests"),
+                testcase.Replace(".json", string.Empty));
+        library.Folders =
+        [
+            new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 1")},
+            new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 2")}
+        ];
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Equal(2, postLib.Series.Count);
+        var s = postLib.Series.First(s => s.Name == "Plush");
+        Assert.Equal(2, s.Volumes.Count);
+        var s2 = postLib.Series.First(s => s.Name == "Accel");
+        Assert.Single(s2.Volumes);
+
+        // Rescan to ensure nothing changes yet again
+        await scanner.ScanLibrary(library.Id, true);
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.Equal(2, postLib.Series.Count);
+        s = postLib.Series.First(s => s.Name == "Plush");
+        Assert.Equal(2, s.Volumes.Count);
+        s2 = postLib.Series.First(s => s.Name == "Accel");
+        Assert.Single(s2.Volumes);
+    }
 }
