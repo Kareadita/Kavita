@@ -1,11 +1,4 @@
-import {
-  AsyncPipe,
-  DOCUMENT,
-  Location,
-  NgClass,
-  NgStyle,
-  NgTemplateOutlet
-} from '@angular/common';
+import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -121,7 +114,7 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
-
+import {PageBookmark} from "../../../_models/readers/page-bookmark";
 
 
 enum TabID {
@@ -233,6 +226,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   reviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
+  bookmarks: Array<PageBookmark> = [];
   ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -712,7 +706,24 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
       this.collections = tags;
       this.cdRef.markForCheck();
-    })
+    });
+
+
+    this.readerService.getBookmarksForSeries(seriesId).subscribe(bookmarks => {
+      if (bookmarks.length > 0) {
+        this.bookmarks = Object.values(
+          bookmarks.reduce((acc, bookmark) => {
+            if (!acc[bookmark.seriesId]) {
+              acc[bookmark.seriesId] = bookmark; // Select the first one per seriesId
+            }
+            return acc;
+          }, {} as Record<number, PageBookmark>)
+        );
+      } else {
+        this.bookmarks = [];
+      }
+      this.cdRef.markForCheck();
+    });
 
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
       this.readingTimeLeft = timeLeft;

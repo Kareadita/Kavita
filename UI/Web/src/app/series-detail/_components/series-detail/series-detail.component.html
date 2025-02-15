@@ -266,15 +266,19 @@
             </li>
           }
 
-          @if (hasRelations || readingLists.length > 0 || collections.length > 0) {
+          @if (hasRelations || readingLists.length > 0 || collections.length > 0 || bookmarks.length > 0) {
             <li [ngbNavItem]="TabID.Related">
               <a ngbNavLink>
                 {{t(TabID.Related)}}
-                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length + (bookmarks.length > 0 ? 1 : 0)}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                  <app-related-tab [readingLists]="readingLists" [collections]="collections" [relations]="relations"></app-related-tab>
+                  <app-related-tab [readingLists]="readingLists"
+                                   [collections]="collections"
+                                   [relations]="relations"
+                                   [libraryId]="libraryId"
+                                   [bookmarks]="bookmarks"></app-related-tab>
                 }
               </ng-template>
             </li>

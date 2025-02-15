@@ -109,6 +109,7 @@ export class ReaderService {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
 
+
   getBookmarks(chapterId: number) {
     return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/chapter-bookmarks?chapterId=' + chapterId);
   }

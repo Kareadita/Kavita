@@ -15,7 +15,6 @@ import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { Pagination } from 'src/app/_models/pagination';
@@ -103,13 +102,13 @@ export class BookmarksComponent implements OnInit {
   async handleAction(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case(Action.Delete):
-        this.clearBookmarks(series);
+        await this.clearBookmarks(series);
         break;
       case(Action.DownloadBookmark):
         this.downloadBookmarks(series);
         break;
       case(Action.ViewSeries):
-        this.router.navigate(['library', series.libraryId, 'series', series.id]);
+        await this.router.navigate(['library', series.libraryId, 'series', series.id]);
         break;
       default:
         break;
