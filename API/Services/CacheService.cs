@@ -173,7 +173,22 @@ public class CacheService : ICacheService
 
         await extractLock.WaitAsync();
         try {
-            if(_directoryService.Exists(extractPath)) return chapter;
+            if (_directoryService.Exists(extractPath))
+            {
+                if (extractPdfToImages)
+                {
+                    var pdfImages = _directoryService.GetFiles(extractPath,
+                        Tasks.Scanner.Parser.Parser.ImageFileExtensions);
+                    if (pdfImages.Any())
+                    {
+                        return chapter;
+                    }
+                }
+                else
+                {
+                    return chapter;
+                }
+            }
 
             var files = chapter?.Files.ToList();
             ExtractChapterFiles(extractPath, files, extractPdfToImages);
