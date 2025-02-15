@@ -112,7 +112,7 @@ public class PdfComicInfoExtractor : IPdfComicInfoExtractor
 
         info.UserRating = GetFloatFromText(MaybeGetMetadata(metadata, "UserRating")) ?? 0.0f;
         info.TitleSort  = MaybeGetMetadata(metadata, "TitleSort") ?? string.Empty;
-        info.Series     = MaybeGetMetadata(metadata, "Series") ?? info.Title;
+        info.Series     = MaybeGetMetadata(metadata, "Series") ?? info.TitleSort;
         info.SeriesSort = info.Series;
         info.Volume     = (GetFloatFromText(MaybeGetMetadata(metadata, "Volume")) ?? 0.0f).ToString();
 
