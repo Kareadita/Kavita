@@ -838,8 +838,6 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         ReadObjectOffsets();
         ReadMetadata(filename);
-
-        LogMetadata(filename);
     }
 
     public Dictionary<string, string> GetMetadata()
@@ -866,7 +864,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         _stream.Seek(-32, SeekOrigin.End);
 
-        long xrefOffset = _lexer.GetXRefStart();
+        var xrefOffset = _lexer.GetXRefStart();
 
         ReadXRefAndTrailer(xrefOffset);
     }
@@ -900,7 +898,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
             if (token.type == PdfLexer.TokenType.Int)
             {
-                long startObj = (long)token.value;
+                var startObj = (long)token.value;
                 token = _lexer.NextToken();
 
                 if (token.type != PdfLexer.TokenType.Int)
@@ -908,7 +906,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                     throw new PdfMetadataExtractorException("Expected number of objects in xref subsection");
                 }
 
-                long numObj = (long)token.value;
+                var numObj = (long)token.value;
 
                 if (_objectOffsets.Length < startObj + numObj)
                 {
@@ -917,11 +915,11 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
                 _lexer.ExpectNewline();
 
-                int generation = 0;
+                var generation = 0;
 
                 for (var obj = startObj; obj < startObj + numObj; ++obj)
                 {
-                    bool inUse = _lexer.NextXRefEntry(ref _objectOffsets[obj], ref generation);
+                    var inUse = _lexer.NextXRefEntry(ref _objectOffsets[obj], ref generation);
 
                     if (!inUse)
                     {
@@ -955,13 +953,13 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
 
         long length = -1;
         long size = -1;
-        bool deflate = false;
+        var deflate = false;
         long prev = -1;
         long typeWidth = -1;
         long offsetWidth = -1;
         long generationWidth = -1;
         Queue<XRefSection> sections = new();
-        MetadataRef meta = new MetadataRef(-1, -1);
+        var meta = new MetadataRef(-1, -1);
 
         // Cross-reference stream dictionary (PDF Spec 7.5.8.2)
 
@@ -1025,7 +1023,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                             throw new PdfMetadataExtractorException("Expected integer in /Index array");
                         }
 
-                        long first = (long)token.value;
+                        var first = (long)token.value;
                         token = _lexer.NextToken();
 
                         if (token.type != PdfLexer.TokenType.Int)
@@ -1033,7 +1031,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                             throw new PdfMetadataExtractorException("Expected integer pair in /Index array");
                         }
 
-                        long count = (long)token.value;
+                        var count = (long)token.value;
                         sections.Enqueue(new XRefSection(first, count));
                     }
 
@@ -1045,9 +1043,9 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                         throw new PdfMetadataExtractorException("Expected array after /W");
                     }
 
-                    long[] widths = new long[3];
+                    var widths = new long[3];
 
-                    for (int i = 0; i < 3; ++i)
+                    for (var i = 0; i < 3; ++i)
                     {
                         token = _lexer.NextToken();
 
@@ -1135,7 +1133,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                 Array.Resize(ref _objectOffsets, (int)size);
             }
 
-            for (long i = section.first; i < section.first + section.count; ++i)
+            for (var i = section.first; i < section.first + section.count; ++i)
             {
                 long type = 0;
                 long offset = 0;
@@ -1146,17 +1144,17 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
                     type = 1;
                 }
 
-                for (int j = 0; j < typeWidth; ++j)
+                for (var j = 0; j < typeWidth; ++j)
                 {
                     type = (type << 8) | (UInt16)stream.ReadByte();
                 }
 
-                for (int j = 0; j < offsetWidth; ++j)
+                for (var j = 0; j < offsetWidth; ++j)
                 {
                     offset = (offset << 8) | (UInt16)stream.ReadByte();
                 }
 
-                for (int j = 0; j < generationWidth; ++j)
+                for (var j = 0; j < generationWidth; ++j)
                 {
                     generation = (generation << 8) | (UInt16)stream.ReadByte();
                 }
@@ -1454,7 +1452,7 @@ class PdfMetadataExtractor : IPdfMetadataExtractor
         }
 
         long length = -1;
-        bool deflate = false;
+        var deflate = false;
 
         // Metadata stream dictionary (PDF Spec 14.3.2)
 
