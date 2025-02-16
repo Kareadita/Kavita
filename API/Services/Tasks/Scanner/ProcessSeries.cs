@@ -285,7 +285,7 @@ public class ProcessSeries : IProcessSeries
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
-        if (firstFile == null || Parser.Parser.IsPdf(firstFile.FilePath)) return;
+        if (firstFile == null) return;
 
         var chapters = series.Volumes
             .SelectMany(volume => volume.Chapters)
