@@ -101,7 +101,22 @@ public class ScannerServiceTests : AbstractDbTest
     [Fact]
     public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
     {
-        var testcase = "Flat Series with Specials Folder - Manga.json";
+        var testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(4, postLib.Series.First().Volumes.Count);
+        Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FlatSeriesWithSpecialFolder_AlternativeNaming()
+    {
+        var testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
