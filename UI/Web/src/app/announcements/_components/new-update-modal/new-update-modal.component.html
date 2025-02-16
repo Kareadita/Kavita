@@ -1,7 +1,6 @@
 <ng-container *transloco="let t; read:'new-version-modal'">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
-    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body scrollable-modal">
     @if (update) {
@@ -9,7 +8,6 @@
     }
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
     <button type="button" class="btn btn-primary" (click)="refresh()">{{t('refresh')}}</button>
   </div>
 

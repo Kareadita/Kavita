@@ -76,7 +76,7 @@ export class VersionService implements OnDestroy{
       this.modalOpen = true;
 
       this.serverService.getChangelog(1).subscribe(changelog => {
-        const ref = this.modalService.open(NewUpdateModalComponent, {size: 'lg'});
+        const ref = this.modalService.open(NewUpdateModalComponent, {size: 'lg', keyboard: false});
         ref.componentInstance.version = version;
         ref.componentInstance.update = changelog[0];
 
