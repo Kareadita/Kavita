@@ -17,13 +17,13 @@
         @if (settingsForm.get('hostName'); as formControl) {
           <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
             <ng-template #view>
-              {{formControl.value}}
+              {{formControl.value | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="hostname-validations" class="invalid-feedback">
                   @if (formControl.errors?.pattern) {
                     <div>{{t('host-name-validation')}}</div>
