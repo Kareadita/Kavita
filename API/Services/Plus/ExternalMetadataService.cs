@@ -566,7 +566,6 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        var relatedSeriesDict = new Dictionary<int, Series>();
         foreach (var relation in externalMetadataRelations)
         {
             var names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle};
@@ -585,19 +584,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
 
             if (relationshipExists) continue;
-
-            relatedSeriesDict[relatedSeries.Id] = relatedSeries;
-        }
-
-        // Process relationships
-        foreach (var relation in externalMetadataRelations)
-        {
-            var relatedSeries = relatedSeriesDict.GetValueOrDefault(
-                relatedSeriesDict.Keys.FirstOrDefault(k =>
-                    relatedSeriesDict[k].Name == relation.SeriesName.PreferredTitle ||
-                    relatedSeriesDict[k].Name == relation.SeriesName.NativeTitle));
-
-            if (relatedSeries == null) continue;
 
             // Add new relationship
             var newRelation = new SeriesRelation
