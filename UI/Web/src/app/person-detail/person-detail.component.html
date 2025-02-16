@@ -26,6 +26,7 @@
             <div class="person-badge">
               <app-image
                       objectFit="cover"
+                      [styles]="{'object-position': 'top'}"
                       height="200px"
                       width="200px"
                       [imageUrl]="imageService.getPersonImage(person.id)"
