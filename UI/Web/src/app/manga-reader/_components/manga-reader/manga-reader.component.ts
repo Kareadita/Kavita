@@ -788,7 +788,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.mangaReaderService.shouldBeWebtoonMode()) {
       this.readerMode = ReaderMode.Webtoon;
-      this.toastr.info(translate('manga-reader.webtoon-override'));
+      this.toastr.info(translate('toasts.webtoon-override'));
       this.readerModeSubject.next(this.readerMode);
       this.cdRef.markForCheck();
     }
