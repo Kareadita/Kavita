@@ -364,4 +364,5 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   protected readonly LibraryType = LibraryType;
+    protected readonly encodeURIComponent = encodeURIComponent;
 }

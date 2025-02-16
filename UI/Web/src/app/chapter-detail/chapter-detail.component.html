@@ -95,7 +95,7 @@
                 <div>
                   <app-badge-expander [items]="chapter.writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                      <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -111,7 +111,7 @@
                   <div>
                     <app-badge-expander [items]="chapter.coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                        <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                       </ng-template>
                     </app-badge-expander>
                   </div>

@@ -666,4 +666,6 @@ export class VolumeDetailComponent implements OnInit {
       this.currentlyReadingChapter = undefined;
     }
   }
+
+  protected readonly encodeURIComponent = encodeURIComponent;
 }
