@@ -81,4 +81,46 @@ public class BookServiceTests
         Assert.Equal("Accel World", comicInfo.Series);
     }
 
+    [Fact]
+    public void ShouldHaveComicInfoForPDF()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "test.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Variations Chromatiques de concert", comicInfo.Title);
+        Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
+    }
+
+    [Fact]
+    public void ShouldUsePDFInfoDict()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Books/PDFs");
+        var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Rollo at Work", comicInfo.Title);
+        Assert.Equal("Jacob Abbott", comicInfo.Writer);
+        Assert.Equal(2008, comicInfo.Year);
+    }
+
+    [Fact]
+    public void ShouldHandleIndirectPDFObjects()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "indirect.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal(2018, comicInfo.Year);
+        Assert.Equal(8, comicInfo.Month);
+    }
+
+    [Fact]
+    public void FailGracefullyWithEncryptedPDF()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "encrypted.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.Null(comicInfo);
+    }
 }
