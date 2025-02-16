@@ -969,7 +969,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        if (!string.IsNullOrEmpty(externalMetadata.CoverUrl) && !settings.HasOverride(MetadataSettingField.Covers))
+        if (string.IsNullOrEmpty(externalMetadata.CoverUrl))
         {
             return false;
         }
