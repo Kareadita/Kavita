@@ -114,24 +114,12 @@ public class PdfComicInfoExtractor : IPdfComicInfoExtractor
         info.UserRating = GetFloatFromText(MaybeGetMetadata(metadata, "UserRating")) ?? 0.0f;
         info.Series     = MaybeGetMetadata(metadata, "Series") ?? info.Title;
         info.SeriesSort = info.Series;
-        info.Volume     = (GetFloatFromText(MaybeGetMetadata(metadata, "Volume")) ?? 0.0f).ToString(CultureInfo.InvariantCulture);
+        info.Volume     = MaybeGetMetadata(metadata, "Volume") ?? string.Empty;
 
         // If this is a single book and not a collection, set publication status to Completed
         if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
         {
             info.Count = 1;
-        }
-
-        // Removed as probably unneeded per discussion in https://github.com/Kareadita/Kavita/pull/3108#discussion_r1956747782
-        //
-        var hasVolumeInSeries = !Parser.ParseVolume(info.Title, LibraryType.Manga)
-            .Equals(Parser.LooseLeafVolume);
-
-        if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
-        {
-            // This is likely a light novel for which we can set series from parsed title
-            // info.Series = Parser.ParseSeries(info.Title, LibraryType.Manga);
-            // info.Volume = Parser.ParseVolume(info.Title, LibraryType.Manga);
         }
 
         ComicInfo.CleanComicInfo(info);
