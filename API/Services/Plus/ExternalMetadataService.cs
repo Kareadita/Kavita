@@ -1326,10 +1326,14 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
-            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
+            var ret =  await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
+
+            ret.Summary = StringHelper.SquashBreaklines(ret.Summary);
+
+            return ret;
 
         }
         catch (Exception e)
