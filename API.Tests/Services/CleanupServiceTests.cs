@@ -521,6 +521,71 @@ public class CleanupServiceTests : AbstractDbTest
     }
     #endregion
 
+    #region ConsolidateProgress
+
+    [Fact]
+    public async Task ConsolidateProgress_ShouldRemoveDuplicates()
+    {
+        await ResetDb();
+
+        var s = new SeriesBuilder("Test ConsolidateProgress_ShouldRemoveDuplicates")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithPages(3)
+                    .Build())
+                .Build())
+            .Build();
+
+        s.Library = new LibraryBuilder("Test Lib").Build();
+        _context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "ConsolidateProgress_ShouldRemoveDuplicates",
+        };
+        _context.AppUser.Add(user);
+
+        await _unitOfWork.CommitAsync();
+
+        // Add 2 progress events
+        user.Progresses ??= [];
+        user.Progresses.Add(new AppUserProgress()
+        {
+            ChapterId = 1,
+            VolumeId = 1,
+            SeriesId = 1,
+            LibraryId = s.LibraryId,
+            PagesRead = 1,
+        });
+        await _unitOfWork.CommitAsync();
+
+        // Add a duplicate with higher page number
+        user.Progresses.Add(new AppUserProgress()
+        {
+            ChapterId = 1,
+            VolumeId = 1,
+            SeriesId = 1,
+            LibraryId = s.LibraryId,
+            PagesRead = 3,
+        });
+        await _unitOfWork.CommitAsync();
+
+        Assert.Equal(2, (await _unitOfWork.AppUserProgressRepository.GetAllProgress()).Count());
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+
+        await cleanupService.ConsolidateProgress();
+
+        var progress = await _unitOfWork.AppUserProgressRepository.GetAllProgress();
+
+        Assert.Single(progress);
+        Assert.True(progress.First().PagesRead == 3);
+    }
+    #endregion
+
 
     #region EnsureChapterProgressIsCapped
 
@@ -587,7 +652,7 @@ public class CleanupServiceTests : AbstractDbTest
     }
     #endregion
 
-    // #region CleanupBookmarks
+    #region CleanupBookmarks
     //
     // [Fact]
     // public async Task CleanupBookmarks_LeaveAllFiles()
@@ -724,5 +789,5 @@ public class CleanupServiceTests : AbstractDbTest
     //     Assert.Equal(1, ds.FileSystem.Directory.GetDirectories($"{BookmarkDirectory}1/1/").Length);
     // }
     //
-    // #endregion
+    #endregion
 }

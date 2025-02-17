@@ -19,6 +19,7 @@ namespace API.Data.Repositories;
 public interface IAppUserProgressRepository
 {
     void Update(AppUserProgress userProgress);
+    void Remove(AppUserProgress userProgress);
     Task<int> CleanupAbandonedChapters();
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId);
@@ -55,6 +56,11 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     public void Update(AppUserProgress userProgress)
     {
         _context.Entry(userProgress).State = EntityState.Modified;
+    }
+
+    public void Remove(AppUserProgress userProgress)
+    {
+        _context.Remove(userProgress);
     }
 
     /// <summary>
