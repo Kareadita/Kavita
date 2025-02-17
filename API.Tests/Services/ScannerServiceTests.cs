@@ -562,4 +562,73 @@ public class ScannerServiceTests : AbstractDbTest
         s2 = postLib.Series.First(s => s.Name == "Accel");
         Assert.Single(s2.Volumes);
     }
+
+    //[Fact]
+    public async Task ScanLibrary_AlternatingRemoval_IssueReplication()
+    {
+        // https://github.com/Kareadita/Kavita/issues/3476#issuecomment-2661635558
+        // TODO: Come back to this, it's complicated
+        const string testcase = "Alternating Removal - Manga.json";
+
+        // Setup: Generate test library
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+        var testDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(),
+            "../../../Services/Test Data/ScannerService/ScanTests",
+            testcase.Replace(".json", string.Empty));
+
+        library.Folders =
+        [
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") },
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
+        ];
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+
+        // First Scan: Everything should be added
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Contains(postLib.Series, s => s.Name == "Accel");
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+
+        // Second Scan: Remove Root 2, expect Accel to be removed
+        library.Folders = [new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") }];
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        await scanner.ScanLibrary(library.Id);
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.DoesNotContain(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+
+        // Third Scan: Re-add Root 2, Accel should come back
+        library.Folders =
+        [
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") },
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
+        ];
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        await scanner.ScanLibrary(library.Id);
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Accel should be back
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+
+        // Fourth Scan: Run again to check stability (should not remove Accel)
+        await scanner.ScanLibrary(library.Id);
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.Contains(postLib.Series, s => s.Name == "Accel");
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+    }
+
 }

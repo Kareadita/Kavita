@@ -6,7 +6,6 @@ import { ChapterInfo } from '../_models/chapter-info';
 import { DimensionMap } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 import { BookmarkInfo } from 'src/app/_models/manga-reader/bookmark-info';
-import {ReaderMode} from "../../_models/preferences/reader-mode";
 
 @Injectable({
   providedIn: 'root'

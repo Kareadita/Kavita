@@ -1848,7 +1848,7 @@ public class SeriesRepository : ISeriesRepository
                 .ToList();
 
             // Prefer the first match or handle duplicates by choosing the last one
-            if (matchingSeries.Any())
+            if (matchingSeries.Count != 0)
             {
                 ids.Add(matchingSeries.Last().Id);
             }
