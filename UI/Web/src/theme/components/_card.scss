@@ -73,6 +73,7 @@ $image-width: 160px;
 
 
     .card-body {
+        padding: 0px !important;
         background-color: rgba(0,0,0,0.7);
         border-width: var(--card-border-width);
         border-style: var(--card-border-style);
