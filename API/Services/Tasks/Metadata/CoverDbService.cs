@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
+
 namespace API.Services.Tasks.Metadata;
 #nullable enable
 
@@ -29,7 +30,7 @@ public interface ICoverDbService
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
     Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true);
-    Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true);
+    Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
 
 
@@ -498,7 +499,8 @@ public class CoverDbService : ICoverDbService
     /// <param name="series"></param>
     /// <param name="url"></param>
     /// <param name="fromBase64"></param>
-    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true)
+    /// <param name="chooseBetterImage">If images are similar, will choose the higher quality image</param>
+    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -506,6 +508,13 @@ public class CoverDbService : ICoverDbService
 
             if (!string.IsNullOrEmpty(filePath))
             {
+                // Additional check to see if downloaded image is similar and we have a higher resolution
+                if (chooseBetterImage)
+                {
+                    var betterImage = Path.Join(_directoryService.CoverImageDirectory, series.CoverImage).GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
+                    filePath = Path.GetFileName(betterImage);
+                }
+
                 series.CoverImage = filePath;
                 series.CoverImageLocked = true;
                 _imageService.UpdateColorScape(series);
@@ -540,6 +549,6 @@ public class CoverDbService : ICoverDbService
                 filename, encodeFormat, coverImageSize.GetDimensions().Width);
         }
 
-        return  await DownloadImageFromUrl(filename, encodeFormat, url);
+        return await DownloadImageFromUrl(filename, encodeFormat, url);
     }
 }

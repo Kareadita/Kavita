@@ -110,13 +110,10 @@ public class UploadController : BaseApiController
                 lockState = uploadFileDto.LockCover;
             }
 
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                series.CoverImage = filePath;
-                series.CoverImageLocked = lockState;
-                _imageService.UpdateColorScape(series);
-                _unitOfWork.SeriesRepository.Update(series);
-            }
+            series.CoverImage = filePath;
+            series.CoverImageLocked = lockState;
+            _imageService.UpdateColorScape(series);
+            _unitOfWork.SeriesRepository.Update(series);
 
             if (_unitOfWork.HasChanges())
             {

@@ -1058,7 +1058,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false);
+            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false, true);
         }
         catch (Exception ex)
         {

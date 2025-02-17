@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -11,9 +10,11 @@ using API.Entities.Interfaces;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 using NetVips;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using Color = System.Drawing.Color;
 using Image = NetVips.Image;
 
 namespace API.Services;
@@ -747,6 +748,7 @@ public class ImageService : IImageService
         entity.PrimaryColor = colors.Primary;
         entity.SecondaryColor = colors.Secondary;
     }
+
 
     public static Color HexToRgb(string? hex)
     {
