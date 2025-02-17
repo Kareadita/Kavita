@@ -1370,7 +1370,9 @@ public class OpdsController : BaseApiController
         using var sm = new StringWriter();
         _xmlSerializer.Serialize(sm, feed);
 
-        return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
+        var ret = sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
+
+        return ret;
     }
 
     // Recursively sanitize all string properties in the object
@@ -1381,6 +1383,10 @@ public class OpdsController : BaseApiController
         var properties = obj.GetType().GetProperties();
         foreach (var property in properties)
         {
+            // Skip properties that require an index (e.g., indexed collections)
+            if (property.GetIndexParameters().Length > 0)
+                continue;
+
             if (property.PropertyType == typeof(string) && property.CanWrite)
             {
                 var value = (string?)property.GetValue(obj);
@@ -1391,7 +1397,9 @@ public class OpdsController : BaseApiController
             }
             else if (property.PropertyType.IsClass) // Handle nested objects
             {
-                SanitizeFeed(property.GetValue(obj));
+                var nestedObject = property.GetValue(obj);
+                if (nestedObject != null)
+                    SanitizeFeed(nestedObject);
             }
         }
     }
