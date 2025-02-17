@@ -37,6 +37,7 @@ export class MatchSeriesResultItemComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required: true}) item!: ExternalSeriesMatch;
+  @Input({required: true}) isDarkMode = true;
   @Output() selected: EventEmitter<ExternalSeriesMatch> = new EventEmitter();
 
   isSelected = false;

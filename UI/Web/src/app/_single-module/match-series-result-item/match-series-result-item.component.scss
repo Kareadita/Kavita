@@ -1,0 +1,33 @@
+.search-result {
+    img {
+        max-width: 100px;
+        min-width: 100px;
+    }
+}
+.title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.match-item-container {
+    &.dark {
+        background-color: var(--elevation-layer6-dark);
+    }
+
+    &.light {
+        background-color: var(--elevation-layer6);
+    }
+    border-radius: 15px;
+
+    &:hover {
+        &.dark {
+            background-color: var(--elevation-layer11-dark);
+        }
+
+        &.light {
+            background-color: var(--elevation-layer11);
+        }
+    }
+}

@@ -1,14 +1,15 @@
 <ng-container *transloco="let t;">
   <div>
     <div class="row g-0 mb-2">
-      <div class="col-11">
-        <h6 class="section-title" [id]="id || title">{{title}}</h6>
-      </div>
-      <div class="col-1">
+      <div class="col-auto">
         @if (switchRef) {
           <ng-container [ngTemplateOutlet]="switchRef"></ng-container>
         }
       </div>
+      <div class="col-auto">
+        <h6 class="section-title" [id]="id || title">{{title}}</h6>
+      </div>
+
     </div>
 
 

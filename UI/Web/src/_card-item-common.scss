@@ -163,11 +163,15 @@ $image-width: 160px;
     align-items: center;
     padding: 0 5px;
 
+    :first-child {
+      min-width: 22px;
+    } 
+
     .card-title {
       font-size: 0.8rem;
       margin: 0;
       text-align: center;
-      max-width: 98px;
+      max-width: 90px;
 
       a {
         overflow: hidden;

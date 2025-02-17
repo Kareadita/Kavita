@@ -11,3 +11,24 @@
   color: var(--primary-color);
   cursor: pointer;
 }
+
+.setting-title.edit:hover ~ .edit-btn{
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.edit-btn {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+  transition-delay: 0.5s;
+
+  &:hover {
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+  }
+
+  .btn {
+    margin-bottom: 0.5em;
+    line-height: 1.2;
+  }
+}

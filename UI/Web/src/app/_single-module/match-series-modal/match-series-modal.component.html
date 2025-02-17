@@ -32,7 +32,7 @@
             <div class="mb-3" style="width: 100%">
               <app-setting-switch [title]="t('dont-match-label')" [subtitle]="t('dont-match-tooltip')">
                 <ng-template #switch>
-                  <div class="form-check form-switch float-end">
+                  <div class="form-check form-switch">
                     <input id="dont-match" type="checkbox" class="form-check-input" formControlName="dontMatch" role="switch">
                   </div>
                 </ng-template>
@@ -50,8 +50,7 @@
       @if (!formGroup.get('dontMatch')?.value) {
         <app-loading [loading]="isLoading"></app-loading>
         @for(item of matches; track item.series.name) {
-          <app-match-series-result-item [item]="item" (selected)="selectMatch($event)"></app-match-series-result-item>
-          <div class="setting-section-break"></div>
+          <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)"></app-match-series-result-item>
         } @empty {
           @if (!isLoading) {
             {{t('no-results')}}

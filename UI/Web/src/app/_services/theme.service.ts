@@ -44,6 +44,9 @@ export class ThemeService {
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
+  
+  private darkModeSource = new ReplaySubject<boolean>(1);
+  public isDarkMode$ = this.darkModeSource.asObservable();
 
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
@@ -237,9 +240,11 @@ export class ThemeService {
           }
 
           this.currentThemeSource.next(theme);
+          this.darkModeSource.next(this.isDarkTheme());
         });
       } else {
         this.currentThemeSource.next(theme);
+        this.darkModeSource.next(this.isDarkTheme());
       }
     } else {
       // Only time themes isn't already loaded is on first load
