@@ -7,6 +7,8 @@ h2 {
 
 .main-container {
   margin-top: 10px;
+  max-width: 1920px;
+  padding: 0 20px;
 }
 
 ::ng-deep .content-wrapper:not(.closed) {

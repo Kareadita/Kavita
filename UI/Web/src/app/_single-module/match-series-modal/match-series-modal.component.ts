@@ -10,11 +10,14 @@ import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-m
 import {ToastrService} from "ngx-toastr";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import { ThemeService } from 'src/app/_services/theme.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-match-series-modal',
   standalone: true,
   imports: [
+    AsyncPipe,
     TranslocoDirective,
     MatchSeriesResultItemComponent,
     LoadingComponent,
@@ -31,6 +34,7 @@ export class MatchSeriesModalComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly modalService = inject(NgbActiveModal);
   private readonly toastr = inject(ToastrService);
+  protected readonly themeService = inject(ThemeService);
 
   @Input({required: true}) series!: Series;
 
