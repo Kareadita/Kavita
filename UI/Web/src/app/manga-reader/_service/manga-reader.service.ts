@@ -11,7 +11,7 @@ import {ReaderMode} from "../../_models/preferences/reader-mode";
 @Injectable({
   providedIn: 'root'
 })
-export class ManagaReaderService {
+export class MangaReaderService {
 
   private pageDimensions: DimensionMap = {};
   private pairs: {[key: number]: number} = {};
@@ -168,7 +168,7 @@ export class ManagaReaderService {
       }
 
       // Boost score if width is small (≤ 800px, common in webtoons)
-      if (info.width <= 800) {
+      if (info.width <= 750) {
         score += 0.5; // Adjust weight as needed
       }
 

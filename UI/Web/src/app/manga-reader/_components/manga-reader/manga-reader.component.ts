@@ -52,7 +52,7 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
-import {ManagaReaderService} from '../../_service/managa-reader.service';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {CanvasRendererComponent} from '../canvas-renderer/canvas-renderer.component';
 import {DoubleRendererComponent} from '../double-renderer/double-renderer.component';
 import {DoubleReverseRendererComponent} from '../double-reverse-renderer/double-reverse-renderer.component';
@@ -99,7 +99,7 @@ enum KeyDirection {
     templateUrl: './manga-reader.component.html',
     styleUrls: ['./manga-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ManagaReaderService],
+    providers: [MangaReaderService],
     animations: [
         trigger('slideFromTop', [
             state('in', style({ transform: 'translateY(0)' })),
@@ -153,7 +153,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly toastr = inject(ToastrService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
-  public readonly mangaReaderService = inject(ManagaReaderService);
+  public readonly mangaReaderService = inject(MangaReaderService);
 
   protected readonly KeyDirection = KeyDirection;
   protected readonly ReaderMode = ReaderMode;

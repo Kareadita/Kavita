@@ -18,7 +18,7 @@ import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_service/managa-reader.service';
+import { MangaReaderService } from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
 import { NgClass, AsyncPipe } from '@angular/common';
@@ -67,7 +67,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: MangaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings$.pipe(takeUntilDestroyed(this.destroyRef), tap((value: ReaderSetting) => {
