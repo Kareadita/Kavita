@@ -41,7 +41,7 @@ $image-width: 160px;
         position: relative;
         color: var(--card-text-color);
         border: 1px var(--card-border-color);
-
+        box-sizing: border-box;
     }
 
     .card-title {
@@ -73,7 +73,7 @@ $image-width: 160px;
 
 
     .card-body {
-        padding: 0px !important;
+        padding: 0 5px !important;
         background-color: rgba(0,0,0,0.7);
         border-width: var(--card-border-width);
         border-style: var(--card-border-style);
@@ -81,8 +81,7 @@ $image-width: 160px;
         position: absolute;
         bottom: 0;
         z-index: 115;
-        width: 95%;
-        margin-left: 2.5%;
+        width: 100%;
         bottom: 39px;
         font-size: 0.8rem;
         -webkit-box-orient: vertical;
