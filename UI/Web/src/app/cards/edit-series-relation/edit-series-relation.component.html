@@ -17,8 +17,13 @@
             <ng-template #badgeItem let-item let-position="idx">
               {{item.name}} ({{libraryNames[item.libraryId]}})
             </ng-template>
-            <ng-template #optionItem let-item let-position="idx">
-              {{item.name}} ({{libraryNames[item.libraryId]}})
+            <ng-template #optionItem let-item let-position="idx" let-value="value">
+              @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
+                {{item.name}}
+              } @else {
+                {{item.localizedName}}
+              }
+              ({{libraryNames[item.libraryId]}})
             </ng-template>
           </app-typeahead>
         </div>
