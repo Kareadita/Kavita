@@ -58,7 +58,7 @@ public class Program
         }
 
         Configuration.KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
-            ?  "http://localhost:5020" : "https://plus-next.kavitareader.com";
+            ?  "http://localhost:5020" : "https://plus.kavitareader.com";
 
         try
         {
