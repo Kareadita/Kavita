@@ -567,14 +567,15 @@ public class SettingsController : BaseApiController
         existingMetadataSetting.EnableStartDate = dto.EnableStartDate;
         existingMetadataSetting.EnableGenres = dto.EnableGenres;
         existingMetadataSetting.EnableTags = dto.EnableTags;
-        existingMetadataSetting.PersonRoles = dto.PersonRoles;
         existingMetadataSetting.FirstLastPeopleNaming = dto.FirstLastPeopleNaming;
+        existingMetadataSetting.EnableCoverImage = dto.EnableCoverImage;
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
         existingMetadataSetting.Blacklist = dto.Blacklist.Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
         existingMetadataSetting.Whitelist = dto.Whitelist.Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
         existingMetadataSetting.Overrides = dto.Overrides.ToList() ?? [];
+        existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
 
         // Handle Field Mappings
         if (dto.FieldMappings != null)
