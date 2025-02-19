@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
@@ -36,6 +37,7 @@ public class TokenService : ITokenService
     private readonly IUnitOfWork _unitOfWork;
     private readonly SymmetricSecurityKey _key;
     private const string RefreshTokenName = "RefreshToken";
+    private static readonly SemaphoreSlim _refreshTokenLock = new SemaphoreSlim(1, 1);
 
     public TokenService(IConfiguration config, UserManager<AppUser> userManager, ILogger<TokenService> logger, IUnitOfWork unitOfWork)
     {
@@ -81,6 +83,8 @@ public class TokenService : ITokenService
 
     public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request)
     {
+        await _refreshTokenLock.WaitAsync();
+
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -91,6 +95,7 @@ public class TokenService : ITokenService
                 _logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
                 return null;
             }
+
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
             {
@@ -98,12 +103,18 @@ public class TokenService : ITokenService
                 return null;
             }
 
-            var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
+            var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
+                RefreshTokenName, request.RefreshToken);
             if (!validated && tokenContent.ValidTo <= DateTime.UtcNow.Add(TimeSpan.FromHours(1)))
             {
                 _logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
                 return null;
             }
+
+            // Remove the old refresh token first
+            await _userManager.RemoveAuthenticationTokenAsync(user,
+                TokenOptions.DefaultProvider,
+                RefreshTokenName);
 
             try
             {
@@ -121,7 +132,8 @@ public class TokenService : ITokenService
                 Token = await CreateToken(user),
                 RefreshToken = await CreateRefreshToken(user)
             };
-        } catch (SecurityTokenExpiredException ex)
+        }
+        catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
             _logger.LogError(ex, "Failed to validate refresh token");
@@ -132,6 +144,10 @@ public class TokenService : ITokenService
             // Handle other exceptions
             _logger.LogError(ex, "Failed to validate refresh token");
             return null;
+        }
+        finally
+        {
+            _refreshTokenLock.Release();
         }
     }
 

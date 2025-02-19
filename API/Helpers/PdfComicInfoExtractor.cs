@@ -5,7 +5,6 @@
  * PDF 1.7 Specification a.k.a. PDF32000-1:2008
  * https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
  */
-//
 using System;
 using API.Data.Metadata;
 using API.Entities.Enums;
