@@ -62,6 +62,7 @@ public class UpdateNotificationDto
     public IList<string> Theme { get; set; }
     public IList<string> Developer { get; set; }
     public IList<string> Api { get; set; }
+    public IList<string> FeatureRequests { get; set; }
     /// <summary>
     /// The part above the changelog part
     /// </summary>

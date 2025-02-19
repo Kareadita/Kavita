@@ -656,7 +656,8 @@
         "removed": "Removed",
         "api": "API",
         "published-label": "Published: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Feature Requests"
     },
 
     "new-version-modal": {

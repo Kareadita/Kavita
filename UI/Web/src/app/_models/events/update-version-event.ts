@@ -17,6 +17,7 @@ export interface UpdateVersionEvent {
   theme: Array<string>;
   developer: Array<string>;
   api: Array<string>;
+  featureRequests: Array<string>;
   /**
    * The part above the changelog part
    */

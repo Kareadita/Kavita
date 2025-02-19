@@ -131,6 +131,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     Theme = sections.TryGetValue("Theme", out var theme) ? theme : [],
                     Developer = sections.TryGetValue("Developer", out var developer) ? developer : [],
                     Api = sections.TryGetValue("Api", out var api) ? api : [],
+                    FeatureRequests = sections.TryGetValue("Feature Requests", out var frs) ? frs : [],
                     BlogPart = _markdown.Transform(blogPart.Trim()),
                     UpdateBody = _markdown.Transform(prInfo.Body.Trim())
                 };
