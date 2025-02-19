@@ -631,7 +631,6 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
     }
 
-
     [Fact]
     public async Task ScanLibrary_DeleteSeriesInUI_ComeBack()
     {
@@ -678,5 +677,4 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
     }
-
 }
