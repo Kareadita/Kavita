@@ -24273,6 +24273,13 @@
             },
             "nullable": true
           },
+          "featureRequests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "blogPart": {
             "type": "string",
             "description": "The part above the changelog part",

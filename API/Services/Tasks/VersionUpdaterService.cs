@@ -377,6 +377,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             Theme = parsedSections.TryGetValue("Theme", out var theme) ? theme : [],
             Developer = parsedSections.TryGetValue("Developer", out var developer) ? developer : [],
             Api = parsedSections.TryGetValue("Api", out var api) ? api : [],
+            FeatureRequests = parsedSections.TryGetValue("Feature Requests", out var frs) ? frs : [],
             BlogPart = blogPart
         };
     }

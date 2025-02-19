@@ -33,7 +33,7 @@ export class ChangelogComponent implements OnInit {
   isLoading: boolean = true;
 
   ngOnInit(): void {
-    this.serverService.getChangelog(10).subscribe(updates => {
+    this.serverService.getChangelog(30).subscribe(updates => {
       this.updates = updates;
       this.isLoading = false;
       this.cdRef.markForCheck();
