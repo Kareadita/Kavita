@@ -631,4 +631,52 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
     }
 
+
+    [Fact]
+    public async Task ScanLibrary_DeleteSeriesInUI_ComeBack()
+    {
+        const string testcase = "Delete Series In UI - Manga.json";
+
+        // Setup: Generate test library
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+        var testDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(),
+            "../../../Services/Test Data/ScannerService/ScanTests",
+            testcase.Replace(".json", string.Empty));
+
+        library.Folders =
+        [
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") },
+            new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
+        ];
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+
+        // First Scan: Everything should be added
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Contains(postLib.Series, s => s.Name == "Accel");
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+
+        // Second Scan: Delete the Series
+        library.Series = [];
+        await _unitOfWork.CommitAsync();
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Empty(postLib.Series);
+
+        await scanner.ScanLibrary(library.Id);
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
+        Assert.Contains(postLib.Series, s => s.Name == "Plush");
+    }
+
 }
