@@ -165,7 +165,7 @@
         @if(settingsForm.get('blacklist'); as formControl) {
           <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
             <ng-template #view>
-              @let val = (formControl.value || '').split(',');
+              @let val = breakTags(formControl.value);
 
               @for(opt of val; track opt) {
                 <app-tag-badge>{{opt.trim()}}</app-tag-badge>
@@ -184,7 +184,7 @@
         @if(settingsForm.get('whitelist'); as formControl) {
           <app-setting-item [title]="t('whitelist-label')" [subtitle]="t('whitelist-tooltip')">
             <ng-template #view>
-              @let val = (formControl.value || '').split(',');
+              @let val = breakTags(formControl.value);
 
               @for(opt of val; track opt) {
                 <app-tag-badge>{{opt.trim()}}</app-tag-badge>

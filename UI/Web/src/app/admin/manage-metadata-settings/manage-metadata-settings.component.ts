@@ -149,6 +149,15 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
   }
 
+  breakTags(csString: string) {
+    if (csString) {
+      return csString.split(',');
+    }
+
+    return [];
+  }
+
+
   packData(withFieldMappings: boolean = true) {
     const model = this.settingsForm.value;
 
