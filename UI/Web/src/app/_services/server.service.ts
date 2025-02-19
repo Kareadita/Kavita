@@ -54,7 +54,7 @@ export class ServerService {
   }
 
   checkHowOutOfDate() {
-    return this.http.get<string>(this.baseUrl + 'server/checkHowOutOfDate', TextResonse)
+    return this.http.get<string>(this.baseUrl + 'server/check-out-of-date', TextResonse)
       .pipe(map(r => parseInt(r, 10)));
   }
 
