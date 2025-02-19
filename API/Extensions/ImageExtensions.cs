@@ -46,6 +46,17 @@ public static class ImageExtensions
         return (float)(totalDiff / (img1.Width * img1.Height));
     }
 
+    public static float GetSimilarity(this string imagePath1, string imagePath2)
+    {
+        if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
+        {
+            throw new FileNotFoundException("One or both image files do not exist");
+        }
+
+        // Calculate similarity score
+        return CalculateSimilarity(imagePath1, imagePath2);
+    }
+
     /// <summary>
     /// Determines which image is "better" based on similarity and resolution.
     /// </summary>
@@ -57,7 +68,7 @@ public static class ImageExtensions
     {
         if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
         {
-            throw new FileNotFoundException("One or both image files do not exist.");
+            throw new FileNotFoundException("One or both image files do not exist");
         }
 
         // Calculate similarity score

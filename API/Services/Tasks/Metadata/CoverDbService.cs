@@ -29,7 +29,7 @@ public interface ICoverDbService
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
-    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true);
+    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
 
@@ -462,12 +462,38 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-
-    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true)
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="person"></param>
+    /// <param name="url"></param>
+    /// <param name="fromBase64"></param>
+    /// <param name="checkNoImagePlaceholder">Will check against all known null image placeholders to avoid writing it</param>
+    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false)
     {
+        // TODO: Refactor checkNoImagePlaceholder bool to an action that evaluates how to process Image
         if (!string.IsNullOrEmpty(url))
         {
             var filePath = await CreateThumbnail(url, $"{ImageService.GetPersonFormat(person.Id)}", fromBase64);
+
+            // Additional check to see if downloaded image is similar and we have a higher resolution
+            if (checkNoImagePlaceholder)
+            {
+                var matchRating = Path.Join(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg").GetSimilarity(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
+
+                if (matchRating >= 0.9f)
+                {
+                    if (string.IsNullOrEmpty(person.CoverImage))
+                    {
+                        filePath = null;
+                    }
+                    else
+                    {
+                        filePath = Path.GetFileName(Path.Join(_directoryService.CoverImageDirectory, person.CoverImage));
+                    }
+
+                }
+            }
 
             if (!string.IsNullOrEmpty(filePath))
             {

@@ -752,7 +752,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.SeriesRepository.Update(series);
         await _unitOfWork.CommitAsync();
 
-        await DownloadAndSetCovers(upstreamArtists);
+        await DownloadAndSetPersonCovers(upstreamArtists);
 
         return true;
     }
@@ -809,7 +809,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.SeriesRepository.Update(series);
         await _unitOfWork.CommitAsync();
 
-        await DownloadAndSetCovers(upstreamWriters);
+        await DownloadAndSetPersonCovers(upstreamWriters);
 
         return true;
     }
@@ -1066,7 +1066,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    private async Task DownloadAndSetCovers(List<SeriesStaffDto> people)
+    private async Task DownloadAndSetPersonCovers(List<SeriesStaffDto> people)
     {
         foreach (var staff in people)
         {
@@ -1075,7 +1075,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
             if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
             {
-                await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false);
+                await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
             }
         }
     }
