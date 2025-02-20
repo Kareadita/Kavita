@@ -28,7 +28,7 @@ public interface IMetadataService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false, bool forceColorScape = false);
     /// <summary>
-    /// Performs a forced refresh of cover images just for a series and it's nested entities
+    /// Performs a forced refresh of cover images just for a series, and it's nested entities
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
@@ -75,12 +75,12 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="encodeFormat">Convert image to Encoding Format when extracting the cover</param>
     /// <param name="forceColorScape">Force colorscape gen</param>
-    private Task<bool> UpdateChapterCoverImage(Chapter? chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
+    private bool UpdateChapterCoverImage(Chapter? chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
     {
-        if (chapter == null) return Task.FromResult(false);
+        if (chapter == null) return false;
 
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null) return Task.FromResult(false);
+        if (firstFile == null) return false;
 
         if (!_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage),
@@ -93,7 +93,7 @@ public class MetadataService : IMetadataService
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
 
@@ -107,7 +107,7 @@ public class MetadataService : IMetadataService
         _unitOfWork.ChapterRepository.Update(chapter);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
-        return Task.FromResult(true);
+        return true;
     }
 
     private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
@@ -135,10 +135,10 @@ public class MetadataService : IMetadataService
     /// <param name="volume"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="forceColorScape">Force updating colorscape</param>
-    private Task<bool> UpdateVolumeCoverImage(Volume? volume, bool forceUpdate, bool forceColorScape = false)
+    private bool UpdateVolumeCoverImage(Volume? volume, bool forceUpdate, bool forceColorScape = false)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null) return Task.FromResult(false);
+        if (volume == null) return false;
 
         if (!_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
@@ -150,7 +150,7 @@ public class MetadataService : IMetadataService
                 _unitOfWork.VolumeRepository.Update(volume);
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
             }
-            return Task.FromResult(false);
+            return false;
         }
 
         if (!volume.CoverImageLocked)
@@ -162,7 +162,7 @@ public class MetadataService : IMetadataService
             if (firstChapter == null)
             {
                 firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
-                if (firstChapter == null) return Task.FromResult(false);
+                if (firstChapter == null) return false;
             }
 
             volume.CoverImage = firstChapter.CoverImage;
@@ -171,7 +171,7 @@ public class MetadataService : IMetadataService
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
-        return Task.FromResult(true);
+        return true;
     }
 
     /// <summary>
@@ -179,9 +179,9 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private Task UpdateSeriesCoverImage(Series? series, bool forceUpdate, bool forceColorScape = false)
+    private void UpdateSeriesCoverImage(Series? series, bool forceUpdate, bool forceColorScape = false)
     {
-        if (series == null) return Task.CompletedTask;
+        if (series == null) return;
 
         if (!_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage),
@@ -194,7 +194,7 @@ public class MetadataService : IMetadataService
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
             }
 
-            return Task.CompletedTask;
+            return;
         }
 
         series.Volumes ??= [];
@@ -203,7 +203,6 @@ public class MetadataService : IMetadataService
         _imageService.UpdateColorScape(series);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
-        return Task.CompletedTask;
     }
 
 
@@ -213,7 +212,7 @@ public class MetadataService : IMetadataService
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="encodeFormat"></param>
-    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
+    private void ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
     {
         _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
@@ -226,8 +225,8 @@ public class MetadataService : IMetadataService
                 var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
-                    // If cover was update, either the file has changed or first scan and we should force a metadata update
+                    var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+                    // If cover was update, either the file has changed or first scan, and we should force a metadata update
                     UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
                     {
@@ -237,7 +236,7 @@ public class MetadataService : IMetadataService
                     index++;
                 }
 
-                var volumeUpdated = await UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate, forceColorScape);
+                var volumeUpdated = UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate, forceColorScape);
                 if (volumeIndex == 0 && volumeUpdated)
                 {
                     firstVolumeUpdated = true;
@@ -245,7 +244,7 @@ public class MetadataService : IMetadataService
                 volumeIndex++;
             }
 
-            await UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate, forceColorScape);
+            UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate, forceColorScape);
         }
         catch (Exception ex)
         {
@@ -311,7 +310,7 @@ public class MetadataService : IMetadataService
 
                 try
                 {
-                    await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+                    ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
                 }
                 catch (Exception ex)
                 {
@@ -383,7 +382,7 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
-        await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+        ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
 
 
         if (_unitOfWork.HasChanges())
