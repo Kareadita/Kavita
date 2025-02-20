@@ -1,7 +1,7 @@
 <ng-container *transloco="let t;">
   <div>
     <div class="settings-row g-0 row">
-      <div class="col-auto setting-title edit">
+      <div class="col-auto {{fixedExtras ? 'setting-title no-anim edit' : 'setting-title edit'}}">
         <h6 class="section-title">
           @if (labelId) {
             <label class="reset-label" [for]="labelId">{{title}}</label>

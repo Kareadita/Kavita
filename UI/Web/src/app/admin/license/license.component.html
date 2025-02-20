@@ -9,7 +9,7 @@
 
     <form [formGroup]="formGroup">
       <div class="mt-2">
-        <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="hasLicense">
+        <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="hasLicense" [fixedExtras]="true">
           <ng-template #titleExtra>
             <button class="btn btn-icon btn-sm" (click)="loadLicenseInfo(true)">
               @if (isChecking) {
@@ -75,10 +75,10 @@
             </div>
 
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-              <!--            <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"-->
-              <!--                    (click)="deleteLicense()">-->
-              <!--              {{t('activate-delete')}}-->
-              <!--            </button>-->
+                          <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
+                                  (click)="deleteLicense()">
+                            {{t('activate-delete')}}
+                          </button>
               <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header"
                       [ngbTooltip]="t('activate-reset-tooltip')"
                       [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="resetLicense()">

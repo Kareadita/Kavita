@@ -11,7 +11,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
-import {AbstractControl, FormControl} from "@angular/forms";
+import {AbstractControl} from "@angular/forms";
 
 @Component({
   selector: 'app-setting-item',
@@ -37,6 +37,10 @@ export class SettingItemComponent implements OnChanges {
   @Input() subtitle: string | undefined = undefined;
   @Input() labelId: string | undefined = undefined;
   @Input() toggleOnViewClick: boolean = true;
+  /**
+   * When true, the hover animation will not be present and the titleExtras will be always visible
+   */
+  @Input() fixedExtras: boolean = false;
   @Input() control: AbstractControl<any> | null = null;
   @Output() editMode = new EventEmitter<boolean>();
 
