@@ -537,8 +537,16 @@ public class CoverDbService : ICoverDbService
                 // Additional check to see if downloaded image is similar and we have a higher resolution
                 if (chooseBetterImage)
                 {
-                    var betterImage = Path.Join(_directoryService.CoverImageDirectory, series.CoverImage).GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
-                    filePath = Path.GetFileName(betterImage);
+                    try
+                    {
+                        var betterImage = Path.Join(_directoryService.CoverImageDirectory, series.CoverImage)
+                            .GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
+                        filePath = Path.GetFileName(betterImage);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue trying to choose a better cover image for Series: {SeriesName} ({SeriesId})", series.Name, series.Id);
+                    }
                 }
 
                 series.CoverImage = filePath;
