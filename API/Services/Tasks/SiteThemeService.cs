@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Theme;
@@ -32,6 +33,7 @@ internal class GitHubContent
     [JsonProperty("type")]
     public string Type { get; set; }
 
+    [JsonPropertyName("download_url")]
     [JsonProperty("download_url")]
     public string DownloadUrl { get; set; }
 
@@ -151,6 +153,7 @@ public class ThemeService : IThemeService
             // Fetch contents of the theme directory
             var themeContents = await GetDirectoryContent(themeDir.Path);
 
+
             // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
             var previewUrls = GetPreviewUrls(themeContents);
@@ -187,7 +190,7 @@ public class ThemeService : IThemeService
         return themeDtos;
     }
 
-    private static IList<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
+    private static List<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
     {
         return themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") )
             .Select(p => p.DownloadUrl)
@@ -196,10 +199,12 @@ public class ThemeService : IThemeService
 
     private static async Task<IList<GitHubContent>> GetDirectoryContent(string path)
     {
-        return await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
+        var json = await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
             .WithHeader("Accept", "application/vnd.github+json")
             .WithHeader("User-Agent", "Kavita")
-            .GetJsonAsync<List<GitHubContent>>();
+            .GetStringAsync();
+
+        return string.IsNullOrEmpty(json) ? [] : JsonConvert.DeserializeObject<List<GitHubContent>>(json);
     }
 
     /// <summary>

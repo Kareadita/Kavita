@@ -12,17 +12,14 @@ import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SiteThemeProviderPipe } from '../../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
 import { AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
-import {SeriesCardComponent} from "../../cards/series-card/series-card.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadableSiteTheme} from "../../_models/theme/downloadable-site-theme";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
@@ -46,8 +43,8 @@ interface ThemeContainer {
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective, CarouselReelComponent,
-    SeriesCardComponent, ImageComponent, DefaultValuePipe, NgTemplateOutlet, SafeUrlPipe, NgxFileDropModule,
+  imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
+    ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
     ReactiveFormsModule, Select2Module, LoadingComponent]
 })
 export class ThemeManagerComponent {
