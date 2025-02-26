@@ -13,14 +13,14 @@
             <li [ngbNavItem]="tabs[TabID.General]">
               <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
               <ng-template ngbNavContent>
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3" style="width: 100%">
                     <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
                         <div class="input-group">
                           @if (editSeriesForm.get('name'); as formControl) {
                             <input id="name" class="form-control" formControlName="name" type="text" readonly
-                                   [class.is-invalid]="formControl.invalid && formControl.touched">
+                                   [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors) {
                               @if (formControl.errors.required) {
                                 <div class="invalid-feedback">{{t('required-field')}}</div>
@@ -33,14 +33,14 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3" style="width: 100%">
                     @if (editSeriesForm.get('sortName'); as formControl) {
                       <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
                           <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                             <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
-                            <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
+                            <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors) {
                               @if (formControl.errors.required) {
                                 <div class="invalid-feedback">{{t('required-field')}}</div>
@@ -53,7 +53,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3" style="width: 100%">
                     <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -69,7 +69,7 @@
                 </div>
 
                 @if (metadata) {
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="mb-3" style="width: 100%">
                       <app-setting-item [title]="t('summary-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
@@ -91,7 +91,7 @@
                 <a ngbNavLink>{{t(tabs[TabID.Metadata])}}</a>
                 <ng-template ngbNavContent>
 
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-lg-8 col-md-12 pe-2">
                       <div class="mb-3">
                         <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -131,7 +131,7 @@
                     </div>
                   </div>
 
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-md-12">
                       <div class="mb-3">
                         <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -152,7 +152,7 @@
                     </div>
                   </div>
 
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-md-12">
                       <div class="mb-3">
                         <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -173,7 +173,7 @@
                     </div>
                   </div>
 
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-lg-6 col-md-12 pe-2">
                       <div class="mb-3">
                         <app-setting-item [title]="t('age-rating-label')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -215,7 +215,7 @@
             <li [ngbNavItem]="tabs[TabID.People]">
               <a ngbNavLink>{{t(tabs[TabID.People])}}</a>
               <ng-template ngbNavContent>
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -233,7 +233,7 @@
                     </app-setting-item>
                   </div>
                 </div>
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -253,7 +253,7 @@
                 </div>
 
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -272,7 +272,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -291,7 +291,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -311,7 +311,7 @@
                 </div>
 
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -329,7 +329,7 @@
                     </app-setting-item>
                   </div>
                 </div>
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -350,7 +350,7 @@
 
 
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -368,7 +368,7 @@
                     </app-setting-item>
                   </div>
                 </div>
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -387,7 +387,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -406,7 +406,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -425,7 +425,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -444,7 +444,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="mb-3">
                     <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
@@ -498,7 +498,7 @@
               <ng-template ngbNavContent>
                 <h5>{{t('info-title')}}</h5>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       <app-setting-item [title]="t('library-title')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -519,7 +519,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       <app-setting-item [title]="t('folder-path-title')" [subtitle]="t('folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -541,7 +541,7 @@
                 </div>
 
                 @if (metadata) {
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-lg-6 col-md-12 pe-2">
                       <div class="mb-3">
                         <app-setting-item [title]="t('max-items-title')" [subtitle]="t('highest-count-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -562,7 +562,7 @@
                     </div>
                   </div>
 
-                  <div class="row g-0">
+                  <div class="row">
                     <div class="col-lg-6 col-md-12 pe-2">
                       <div class="mb-3">
                         <app-setting-item [title]="t('publication-status-title')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -584,7 +584,7 @@
                   </div>
                 }
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -605,7 +605,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -626,7 +626,7 @@
                   </div>
                 </div>
 
-                <div class="row g-0">
+                <div class="row">
                   <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       <app-setting-item [title]="t('total-pages-title')" [toggleOnViewClick]="false" [showEdit]="false">
@@ -660,7 +660,7 @@
                         <div class="flex-grow-1">
                           <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                           <div>
-                            <div class="row g-0">
+                            <div class="row">
                               <div class="col">
                                 {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
                               </div>
@@ -668,7 +668,7 @@
                                 {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime | translocoDate: {dateStyle: 'short' } | defaultDate}}
                               </div>
                             </div>
-                            <div class="row g-0">
+                            <div class="row">
                               <div class="col">
                                 <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
                                         [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!isAdmin">
@@ -685,7 +685,7 @@
                                 @for(file of volume.volumeFiles; track file.id) {
                                   <li class="list-group-item">
                                     <span>{{file.filePath}}</span>
-                                    <div class="row g-0">
+                                    <div class="row">
                                       <div class="col">
                                         {{t('chapter-title')}} {{file.chapter}}
                                       </div>
