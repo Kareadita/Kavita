@@ -9,6 +9,7 @@ using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums.Theme;
 using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
 using HtmlAgilityPack;
@@ -192,7 +193,8 @@ public class ThemeService : IThemeService
 
     private static List<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
     {
-        return themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") )
+        return themeContents
+            .Where(c => Parser.IsImage(c.Name) )
             .Select(p => p.DownloadUrl)
             .ToList();
     }
