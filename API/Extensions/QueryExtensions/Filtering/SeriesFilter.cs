@@ -253,7 +253,7 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,
@@ -372,7 +372,7 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,
@@ -435,7 +435,7 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,

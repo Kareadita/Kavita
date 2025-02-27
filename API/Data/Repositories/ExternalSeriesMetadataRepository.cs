@@ -229,6 +229,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .Include(s => s.Library)
             .Include(s => s.ExternalSeriesMetadata)
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
+            .Where(s => s.Library.AllowMetadataMatching)
             .FilterMatchState(filter.MatchStateOption)
             .OrderBy(s => s.NormalizedName)
             .ProjectTo<ManageMatchSeriesDto>(_mapper.ConfigurationProvider)
