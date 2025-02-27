@@ -41,7 +41,7 @@ $image-width: 160px;
         position: relative;
         color: var(--card-text-color);
         border: 1px var(--card-border-color);
-
+        box-sizing: border-box;
     }
 
     .card-title {
