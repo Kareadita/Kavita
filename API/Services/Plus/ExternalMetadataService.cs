@@ -111,7 +111,7 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task FetchExternalDataTask()
     {
         // Find all Series that are eligible and limit
-        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25);
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, false);
         if (ids.Count == 0) return;
 
         _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
@@ -133,6 +133,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
+    /// <returns>If a successful match was made</returns>
     public async Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType)
     {
         if (!IsPlusEligible(libraryType)) return false;
@@ -150,8 +151,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
 
         // Prefetch SeriesDetail data
-        await GetSeriesDetailPlus(seriesId, libraryType);
-        return true;
+        return await GetSeriesDetailPlus(seriesId, libraryType) != null;
     }
 
     public async Task<IList<MalStackDto>> GetStacksForUser(int userId)

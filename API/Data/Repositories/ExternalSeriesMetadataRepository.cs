@@ -213,9 +213,10 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     {
         return await _context.Series
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
-            .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
-            .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue)
             .Where(s => s.Library.AllowMetadataMatching)
+            .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
+            .Where(s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.AniListId == 0)
+            .Where(s => !s.IsBlacklisted && !s.DontMatch)
             .OrderByDescending(s => s.Library.Type)
             .ThenBy(s => s.NormalizedName)
             .Select(s => s.Id)

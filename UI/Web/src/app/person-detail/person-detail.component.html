@@ -61,6 +61,7 @@
 
     @if (works$ | async; as works) {
       <div class="row mt-2">
+        <!-- TODO: If the person is JUST a character, then switch this title to: 'A character in` -->
         <app-carousel-reel [items]="works" [title]="t('known-for-title')" (sectionClick)="loadFilterByPerson()">
           <ng-template #carouselItem let-item>
             <app-card-item [entity]="item"
