@@ -566,7 +566,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        foreach (var relation in externalMetadataRelations)
+        foreach (var relation in externalMetadataRelations.Where(r => r.Relation != RelationKind.Parent))
         {
             var names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle};
             var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(

@@ -917,6 +917,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }
 
+    // BUG: Related or other tab can be in history but no longer there, need to default
+
     this.updateUrl(this.activeTabId);
     this.cdRef.markForCheck();
   }

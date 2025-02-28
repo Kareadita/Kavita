@@ -2276,6 +2276,72 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(seriesName, sequel.Relations.First().TargetSeries.Name);
     }
 
+    [Fact]
+    public async Task Relationships_Prequel_CreatesSequel()
+    {
+        await ResetDb();
+
+        // ID 1: Blue Lock - Episode Nagi
+        var series = new SeriesBuilder("Blue Lock - Episode Nagi")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series);
+
+        // ID 2: Blue Lock
+        var series2 = new SeriesBuilder("Blue Lock")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        _context.Series.Attach(series2);
+        await _context.SaveChangesAsync();
+
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        _context.MetadataSettings.Update(metadataSettings);
+        await _context.SaveChangesAsync();
+
+        // Apply to Blue Lock - Episode Nagi (ID 1), setting Blue Lock (ID 2) as its prequel
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Blue Lock - Episode Nagi", // The series we're updating metadata for
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.Prequel, // Blue Lock is the prequel to Nagi
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = "Blue Lock",
+                    EnglishTitle = "Blue Lock",
+                    NativeTitle = "ブルーロック",
+                    RomajiTitle = "Blue Lock",
+                },
+                PlusMediaFormat = PlusMediaFormat.Manga,
+                AniListId = 106130,
+                MalId = 114745,
+                Provider = ScrobbleProvider.AniList
+            }]
+        }, 1); // Apply to series ID 1 (Nagi)
+
+        // Verify Blue Lock - Episode Nagi has Blue Lock as prequel
+        var nagiSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(nagiSeries);
+        Assert.Single(nagiSeries.Relations);
+        Assert.Equal("Blue Lock", nagiSeries.Relations.First().TargetSeries.Name);
+        Assert.Equal(RelationKind.Prequel, nagiSeries.Relations.First().RelationKind);
+
+        // Verify Blue Lock has Blue Lock - Episode Nagi as sequel
+        var blueLockSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(blueLockSeries);
+        Assert.Single(blueLockSeries.Relations);
+        Assert.Equal("Blue Lock - Episode Nagi", blueLockSeries.Relations.First().TargetSeries.Name);
+        Assert.Equal(RelationKind.Sequel, blueLockSeries.Relations.First().RelationKind);
+    }
+
 
     #endregion
 
