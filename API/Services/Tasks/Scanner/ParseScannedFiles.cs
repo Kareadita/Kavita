@@ -202,9 +202,14 @@ public class ParseScannedFiles
     /// <returns></returns>
     private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
-        // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
-        // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
-        if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
+        if (forceCheck)
+        {
+            return false;
+        }
+
+        // TryGetSeriesList falls back to parent folders to match to seriesList
+        var seriesList = TryGetSeriesList(seriesPaths, directory);
+        if (seriesList == null)
         {
             return false;
         }
@@ -220,6 +225,27 @@ public class ParseScannedFiles
         }
 
         return true;
+    }
+
+    private IList<SeriesModified>? TryGetSeriesList(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
+    {
+        if (string.IsNullOrEmpty(directory))
+        {
+            return null;
+        }
+
+        if (seriesPaths.TryGetValue(directory, out var seriesList))
+        {
+            return seriesList;
+        }
+
+        var parent = Directory.GetParent(directory);
+        if (parent == null)
+        {
+            return null;
+        }
+
+        return TryGetSeriesList(seriesPaths, parent.FullName);
     }
 
     /// <summary>
@@ -721,7 +747,8 @@ public class ParseScannedFiles
         // If folder hasn't changed, generate fake ParserInfos
         if (!result.HasChanged)
         {
-            result.ParserInfos = seriesPaths[normalizedFolder]
+            // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
+            result.ParserInfos = TryGetSeriesList(seriesPaths, normalizedFolder)!
                 .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
                 .ToList();
 
