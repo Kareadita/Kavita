@@ -239,13 +239,7 @@ public class ParseScannedFiles
             return seriesList;
         }
 
-        var parent = Directory.GetParent(directory);
-        if (parent == null)
-        {
-            return null;
-        }
-
-        return TryGetSeriesList(seriesPaths, parent.FullName);
+        return TryGetSeriesList(seriesPaths, _directoryService.GetParentDirectoryName(directory));
     }
 
     /// <summary>
