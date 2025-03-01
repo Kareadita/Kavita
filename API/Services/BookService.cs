@@ -311,8 +311,16 @@ public class BookService : IBookService
 
             var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
             image.Attributes.Remove(key);
-            // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
-            image.Attributes.Add(key, $"{apiBase}" + Uri.EscapeDataString(imageFile));
+
+            if (!imageFile.StartsWith("http"))
+            {
+                // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
+                image.Attributes.Add(key, $"{apiBase}" + Uri.EscapeDataString(imageFile));
+            }
+            else
+            {
+                image.Attributes.Add(key, imageFile);
+            }
 
             // Add a custom class that the reader uses to ensure images stay within reader
             parent.AddClass("kavita-scale-width-container");
