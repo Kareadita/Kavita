@@ -276,18 +276,18 @@ public static class Seed
         await context.SaveChangesAsync();
 
         // Port, IpAddresses and LoggingLevel are managed in appSettings.json. Update the DB values to match
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.Port)).Value =
             Configuration.Port + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.IpAddresses).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.IpAddresses)).Value =
             Configuration.IpAddresses;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheDirectory)).Value =
             directoryService.CacheDirectory + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.BackupDirectory)).Value =
             DirectoryService.BackupDirectory + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheSize).Value =
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
-        await context.SaveChangesAsync();
 
+        await context.SaveChangesAsync();
     }
 
     public static async Task SeedMetadataSettings(DataContext context)
