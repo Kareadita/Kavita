@@ -49,7 +49,7 @@ public interface IExternalMetadataService
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
-    Task FixSeriesMatch(int seriesId, int anilistId);
+    Task FixSeriesMatch(int seriesId, int anilistId, long? malId);
     Task UpdateSeriesDontMatch(int seriesId, bool dontMatch);
     Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId);
 }
@@ -303,7 +303,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="anilistId"></param>
-    public async Task FixSeriesMatch(int seriesId, int anilistId)
+    public async Task FixSeriesMatch(int seriesId, int anilistId, long? malId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
         if (series == null) return;
@@ -317,6 +317,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type, new PlusSeriesRequestDto()
         {
             AniListId = anilistId,
+            MalId = malId,
             SeriesName = string.Empty // Required field
         });
 

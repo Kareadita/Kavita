@@ -11102,6 +11102,14 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "malId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ],
         "responses": {

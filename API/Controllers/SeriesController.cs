@@ -652,9 +652,9 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("update-match")]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId, [FromQuery] long? malId)
     {
-        BackgroundJob.Enqueue(() => _externalMetadataService.FixSeriesMatch(seriesId, aniListId));
+        BackgroundJob.Enqueue(() => _externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId));
 
         return Ok();
     }
