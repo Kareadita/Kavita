@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.REPO_GHA_PAT }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -59,6 +60,11 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+          # Pull latest changes with rebase to avoid merge commits
+          git pull --rebase origin develop
+          
+          # Commit and push
           git commit -m "Update OpenAPI documentation" openapi.json
           git push
         env:
