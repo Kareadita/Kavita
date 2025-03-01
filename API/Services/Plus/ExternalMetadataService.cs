@@ -318,7 +318,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             AniListId = anilistId,
             MalId = malId,
-            SeriesName = string.Empty // Required field
+            SeriesName = series.Name // Required field, not used since AniList/Mal Id are passed
         });
 
         if (metadata.Series == null)
@@ -330,6 +330,11 @@ public class ExternalMetadataService : IExternalMetadataService
         // Find all scrobble events and rewrite them to be the correct
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
         _unitOfWork.ScrobbleRepository.Remove(events);
+
+        // Find all scrobble errors and remove them
+        var errors = await _unitOfWork.ScrobbleRepository.GetAllScrobbleErrorsForSeries(seriesId);
+        _unitOfWork.ScrobbleRepository.Remove(errors);
+
         await _unitOfWork.CommitAsync();
 
         // Regenerate all events for the series for all users
