@@ -18,6 +18,7 @@ import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
 import {allMetadataSettingField, MetadataSettingField} from "../_models/metadata-setting-field";
 import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe";
+import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 
 @Component({
@@ -33,6 +34,7 @@ import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe
     AgeRatingPipe,
     PersonRolePipe,
     MetadataSettingFiledPipe,
+    EnterBlurDirective,
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',

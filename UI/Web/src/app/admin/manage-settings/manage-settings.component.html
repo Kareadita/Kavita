@@ -21,7 +21,7 @@
             </ng-template>
             <ng-template #edit>
               <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="hostname-validations" class="invalid-feedback">
@@ -44,7 +44,7 @@
             <ng-template #edit>
               <div class="input-group">
                 <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
                 <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
               </div>
 
@@ -69,7 +69,7 @@
             <ng-template #edit>
               <div class="input-group">
                 <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
                 <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
               </div>
 
@@ -94,7 +94,7 @@
             <ng-template #edit>
               <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
                      formControlName="port" type="number" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57" appEnterBlur>
             </ng-template>
           </app-setting-item>
         }
@@ -116,7 +116,7 @@
               <input id="settings-backup" aria-describedby="total-backups-validations" class="form-control"
                      formControlName="totalBackups" type="number" inputmode="numeric" step="1" min="1" max="30"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="total-backups-validations" class="invalid-feedback">
@@ -146,7 +146,7 @@
               <input id="settings-logs" aria-describedby="total-logs-validations" class="form-control"
                      formControlName="totalLogs" type="number" inputmode="numeric" step="1" min="1" max="30"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="total-logs-validations" class="invalid-feedback">
@@ -202,7 +202,7 @@
             <ng-template #edit>
               <input id="setting-cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
                      type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="cache-size-validations" class="invalid-feedback">
@@ -271,7 +271,7 @@
               <input id="setting-on-deck-progress-days" aria-describedby="on-deck-progress-days-validations" class="form-control" formControlName="onDeckProgressDays"
                      type="number" inputmode="numeric" step="1" min="1"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="on-deck-last-progress-validations" class="invalid-feedback">
@@ -298,7 +298,7 @@
               <input id="on-deck-last-chapter-add" aria-describedby="on-deck-last-chapter-add-validations" class="form-control" formControlName="onDeckUpdateDays"
                      type="number" inputmode="numeric" step="1" min="1"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="on-deck-last-chapter-add-validations" class="invalid-feedback">

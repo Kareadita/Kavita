@@ -7,17 +7,15 @@ import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, take} from "rxjs/operators";
-import {PaginatedResult, Pagination} from "../../_models/pagination";
+import {PaginatedResult} from "../../_models/pagination";
 import {SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {translate, TranslocoModule} from "@jsverse/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {ToastrService} from "ngx-toastr";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
 import {AsyncPipe} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 
@@ -32,7 +30,7 @@ export interface DataTablePage {
   selector: 'app-user-scrobble-history',
   standalone: true,
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, CardActionablesComponent, AsyncPipe],
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -47,7 +45,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
 
 

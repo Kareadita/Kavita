@@ -10,6 +10,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 @Component({
   selector: 'app-manage-email-settings',
@@ -17,7 +18,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   styleUrls: ['./manage-email-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

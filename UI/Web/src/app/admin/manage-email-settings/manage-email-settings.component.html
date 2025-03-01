@@ -19,7 +19,7 @@
           <ng-template #edit>
             <div class="input-group">
               <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
               <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
               <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
             </div>
@@ -43,7 +43,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" />
+            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" appEnterBlur/>
           </ng-template>
         </app-setting-item>
       }
@@ -56,7 +56,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" />
+            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
@@ -69,7 +69,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="host" id="settings-host" />
+            <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
@@ -82,7 +82,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
@@ -107,7 +107,7 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="userName" id="settings-username" />
+            <input type="text" class="form-control" formControlName="userName" id="settings-username" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
@@ -120,7 +120,7 @@
             {{formControl.value ? '********' : null | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="password" id="settings-password" />
+            <input type="text" class="form-control" formControlName="password" id="settings-password" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
@@ -133,7 +133,7 @@
             {{formControl.value | bytes}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" appEnterBlur />
           </ng-template>
         </app-setting-item>
       }
