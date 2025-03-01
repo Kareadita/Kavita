@@ -83,6 +83,11 @@ export class EditListComponent implements OnInit {
       .map(key => this.form.get(key)?.value)
       .join(',');
 
+    // Recreate form to ensure index's match
+    this.form = new FormGroup({});
+    this.Items.forEach((item, index) => {
+      this.form.addControl('link' + index, new FormControl(item, []));
+    })
 
     this.emit();
     this.cdRef.markForCheck();
