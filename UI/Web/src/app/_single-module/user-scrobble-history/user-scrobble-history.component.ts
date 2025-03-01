@@ -67,7 +67,8 @@ export class UserScrobbleHistoryComponent implements OnInit {
 
   ngOnInit() {
 
-    this.onPageChange({offset: 0});
+    this.pageInfo.pageNumber = 0;
+    this.cdRef.markForCheck();
 
     this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
       this.tokenExpired = hasExpired;
