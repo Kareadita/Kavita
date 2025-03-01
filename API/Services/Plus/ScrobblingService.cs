@@ -930,18 +930,20 @@ public class ScrobblingService : IScrobblingService
 
             if (await _unitOfWork.ExternalSeriesMetadataRepository.IsBlacklistedSeries(evt.SeriesId))
             {
-                _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
-                {
-                    Comment = UnknownSeriesErrorMessage,
-                    Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
-                    LibraryId = evt.LibraryId,
-                    SeriesId = evt.SeriesId
-                });
-                evt.IsErrored = true;
-                evt.ErrorDetails = UnknownSeriesErrorMessage;
-                evt.ProcessDateUtc = DateTime.UtcNow;
-                _unitOfWork.ScrobbleRepository.Update(evt);
-                await _unitOfWork.CommitAsync();
+                // I'm not sure why I was storing a scrobble error when blacklisted, but this should now address
+                // https://github.com/Kareadita/Kavita/issues/3348
+                // _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                // {
+                //     Comment = UnknownSeriesErrorMessage,
+                //     Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
+                //     LibraryId = evt.LibraryId,
+                //     SeriesId = evt.SeriesId
+                // });
+                // evt.IsErrored = true;
+                // evt.ErrorDetails = UnknownSeriesErrorMessage;
+                // evt.ProcessDateUtc = DateTime.UtcNow;
+                // _unitOfWork.ScrobbleRepository.Update(evt);
+                // await _unitOfWork.CommitAsync();
                 return 0;
             }
 
