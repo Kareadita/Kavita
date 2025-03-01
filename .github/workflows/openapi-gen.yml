@@ -1,0 +1,54 @@
+name: Generate OpenAPI Documentation
+
+on:
+  push:
+    branches: [ 'develop', '!release/**' ]
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+  pull_request:
+    branches: [ 'develop', '!release/**' ]
+  workflow_dispatch:
+
+jobs:
+  generate-openapi:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Swashbuckle CLI tool
+        run: dotnet tool install --global Swashbuckle.AspNetCore.Cli
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build API/API.csproj --configuration Debug
+
+      - name: Generate OpenAPI file
+        run: swagger tofile --output openapi.json API/bin/Debug/net9.0/API.dll v1
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git add openapi.json
+          git diff --staged --quiet openapi.json || echo "has_changes=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push if changed
+        if: steps.git-check.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Update OpenAPI documentation" openapi.json
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GHA_PAT }}

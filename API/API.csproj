@@ -12,10 +12,11 @@
     <LangVersion>latestmajor</LangVersion>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
-      <Delete Files="../openapi.json" />
-      <Exec Command="swagger tofile --output ../openapi.json bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).dll v1" />
-  </Target>
+  <!-- Moved to GA -->
+<!--  <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">-->
+<!--      <Delete Files="../openapi.json" />-->
+<!--      <Exec Command="swagger tofile &#45;&#45;output ../openapi.json bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).dll v1" />-->
+<!--  </Target>-->
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
