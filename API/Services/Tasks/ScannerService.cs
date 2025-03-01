@@ -336,7 +336,7 @@ public class ScannerService : IScannerService
     private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries)
     {
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0 && s.HasChanged))
+        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0))
         {
             var parsedFiles = series.ParsedInfos;
             parsedSeries.Add(series.ParsedSeries, parsedFiles);

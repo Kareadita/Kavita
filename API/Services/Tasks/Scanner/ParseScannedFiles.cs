@@ -64,10 +64,6 @@ public class ScanResult
 public class ScannedSeriesResult
 {
     /// <summary>
-    /// Was the Folder scanned or not. If not modified since last scan, this will be false and indicates that upstream should count this as skipped
-    /// </summary>
-    public bool HasChanged { get; set; }
-    /// <summary>
     /// The Parsed Series information used for tracking
     /// </summary>
     public ParsedSeries ParsedSeries { get; set; }
@@ -521,7 +517,7 @@ public class ParseScannedFiles
 
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
-        GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
+        GenerateProcessedScannedSeries(scannedSeries, processedScannedSeries);
     }
 
     /// <summary>
@@ -530,13 +526,13 @@ public class ParseScannedFiles
     /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
     /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
     /// <param name="processedScannedSeries">A thread-safe concurrent bag of processed series results</param>
-    private void GenerateProcessedScannedSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    private void GenerateProcessedScannedSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
     {
         // First, update the sort order for all series
         UpdateSeriesSortOrder(scannedSeries);
 
         // Now, generate the final processed scanned series results
-        CreateFinalSeriesResults(scannedSeries, scanResults, processedScannedSeries);
+        CreateFinalSeriesResults(scannedSeries, processedScannedSeries);
     }
 
     /// <summary>
@@ -567,7 +563,7 @@ public class ParseScannedFiles
     /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
     /// <param name="processedScannedSeries">The list where processed results will be added</param>
     private static void CreateFinalSeriesResults(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries,
-        IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
     {
         foreach (var series in scannedSeries.Keys)
         {
@@ -575,7 +571,6 @@ public class ParseScannedFiles
 
             processedScannedSeries.Add(new ScannedSeriesResult
             {
-                HasChanged = scanResults.Any(sr => sr.HasChanged),  // Combine HasChanged flag across all scanResults
                 ParsedSeries = series,
                 ParsedInfos = scannedSeries[series]
             });
