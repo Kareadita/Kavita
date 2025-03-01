@@ -252,8 +252,6 @@ public static class SeriesFilter
         if (!condition) return queryable;
 
         var subQuery = queryable
-            .Include(s => s.Progress)
-            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,
