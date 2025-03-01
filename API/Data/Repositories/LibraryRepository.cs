@@ -18,6 +18,7 @@ using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 [Flags]
 public enum LibraryIncludes
@@ -260,7 +261,7 @@ public class LibraryRepository : ILibraryRepository
     public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int>? libraryIds)
     {
         var ret = await _context.Series
-            .WhereIf(libraryIds is {Count: > 0} , s => libraryIds.Contains(s.LibraryId))
+            .WhereIf(libraryIds is {Count: > 0} , s => libraryIds!.Contains(s.LibraryId))
             .Select(s => s.Metadata.Language)
             .AsSplitQuery()
             .AsNoTracking()

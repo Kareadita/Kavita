@@ -19,11 +19,13 @@ public interface IScrobbleRepository
     void Attach(ScrobbleError error);
     void Remove(ScrobbleEvent evt);
     void Remove(IEnumerable<ScrobbleEvent> events);
+    void Remove(IEnumerable<ScrobbleError> errors);
     void Update(ScrobbleEvent evt);
     Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false);
     Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo);
     Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors();
+    Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId);
     Task ClearScrobbleErrors();
     Task<bool> HasErrorForSeries(int seriesId);
     Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType);
@@ -64,6 +66,11 @@ public class ScrobbleRepository : IScrobbleRepository
     public void Remove(IEnumerable<ScrobbleEvent> events)
     {
         _context.ScrobbleEvent.RemoveRange(events);
+    }
+
+    public void Remove(IEnumerable<ScrobbleError> errors)
+    {
+        _context.ScrobbleError.RemoveRange(errors);
     }
 
     public void Update(ScrobbleEvent evt)
@@ -110,6 +117,13 @@ public class ScrobbleRepository : IScrobbleRepository
         return await _context.ScrobbleError
             .OrderBy(e => e.LastModifiedUtc)
             .ProjectTo<ScrobbleErrorDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId)
+    {
+        return await _context.ScrobbleError
+            .Where(e => e.SeriesId == seriesId)
             .ToListAsync();
     }
 
@@ -161,4 +175,5 @@ public class ScrobbleRepository : IScrobbleRepository
         return await _context.ScrobbleEvent.Where(e => e.SeriesId == seriesId)
             .ToListAsync();
     }
+
 }
