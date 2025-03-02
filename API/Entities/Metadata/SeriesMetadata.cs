@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -100,5 +101,15 @@ public class SeriesMetadata : IHasConcurrencyToken
     public void OnSavingChanges()
     {
         RowVersion++;
+    }
+
+    /// <summary>
+    /// Are all instances of the role from Kavita+
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public bool AllKavitaPlus(PersonRole role)
+    {
+        return People.Where(p => p.Role == role).All(p => p.KavitaPlusConnection);
     }
 }

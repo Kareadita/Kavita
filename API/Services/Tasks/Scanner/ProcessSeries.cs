@@ -331,7 +331,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         #region PeopleAndTagsAndGenres
-        if (!series.Metadata.WriterLocked)
+        if (!series.Metadata.WriterLocked && !series.Metadata.AllKavitaPlus(PersonRole.Writer))
         {
             var personSw = Stopwatch.StartNew();
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
@@ -339,73 +339,73 @@ public class ProcessSeries : IProcessSeries
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process writer on Series: {File} for {Count} people", personSw.ElapsedMilliseconds, series.Name, chapterPeople.Count);
         }
 
-        if (!series.Metadata.ColoristLocked)
+        if (!series.Metadata.ColoristLocked && !series.Metadata.AllKavitaPlus(PersonRole.Colorist))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Colorist)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Colorist);
         }
 
-        if (!series.Metadata.PublisherLocked)
+        if (!series.Metadata.PublisherLocked && !series.Metadata.AllKavitaPlus(PersonRole.Publisher))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Publisher)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Publisher);
         }
 
-        if (!series.Metadata.CoverArtistLocked)
+        if (!series.Metadata.CoverArtistLocked && !series.Metadata.AllKavitaPlus(PersonRole.CoverArtist))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.CoverArtist)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.CoverArtist);
         }
 
-        if (!series.Metadata.CharacterLocked)
+        if (!series.Metadata.CharacterLocked && !series.Metadata.AllKavitaPlus(PersonRole.Character))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Character)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Character);
         }
 
-        if (!series.Metadata.EditorLocked)
+        if (!series.Metadata.EditorLocked && !series.Metadata.AllKavitaPlus(PersonRole.Editor))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Editor)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Editor);
         }
 
-        if (!series.Metadata.InkerLocked)
+        if (!series.Metadata.InkerLocked && !series.Metadata.AllKavitaPlus(PersonRole.Inker))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Inker)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Inker);
         }
 
-        if (!series.Metadata.ImprintLocked)
+        if (!series.Metadata.ImprintLocked && !series.Metadata.AllKavitaPlus(PersonRole.Imprint))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Imprint)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Imprint);
         }
 
-        if (!series.Metadata.TeamLocked)
+        if (!series.Metadata.TeamLocked && !series.Metadata.AllKavitaPlus(PersonRole.Team))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Team)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Team);
         }
 
-        if (!series.Metadata.LocationLocked)
+        if (!series.Metadata.LocationLocked && !series.Metadata.AllKavitaPlus(PersonRole.Location))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Location)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Location);
         }
 
-        if (!series.Metadata.LettererLocked)
+        if (!series.Metadata.LettererLocked && !series.Metadata.AllKavitaPlus(PersonRole.Letterer))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Letterer)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Letterer);
         }
 
-        if (!series.Metadata.PencillerLocked)
+        if (!series.Metadata.PencillerLocked && !series.Metadata.AllKavitaPlus(PersonRole.Penciller))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Penciller)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Penciller);
         }
 
-        if (!series.Metadata.TranslatorLocked)
+        if (!series.Metadata.TranslatorLocked && !series.Metadata.AllKavitaPlus(PersonRole.Translator))
         {
             var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Translator)).ToList();
             await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Translator);
