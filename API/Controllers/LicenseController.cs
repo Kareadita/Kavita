@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
+using EasyCaching.Core;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,8 @@ public class LicenseController(
     ILogger<LicenseController> logger,
     ILicenseService licenseService,
     ILocalizationService localizationService,
-    ITaskScheduler taskScheduler)
+    ITaskScheduler taskScheduler,
+    IEasyCachingProviderFactory cachingProviderFactory)
     : BaseApiController
 {
     /// <summary>
@@ -32,8 +34,13 @@ public class LicenseController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
+
         var result = await licenseService.HasActiveLicense(forceCheck);
-        if (result)
+
+        var licenseInfoProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+        var cacheValue = await licenseInfoProvider.GetAsync<bool>(LicenseService.CacheKey);
+
+        if (result && !cacheValue.IsNull && !cacheValue.Value)
         {
             await taskScheduler.ScheduleKavitaPlusTasks();
         }
