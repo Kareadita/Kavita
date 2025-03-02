@@ -1082,10 +1082,18 @@ public class ExternalMetadataService : IExternalMetadataService
             var aniListId = ScrobblingService.ExtractId<int?>(staff.Url, ScrobblingService.AniListStaffWebsite);
             if (aniListId is null or <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
-            if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage) && !staff.ImageUrl.EndsWith("default.jpg"))
+            if (person == null || string.IsNullOrEmpty(staff.ImageUrl) ||
+                !string.IsNullOrEmpty(person.CoverImage) || staff.ImageUrl.EndsWith("default.jpg")) continue;
+
+            try
             {
                 await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception saving cover image for Person {PersonName} ({PersonId})", person.Name, person.Id);
+            }
+
         }
     }
 
