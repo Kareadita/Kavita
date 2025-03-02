@@ -298,38 +298,38 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
 
-    [Fact]
-    public async Task ScanLibrary_PublishersInheritFromChapters()
-    {
-        const string testcase = "Flat Special - Manga.json";
-
-        var infos = new Dictionary<string, ComicInfo>();
-        infos.Add("Uzaki-chan Wants to Hang Out! v01 (2019) (Digital) (danke-Empire).cbz", new ComicInfo()
+        [Fact]
+        public async Task ScanLibrary_PublishersInheritFromChapters()
         {
-            Publisher = "Correct Publisher"
-        });
-        infos.Add("Uzaki-chan Wants to Hang Out! - 2022 New Years Special SP01.cbz", new ComicInfo()
-        {
-            Publisher = "Special Publisher"
-        });
-        infos.Add("Uzaki-chan Wants to Hang Out! - Ch. 103 - Kouhai and Control.cbz", new ComicInfo()
-        {
-            Publisher = "Chapter Publisher"
-        });
+            const string testcase = "Flat Special - Manga.json";
 
-        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+            var infos = new Dictionary<string, ComicInfo>();
+            infos.Add("Uzaki-chan Wants to Hang Out! v01 (2019) (Digital) (danke-Empire).cbz", new ComicInfo()
+            {
+                Publisher = "Correct Publisher"
+            });
+            infos.Add("Uzaki-chan Wants to Hang Out! - 2022 New Years Special SP01.cbz", new ComicInfo()
+            {
+                Publisher = "Special Publisher"
+            });
+            infos.Add("Uzaki-chan Wants to Hang Out! - Ch. 103 - Kouhai and Control.cbz", new ComicInfo()
+            {
+                Publisher = "Chapter Publisher"
+            });
+
+            var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
 
-        var scanner = _scannerHelper.CreateServices();
-        await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+            var scanner = _scannerHelper.CreateServices();
+            await scanner.ScanLibrary(library.Id);
+            var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
-        Assert.NotNull(postLib);
-        Assert.Single(postLib.Series);
-        var publishers = postLib.Series.First().Metadata.People
-            .Where(p => p.Role == PersonRole.Publisher);
-        Assert.Equal(3, publishers.Count());
-    }
+            Assert.NotNull(postLib);
+            Assert.Single(postLib.Series);
+            var publishers = postLib.Series.First().Metadata.People
+                .Where(p => p.Role == PersonRole.Publisher);
+            Assert.Equal(3, publishers.Count());
+        }
 
 
     /// <summary>

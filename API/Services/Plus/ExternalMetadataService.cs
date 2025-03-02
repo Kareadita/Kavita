@@ -460,11 +460,19 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
 
-                madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId);
-                if (madeMetadataModification)
+                try
                 {
-                    _unitOfWork.SeriesRepository.Update(series);
+                    madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId);
+                    if (madeMetadataModification)
+                    {
+                        _unitOfWork.SeriesRepository.Update(series);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "There was an exception when trying to write Series metadata from Kavita+");
+                }
+
             }
 
             // WriteExternalMetadataToSeries will commit but not always

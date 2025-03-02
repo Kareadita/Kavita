@@ -104,6 +104,16 @@ public class SeriesMetadata : IHasConcurrencyToken
     }
 
     /// <summary>
+    /// Any People in this Role present
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public bool AnyOfRole(PersonRole role)
+    {
+        return People.Any(p => p.Role == role);
+    }
+
+    /// <summary>
     /// Are all instances of the role from Kavita+
     /// </summary>
     /// <param name="role"></param>
