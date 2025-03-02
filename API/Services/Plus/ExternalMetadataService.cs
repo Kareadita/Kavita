@@ -383,7 +383,10 @@ public class ExternalMetadataService : IExternalMetadataService
     {
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
-        if (series == null) return _defaultReturn;
+        if (series == null)
+        {
+            return _defaultReturn;
+        }
 
         try
         {
@@ -1079,7 +1082,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var aniListId = ScrobblingService.ExtractId<int?>(staff.Url, ScrobblingService.AniListStaffWebsite);
             if (aniListId is null or <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
-            if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
+            if (person != null && !string.IsNullOrEmpty(staff.ImageUrl) && string.IsNullOrEmpty(person.CoverImage) && !staff.ImageUrl.EndsWith("default.jpg"))
             {
                 await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
             }
