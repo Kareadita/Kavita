@@ -19,7 +19,6 @@ using API.SignalR;
 using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -77,7 +76,7 @@ public class ScrobblingService : IScrobblingService
     public const string AniListCharacterWebsite = "https://anilist.co/character/";
 
 
-    private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
+    private static readonly Dictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
         {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
@@ -89,18 +88,14 @@ public class ScrobblingService : IScrobblingService
 
     private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
-    private static readonly IList<ScrobbleProvider> BookProviders = new List<ScrobbleProvider>()
-    {
-    };
-    private static readonly IList<ScrobbleProvider> LightNovelProviders = new List<ScrobbleProvider>()
-    {
+    private static readonly IList<ScrobbleProvider> BookProviders = [];
+    private static readonly IList<ScrobbleProvider> LightNovelProviders =
+    [
         ScrobbleProvider.AniList
-    };
-    private static readonly IList<ScrobbleProvider> ComicProviders = new List<ScrobbleProvider>();
-    private static readonly IList<ScrobbleProvider> MangaProviders = new List<ScrobbleProvider>()
-    {
-        ScrobbleProvider.AniList
-    };
+    ];
+    private static readonly IList<ScrobbleProvider> ComicProviders = [];
+    private static readonly IList<ScrobbleProvider> MangaProviders = (List<ScrobbleProvider>)
+        [ScrobbleProvider.AniList];
 
 
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
@@ -532,11 +527,10 @@ public class ScrobblingService : IScrobblingService
                     {
                         // Create a new ExternalMetadata entry to indicate that this is not matchable
                         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
-                        if (series.ExternalSeriesMetadata == null)
-                        {
-                            series.ExternalSeriesMetadata = new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
-                        }
-                        series!.IsBlacklisted = true;
+                        if (series == null) return 0;
+
+                        series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
+                        series.IsBlacklisted = true;
                         _unitOfWork.SeriesRepository.Update(series);
 
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
@@ -824,6 +818,7 @@ public class ScrobblingService : IScrobblingService
                         readEvt.AppUser.Id);
                 _unitOfWork.ScrobbleRepository.Update(readEvt);
             }
+
             progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, async evt => new ScrobbleDto()
             {
                 Format = evt.Format,
@@ -888,9 +883,9 @@ public class ScrobblingService : IScrobblingService
                 await _unitOfWork.CommitAsync();
             }
         }
-        catch (FlurlHttpException)
+        catch (FlurlHttpException ex)
         {
-            _logger.LogError("Kavita+ API or a Scrobble service may be experiencing an outage. Stopping sending data");
+            _logger.LogError(ex, "Kavita+ API or a Scrobble service may be experiencing an outage. Stopping sending data");
             return;
         }
 
@@ -986,7 +981,7 @@ public class ScrobblingService : IScrobblingService
             {
                 if (ex.Message.Contains("Access token is invalid"))
                 {
-                    _logger.LogCritical("Access Token for UserId: {UserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
+                    _logger.LogCritical(ex, "Access Token for UserId: {UserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
                     evt.IsErrored = true;
                     evt.ErrorDetails = AccessTokenErrorMessage;
                     _unitOfWork.ScrobbleRepository.Update(evt);
@@ -1106,7 +1101,7 @@ public class ScrobblingService : IScrobblingService
             return null; // Unsupported website
         }
 
-        if (id == null)
+        if (Equals(id, default(T)))
         {
             throw new ArgumentNullException(nameof(id), "ID cannot be null.");
         }
@@ -1140,7 +1135,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("User {UserName} had an issue figuring out rate: {Message}", user.UserName, ex.Message);
+            _logger.LogInformation(ex, "User {UserName} had an issue figuring out rate: {Message}", user.UserName, ex.Message);
             userRateLimits.Add(user.Id, 0);
         }
 
