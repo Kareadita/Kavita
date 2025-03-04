@@ -122,7 +122,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var libraryType = libTypes[seriesId];
             var success = await FetchSeriesMetadata(seriesId, libraryType);
             if (success) count++;
-            await Task.Delay(1500);
+            await Task.Delay(6000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
     }
