@@ -1380,6 +1380,15 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
+    /// <summary>
+    /// This is to get series information for the recommendation drawer on Kavita
+    /// </summary>
+    /// <remarks>This uses a different API that series detail</remarks>
+    /// <param name="license"></param>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(string license, int? aniListId, long? malId, int? seriesId)
     {
         var payload = new ExternalMetadataIdsDto()
