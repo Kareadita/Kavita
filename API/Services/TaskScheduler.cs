@@ -215,7 +215,7 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false),
             LicenseService.Cron, RecurringJobOptions);
 
-        // KavitaPlus Scrobbling (every 4 hours)
+        // KavitaPlus Scrobbling (every hour)
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
             "0 */1 * * *", RecurringJobOptions);
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
@@ -223,7 +223,7 @@ public class TaskScheduler : ITaskScheduler
 
         // Backfilling/Freshening Reviews/Rating/Recommendations
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
-            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 4)),
+            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 5)),
             RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns

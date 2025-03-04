@@ -148,8 +148,6 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        _logger.LogDebug("Prefetching Kavita+ data for Series {SeriesId}", seriesId);
-
         // Prefetch SeriesDetail data
         return await GetSeriesDetailPlus(seriesId, libraryType) != null;
     }
@@ -412,10 +410,39 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            var result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                .WithKavitaPlusHeaders(license)
-                .PostJsonAsync(data)
-                .ReceiveJson<SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
+            SeriesDetailPlusApiDto? result = null;
+            try
+            {
+                result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+                    .WithKavitaPlusHeaders(license)
+                    .PostJsonAsync(data)
+                    .ReceiveJson<
+                        SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
+            }
+            catch (FlurlHttpException ex)
+            {
+                var errorMessage = await ex.GetResponseStringAsync();
+                // Trim quotes if the response is a JSON string
+                errorMessage = errorMessage.Trim('"');
+
+                if (ex.StatusCode == 400 && errorMessage.Contains("Too many Requests"))
+                {
+                    _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
+                    await Task.Delay(3000);
+
+                    result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+                        .WithKavitaPlusHeaders(license)
+                        .PostJsonAsync(data)
+                        .ReceiveJson<
+                            SeriesDetailPlusApiDto>();
+                }
+            }
+
+            if (result == null)
+            {
+                _logger.LogInformation("Hit rate limit twice, try again later");
+                return _defaultReturn;
+            }
 
 
             // Clear out existing results
