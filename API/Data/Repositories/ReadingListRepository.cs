@@ -186,7 +186,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true)
     {
-        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
+        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
@@ -201,7 +201,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)
     {
-        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
+        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
@@ -216,7 +216,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId, bool includePromoted)
     {
-        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
+        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
