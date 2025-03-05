@@ -130,6 +130,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     Removed = sections.TryGetValue("Removed", out var removed) ? removed : [],
                     Theme = sections.TryGetValue("Theme", out var theme) ? theme : [],
                     Developer = sections.TryGetValue("Developer", out var developer) ? developer : [],
+                    KnownIssues = sections.TryGetValue("KnownIssues", out var knownIssues) ? knownIssues : [],
                     Api = sections.TryGetValue("Api", out var api) ? api : [],
                     FeatureRequests = sections.TryGetValue("Feature Requests", out var frs) ? frs : [],
                     BlogPart = _markdown.Transform(blogPart.Trim()),
@@ -376,6 +377,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             Fixed = parsedSections.TryGetValue("Fixed", out var fixes) ? fixes : [],
             Theme = parsedSections.TryGetValue("Theme", out var theme) ? theme : [],
             Developer = parsedSections.TryGetValue("Developer", out var developer) ? developer : [],
+            KnownIssues = parsedSections.TryGetValue("Known Issues", out var knownIssues) ? knownIssues : [],
             Api = parsedSections.TryGetValue("Api", out var api) ? api : [],
             FeatureRequests = parsedSections.TryGetValue("Feature Requests", out var frs) ? frs : [],
             BlogPart = blogPart
