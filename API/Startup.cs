@@ -280,6 +280,7 @@ public class Startup
                     // v0.8.5
                     await ManualMigrateBlacklistTableToSeries.Migrate(dataContext, logger);
                     await ManualMigrateInvalidBlacklistSeries.Migrate(dataContext, logger);
+                    await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

@@ -839,6 +839,7 @@ public class ScrobblingService : IScrobblingService
 
         await SaveToDb(progressCounter, true);
         _logger.LogInformation("Scrobbling Events is complete");
+
     }
 
     private async Task<int> ProcessRatingEvents(List<ScrobbleEvent> decisions, Dictionary<int, int> userRateLimits, List<AppUser> usersToScrobble, int totalEvents,
