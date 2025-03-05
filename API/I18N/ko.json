@@ -201,5 +201,7 @@
     "person-doesnt-exist": "사람이 존재하지 않습니다",
     "person-name-required": "개인 이름은 필수 항목이며 null일 수 없습니다",
     "person-name-unique": "개인 이름은 고유해야 합니다",
-    "person-image-doesnt-exist": "CoversDB에 사람이 존재하지 않습니다"
+    "person-image-doesnt-exist": "CoversDB에 사람이 존재하지 않습니다",
+    "kavitaplus-restricted": "Kavita+만 해당",
+    "email-taken": "이미 사용중인 이메일"
 }

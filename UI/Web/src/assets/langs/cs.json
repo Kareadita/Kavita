@@ -948,7 +948,7 @@
         "confirm-delete": "Jste si jisti, že chcete vymazat všechny záložky pro více sérií? Toto nelze vrátit zpět.",
         "delete-success": "Záložky byly odstraněny",
         "no-data": "Nejsou zde žádné záložky. Zkuste vytvořit nějakou",
-        "no-data-2": "jedna.",
+        "no-data-2": "jednu.",
         "confirm-single-delete": "Opravdu chcete vymazat všechny záložky pro {{seriesName}}? Toto nelze vrátit zpět.",
         "delete-single-success": "Záložky {{seriesName}} byly odstraněny"
     },
@@ -985,7 +985,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
@@ -1325,7 +1326,7 @@
         "admin-tasks": "Úkoly",
         "admin-statistics": "Statistiky",
         "user-stats": "Statistiky",
-        "scrobbling": "Scrobbling",
+        "scrobbling": "Scrobblování",
         "customize": "Přizpůsobení",
         "cbl-import": "Seznam četby CBL",
         "server-section-title": "Server",
@@ -1353,7 +1354,7 @@
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
-        "create-one-part-2": "jedna",
+        "create-one-part-2": "jednu",
         "create-one-part-1": "Zkuste vytvořit",
         "title": "Sbírky",
         "no-data": "Neexistují žádné sbírky."
@@ -1990,7 +1991,8 @@
         "removed": "Odstraněno",
         "api": "API",
         "published-label": "Vydáno: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Požadavky na funkce"
     },
     "new-version-modal": {
         "title": "Kavita byla aktualizována!",
@@ -2420,7 +2422,8 @@
         "reading-lists-promoted": "Seznamy čtení propagovány",
         "reading-list-promoted": "Seznam čtení propagován",
         "mal-token-required": "Je vyžadován MAL Token, nastavený v Nastavení uživatele",
-        "match-success": "Správně sladěné série"
+        "match-success": "Správně sladěné série",
+        "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",

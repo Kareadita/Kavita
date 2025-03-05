@@ -1005,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Iontráil {{url}}",
@@ -2227,7 +2228,8 @@
         "person-image-downloaded": "Rinneadh clúdach duine a íoslódáil agus a chur i bhfeidhm.",
         "confirm-delete-multiple-chapters": "An bhfuil tú cinnte gur mhaith leat {{count}} chaibidil/imleabhar a scriosadh? Ní athróidh sé comhaid ar diosca.",
         "bulk-delete-libraries": "An bhfuil tú cinnte gur mhaith leat {{count}} leabharlann a scriosadh?",
-        "match-success": "Sraith a mheaitseáil i gceart"
+        "match-success": "Sraith a mheaitseáil i gceart",
+        "webtoon-override": "Ag aistriú go mód Webtoon mar gheall ar íomhánna a léiríonn webtoon."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -2486,7 +2488,8 @@
         "theme": "Téama",
         "api": "API",
         "published-label": "Foilsithe: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Iarratais Gné"
     },
     "match-series-modal": {
         "save": "{{common.save}}",

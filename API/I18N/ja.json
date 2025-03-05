@@ -184,5 +184,6 @@
     "check-updates": "アップデートをチェックする",
     "license-check": "ライセンスを確認",
     "collection-already-exists": "コレクションは既に存在しています",
-    "email-settings-invalid": "メール設定に不足している情報があります。すべてのメール設定が保存されていることを確認してください。"
+    "email-settings-invalid": "メール設定に不足している情報があります。すべてのメール設定が保存されていることを確認してください。",
+    "email-taken": "メールアドレスは既に使われています"
 }

@@ -1005,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Insira uma {{url}}",
@@ -2227,7 +2228,8 @@
         "person-image-downloaded": "A capa da pessoa foi baixada e aplicada.",
         "confirm-delete-multiple-chapters": "Tem certeza de que deseja excluir {{count}} capítulos/volumes? Não modificará arquivos no disco.",
         "bulk-delete-libraries": "Tem certeza de que deseja excluir {{count}} bibliotecas?",
-        "match-success": "Série correspondida corretamente"
+        "match-success": "Série correspondida corretamente",
+        "webtoon-override": "Mudando para o modo Webtoon devido a imagens que representam um Webtoon."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2482,7 +2484,8 @@
         "removed": "Removido",
         "api": "API",
         "published-label": "Publicado: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Solicitações de Recursos"
     },
     "new-version-modal": {
         "title": "Kavita foi atualizado!",

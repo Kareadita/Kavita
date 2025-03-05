@@ -199,5 +199,9 @@
     "person-name-required": "Il nome della persona è richiesto e non può essere null",
     "person-name-unique": "Il nome della persona deve essere univoco",
     "person-image-doesnt-exist": "La persona non esiste su CoversDB",
-    "collection-already-exists": "La collezione esiste già"
+    "collection-already-exists": "La collezione esiste già",
+    "generic-cover-volume-save": "Impossibile salvare l'immagine di copertina nel Volume",
+    "generic-cover-person-save": "Impossibile salvare l'immagine di copertina nella Persona",
+    "error-import-stack": "Si è verificato un errore durante l'importazione dello stack MAL",
+    "kavitaplus-restricted": "Riservato a Kavita+"
 }

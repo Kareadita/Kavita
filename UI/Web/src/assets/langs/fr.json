@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Sauvegarde en cours…",
         "update": "Mise à jour",
-        "account-detail-title": "Détails du compte"
+        "account-detail-title": "Détails du compte",
+        "invalid-email-warning": "Une adresse mail invalide bloquera certaines fonctionnalités de Kavita"
     },
     "user-scrobble-history": {
         "title": "Historique de scrobble",
@@ -47,7 +48,9 @@
         "processed": "Traité",
         "not-processed": "Non Traité",
         "special": "{{entity-title.special}}",
-        "token-expired": "Votre jeton AniList a expiré ! Les événements de scrobbling ne seront pas pris en compte tant que vous n'aurez pas renouvelé votre compte sur la page Comptes."
+        "token-expired": "Votre jeton AniList a expiré ! Les événements de scrobbling ne seront pas pris en compte tant que vous n'aurez pas renouvelé votre compte sur la page Comptes.",
+        "scrobbling-disabled": "Le suivi de lecture est désactivé dans les paramètres de votre compte.",
+        "generate-scrobble-events": "Rattraper les Événements"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progression de la lecture",
@@ -168,7 +171,10 @@
         "clients-api-key-label": "Clé API",
         "clients-opds-url-tooltip": "Voir une liste de clients OPDS suportés ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "Suivi de lecture AniList",
+        "anilist-scrobbling-tooltip": "Autorise Kavita à mettre à jour le suivi de lecture et les notes sur AniList"
     },
     "user-holds": {
         "title": "Enregistrement du suivi d'activité",
