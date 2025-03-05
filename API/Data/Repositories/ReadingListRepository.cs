@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.Entities;
@@ -185,10 +186,11 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true)
     {
-        var userAgeRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
+        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
-            .Where(l => l.AgeRating >= userAgeRating);
+            .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
+
         query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.NormalizedTitle);
 
        var finalQuery = query.ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
@@ -199,8 +201,10 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)
     {
+        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
+            .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
@@ -212,8 +216,10 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId, bool includePromoted)
     {
+        var user = await _context.AppUser.SingleAsync(u => u.Id == userId);
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
+            .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
             .Where(l => l.Items.Any(i => i.ChapterId == chapterId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
