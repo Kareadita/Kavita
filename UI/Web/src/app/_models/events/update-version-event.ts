@@ -18,6 +18,7 @@ export interface UpdateVersionEvent {
   developer: Array<string>;
   api: Array<string>;
   featureRequests: Array<string>;
+  knownIssues: Array<string>;
   /**
    * The part above the changelog part
    */

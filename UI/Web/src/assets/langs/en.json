@@ -657,7 +657,8 @@
         "api": "API",
         "published-label": "Published: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Feature Requests"
+        "feature-requests": "Feature Requests",
+        "known-issues": "Known Issues"
     },
 
     "new-version-modal": {
@@ -669,6 +670,7 @@
         "developer": "{{changelog.developer}}",
         "theme": "{{changelog.theme}}",
         "removed": "{{changelog.removed}}",
+        "known-issues": "{{changelog.known-issues}}",
         "api": "{{changelog.api}}",
         "close": "{{common.close}}",
         "refresh": "Refresh"
