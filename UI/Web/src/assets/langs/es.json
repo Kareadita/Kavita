@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Guardando …",
         "update": "Actualizar",
-        "account-detail-title": "Detalles de la cuenta"
+        "account-detail-title": "Detalles de la cuenta",
+        "invalid-email-warning": "Un correo invalido deshabilitara algunas funciones de Kavita"
     },
     "user-scrobble-history": {
         "title": "Historial de Scrobble",
@@ -47,7 +48,8 @@
         "processed": "Procesado",
         "not-processed": "Sin procesar",
         "special": "{{entity-title.special}}",
-        "token-expired": "¡Tu token de AniList ha expirado! Los eventos de scrobbling no se procesarán hasta que no sea renovado en la página de Cuentas."
+        "token-expired": "¡Tu token de AniList ha expirado! Los eventos de scrobbling no se procesarán hasta que no sea renovado en la página de Cuentas.",
+        "generate-scrobble-events": "Eventos de Backfill"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progreso en la lectura",
@@ -168,7 +170,9 @@
         "clients-api-key-label": "Clave API",
         "clients-opds-url-tooltip": "Ver lista de clientes OPDS compatibles: ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList Scrobbling"
     },
     "user-holds": {
         "title": "Retenciones de scrobble",
@@ -643,7 +647,8 @@
         "email-label": "Email registrado",
         "license-mismatch": "Esta licencia puede estar vinculada a otra instancia de Kavita. Vuelve a registrarla para arreglarlo.",
         "k+-license-overwrite": "Esta licencia está vinculada a otra instancia de Kavita. Esto puede ocurrir luego de una reinstalación, o, raramente, como un efecto secundario de una actualización del sistema. Selecciona \"sobreescribir\" para forzar esta instancia a registrarse con Kavita+.",
-        "k+-unlocked-description": "¡Bienvenido a Kavita+! Kavita generará eventos de scrobble basándose en tu progreso, calificaciones y lista de \"Quiero Leer\" luego de que registres tus servicios proveedores de Scrobbling dentro de tu cuenta. Asegúrate de que les agregues una retención de scrobbling a las series que no quieres que sean sincronizadas."
+        "k+-unlocked-description": "¡Bienvenido a Kavita+! Kavita generará eventos de scrobble basándose en tu progreso, calificaciones y lista de \"Quiero Leer\" luego de que registres tus servicios proveedores de Scrobbling dentro de tu cuenta. Asegúrate de que les agregues una retención de scrobbling a las series que no quieres que sean sincronizadas.",
+        "supported-version-label": "En Soportado Kavita versión"
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -994,7 +999,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Introduzca una {{url}}",
@@ -2414,7 +2420,8 @@
         "individual-role-title": "Como {{role}}",
         "browse-person-title": "Todas las obras de {{name}}",
         "browse-person-by-role-title": "Todas las obras de {{name}} como {{rol}}",
-        "all-roles": "Roles"
+        "all-roles": "Roles",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "edit-person-modal": {
         "loading": "{{common.loading}}",
@@ -2463,7 +2470,8 @@
         "theme": "Tema",
         "removed": "Eliminado",
         "published-label": "Publicado: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Petición de funciones"
     },
     "new-version-modal": {
         "developer": "{{changelog.developer}}",
@@ -2483,7 +2491,8 @@
         "username-header": "Nombre de usuario",
         "anilist-header": "AniList",
         "no-data": "{{common.no-data}}",
-        "expires-label": "Expira: {{data}}"
+        "expires-label": "Expira: {{data}}",
+        "token-set-label": "Token configurado"
     },
     "manage-matched-metadata": {
         "valid-until-header": "Siguiente refresco",
@@ -2491,16 +2500,40 @@
         "status-header": "Estado",
         "series-name-header": "Serie",
         "all-status-label": "Todo",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "actions-header": "Acciones",
+        "library-name-header": "Libreria",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "unmatched-status-label": "No Emparejado"
     },
     "match-series-result-item": {
         "chapter-count": "{{common.chapter-count}}",
-        "details": "Ver página"
+        "details": "Ver página",
+        "volume-count": "{{server-stats.volume-count}}"
     },
     "match-series-modal": {
         "search": "Buscar",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "query-label": "Consulta"
+    },
+    "manage-metadata-settings": {
+        "derive-publication-status-label": "Estado de publicación",
+        "enable-people-label": "Personas",
+        "summary-label": "Resumen",
+        "enable-relations-label": "Relaciones",
+        "enable-genres-label": "Géneros",
+        "enable-tags-label": "Etiquetas",
+        "genre": "Género"
+    },
+    "metadata-setting-field-pipe": {
+        "summary": "{{filter-field-pipe.summary}}",
+        "people": "{{tabs.people-tab}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
     }
 }

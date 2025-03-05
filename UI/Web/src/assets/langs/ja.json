@@ -25,7 +25,7 @@
         "cancel": "{{common.cancel}}",
         "saving": "保存中…",
         "update": "更新",
-        "account-detail-title": "口座の詳細"
+        "account-detail-title": "アカウントの詳細"
     },
     "user-scrobble-history": {
         "title": "Scrobble 履歴",
@@ -46,7 +46,8 @@
         "not-applicable": "該当なし",
         "processed": "処理済み",
         "not-processed": "未処理",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "Scrobbleはアカウント設定で無効になっています。"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "読書の進捗状況",
@@ -167,7 +168,8 @@
         "clients-api-key-label": "APIキー",
         "clients-opds-url-tooltip": "サポートされている OPDS クライアントのリストを参照してください ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "kavitaplus-settings-title": "Kavita+"
     },
     "user-holds": {
         "title": "Scrobble Holds",
@@ -1086,7 +1088,7 @@
         "port-label": "ポート",
         "port-tooltip": "サーバーがリッスンするIPアドレスのカンマ区切りのリストです。Dockerで実行している場合は固定されています。有効にするには再起動が必要です。",
         "backup-label": "日次バックアップ",
-        "backup-tooltip": "維持するバックアップの数。 デフォルトは30、最小は1、最大は30です.",
+        "backup-tooltip": "維持するバックアップの数。 デフォルトは30、最小は1、最大は30です。",
         "log-label": "ログの日数",
         "log-tooltip": "維持するログの数。 デフォルトは30、最小は1、最大は30です。",
         "logging-level-label": "ログレベル",
@@ -2021,7 +2023,7 @@
     "validation": {
         "required-field": "必須項目",
         "valid-email": "これは有効な電子メールでなければなりません",
-        "password-validation": "パスワードは6文字と32文字の間の長さでなければなりません"
+        "password-validation": "パスワードは6文字と256文字の間の長さでなければなりません"
     },
     "entity-type": {
         "volume": "ボリューム",
@@ -2061,5 +2063,8 @@
         "issue-num": "問題",
         "chapter-num": "チャプター",
         "volume-num": "ボリューム"
+    },
+    "tabs": {
+        "details-tab": "詳細"
     }
 }

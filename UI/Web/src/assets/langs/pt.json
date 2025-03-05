@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "A Guardar…",
         "update": "Atualizar",
-        "account-detail-title": "Detalhes da Conta"
+        "account-detail-title": "Detalhes da Conta",
+        "invalid-email-warning": "Um email inválido bloqueará algumas funcionalidades do Kavita"
     },
     "user-scrobble-history": {
         "title": "Histórico de Scrobble",
@@ -47,7 +48,9 @@
         "processed": "Processado",
         "not-processed": "Não Processado",
         "special": "{{entity-title.special}}",
-        "token-expired": "O token do AniList expirou! Os eventos de scrobbling não serão processados até que o token seja refrescado na página Contas."
+        "token-expired": "O token do AniList expirou! Os eventos de scrobbling não serão processados até que o token seja refrescado na página Contas.",
+        "scrobbling-disabled": "O scrobbling está desabilitado nas suas Definições de Conta.",
+        "generate-scrobble-events": "Eventos de Scrobbling"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leitura Efetuada",
@@ -168,7 +171,12 @@
         "clients-api-key-label": "Chave da API",
         "clients-opds-url-tooltip": "Veja uma lista de clientes OPDS suportados: ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "want-to-read-sync-label": "Sincronizar Leituras Futuras",
+        "want-to-read-sync-tooltip": "Permitir que o Kavita adicione itens à lista Leituras Futuras com base nas séries da lista de leitura Pendentes do AniList e/ou MAL",
+        "anilist-scrobbling-tooltip": "Permitir que o Kavita faça Scrobble (sincronização unidirecional) do progresso das leituras e classificações para o AniList",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "Scrobbling AniList"
     },
     "user-holds": {
         "title": "Retenções de Scrobble",
@@ -898,7 +906,9 @@
         "file-type-group-tooltip": "Os tipos de ficheiros que o Kavita pode procurar. Por exemplo, Arquivo irá incluir todos os ficheiros cb*, zip, rar, etc.",
         "exclude-patterns-label": "Padrões de Exclusão",
         "exclude-patterns-tooltip": "Configura um conjunto de padrões (sintaxe Glob) que o Kavita irá excluir dos resultados da analise de directorias.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-label": "Permitir Correspondência de Metadados",
+        "allow-metadata-matching-tooltip": "Se o Kavita deve descarregar metadados para as Séries nesta Biblioteca. Isto irá acontecer apenas se o servidor tiver uma subscrição Kavita+ ativa."
     },
     "file-type-group-pipe": {
         "archive": "Arquivo",
@@ -995,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Introduza um {{url}}",
@@ -1380,7 +1391,8 @@
         "admin-email-history": "Histórico de Emails",
         "admin-matched-metadata": "Metadados com Correspondência",
         "admin-manage-tokens": "Gerir Tokens de Utilizador",
-        "scrobble-holds": "Pausas de Scrobble"
+        "scrobble-holds": "Pausas de Scrobble",
+        "admin-metadata": "Gerir Metadados"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -2216,7 +2228,8 @@
         "person-image-downloaded": "A capa da pessoa foi descarregada e aplicada.",
         "confirm-delete-multiple-chapters": "Tem a certeza de que pretende eliminar {{count}} capítulos/volumes? Este processo não irá modificar ficheiros em disco.",
         "bulk-delete-libraries": "Tem a certeza que deseja eliminar {{count}} bibliotecas?",
-        "match-success": "Séries correspondidas com sucesso"
+        "match-success": "Séries correspondidas com sucesso",
+        "webtoon-override": "O modo Webtoon vai ser usado porque as imagens representam um webtoon."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2287,7 +2300,8 @@
         "back-to": "Voltar para {{action}}",
         "title": "Ações",
         "copy-settings": "Copiar Definições De",
-        "match": "Correspondência"
+        "match": "Correspondência",
+        "match-tooltip": "Fazer a associação manual das Séries com o Kavita+"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2420,7 +2434,8 @@
         "browse-person-by-role-title": "Todas as Obras de {{name}} como {{role}}",
         "individual-role-title": "Como um {{role}}",
         "browse-person-title": "Todos as Obras de {{name}}",
-        "known-for-title": "Conhecido Por"
+        "known-for-title": "Conhecido Por",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "edit-person-modal": {
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -2460,7 +2475,8 @@
         "theme": "Tema",
         "installed": "{{changelog.installed}}",
         "removed": "Removido",
-        "developer": "Programador"
+        "developer": "Programador",
+        "feature-requests": "Pedidos de Funcionalidades"
     },
     "match-series-modal": {
         "search": "Pesquisa",
@@ -2471,7 +2487,8 @@
         "no-results": "Não foi possível encontrar uma correspondência. Tente adicionar o url de um provedor suportado e tente novamente.",
         "query-label": "Consulta",
         "dont-match-label": "Não fazer Correspondência",
-        "dont-match-tooltip": "Optar que esta série não tenha correspondências ou scrobbling"
+        "dont-match-tooltip": "Optar que esta série não tenha correspondências ou scrobbling",
+        "description": "Selecione uma correspondência para refazer os metadados do Kavita+ e voltar a gerar eventos de scrobble. A opção \"Não Corresponder\" pode ser usada para impedir que o Kavita faça scrobbling e correspondência de metadados."
     },
     "new-version-modal": {
         "added": "{{changelog.added}}",
@@ -2489,7 +2506,9 @@
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
         "chapter-count": "{{common.chapter-count}}",
-        "details": "Ver página"
+        "details": "Ver página",
+        "updating-metadata-status": "Metadados em Atualização",
+        "releasing": "Em Lançamento"
     },
     "email-history": {
         "description": "Aqui pode encontrar todos os emails enviados pelo Kavita, e para que utilizadores.",
@@ -2507,7 +2526,8 @@
         "description": "Os utilizadores que têm tokens de scrobbling, podem ter de os renovar ocasionalmente. O Kavita irá enviar um email automaticamente, se o email estiver configurado e for válido.",
         "anilist-header": "AniList",
         "mal-header": "MAL",
-        "expires-label": "Expira: {{date}}"
+        "expires-label": "Expira: {{date}}",
+        "token-set-label": "Grupo de Tokens"
     },
     "manage-matched-metadata": {
         "title": "Correspondência de Metadados",
@@ -2520,6 +2540,62 @@
         "blacklist-status-label": "Necessita Correspondência Manual",
         "all-status-label": "Todos",
         "dont-match-label": "Não Corresponde",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "library-name-header": "Biblioteca",
+        "actions-header": "Ações",
+        "match-alt": "Corresponder {{seriesName}}"
+    },
+    "manage-metadata-settings": {
+        "description": "O Kavita+ tem a capacidade de descarregar e escrever alguns metadados na base de dados. Esta página permite selecionar o que está abrangido.",
+        "summary-label": "Sumário",
+        "enabled-label": "Permitir Descarregar Metadados",
+        "summary-tooltip": "Permitir que o Sumário seja escrito quando o campo está desbloqueado.",
+        "derive-publication-status-label": "Estado da Publicação",
+        "derive-publication-status-tooltip": "Permitir que o Estado da Publicação seja obtido do Total de Capítulos/Volumes.",
+        "enable-relations-label": "Relações",
+        "enable-relations-tooltip": "Permitir que as Relações sejam <b>adicionadas</b>.",
+        "localized-name-label": "Nome da Série Localizado",
+        "localized-name-tooltip": "Permitir que o Nome Localizado seja escrito quando o campo está desbloqueado. O Kavita tentará escolher o melhor valor possível.",
+        "enabled-tooltip": "Permitir que o Kavita descarregue metadados e os persista na sua base de dados.",
+        "enable-people-label": "Pessoas",
+        "enable-genres-tooltip": "Permitir que os Géneros sejam guardados na Série.",
+        "enable-genres-label": "Géneros",
+        "enable-cover-image-label": "Imagem de Capa",
+        "enable-cover-image-tooltip": "Permitir que o Kavita escreva a imagem de capa da Série",
+        "enable-tags-label": "Etiquetas",
+        "enable-tags-tooltip": "Permitir que as Etiquetas sejam guardadas na Série.",
+        "enable-start-date-label": "Data de Início",
+        "enable-start-date-tooltip": "Permitir que a Data de Início da Série seja guardada na Série",
+        "enable-people-tooltip": "Permitir que Pessoas (Personagens­, Escritores, etc) sejam <b>adicionados</b>. Todas as pessoas incluem imagens.",
+        "blacklist-tooltip": "O que estiver nesta lista será removido do processamento dos Géneros e Etiquetas. Neste campo devem ser colocados géneros/etiquetas que <b>não quer</b> que sejam guardados. Garanta que estão separados por vírgulas.",
+        "blacklist-label": "Colocar Géneros/Etiquetas na Lista Negra",
+        "age-rating-mapping-title": "Mapeamento de Classificação Etária",
+        "genre": "Género",
+        "tag": "Etiqueta",
+        "field-mapping-title": "Mapeamento de Campo",
+        "overrides-description": "Permitir que o Kavita escreva em campos bloqueados.",
+        "add-field-mapping-label": "Adicionar Mapeamento de Campo",
+        "add-age-rating-mapping-label": "Adicionar Mapeamento de Classificação Etária",
+        "remove-source-tag-label": "Remover Etiqueta de Origem",
+        "whitelist-label": "Etiquetas Permitidas",
+        "field-mapping-description": "Configure regras para os termos encontrados nos campos Género/Etiqueta e mapeie-os para termos novos no Género/Etiqueta ou remova-os, opcionalmente, da lista de origem. Só é aplicável quando o Género/Etiqueta podem ser escritos.",
+        "whitelist-tooltip": "Apenas que apenas os termos nesta lista sejam escritos nas <b>Etiquetas</b>. Certifique-se que os termos estão separados por vírgulas.",
+        "age-rating-mapping-description": "Os termos à esquerda que forem encontrados no Género ou Etiquetas, serão usados para definir a Classificação Etária da Série.",
+        "first-last-name-label": "Convenção Primeiro Nome/Sobrenome",
+        "first-last-name-tooltip": "Certificar que os nomes das Pessoas são escritos pela ordem Primeiro Nome e depois Sobrenome",
+        "overrides-label": "Substituições",
+        "person-roles-label": "Papéis"
+    },
+    "metadata-setting-field-pipe": {
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "covers": "Capas",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
     }
 }

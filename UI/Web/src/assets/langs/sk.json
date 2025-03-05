@@ -4,7 +4,7 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "Zabudnuté heslo?",
+        "forgot-password": "Zabudli ste heslo?",
         "submit": "Prihlásiť sa"
     },
     "dashboard": {
@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Ukladanie…",
         "update": "Aktualizovať",
-        "account-detail-title": "Podrobnosti o účte"
+        "account-detail-title": "Podrobnosti o účte",
+        "invalid-email-warning": "Neplatný e-mail zablokuje niektoré funkcie Kavity"
     },
     "user-scrobble-history": {
         "title": "História Scrobblingu",
@@ -48,7 +49,8 @@
         "not-read-warning": "Upstream poskytovatelia si vždy ponechajú najvyššie číslo",
         "volume-num": "Zväzok {{num}}",
         "generate-scrobble-events": "Záložné udalosti",
-        "token-expired": "Platnosť vášho tokenu AniList vypršala! Scrobbling udalosti sa spracujú až po obnovení na stránke Účty."
+        "token-expired": "Platnosť vášho tokenu AniList vypršala! Scrobbling udalosti sa spracujú až po obnovení na stránke Účty.",
+        "scrobbling-disabled": "Scrobblovanie je zakázané v nastaveniach vášho účtu."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Pokrok v čítaní",
@@ -169,7 +171,12 @@
         "show-screen-hints-tooltip": "Zobrazte prekrytie, ktoré vám pomôže pochopiť oblasť a smer stránkovania",
         "emulate-comic-book-tooltip": "Aplikuje tieňový efekt na emuláciu čítania z knihy",
         "pdf-spread-mode-tooltip": "Ako by mali byť stránky usporiadané. Jedno alebo dvojlôžkové (nepárne/párne)",
-        "pdf-theme-label": "Téma"
+        "pdf-theme-label": "Téma",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList Scrobblovanie",
+        "anilist-scrobbling-tooltip": "Umožniť Kavite scrobblovať (jednosmerná synchronizácia) priebeh čítania a hodnotenia do zoznamu AniList",
+        "want-to-read-sync-label": "Synchronizovať \"chcem čítať\"",
+        "want-to-read-sync-tooltip": "Povoľte Kavite pridávať položky do vášho zoznamu Chcete si prečítať na základe AniListu a MAL sérií v zozname čakajúcich na prečítanie"
     },
     "user-holds": {
         "title": "Scrobble tituly",
@@ -307,7 +314,7 @@
         "no-token-set": "Token nieje nastavený",
         "token-set": "Token je nastavený",
         "generate": "Generovať",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "Noví používatelia by mali kliknúť na \"{{scrobbling-providers.generate}}\" nižšie, aby umožnili Kavite+ komunikovať s {{service}}. Po autorizácii programu skopírujte a vložte token do vstupu nižšie. Token môžete kedykoľvek regenerovať.",
         "token-input-label": "{{service}} Token vložiť sem",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
@@ -895,7 +902,9 @@
         "help": "{{common.help}}",
         "help-us-part-1": "Pomôžte nám: ",
         "type-tooltip": "Typ knižnice určuje, ako sa analyzujú názvy súborov a či používateľské rozhranie zobrazuje kapitoly (manga) vs. čísla (komiksy). Viac podrobností o rozdieloch medzi typmi knižníc nájdete na wiki.",
-        "kavitaplus-eligible-label": "Kavita+ Oprávnené"
+        "kavitaplus-eligible-label": "Kavita+ Oprávnené",
+        "allow-metadata-matching-label": "Povoliť zhodu metadát",
+        "allow-metadata-matching-tooltip": "Mala by Kavita stiahnuť metadáta pre série v rámci tejto knižnice. Toto sa uskutoční len vtedy, ak má server aktívne predplatné Kavita+."
     },
     "file-type-group-pipe": {
         "archive": "Archív",
@@ -992,7 +1001,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Zadajte {{url}}",
@@ -1327,7 +1337,7 @@
         "source-url-title": "Zdroj Url:",
         "last-sync-tooltip": "Kavita sa denne synchronizuje s poskytovateľmi zberu upstream.",
         "missing-series-title": "Chýbajúce série:",
-        "total-series-title": "Celkovo sérii"
+        "total-series-title": "Celkovo sérii:"
     },
     "library-recommended": {
         "no-data": "Nie je tu nič na zobrazenie. Pridajte nejaké metadáta do svojej knižnice, prečítajte si niečo alebo niečo ohodnoťte. Táto knižnica môže mať tiež vypnuté odporúčania.",
@@ -1368,7 +1378,8 @@
         "admin-manage-tokens": "Správa používateľských tokenov",
         "admin-email-history": "História e-mailov",
         "admin-matched-metadata": "Zhodné metadáta",
-        "scrobble-holds": "Scrobble chyty"
+        "scrobble-holds": "Scrobble chyty",
+        "admin-metadata": "Spravovať metadáta"
     },
     "collection-detail": {
         "no-data": "Neexistujú žiadne položky. Skúste pridať sériu.",
@@ -1954,7 +1965,7 @@
         "clear": "{{common.clear}}",
         "smart-filters-title": "Smart Filtre",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "Keď je prítomný filter, nemôžete zmeniť poradie položiek pomocou prehodenia (drag & drop). Použite {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Hromadný režim"
     },
@@ -2168,7 +2179,8 @@
         "person-image-downloaded": "Titulná fotka osoby bola stiahnutá a použitá.",
         "confirm-delete-multiple-chapters": "Naozaj chcete odstrániť {{count}} kapitolu/zväzky? Nezmení súbory na disku.",
         "bulk-delete-libraries": "Naozaj chcete odstrániť {{count}} knižnice?",
-        "match-success": "Séria správne priradená"
+        "match-success": "Séria správne priradená",
+        "webtoon-override": "Prepnutie do režimu Webtoon kvôli obrázkom reprezentujúcim webtoon."
     },
     "actionable": {
         "scan-library": "Skenovať knižnicu",
@@ -2223,7 +2235,7 @@
         "scan-series-tooltip": "Skenovať Série pre zmeny",
         "promote-tooltip": "Zviditeľnite položku pre všetkých používateľov",
         "customize-tooltip": "TODO",
-        "scan-library-tooltip": "Skenovať zmeny v knižnici. Použite vynútenie skenovania pre vynútenie kontroly každého priečinka.",
+        "scan-library-tooltip": "Skenovať zmeny v knižnici. Použite vynútenie skenovania pre vynútenie kontroly každého priečinka",
         "generate-colorscape": "Generovať ColorScape",
         "refresh-covers-tooltip": "Regenerovať všetky Obaly",
         "mark-as-unread-tooltip": "Označiť priebeh ako neprečítané",
@@ -2234,7 +2246,8 @@
         "unpromote": "Zrušiť propagáciu",
         "unpromote-tooltip": "Obmedzte viditeľnosť iba na svoj účet",
         "copy-settings": "Kopírovať nastavenia z",
-        "match": "Zhoda"
+        "match": "Zhoda",
+        "match-tooltip": "Zoraďte sériu s Kavitou+ manuálne"
     },
     "preferences": {
         "left-to-right": "Zľava doprava",
@@ -2331,7 +2344,8 @@
         "individual-role-title": "Ako {{role}}",
         "browse-person-title": "Všetky diela {{name}}",
         "known-for-title": "Známy pre",
-        "browse-person-by-role-title": "Všetky diela {{name}} ako {{role}}"
+        "browse-person-by-role-title": "Všetky diela {{name}} ako {{role}}",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "download-button": {
         "download-tooltip": "Stiahnuť",
@@ -2461,7 +2475,8 @@
         "removed": "Odstránené",
         "api": "API",
         "published-label": "Zverejnené: ",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Požiadavky na funkcie"
     },
     "new-version-modal": {
         "title": "Kavita bola aktualizovaná!",
@@ -2487,7 +2502,11 @@
         "blacklist-status-label": "Vyžaduje sa manuálna zhoda",
         "all-status-label": "Všetky",
         "dont-match-label": "Nezhodovať",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "library-name-header": "Knižnica",
+        "actions-header": "Akcie",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "match-alt": "Zhoda {{seriesName}}"
     },
     "match-series-modal": {
         "description": "Vyberte zhodu na opätovné prepojenie metadát Kavita+ a regeneráciu scrobble udalostí. \"Nezhoda\" sa dá použiť na obmedzenie Kavity v zhode metadát a scrobblingu.",
@@ -2524,6 +2543,59 @@
         "chapter-count": "{{common.chapter-count}}",
         "volume-count": "{{server-stats.volume-count}}",
         "releasing": "Vydanie",
-        "details": "Zobraziť stránku"
+        "details": "Zobraziť stránku",
+        "updating-metadata-status": "Aktualizácia metadát"
+    },
+    "manage-metadata-settings": {
+        "tag": "Tag/Značka",
+        "enable-genres-tooltip": "Povoľte zapísanie žánrov série.",
+        "description": "Systém Kavita+ má schopnosť preberať a zapisovať niektoré obmedzené metadáta do databázy. Táto stránka umožňuje prepínať, čo je v rozsahu.",
+        "localized-name-label": "Názov lokalizovanej série",
+        "localized-name-tooltip": "Umožniť zápis lokalizovaného názvu, keď je pole odomknuté. Kavita sa pokúsi o čo najlepší odhad.",
+        "derive-publication-status-tooltip": "Umožniť odvodenie statusu publikácie z celkového počtu kapitol/súborov.",
+        "enable-relations-label": "Vzťahy",
+        "enable-relations-tooltip": "<b>Povoliť</b> pridávanie vzťahov sérii.",
+        "enable-cover-image-label": "Obrázok obálky",
+        "enable-cover-image-tooltip": "Povoliť Kavite zapísať obrázok na obálku série",
+        "enable-start-date-tooltip": "Umožniť zápis dátumu začiatku série do série",
+        "enable-genres-label": "Žánre",
+        "overrides-label": "Prepísania",
+        "field-mapping-description": "Nastavte pravidlá pre určité reťazce nájdené v poli Žáner/Značka(Tag) a namapujte ich na nový reťazec v Žáner/Značka(Tag) a prípadne ho odstráňte zo zoznamu Zdroja. Použiteľné iba vtedy, keď je povolený zápis žánru/značky(tagu).",
+        "overrides-description": "Umožnite Kavite zapísať uzamknuté polia.",
+        "enabled-label": "Povolenie preberania metadát",
+        "summary-label": "Zhrnutie",
+        "summary-tooltip": "Umožniť zápis súhrnu, keď je pole odomknuté.",
+        "derive-publication-status-label": "Stav publikácie",
+        "enabled-tooltip": "Povoľte Kavite sťahovať metadáta a zapisovať do databázy.",
+        "enable-start-date-label": "Dátum začiatku",
+        "enable-people-label": "Ľudia",
+        "enable-people-tooltip": "Povoliť <b>pridávanie</b> ľudí (postáv, spisovateľov atď.). Všetky osoby obsahujú obrázky.",
+        "enable-tags-tooltip": "Povolenie zapísania Tagov/značiek série.",
+        "blacklist-label": "Čierna listina/Blacklist Žánrov/značiek",
+        "blacklist-tooltip": "Všetko v tomto zozname bude odstránené zo spracovania žánru aj tagu/značky. Toto je miesto na pridávanie žánrov/značiek(tagov), ktoré <b>nechcete</b> zapísať. Uistite sa, že sú oddelené čiarkami.",
+        "enable-tags-label": "Tagy/Značky",
+        "whitelist-tooltip": "Povoliť zápis reťazca v tomto zozname iba pre <b>Tagy/Značky</b>. Uistite sa, že sú oddelené čiarkami.",
+        "age-rating-mapping-title": "Priradenie vekového hodnotenia",
+        "age-rating-mapping-description": "Akékoľvek reťazce vľavo, ak sa nachádzajú v žánri alebo v tagoch/značkách, nastavia vekové hodnotenie série.",
+        "genre": "Žáner",
+        "whitelist-label": "Biely zoznam(Whitelist) tagov/značiek",
+        "add-age-rating-mapping-label": "Pridajte mapovanie vekového hodnotenia",
+        "field-mapping-title": "Mapovanie polí",
+        "add-field-mapping-label": "Pridať mapovanie polí",
+        "remove-source-tag-label": "Odstrániť zdroj značky/tagu",
+        "first-last-name-label": "Meno Priezvisko Pomenovanie",
+        "person-roles-label": "Roly",
+        "first-last-name-tooltip": "Uistite sa, že mená osôb sú napísané najprv s krstným menom a potom s priezviskom"
+    },
+    "metadata-setting-field-pipe": {
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "covers": "Obaly",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
     }
 }

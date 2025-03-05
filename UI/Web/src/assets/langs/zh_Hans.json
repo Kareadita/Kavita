@@ -1005,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "输入 {{url}}",
@@ -2227,7 +2228,8 @@
         "person-image-downloaded": "已下载并应用了人物封面。",
         "confirm-delete-multiple-chapters": "您确定要删除 {{count}} 章节/卷吗？它不会修改磁盘上的文件。",
         "bulk-delete-libraries": "您确定要删除 {{count}} 个资料库吗？",
-        "match-success": "系列匹配正确"
+        "match-success": "系列匹配正确",
+        "webtoon-override": "由于图片为条漫形式，正在切换至条漫模式。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2314,7 +2316,7 @@
         "split-right-to-left": "从右到左拆分",
         "split-left-to-right": "从左到右拆分",
         "no-split": "不拆分",
-        "webtoon": "网络漫画",
+        "webtoon": "条漫",
         "single": "单页",
         "double": "双页",
         "double-manga": "双页 (日漫)",
@@ -2502,7 +2504,8 @@
         "added": "添加时间",
         "changed": "已更改",
         "fixed": "固定",
-        "developer": "开发人员"
+        "developer": "开发人员",
+        "feature-requests": "功能请求"
     },
     "new-version-modal": {
         "title": "Kavita 已更新！",

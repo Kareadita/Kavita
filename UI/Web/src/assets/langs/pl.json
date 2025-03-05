@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Zapisuję…",
         "update": "Aktualizacja",
-        "account-detail-title": "Szczegóły konta"
+        "account-detail-title": "Szczegóły konta",
+        "invalid-email-warning": "Nie poprawny adres e-mail zablokuje niektóre funkcję Kavity"
     },
     "user-scrobble-history": {
         "title": "Historia Scrobblowania",
@@ -38,7 +39,7 @@
         "series-header": "Serie",
         "data-header": "Data",
         "is-processed-header": "Jest przetwarzany",
-        "no-data": "Brak danych",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Tom {{v}} Rozdział {{n}}",
         "volume-num": "Tom {{num}}",
         "chapter-num": "Rozdział {{num}}",
@@ -46,7 +47,10 @@
         "not-applicable": "Nie dotyczy",
         "processed": "Przetworzono",
         "not-processed": "Nie przetworzono",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "Scrobbling jest wyłączony w opcjach twojego Konta.",
+        "token-expired": "Twój token AniList wygasł! Scrobbling nie będzie przetwarzany do momentu jego odnowienia na stronie Konta.",
+        "generate-scrobble-events": "Wydarzenia Backfill"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Postęp czytania",
@@ -167,12 +171,20 @@
         "clients-api-key-label": "Klucz API",
         "clients-opds-url-tooltip": "Zobacz listę wspieranych klientów ODPS: ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-tooltip": "Pozwól Kavicie Scrobblować (synchronizacja jednostronna) postęp czytania i oceny do AniList",
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "want-to-read-sync-label": "Synchronizuj Chcę przeczytać",
+        "want-to-read-sync-tooltip": "Pozwól Kavicie na dodanie do twojej listy Chcę przeczytać na podstawie serii oczekujących na przeczytanie z AniList i MAL"
     },
     "user-holds": {
-        "description": "To jest lista serii zarządzana przez użytkownika, które nie będą scrobblowane do zewnętrznych dostawców. Możesz usunąć serię w dowolnym momencie, a następne zdarzenie umożliwiające scrobblowanie (postęp czytania, ocena, status 'chcę przeczytać') wywoła odpowiednie zdarzenia.",
+        "description": "To jest lista serii zarządzana przez użytkownika, które nie będą scrobblowane do zewnętrznych dostawców. Możesz usunąć serię w dowolnym momencie, a następne zdarzenie umożliwiające scrobblowanie (postęp czytania, ocena, status 'chcę przeczytać') wywoła scrobblowanie.",
         "no-data": "{{typeahead.no-data}}",
-        "title": "Wstrzymane pozycje scrobblowania"
+        "title": "Wstrzymane pozycje scrobblowania",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "title": "Menedżer motywów",
@@ -222,7 +234,7 @@
         "devices-title": "Urządzenia",
         "no-devices": "Nie skonfigurowano jeszcze żadnych urządzeń",
         "platform-label": "Platforma",
-        "email-label": "Email",
+        "email-label": "E-mail",
         "name-label": "Nazwa",
         "email-setup-alert": "Chcesz wysyłać pliki na swoje urządzenia? Najpierw poproś administratora o skonfigurowanie poczty e-mail!",
         "add": "{{common.add}}",
@@ -258,12 +270,12 @@
         "permission-error": "Nie masz uprawnień do zmiany hasła. Skontaktuj się z administratorem serwera."
     },
     "change-email": {
-        "email-title": "Email",
-        "email-label": "Nowy Email",
+        "email-title": "E-mail",
+        "email-label": "Nowy E-mail",
         "current-password-label": "Bieżące hasło",
         "email-not-confirmed": "Ten e-mail nie został potwierdzony",
         "email-confirmed": "Ten e-mail został potwierdzony",
-        "email-updated-title": "Zaktualizowano email",
+        "email-updated-title": "Zaktualizowano e-mail",
         "email-updated-description": "Możesz użyć poniższego linku, aby potwierdzić adres e-mail swojego konta. Jeżeli został skonfigurowany, wiadomość e-mail zostanie wysłana, a link może zostać użyty do potwierdzenia wiadomości e-mail.",
         "setup-user-account": "Konfiguracja konta użytkownika",
         "invite-url-label": "Adres URL zaproszenia",
@@ -312,14 +324,20 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "mal-used-for": "MyAnimeList jest użyte do synchronizacji Inteligentnej Kolekcji oraz Chcę przeczytać.",
+        "anilist-first-description": "Twój token AniList jest teraz skonfigurowany. Ten token działa przez rok, a Kavita poinformuje Cię przed jego wygaśnięciem, aby odświeżyć go tutaj. Dzięki temu Kavita wygeneruje zdarzenia scrobble (synchronizacji) z historii czytania, chęci przeczytania i ocen. Można to zrobić teraz lub później. Jeśli masz jakieś serie, których nie chcesz scrobblować, wybierz później i umieść na nich Scrobble Hold. Wystarczy uruchomić to zadanie tylko raz. Następnie Kavita zajmie się synchronizacją.<br/> Jeśli wybierzesz „Później”, możesz znaleźć przycisk na stronie Scrobbling.",
+        "anilist-used-for": "AniList jest używane do scrobblowania (synchronizacja danych) i synchronizacja Chcę przeczytać.",
+        "anilist-first-header": "Token AniList zapisany",
+        "anilist-first-later": "Potem",
+        "anilist-first-now": "Teraz"
     },
     "typeahead": {
         "locked-field": "Pole jest zablokowane",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "Dodaj {{item}}…",
-        "no-data": "Brak danych",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", aby dodać element niestandardowy"
     },
     "generic-list-modal": {
@@ -606,14 +624,35 @@
         "activate-discordId-tooltip": "Połącz swoje konto Discord z Kavita+. Dzięki temu uzyskasz dostęp do ukrytych kanałów, które pomogą ci kształtować Kavitę.",
         "discord-validation": "To nie jest prawidłowy identyfikator użytkownika Discord. Twój identyfikator użytkownika nie jest nazwą użytkownika Discord.",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "Resetuj licencję",
         "activate-reset-tooltip": "Unieważnienie poprzedniej rejestracji przy użyciu licencji. Wymaga zarówno licencji, jak i adresu e-mail",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "Kavita+ to usługa subskrypcji premium, która odblokowuje funkcje dla wszystkich użytkowników tej instancji Kavita. Kup subskrypcję, aby odblokować ",
         "kavita+-desc-part-2": "dodatkowe korzyści",
         "kavita+-desc-part-3": "dzisiaj!",
-        "kavita+-requirement": "Kavita+ została zaprojektowana do pracy tylko z ostatnim 2 wersjami. Wszystko poza tym może nie działać.",
-        "help-label": "{{common.help}}"
+        "kavita+-requirement": "Kavita+ została zaprojektowana do pracy tylko z ostatnim 3 wersjami. Wszystko poza tym może nie działać.",
+        "help-label": "{{common.help}}",
+        "k+-license-overwrite": "Licencja jest zarejestrowana na inną instancję Kavita.Może się to zdarzyć przy ponownej instalacji i rzadko z powodu aktualizacji systemu. Wybierz opcję zastąpienia, aby wymusić rejestrację tej instancji w Kavita+.",
+        "k+-unlocked-description": "Witamy w Kavita+! Kavita wygeneruje wydarzenia scrobble na podstawie twoich postępów, ocen i listy Chcę przeczytać po zarejestrowaniu dostawców scrobblingu na koncie. Poświęć trochę czasu, aby upewnić się, że umieściłeś blokady scrobblowania dla wszystkich serii, których nie chcesz scrobblować.",
+        "info-title": "Informacje licencyjne",
+        "actions-title": "Akcje",
+        "license-active-label": "Aktywacja licencji",
+        "expiration-label": "Wygaśnie",
+        "valid-tooltip": "Ważne",
+        "invalid-tooltip": "Nieważne",
+        "reset-label": "Reset",
+        "delete-label": "Usuń licencję",
+        "faq-title": "FAQ",
+        "total-subbed-months-label": "Łączna liczba miesięcy subskrypcji",
+        "license-mismatch": "Licencja może być używana w innej instancji Kavity. Zarejestruj ponownie aby naprawić.",
+        "k+-already-registered-header": "Licencja jest już zarejestrowana",
+        "overwrite": "Zastęp",
+        "k+-unlocked": "Kavita+ odblokowana!",
+        "supported-version-label": "W wspieranej wersji Kavita",
+        "reset-tooltip": "Spowoduje to reset serwera Kavita+, do którego powiązana jest licencja. Wymaga adresu e-mail i klucza licencji",
+        "email-label": "Zarejestrowany e-mail",
+        "delete-tooltip": "Spowoduje to usunięcie licencji z Kavity, aby uniemożliwić Kavicie rozmowę z Kavitą+. Nie powoduje to anulowania subskrypcji. Aby anulować subskrypcję, należy najpierw użyć opcji „Zarządzaj”.",
+        "manage-tooltip": "Zaktualizuj metody płatności, anulowanie/wstrzymanie subskrypcji, itp."
     },
     "book-line-overlay": {
         "copy": "Kopiuj",
@@ -867,7 +906,9 @@
         "file-type-group-tooltip": "Jakie typy plików Kavita będzie szukać podczas skanowania. Na przykład, Archiwa zawiera wszystkie cb*, zip, rar, itd. typy plików.",
         "exclude-patterns-label": "Wyklucz wzorce",
         "exclude-patterns-tooltip": "Skonfiguruj zestaw wzorców (składnia Glob) które Kavita będzie dopasowywać podczas skanowania katalogów i wykluczać z wyników skanera.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-tooltip": "Czy Kavita powinna pobrać metadane dla serii w tej bibliotece.Nastąpi to tylko wtedy, gdy serwer ma aktywną subskrypcję Kavita+.",
+        "allow-metadata-matching-label": "Zezwól na dopasowywanie metadanych"
     },
     "file-type-group-pipe": {
         "archive": "Archiwum",
@@ -964,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Wprowadź {{url}}",
@@ -1023,7 +1065,7 @@
         "file-header": "Plik",
         "comment-header": "Komentarz",
         "created-header": "Utworzono",
-        "no-data": "Brak danych"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Aby korzystać z niektórych funkcji Kavita, takich jak Wyślij do urządzenia, należy skonfigurować dostawcę poczty e-mail. Inne funkcje, takie jak zapomniałem hasła, wymagają interwencji admina bez konfiguracji poczty e-mail.",
@@ -1324,18 +1366,18 @@
         "server-section-title": "Serwer",
         "info-section-title": "Info",
         "import-section-title": "Importuj",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "Ogólne",
         "admin-users": "Użytkownicy",
         "admin-libraries": "Biblioteki",
         "admin-media": "Media",
         "admin-media-issues": "Problemy z mediami",
         "admin-logs": "Logi",
-        "admin-email": "Email",
+        "admin-email": "E-mail",
         "admin-tasks": "Zadania",
         "admin-statistics": "Statystyki",
         "admin-system": "System",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "Licencja",
         "account": "Konto",
         "preferences": "Preferencje",
         "clients": "Klucz API / ODPS",
@@ -1345,7 +1387,12 @@
         "theme": "Motyw",
         "customize": "Dostosuj",
         "cbl-import": "Lista czytelnicza CBL",
-        "mal-stack-import": "MAL Stack"
+        "mal-stack-import": "MAL Stack",
+        "admin-matched-metadata": "Pasujące metadane",
+        "admin-manage-tokens": "Zarządzanie tokenami użytkownika",
+        "admin-metadata": "Zarządzaj metadanymi",
+        "scrobble-holds": "Wstrzymane pozycje scrobblowania",
+        "admin-email-history": "Historia e-mail"
     },
     "collection-detail": {
         "no-data": "Brak elementów. Spróbuj dodać serię.",
@@ -1820,7 +1867,7 @@
     },
     "kavitaplus-metadata-breakdown-stats": {
         "description": "Kavita powoli pobiera metadane (oceny, recenzje, rekomendacje itp.) dla kwalifikujących się serii.",
-        "no-data": "Brak danych",
+        "no-data": "{{common.no-data}}",
         "completed-series-label": "Zakończone serie",
         "complete": "Wszystkie serie mają metadane",
         "title": "Podział metadanych Kavita+",
@@ -1870,7 +1917,7 @@
         "count-header": "Liczba"
     },
     "series-preview-drawer": {
-        "staff-label": "Ekipa",
+        "staff-label": "Personel",
         "tags-label": "{{filter-field-pipe.tags}}",
         "genres-label": "{{filter-field-pipe.genres}}",
         "view-series": "Wyświetl serię",
@@ -2110,13 +2157,13 @@
         "series-deleted": "Seria usunięta",
         "delete-review": "Czy na pewno chcesz usunąć swoją recenzję?",
         "review-deleted": "Recenzja usunięta",
-        "file-send-to": "Plik(i) wysłane emailem do {{name}}",
+        "file-send-to": "Plik(i) wysłane e-mailem do {{name}}",
         "theme-missing": "Aktywny motyw już nie istnieje. Odśwież stronę.",
         "email-sent": "Email wysłany do {{name}}",
         "email-not-sent": "Adres e-mail w pliku nie jest prawidłowy i nie można go wysłać. Link został zrzucony do logów. Administrator może podać ten link, aby zakończyć przepływ.",
         "k+-license-saved": "Klucz licencyjny został zapisany, ale jest nieważny. Kliknij sprawdź, aby ponownie zweryfikować subskrypcję. Propagacja rejestracji po raz pierwszy może potrwać kilka minut.",
         "k+-error": "Wystąpił błąd podczas aktywacji licencji. Spróbuj ponownie.",
-        "k+-delete-key": "Spowoduje to jedynie usunięcie klucza licencyjnego Kavity i umożliwi wyświetlenie linku do zakupu. Nie spowoduje to anulowania subskrypcji! Używaj tej opcji tylko na polecenie pomocy technicznej!",
+        "k+-delete-key": "Spowoduje to jedynie usunięcie klucza licencyjnego Kavity i umożliwi wyświetlenie linku do zakupu. <b>Nie spowoduje to anulowania subskrypcji!</b> Użyj opcji Zarządzaj, aby najpierw anulować subskrypcję.",
         "k+-reset-key": "To unieważni poprzednią rejestrację przy użyciu licencji i pozwoli na ponowną rejestrację instancji Kavita.",
         "k+-reset-key-success": "Twoja licencja została wyrejestrowana. Użyj przycisku Edytuj, aby ponownie zarejestrować swoją instancję i ponownie aktywować Kavita+",
         "library-deleted": "Biblioteka {{name}} została usunięta",
@@ -2179,7 +2226,10 @@
         "person-image-downloaded": "Obrazek osoby został pobrany i ustawiony.",
         "must-select-library": "Należy wybrać co najmniej jedną bibliotekę",
         "stack-imported": "Zaimportowano Stacki",
-        "confirm-delete-multiple-chapters": "Czy na pewno chcesz usunąć {{count}} rozdziałów/tomów? Nie spowoduje to modyfikacji plików na dysku."
+        "confirm-delete-multiple-chapters": "Czy na pewno chcesz usunąć {{count}} rozdziałów/tomów? Nie spowoduje to modyfikacji plików na dysku.",
+        "webtoon-override": "Przełączanie do trybu Webtoon z powodu obrazów odpowiadających webtoonowi.",
+        "bulk-delete-libraries": "Jesteś pewien że chcesz usunąć {{count}} bibliotek?",
+        "match-success": "Seria dopasowana prawidłowo"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 godzina",
@@ -2249,7 +2299,9 @@
         "back-to": "Powrót do {{action}}",
         "title": "Akcje",
         "copy-settings": "Kopiuj ustawienia z",
-        "import-mal-stack": "Importuj MAL Stack"
+        "import-mal-stack": "Importuj MAL Stack",
+        "match-tooltip": "Dopasuj serię ręcznie z Kavita+",
+        "match": "Dopasuj"
     },
     "preferences": {
         "left-to-right": "Od lewej do prawej",
@@ -2343,7 +2395,7 @@
         "edit": "Edytuj",
         "help": "Pomoc",
         "submit": "Prześlij",
-        "email": "Email",
+        "email": "E-mail",
         "read": "Czytaj",
         "loading": "Ładowanie…",
         "username": "Nazwa użytkownika",
@@ -2366,14 +2418,17 @@
         "issue-nums": "Wydania",
         "chapter-nums": "Rozdziały",
         "volume-nums": "Tomy",
-        "author-count": "{{num}} autorów"
+        "author-count": "{{num}} autorów",
+        "no-data": "Brak danych",
+        "chapter-count": "{{num}} Rozdziałów"
     },
     "person-detail": {
         "all-roles": "Role",
         "known-for-title": "Znany z",
         "browse-person-title": "Wszystkie dzieła {{name}}",
         "individual-role-title": "Jako {{role}}",
-        "browse-person-by-role-title": "Wszystkie dzieła {{name}} jako {{role}}"
+        "browse-person-by-role-title": "Wszystkie dzieła {{name}} jako {{role}}",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "browse-authors": {
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -2382,7 +2437,10 @@
     },
     "confirm": {
         "confirm": "Potwierdź",
-        "alert": "Uwaga"
+        "alert": "Uwaga",
+        "info": "Informacje",
+        "cancel": "{{common.cancel}}",
+        "ok": "Ok"
     },
     "edit-person-modal": {
         "role-label": "Rola",
@@ -2406,5 +2464,138 @@
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "changelog-update-item": {
+        "added": "Dodano",
+        "download": "Pobierz",
+        "changed": "Zmieniono",
+        "fixed": "Naprawione",
+        "developer": "Twórca",
+        "theme": "Motyw",
+        "removed": "Usunięto",
+        "api": "API",
+        "published-label": "Opublikowano: ",
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Prośby o funkcje"
+    },
+    "new-version-modal": {
+        "refresh": "Odśwież",
+        "description": "Nowa wersja Kavity jest dostępna. Odśwież aby zaktualizować.",
+        "api": "{{changelog.api}}",
+        "title": "Kavita została zaktualizowana!",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "developer": "{{changelog.developer}}",
+        "close": "{{common.close}}"
+    },
+    "manage-matched-metadata": {
+        "description": "Tutaj znajdują się wszystkie odpowiednie serie, które można dopasować do zewnętrznych metadanych. Kavita będzie wstępnie pobierać lub odświeżać metadane serii, 50 serii na 24 godziny dziennie.",
+        "no-data": "{{common.no-data}}",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "title": "Dopasowana metadata",
+        "series-name-header": "Serie",
+        "matched-status-label": "Dopasowano",
+        "unmatched-status-label": "Nie dopasowano",
+        "blacklist-status-label": "Wymagane ręczne dopasowanie",
+        "library-name-header": "Biblioteka",
+        "valid-until-header": "Następne odświeżenie",
+        "actions-header": "Akcje",
+        "all-status-label": "Wyszystko",
+        "match-alt": "Dopasuj {{seriesName}}",
+        "dont-match-label": "Nie pasuję",
+        "status-header": "tatus"
+    },
+    "manage-metadata-settings": {
+        "derive-publication-status-tooltip": "Umożliwienie uzyskania statusu publikacji na podstawie łącznej liczby rozdziałów/tomów.",
+        "enabled-label": "Włącz pobieranie metadanych",
+        "derive-publication-status-label": "Status publikacji",
+        "first-last-name-label": "Imię/Nazwisko",
+        "person-roles-label": "Role",
+        "enabled-tooltip": "Zezwól Kavicie na pobieranie metadanych i zapisywanie ich w bazie danych.",
+        "field-mapping-description": "Konfiguruje reguły dla określonych ciągów znaków znalezionych w polu Genre/Tag i mapuje je na nowy ciąg znaków w polu Genre/Tag oraz opcjonalnie usuwa je z listy źródłowej. Ma zastosowanie tylko wtedy, gdy zapisywanie Genre/Tag jest włączone.",
+        "first-last-name-tooltip": "Upewnij się że imiona Ludzi są zapisywanie - Imię potem Nazwisko",
+        "enable-start-date-tooltip": "Zezwalaj na zapisywanie daty rozpoczęcia serii w serii",
+        "summary-tooltip": "Zezwala na zapisywanie streszczenia, gdy pole jest odblokowane.",
+        "description": "Kavita+ ma możliwość pobierania i zapisywania pewnych ograniczonych metadanych do bazy danych. Ta strona umożliwia przełączanie ich zakresu.",
+        "summary-label": "Streszczenie",
+        "localized-name-label": "Zlokalizowana nazwa serii",
+        "localized-name-tooltip": "Zezwól na wpisanie zlokalizowanej nazwy, gdy pole jest odblokowane.Kavita podejmie próbę najlepszego odgadnięcia.",
+        "age-rating-mapping-description": "Wszelkie ciągi po lewej stronie, jeśli zostaną znalezione w gatunku lub tagach, ustawią klasyfikację wiekową serii.",
+        "enable-relations-label": "Powiązania",
+        "enable-tags-tooltip": "Zezwalaj na zapisywanie tagów serii.",
+        "blacklist-label": "Czarna lista Gatunki/Tagi",
+        "field-mapping-title": "Mapowanie pola",
+        "enable-relations-tooltip": "Zezwalaj na <b>dodawanie</b> relacji między seriami.",
+        "enable-people-label": "Ludzie",
+        "enable-start-date-label": "Data rozpoczęcia",
+        "enable-genres-label": "Gatunki",
+        "enable-people-tooltip": "Zezwalaj na <b>dodawanie</b> osób (postaci, pisarzy itp.). Wszystkie osoby zawierają obrazy.",
+        "enable-cover-image-label": "Obraz okładki",
+        "enable-genres-tooltip": "Zezwalaj na zapisywanie gatunków serii.",
+        "enable-tags-label": "Tagi",
+        "enable-cover-image-tooltip": "Pozwól Kavicie napisać obraz okładki dla serii",
+        "blacklist-tooltip": "Wszystko, co znajdzie się na tej liście, zostanie usunięte z przetwarzania gatunków i tagów. Jest to miejsce na dodanie gatunków/tagów, które <b>nie mają</b> być zapisywane. Upewnij się, że są one oddzielone przecinkami.",
+        "whitelist-label": "Tagi na białej liście",
+        "whitelist-tooltip": "Zezwalaj na zapisywanie ciągów z tej listy tylko dla <b>Tagów</b>.Upewnij się, że są one oddzielone przecinkami.",
+        "age-rating-mapping-title": "Mapowanie klasyfikacji wiekowej",
+        "genre": "Gatunek",
+        "tag": "Tag",
+        "remove-source-tag-label": "Usuń tag źródłowy",
+        "add-age-rating-mapping-label": "Dodaj filtr klasyfikacji wiekowej",
+        "add-field-mapping-label": "Dodaj mapowanie pola",
+        "overrides-label": "Zastąpienia",
+        "overrides-description": "Zezwól Kavicie na zapisywanie w zablokowanych polach."
+    },
+    "match-series-modal": {
+        "description": "Wybierz dopasowanie, aby przekierować metadane Kavita+ i zregenerować zdarzenia scrobblowania.Opcja Nie dopasowuj może być użyta do ograniczenia dopasowywania metadanych i scrobblowania przez Kavita+.",
+        "no-results": "Nie można znaleźć dopasowania. Spróbuj dodać adres URL od obsługiwanego dostawcy i spróbuj ponownie.",
+        "dont-match-label": "Ni pasuję",
+        "dont-match-tooltip": "Wybierz tą serie do dopasowania i scrobblingu",
+        "save": "{{common.save}}",
+        "title": "Dopasuj {{seriesName}}",
+        "query-label": "Zapytanie",
+        "close": "{{common.close}}",
+        "query-tooltip": "Wprowadź nazwę serii, adres URL AniList/MyAnimeList. Adresy URL będą użyte do bezpośredniego wyszukiwania.",
+        "search": "Szukaj"
+    },
+    "manage-user-tokens": {
+        "description": "Użytkownicy posiadający tokeny scrobblowania mogą od czasu do czasu wymagać odnowienia. Kavita automatycznie wyśle do nich wiadomość e-mail, jeśli e-mail jest skonfigurowany i mają prawidłowy adres e-mail.",
+        "mal-header": "MAL",
+        "anilist-header": "AniList",
+        "username-header": "Nazwa użytkownika",
+        "token-set-label": "Token ustawiony",
+        "no-data": "{{common.no-data}}",
+        "expires-label": "Wygasa: {{date}}"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "releasing": "Wydawane",
+        "updating-metadata-status": "Aktualizacja metadanych",
+        "details": "Pokaż stronę",
+        "chapter-count": "{{common.chapter-count}}"
+    },
+    "metadata-setting-field-pipe": {
+        "genres": "{{metadata-fields.genres-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "covers": "Okładki",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
+    },
+    "email-history": {
+        "sent-header": "Udane",
+        "description": "Tutaj można znaleźć wszystkie wiadomości e-mail wysłane przez Kavita i do którego użytkownika.",
+        "template-header": "Szablon",
+        "date-header": "Data wysłania",
+        "user-header": "Wyślij do",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "Wysłano",
+        "not-sent-tooltip": "Nie wysłano"
     }
 }

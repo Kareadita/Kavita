@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Speichern…",
         "update": "Aktualisierung",
-        "account-detail-title": "Konto Details"
+        "account-detail-title": "Konto Details",
+        "invalid-email-warning": "Eine ungültige E-Mail-Adresse blockiert einige Funktionen von Kavita"
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
@@ -180,7 +181,10 @@
     "user-holds": {
         "title": "Scrobble pausiert",
         "description": "Dies ist eine benutzergesteuerte Liste von Serien, die nicht an Upstream-Anbieter gescrobbelt wird. Du kannst eine Serie jederzeit entfernen und das nächste scrobbelfähige Ereignis (Lesefortschritt, Bewertung, Status „möchte lesen“) löst das Scrobbeln aus.",
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "title": "Motiv-Manager",
@@ -333,7 +337,8 @@
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "Hinzufügen {{item}}…",
-        "add-custom-item": ", tippen um benutzerdefiniertes Element hinzuzufügen"
+        "add-custom-item": ", tippen um benutzerdefiniertes Element hinzuzufügen",
+        "no-data": "{{common.no-data}}"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -1000,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Geben Sie eine {{url}}",
@@ -1058,7 +1064,8 @@
         "clear-alerts": "Alarme löschen",
         "file-header": "Datei",
         "comment-header": "Kommentar",
-        "created-header": "Erstellt"
+        "created-header": "Erstellt",
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Um einige Funktionen von Kavita zu nutzen, wie z.B. An Gerät senden, muss ein E-Mail-Anbieter eingerichtet werden. Andere Funktionen, wie z.B. Passwort vergessen, erfordern einen Administrator-Eingriff ohne E-Mail-Einrichtung.",
@@ -1863,7 +1870,8 @@
         "description": "Kavita holt die Metadaten (Bewertungen, Rezensionen, Empfehlungen usw.) für die in Frage kommenden Serien nach und nach ab.",
         "errored-series-label": "Fehlerhafte Serien",
         "completed-series-label": "Abgeschlossene Serie",
-        "complete": "Alle Serien haben Metadaten"
+        "complete": "Alle Serien haben Metadaten",
+        "no-data": "{{common.no-data}}"
     },
     "file-breakdown-stats": {
         "format-title": "Format",
@@ -2220,7 +2228,8 @@
         "person-image-downloaded": "Personen Cover wurde heruntergeladen und angewendet.",
         "confirm-delete-multiple-chapters": "Sind Sie sicher, dass Sie {{count}} Kapitel/Bände löschen möchten? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "bulk-delete-libraries": "Möchten Sie wirklich {{count}} Bibliotheken löschen?",
-        "match-success": "Reihenfolge korrekt zugeordnet"
+        "match-success": "Reihenfolge korrekt zugeordnet",
+        "webtoon-override": "Wechsel in den Webtoon-Modus, da die Bilder einen Webtoon darstellen."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2417,14 +2426,16 @@
         "alert": "Alarm",
         "confirm": "Bestätigen",
         "info": "Info",
-        "ok": "Ok"
+        "ok": "Ok",
+        "cancel": "{{common.cancel}}"
     },
     "person-detail": {
         "all-roles": "Funktionen",
         "known-for-title": "Bekannt für",
         "individual-role-title": "Als eine {{role}}",
         "browse-person-title": "Alle Werke von {{name}}",
-        "browse-person-by-role-title": "Alle Werke von {{name}} als {{role}}"
+        "browse-person-by-role-title": "Alle Werke von {{name}} als {{role}}",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "browse-authors": {
         "author-count": "{{num}} Personen",
@@ -2463,12 +2474,16 @@
         "theme": "Theme",
         "removed": "Entfernt",
         "api": "API",
-        "published-label": "Veröffentlicht: "
+        "published-label": "Veröffentlicht: ",
+        "feature-requests": "Feature-Anfragen",
+        "installed": "{{changelog.installed}}"
     },
     "match-series-result-item": {
         "releasing": "Veröffentlichung",
         "details": "Seite anzeigen",
-        "updating-metadata-status": "Metadaten aktualisieren"
+        "updating-metadata-status": "Metadaten aktualisieren",
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "match-series-modal": {
         "description": "Wähle einen Treffer aus, um die Metadaten von Kavita+ neu zu verknüpfen und Scrobble-Ereignisse neu zu generieren. „Nicht übereinstimmend“ kann verwendet werden, um Kavita daran zu hindern, Metadaten abzugleichen und zu scrobbeln.",
@@ -2478,7 +2493,9 @@
         "dont-match-label": "Keine Übereinstimmung",
         "dont-match-tooltip": "Diese Serie von Matching und Scrobbeln ausschließen",
         "search": "Suche",
-        "title": "Treffer {{seriesName}}"
+        "title": "Treffer {{seriesName}}",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}"
     },
     "email-history": {
         "description": "Hier findest du alle E-Mails, die von Kavita an welchen Benutzer gesendet wurden.",
@@ -2487,12 +2504,21 @@
         "user-header": "Gesendet an",
         "sent-header": "Erfolgreich",
         "sent-tooltip": "Gesendet",
-        "not-sent-tooltip": "Nicht gesendet"
+        "not-sent-tooltip": "Nicht gesendet",
+        "no-data": "{{common.no-data}}"
     },
     "new-version-modal": {
         "title": "Kavita wurde aktualisiert!",
         "description": "Eine neue Version von Kavita ist verfügbar. Aktualisieren Sie zum Update.",
-        "refresh": "Aktualisieren"
+        "refresh": "Aktualisieren",
+        "developer": "{{changelog.developer}}",
+        "close": "{{common.close}}",
+        "api": "{{changelog.api}}",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}"
     },
     "manage-matched-metadata": {
         "title": "Abgeglichene Metadaten",
@@ -2504,14 +2530,21 @@
         "unmatched-status-label": "Nicht übereinstimmend",
         "blacklist-status-label": "Benötigt Manuelle Übereinstimmung",
         "all-status-label": "Alle",
-        "dont-match-label": "Nicht passend"
+        "dont-match-label": "Nicht passend",
+        "library-name-header": "Bibliothek",
+        "actions-header": "Aktionen",
+        "match-alt": "Entspricht {{seriesName}}",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "no-data": "{{common.no-data}}"
     },
     "manage-user-tokens": {
         "description": "Die Token von Benutzern, die Scrobbeln verwenden, müssen gelegentlich erneuert werden. Kavita sendet ihnen automatisch eine E-Mail, wenn eine E-Mail-Adresse eingerichtet ist und sie eine gültige E-Mail-Adresse haben.",
         "username-header": "Benutzername",
         "anilist-header": "AniList",
         "mal-header": "MAL",
-        "expires-label": "Läuft ab: {{date}}"
+        "expires-label": "Läuft ab: {{date}}",
+        "token-set-label": "Token-Set",
+        "no-data": "{{common.no-data}}"
     },
     "manage-metadata-settings": {
         "description": "Kavita+ kann einige begrenzte Metadaten herunterladen und in die Datenbank schreiben. Auf dieser Seite kannst du einstellen, was im Umfang enthalten ist.",
@@ -2546,6 +2579,23 @@
         "derive-publication-status-tooltip": "Erlaube, dass der Publikationsstatus aus der Gesamtzahl der Kapitel/Bände abgeleitet wird.",
         "age-rating-mapping-description": "Alle Links, die sich entweder in Genre oder Tags befinden, legen die Altersfreigabe für die Serie fest.",
         "field-mapping-description": "Richtet Regeln für bestimmte Zeichenketten ein, die im Feld „Genre/Tag“ gefunden werden, und ordnet sie einer neuen Zeichenkette in „Genre/Tag“ zu und entfernt sie optional aus der Liste „Quelle“. Gilt nur, wenn das Schreiben von Genre/Tag aktiviert ist.",
-        "enable-start-date-label": "Startdatum"
+        "enable-start-date-label": "Startdatum",
+        "localized-name-label": "Lokalisierter Seriennamen",
+        "localized-name-tooltip": "Erlaube die Eingabe von lokalisierten Namen, wenn das Feld entsperrt ist. Kavita wird versuchen, die beste Schätzung vorzunehmen.",
+        "enable-cover-image-tooltip": "Erlaubt Kavita, das Titelbild für die Serie zu schreiben",
+        "enable-cover-image-label": "Cover Bild",
+        "overrides-label": "Überschreibungen",
+        "overrides-description": "Erlaube Kavita, gesperrte Felder zu überschreiben."
+    },
+    "metadata-setting-field-pipe": {
+        "covers": "Covers",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
     }
 }
