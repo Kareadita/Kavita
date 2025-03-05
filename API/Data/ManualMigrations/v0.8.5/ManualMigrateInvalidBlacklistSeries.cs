@@ -28,6 +28,7 @@ public static class ManualMigrateInvalidBlacklistSeries
             .Include(s => s.ExternalSeriesMetadata)
             .Where(s => s.IsBlacklisted && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue)
             .ToListAsync();
+
         foreach (var series in blacklistedSeries)
         {
             series.IsBlacklisted = false;
