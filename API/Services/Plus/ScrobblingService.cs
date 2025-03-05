@@ -223,7 +223,7 @@ public class ScrobblingService : IScrobblingService
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
-                .WithKavitaPlusHeaders(license.Value)
+                .WithKavitaPlusHeaders(license.Value, token)
                 .GetStringAsync();
 
             return bool.Parse(response);
@@ -474,7 +474,7 @@ public class ScrobblingService : IScrobblingService
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
-                .WithKavitaPlusHeaders(license)
+                .WithKavitaPlusHeaders(license, aniListToken)
                 .GetStringAsync();
 
             return int.Parse(response);

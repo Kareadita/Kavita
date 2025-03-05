@@ -219,10 +219,12 @@ public class ExternalMetadataService : IExternalMetadataService
             MalId = potentialMalId ?? ScrobblingService.GetMalId(series),
         };
 
+        var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
+
         try
         {
             var results = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
-                .WithKavitaPlusHeaders(license)
+                .WithKavitaPlusHeaders(license, token)
                 .PostJsonAsync(matchRequest)
                 .ReceiveJson<IList<ExternalSeriesMatchDto>>();
 
@@ -411,11 +413,13 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+            var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
             SeriesDetailPlusApiDto? result = null;
+
             try
             {
                 result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                    .WithKavitaPlusHeaders(license)
+                    .WithKavitaPlusHeaders(license, token)
                     .PostJsonAsync(data)
                     .ReceiveJson<
                         SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
@@ -432,7 +436,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     await Task.Delay(3000);
 
                     result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                        .WithKavitaPlusHeaders(license)
+                        .WithKavitaPlusHeaders(license, token)
                         .PostJsonAsync(data)
                         .ReceiveJson<
                             SeriesDetailPlusApiDto>();
@@ -1422,8 +1426,9 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
+            var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
             var ret =  await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
-                .WithKavitaPlusHeaders(license)
+                .WithKavitaPlusHeaders(license, token)
                 .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
 

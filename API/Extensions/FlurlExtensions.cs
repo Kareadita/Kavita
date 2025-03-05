@@ -7,13 +7,14 @@ namespace API.Extensions;
 
 public static class FlurlExtensions
 {
-    public static IFlurlRequest WithKavitaPlusHeaders(this string request, string license)
+    public static IFlurlRequest WithKavitaPlusHeaders(this string request, string license, string? anilistToken = null)
     {
         return request
             .WithHeader("Accept", "application/json")
             .WithHeader("User-Agent", "Kavita")
             .WithHeader("x-license-key", license)
             .WithHeader("x-installId", HashUtil.ServerToken())
+            .WithHeader("x-anilist-token", anilistToken ?? string.Empty)
             .WithHeader("x-kavita-version", BuildInfo.Version)
             .WithHeader("Content-Type", "application/json")
             .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs));
