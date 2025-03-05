@@ -68,9 +68,10 @@ public class ExternalMetadataService : IExternalMetadataService
         [LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
+        Series =  null,
         Recommendations = null,
-        Ratings = ArraySegment<RatingDto>.Empty,
-        Reviews = ArraySegment<UserReviewDto>.Empty
+        Ratings = [],
+        Reviews = []
     };
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
