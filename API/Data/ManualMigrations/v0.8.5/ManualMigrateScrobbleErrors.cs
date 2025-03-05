@@ -33,6 +33,7 @@ public static class ManualMigrateScrobbleErrors
         if (context.ChangeTracker.HasChanges())
         {
             await context.SaveChangesAsync();
+            logger.LogInformation("Removed {Count} old scrobble events", events.Count);
         }
 
         await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
