@@ -2455,7 +2455,8 @@
         "api": "API",
         "installed": "{{changelog.installed}}",
         "theme": "Thème",
-        "published-label": "Publié : "
+        "published-label": "Publié : ",
+        "known-issues": "Problèmes connus"
     },
     "match-series-modal": {
         "title": "Correspondance {{seriesName}}",
@@ -2496,6 +2497,13 @@
         "all-status-label": "Tout",
         "dont-match-label": "Ne correspond pas",
         "no-data": "{{common.no-data}}",
-        "valid-until-header": "Rafraîchissement suivant"
+        "valid-until-header": "Rafraîchissement suivant",
+        "library-name-header": "Bibliothèque"
+    },
+    "manage-metadata-settings": {
+        "enable-relations-label": "Relations",
+        "enabled-tooltip": "Autorise Kavita à télécharger des métadata et les enregistrer dans sa base de données.",
+        "enabled-label": "Activer le téléchargement des métadata",
+        "summary-label": "Résumé"
     }
 }
