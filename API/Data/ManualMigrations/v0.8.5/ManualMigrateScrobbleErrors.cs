@@ -38,7 +38,7 @@ public static class ManualMigrateScrobbleErrors
 
         await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
         {
-            Name = "ManualMigrateInvalidBlacklistSeries",
+            Name = "ManualMigrateScrobbleErrors",
             ProductVersion = BuildInfo.Version.ToString(),
             RanAt = DateTime.UtcNow
         });
