@@ -2485,7 +2485,8 @@
         "api": "API",
         "published-label": "Publicado: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Solicitações de Recursos"
+        "feature-requests": "Solicitações de Recursos",
+        "known-issues": "Problemas Conhecidos"
     },
     "new-version-modal": {
         "title": "Kavita foi atualizado!",
@@ -2498,7 +2499,8 @@
         "removed": "{{changelog.removed}}",
         "api": "{{changelog.api}}",
         "close": "{{common.close}}",
-        "refresh": "Atualizar"
+        "refresh": "Atualizar",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "title": "Metadados Correspondentes",
