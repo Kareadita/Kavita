@@ -51,8 +51,8 @@
 
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.0.1" />
-      <PackageReference Include="MailKit" Version="4.9.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+      <PackageReference Include="MailKit" Version="4.10.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
@@ -62,19 +62,19 @@
     <PackageReference Include="ExCSS" Version="4.3.0" />
     <PackageReference Include="Flurl" Version="4.0.0" />
     <PackageReference Include="Flurl.Http" Version="4.0.2" />
-    <PackageReference Include="Hangfire" Version="1.8.17" />
+    <PackageReference Include="Hangfire" Version="1.8.18" />
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.74" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.17" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
@@ -91,16 +91,16 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.SignalR.Core" Version="0.1.2" />
     <PackageReference Include="SharpCompress" Version="0.39.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.5.0.109200">
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.7.0.110445">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="21.2.1" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="22.0.11" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
     <PackageReference Include="VersOne.Epub" Version="3.3.2" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>

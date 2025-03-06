@@ -3,7 +3,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.8.4.22</AssemblyVersion>
+        <AssemblyVersion>0.8.5.0</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <InvariantGlobalization>true</InvariantGlobalization>
         <TieredPGO>true</TieredPGO>
@@ -13,9 +13,9 @@
       <PackageReference Include="Cronos" Version="0.9.0" />
       <PackageReference Include="DotNet.Glob" Version="3.1.3" />
       <PackageReference Include="Flurl.Http" Version="4.0.2" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.5.0.109200">
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.7.0.110445">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

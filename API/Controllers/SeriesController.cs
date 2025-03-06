@@ -640,7 +640,7 @@ public class SeriesController : BaseApiController
         }
 
         var ret = await _externalMetadataService.MatchSeries(dto);
-        await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(5));
+        await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(1));
 
         return Ok(ret);
     }
