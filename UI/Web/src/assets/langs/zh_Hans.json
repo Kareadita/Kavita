@@ -2505,7 +2505,8 @@
         "changed": "已更改",
         "fixed": "固定",
         "developer": "开发人员",
-        "feature-requests": "功能请求"
+        "feature-requests": "功能请求",
+        "known-issues": "已知问题"
     },
     "new-version-modal": {
         "title": "Kavita 已更新！",
@@ -2518,7 +2519,8 @@
         "removed": "{{changelog.removed}}",
         "api": "{{changelog.api}}",
         "close": "{{common.close}}",
-        "refresh": "刷新"
+        "refresh": "刷新",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-user-tokens": {
         "description": "拥有 scrobbling 令牌的用户有时可能需要更新。如果设置了电子邮件并且他们有有效的电子邮件，Kavita 将自动向他们发送电子邮件。",

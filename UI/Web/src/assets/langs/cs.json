@@ -1992,7 +1992,8 @@
         "api": "API",
         "published-label": "Vydáno: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Požadavky na funkce"
+        "feature-requests": "Požadavky na funkce",
+        "known-issues": "Známé problémy"
     },
     "new-version-modal": {
         "title": "Kavita byla aktualizována!",
@@ -2005,7 +2006,8 @@
         "fixed": "{{changelog.fixed}}",
         "developer": "{{changelog.developer}}",
         "theme": "{{changelog.theme}}",
-        "refresh": "Obnovit"
+        "refresh": "Obnovit",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "person-detail": {
         "all-roles": "Role",

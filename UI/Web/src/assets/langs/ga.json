@@ -2476,7 +2476,8 @@
         "removed": "{{changelog.removed}}",
         "api": "{{changelog.api}}",
         "close": "{{common.close}}",
-        "refresh": "Athnuaigh"
+        "refresh": "Athnuaigh",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "changelog-update-item": {
         "download": "Íosluchtaigh",
@@ -2489,7 +2490,8 @@
         "api": "API",
         "published-label": "Foilsithe: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Iarratais Gné"
+        "feature-requests": "Iarratais Gné",
+        "known-issues": "Fadhbanna ar eolas"
     },
     "match-series-modal": {
         "save": "{{common.save}}",

@@ -2476,7 +2476,8 @@
         "api": "API",
         "published-label": "Opublikowano: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Prośby o funkcje"
+        "feature-requests": "Prośby o funkcje",
+        "known-issues": "Znane błędy"
     },
     "new-version-modal": {
         "refresh": "Odśwież",
@@ -2489,7 +2490,8 @@
         "theme": "{{changelog.theme}}",
         "removed": "{{changelog.removed}}",
         "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "description": "Tutaj znajdują się wszystkie odpowiednie serie, które można dopasować do zewnętrznych metadanych. Kavita będzie wstępnie pobierać lub odświeżać metadane serii, 50 serii na 24 godziny dziennie.",

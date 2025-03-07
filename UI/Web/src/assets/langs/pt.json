@@ -2476,7 +2476,8 @@
         "installed": "{{changelog.installed}}",
         "removed": "Removido",
         "developer": "Programador",
-        "feature-requests": "Pedidos de Funcionalidades"
+        "feature-requests": "Pedidos de Funcionalidades",
+        "known-issues": "Questões conhecidas"
     },
     "match-series-modal": {
         "search": "Pesquisa",
@@ -2501,7 +2502,8 @@
         "fixed": "{{changelog.fixed}}",
         "removed": "{{changelog.removed}}",
         "api": "{{changelog.api}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",

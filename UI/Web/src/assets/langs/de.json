@@ -2476,7 +2476,8 @@
         "api": "API",
         "published-label": "Veröffentlicht: ",
         "feature-requests": "Feature-Anfragen",
-        "installed": "{{changelog.installed}}"
+        "installed": "{{changelog.installed}}",
+        "known-issues": "Bekannte Probleme"
     },
     "match-series-result-item": {
         "releasing": "Veröffentlichung",
@@ -2518,7 +2519,8 @@
         "changed": "{{changelog.changed}}",
         "fixed": "{{changelog.fixed}}",
         "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}"
+        "removed": "{{changelog.removed}}",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "title": "Abgeglichene Metadaten",
