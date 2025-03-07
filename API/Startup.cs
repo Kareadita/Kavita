@@ -282,6 +282,7 @@ public class Startup
                     await ManualMigrateInvalidBlacklistSeries.Migrate(dataContext, logger);
                     await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
                     await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
+                    await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
