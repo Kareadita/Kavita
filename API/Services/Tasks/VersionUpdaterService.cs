@@ -292,6 +292,13 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
         var updateDtos = query.ToList();
 
+        // Sometimes a release can be 0.8.5.0 on disk, but 0.8.5 from Github
+        var versionParts = updateDtos[0].UpdateVersion.Split('.');
+        if (versionParts.Length < 4)
+        {
+            updateDtos[0].UpdateVersion += ".0"; // Append missing parts
+        }
+
         // If we're on a nightly build, enrich the information
         if (updateDtos.Count != 0 && BuildInfo.Version > new Version(updateDtos[0].UpdateVersion))
         {
@@ -419,6 +426,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             PublishDate = update.Published_At,
             IsReleaseEqual = IsVersionEqualToBuildVersion(updateVersion),
             IsReleaseNewer = BuildInfo.Version < updateVersion,
+            IsPrerelease = false,
 
             Added = parsedSections.TryGetValue("Added", out var added) ? added : [],
             Removed = parsedSections.TryGetValue("Removed", out var removed) ? removed : [],

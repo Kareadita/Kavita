@@ -18,8 +18,7 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../_pipes/filter.pipe';
-import { LoadingComponent } from '../../shared/loading/loading.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
@@ -31,9 +30,11 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     styleUrls: ['./manage-media-issues.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, LoadingComponent, FilterPipe, SortableHeader, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule]
+    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule]
 })
 export class ManageMediaIssuesComponent implements OnInit {
+
+  protected readonly ColumnMode = ColumnMode;
 
   @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
@@ -70,17 +71,6 @@ export class ManageMediaIssuesComponent implements OnInit {
     });
   }
 
-  onSort(evt: any) {
-    //SortEvent<KavitaMediaError>
-    this.currentSort.next(evt);
-
-    // Must clear out headers here
-    this.headers.forEach((header) => {
-      if (header.sortable !== evt.column) {
-        header.direction = '';
-      }
-    });
-  }
 
   loadData() {
     this.isLoading = true;
@@ -101,6 +91,5 @@ export class ManageMediaIssuesComponent implements OnInit {
     const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
-    protected readonly ColumnMode = ColumnMode;
-  protected readonly translate = translate;
+
 }
