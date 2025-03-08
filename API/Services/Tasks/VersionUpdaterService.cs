@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Update;
@@ -68,13 +69,19 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
     private static partial Regex BlogPartRegex();
     private readonly string _cacheFilePath;
+    /// <summary>
+    /// The latest release cache
+    /// </summary>
+    private readonly string _cacheLatestReleaseFilePath;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IDirectoryService directoryService)
     {
         _logger = logger;
         _eventHub = eventHub;
         _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
+        _cacheLatestReleaseFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_latest_release_cache.json");
 
         FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);
         FlurlConfiguration.ConfigureClientForUrl(GithubAllReleasesUrl);
@@ -86,8 +93,20 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     /// <returns>Latest update</returns>
     public async Task<UpdateNotificationDto?> CheckForUpdate()
     {
+        // Attempt to fetch from cache
+        var cachedRelease = await TryGetCachedLatestRelease();
+        if (cachedRelease != null)
+        {
+            return cachedRelease;
+        }
+
         var update = await GetGithubRelease();
         var dto = CreateDto(update);
+
+        if (dto != null)
+        {
+            await CacheLatestReleaseAsync(dto);
+        }
 
         return dto;
     }
@@ -321,16 +340,43 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return null;
     }
 
+    private async Task<UpdateNotificationDto?> TryGetCachedLatestRelease()
+    {
+        if (!File.Exists(_cacheLatestReleaseFilePath)) return null;
+
+        var fileInfo = new FileInfo(_cacheLatestReleaseFilePath);
+        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
+        {
+            var cachedData = await File.ReadAllTextAsync(_cacheLatestReleaseFilePath);
+            return System.Text.Json.JsonSerializer.Deserialize<UpdateNotificationDto>(cachedData);
+        }
+
+        return null;
+    }
+
     private async Task CacheReleasesAsync(IList<UpdateNotificationDto> updates)
     {
         try
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(updates, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            var json = System.Text.Json.JsonSerializer.Serialize(updates, JsonOptions);
             await File.WriteAllTextAsync(_cacheFilePath, json);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to cache releases");
+        }
+    }
+
+    private async Task CacheLatestReleaseAsync(UpdateNotificationDto update)
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(update, JsonOptions);
+            await File.WriteAllTextAsync(_cacheLatestReleaseFilePath, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cache latest release");
         }
     }
 
@@ -346,7 +392,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     public async Task<int> GetNumberOfReleasesBehind()
     {
         var updates = await GetAllReleases();
-        return updates.TakeWhile(update => update.UpdateVersion != update.CurrentVersion).Count();
+        return updates
+            .Where(update => !update.IsPrerelease)
+            .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
+            .Count();
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)

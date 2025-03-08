@@ -40,8 +40,7 @@ public class UpdateNotificationDto
     /// <summary>
     /// Date of the publish
     /// </summary>
-    public required string PublishDate { get; set
-        ; }
+    public required string PublishDate { get; set; }
     /// <summary>
     /// Is the server on a nightly within this release
     /// </summary>
