@@ -174,7 +174,9 @@
         "save": "{{common.save}}",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "Suivi de lecture AniList",
-        "anilist-scrobbling-tooltip": "Autorise Kavita à mettre à jour le suivi de lecture et les notes sur AniList"
+        "anilist-scrobbling-tooltip": "Autorise Kavita à mettre à jour le suivi de lecture et les notes sur AniList",
+        "want-to-read-sync-label": "À lire : Synchroniser",
+        "want-to-read-sync-tooltip": "Permettre à Kavita d'ajouter des éléments à votre liste \"À lire\" en fonction des séries AniList et MAL de la liste de lecture \"En attente\""
     },
     "user-holds": {
         "title": "Enregistrement du suivi d'activité",
@@ -324,11 +326,11 @@
         "save": "{{common.save}}",
         "loading": "{{common.loading}}",
         "mal-used-for": "MyAnimeList est utilisé pour les collections intelligentes et la synchronisation en mode lecture.",
-        "anilist-used-for": "AniList est utilisé pour le scrobbling (synchronisation des données) et la synchronisation en mode lecture.",
+        "anilist-used-for": "AniList est utilisé pour le scrobbling (synchronisation des données) et la synchronisation de la liste \"À lire\".",
         "anilist-first-header": "Jeton AniList sauvegardé",
         "anilist-first-later": "Plus tard",
         "anilist-first-now": "Maintenant",
-        "anilist-first-description": "Votre jeton AniList est maintenant configuré. Ce jeton dure un an et Kavita vous informera avant son expiration pour le rafraîchir. Avec cela, Kavita générera des événements de scrobble (synchronisation) à partir de votre historique de lecture, de vos souhaits de lecture et de vos notes. Vous pouvez commencer cela maintenant ou plus tard. Si vous avez des séries que vous ne souhaitez pas voir scrobblé, sélectionnez plus tard et placez un Scrobble Hold sur elles. Vous n'avez besoin d'exécuter cette tâche qu'une seule fois. Ensuite, Kavita se chargera de la synchronisation pour vous.<br/> Si vous sélectionnez « Plus tard », vous pouvez trouver le bouton sur la page Scrobbling."
+        "anilist-first-description": "Votre jeton AniList est maintenant configuré. Ce jeton dure un an et Kavita vous informera avant son expiration pour le rafraîchir. Avec cela, Kavita générera des événements de scrobble (synchronisation) à partir de votre historique de lecture, de votre liste \"À lire\" et de vos notations. Vous pouvez commencer maintenant ou plus tard. Si vous avez des séries que vous ne souhaitez pas voir scrobblé, sélectionnez plus tard et placez y un Scrobble Hold. Vous n'avez besoin d'exécuter cette tâche qu'une seule fois. Ensuite, Kavita se chargera de la synchronisation pour vous.<br/> Si vous sélectionnez « Plus tard », vous pouvez trouver le bouton sur la page Scrobbling."
     },
     "typeahead": {
         "locked-field": "Ce champ est vérouillé",
@@ -2456,7 +2458,8 @@
         "installed": "{{changelog.installed}}",
         "theme": "Thème",
         "published-label": "Publié : ",
-        "known-issues": "Problèmes connus"
+        "known-issues": "Problèmes connus",
+        "feature-requests": "Demandes de fonctionnalités"
     },
     "match-series-modal": {
         "title": "Correspondance {{seriesName}}",
@@ -2475,7 +2478,8 @@
         "changed": "{{changelog.changed}}",
         "close": "{{common.close}}",
         "refresh": "Rafraîchir",
-        "api": "{{changelog.api}}"
+        "api": "{{changelog.api}}",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-user-tokens": {
         "expires-label": "Expiration : {{date}}",
@@ -2487,7 +2491,7 @@
         "no-data": "{{common.no-data}}"
     },
     "manage-matched-metadata": {
-        "description": "Toutes les séries applicables qui peuvent être associées à des métadonnées externes résident ici. Kavita prélève ou actualise les métadonnées des séries à raison de 50 séries par jour pendant 24 heures.",
+        "description": "Toutes les séries applicables qui peuvent correspondre à des métadonnées externes résident ici. Kavita prélève ou actualise les métadonnées des séries à raison de 50 séries par jour pendant 24 heures.",
         "matched-status-label": "Correspondance",
         "title": "Métadonnées correspondantes",
         "status-header": "Statut",
@@ -2498,12 +2502,18 @@
         "dont-match-label": "Ne correspond pas",
         "no-data": "{{common.no-data}}",
         "valid-until-header": "Rafraîchissement suivant",
-        "library-name-header": "Bibliothèque"
+        "library-name-header": "Bibliothèque",
+        "match-alt": "Correspondance {{seriesName}}",
+        "actions-header": "Actions",
+        "dont-match-status-label": "{{dont-match-label}}"
     },
     "manage-metadata-settings": {
         "enable-relations-label": "Relations",
-        "enabled-tooltip": "Autorise Kavita à télécharger des métadata et les enregistrer dans sa base de données.",
+        "enabled-tooltip": "Autorise Kavita à télécharger et à enregistrer des métadonnées dans sa base de données.",
         "enabled-label": "Activer le téléchargement des métadata",
-        "summary-label": "Résumé"
+        "summary-label": "Résumé",
+        "description": "Kavita+ a la capacité de télécharger et d'enregistrer certaines métadonnées dans la base de données. Cette page vous permet de définir les métadonnées prises en compte.",
+        "localized-name-label": "Nom de séries localisé",
+        "summary-tooltip": "Permettre d'écrire un résumé lorsque le champ est déverrouillé."
     }
 }

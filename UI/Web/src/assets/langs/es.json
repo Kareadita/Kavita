@@ -49,7 +49,8 @@
         "not-processed": "Sin procesar",
         "special": "{{entity-title.special}}",
         "token-expired": "¡Tu token de AniList ha expirado! Los eventos de scrobbling no se procesarán hasta que no sea renovado en la página de Cuentas.",
-        "generate-scrobble-events": "Eventos de Backfill"
+        "generate-scrobble-events": "Eventos de Backfill",
+        "scrobbling-disabled": "Has deshabilitado el scrobbling en las configuraciones de tu cuenta"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progreso en la lectura",
@@ -172,7 +173,8 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "kavitaplus-settings-title": "Kavita+",
-        "anilist-scrobbling-label": "AniList Scrobbling"
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "anilist-scrobbling-tooltip": "Permite a Kavita scrobblear (sincronizar unilateralmente) tu progreso y tus evaluaciones a AniList"
     },
     "user-holds": {
         "title": "Retenciones de scrobble",
