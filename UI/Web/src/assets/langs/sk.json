@@ -2476,7 +2476,8 @@
         "api": "API",
         "published-label": "Zverejnené: ",
         "installed": "{{changelog.installed}}",
-        "feature-requests": "Požiadavky na funkcie"
+        "feature-requests": "Požiadavky na funkcie",
+        "known-issues": "Známe problémy"
     },
     "new-version-modal": {
         "title": "Kavita bola aktualizovaná!",
@@ -2489,7 +2490,8 @@
         "removed": "{{changelog.removed}}",
         "api": "{{changelog.api}}",
         "close": "{{common.close}}",
-        "refresh": "Obnoviť"
+        "refresh": "Obnoviť",
+        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "description": "Všetky príslušné série, ktoré je možné priradiť k externým metaúdajom, sa nachádzajú tu. Kavita vopred načíta alebo obnoví metadáta série, 50 sérií za 24 hodín denne.",
