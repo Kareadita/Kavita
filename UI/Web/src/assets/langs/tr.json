@@ -1,14 +1,14 @@
 {
     "login": {
-        "title": "Giriş",
+        "title": "Hesabınızla oturum açın",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Şifremi Unuttum?",
-        "submit": "{{common.submit}}"
+        "submit": "Oturum aç"
     },
     "dashboard": {
-        "no-libraries": "Kurulmuş kütüphane yok. Lütfen kütüphane ayarlayın",
+        "no-libraries": "Kurulmuş kütüphane yok. Bir tane oluştur",
         "server-settings-link": "Sunucu ayarları",
         "not-granted": "Herhangi bir kütüphaneye erişim izniniz yok.",
         "recently-updated-title": "Yakın zamanda güncellenmiş Seriler",
@@ -22,7 +22,8 @@
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Kaydediliyor…",
-        "update": "Güncelle"
+        "update": "Güncelle",
+        "account-detail-title": "Hesap ayrıntıları"
     },
     "user-scrobble-history": {
         "title": "Arşiv geçmişi",
@@ -32,7 +33,7 @@
         "type-header": "Tür",
         "series-header": "Seriler",
         "data-header": "Veri",
-        "no-data": "Bilgi yok",
+        "no-data": "{{common.no-data}}",
         "not-applicable": "Uygulanamaz",
         "processed": "İşlendi",
         "not-processed": "İşlenmemiş",
@@ -46,7 +47,7 @@
         "review": "İnceleme güncellemesi"
     },
     "spoiler": {
-        "click-to-show": "Spoiler, açmak için tıklayın"
+        "click-to-show": "Spoiler, görmek için tıklayın"
     },
     "review-series-modal": {
         "title": "İncelemeyi düzenle",
@@ -65,7 +66,7 @@
     "review-card": {
         "your-review": "Sizin incelemeniz",
         "external-review": "Diğer İncelemeler",
-        "local-review": "İnceleme"
+        "local-review": "Yerel inceleme"
     },
     "want-to-read": {
         "title": "Okuyacaklarım",
@@ -118,8 +119,8 @@
         "margin-book-label": "Birleştir",
         "clients-opds-alert": "OPDS bu sunucuda aktif değil. Bu Tachiyomi kullanıcıları etkilemeyecek.",
         "clients-opds-description": "Tüm 3. Parti istemciler API key ya da alttaki bağlantı linkini kullanmak zorundadır. Bunlar şifre gibidir, başkalarıyla paylaşmayın.",
-        "clients-api-key-tooltip": "API key şifre gibidir. Gizli tutun, başkalarıyla paylaşmayın.",
-        "clients-opds-url-tooltip": "OPDS linki",
+        "clients-api-key-tooltip": "API anahtarı bir şifre gibidir. Sıfırlamak mevcut istemcileri geçersiz kılar.",
+        "clients-opds-url-tooltip": "Desteklenen OPDS istemcilerinin listesine bakın: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -190,7 +191,8 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "setup-user-account": "Kullanıcının hesabını kur"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
@@ -199,15 +201,18 @@
         "save": "{{common.save}}"
     },
     "scrobbling-providers": {
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "Kullanıcılar ilk kez Kavita+'nın {{service}} ile iletişimine izin vermek için aşağıdaki \"{{scrobbling-providers.generate}}\" üzerine tıklamalıdır. Uygulamaya yetki verdikten sonra, jetonu kopyalayıp aşağıdaki girişe yapıştırın. Jetonunuzu istediğiniz zaman yenileyebilirsiniz.",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "anilist-first-later": "Sonra",
+        "anilist-first-now": "Şimdi"
     },
     "typeahead": {
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "no-data": "{{common.no-data}}"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -276,7 +281,8 @@
         "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "setup-user-account": "Kullanıcının hesabını kur"
     },
     "library-selector": {
         "select-all": "{{common.select-all}}",
@@ -288,7 +294,7 @@
         "loading": "{{common.loading}}",
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "Lisansı Sıfırla",
         "activate-save": "{{common.save}}"
     },
     "book-line-overlay": {
@@ -514,7 +520,9 @@
         "on-deck": "{{dashboard.on-deck-title}}"
     },
     "settings": {
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}"
+        "kavitaplus-section-title": "Kavita+",
+        "account-section-title": "Hesap",
+        "account": "Hesap"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}"
@@ -597,7 +605,7 @@
         "language-label": "{{metadata-fields.language-title}}"
     },
     "metadata-filter-row": {
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "0.0 - 5.0 yıldız"
     },
     "edit-series-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -729,7 +737,7 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "Bir süzgeç mevcutken ögeleri sürükle ve bırak yoluyla yeniden sıralayamazsınız. {{customize-sidenav-streams.order-numbers-label}} kullanın",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
     },
     "manage-external-sources": {
@@ -762,7 +770,7 @@
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "genres": "{{metadata-fields.genres-title}}",
         "release-year": "{{sort-field-pipe.release-year}}",
         "tags": "{{metadata-fields.tags-title}}",
@@ -795,5 +803,17 @@
         "password": "Parola",
         "select-all": "Tümünü Seç",
         "book-num": "Kitap"
+    },
+    "tabs": {
+        "account-tab": "Hesap"
+    },
+    "toasts": {
+        "account-registration-complete": "Hesap kaydı tamamlandı",
+        "account-migration-complete": "Hesap taşıma tamamlandı"
+    },
+    "api-key": {
+        "hide": "Gizle",
+        "show": "Göster",
+        "copy": "Kopyala"
     }
 }
