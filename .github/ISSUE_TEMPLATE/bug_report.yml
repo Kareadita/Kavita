@@ -28,7 +28,7 @@ body:
       label: Kavita Version Number - If you don not see your version number listed, please update Kavita and see if your issue still persists.
       multiple: false
       options:
-        - 0.8.5 - Stable
+        - 0.8.5.3 - Stable
         - Nightly Testing Branch
     validations:
       required: true
