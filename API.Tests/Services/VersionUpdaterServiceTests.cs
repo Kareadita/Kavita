@@ -220,7 +220,7 @@ public class VersionUpdaterServiceTests : IDisposable
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.Equal("0.7.0", result[0].UpdateVersion);
+        Assert.Equal("0.7.0.0", result[0].UpdateVersion);
         Assert.Equal("0.6.0", result[1].UpdateVersion);
     }
 
@@ -308,7 +308,7 @@ public class VersionUpdaterServiceTests : IDisposable
 
         // Assert
         Assert.Equal(1, result.Count);
-        Assert.Equal("0.7.0", result[0].UpdateVersion);
+        Assert.Equal("0.7.0.0", result[0].UpdateVersion);
         Assert.NotEmpty(_httpTest.CallLog); // HTTP call was made
     }
 
