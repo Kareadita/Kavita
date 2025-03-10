@@ -569,7 +569,7 @@ public class ScannerServiceTests : AbstractDbTest
 
     /// <summary>
     /// Regression bug appeared where multi-root and one root gets a new file, on next scan of library,
-    /// the series in the other root are deleted.
+    /// the series in the other root are deleted. (This is actually failing because the file in Root 1 isn't being detected)
     /// </summary>
     [Fact]
     public async Task ScanLibrary_MultipleRoots_MultipleScans_DataPersists_NonForced()
