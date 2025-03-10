@@ -230,6 +230,11 @@ public class ParseScannedFiles
 
     private IList<SeriesModified>? TryGetSeriesList(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
     {
+        if (seriesPaths.Count == 0)
+        {
+            return null;
+        }
+
         if (string.IsNullOrEmpty(directory))
         {
             return null;
