@@ -368,6 +368,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var testDirectoryPath = Path.Join(
             Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests"),
             testcase.Replace(".json", string.Empty));
+        testDirectoryPath = Path.GetFullPath(testDirectoryPath);
         library.Folders = [new FolderPath() {Path = testDirectoryPath}];
 
         _unitOfWork.LibraryRepository.Update(library);
@@ -399,15 +400,8 @@ public class ParseScannedFilesTests : AbstractDbTest
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
-        var folderMapRel = await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
-        IDictionary<string, IList<SeriesModified>> folderMap = new Dictionary<string, IList<SeriesModified>>();
-        foreach (var key in folderMapRel.Keys)
-        {
-            folderMap.Add(key, folderMapRel[key]);
-            folderMap.Add(Path.GetFullPath(key).Replace("\\", "/"), folderMapRel[key]);
-        }
-
-        Assert.Equal(6*2, folderMap.Count);
+        var folderMap = await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
+        Assert.Equal(6, folderMap.Count);
 
         var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
         var changes = res.Where(sc => sc.HasChanged).ToList();
@@ -419,13 +413,14 @@ public class ParseScannedFilesTests : AbstractDbTest
     [Fact]
     public async Task HasSeriesFolderNotChangedSinceLastScan_PublisherLayout()
     {
-        const string testcase = "Subfolder always scanning fix publisher layout - ComicVine.json";
+        const string testcase = "Subfolder always scanning fix publisher layout - Comic.json";
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
         var testDirectoryPath = Path.Join(
             Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests"),
             testcase.Replace(".json", string.Empty));
+        testDirectoryPath = Path.GetFullPath(testDirectoryPath);
         library.Folders = [new FolderPath() {Path = testDirectoryPath}];
 
         _unitOfWork.LibraryRepository.Update(library);
