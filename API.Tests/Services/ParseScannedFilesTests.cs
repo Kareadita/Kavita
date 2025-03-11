@@ -364,42 +364,42 @@ public class ParseScannedFilesTests : AbstractDbTest
         const string testcase = "Subfolders always scanning all series changes - Manga.json";
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
-
-        var testDirectoryPath = Path.Join(
-            Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests"),
-            testcase.Replace(".json", string.Empty));
-        testDirectoryPath = Path.GetFullPath(testDirectoryPath);
-        library.Folders = [new FolderPath() {Path = testDirectoryPath}];
+        var testDirectoryPath = library.Folders.First().Path;
 
         _unitOfWork.LibraryRepository.Update(library);
         await _unitOfWork.CommitAsync();
 
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
         var scanner = _scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
+
         var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
         Assert.Equal(2, spiceAndWolf.Volumes.Count);
+
         var frieren = postLib.Series.First(x => x.Name == "Frieren - Beyond Journey's End");
         Assert.Single(frieren.Volumes);
+
         var executionerAndHerWayOfLife = postLib.Series.First(x => x.Name == "The Executioner and Her Way of Life");
         Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
 
         Thread.Sleep(1100); // Ensure at least one second has passed since library scan
 
-        var executionerCopyDir =
-           Path.Join(Path.Join(testDirectoryPath, "The Executioner and Her Way of Life"),
+        // Add a new chapter to a volume of the series, and scan. Validate that only, and all directories of this
+        // series are marked as HasChanged
+        var executionerCopyDir = Path.Join(Path.Join(testDirectoryPath, "The Executioner and Her Way of Life"),
                "The Executioner and Her Way of Life Vol. 1");
         File.Copy(Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0001.cbz"),
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
 
-        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
-
+        // 4 series, of which 2 have volumes as directories
         var folderMap = await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
         Assert.Equal(6, folderMap.Count);
 
@@ -416,41 +416,38 @@ public class ParseScannedFilesTests : AbstractDbTest
         const string testcase = "Subfolder always scanning fix publisher layout - Comic.json";
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
-
-        var testDirectoryPath = Path.Join(
-            Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests"),
-            testcase.Replace(".json", string.Empty));
-        testDirectoryPath = Path.GetFullPath(testDirectoryPath);
-        library.Folders = [new FolderPath() {Path = testDirectoryPath}];
+        var testDirectoryPath = library.Folders.First().Path;
 
         _unitOfWork.LibraryRepository.Update(library);
         await _unitOfWork.CommitAsync();
 
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
         var scanner = _scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
+
         var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
         Assert.Equal(2, spiceAndWolf.Volumes.Count);
+
         var frieren = postLib.Series.First(x => x.Name == "Frieren - Beyond Journey's End");
         Assert.Equal(2, frieren.Volumes.Count);
 
         Thread.Sleep(1100); // Ensure at least one second has passed since library scan
 
-        var executionerCopyDir =
-            Path.Join(Path.Join(testDirectoryPath, "YenPress"), "The Executioner and Her Way of Life");
+        // Add a volume to a series, and scan. Ensure only this series is marked as HasChanged
+        var executionerCopyDir = Path.Join(Path.Join(testDirectoryPath, "YenPress"), "The Executioner and Her Way of Life");
         File.Copy(Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1.cbz"),
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 2.cbz"));
 
-        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
-
-        var folderMap = await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
-        var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
+        var res = await psf.ScanFiles(testDirectoryPath, true,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(1, changes);
     }

@@ -133,7 +133,7 @@ public class ScannerHelper
 
         _testOutputHelper.WriteLine($"Test Directory Path: {testDirectory}");
 
-        return testDirectory;
+        return Path.GetFullPath(testDirectory);
     }
 
 
