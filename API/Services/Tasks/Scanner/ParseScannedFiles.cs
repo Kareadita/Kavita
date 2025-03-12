@@ -182,7 +182,7 @@ public class ParseScannedFiles
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
-            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
+            if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck))
             {
                 HandleUnchangedFolder(result, folderPath, directory);
             }
@@ -200,15 +200,21 @@ public class ParseScannedFiles
     /// <summary>
     /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second
     /// </summary>
+    /// <param name="library"></param>
     /// <param name="seriesPaths"></param>
     /// <param name="directory">This should be normalized</param>
     /// <param name="forceCheck"></param>
     /// <returns></returns>
-    private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
+    private bool HasSeriesFolderNotChangedSinceLastScan(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
-        // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
-        // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
-        if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
+        if (forceCheck)
+        {
+            return false;
+        }
+
+        // TryGetSeriesList falls back to parent folders to match to seriesList
+        var seriesList = TryGetSeriesList(library, seriesPaths, directory);
+        if (seriesList == null)
         {
             return false;
         }
@@ -224,6 +230,31 @@ public class ParseScannedFiles
         }
 
         return true;
+    }
+
+    private IList<SeriesModified>? TryGetSeriesList(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
+    {
+        if (seriesPaths.Count == 0)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(directory))
+        {
+            return null;
+        }
+
+        if (library.Folders.Any(fp => fp.Path.Equals(directory)))
+        {
+            return null;
+        }
+
+        if (seriesPaths.TryGetValue(directory, out var seriesList))
+        {
+            return seriesList;
+        }
+
+        return TryGetSeriesList(library, seriesPaths, _directoryService.GetParentDirectoryName(directory));
     }
 
     /// <summary>
@@ -284,7 +315,7 @@ public class ParseScannedFiles
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
 
-        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
+        if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, normalizedPath, forceCheck))
         {
             result.Add(CreateScanResult(folderPath, libraryRoot, false, ArraySegment<string>.Empty));
         }
@@ -725,7 +756,8 @@ public class ParseScannedFiles
         // If folder hasn't changed, generate fake ParserInfos
         if (!result.HasChanged)
         {
-            result.ParserInfos = seriesPaths[normalizedFolder]
+            // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
+            result.ParserInfos = TryGetSeriesList(library, seriesPaths, normalizedFolder)!
                 .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
                 .ToList();
 

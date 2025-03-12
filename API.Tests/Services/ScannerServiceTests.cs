@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -735,5 +736,64 @@ public class ScannerServiceTests : AbstractDbTest
 
         Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
+    }
+
+    [Fact]
+    public async Task SubFolders_NoRemovals_ChangesFound()
+    {
+        const string testcase = "Subfolders always scanning all series changes - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
+
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Equal(2, spiceAndWolf.Volumes.Count);
+        Assert.Equal(3, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        var frieren = postLib.Series.First(x => x.Name == "Frieren - Beyond Journey's End");
+        Assert.Single(frieren.Volumes);
+        Assert.Equal(2, frieren.Volumes.Sum(v => v.Chapters.Count));
+
+        var executionerAndHerWayOfLife = postLib.Series.First(x => x.Name == "The Executioner and Her Way of Life");
+        Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
+        Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Sum(v => v.Chapters.Count));
+
+        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+
+        // Add a new chapter to a volume of the series, and scan. Validate that no chapters were lost, and the new
+        // chapter was added
+        var executionerCopyDir = Path.Join(Path.Join(testDirectoryPath, "The Executioner and Her Way of Life"),
+            "The Executioner and Her Way of Life Vol. 1");
+        File.Copy(Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0001.cbz"),
+            Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
+
+        await scanner.ScanLibrary(library.Id);
+        await _unitOfWork.CommitAsync();
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
+
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Equal(2, spiceAndWolf.Volumes.Count);
+        Assert.Equal(3, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        frieren = postLib.Series.First(x => x.Name == "Frieren - Beyond Journey's End");
+        Assert.Single(frieren.Volumes);
+        Assert.Equal(2, frieren.Volumes.Sum(v => v.Chapters.Count));
+
+        executionerAndHerWayOfLife = postLib.Series.First(x => x.Name == "The Executioner and Her Way of Life");
+        Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
+        Assert.Equal(3, executionerAndHerWayOfLife.Volumes.Sum(v => v.Chapters.Count)); // Incremented by 1
     }
 }
