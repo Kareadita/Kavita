@@ -865,8 +865,11 @@ public class ProcessSeries : IProcessSeries
         var fileInfo = _directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
+            // TODO: I wonder if we can simplify this force check.
             existingFile.Format = info.Format;
+
             if (!forceUpdate && !_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
+
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
             existingFile.FileName = Parser.Parser.RemoveExtensionIfSupported(existingFile.FilePath);
