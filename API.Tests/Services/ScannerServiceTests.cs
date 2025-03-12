@@ -609,6 +609,8 @@ public class ScannerServiceTests : AbstractDbTest
         var root1PlushFolder = Path.Join(testDirectoryPath, "Root 1/Antarctic Press/Plush");
         File.Copy(Path.Join(root1PlushFolder, "Plush v02.cbz"), Path.Join(root1PlushFolder, "Plush v03.cbz"));
 
+        await Task.Delay(1100);
+
         // Rescan to ensure nothing changes yet again
         await scanner.ScanLibrary(library.Id, false);
 

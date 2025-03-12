@@ -32,6 +32,10 @@ public class ParsedSeries
     /// Format of the Series
     /// </summary>
     public required MangaFormat Format { get; init; }
+    /// <summary>
+    /// Has this Series changed or not aka do we need to process it or not.
+    /// </summary>
+    public bool HasChanged { get; set; }
 }
 
 public class ScanResult

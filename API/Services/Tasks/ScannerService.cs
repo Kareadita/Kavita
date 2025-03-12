@@ -335,11 +335,21 @@ public class ScannerService : IScannerService
 
     private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries)
     {
+        // Why does this only grab things that have changed?
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0 && s.HasChanged))
+        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0)) // && s.HasChanged
         {
             var parsedFiles = series.ParsedInfos;
-            parsedSeries.Add(series.ParsedSeries, parsedFiles);
+            series.ParsedSeries.HasChanged = series.HasChanged;
+
+            if (series.HasChanged)
+            {
+                parsedSeries.Add(series.ParsedSeries, parsedFiles);
+            }
+            else
+            {
+                parsedSeries.Add(series.ParsedSeries, []);
+            }
         }
 
         return parsedSeries;
@@ -601,6 +611,12 @@ public class ScannerService : IScannerService
 
         foreach (var series in parsedSeries)
         {
+            if (!series.Key.HasChanged)
+            {
+                _logger.LogDebug("{Series} hasn't changed", series.Key.Name);
+                continue;
+            }
+
             // Filter out ParserInfos where FullFilePath is empty (i.e., folder not modified)
             var validInfos = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename)).ToList();
 
