@@ -626,11 +626,10 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Single(s2.Volumes);
     }
 
-    //[Fact]
+    [Fact]
     public async Task ScanLibrary_AlternatingRemoval_IssueReplication()
     {
         // https://github.com/Kareadita/Kavita/issues/3476#issuecomment-2661635558
-        // TODO: Come back to this, it's complicated
         const string testcase = "Alternating Removal - Manga.json";
 
         // Setup: Generate test library
@@ -665,6 +664,14 @@ public class ScannerServiceTests : AbstractDbTest
         _unitOfWork.LibraryRepository.Update(library);
         await _unitOfWork.CommitAsync();
 
+        // Emulate time passage by updating lastFolderScan to be a min in the past
+        foreach (var s in postLib.Series)
+        {
+            s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
+            _context.Series.Update(s);
+        }
+        await _context.SaveChangesAsync();
+
         await scanner.ScanLibrary(library.Id);
         postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
@@ -680,11 +687,27 @@ public class ScannerServiceTests : AbstractDbTest
         _unitOfWork.LibraryRepository.Update(library);
         await _unitOfWork.CommitAsync();
 
+        // Emulate time passage by updating lastFolderScan to be a min in the past
+        foreach (var s in postLib.Series)
+        {
+            s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
+            _context.Series.Update(s);
+        }
+        await _context.SaveChangesAsync();
+
         await scanner.ScanLibrary(library.Id);
         postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Accel should be back
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
+
+        // Emulate time passage by updating lastFolderScan to be a min in the past
+        foreach (var s in postLib.Series)
+        {
+            s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
+            _context.Series.Update(s);
+        }
+        await _context.SaveChangesAsync();
 
         // Fourth Scan: Run again to check stability (should not remove Accel)
         await scanner.ScanLibrary(library.Id);
