@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run on direct pushes to develop, not PRs
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.repository_owner == 'Kareadita'
 
     steps:
       - name: Checkout code
@@ -60,10 +61,10 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
+
           # Pull latest changes with rebase to avoid merge commits
           git pull --rebase origin develop
-          
+
           # Commit and push
           git commit -m "Update OpenAPI documentation" openapi.json
           git push
