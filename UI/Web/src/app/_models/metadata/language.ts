@@ -3,3 +3,10 @@ export interface Language {
     title: string;
 }
 
+export interface KavitaLocale {
+  fileName: string;
+  renderName: string;
+  translationCompletion: number;
+  isRtL: boolean;
+  hash: string;
+}

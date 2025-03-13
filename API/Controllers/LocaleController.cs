@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using API.DTOs.Filtering;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -19,37 +20,16 @@ public class LocaleController : BaseApiController
         _localizationService = localizationService;
     }
 
+    /// <summary>
+    /// Returns all applicable locales on the server
+    /// </summary>
+    /// <remarks>This can be cached as it will not change per version.</remarks>
+    /// <returns></returns>
+    [AllowAnonymous]
     [HttpGet]
-    public ActionResult<IEnumerable<string>> GetAllLocales()
+    public ActionResult<IEnumerable<KavitaLocale>> GetAllLocales()
     {
-        // Check if temp/locale_map.json exists
-
-        // If not, scan the 2 locale files and calculate empty keys or empty values
-
-        // Formulate the Locale object with Percentage
-        var languages = _localizationService.GetLocales().Select(c =>
-            {
-                try
-                {
-                    var cult = new CultureInfo(c);
-                    return new LanguageDto()
-                    {
-                        Title = cult.DisplayName,
-                        IsoCode = cult.IetfLanguageTag
-                    };
-                }
-                catch (Exception ex)
-                {
-                    // Some OS' don't have all culture codes supported like PT_BR, thus we need to default
-                    return new LanguageDto()
-                    {
-                        Title = c,
-                        IsoCode = c
-                    };
-                }
-            })
-            .Where(l => !string.IsNullOrEmpty(l.IsoCode))
-            .OrderBy(d => d.Title);
-        return Ok(languages);
+        // TODO: Add caching against version number
+        return Ok(_localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f));
     }
 }

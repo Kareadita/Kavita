@@ -19,13 +19,12 @@ import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.componen
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
-import {OutOfDateModalComponent} from "./announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
 import {TranslocoService} from "@jsverse/transloco";
-import {User} from "./_models/user";
 import {VersionService} from "./_services/version.service";
 import {LicenseService} from "./_services/license.service";
+import {LocalizationService} from "./_services/localization.service";
 
 @Component({
     selector: 'app-root',
@@ -36,8 +35,9 @@ import {LicenseService} from "./_services/license.service";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
+  protected readonly Breakpoint = Breakpoint;
 
-  transitionState$!: Observable<boolean>;
+
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly offcanvas = inject(NgbOffcanvas);
@@ -53,8 +53,9 @@ export class AppComponent implements OnInit {
   private readonly translocoService = inject(TranslocoService);
   private readonly versionService = inject(VersionService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
+  private readonly localizationService = inject(LocalizationService);
 
-  protected readonly Breakpoint = Breakpoint;
+  transitionState$!: Observable<boolean>;
 
 
   constructor(ratingConfig: NgbRatingConfig, modalConfig: NgbModalConfig) {
@@ -112,6 +113,7 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
     this.setCurrentUser();
     this.themeService.setColorScape('');
+    this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
   }
 
 
