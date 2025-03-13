@@ -399,6 +399,15 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     public async Task<int> GetNumberOfReleasesBehind()
     {
         var updates = await GetAllReleases();
+
+        // If the user is on nightly, then we need to handle releases behind differently
+        if (updates[0].IsPrerelease)
+        {
+            return updates
+                .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
+                .Count();
+        }
+
         return updates
             .Where(update => !update.IsPrerelease)
             .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)

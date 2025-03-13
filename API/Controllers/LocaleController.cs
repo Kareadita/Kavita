@@ -41,11 +41,12 @@ public class LocaleController : BaseApiController
         var result = await _localeCacheProvider.GetAsync<IEnumerable<KavitaLocale>>(CacheKey);
         if (result.HasValue)
         {
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         var ret = _localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f);
         await _localeCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromDays(7));
+
         return Ok();
     }
 }
