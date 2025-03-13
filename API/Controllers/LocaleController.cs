@@ -6,6 +6,7 @@ using API.DTOs.Filtering;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 
 namespace API.Controllers;
 
@@ -14,10 +15,12 @@ namespace API.Controllers;
 public class LocaleController : BaseApiController
 {
     private readonly ILocalizationService _localizationService;
+    private readonly IHostEnvironment _environment;
 
-    public LocaleController(ILocalizationService localizationService)
+    public LocaleController(ILocalizationService localizationService, IHostEnvironment environment)
     {
         _localizationService = localizationService;
+        _environment = environment;
     }
 
     /// <summary>
@@ -30,6 +33,11 @@ public class LocaleController : BaseApiController
     public ActionResult<IEnumerable<KavitaLocale>> GetAllLocales()
     {
         // TODO: Add caching against version number
+        if (!_environment.IsDevelopment())
+        {
+
+        }
+
         return Ok(_localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f));
     }
 }

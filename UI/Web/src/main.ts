@@ -30,6 +30,7 @@ import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
+import {provideTranslocoDefaultLocale} from "@jsverse/transloco-locale/lib/transloco-locale.providers";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -112,7 +113,9 @@ const translocoOptions = {
     missingHandler: {
       useFallbackTranslation: true,
       allowEmpty: false,
+      logMissingKey: true
     },
+    failedRetries: 2,
   } as TranslocoConfig
 };
 

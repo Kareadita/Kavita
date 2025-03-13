@@ -18,6 +18,7 @@ import {Action} from "./action-factory.service";
 import {CoverImageSize} from "../admin/_models/cover-image-size";
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
 import {LicenseService} from "./license.service";
+import {LocalizationService} from "./localization.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -48,6 +49,7 @@ export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
+  private readonly localizationService = inject(LocalizationService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -168,6 +170,8 @@ export class AccountService {
   }
 
   setCurrentUser(user?: User, refreshConnections = true) {
+
+    const isSameUser = this.currentUser === user;
     if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
@@ -197,7 +201,9 @@ export class AccountService {
       // But that really messes everything up
       this.messageHub.stopHubConnection();
       this.messageHub.createHubConnection(this.currentUser);
-      this.licenseService.hasValidLicense().subscribe();
+      if (!isSameUser) {
+        this.licenseService.hasValidLicense().subscribe();
+      }
       this.startRefreshTokenTimer();
     }
   }
@@ -316,6 +322,8 @@ export class AccountService {
 
         // Update the locale on disk (for logout and compact-number pipe)
         localStorage.setItem(AccountService.localeKey, this.currentUser.preferences.locale);
+        this.localizationService.refreshTranslations(this.currentUser.preferences.locale);
+
       }
       return settings;
     }), takeUntilDestroyed(this.destroyRef));
