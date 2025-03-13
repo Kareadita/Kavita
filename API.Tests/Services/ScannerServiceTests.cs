@@ -822,4 +822,35 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
         Assert.Equal(3, executionerAndHerWayOfLife.Volumes.Sum(v => v.Chapters.Count)); // Incremented by 1
     }
+
+    [Fact]
+    public async Task RemovalPickedUp_NoOtherChanges()
+    {
+        const string testcase = "Series removed when no other changes are made - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(2, postLib.Series.Count);
+
+        var executionerCopyDir = Path.Join(testDirectoryPath, "The Executioner and Her Way of Life");
+        Directory.Delete(executionerCopyDir, true);
+
+        await scanner.ScanLibrary(library.Id);
+        await _unitOfWork.CommitAsync();
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series, s => s.Name == "Spice and Wolf");
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+    }
 }
