@@ -27,4 +27,8 @@ public static class EasyCacheProfiles
     /// Match Series metadata for Kavita+ metadata download
     /// </summary>
     public const string KavitaPlusMatchSeries = "kavita+matchSeries";
+    /// <summary>
+    /// All Locales on the Server
+    /// </summary>
+    public const string LocaleOptions = "locales";
 }

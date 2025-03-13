@@ -85,6 +85,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
+            options.UseInMemory(EasyCacheProfiles.LocaleOptions);
 
             // KavitaPlus stuff
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);

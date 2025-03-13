@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
+using API.Constants;
 using API.DTOs.Filtering;
 using API.Services;
+using EasyCaching.Core;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
@@ -15,12 +19,14 @@ namespace API.Controllers;
 public class LocaleController : BaseApiController
 {
     private readonly ILocalizationService _localizationService;
-    private readonly IHostEnvironment _environment;
+    private readonly IEasyCachingProvider _localeCacheProvider;
 
-    public LocaleController(ILocalizationService localizationService, IHostEnvironment environment)
+    private static readonly string CacheKey = "locales_" + BuildInfo.Version;
+
+    public LocaleController(ILocalizationService localizationService, IEasyCachingProviderFactory cachingProviderFactory)
     {
         _localizationService = localizationService;
-        _environment = environment;
+        _localeCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.LocaleOptions);
     }
 
     /// <summary>
@@ -30,14 +36,16 @@ public class LocaleController : BaseApiController
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet]
-    public ActionResult<IEnumerable<KavitaLocale>> GetAllLocales()
+    public async Task<ActionResult<IEnumerable<KavitaLocale>>> GetAllLocales()
     {
-        // TODO: Add caching against version number
-        if (!_environment.IsDevelopment())
+        var result = await _localeCacheProvider.GetAsync<IEnumerable<KavitaLocale>>(CacheKey);
+        if (result.HasValue)
         {
-
+            return Ok(result);
         }
 
-        return Ok(_localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f));
+        var ret = _localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f);
+        await _localeCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromDays(7));
+        return Ok();
     }
 }

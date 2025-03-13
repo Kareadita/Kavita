@@ -193,7 +193,6 @@ public class LibraryController : BaseApiController
 
         var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username).ToList();
         await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
-        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
 
         return Ok(ret.Find(l => l.Id == libraryId));
     }
