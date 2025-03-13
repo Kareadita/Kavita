@@ -403,15 +403,15 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         // If the user is on nightly, then we need to handle releases behind differently
         if (updates[0].IsPrerelease)
         {
-            return updates
+            return Math.Min(0, updates
                 .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
-                .Count();
+                .Count() - 1);
         }
 
-        return updates
+        return Math.Min(0, updates
             .Where(update => !update.IsPrerelease)
             .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
-            .Count();
+            .Count());
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
