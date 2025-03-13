@@ -25,8 +25,6 @@ export class VersionService implements OnDestroy{
   constructor() {
     this.startPeriodicUpdateCheck();
     this.startOutOfDateCheck();
-
-    this.serverService.checkHowOutOfDate().subscribe()
   }
 
   ngOnDestroy() {
