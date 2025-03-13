@@ -14,15 +14,11 @@ jobs:
   generate-openapi:
     runs-on: ubuntu-latest
     # Only run on direct pushes to develop, not PRs
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    if: github.repository_owner == 'Kareadita'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.repository_owner == 'Kareadita'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.REPO_GHA_PAT }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -62,11 +58,11 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
+          git commit -m "Update OpenAPI documentation" openapi.json
+
           # Pull latest changes with rebase to avoid merge commits
           git pull --rebase origin develop
 
-          # Commit and push
-          git commit -m "Update OpenAPI documentation" openapi.json
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_GHA_PAT }}
