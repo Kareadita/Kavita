@@ -21,7 +21,7 @@ import {LocalizationService} from "../../_services/localization.service";
 import {bookColorThemes} from "../../book-reader/_components/reader-settings/reader-settings.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
-import {Language} from "../../_models/metadata/language";
+import {KavitaLocale, Language} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap, tap} from "rxjs";
 import {take} from "rxjs/operators";
@@ -35,7 +35,7 @@ import {
   NgbAccordionDirective, NgbAccordionHeader,
   NgbAccordionItem, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {AsyncPipe, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {AsyncPipe, DecimalPipe, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {ColorPickerModule} from "ngx-color-picker";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -76,7 +76,8 @@ import {LicenseService} from "../../_services/license.service";
     PdfSpreadModePipe,
     PdfThemePipe,
     PdfScrollModePipe,
-    AsyncPipe
+    AsyncPipe,
+    DecimalPipe
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -112,7 +113,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
 
   fontFamilies: Array<string> = [];
-  locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
+  locales: Array<KavitaLocale> = [];
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -120,7 +121,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
 
-    return this.locales.filter(l => l.isoCode === this.settingsForm.get('locale')!.value)[0].title;
+    return this.locales.filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
   }
 
 
@@ -128,7 +129,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
-    this.localizationService.getLocales().subscribe(res => {
+    this.localizationService.locales$.subscribe(res => {
       this.locales = res;
 
       this.cdRef.markForCheck();

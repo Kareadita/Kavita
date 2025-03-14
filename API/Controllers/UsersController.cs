@@ -150,7 +150,7 @@ public class UsersController : BaseApiController
         }
 
 
-        if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
+        if (_localizationService.GetLocales().Select(l => l.FileName).Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;
         }

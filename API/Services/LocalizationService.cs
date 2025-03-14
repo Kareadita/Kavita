@@ -10,12 +10,21 @@ using Microsoft.Extensions.Hosting;
 namespace API.Services;
 #nullable enable
 
+public class KavitaLocale
+{
+    public string FileName { get; set; } // Key
+    public string RenderName { get; set; }
+    public float TranslationCompletion { get; set; }
+    public bool IsRtL { get; set; }
+    public string Hash { get; set; } // ETAG hash so I can run my own localization busting implementation
+}
+
 
 public interface ILocalizationService
 {
     Task<string> Get(string locale, string key, params object[] args);
     Task<string> Translate(int userId, string key, params object[] args);
-    IEnumerable<string> GetLocales();
+    IEnumerable<KavitaLocale> GetLocales();
 }
 
 public class LocalizationService : ILocalizationService
@@ -134,14 +143,260 @@ public class LocalizationService : ILocalizationService
     /// Returns all available locales that exist on both the Frontend and the Backend
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<string> GetLocales()
+    public IEnumerable<KavitaLocale> GetLocales()
     {
         var uiLanguages = _directoryService
-            .GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json")
-            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
+        .GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json");
         var backendLanguages = _directoryService
-            .GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json")
-            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
-        return uiLanguages.Intersect(backendLanguages).Distinct();
+            .GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json");
+
+        var locales = new Dictionary<string, KavitaLocale>();
+        var localeCounts = new Dictionary<string, Tuple<int, int>>();  // fileName -> (nonEmptyValues, totalKeys)
+
+        // First pass: collect all files and count non-empty strings
+
+        // Process UI language files
+        foreach (var file in uiLanguages)
+        {
+            var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(file);
+            var fileContent = _directoryService.FileSystem.File.ReadAllText(file);
+            var hash = ComputeHash(fileContent);
+
+            var counts = CalculateNonEmptyStrings(fileContent);
+
+            if (localeCounts.TryGetValue(fileName, out var existingCount))
+            {
+                // Update existing counts
+                localeCounts[fileName] = Tuple.Create(
+                    existingCount.Item1 + counts.Item1,
+                    existingCount.Item2 + counts.Item2
+                );
+            }
+            else
+            {
+                // Add new counts
+                localeCounts[fileName] = counts;
+            }
+
+            if (!locales.TryGetValue(fileName, out var locale))
+            {
+                locales[fileName] = new KavitaLocale
+                {
+                    FileName = fileName,
+                    RenderName = GetDisplayName(fileName),
+                    TranslationCompletion = 0, // Will be calculated later
+                    IsRtL = IsRightToLeft(fileName),
+                    Hash = hash
+                };
+            }
+            else
+            {
+                // Update existing locale hash
+                locale.Hash = CombineHashes(locale.Hash, hash);
+            }
+        }
+
+        // Process backend language files
+        foreach (var file in backendLanguages)
+        {
+            var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(file);
+            var fileContent = _directoryService.FileSystem.File.ReadAllText(file);
+            var hash = ComputeHash(fileContent);
+
+            var counts = CalculateNonEmptyStrings(fileContent);
+
+            if (localeCounts.TryGetValue(fileName, out var existingCount))
+            {
+                // Update existing counts
+                localeCounts[fileName] = Tuple.Create(
+                    existingCount.Item1 + counts.Item1,
+                    existingCount.Item2 + counts.Item2
+                );
+            }
+            else
+            {
+                // Add new counts
+                localeCounts[fileName] = counts;
+            }
+
+            if (!locales.TryGetValue(fileName, out var locale))
+            {
+                locales[fileName] = new KavitaLocale
+                {
+                    FileName = fileName,
+                    RenderName = GetDisplayName(fileName),
+                    TranslationCompletion = 0, // Will be calculated later
+                    IsRtL = IsRightToLeft(fileName),
+                    Hash = hash
+                };
+            }
+            else
+            {
+                // Update existing locale hash
+                locale.Hash = CombineHashes(locale.Hash, hash);
+            }
+        }
+
+        // Second pass: calculate completion percentages based on English total
+        if (localeCounts.TryGetValue("en", out var englishCounts) && englishCounts.Item2 > 0)
+        {
+            var englishTotalKeys = englishCounts.Item2;
+
+            foreach (var locale in locales.Values)
+            {
+                if (localeCounts.TryGetValue(locale.FileName, out var counts))
+                {
+                    // Calculate percentage based on English total keys
+                    locale.TranslationCompletion = (float)counts.Item1 / englishTotalKeys * 100;
+                }
+            }
+        }
+
+        return locales.Values;
+    }
+
+    // Helper methods that would need to be implemented
+    private static string ComputeHash(string content)
+    {
+        // Implement a hashing algorithm (e.g., SHA256, MD5) to generate a hash for the content
+        using var md5 = System.Security.Cryptography.MD5.Create();
+        var inputBytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var hashBytes = md5.ComputeHash(inputBytes);
+        return Convert.ToBase64String(hashBytes);
+    }
+
+    private static string CombineHashes(string hash1, string hash2)
+    {
+        // Combine two hashes, possibly by concatenating and rehashing
+        return ComputeHash(hash1 + hash2);
+    }
+
+    private static string GetDisplayName(string fileName)
+    {
+        // Map the filename to a human-readable display name
+        // This could use a lookup table or follow a naming convention
+        try
+        {
+            var cultureInfo = new System.Globalization.CultureInfo(fileName);
+            return cultureInfo.NativeName;
+        }
+        catch
+        {
+            // Fall back to the file name if the culture isn't recognized
+            return fileName;
+        }
+    }
+
+    private static bool IsRightToLeft(string fileName)
+    {
+        // Determine if the language is right-to-left
+        try
+        {
+            var cultureInfo = new System.Globalization.CultureInfo(fileName);
+            return cultureInfo.TextInfo.IsRightToLeft;
+        }
+        catch
+        {
+            return false; // Default to left-to-right
+        }
+    }
+
+    private static float CalculateTranslationCompletion(string fileContent)
+    {
+        try
+        {
+            var jsonObject = System.Text.Json.JsonDocument.Parse(fileContent);
+
+            int totalKeys = 0;
+            int nonEmptyValues = 0;
+
+            // Count all keys and non-empty values
+            CountNonEmptyValues(jsonObject.RootElement, ref totalKeys, ref nonEmptyValues);
+
+            return totalKeys > 0 ? (nonEmptyValues * 1f) / totalKeys * 100 : 0;
+        }
+        catch (Exception ex)
+        {
+            // Consider logging the exception
+            return 0; // Return 0% completion if there's an error parsing
+        }
+    }
+    private static Tuple<int, int> CalculateNonEmptyStrings(string fileContent)
+    {
+        try
+        {
+            var jsonObject = JsonDocument.Parse(fileContent);
+
+            var totalKeys = 0;
+            var nonEmptyValues = 0;
+
+            // Count all keys and non-empty values
+            CountNonEmptyValues(jsonObject.RootElement, ref totalKeys, ref nonEmptyValues);
+
+            return Tuple.Create(nonEmptyValues, totalKeys);
+        }
+        catch (Exception)
+        {
+            // Consider logging the exception
+            return Tuple.Create(0, 0); // Return 0% completion if there's an error parsing
+        }
+    }
+
+    private static void CountNonEmptyValues(JsonElement element, ref int totalKeys, ref int nonEmptyValues)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                if (property.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    totalKeys++;
+                    var value = property.Value.GetString();
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        nonEmptyValues++;
+                    }
+                }
+                else
+                {
+                    // Recursively process nested objects
+                    CountNonEmptyValues(property.Value, ref totalKeys, ref nonEmptyValues);
+                }
+            }
+        }
+        else if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                CountNonEmptyValues(item, ref totalKeys, ref nonEmptyValues);
+            }
+        }
+    }
+
+    private void CountEntries(System.Text.Json.JsonElement element, ref int total, ref int translated)
+    {
+        if (element.ValueKind == System.Text.Json.JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                CountEntries(property.Value, ref total, ref translated);
+            }
+        }
+        else if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                CountEntries(item, ref total, ref translated);
+            }
+        }
+        else if (element.ValueKind == System.Text.Json.JsonValueKind.String)
+        {
+            total++;
+            string value = element.GetString();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                translated++;
+            }
+        }
     }
 }

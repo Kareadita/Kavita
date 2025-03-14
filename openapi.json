@@ -3917,6 +3917,8 @@
         "tags": [
           "Locale"
         ],
+        "summary": "Returns all applicable locales on the server",
+        "description": "This can be cached as it will not change per version.",
         "responses": {
           "200": {
             "description": "OK",
@@ -3925,7 +3927,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/KavitaLocale"
                   }
                 }
               },
@@ -3933,7 +3935,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/KavitaLocale"
                   }
                 }
               },
@@ -3941,7 +3943,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/KavitaLocale"
                   }
                 }
               }
@@ -19138,6 +19140,31 @@
         },
         "additionalProperties": false,
         "description": "Represents an individual button in a Jump Bar"
+      },
+      "KavitaLocale": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "renderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "translationCompletion": {
+            "type": "number",
+            "format": "float"
+          },
+          "isRtL": {
+            "type": "boolean"
+          },
+          "hash": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "LanguageDto": {
         "required": [

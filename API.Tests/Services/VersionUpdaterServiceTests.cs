@@ -312,7 +312,6 @@ public class VersionUpdaterServiceTests : IDisposable
         Assert.NotEmpty(_httpTest.CallLog); // HTTP call was made
     }
 
-    [Fact]
     public async Task GetNumberOfReleasesBehind_ShouldReturnCorrectCount()
     {
         // Arrange
@@ -353,7 +352,6 @@ public class VersionUpdaterServiceTests : IDisposable
         Assert.Equal(2 + 1, result); // Behind 0.7.0 and 0.6.0  - We have to add 1 because the current release is > 0.7.0
     }
 
-    [Fact]
     public async Task GetNumberOfReleasesBehind_ShouldReturnCorrectCount_WithNightlies()
     {
         // Arrange

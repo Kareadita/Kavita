@@ -15,8 +15,8 @@
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="global-header" formControlName="locale">
-                @for(opt of locales; track opt.title) {
-                  <option [value]="opt.isoCode">{{opt.title | titlecase}}</option>
+                @for(opt of locales; track opt.renderName) {
+                  <option [value]="opt.fileName">{{opt.renderName | titlecase}} ({{opt.translationCompletion | number:'1.0-1'}}%)</option>
                 }
               </select>
             </ng-template>
