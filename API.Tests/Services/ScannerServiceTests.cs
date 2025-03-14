@@ -55,6 +55,28 @@ public class ScannerServiceTests : AbstractDbTest
         await _context.SaveChangesAsync();
     }
 
+
+    protected async Task SetAllSeriesLastScannedInThePast(Library library, TimeSpan? duration = null)
+    {
+        foreach (var series in library.Series)
+        {
+            await SetLastScannedInThePast(series, duration, false);
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    protected async Task SetLastScannedInThePast(Series series, TimeSpan? duration = null, bool save = true)
+    {
+        duration ??= TimeSpan.FromMinutes(2);
+        series.LastFolderScanned = DateTime.Now.Subtract(duration.Value);
+        _context.Series.Update(series);
+
+        if (save)
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+
     [Fact]
     public async Task ScanLibrary_ComicVine_PublisherFolder()
     {
@@ -611,9 +633,7 @@ public class ScannerServiceTests : AbstractDbTest
         File.Copy(Path.Join(root1PlushFolder, "Plush v02.cbz"), Path.Join(root1PlushFolder, "Plush v03.cbz"));
 
         // Emulate time passage by updating lastFolderScan to be a min in the past
-        s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-        _context.Series.Update(s);
-        await _context.SaveChangesAsync();
+        await SetLastScannedInThePast(s);
 
         // Rescan to ensure nothing changes yet again
         await scanner.ScanLibrary(library.Id, false);
@@ -702,12 +722,7 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
 
         // Emulate time passage by updating lastFolderScan to be a min in the past
-        foreach (var s in postLib.Series)
-        {
-            s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-            _context.Series.Update(s);
-        }
-        await _context.SaveChangesAsync();
+        await SetAllSeriesLastScannedInThePast(postLib);
 
         // Fourth Scan: Run again to check stability (should not remove Accel)
         await scanner.ScanLibrary(library.Id);
@@ -794,7 +809,7 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
         Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Sum(v => v.Chapters.Count));
 
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        await SetAllSeriesLastScannedInThePast(postLib);
 
         // Add a new chapter to a volume of the series, and scan. Validate that no chapters were lost, and the new
         // chapter was added
@@ -845,11 +860,9 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(3, spiceAndWolf.Volumes.Count);
         Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
-        spiceAndWolf.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(2));
-        _context.Series.Update(spiceAndWolf);
-        await _context.SaveChangesAsync();
+        await SetLastScannedInThePast(spiceAndWolf);
 
-        // Add file at series root
+        // Add volume to Spice and Wolf series directory
         var spiceAndWolfDir = Path.Join(testDirectoryPath, "Spice and Wolf");
         File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 1.cbz"),
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
@@ -864,9 +877,7 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(4, spiceAndWolf.Volumes.Count);
         Assert.Equal(5, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
-        spiceAndWolf.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(2));
-        _context.Series.Update(spiceAndWolf);
-        await _context.SaveChangesAsync();
+        await SetLastScannedInThePast(spiceAndWolf);
 
         // Add file in subfolder
         spiceAndWolfDir = Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3");
