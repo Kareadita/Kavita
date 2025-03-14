@@ -165,17 +165,15 @@ public class ScrobblingService : IScrobblingService
     private async Task<bool> ShouldSendEarlyReminder(int userId, DateTime tokenExpiry)
     {
         var earlyReminderDate = tokenExpiry.AddDays(-5);
-        if (earlyReminderDate <= DateTime.UtcNow)
-        {
-            var hasAlreadySentReminder = await _unitOfWork.DataContext.EmailHistory
-                .AnyAsync(h => h.AppUserId == userId && h.Sent &&
-                               h.EmailTemplate == EmailService.TokenExpiringSoonTemplate &&
-                               h.SendDate >= earlyReminderDate);
+        if (earlyReminderDate > DateTime.UtcNow) return false;
 
-            return !hasAlreadySentReminder;
-        }
+        var hasAlreadySentReminder = await _unitOfWork.DataContext.EmailHistory
+            .AnyAsync(h => h.AppUserId == userId && h.Sent &&
+                           h.EmailTemplate == EmailService.TokenExpiringSoonTemplate &&
+                           h.SendDate >= earlyReminderDate);
 
-        return false;
+        return !hasAlreadySentReminder;
+
     }
 
     /// <summary>
@@ -183,17 +181,15 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     private async Task<bool> ShouldSendExpirationReminder(int userId, DateTime tokenExpiry)
     {
-        if (tokenExpiry <= DateTime.UtcNow)
-        {
-            var hasAlreadySentExpirationEmail = await _unitOfWork.DataContext.EmailHistory
-                .AnyAsync(h => h.AppUserId == userId && h.Sent &&
-                               h.EmailTemplate == EmailService.TokenExpirationTemplate &&
-                               h.SendDate >= tokenExpiry);
+        if (tokenExpiry > DateTime.UtcNow) return false;
 
-            return !hasAlreadySentExpirationEmail;
-        }
+        var hasAlreadySentExpirationEmail = await _unitOfWork.DataContext.EmailHistory
+            .AnyAsync(h => h.AppUserId == userId && h.Sent &&
+                           h.EmailTemplate == EmailService.TokenExpirationTemplate &&
+                           h.SendDate >= tokenExpiry);
 
-        return false;
+        return !hasAlreadySentExpirationEmail;
+
     }
 
 
@@ -803,17 +799,12 @@ public class ScrobblingService : IScrobblingService
         }
 
 
+        var totalEvents = readEvents.Count + decisions.Count + ratingEvents.Count;
+        if (totalEvents == 0) return;
 
         // Get all the applicable users to scrobble and set their rate limits
         var usersToScrobble = await PrepareUsersToScrobble(readEvents, addToWantToRead, removeWantToRead, ratingEvents, userRateLimits, license);
 
-
-
-        var totalEvents = readEvents.Count + decisions.Count + ratingEvents.Count;
-        if (totalEvents == 0)
-        {
-            return;
-        }
 
         _logger.LogInformation("Scrobble Processing Details:" +
                                "\n  Read Events: {ReadEventsCount}" +
@@ -854,9 +845,7 @@ public class ScrobblingService : IScrobblingService
     /// <param name="addEvents">List of events for adding to want-to-read</param>
     /// <param name="removeEvents">List of events for removing from want-to-read</param>
     /// <returns>List of events that represent the final state (add or remove)</returns>
-    private List<ScrobbleEvent> CalculateNetWantToReadDecisions(
-        List<ScrobbleEvent> addEvents,
-        List<ScrobbleEvent> removeEvents)
+    private static List<ScrobbleEvent> CalculateNetWantToReadDecisions(List<ScrobbleEvent> addEvents, List<ScrobbleEvent> removeEvents)
     {
         // Create a dictionary to track the latest event for each user/series combination
         var latestEvents = new Dictionary<(int SeriesId, int AppUserId), ScrobbleEvent>();
@@ -866,11 +855,10 @@ public class ScrobblingService : IScrobblingService
         {
             var key = (addEvent.SeriesId, addEvent.AppUserId);
 
-            if (!latestEvents.ContainsKey(key) ||
-                addEvent.CreatedUtc > latestEvents[key].CreatedUtc)
-            {
-                latestEvents[key] = addEvent;
-            }
+            if (latestEvents.TryGetValue(key, out var value) && addEvent.CreatedUtc <= value.CreatedUtc) continue;
+
+            value = addEvent;
+            latestEvents[key] = value;
         }
 
         // Process all remove events
@@ -878,11 +866,10 @@ public class ScrobblingService : IScrobblingService
         {
             var key = (removeEvent.SeriesId, removeEvent.AppUserId);
 
-            if (!latestEvents.ContainsKey(key) ||
-                removeEvent.CreatedUtc > latestEvents[key].CreatedUtc)
-            {
-                latestEvents[key] = removeEvent;
-            }
+            if (latestEvents.TryGetValue(key, out var value) && removeEvent.CreatedUtc <= value.CreatedUtc) continue;
+
+            value = removeEvent;
+            latestEvents[key] = value;
         }
 
         // Return all events that represent the final state
