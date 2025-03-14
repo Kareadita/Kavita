@@ -12,6 +12,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
 
@@ -81,6 +82,10 @@ public class LicenseController(
         }
     }
 
+    /// <summary>
+    /// Remove the Kavita+ License on the Server
+    /// </summary>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpDelete]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
@@ -91,7 +96,9 @@ public class LicenseController(
         setting.Value = null;
         unitOfWork.SettingsRepository.Update(setting);
         await unitOfWork.CommitAsync();
-        await taskScheduler.ScheduleKavitaPlusTasks();
+
+        TaskScheduler.RemoveKavitaPlusTasks();
+
         return Ok();
     }
 
