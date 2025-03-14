@@ -451,4 +451,77 @@ public class ParseScannedFilesTests : AbstractDbTest
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(1, changes);
     }
+
+    [Fact]
+    public async Task SubFoldersNoSubFolders_SkipAll()
+    {
+        const string testcase = "Subfolders and files at root - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var fs = new FileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
+        var scanner = _scannerHelper.CreateServices(ds, fs);
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Equal(3, spiceAndWolf.Volumes.Count);
+        Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+
+        var res = await psf.ScanFiles(testDirectoryPath, true,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+        Assert.DoesNotContain(res, sc => sc.HasChanged);
+    }
+
+    [Fact]
+    public async Task SubFoldersNoSubFolders_ScanAllAfterAdd()
+    {
+        const string testcase = "Subfolders and files at root - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var fs = new FileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
+        var scanner = _scannerHelper.CreateServices(ds, fs);
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Equal(3, spiceAndWolf.Volumes.Count);
+        Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+
+        var spiceAndWolfDir = Path.Join(testDirectoryPath, "Spice and Wolf");
+        File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 1.cbz"),
+            Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
+
+        var res = await psf.ScanFiles(testDirectoryPath, true,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+        var changes = res.Count(sc => sc.HasChanged);
+        Assert.Equal(2, changes);
+    }
 }
