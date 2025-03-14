@@ -128,9 +128,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         // Assert
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
-        // Note: Based on the current implementation, it will create a duplicate event
-        // This test checks the actual behavior, not the desired behavior
-        Assert.Equal(2, events.Count);
+        Assert.Single(events);
         Assert.All(events, e => Assert.Equal(ScrobbleEventType.AddWantToRead, e.ScrobbleEventType));
     }
 
@@ -153,10 +151,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         // Assert
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
-        // Note: Based on the current implementation, it won't delete the existing event
-        // but will add a new RemoveWantToRead event
-        Assert.Equal(2, events.Count);
-        Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.AddWantToRead);
+        Assert.Single(events);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.RemoveWantToRead);
     }
 
@@ -179,9 +174,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         // Assert
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
-        // Note: Based on the current implementation, it will create a duplicate event
-        // This test checks the actual behavior, not the desired behavior
-        Assert.Equal(2, events.Count);
+        Assert.Single(events);
         Assert.All(events, e => Assert.Equal(ScrobbleEventType.RemoveWantToRead, e.ScrobbleEventType));
     }
 

@@ -32,6 +32,7 @@ public interface IScrobbleRepository
     Task<IEnumerable<ScrobbleEvent>> GetUserEventsForSeries(int userId, int seriesId);
     Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination);
     Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId);
+    Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds);
 }
 
 /// <summary>
@@ -172,8 +173,15 @@ public class ScrobbleRepository : IScrobbleRepository
 
     public async Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId)
     {
-        return await _context.ScrobbleEvent.Where(e => e.SeriesId == seriesId)
+        return await _context.ScrobbleEvent
+            .Where(e => e.SeriesId == seriesId)
             .ToListAsync();
     }
 
+    public async Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => seriesIds.Contains(e.SeriesId))
+            .ToListAsync();
+    }
 }
