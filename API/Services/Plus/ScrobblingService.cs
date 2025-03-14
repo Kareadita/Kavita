@@ -435,6 +435,16 @@ public class ScrobblingService : IScrobblingService
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
+
+
+        // if (existing && onWantToRead) return;
+        //
+        // if (existing)
+        // {
+        //     // Delete the existing entry
+        // }
+
+
         if (existing) return; // BUG: If I take a series and add to remove from want to read, then add to want to read, Kavita rejects the second as a duplicate, when it's not
 
         var evt = new ScrobbleEvent()
