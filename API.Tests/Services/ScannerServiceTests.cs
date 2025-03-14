@@ -824,40 +824,7 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
     [Fact]
-    public async Task SubFoldersNoSubFolders_SkipAll()
-    {
-        const string testcase = "Subfolders and files at root - Manga.json";
-        var infos = new Dictionary<string, ComicInfo>();
-        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
-
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
-
-        var scanner = _scannerHelper.CreateServices();
-        await scanner.ScanLibrary(library.Id);
-
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        Assert.NotNull(postLib);
-        Assert.Single(postLib.Series);
-
-        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
-        Assert.Equal(3, spiceAndWolf.Volumes.Count);
-        Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
-
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
-
-        await scanner.ScanLibrary(library.Id);
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
-        Assert.NotNull(postLib);
-        Assert.Single(postLib.Series);
-
-        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
-        Assert.Equal(3, spiceAndWolf.Volumes.Count);
-        Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
-    }
-
-    [Fact]
-    public async Task SubFoldersNoSubFolders_ScanAllAfterAdd()
+    public async Task SubFoldersNoSubFolders_CorrectPickupAfterAdd()
     {
         const string testcase = "Subfolders and files at root - Manga.json";
         var infos = new Dictionary<string, ComicInfo>();
@@ -878,8 +845,11 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(3, spiceAndWolf.Volumes.Count);
         Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        spiceAndWolf.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(2));
+        _context.Series.Update(spiceAndWolf);
+        await _context.SaveChangesAsync();
 
+        // Add file at series root
         var spiceAndWolfDir = Path.Join(testDirectoryPath, "Spice and Wolf");
         File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 1.cbz"),
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
@@ -893,5 +863,25 @@ public class ScannerServiceTests : AbstractDbTest
         spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
         Assert.Equal(4, spiceAndWolf.Volumes.Count);
         Assert.Equal(5, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        spiceAndWolf.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(2));
+        _context.Series.Update(spiceAndWolf);
+        await _context.SaveChangesAsync();
+
+        // Add file in subfolder
+        spiceAndWolfDir = Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3");
+        File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0012.cbz"),
+            Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0013.cbz"));
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Equal(4, spiceAndWolf.Volumes.Count);
+        Assert.Equal(6, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
     }
 }

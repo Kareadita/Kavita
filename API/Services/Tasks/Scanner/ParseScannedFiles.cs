@@ -164,10 +164,11 @@ public class ParseScannedFiles
         foreach (var directory in allDirectories)
         {
             // Don't process any folders where we've already scanned everything below
-           if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
+            if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
                 var hasChanged = !HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck);
                 // Skip this directory as we've already processed a parent unless there are loose files at that directory
+                // and they have changes
                 CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher, hasChanged);
                 continue;
             }

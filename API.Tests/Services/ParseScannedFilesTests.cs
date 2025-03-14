@@ -479,6 +479,8 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.Equal(3, spiceAndWolf.Volumes.Count);
         Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
+        // Needs to be actual time as the write time is now, so if we set LastFolderChecked in the past
+        // it'll always a scan as it was changed since the last scan.
         Thread.Sleep(1100); // Ensure at least one second has passed since library scan
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
@@ -513,8 +515,11 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.Equal(3, spiceAndWolf.Volumes.Count);
         Assert.Equal(4, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        spiceAndWolf.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(2));
+        _context.Series.Update(spiceAndWolf);
+        await _context.SaveChangesAsync();
 
+        // Add file at series root
         var spiceAndWolfDir = Path.Join(testDirectoryPath, "Spice and Wolf");
         File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 1.cbz"),
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
@@ -522,6 +527,16 @@ public class ParseScannedFilesTests : AbstractDbTest
         var res = await psf.ScanFiles(testDirectoryPath, true,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
+        Assert.Equal(2, changes);
+
+        // Add file in subfolder
+        spiceAndWolfDir = Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3");
+        File.Copy(Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0011.cbz"),
+            Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0013.cbz"));
+
+        res = await psf.ScanFiles(testDirectoryPath, true,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+        changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
     }
 }
