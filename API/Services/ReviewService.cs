@@ -76,8 +76,8 @@ public static class ReviewService
         plainText = Regex.Replace(plainText, @"~~", string.Empty);
         plainText = Regex.Replace(plainText, @"__", string.Empty);
 
-        // Take the first 100 characters
-        plainText = plainText.Length > 100 ? plainText.Substring(0, BodyTextLimit) : plainText;
+        // Take the first BodyTextLimit characters
+        plainText = plainText.Length > BodyTextLimit ? plainText.Substring(0, BodyTextLimit) : plainText;
 
         return plainText + "…";
     }
