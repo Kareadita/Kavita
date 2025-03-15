@@ -469,6 +469,7 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return true;
         if (!ExternalMetadataService.IsPlusEligible(library.Type)) return true;
+
         return false;
     }
 
@@ -485,7 +486,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to Kavita+ API");
+            _logger.LogError(e, "An error happened trying to get rate limit from Kavita+ API");
         }
 
         return 0;
@@ -741,8 +742,10 @@ public class ScrobblingService : IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ClearProcessedEvents()
     {
-        var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(7);
+        const int daysAgo = 7;
+        var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(daysAgo);
         _unitOfWork.ScrobbleRepository.Remove(events);
+        _logger.LogInformation("Removing {Count} scrobble events that have been processed {DaysAgo}+ days ago", events.Count, daysAgo);
         await _unitOfWork.CommitAsync();
     }
 
@@ -756,7 +759,6 @@ public class ScrobblingService : IScrobblingService
     {
         // Check how many scrobble events we have available then only do those.
         var userRateLimits = new Dictionary<int, int>();
-        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
         var progressCounter = 0;
 
@@ -798,11 +800,11 @@ public class ScrobblingService : IScrobblingService
             await _unitOfWork.CommitAsync();
         }
 
-
         var totalEvents = readEvents.Count + decisions.Count + ratingEvents.Count;
         if (totalEvents == 0) return;
 
         // Get all the applicable users to scrobble and set their rate limits
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var usersToScrobble = await PrepareUsersToScrobble(readEvents, addToWantToRead, removeWantToRead, ratingEvents, userRateLimits, license);
 
 
@@ -836,6 +838,20 @@ public class ScrobblingService : IScrobblingService
         await SaveToDb(progressCounter, true);
         _logger.LogInformation("Scrobbling Events is complete");
 
+        // Cleanup any events that are due to bugs or legacy
+        try
+        {
+            var eventsWithoutAnilistToken = (await _unitOfWork.ScrobbleRepository.GetEvents())
+                .Where(e => !e.IsProcessed && !e.IsErrored)
+                .Where(e => string.IsNullOrEmpty(e.AppUser.AniListAccessToken));
+
+            _unitOfWork.ScrobbleRepository.Remove(eventsWithoutAnilistToken);
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception when trying to delete old scrobble events when the user has no active token");
+        }
     }
 
     /// <summary>
@@ -974,6 +990,7 @@ public class ScrobblingService : IScrobblingService
             .Where(user => user.UserPreferences.AniListScrobblingEnabled)
             .DistinctBy(u => u.Id)
             .ToList();
+
         foreach (var user in usersToScrobble)
         {
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
@@ -1130,6 +1147,7 @@ public class ScrobblingService : IScrobblingService
     {
         var providers = new List<ScrobbleProvider>();
         if (!string.IsNullOrEmpty(appUser.AniListAccessToken)) providers.Add(ScrobbleProvider.AniList);
+
         return providers;
     }
 
