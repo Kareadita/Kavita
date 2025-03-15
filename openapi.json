@@ -20527,6 +20527,11 @@
             "type": "string",
             "format": "date-time"
           },
+          "readDateUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the chapter was read"
+          },      
           "chapterId": {
             "type": "integer",
             "format": "int32"
