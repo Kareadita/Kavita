@@ -231,7 +231,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
             foreach (var result in results)
             {
-                result.Series.Summary = StringHelper.SquashBreaklines(result.Series.Summary);
+                result.Series.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(result.Series.Summary));
             }
 
             return results;
@@ -730,7 +730,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                Description = StringHelper.SquashBreaklines(w.Description),
+                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Character)
@@ -809,7 +809,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.SquashBreaklines(w.Description),
+                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.CoverArtist)
@@ -866,7 +866,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.SquashBreaklines(w.Description),
+                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Writer)
@@ -1122,7 +1122,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        series.Metadata.Summary = StringHelper.SquashBreaklines(externalMetadata.Summary);
+        series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
         return true;
     }
 
@@ -1432,7 +1432,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
 
-            ret.Summary = StringHelper.SquashBreaklines(ret.Summary);
+            ret.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(ret.Summary));
 
             return ret;
 
