@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Threading;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -13,7 +14,7 @@ namespace API.Tests.Helpers;
 
 public class CacheHelperTests
 {
-    private const string TestCoverImageDirectory = @"c:\";
+    private static readonly string TestCoverImageDirectory = Path.GetPathRoot(Directory.GetCurrentDirectory());
     private const string TestCoverImageFile = "thumbnail.jpg";
     private readonly string _testCoverPath = Path.Join(TestCoverImageDirectory, TestCoverImageFile);
     private const string TestCoverArchive = @"file in folder.zip";
@@ -133,9 +134,10 @@ public class CacheHelperTests
     [Fact]
     public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceCreated()
     {
+        var now = DateTimeOffset.Now;
         var filesystemFile = new MockFileData("")
         {
-            LastWriteTime = DateTimeOffset.Now
+            LastWriteTime =now,
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
@@ -147,12 +149,12 @@ public class CacheHelperTests
         var cacheHelper = new CacheHelper(fileService);
 
         var chapter = new ChapterBuilder("1")
-            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
-            .WithCreated(filesystemFile.LastWriteTime.DateTime)
+            .WithLastModified(now.DateTime)
+            .WithCreated(now.DateTime)
             .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
-            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .WithLastModified(now.DateTime)
             .Build();
         Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
@@ -160,9 +162,10 @@ public class CacheHelperTests
     [Fact]
     public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceLastModified()
     {
+        var now = DateTimeOffset.Now;
         var filesystemFile = new MockFileData("")
         {
-            LastWriteTime = DateTimeOffset.Now
+            LastWriteTime = now,
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
@@ -174,12 +177,12 @@ public class CacheHelperTests
         var cacheHelper = new CacheHelper(fileService);
 
         var chapter = new ChapterBuilder("1")
-            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
-            .WithCreated(filesystemFile.LastWriteTime.DateTime)
+            .WithLastModified(now.DateTime)
+            .WithCreated(now.DateTime)
             .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
-            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .WithLastModified(now.DateTime)
             .Build();
 
         Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
