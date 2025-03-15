@@ -197,9 +197,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         // Assert
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
-        // Note: Based on the current implementation, it won't update the existing event
-        // but will add a new AddWantToRead event
-        Assert.Equal(2, events.Count);
+        Assert.Single(events);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.RemoveWantToRead);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.AddWantToRead);
     }
