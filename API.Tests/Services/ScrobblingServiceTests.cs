@@ -198,7 +198,6 @@ public class ScrobblingServiceTests : AbstractDbTest
         var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
         Assert.Single(events);
-        Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.RemoveWantToRead);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.AddWantToRead);
     }
 
