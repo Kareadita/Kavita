@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using API.Helpers;
 using Xunit;
 
@@ -33,7 +34,7 @@ public class RateLimiterTests
     }
 
     [Fact]
-    public void AcquireTokens_Refill()
+    public async Task AcquireTokens_Refill()
     {
         // Arrange
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(1));
@@ -43,14 +44,14 @@ public class RateLimiterTests
         limiter.TryAcquire("test_key");
 
         // Wait for refill
-        System.Threading.Thread.Sleep(1100);
+        await Task.Delay(1100);
 
         // Assert
         Assert.True(limiter.TryAcquire("test_key"));
     }
 
     [Fact]
-    public void AcquireTokens_Refill_WithOff()
+    public async Task AcquireTokens_Refill_WithOff()
     {
         // Arrange
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(10), false);
@@ -60,7 +61,7 @@ public class RateLimiterTests
         limiter.TryAcquire("test_key");
 
         // Wait for refill
-        System.Threading.Thread.Sleep(2100);
+        await Task.Delay(2100);
 
         // Assert
         Assert.False(limiter.TryAcquire("test_key"));
