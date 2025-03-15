@@ -872,7 +872,8 @@ public class ScannerServiceTests : AbstractDbTest
     [Fact]
     public async Task SubFoldersNoSubFolders_CorrectPickupAfterAdd()
     {
-        const string testcase = "Subfolders and files at root - Manga.json";
+        // This test case is used in multiple tests and can result in conflict if not separated
+        const string testcase = "Subfolders and files at root (2) - Manga.json";
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
         var testDirectoryPath = library.Folders.First().Path;
