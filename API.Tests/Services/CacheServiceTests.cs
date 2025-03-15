@@ -71,10 +71,11 @@ public class CacheServiceTests
     private readonly DbConnection _connection;
     private readonly DataContext _context;
 
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
+    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
+    private static readonly string CacheDirectory = Root + "kavita/config/cache/";
+    private static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
+    private static readonly string BackupDirectory = Root + "kavita/config/backups/";
+    private static readonly string DataDirectory = Root + "kavita/data/";
 
     public CacheServiceTests()
     {
@@ -118,7 +119,7 @@ public class CacheServiceTests
         _context.ServerSetting.Update(setting);
 
         _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
             .Build());
         return await _context.SaveChangesAsync() > 0;
     }
@@ -133,8 +134,8 @@ public class CacheServiceTests
     private static MockFileSystem CreateFileSystem()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
+        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
+        fileSystem.AddDirectory(Root + "kavita/config/");
         fileSystem.AddDirectory(CacheDirectory);
         fileSystem.AddDirectory(CoverImageDirectory);
         fileSystem.AddDirectory(BackupDirectory);

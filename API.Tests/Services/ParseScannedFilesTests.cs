@@ -204,11 +204,11 @@ public class ParseScannedFilesTests : AbstractDbTest
     public async Task ScanLibrariesForSeries_ShouldFindFiles()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Data/");
-        fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
+        fileSystem.AddDirectory(Root + "Data/");
+        fileSystem.AddFile(Root + "Data/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile(Root + "Data/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile(Root + "Data/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile(Root + "Data/Nothing.pdf", new MockFileData(string.Empty));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
@@ -221,7 +221,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         Assert.NotNull(library);
 
         library.Type = LibraryType.Manga;
-        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {"C:/Data/"}, false,
+        var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {Root + "Data/"}, false,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(1));
 
 

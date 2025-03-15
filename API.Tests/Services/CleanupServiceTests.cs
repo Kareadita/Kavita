@@ -29,12 +29,12 @@ public class CleanupServiceTests : AbstractDbTest
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
     private readonly IReaderService _readerService;
-
+    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
 
     public CleanupServiceTests() : base()
     {
         _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
             .Build());
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),

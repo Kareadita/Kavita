@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,15 +30,16 @@ public abstract class AbstractDbTest : IDisposable
     protected readonly IMapper _mapper;
 
 
-    protected const string CacheDirectory = "C:/kavita/config/cache/";
-    protected const string CacheLongDirectory = "C:/kavita/config/cache-long/";
-    protected const string CoverImageDirectory = "C:/kavita/config/covers/";
-    protected const string BackupDirectory = "C:/kavita/config/backups/";
-    protected const string LogDirectory = "C:/kavita/config/logs/";
-    protected const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
-    protected const string TempDirectory = "C:/kavita/config/temp/";
-    protected const string DataDirectory = "C:/data/";
+    protected static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
+    protected static readonly string CacheDirectory = Root + "kavita/config/cache/";
+    protected static readonly string CacheLongDirectory = Root + "kavita/config/cache-long/";
+    protected static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
+    protected static readonly string BackupDirectory = Root + "kavita/config/backups/";
+    protected static readonly string LogDirectory = Root + "kavita/config/logs/";
+    protected static readonly string BookmarkDirectory = Root + "kavita/config/bookmarks/";
+    protected static readonly string SiteThemeDirectory = Root + "kavita/config/themes/";
+    protected static readonly string TempDirectory = Root + "kavita/config/temp/";
+    protected static readonly string DataDirectory = Root + "data/";
 
     protected AbstractDbTest()
     {
@@ -116,8 +118,8 @@ public abstract class AbstractDbTest : IDisposable
     protected static MockFileSystem CreateFileSystem()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
+        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
+        fileSystem.AddDirectory(Root + "kavita/config/");
         fileSystem.AddDirectory(CacheDirectory);
         fileSystem.AddDirectory(CacheLongDirectory);
         fileSystem.AddDirectory(CoverImageDirectory);
