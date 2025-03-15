@@ -98,6 +98,11 @@ public class ScrobbleRepository : IScrobbleRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns all processed events that were processed 7 or more days ago
+    /// </summary>
+    /// <param name="daysAgo"></param>
+    /// <returns></returns>
     public async Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo)
     {
         var date = DateTime.UtcNow.Subtract(TimeSpan.FromDays(daysAgo));
