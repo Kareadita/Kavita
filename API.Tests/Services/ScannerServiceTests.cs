@@ -927,4 +927,35 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(6, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
     }
+
+    [Fact]
+    public async Task PublisherLayoutNewSeriesPickup()
+    {
+        const string testcase = "Publisher Layout picking up - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(3, postLib.Series.Count);
+
+        var publisher2Dir = Path.Join(testDirectoryPath, "Publisher2");
+        var executionDir = Path.Join(publisher2Dir, "The Executioner and Her Way of Life");
+        var newSeriesDir = Path.Join(publisher2Dir, "Seraph of the End");
+        Directory.CreateDirectory(newSeriesDir);
+        File.Copy(Path.Join(executionDir, "The Executioner and Her Way of Life Vol. 1.cbz"),
+            Path.Join(newSeriesDir, "Seraph of the End Vol. 1.cbz"));
+
+        await scanner.ScanLibrary(library.Id);
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
+    }
 }
