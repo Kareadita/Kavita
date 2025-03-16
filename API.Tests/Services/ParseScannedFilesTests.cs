@@ -399,9 +399,9 @@ public class ParseScannedFilesTests : AbstractDbTest
         File.Copy(Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0001.cbz"),
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
 
-        // 4 series, of which 2 have volumes as directories
+        // 4 series
         var folderMap = await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
-        Assert.Equal(6, folderMap.Count);
+        Assert.Equal(4, folderMap.Count);
 
         var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
         var changes = res.Where(sc => sc.HasChanged).ToList();
@@ -570,5 +570,46 @@ public class ParseScannedFilesTests : AbstractDbTest
             await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public async Task PublisherLayoutWithSubFolders_NoExtraScans()
+    {
+        const string testcase = "Publisher Layout with Subfolders no extra scans - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var fs = new FileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
+
+        var scanner = _scannerHelper.CreateServices(ds, fs);
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(2, postLib.Series.Count);
+
+        Thread.Sleep(1100);
+
+        // Add new series
+        var publisherDir = Path.Join(testDirectoryPath, "Publisher");
+        var executionDir = Path.Join(publisherDir, "The Executioner and Her Way of Life");
+        var newSeriesDir = Path.Join(publisherDir, "Seraph of the End");
+        Directory.CreateDirectory(newSeriesDir);
+        File.Copy(Path.Join(executionDir, "The Executioner and Her Way of Life Vol. 1.cbz"),
+            Path.Join(newSeriesDir, "Seraph of the End Vol. 1.cbz"));
+
+
+        var res = await psf.ScanFiles(testDirectoryPath, true,
+            await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+
+        var changes = res.Count(sc => sc.HasChanged);
+        Assert.Equal(1, changes);
     }
 }

@@ -154,6 +154,7 @@ public interface ISeriesRepository
     public Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
         MangaFormat format);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
+    // Keys are the LowestFolderpath
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
     /// <summary>
@@ -2243,7 +2244,7 @@ public class SeriesRepository : ISeriesRepository
         var map = new Dictionary<string, IList<SeriesModified>>();
         foreach (var series in info)
         {
-            if (string.IsNullOrEmpty(series.FolderPath)) continue;
+            /*if (string.IsNullOrEmpty(series.FolderPath)) continue;
             if (!map.TryGetValue(series.FolderPath, out var value))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
@@ -2254,10 +2255,10 @@ public class SeriesRepository : ISeriesRepository
             else
             {
                 value.Add(series);
-            }
+            }*/
 
 
-            if (string.IsNullOrEmpty(series.LowestFolderPath) || series.FolderPath.Equals(series.LowestFolderPath)) continue;
+            if (string.IsNullOrEmpty(series.LowestFolderPath) /*|| series.FolderPath.Equals(series.LowestFolderPath)*/) continue;
             if (!map.TryGetValue(series.LowestFolderPath, out var value2))
             {
                 map.Add(series.LowestFolderPath, new List<SeriesModified>()

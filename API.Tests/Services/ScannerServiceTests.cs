@@ -946,6 +946,8 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib);
         Assert.Equal(3, postLib.Series.Count);
 
+        Thread.Sleep(1100);
+
         var publisher2Dir = Path.Join(testDirectoryPath, "Publisher2");
         var executionDir = Path.Join(publisher2Dir, "The Executioner and Her Way of Life");
         var newSeriesDir = Path.Join(publisher2Dir, "Seraph of the End");
@@ -957,5 +959,46 @@ public class ScannerServiceTests : AbstractDbTest
         postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
+    }
+
+    [Fact]
+    public async Task SubfoldersAddNewChapterInNonSubFolder()
+    {
+        const string testcase = "SubFolders add in non Subfolder - Manga.json";
+        var infos = new Dictionary<string, ComicInfo>();
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var testDirectoryPath = library.Folders.First().Path;
+
+        _unitOfWork.LibraryRepository.Update(library);
+        await _unitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(1, spiceAndWolf.Volumes.Select(v => v.Chapters.Count).Sum());
+
+        Thread.Sleep(1100);
+
+        // Add new chapter in "Main" Series directory
+        var spiceAndWolfDir = Path.Join(testDirectoryPath, "Spice and Wolf");
+        var vol1Dir = Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 1");
+        File.Copy(Path.Join(vol1Dir, "Spice and Wolf Vol. 1 Ch. 0001.cbz"),
+            Path.Join(spiceAndWolfDir, "Spice and Wolf Ch. 0002.cbz"));
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(2, spiceAndWolf.Volumes.Select(v => v.Chapters.Count).Sum());
     }
 }
