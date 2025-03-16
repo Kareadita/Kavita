@@ -263,6 +263,7 @@ public class LicenseService(
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
+        // TODO: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
 
         try
         {

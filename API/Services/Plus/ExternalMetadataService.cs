@@ -609,6 +609,8 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin) || madeModification;
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
+        // TODO: Hook in individual issue metadata
+
         return madeModification;
     }
 
