@@ -29,7 +29,6 @@ public class CleanupServiceTests : AbstractDbTest
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
     private readonly IReaderService _readerService;
-    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
 
     public CleanupServiceTests() : base()
     {

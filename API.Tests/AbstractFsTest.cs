@@ -2,13 +2,14 @@
 
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Tests;
 
 public abstract class AbstractFsTest
 {
 
-    protected static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
+    protected static readonly string Root = Parser.NormalizePath(Path.GetPathRoot(Directory.GetCurrentDirectory()));
     protected static readonly string ConfigDirectory = Root + "kavita/config/";
     protected static readonly string CacheDirectory = ConfigDirectory + "cache/";
     protected static readonly string CacheLongDirectory = ConfigDirectory + "cache-long/";
