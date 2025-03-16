@@ -49,7 +49,7 @@ public interface IExternalMetadataService
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId);
     Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto);
-    Task FixSeriesMatch(int seriesId, int anilistId, long? malId);
+    Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId);
     Task UpdateSeriesDontMatch(int seriesId, bool dontMatch);
     Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId);
 }
@@ -196,7 +196,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
-            SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata);
+            SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library);
         if (series == null) return [];
 
         var potentialAnilistId = ScrobblingService.ExtractId<int?>(dto.Query, ScrobblingService.AniListWeblinkWebsite);
@@ -210,7 +210,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var matchRequest = new MatchSeriesRequestDto()
         {
-            Format = series.Format == MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             Query = dto.Query,
             SeriesName = series.Name,
             AlternativeNames = altNames.Where(s => !string.IsNullOrEmpty(s)).ToList(),
@@ -312,8 +312,10 @@ public class ExternalMetadataService : IExternalMetadataService
     /// This will override any sort of matching that was done prior and force it to be what the user Selected
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="anilistId"></param>
-    public async Task FixSeriesMatch(int seriesId, int anilistId, long? malId)
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="cbrId"></param>
+    public async Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
         if (series == null) return;
@@ -329,15 +331,17 @@ public class ExternalMetadataService : IExternalMetadataService
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
                 new PlusSeriesRequestDto()
                 {
-                    AniListId = anilistId,
+                    AniListId = aniListId,
                     MalId = malId,
+                    CbrId = cbrId,
+                    MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                     SeriesName = series.Name // Required field, not used since AniList/Mal Id are passed
                 });
 
             if (metadata.Series == null)
             {
-                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series AniList Id: {AniListId}",
-                    series.Name, anilistId);
+                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series with Id: {AniListId}/{MalId}/{CbrId}",
+                    series.Name, aniListId, malId, cbrId);
                 return;
             }
 
@@ -421,8 +425,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
                     .WithKavitaPlusHeaders(license, token)
                     .PostJsonAsync(data)
-                    .ReceiveJson<
-                        SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
+                    .ReceiveJson<SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
             }
             catch (FlurlHttpException ex)
             {
@@ -438,8 +441,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
                         .WithKavitaPlusHeaders(license, token)
                         .PostJsonAsync(data)
-                        .ReceiveJson<
-                            SeriesDetailPlusApiDto>();
+                        .ReceiveJson<SeriesDetailPlusApiDto>();
                 }
             }
 

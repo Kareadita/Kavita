@@ -13,4 +13,5 @@ internal class SeriesDetailPlusApiDto
     public ExternalSeriesDetailDto? Series { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+    public int? CbrId { get; set; }
 }

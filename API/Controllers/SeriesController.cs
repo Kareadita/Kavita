@@ -648,13 +648,13 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// This will perform the fix match
     /// </summary>
-    /// <param name="aniListId"></param>
+    /// <param name="match"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("update-match")]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int aniListId, [FromQuery] long? malId)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
     {
-        BackgroundJob.Enqueue(() => _externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId));
+        BackgroundJob.Enqueue(() => _externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId, cbrId));
 
         return Ok();
     }

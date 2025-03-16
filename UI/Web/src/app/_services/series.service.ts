@@ -242,7 +242,7 @@ export class SeriesService {
   }
 
   updateMatch(seriesId: number, series: ExternalSeriesDetail) {
-    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId}${series.malId ? '&malId=' + series.malId : ''}`, {}, TextResonse);
+    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId || 0}&malId=${series.malId || 0}&cbrId=${series.cbrId || 0}`, {}, TextResonse);
   }
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {
