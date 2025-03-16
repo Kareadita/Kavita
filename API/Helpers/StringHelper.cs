@@ -3,8 +3,19 @@
 namespace API.Helpers;
 #nullable enable
 
-public static class StringHelper
+public static partial class StringHelper
 {
+    #region Regex Source Generators
+    [GeneratedRegex(@"\s?\(Source:\s*[^)]+\)")]
+    private static partial Regex SourceRegex();
+    [GeneratedRegex(@"<br\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+    private static partial Regex BrStandardizeRegex();
+    [GeneratedRegex(@"(?:<br />\s*)+", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+    private static partial Regex BrMultipleRegex();
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhiteSpaceRegex();
+    #endregion
+
     /// <summary>
     /// Used to squash duplicate break and new lines with a single new line.
     /// </summary>
@@ -19,13 +30,13 @@ public static class StringHelper
         }
 
         // First standardize all br tags to <br /> format
-        summary = Regex.Replace(summary, @"<br\s*/?>", "<br />", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        summary = BrStandardizeRegex().Replace(summary, "<br />");
 
         // Replace multiple consecutive br tags with a single br tag
-        summary = Regex.Replace(summary, @"(?:<br />\s*)+", "<br /> ", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        summary = BrMultipleRegex().Replace(summary, "<br /> ");
 
         // Normalize remaining whitespace (replace multiple spaces with a single space)
-        summary = Regex.Replace(summary, @"\s+", " ").Trim();
+        summary = WhiteSpaceRegex().Replace(summary, " ").Trim();
 
         return summary.Trim();
     }
@@ -37,6 +48,8 @@ public static class StringHelper
     /// <returns></returns>
     public static string? RemoveSourceInDescription(string? description)
     {
-        return description?.Trim();
+        if (string.IsNullOrEmpty(description)) return description;
+
+        return SourceRegex().Replace(description, string.Empty).Trim();
     }
 }

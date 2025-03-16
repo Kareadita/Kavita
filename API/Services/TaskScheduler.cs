@@ -236,6 +236,20 @@ public class TaskScheduler : ITaskScheduler
             RecurringJobOptions);
     }
 
+    /// <summary>
+    /// Removes any Kavita+ Recurring Jobs
+    /// </summary>
+    public static void RemoveKavitaPlusTasks()
+    {
+        RecurringJob.RemoveIfExists(CheckScrobblingTokensId);
+        RecurringJob.RemoveIfExists(LicenseCheckId);
+        RecurringJob.RemoveIfExists(ProcessScrobblingEventsId);
+        RecurringJob.RemoveIfExists(ProcessProcessedScrobblingEventsId);
+        RecurringJob.RemoveIfExists(KavitaPlusDataRefreshId);
+        RecurringJob.RemoveIfExists(KavitaPlusStackSyncId);
+        RecurringJob.RemoveIfExists(KavitaPlusWantToReadSyncId);
+    }
+
     #region StatsTasks
 
 

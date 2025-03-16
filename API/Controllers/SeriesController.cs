@@ -99,7 +99,7 @@ public class SeriesController : BaseApiController
     /// <param name="filterDto"></param>
     /// <returns></returns>
     [HttpPost("v2")]
-    public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
     {
         var userId = User.GetUserId();
         var series =

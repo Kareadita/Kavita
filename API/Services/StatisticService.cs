@@ -357,6 +357,7 @@ public class StatisticService : IStatisticService
                 SeriesId = u.SeriesId,
                 LibraryId = u.LibraryId,
                 ReadDate = u.LastModified,
+                ReadDateUtc = u.LastModifiedUtc,
                 ChapterId = u.ChapterId,
                 ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).MinNumber
             })

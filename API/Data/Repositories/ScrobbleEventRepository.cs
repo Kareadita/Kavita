@@ -32,6 +32,8 @@ public interface IScrobbleRepository
     Task<IEnumerable<ScrobbleEvent>> GetUserEventsForSeries(int userId, int seriesId);
     Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination);
     Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId);
+    Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds);
+    Task<IList<ScrobbleEvent>> GetEvents();
 }
 
 /// <summary>
@@ -97,6 +99,11 @@ public class ScrobbleRepository : IScrobbleRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns all processed events that were processed 7 or more days ago
+    /// </summary>
+    /// <param name="daysAgo"></param>
+    /// <returns></returns>
     public async Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo)
     {
         var date = DateTime.UtcNow.Subtract(TimeSpan.FromDays(daysAgo));
@@ -172,8 +179,22 @@ public class ScrobbleRepository : IScrobbleRepository
 
     public async Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId)
     {
-        return await _context.ScrobbleEvent.Where(e => e.SeriesId == seriesId)
+        return await _context.ScrobbleEvent
+            .Where(e => e.SeriesId == seriesId)
             .ToListAsync();
     }
 
+    public async Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => seriesIds.Contains(e.SeriesId))
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetEvents()
+    {
+        return await _context.ScrobbleEvent
+            .Include(e => e.AppUser)
+            .ToListAsync();
+    }
 }
