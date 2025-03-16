@@ -25,17 +25,11 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class BookmarkServiceTests
+public class BookmarkServiceTests: AbstractFsTest
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly DbConnection _connection;
     private readonly DataContext _context;
-
-    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
-    private static readonly string CacheDirectory = Root + "kavita/config/cache/";
-    private static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
-    private static readonly string BackupDirectory = Root + "kavita/config/backups/";
-    private static readonly string BookmarkDirectory = Root + "kavita/config/bookmarks/";
 
 
     public BookmarkServiceTests()
@@ -101,20 +95,6 @@ Substitute.For<IMediaConversionService>());
         _context.AppUserBookmark.RemoveRange(_context.AppUserBookmark.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
-        fileSystem.AddDirectory(Root + "kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(Root + "data/");
-
-        return fileSystem;
     }
 
     #endregion

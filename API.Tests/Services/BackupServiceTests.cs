@@ -22,7 +22,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class BackupServiceTests
+public class BackupServiceTests: AbstractFsTest
 {
     private readonly ILogger<BackupService> _logger = Substitute.For<ILogger<BackupService>>();
     private readonly IUnitOfWork _unitOfWork;
@@ -32,14 +32,6 @@ public class BackupServiceTests
     private readonly DbConnection _connection;
     private readonly DataContext _context;
 
-    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
-    private static readonly string CacheDirectory = Root + "kavita/config/cache/";
-    private static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
-    private static readonly string BackupDirectory = Root + "kavita/config/backups/";
-    private static readonly string LogDirectory = Root + "kavita/config/logs/";
-    private static readonly string ConfigDirectory = Root + "kavita/config/";
-    private static readonly string BookmarkDirectory = Root + "kavita/config/bookmarks";
-    private static readonly string ThemesDirectory = Root + "kavita/config/theme";
 
     public BackupServiceTests()
     {
@@ -94,22 +86,6 @@ public class BackupServiceTests
         _context.Series.RemoveRange(_context.Series.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
-        fileSystem.AddDirectory(Root + "kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(LogDirectory);
-        fileSystem.AddDirectory(ThemesDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(Root + "data/");
-
-        return fileSystem;
     }
 
     #endregion

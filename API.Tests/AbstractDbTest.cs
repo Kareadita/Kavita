@@ -22,24 +22,12 @@ using NSubstitute;
 
 namespace API.Tests;
 
-public abstract class AbstractDbTest : IDisposable
+public abstract class AbstractDbTest : AbstractFsTest , IDisposable
 {
     protected readonly DbConnection _connection;
     protected readonly DataContext _context;
     protected readonly IUnitOfWork _unitOfWork;
     protected readonly IMapper _mapper;
-
-
-    protected static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
-    protected static readonly string CacheDirectory = Root + "kavita/config/cache/";
-    protected static readonly string CacheLongDirectory = Root + "kavita/config/cache-long/";
-    protected static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
-    protected static readonly string BackupDirectory = Root + "kavita/config/backups/";
-    protected static readonly string LogDirectory = Root + "kavita/config/logs/";
-    protected static readonly string BookmarkDirectory = Root + "kavita/config/bookmarks/";
-    protected static readonly string SiteThemeDirectory = Root + "kavita/config/themes/";
-    protected static readonly string TempDirectory = Root + "kavita/config/temp/";
-    protected static readonly string DataDirectory = Root + "data/";
 
     protected AbstractDbTest()
     {
@@ -114,24 +102,6 @@ public abstract class AbstractDbTest : IDisposable
     }
 
     protected abstract Task ResetDb();
-
-    protected static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
-        fileSystem.AddDirectory(Root + "kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CacheLongDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(SiteThemeDirectory);
-        fileSystem.AddDirectory(LogDirectory);
-        fileSystem.AddDirectory(TempDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
 
     public void Dispose()
     {

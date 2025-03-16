@@ -62,7 +62,7 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         throw new System.NotImplementedException();
     }
 }
-public class CacheServiceTests
+public class CacheServiceTests: AbstractFsTest
 {
     private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
     private readonly IUnitOfWork _unitOfWork;
@@ -70,12 +70,6 @@ public class CacheServiceTests
 
     private readonly DbConnection _connection;
     private readonly DataContext _context;
-
-    private static readonly string Root = Path.GetPathRoot(Directory.GetCurrentDirectory());
-    private static readonly string CacheDirectory = Root + "kavita/config/cache/";
-    private static readonly string CoverImageDirectory = Root + "kavita/config/covers/";
-    private static readonly string BackupDirectory = Root + "kavita/config/backups/";
-    private static readonly string DataDirectory = Root + "kavita/data/";
 
     public CacheServiceTests()
     {
@@ -129,19 +123,6 @@ public class CacheServiceTests
         _context.Series.RemoveRange(_context.Series.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory(Root + "kavita/");
-        fileSystem.AddDirectory(Root + "kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
     }
 
     #endregion
@@ -264,7 +245,7 @@ public class CacheServiceTests
             .WithFile(new MangaFileBuilder($"{DataDirectory}2.epub", MangaFormat.Epub).Build())
             .Build();
         cs.GetCachedFile(c);
-        Assert.Same($"{DataDirectory}1.epub", cs.GetCachedFile(c));
+        Assert.Equal($"{DataDirectory}1.epub", cs.GetCachedFile(c));
     }
 
     #endregion
