@@ -14,7 +14,7 @@ namespace API.Tests.Helpers;
 
 public class CacheHelperTests: AbstractFsTest
 {
-    private static readonly string TestCoverImageDirectory = Root;
+    private static readonly string TestCoverImageDirectory = Path.GetPathRoot(Directory.GetCurrentDirectory());
     private const string TestCoverImageFile = "thumbnail.jpg";
     private readonly string _testCoverPath = Path.Join(TestCoverImageDirectory, TestCoverImageFile);
     private const string TestCoverArchive = @"file in folder.zip";
