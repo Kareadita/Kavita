@@ -209,17 +209,27 @@ public class ParseScannedFiles
     /// <returns></returns>
     private bool HasSeriesFolderNotChangedSinceLastScan(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
-        if (forceCheck)
+        // Reverting code from: https://github.com/Kareadita/Kavita/pull/3619/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
+        // This is to be able to release hotfix and tackle this in appropriate time
+
+        // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
+        // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
+        if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
         {
             return false;
         }
 
+        // if (forceCheck)
+        // {
+        //     return false;
+        // }
+
         // TryGetSeriesList falls back to parent folders to match to seriesList
-        var seriesList = TryGetSeriesList(library, seriesPaths, directory);
-        if (seriesList == null)
-        {
-            return false;
-        }
+        // var seriesList = TryGetSeriesList(library, seriesPaths, directory);
+        // if (seriesList == null)
+        // {
+        //     return false;
+        // }
 
         foreach (var series in seriesList)
         {
@@ -299,7 +309,9 @@ public class ParseScannedFiles
         {
             return;
         }
-        result.Add(CreateScanResult(directory, folderPath, hasChanged, files));
+        // Revert of https://github.com/Kareadita/Kavita/pull/3629/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
+        // for Hotfix v0.8.5.x
+        result.Add(CreateScanResult(directory, folderPath, true, files));
     }
 
     /// <summary>
@@ -758,10 +770,14 @@ public class ParseScannedFiles
         // If folder hasn't changed, generate fake ParserInfos
         if (!result.HasChanged)
         {
-            // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
-            result.ParserInfos = TryGetSeriesList(library, seriesPaths, normalizedFolder)!
+            result.ParserInfos = seriesPaths[normalizedFolder]
                 .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
                 .ToList();
+
+            // // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
+            // result.ParserInfos = TryGetSeriesList(library, seriesPaths, normalizedFolder)!
+            // .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
+            // .ToList();
 
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
