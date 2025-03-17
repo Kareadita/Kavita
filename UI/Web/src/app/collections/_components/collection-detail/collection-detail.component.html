@@ -32,7 +32,7 @@
                 <div class="under-image">
                   <app-image [imageUrl]="collectionTag.source | providerImage"
                              width="16px" height="16px"
-                             [ngbTooltip]="collectionTag.source | providerName" tabindex="0"></app-image>
+                             [ngbTooltip]="collectionTag.source | scrobbleProviderName" tabindex="0"></app-image>
                   <span class="ms-2 me-2">{{t('sync-progress', {title: series.length + ' / ' + collectionTag.totalSourceCount})}}</span>
                   <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag.lastSyncUtc | date: 'short' | defaultDate })"></i>
                 </div>

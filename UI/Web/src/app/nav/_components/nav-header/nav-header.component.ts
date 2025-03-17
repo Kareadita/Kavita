@@ -1,4 +1,4 @@
-import {AsyncPipe, DOCUMENT, NgOptimizedImage, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -17,7 +17,7 @@ import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
-import {Person, PersonRole} from 'src/app/_models/metadata/person';
+import {Person} from 'src/app/_models/metadata/person';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {SearchResult} from 'src/app/_models/search/search-result';
 import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
@@ -28,40 +28,34 @@ import {ScrollService} from 'src/app/_services/scroll.service';
 import {SearchService} from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
-import {PersonRolePipe} from '../../../_pipes/person-role.pipe';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {SeriesFormatComponent} from '../../../shared/series-format/series-format.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {GroupedTypeaheadComponent, SearchEvent} from '../grouped-typeahead/grouped-typeahead.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
-import {
-  GenericListModalComponent
-} from "../../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
 
 @Component({
     selector: 'app-nav-header',
     templateUrl: './nav-header.component.html',
     styleUrls: ['./nav-header.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
-    SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent, NgTemplateOutlet]
+    imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
+      SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+      AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavHeaderComponent implements OnInit {
 

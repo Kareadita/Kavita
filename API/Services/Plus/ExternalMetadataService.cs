@@ -65,7 +65,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly ICoverDbService _coverDbService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
-        [LibraryType.Comic, LibraryType.Book, LibraryType.Image, LibraryType.ComicVine];
+        [LibraryType.Comic, LibraryType.Book, LibraryType.Image];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Series =  null,
@@ -487,6 +487,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
+            //TODO: if (result.CbrId.HasValue) externalSeriesMetadata.CbrId = result.CbrId.Value;
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
@@ -609,7 +610,7 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin) || madeModification;
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
-        // TODO: Hook in individual issue metadata
+        madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
 
         return madeModification;
     }
@@ -1028,6 +1029,16 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogError(ex, "There was an issue determining Age Rating for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
         }
 
+        return false;
+    }
+
+
+    private async Task<bool> UpdateChapters(Series series, MetadataSettingsDto settings,
+        ExternalSeriesDetailDto externalMetadata)
+    {
+        if (externalMetadata.PlusMediaFormat != PlusMediaFormat.Comic) return false;
+
+        var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(1);
         return false;
     }
 
