@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 
@@ -19,7 +20,7 @@ public static class JwtHelper
         var token = jwtHandler.ReadJwtToken(jwtToken);
         var exp = token.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
 
-        if (long.TryParse(exp, out var expSeconds))
+        if (long.TryParse(exp, CultureInfo.InvariantCulture, out var expSeconds))
         {
             return DateTimeOffset.FromUnixTimeSeconds(expSeconds).UtcDateTime;
         }

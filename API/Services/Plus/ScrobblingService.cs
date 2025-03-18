@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -1167,18 +1168,18 @@ public class ScrobblingService : IScrobblingService
             var value = tokens[index];
             if (typeof(T) == typeof(int?))
             {
-                if (int.TryParse(value, out var intValue))
+                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue))
                     return (T)(object)intValue;
             }
             else if (typeof(T) == typeof(int))
             {
-                if (int.TryParse(value, out var intValue))
+                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue))
                     return (T)(object)intValue;
                 return default;
             }
             else if (typeof(T) == typeof(long?))
             {
-                if (long.TryParse(value, out var longValue))
+                if (long.TryParse(value, CultureInfo.InvariantCulture, out var longValue))
                     return (T)(object)longValue;
             }
             else if (typeof(T) == typeof(string))
@@ -1187,7 +1188,7 @@ public class ScrobblingService : IScrobblingService
             }
         }
 
-        return default(T?);
+        return default;
     }
 
     /// <summary>

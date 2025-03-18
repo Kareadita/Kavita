@@ -695,7 +695,7 @@ public class BookService : IBookService
         var month = 0;
         var day = 0;
         if (string.IsNullOrEmpty(publicationDate)) return (year, month, day);
-        switch (DateTime.TryParse(publicationDate, out var date))
+        switch (DateTime.TryParse(publicationDate, CultureInfo.InvariantCulture, out var date))
         {
             case true:
                 year = date.Year;

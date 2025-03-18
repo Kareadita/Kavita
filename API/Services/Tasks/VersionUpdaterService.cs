@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -253,7 +254,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                             {
                                 Version = version,
                                 PrNumber = prNumber,
-                                Date = DateTime.Parse(commit.Commit.Author.Date)
+                                Date = DateTime.Parse(commit.Commit.Author.Date, CultureInfo.InvariantCulture)
                             });
                         }
                     }

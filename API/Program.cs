@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;

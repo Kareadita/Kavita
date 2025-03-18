@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2080,7 +2081,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task GetEstimatedChapterCreationDate_NextChapter_ChaptersMonthApart()
     {
         await ResetDb();
-        var now = DateTime.Parse("2021-01-01"); // 10/31/2024 can trigger an edge case bug
+        var now = DateTime.Parse("2021-01-01", CultureInfo.InvariantCulture); // 10/31/2024 can trigger an edge case bug
 
         _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())

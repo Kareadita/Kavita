@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -538,13 +539,13 @@ public class ReadingListService : IReadingListService
         var maxPairs = Math.Max(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
-            var arcNumber = int.MaxValue.ToString();
+            var arcNumber = int.MaxValue.ToString(CultureInfo.InvariantCulture);
             if (arcNumbers.Length > i)
             {
                 arcNumber = arcNumbers[i];
             }
 
-            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, out _)) continue;
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, CultureInfo.InvariantCulture, out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumber));
         }
 
