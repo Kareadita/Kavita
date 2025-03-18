@@ -19,9 +19,9 @@ public class ExternalChapterDto
 
     public string? Summary { get; set; }
 
-    public string? Writer { get; set; }
+    public IList<string>? Writers { get; set; }
 
-    public string? Artist { get; set; }
+    public IList<string>? Artists { get; set; }
 
     public DateTime? ReleaseDate { get; set; }
 

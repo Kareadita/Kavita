@@ -836,7 +836,6 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
-        // Download the image and save it
         _unitOfWork.SeriesRepository.Update(series);
         await _unitOfWork.CommitAsync();
 
@@ -1038,8 +1037,71 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (externalMetadata.PlusMediaFormat != PlusMediaFormat.Comic) return false;
 
-        var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(1);
-        return false;
+        if (externalMetadata.ChapterDtos == null || externalMetadata.ChapterDtos.Count == 0) return false;
+
+        // Get all volumes and chapters
+        var madeModification = false;
+        var allChapters =  await _unitOfWork.ChapterRepository.GetAllChaptersForSeries(series.Id);
+
+        var matchedChapters = allChapters
+            .Join(
+                externalMetadata.ChapterDtos,
+                chapter => chapter.Range,
+                dto => dto.IssueNumber,
+                (chapter, dto) => (chapter, dto) // Create a tuple of matched pairs
+            )
+            .ToList();
+
+        foreach (var (chapter, potentialMatch) in matchedChapters)
+        {
+            _logger.LogDebug("Updating {ChapterNumber} with metadata", chapter.Range);
+
+            // Write the metadata
+            if (!string.IsNullOrEmpty(potentialMatch.Title) && !potentialMatch.Title.Contains(series.Name))
+            {
+                chapter.Title = potentialMatch.Title;
+                _unitOfWork.ChapterRepository.Update(chapter);
+                madeModification = true;
+            }
+
+            if (!chapter.SummaryLocked && string.IsNullOrEmpty(chapter.Summary) & !string.IsNullOrEmpty(potentialMatch.Summary))
+            {
+                chapter.Summary = potentialMatch.Summary;
+                _unitOfWork.ChapterRepository.Update(chapter);
+                madeModification = true;
+            }
+
+            // ReleaseDate
+            // Cover Image
+
+
+            // Update People (Writer/Artist/Publisher)
+            if (!chapter.PublisherLocked)
+            {
+                // Update publisher
+            }
+
+            //var artists = potentialMatch.Artists.Select(p => new PersonDto())
+
+            //     await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
+            //
+            // foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist))
+            // {
+            //     var meta = upstreamArtists.FirstOrDefault(c => c.Name == person.Person.Name);
+            //     person.OrderWeight = 0;
+            //     if (meta != null)
+            //     {
+            //         person.KavitaPlusConnection = true;
+            //     }
+            // }
+        }
+
+
+
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync();
+
+        return madeModification;
     }
 
     private async Task<bool> UpdateCoverImage(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)

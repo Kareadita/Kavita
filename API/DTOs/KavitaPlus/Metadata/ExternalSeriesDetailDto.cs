@@ -35,11 +35,11 @@ public class ExternalSeriesDetailDto
     public IList<SeriesCharacter>? Characters { get; set; } = [];
 
     #region Comic Only
-    public string Publisher { get; set; }
+    public string? Publisher { get; set; }
     /// <summary>
     /// Only from CBR for <see cref="ScrobbleProvider.Cbr"/>. Full metadata about issues
     /// </summary>
-    public IList<ExternalChapterDto> ChapterDtos { get; set; }
+    public IList<ExternalChapterDto>? ChapterDtos { get; set; }
     #endregion
 
 

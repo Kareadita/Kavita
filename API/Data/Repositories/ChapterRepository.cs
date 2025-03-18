@@ -47,6 +47,7 @@ public interface IChapterRepository
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
     Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter);
     IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
+    Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -297,5 +298,14 @@ public class ChapterRepository : IChapterRepository
             .OrderBy(c => c.SortOrder)
             .Include(c => c.Volume)
             .AsEnumerable();
+    }
+
+    public async Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId)
+    {
+        return await _context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c => c.SortOrder)
+            .Include(c => c.Volume)
+            .ToListAsync();
     }
 }
