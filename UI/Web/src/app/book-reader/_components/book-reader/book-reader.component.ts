@@ -1049,13 +1049,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
-      this.scrollService.scrollTo(scrollTop, this.reader.nativeElement);
+      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
     } else if ((this.writingStyle === WritingStyle.Vertical) && (this.layoutMode === BookPageLayoutMode.Default)) {
        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
     } else {
 
       if (this.layoutMode === BookPageLayoutMode.Default) {
-        this.scrollService.scrollTo(0, this.reader.nativeElement);
+        setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       } else if (this.writingStyle === WritingStyle.Vertical) {
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
             setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
