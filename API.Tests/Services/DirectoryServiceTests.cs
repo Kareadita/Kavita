@@ -12,12 +12,19 @@ using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
 public class DirectoryServiceTests: AbstractFsTest
 {
     private readonly ILogger<DirectoryService> _logger = Substitute.For<ILogger<DirectoryService>>();
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public DirectoryServiceTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
 
 
     #region TraverseTreeParallelForEach
@@ -381,6 +388,7 @@ public class DirectoryServiceTests: AbstractFsTest
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            _testOutputHelper.WriteLine("Skipping test on non Windows platform");
             return;
         }
 
@@ -397,6 +405,7 @@ public class DirectoryServiceTests: AbstractFsTest
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            _testOutputHelper.WriteLine("Skipping test on non Windows platform");
             return;
         }
 
