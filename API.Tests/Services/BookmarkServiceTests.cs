@@ -25,16 +25,11 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class BookmarkServiceTests
+public class BookmarkServiceTests: AbstractFsTest
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly DbConnection _connection;
     private readonly DataContext _context;
-
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
 
 
     public BookmarkServiceTests()
@@ -88,7 +83,7 @@ Substitute.For<IMediaConversionService>());
         _context.ServerSetting.Update(setting);
 
         _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
             .Build());
         return await _context.SaveChangesAsync() > 0;
     }
@@ -100,20 +95,6 @@ Substitute.For<IMediaConversionService>());
         _context.AppUserBookmark.RemoveRange(_context.AppUserBookmark.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory("C:/data/");
-
-        return fileSystem;
     }
 
     #endregion
