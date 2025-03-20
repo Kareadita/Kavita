@@ -1731,7 +1731,8 @@
 
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released": "Released: "
     },
 
     "stream-list-item": {
