@@ -613,6 +613,7 @@ export class VolumeDetailComponent implements OnInit {
         });
         break;
       case Action.AddToReadingList:
+        this.actionService.addVolumeToReadingList(this.volume!, this.seriesId, () => {/* No Operation */ });
         break;
       case Action.Download:
         if (this.downloadInProgress) return;
