@@ -53,6 +53,7 @@ public interface IReadingListRepository
     Task<int> RemoveReadingListsWithoutSeries();
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
     Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items);
+    Task<IEnumerable<ReadingList>> GetReadingListsBySeriesId(int seriesId, ReadingListIncludes includes = ReadingListIncludes.Items);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -170,7 +171,14 @@ public class ReadingListRepository : IReadingListRepository
             .AsSplitQuery()
             .ToListAsync();
     }
-
+    public async Task<IEnumerable<ReadingList>> GetReadingListsBySeriesId(int seriesId, ReadingListIncludes includes = ReadingListIncludes.Items)
+    {
+        return await _context.ReadingList
+            .Where(rl => rl.Items.Any(rli => rli.SeriesId == seriesId))
+            .Includes(includes)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
 
 
     public void Remove(ReadingListItem item)

@@ -50,6 +50,14 @@ public interface IReadingListService
 
     Task CreateReadingListsFromSeries(int libraryId, int seriesId);
     Task<string> GenerateReadingListCoverImage(int readingListId);
+    /// <summary>
+    /// Check, and update if needed, all reading lists' AgeRating who contain the passed series
+    /// </summary>
+    /// <param name="seriesId">The series whose age rating is being updated</param>
+    /// <param name="ageRating">The new (uncommited) age rating of the series</param>
+    /// <returns></returns>
+    /// <remarks>This method does not commit changes</remarks>
+    Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating);
 }
 
 /// <summary>
@@ -843,5 +851,20 @@ public class ReadingListService : IReadingListService
         // TODO: Refactor this so that reading lists have a dedicated cover image so we can calculate primary/secondary colors
 
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
+    }
+    public async Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating)
+    {
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListsBySeriesId(seriesId);
+        foreach (var readingList in readingLists)
+        {
+            var seriesIds = readingList.Items.Select(item => item.SeriesId).ToList();
+            seriesIds.Remove(seriesId); // Don't get AgeRating from database
+
+            var maxAgeRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+            if (ageRating > maxAgeRating)
+                maxAgeRating = ageRating;
+
+            readingList.AgeRating = maxAgeRating;
+        }
     }
 }

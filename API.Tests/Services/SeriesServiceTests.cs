@@ -57,7 +57,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), locService);
+            Substitute.For<IScrobblingService>(), locService, Substitute.For<IReadingListService>());
     }
     #region Setup
 

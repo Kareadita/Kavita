@@ -50,6 +50,7 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IReadingListService _readingListService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -59,7 +60,8 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
+        IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -67,6 +69,7 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _readingListService = readingListService;
     }
 
     /// <summary>
@@ -191,6 +194,7 @@ public class SeriesService : ISeriesService
             {
                 series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata?.AgeRating ?? AgeRating.Unknown;
                 series.Metadata.AgeRatingLocked = true;
+                await _readingListService.UpdateReadingListAgeRatingForSeries(series.Id, series.Metadata.AgeRating);
             }
             else
             {

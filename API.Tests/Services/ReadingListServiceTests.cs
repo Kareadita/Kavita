@@ -583,6 +583,93 @@ public class ReadingListServiceTests
         Assert.Equal(AgeRating.G, readingList.AgeRating);
     }
 
+    [Fact]
+    public async Task UpdateReadingListAgeRatingForSeries()
+    {
+        await ResetDb();
+        var spiceAndWolf = new SeriesBuilder("Spice and Wolf")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolumes([
+            new VolumeBuilder("1")
+                .WithChapters([
+                    new ChapterBuilder("1").Build(),
+                    new ChapterBuilder("2").Build(),
+                ]).Build()
+            ]).Build();
+        spiceAndWolf.Metadata.AgeRating = AgeRating.Everyone;
+
+        var othersidePicnic = new SeriesBuilder("Otherside Picnic ")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolumes([
+                new VolumeBuilder("1")
+                    .WithChapters([
+                        new ChapterBuilder("1").Build(),
+                        new ChapterBuilder("2").Build(),
+                    ]).Build()
+            ]).Build();
+        othersidePicnic.Metadata.AgeRating = AgeRating.Everyone;
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "Amelia",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>
+            {
+                new LibraryBuilder("Test Library", LibraryType.LightNovel)
+                    .WithSeries(spiceAndWolf)
+                    .WithSeries(othersidePicnic)
+                    .Build(),
+            },
+        });
+
+        await _context.SaveChangesAsync();
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("Amelia", AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+
+        var myTestReadingList = new ReadingListBuilder("MyReadingList").Build();
+        var mySecondTestReadingList = new ReadingListBuilder("MySecondReadingList").Build();
+        var myThirdTestReadingList = new ReadingListBuilder("MyThirdReadingList").Build();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            myTestReadingList,
+            mySecondTestReadingList,
+            myThirdTestReadingList,
+        };
+
+
+        await _readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myTestReadingList);
+        await _readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, myTestReadingList);
+        await _readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myThirdTestReadingList);
+        await _readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, mySecondTestReadingList);
+
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        await _readingListService.CalculateReadingListAgeRating(myTestReadingList);
+        await _readingListService.CalculateReadingListAgeRating(mySecondTestReadingList);
+        Assert.Equal(AgeRating.Everyone, myTestReadingList.AgeRating);
+        Assert.Equal(AgeRating.Everyone, mySecondTestReadingList.AgeRating);
+        Assert.Equal(AgeRating.Everyone, myThirdTestReadingList.AgeRating);
+
+        await _readingListService.UpdateReadingListAgeRatingForSeries(othersidePicnic.Id, AgeRating.Mature);
+        await _unitOfWork.CommitAsync();
+
+        // Reading lists containing Otherside Picnic are updated
+        myTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        Assert.NotNull(myTestReadingList);
+        Assert.Equal(AgeRating.Mature, myTestReadingList.AgeRating);
+
+        mySecondTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(2);
+        Assert.NotNull(mySecondTestReadingList);
+        Assert.Equal(AgeRating.Mature, mySecondTestReadingList.AgeRating);
+
+        // Unrelated reading list is not updated
+        myThirdTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(3);
+        Assert.NotNull(myThirdTestReadingList);
+        Assert.Equal(AgeRating.Everyone, myThirdTestReadingList.AgeRating);
+    }
+
     #endregion
 
     #region CalculateStartAndEndDates
