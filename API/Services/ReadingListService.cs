@@ -104,7 +104,13 @@ public class ReadingListService : IReadingListService
                 {
                     title = $"Volume {Parser.CleanSpecialTitle(item.VolumeNumber)}";
                 }
-            } else {
+            }
+            else if (item.VolumeNumber == Parser.SpecialVolume)
+            {
+                title = specialTitle;
+            }
+            else
+            {
                 title = $"Volume {specialTitle}";
             }
         }
