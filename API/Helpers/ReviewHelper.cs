@@ -5,10 +5,9 @@ using System.Text.RegularExpressions;
 using API.DTOs.SeriesDetail;
 using HtmlAgilityPack;
 
+namespace API.Helpers;
 
-namespace API.Services;
-
-public static class ReviewService
+public static class ReviewHelper
 {
     private const int BodyTextLimit = 175;
     public static IEnumerable<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)

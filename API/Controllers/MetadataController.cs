@@ -13,6 +13,7 @@ using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Plus;
 using Kavita.Common.Extensions;
@@ -225,7 +226,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId())!;
 
-        userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+        userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
         if (!isAdmin && ret.Recommendations != null && user != null)
