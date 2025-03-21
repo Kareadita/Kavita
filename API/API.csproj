@@ -51,8 +51,8 @@
 
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.0.1" />
-      <PackageReference Include="MailKit" Version="4.10.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+      <PackageReference Include="MailKit" Version="4.11.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
@@ -66,20 +66,20 @@
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.74" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
     <PackageReference Include="NetVips" Version="3.0.0" />
-    <PackageReference Include="NetVips.Native" Version="8.16.0" />
+    <PackageReference Include="NetVips.Native" Version="8.16.1" />
     <PackageReference Include="NReco.Logging.File" Version="1.2.2" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -96,11 +96,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="22.0.11" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="22.0.12" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
     <PackageReference Include="VersOne.Epub" Version="3.3.2" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
