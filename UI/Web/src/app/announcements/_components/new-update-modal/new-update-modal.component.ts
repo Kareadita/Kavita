@@ -7,13 +7,14 @@ import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {VersionService} from "../../../_services/version.service";
 import {ChangelogUpdateItemComponent} from "../changelog-update-item/changelog-update-item.component";
 
+/**
+ * This modal is used when an update occurred and the UI needs to be refreshed to get the latest JS libraries
+ */
 @Component({
   selector: 'app-new-update-modal',
   standalone: true,
   imports: [
     TranslocoDirective,
-    UpdateSectionComponent,
-    SafeHtmlPipe,
     ChangelogUpdateItemComponent
   ],
   templateUrl: './new-update-modal.component.html',
@@ -41,8 +42,9 @@ export class NewUpdateModalComponent {
 
   private applyUpdate(version: string): void {
     this.bustLocaleCache();
+
     console.log('Setting version key: ', version);
-    localStorage.setItem(VersionService.versionKey, version);
+    // localStorage.setItem(VersionService.versionKey, version);
     location.reload();
   }
 
@@ -54,8 +56,10 @@ export class NewUpdateModalComponent {
     (this.translocoService as any).cache.delete(locale);
     (this.translocoService as any).cache.clear();
 
-    // TODO: Retrigger transloco
-    this.translocoService.setActiveLang(locale);
+    // Retrigger transloco
+    setTimeout(() => {
+      this.translocoService.setActiveLang(locale);
+    }, 10);
   }
 
 }

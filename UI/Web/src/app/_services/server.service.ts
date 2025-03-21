@@ -53,8 +53,8 @@ export class ServerService {
     return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update');
   }
 
-  checkHowOutOfDate() {
-    return this.http.get<string>(this.baseUrl + 'server/check-out-of-date', TextResonse)
+  checkHowOutOfDate(stableOnly: boolean = true) {
+    return this.http.get<string>(this.baseUrl + `server/check-out-of-date?stableOnly=${stableOnly}`, TextResonse)
       .pipe(map(r => parseInt(r, 10)));
   }
 

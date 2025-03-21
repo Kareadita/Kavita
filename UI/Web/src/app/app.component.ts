@@ -97,6 +97,7 @@ export class AppComponent implements OnInit {
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
 
+    this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
 
   }
 
@@ -113,7 +114,6 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
     this.setCurrentUser();
     this.themeService.setColorScape('');
-    this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
   }
 
 

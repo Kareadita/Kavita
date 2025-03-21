@@ -129,7 +129,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
-    this.localizationService.locales$.subscribe(res => {
+    this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
 
       this.cdRef.markForCheck();

@@ -7,7 +7,7 @@ import {shareReplay} from 'rxjs/operators';
 import {debounceTime, defer, distinctUntilChanged, filter, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
-import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
+import {UpdateNotificationModalComponent} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
@@ -134,6 +134,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       }
     },
   ];
+
   customOption = 'custom';
 
 

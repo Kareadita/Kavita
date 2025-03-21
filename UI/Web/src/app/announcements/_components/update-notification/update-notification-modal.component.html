@@ -4,8 +4,9 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body">
-    <h5>{{updateData.updateTitle}}</h5>
-    <pre class="update-body" [innerHtml]="updateData.updateBody | safeHtml"></pre>
+    @if (updateData) {
+      <app-changelog-update-item [update]="updateData" [showExtras]="false"></app-changelog-update-item>
+    }
   </div>
 
   <div class="modal-footer">

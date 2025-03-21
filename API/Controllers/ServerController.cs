@@ -203,10 +203,11 @@ public class ServerController : BaseApiController
     /// <summary>
     /// Returns how many versions out of date this install is
     /// </summary>
+    /// <param name="stableOnly">Only count Stable releases</param>
     [HttpGet("check-out-of-date")]
-    public async Task<ActionResult<int>> CheckHowOutOfDate()
+    public async Task<ActionResult<int>> CheckHowOutOfDate(bool stableOnly = true)
     {
-        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind());
+        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind(stableOnly));
     }
 
 

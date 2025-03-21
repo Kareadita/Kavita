@@ -12,7 +12,7 @@ import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import {BehaviorSubject, debounceTime, startWith} from 'rxjs';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
+import { UpdateNotificationModalComponent } from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ErrorEvent } from 'src/app/_models/events/error-event';
 import { InfoEvent } from 'src/app/_models/events/info-event';
