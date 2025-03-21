@@ -55,7 +55,7 @@ public class PersonController : BaseApiController
     }
 
     /// <summary>
-    /// Returns a list of authors & artists for browsing
+    /// Returns a list of authors and artists for browsing
     /// </summary>
     /// <param name="userParams"></param>
     /// <returns></returns>
