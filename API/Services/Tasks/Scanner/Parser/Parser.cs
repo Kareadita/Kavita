@@ -200,8 +200,8 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex[] MangaSeriesRegex = new[]
-    {
+    private static readonly Regex[] MangaSeriesRegex =
+    [
         // Thai Volume: เล่ม n -> Volume n
         new Regex(
             @"(?<Series>.+?)(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
@@ -374,12 +374,12 @@ public static partial class Parser
         // Japanese Volume: n巻 -> Volume n
         new Regex(
             @"(?<Series>.+?)第(?<Volume>\d+(?:(\-)\d+)?)巻",
-            MatchOptions, RegexTimeout),
+            MatchOptions, RegexTimeout)
 
-    };
+    ];
 
-    private static readonly Regex[] ComicSeriesRegex = new[]
-    {
+    private static readonly Regex[] ComicSeriesRegex =
+    [
         // Thai Volume: เล่ม n -> Volume n
         new Regex(
             @"(?<Series>.+?)(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
@@ -467,11 +467,11 @@ public static partial class Parser
         // MUST BE LAST: Batman & Daredevil - King of New York
         new Regex(
             @"^(?<Series>.*)",
-            MatchOptions, RegexTimeout),
-    };
+            MatchOptions, RegexTimeout)
+    ];
 
-    private static readonly Regex[] ComicVolumeRegex = new[]
-    {
+    private static readonly Regex[] ComicVolumeRegex =
+    [
         // Thai Volume: เล่ม n -> Volume n
         new Regex(
             @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
@@ -507,11 +507,11 @@ public static partial class Parser
         // Russian Volume: n Том -> Volume n
         new Regex(
             @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
-            MatchOptions, RegexTimeout),
-    };
+            MatchOptions, RegexTimeout)
+    ];
 
-    private static readonly Regex[] ComicChapterRegex = new[]
-    {
+    private static readonly Regex[] ComicChapterRegex =
+    [
         // Thai Volume: บทที่ n -> Chapter n, ตอนที่ n -> Chapter n
         new Regex(
             @"(บทที่|ตอนที่)(\s)?(\.?)(\s|_)?(?<Chapter>\d+(\-\d+)?(\.\d+)?)",
@@ -576,11 +576,11 @@ public static partial class Parser
         // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
         new Regex(
             @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
-            MatchOptions, RegexTimeout),
-    };
+            MatchOptions, RegexTimeout)
+    ];
 
-    private static readonly Regex[] MangaChapterRegex = new[]
-    {
+    private static readonly Regex[] MangaChapterRegex =
+    [
         // Thai Chapter: บทที่ n -> Chapter n, ตอนที่ n -> Chapter n, เล่ม n -> Volume n, เล่มที่ n -> Volume n
         new Regex(
             @"(?<Volume>((เล่ม|เล่มที่))?(\s|_)?\.?\d+)(\s|_)(บทที่|ตอนที่)\.?(\s|_)?(?<Chapter>\d+)",
@@ -645,8 +645,8 @@ public static partial class Parser
         // Russian Chapter: n Главa -> Chapter n
         new Regex(
             @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
-            MatchOptions, RegexTimeout),
-    };
+            MatchOptions, RegexTimeout)
+    ];
 
     private static readonly Regex MangaEditionRegex = new Regex(
         // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
@@ -660,25 +660,6 @@ public static partial class Parser
         $@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})",
         MatchOptions, RegexTimeout
     );
-
-    private static readonly Regex MangaSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|Omake)\b",
-        MatchOptions, RegexTimeout
-    );
-
-    private static readonly Regex ComicSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$|\s#)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
-        MatchOptions, RegexTimeout
-    );
-
-    private static readonly Regex EuropeanComicRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        @"\b(?:Bd[-\s]Fr)\b",
-        MatchOptions, RegexTimeout
-    );
-
 
     // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
     private static readonly Regex SpecialMarkerRegex = new Regex(
@@ -931,22 +912,6 @@ public static partial class Parser
 
         return title;
     }
-
-    private static string RemoveMangaSpecialTags(string title)
-    {
-        return MangaSpecialRegex.Replace(title, string.Empty);
-    }
-
-    private static string RemoveEuropeanTags(string title)
-    {
-        return EuropeanComicRegex.Replace(title, string.Empty);
-    }
-
-    private static string RemoveComicSpecialTags(string title)
-    {
-        return ComicSpecialRegex.Replace(title, string.Empty);
-    }
-
 
 
     /// <summary>
