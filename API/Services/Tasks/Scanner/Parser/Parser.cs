@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -44,87 +43,83 @@ public static partial class Parser
         "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
         "GN", "FCBD", "Giant Size");
 
-    private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
+    private static readonly char[] LeadingZeroesTrimChars = ['0'];
 
-    private static readonly char[] SpacesAndSeparators = { '\0', '\t', '\r', ' ', '-', ','};
+    private static readonly char[] SpacesAndSeparators = ['\0', '\t', '\r', ' ', '-', ','];
 
 
     private const string Number = @"\d+(\.\d)?";
     private const string NumberRange = Number + @"(-" + Number + @")?";
 
     /// <summary>
-    /// non greedy matching of a string where parenthesis are balanced
+    /// non-greedy matching of a string where parenthesis are balanced
     /// </summary>
     public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
     /// <summary>
-    /// non greedy matching of a string where square brackets are balanced
+    /// non-greedy matching of a string where square brackets are balanced
     /// </summary>
     public const string BalancedBracket = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
     /// <summary>
     /// Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
     /// </summary>
     private const string TagsInBrackets = $@"\[(?!\s){BalancedBracket}(?<!\s)\]";
-    /// <summary>
-    /// Common regex patterns present in both Comics and Mangas
-    /// </summary>
-    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
 
 
     /// <summary>
     /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
     /// </summary>
     /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
-    public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
-                                                             + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
+    public static readonly Regex FontSrcUrlRegex = new(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
+                                                       + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
         MatchOptions, RegexTimeout);
     /// <summary>
     /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
     /// </summary>
-    public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);",
+    public static readonly Regex CssImportUrlRegex = new("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);",
         MatchOptions | RegexOptions.Multiline, RegexTimeout);
     /// <summary>
     /// Misc css image references, like background-image: url(), border-image, or list-style-image
     /// </summary>
     /// Original prepend: (background|border|list-style)-image:\s?)?
-    public static readonly Regex CssImageUrlRegex = new Regex(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
+    public static readonly Regex CssImageUrlRegex = new(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
         MatchOptions, RegexTimeout);
 
 
-    private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
+    private static readonly Regex ImageRegex = new(ImageFileExtensions,
         MatchOptions, RegexTimeout);
-    private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
+    private static readonly Regex ArchiveFileRegex = new(ArchiveFileExtensions,
         MatchOptions, RegexTimeout);
-    private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
+    private static readonly Regex ComicInfoArchiveRegex = new(@"\.cbz|\.cbr|\.cb7|\.cbt",
         MatchOptions, RegexTimeout);
-    private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
+    private static readonly Regex XmlRegex = new(XmlRegexExtensions,
         MatchOptions, RegexTimeout);
-    private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
+    private static readonly Regex BookFileRegex = new(BookFileExtensions,
         MatchOptions, RegexTimeout);
-    private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
+    private static readonly Regex CoverImageRegex = new(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
         MatchOptions, RegexTimeout);
 
     /// <summary>
     /// Normalize everything within Kavita. Some characters don't fall under Unicode, like full-width characters and need to be
     /// added on a case-by-case basis.
     /// </summary>
-    private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!＊！＋]",
+    private static readonly Regex NormalizeRegex = new(@"[^\p{L}0-9\+!＊！＋]",
         MatchOptions, RegexTimeout);
 
     /// <summary>
     /// Supports Batman (2020) or Batman (2)
     /// </summary>
-    private static readonly Regex SeriesAndYearRegex = new Regex(@"^\D+\s\((?<Year>\d+)\)$",
+    private static readonly Regex SeriesAndYearRegex = new(@"^\D+\s\((?<Year>\d+)\)$",
         MatchOptions, RegexTimeout);
 
     /// <summary>
     /// Recognizes the Special token only
     /// </summary>
-    private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
+    private static readonly Regex SpecialTokenRegex = new(@"SP\d+",
         MatchOptions, RegexTimeout);
 
 
-    private static readonly Regex[] MangaVolumeRegex = new[]
-    {
+    private static readonly Regex[] MangaVolumeRegex =
+    [
         // Thai Volume: เล่ม n -> Volume n
         new Regex(
             @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
@@ -197,8 +192,8 @@ public static partial class Parser
         // Russian Volume: n Том -> Volume n
         new Regex(
             @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
-            MatchOptions, RegexTimeout),
-    };
+            MatchOptions, RegexTimeout)
+    ];
 
     private static readonly Regex[] MangaSeriesRegex =
     [
@@ -713,20 +708,6 @@ public static partial class Parser
         return HasSpecialMarker(filePath);
     }
 
-    private static bool IsMangaSpecial(string? filePath)
-    {
-        if (string.IsNullOrEmpty(filePath)) return false;
-        return HasSpecialMarker(filePath);
-    }
-
-    private static bool IsComicSpecial(string? filePath)
-    {
-        if (string.IsNullOrEmpty(filePath)) return false;
-        return HasSpecialMarker(filePath);
-    }
-
-
-
     public static string ParseMangaSeries(string filename)
     {
         foreach (var regex in MangaSeriesRegex)
@@ -931,20 +912,6 @@ public static partial class Parser
 
         title = RemoveEditionTagHolders(title);
 
-        // if (replaceSpecials)
-        // {
-        //     if (isComic)
-        //     {
-        //         title = RemoveComicSpecialTags(title);
-        //         title = RemoveEuropeanTags(title);
-        //     }
-        //     else
-        //     {
-        //         title = RemoveMangaSpecialTags(title);
-        //     }
-        // }
-
-
         title = title.Trim(SpacesAndSeparators);
 
         title = EmptySpaceRegex.Replace(title, " ");
@@ -1097,7 +1064,7 @@ public static partial class Parser
     }
 
     /// <summary>
-    /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc and that if a full path, the filename
+    /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc. and that if a full path, the filename
     /// doesn't start with ._, which is a metadata file on MACOSX.
     /// </summary>
     /// <param name="path"></param>
