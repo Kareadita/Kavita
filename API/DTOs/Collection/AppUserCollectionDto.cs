@@ -10,7 +10,7 @@ public class AppUserCollectionDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;
-    public string Summary { get; set; } = default!;
+    public string? Summary { get; set; } = default!;
     public bool Promoted { get; set; }
     public AgeRating AgeRating { get; set; }
 

@@ -136,4 +136,19 @@ public abstract class AbstractDbTest : IDisposable
         _context.Dispose();
         _connection.Dispose();
     }
+
+    /// <summary>
+    /// Add a role to an existing User. Commits.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="roleName"></param>
+    protected async Task AddUserWithRole(int userId, string roleName)
+    {
+        var role = new AppRole { Id = userId, Name = roleName, NormalizedName = roleName.ToUpper() };
+
+        await _context.Roles.AddAsync(role);
+        await _context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
+
+        await _context.SaveChangesAsync();
+    }
 }
