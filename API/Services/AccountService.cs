@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using API.Constants;
 using API.Data;
+using API.DTOs.Account;
 using API.Entities;
 using API.Errors;
 using Kavita.Common;
@@ -46,7 +47,7 @@ public class AccountService : IAccountService
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
     {
         var passwordValidationIssues = (await ValidatePassword(user, newPassword)).ToList();
-        if (passwordValidationIssues.Any()) return passwordValidationIssues;
+        if (passwordValidationIssues.Count != 0) return passwordValidationIssues;
 
         var result = await _userManager.RemovePasswordAsync(user);
         if (!result.Succeeded)
@@ -55,15 +56,11 @@ public class AccountService : IAccountService
             return result.Errors.Select(e => new ApiException(400, e.Code, e.Description));
         }
 
-
         result = await _userManager.AddPasswordAsync(user, newPassword);
-        if (!result.Succeeded)
-        {
-            _logger.LogError("Could not update password");
-            return result.Errors.Select(e => new ApiException(400, e.Code, e.Description));
-        }
+        if (result.Succeeded) return [];
 
-        return new List<ApiException>();
+        _logger.LogError("Could not update password");
+        return result.Errors.Select(e => new ApiException(400, e.Code, e.Description));
     }
 
     public async Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password)
@@ -81,15 +78,16 @@ public class AccountService : IAccountService
     }
     public async Task<IEnumerable<ApiException>> ValidateUsername(string username)
     {
-        if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == username.ToUpper()))
+        if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName != null
+                                                   && x.NormalizedUserName.Equals(username, StringComparison.CurrentCultureIgnoreCase)))
         {
-            return new List<ApiException>()
-            {
-                new ApiException(400, "Username is already taken")
-            };
+            return
+            [
+                new(400, "Username is already taken")
+            ];
         }
 
-        return Array.Empty<ApiException>();
+        return [];
     }
 
     public async Task<IEnumerable<ApiException>> ValidateEmail(string email)
@@ -112,6 +110,7 @@ public class AccountService : IAccountService
     {
         if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
+
         return roles.Contains(PolicyConstants.BookmarkRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
@@ -124,6 +123,7 @@ public class AccountService : IAccountService
     {
         if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
+
         return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
@@ -135,9 +135,10 @@ public class AccountService : IAccountService
     public async Task<bool> CanChangeAgeRestriction(AppUser? user)
     {
         if (user == null) return false;
+
         var roles = await _userManager.GetRolesAsync(user);
         if (roles.Contains(PolicyConstants.ReadOnlyRole)) return false;
+
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
     }
-
 }
