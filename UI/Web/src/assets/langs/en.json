@@ -571,9 +571,9 @@
 
     "library-type-pipe": {
         "book": "Book",
-        "comic": "Comic",
+        "comic": "Comic (Legacy)",
         "manga": "Manga",
-        "comicVine": "Comic Vine",
+        "comicVine": "Comic",
         "image": "Image",
         "lightNovel": "Light Novel"
     },

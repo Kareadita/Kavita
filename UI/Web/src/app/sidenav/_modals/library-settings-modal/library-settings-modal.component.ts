@@ -28,7 +28,7 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Library, LibraryType} from 'src/app/_models/library/library';
+import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -47,6 +47,7 @@ import {SettingSwitchComponent} from "../../../settings/_components/setting-swit
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {ActionService} from "../../../_services/action.service";
+import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -68,7 +69,7 @@ enum StepID {
   standalone: true,
   imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -119,7 +120,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   selectedFolders: string[] = [];
   madeChanges = false;
-  libraryTypes: string[] = []
+  libraryTypes: LibraryType[] = allLibraryTypes;
 
   isAddLibrary = false;
   setupStep = StepID.General;
@@ -134,11 +135,6 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingService.getLibraryTypes().subscribe((types) => {
-      this.libraryTypes = types;
-      this.cdRef.markForCheck();
-    });
-
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
