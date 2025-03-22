@@ -69,6 +69,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICoverDbService, CoverDbService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();
+        services.AddScoped<ISettingsService, SettingsService>();
 
 
         services.AddScoped<IScrobblingService, ScrobblingService>();
