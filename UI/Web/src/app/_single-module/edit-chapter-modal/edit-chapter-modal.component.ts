@@ -197,7 +197,12 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
-    this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate, []));
+
+    if (this.chapter.releaseDate !== '0001-01-01T00:00:00') {
+      this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));
+    } else {
+      this.editForm.addControl('releaseDate', new FormControl('', []));
+    }
 
 
     this.editForm.addControl('genres', new FormControl(this.chapter.genres, []));
@@ -261,7 +266,11 @@ export class EditChapterModalComponent implements OnInit {
     const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
-    this.chapter.releaseDate = model.releaseDate;
+    if (model.releaseDate === '') {
+      this.chapter.releaseDate = '0001-01-01T00:00:00';
+    } else {
+      this.chapter.releaseDate = model.releaseDate + 'T00:00:00';
+    }
     this.chapter.ageRating = parseInt(model.ageRating + '', 10) as AgeRating;
     this.chapter.genres = model.genres;
     this.chapter.tags = model.tags;
