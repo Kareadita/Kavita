@@ -278,7 +278,7 @@ public class LicenseService(
             var releases = await versionUpdaterService.GetAllReleases();
             response.IsValidVersion = releases
                 .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
-                .Where(r => !r.IsPrerelease || BuildInfo.Version.IsWithinStableRelease(new Version(r.UpdateVersion))) // Ensure we don't take current nightlies within the current/last stable
+                .Where(r => !r.IsPrerelease) // Ensure we don't take current nightlies within the current/last stable
                 .Take(3)
                 .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
 
