@@ -51,11 +51,11 @@ public class SettingsServiceTests
             FirstLastPeopleNaming = false,
             EnableCoverImage = false,
             AgeRatingMappings = new Dictionary<string, AgeRating>(),
-            Blacklist = new List<string>(),
-            Whitelist = new List<string>(),
-            Overrides = new List<MetadataSettingField>(),
-            PersonRoles = new List<PersonRole>(),
-            FieldMappings = new List<MetadataFieldMapping>()
+            Blacklist = [],
+            Whitelist = [],
+            Overrides = [],
+            PersonRoles = [],
+            FieldMappings = []
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -77,12 +77,12 @@ public class SettingsServiceTests
             FirstLastPeopleNaming = true,
             EnableCoverImage = true,
             AgeRatingMappings = new Dictionary<string, AgeRating> { { "Adult", AgeRating.R18Plus } },
-            Blacklist = new List<string> { "blacklisted-tag" },
-            Whitelist = new List<string> { "whitelisted-tag" },
-            Overrides = new List<MetadataSettingField> { MetadataSettingField.Summary },
-            PersonRoles = new List<PersonRole> { PersonRole.Writer },
-            FieldMappings = new List<MetadataFieldMappingDto>
-            {
+            Blacklist = ["blacklisted-tag"],
+            Whitelist = ["whitelisted-tag"],
+            Overrides = [MetadataSettingField.Summary],
+            PersonRoles = [PersonRole.Writer],
+            FieldMappings =
+            [
                 new MetadataFieldMappingDto
                 {
                     SourceType = MetadataFieldType.Genre,
@@ -91,7 +91,7 @@ public class SettingsServiceTests
                     DestinationValue = "Fight",
                     ExcludeFromSource = true
                 }
-            }
+            ]
         };
 
         // Act
@@ -144,10 +144,7 @@ public class SettingsServiceTests
         var existingSettings = new MetadataSettings
         {
             Id = 1,
-            FieldMappings = new List<MetadataFieldMapping>
-            {
-                new MetadataFieldMapping { Id = 1, SourceValue = "OldValue" }
-            }
+            FieldMappings = [new MetadataFieldMapping {Id = 1, SourceValue = "OldValue"}]
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -189,9 +186,10 @@ public class SettingsServiceTests
         var existingSettings = new MetadataSettings
         {
             Id = 1,
-            FieldMappings = new List<MetadataFieldMapping>
-            {
-                new MetadataFieldMapping {
+            FieldMappings =
+            [
+                new MetadataFieldMapping
+                {
                     Id = 1,
                     SourceType = MetadataFieldType.Genre,
                     DestinationType = MetadataFieldType.Genre,
@@ -199,7 +197,7 @@ public class SettingsServiceTests
                     DestinationValue = "OldDestination",
                     ExcludeFromSource = false
                 }
-            }
+            ]
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -209,8 +207,8 @@ public class SettingsServiceTests
 
         var updateDto = new MetadataSettingsDto
         {
-            FieldMappings = new List<MetadataFieldMappingDto>
-            {
+            FieldMappings =
+            [
                 new MetadataFieldMappingDto
                 {
                     SourceType = MetadataFieldType.Tag,
@@ -219,6 +217,7 @@ public class SettingsServiceTests
                     DestinationValue = "NewDestination",
                     ExcludeFromSource = true
                 },
+
                 new MetadataFieldMappingDto
                 {
                     SourceType = MetadataFieldType.Tag,
@@ -227,7 +226,7 @@ public class SettingsServiceTests
                     DestinationValue = "AnotherDestination",
                     ExcludeFromSource = false
                 }
-            }
+            ]
         };
 
         // Act
@@ -262,8 +261,8 @@ public class SettingsServiceTests
         var existingSettings = new MetadataSettings
         {
             Id = 1,
-            Blacklist = new List<string>(),
-            Whitelist = new List<string>()
+            Blacklist = [],
+            Whitelist = []
         };
 
         // We need to mock the repository and provide a custom implementation for ToNormalized
@@ -275,8 +274,8 @@ public class SettingsServiceTests
         var updateDto = new MetadataSettingsDto
         {
             // Include duplicates with different casing and whitespace
-            Blacklist = new List<string> { "tag1", "Tag1", " tag2 ", "", "  ", "tag3" },
-            Whitelist = new List<string> { "allowed1", "Allowed1", " allowed2 ", "", "allowed3" }
+            Blacklist = ["tag1", "Tag1", " tag2 ", "", "  ", "tag3"],
+            Whitelist = ["allowed1", "Allowed1", " allowed2 ", "", "allowed3"]
         };
 
         // Act
