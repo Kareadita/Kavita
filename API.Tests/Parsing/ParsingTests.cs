@@ -247,6 +247,7 @@ public class ParsingTests
     [InlineData("ch1/backcover.png", false)]
     [InlineData("backcover.png", false)]
     [InlineData("back_cover.png", false)]
+    [InlineData("LD Blacklands #1 35 (back cover).png", false)]
     public void IsCoverImageTest(string inputPath, bool expected)
     {
         Assert.Equal(expected, IsCoverImage(inputPath));

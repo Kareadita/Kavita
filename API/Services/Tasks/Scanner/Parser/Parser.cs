@@ -95,7 +95,7 @@ public static partial class Parser
         MatchOptions, RegexTimeout);
     private static readonly Regex BookFileRegex = new(BookFileExtensions,
         MatchOptions, RegexTimeout);
-    private static readonly Regex CoverImageRegex = new(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
+    private static readonly Regex CoverImageRegex = new(@"(?<!back[\s_-])(?<!\(back )(?<!back)(?:^|[^a-zA-Z0-9])(!?cover|folder)(?![a-zA-Z0-9]|s\b)",
         MatchOptions, RegexTimeout);
 
     /// <summary>
