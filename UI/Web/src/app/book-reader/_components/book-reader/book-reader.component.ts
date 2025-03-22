@@ -1089,16 +1089,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const actualWidth = this.bookContentElemRef.nativeElement.scrollWidth;
     const lastPageWidth = actualWidth % pageWidth;
 
-    if (lastPageWidth >= pageWidth/2) {
+    if (lastPageWidth >= pageWidth/2 || lastPageWidth === 0) {
       // The last page needs more than one column, no pages will be duplicated
       return;
     }
 
+    // Need to adjust height with the column gap to ensure we don't have too much extra page
     const columnHeight = this.getPageHeight()-COLUMN_GAP;
     const emptyPage = this.renderer.createElement('div');
     this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
     this.renderer.setStyle(emptyPage, 'width', this.ColumnWidth);
-    //this.renderer.setStyle(emptyPage, "background", "red")
     this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
   }
 
