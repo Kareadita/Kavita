@@ -535,7 +535,7 @@
                   <div class="mb-3">
                     <app-setting-item [title]="t('date-added-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
-                        {{chapter.createdUtc | utcToLocalTime | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
+                        {{chapter.createdUtc | utcToLocalTime:'short' | defaultDate}}
                       </ng-template>
                     </app-setting-item>
                   </div>

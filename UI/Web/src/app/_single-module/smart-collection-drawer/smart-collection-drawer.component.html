@@ -12,7 +12,7 @@
       <app-setting-item [title]="t('edit-collection-tags.last-sync-title')" [showEdit]="false" [canEdit]="false"
                         [subtitle]="t('edit-collection-tags.last-sync-tooltip')">
         <ng-template #view>
-          {{collection.lastSyncUtc | utcToLocalTime | date:'shortDate' | defaultDate}}
+          {{collection.lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}
         </ng-template>
       </app-setting-item>
     </div>

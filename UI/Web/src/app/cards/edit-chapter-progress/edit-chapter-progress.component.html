@@ -74,10 +74,10 @@
             }
           </td>
           <td>
-            {{progressEvents[idx].createdUtc | utcToLocalTime | date:'shortDate' | defaultDate}}
+            {{progressEvents[idx].createdUtc | utcToLocalTime:'shortDate' | defaultDate}}
           </td>
           <td>
-            {{progressEvents[idx].lastModifiedUtc | utcToLocalTime | date:'shortDate' | defaultDate}}
+            {{progressEvents[idx].lastModifiedUtc | utcToLocalTime:'shortDate' | defaultDate}}
           </td>
 <!--          <td>-->
 <!--            @if(editMode[idx]) {-->
