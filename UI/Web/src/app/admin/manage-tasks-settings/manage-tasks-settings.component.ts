@@ -306,7 +306,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       modelSettings.taskCleanup = this.settingsForm.get('taskCleanupCustom')?.value;
     }
 
-    console.log('modelSettings: ', modelSettings);
     return modelSettings;
   }
 

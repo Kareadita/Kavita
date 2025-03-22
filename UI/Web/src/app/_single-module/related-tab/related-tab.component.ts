@@ -29,7 +29,7 @@ export interface RelatedSeriesPair {
   styleUrl: './related-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RelatedTabComponent implements OnInit {
+export class RelatedTabComponent {
 
   protected readonly imageService = inject(ImageService);
   protected readonly router = inject(Router);
@@ -39,10 +39,6 @@ export class RelatedTabComponent implements OnInit {
   @Input() relations: Array<RelatedSeriesPair> = [];
   @Input() bookmarks: Array<PageBookmark> = [];
   @Input() libraryId!: number;
-
-  ngOnInit() {
-    console.log('bookmarks: ', this.bookmarks);
-  }
 
   openReadingList(readingList: ReadingList) {
     this.router.navigate(['lists', readingList.id]);

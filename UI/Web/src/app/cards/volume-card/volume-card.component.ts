@@ -220,7 +220,6 @@ export class VolumeCardComponent implements OnInit {
   read(event: any) {
     event.stopPropagation();
     event.preventDefault();
-    console.log('reading volume');
     this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
   }
 

@@ -224,7 +224,6 @@ export class LicenseComponent implements OnInit {
 
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;
-    console.log('edit mode: ', !this.isViewMode)
     this.cdRef.markForCheck();
     this.resetForm();
   }

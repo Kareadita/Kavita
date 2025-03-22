@@ -42,9 +42,6 @@ export class NewUpdateModalComponent {
 
   private applyUpdate(version: string): void {
     this.bustLocaleCache();
-
-    console.log('Setting version key: ', version);
-    // localStorage.setItem(VersionService.versionKey, version);
     location.reload();
   }
 
