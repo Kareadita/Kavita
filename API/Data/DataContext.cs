@@ -11,6 +11,7 @@ using API.Entities.Enums.UserPreferences;
 using API.Entities.History;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

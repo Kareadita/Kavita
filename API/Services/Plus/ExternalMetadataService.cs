@@ -16,6 +16,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Helpers;
 using API.Services.Tasks.Metadata;

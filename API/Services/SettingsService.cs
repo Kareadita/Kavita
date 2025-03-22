@@ -67,21 +67,20 @@ public class SettingsService : ISettingsService
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
-        existingMetadataSetting.Blacklist = dto.Blacklist.Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
-        existingMetadataSetting.Whitelist = dto.Whitelist.Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
-        existingMetadataSetting.Overrides = dto.Overrides.ToList() ?? [];
+        existingMetadataSetting.Blacklist = (dto.Blacklist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
+        existingMetadataSetting.Whitelist = (dto.Whitelist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
+        existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
 
         // Handle Field Mappings
+
+        // Clear existing mappings
+        existingMetadataSetting.FieldMappings ??= [];
+        _unitOfWork.SettingsRepository.RemoveRange(existingMetadataSetting.FieldMappings);
+        existingMetadataSetting.FieldMappings.Clear();
+
         if (dto.FieldMappings != null)
         {
-            // Clear existing mappings
-            existingMetadataSetting.FieldMappings ??= [];
-            _unitOfWork.SettingsRepository.RemoveRange(existingMetadataSetting.FieldMappings);
-
-            existingMetadataSetting.FieldMappings.Clear();
-
-
             // Add new mappings
             foreach (var mappingDto in dto.FieldMappings)
             {

@@ -11,6 +11,7 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
