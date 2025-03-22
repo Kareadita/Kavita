@@ -585,19 +585,27 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
 
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+        {
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        }
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null)
+        {
             return Unauthorized();
+        }
 
         var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, true, GetUserParams(pageNumber), false);
         if (readingLists == null)
+        {
             return Unauthorized();
+        }
 
-        var readingList = readingLists.SingleOrDefault(rl => rl.Id == readingListId);
+        var readingList = readingLists.FirstOrDefault(rl => rl.Id == readingListId);
         if (readingList == null)
+        {
             return BadRequest(await _localizationService.Translate(userId, "reading-list-restricted"));
+        }
 
         var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);

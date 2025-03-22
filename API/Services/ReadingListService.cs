@@ -858,6 +858,7 @@ public class ReadingListService : IReadingListService
 
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
+
     public async Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating)
     {
         var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListsBySeriesId(seriesId);
@@ -868,7 +869,9 @@ public class ReadingListService : IReadingListService
 
             var maxAgeRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
             if (ageRating > maxAgeRating)
+            {
                 maxAgeRating = ageRating;
+            }
 
             readingList.AgeRating = maxAgeRating;
         }

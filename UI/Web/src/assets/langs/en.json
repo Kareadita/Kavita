@@ -1732,7 +1732,7 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released": "Released: "
+        "released-label": "Released: {{date}}"
     },
 
     "stream-list-item": {

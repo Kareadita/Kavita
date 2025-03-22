@@ -42,7 +42,7 @@
 
         @if (item.releaseDate !== '0001-01-01T00:00:00') {
           <div class="ps-1 mt-2">
-            {{t('released')}}{{item.releaseDate | date:'longDate'}}
+            {{t('released-label', {date: item.releaseDate | date:'longDate'})}}
           </div>
         }
       </div>
