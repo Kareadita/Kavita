@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs.Account;
 using API.Entities;
 using API.Errors;
+using API.Extensions;
 using Kavita.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -78,8 +79,9 @@ public class AccountService : IAccountService
     }
     public async Task<IEnumerable<ApiException>> ValidateUsername(string username)
     {
+        // Reverted because of https://go.microsoft.com/fwlink/?linkid=2129535
         if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName != null
-                                                   && x.NormalizedUserName.Equals(username, StringComparison.CurrentCultureIgnoreCase)))
+                                                   && x.NormalizedUserName == username.ToUpper()))
         {
             return
             [
