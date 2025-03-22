@@ -26,9 +26,9 @@
             {{item.username}}
           </div>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item">{{t('comics-label', {value: item.comicsTime})}}</li>
-            <li class="list-group-item">{{t('manga-label', {value: item.mangaTime})}}</li>
-            <li class="list-group-item">{{t('books-label', {value: item.booksTime})}}</li>
+            <li class="list-group-item">{{t('comics-label', {value: item.comicsTime | number:'1.0-1'})}}</li>
+            <li class="list-group-item">{{t('manga-label', {value: item.mangaTime | number:'1.0-1'})}}</li>
+            <li class="list-group-item">{{t('books-label', {value: item.booksTime | number:'1.0-1'})}}</li>
           </ul>
         </div>
       </ng-template>

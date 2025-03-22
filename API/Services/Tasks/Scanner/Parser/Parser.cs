@@ -1042,11 +1042,6 @@ public static partial class Parser
     {
         if (string.IsNullOrEmpty(name)) return name;
         var cleaned = SpecialTokenRegex.Replace(name.Replace('_', ' '), string.Empty).Trim();
-        var lastIndex = cleaned.LastIndexOf('.');
-        if (lastIndex > 0)
-        {
-            cleaned = cleaned.Substring(0, cleaned.LastIndexOf('.')).Trim();
-        }
 
         return string.IsNullOrEmpty(cleaned) ? name : cleaned;
     }

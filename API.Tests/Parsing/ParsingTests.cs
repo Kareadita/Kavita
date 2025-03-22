@@ -40,6 +40,7 @@ public class ParsingTests
     [InlineData("DEAD Tube Prologue", "DEAD Tube Prologue")]
     [InlineData("DEAD Tube Prologue SP01", "DEAD Tube Prologue")]
     [InlineData("DEAD_Tube_Prologue SP01", "DEAD Tube Prologue")]
+    [InlineData("SP01 1. DEAD Tube Prologue", "1. DEAD Tube Prologue")]
     public void CleanSpecialTitleTest(string input, string expected)
     {
         Assert.Equal(expected, CleanSpecialTitle(input));

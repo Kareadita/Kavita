@@ -133,7 +133,7 @@ public class BasicParserTests
 
 
     /// <summary>
-    /// Tests that when the filename parses as a speical, it appropriately parses
+    /// Tests that when the filename parses as a special, it appropriately parses
     /// </summary>
     [Fact]
     public void Parse_MangaLibrary_SpecialInFilename()
@@ -144,14 +144,14 @@ public class BasicParserTests
         Assert.NotNull(actual);
 
         Assert.Equal("Summer Time Rendering", actual.Series);
-        Assert.Equal("Volume SP01", actual.Title);
+        Assert.Equal("Volume", actual.Title);
         Assert.Equal(Parser.SpecialVolume, actual.Volumes);
         Assert.Equal(Parser.DefaultChapter, actual.Chapters);
         Assert.True(actual.IsSpecial);
     }
 
     /// <summary>
-    /// Tests that when the filename parses as a speical, it appropriately parses
+    /// Tests that when the filename parses as a special, it appropriately parses
     /// </summary>
     [Fact]
     public void Parse_MangaLibrary_SpecialInFilename2()
@@ -162,7 +162,25 @@ public class BasicParserTests
         Assert.NotNull(actual);
 
         Assert.Equal("Kimi wa Midara na Boku no Joou", actual.Series);
-        Assert.Equal("[Renzokusei] Special 1 SP02", actual.Title);
+        Assert.Equal("[Renzokusei] Special 1", actual.Title);
+        Assert.Equal(Parser.SpecialVolume, actual.Volumes);
+        Assert.Equal(Parser.DefaultChapter, actual.Chapters);
+        Assert.True(actual.IsSpecial);
+    }
+
+    /// <summary>
+    /// Tests that when the filename parses as a special, it appropriately parses
+    /// </summary>
+    [Fact]
+    public void Parse_MangaLibrary_SpecialInFilename_StrangeNaming()
+    {
+        var actual = _parser.Parse("M:/My Dress-Up Darling/SP01 1. Special Name.cbz",
+            "M:/",
+            RootDirectory, LibraryType.Manga);
+        Assert.NotNull(actual);
+
+        Assert.Equal("My Dress-Up Darling", actual.Series);
+        Assert.Equal("1. Special Name", actual.Title);
         Assert.Equal(Parser.SpecialVolume, actual.Volumes);
         Assert.Equal(Parser.DefaultChapter, actual.Chapters);
         Assert.True(actual.IsSpecial);

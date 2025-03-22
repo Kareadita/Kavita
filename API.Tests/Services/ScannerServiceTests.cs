@@ -167,7 +167,6 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.NotNull(postLib.Series.First().Volumes.FirstOrDefault(v => v.Chapters.FirstOrDefault(c => c.IsSpecial) != null));
     }
 
-
     [Fact]
     public async Task ScanLibrary_SeriesWithUnbalancedParenthesis()
     {
