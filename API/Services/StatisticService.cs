@@ -36,7 +36,6 @@ public interface IStatisticService
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
-    Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown();
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
 }
 
@@ -139,7 +138,9 @@ public class StatisticService : IStatisticService
         }
         else
         {
+#pragma warning disable S6561
             var timeDifference = DateTime.Now - earliestReadDate;
+#pragma warning restore S6561
             var deltaWeeks = (int)Math.Ceiling(timeDifference.TotalDays / 7);
 
             averageReadingTimePerWeek /= deltaWeeks;
@@ -552,29 +553,6 @@ public class StatisticService : IStatisticService
             .Where(p => p.chapter.AvgHoursToRead > 0)
             .SumAsync(p =>
                 p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
-    }
-
-    public async Task<KavitaPlusMetadataBreakdownDto> GetKavitaPlusMetadataBreakdown()
-    {
-        // We need to count number of Series that have an external series record
-        // Then count how many series are blacklisted
-        // Then get total count of series that are Kavita+ eligible
-        var plusLibraries = await _context.Library
-            .Where(l => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(l.Type))
-            .Select(l => l.Id)
-            .ToListAsync();
-
-        var countOfBlacklisted = await _context.SeriesBlacklist.CountAsync();
-        var totalSeries = await _context.Series.Where(s => plusLibraries.Contains(s.LibraryId)).CountAsync();
-        var seriesWithMetadata = await _context.ExternalSeriesMetadata.CountAsync();
-
-        return new KavitaPlusMetadataBreakdownDto()
-        {
-            TotalSeries = totalSeries,
-            ErroredSeries = countOfBlacklisted,
-            SeriesCompleted = seriesWithMetadata
-        };
-
     }
 
     public async Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension)
