@@ -1576,10 +1576,6 @@
         "download-logs-task": "Download Logs",
         "download-logs-task-desc": "Compiles all log files into a zip and downloads it.",
 
-        "analyze-files-task": "Analyze Files",
-        "analyze-files-task-desc": "Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.",
-        "analyze-files-task-success": "File analysis has been queued",
-
         "sync-themes-task": "Sync Themes",
         "sync-themes-task-desc": "Synchronize downloaded themes with upstream changes if version matches.",
         "sync-themes-success": "Synchronization of themes has been queued",

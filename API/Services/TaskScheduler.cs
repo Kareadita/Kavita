@@ -34,7 +34,6 @@ public interface ITaskScheduler
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
-    void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
     void CovertAllCoversToEncoding();
@@ -267,11 +266,6 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), RecurringJobOptions);
     }
 
-    public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
-    {
-        _logger.LogInformation("Enqueuing library file analysis for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
-    }
 
     /// <summary>
     /// Upon cancelling stat, we do report to the Stat service that we are no longer going to be reporting

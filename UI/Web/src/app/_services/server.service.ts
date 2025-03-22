@@ -41,10 +41,6 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/backup-db', {});
   }
 
-  analyzeFiles() {
-    return this.http.post(this.baseUrl + 'server/analyze-files', {});
-  }
-
   syncThemes() {
     return this.http.post(this.baseUrl + 'server/sync-themes', {});
   }
@@ -56,10 +52,6 @@ export class ServerService {
   checkHowOutOfDate(stableOnly: boolean = true) {
     return this.http.get<string>(this.baseUrl + `server/check-out-of-date?stableOnly=${stableOnly}`, TextResonse)
       .pipe(map(r => parseInt(r, 10)));
-  }
-
-  checkForUpdates() {
-    return this.http.get<UpdateVersionEvent>(this.baseUrl + 'server/check-for-updates', {});
   }
 
   getChangelog(count: number = 0) {

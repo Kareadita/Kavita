@@ -351,27 +351,6 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("analyze")]
-    public ActionResult Analyze(int libraryId)
-    {
-        _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
-        return Ok();
-    }
-
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("analyze-multiple")]
-    public ActionResult AnalyzeMultiple(BulkActionDto dto)
-    {
-        foreach (var libraryId in dto.Ids)
-        {
-            _taskScheduler.AnalyzeFilesForLibrary(libraryId, dto.Force ?? false);
-        }
-
-        return Ok();
-    }
-
-
     /// <summary>
     /// Copy the library settings (adv tab + optional type) to a set of other libraries.
     /// </summary>

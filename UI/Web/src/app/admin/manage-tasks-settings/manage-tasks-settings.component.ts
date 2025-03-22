@@ -106,13 +106,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
-    // TODO: Remove this in v0.9. Users should have all updated by then
-    {
-      name: 'analyze-files-task',
-      description: 'analyze-files-task-desc',
-      api: this.serverService.analyzeFiles(),
-      successMessage: 'analyze-files-task-success'
-    },
     {
       name: 'sync-themes-task',
       description: 'sync-themes-task-desc',
