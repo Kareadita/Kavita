@@ -708,7 +708,7 @@ public static partial class Parser
         return HasSpecialMarker(filePath);
     }
 
-    public static string ParseMangaSeries(string filename)
+    private static string ParseMangaSeries(string filename)
     {
         foreach (var regex in MangaSeriesRegex)
         {
@@ -716,6 +716,7 @@ public static partial class Parser
             var group = matches
                 .Select(match => match.Groups["Series"])
                 .FirstOrDefault(group => group.Success && group != Match.Empty);
+
             if (group != null)
             {
                 return CleanTitle(group.Value);

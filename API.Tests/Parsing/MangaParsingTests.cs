@@ -6,13 +6,6 @@ namespace API.Tests.Parsing;
 
 public class MangaParsingTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public MangaParsingTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
     [Theory]
     [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
     [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "1")]
@@ -84,6 +77,7 @@ public class MangaParsingTests
     [InlineData("Accel World Chapter 001 Volume 002", "2")]
     [InlineData("Accel World Volume 2", "2")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake", "30")]
+    [InlineData("Zom 100 - Bucket List of the Dead v01",  "1")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename, LibraryType.Manga));
@@ -212,6 +206,8 @@ public class MangaParsingTests
     [InlineData("不安の種\uff0b - 01", "不安の種\uff0b")]
     [InlineData("Giant Ojou-sama - Ch. 33.5 - Volume 04 Bonus Chapter", "Giant Ojou-sama")]
     [InlineData("[218565]-(C92) [BRIO (Puyocha)] Mika-nee no Tanryoku Shidou - Mika s Guide to Self-Confidence (THE IDOLM@STE", "")]
+    [InlineData("Monster #8 Ch. 001", "Monster #8")]
+    [InlineData("Zom 100 - Bucket List of the Dead v01",  "Zom 100 - Bucket List of the Dead")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename, LibraryType.Manga));
@@ -304,6 +300,7 @@ public class MangaParsingTests
     [InlineData("เด็กคนนี้ขอลาออกจากการเป็นเจ้าของปราสาท เล่ม 1 ตอนที่ 3", "3")]
     [InlineData("Max Level Returner ตอนที่ 5", "5")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
+    [InlineData("Monster #8 Ch. 001", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename, LibraryType.Manga));
