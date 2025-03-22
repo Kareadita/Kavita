@@ -9,7 +9,7 @@ using Xunit;
 
 namespace API.Tests.Parsers;
 
-public class BasicParserTests
+public class BasicParserTests : AbstractFsTest
 {
     private readonly BasicParser _parser;
     private readonly ILogger<DirectoryService> _dsLogger = Substitute.For<ILogger<DirectoryService>>();

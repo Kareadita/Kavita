@@ -41,15 +41,11 @@ public class VersionHelperTests
         int major1, int minor1, int build1,
         int major2, int minor2, int build2)
     {
-        // Arrange
         var v1 = new Version(major1, minor1, build1);
         var v2 = new Version(major2, minor2, build2);
 
-        // Act
         var result = v1.CompareWithoutRevision(v2);
 
-        // Assert
-        // NOTE: This test will likely fail with current implementation
         Assert.False(result);
     }
 
@@ -60,15 +56,11 @@ public class VersionHelperTests
         int major1, int minor1, int build1,
         int major2, int minor2, int build2)
     {
-        // Arrange
         var v1 = new Version(major1, minor1, build1);
         var v2 = new Version(major2, minor2, build2);
 
-        // Act
         var result = v1.CompareWithoutRevision(v2);
 
-        // Assert
-        // NOTE: This test will likely fail with current implementation
         Assert.False(result);
     }
 
@@ -79,15 +71,11 @@ public class VersionHelperTests
         int major1, int minor1, int build1,
         int major2, int minor2, int build2)
     {
-        // Arrange
         var v1 = new Version(major1, minor1, build1);
         var v2 = new Version(major2, minor2, build2);
 
-        // Act
         var result = v1.CompareWithoutRevision(v2);
 
-        // Assert
-        // NOTE: This test will likely fail with current implementation
         Assert.False(result);
     }
 }
