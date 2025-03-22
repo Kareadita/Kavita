@@ -391,7 +391,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var executionerAndHerWayOfLife = postLib.Series.First(x => x.Name == "The Executioner and Her Way of Life");
         Assert.Equal(2, executionerAndHerWayOfLife.Volumes.Count);
 
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
         // Add a new chapter to a volume of the series, and scan. Validate that only, and all directories of this
         // series are marked as HasChanged
@@ -440,7 +440,7 @@ public class ParseScannedFilesTests : AbstractDbTest
         var frieren = postLib.Series.First(x => x.Name == "Frieren - Beyond Journey's End");
         Assert.Equal(2, frieren.Volumes.Count);
 
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
         // Add a volume to a series, and scan. Ensure only this series is marked as HasChanged
         var executionerCopyDir = Path.Join(Path.Join(testDirectoryPath, "YenPress"), "The Executioner and Her Way of Life");
@@ -483,7 +483,7 @@ public class ParseScannedFilesTests : AbstractDbTest
 
         // Needs to be actual time as the write time is now, so if we set LastFolderChecked in the past
         // it'll always a scan as it was changed since the last scan.
-        Thread.Sleep(1100); // Ensure at least one second has passed since library scan
+        await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
             await _unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);

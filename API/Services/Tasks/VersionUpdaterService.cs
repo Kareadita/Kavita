@@ -346,7 +346,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
         {
             var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
-            return System.Text.Json.JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
+            return JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
         }
 
         return null;
