@@ -39,8 +39,5 @@ HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=3 CMD curl
 # Enable detection of running in a container
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 
-# Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
-
 ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]

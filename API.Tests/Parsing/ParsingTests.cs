@@ -11,8 +11,12 @@ public class ParsingTests
     [Fact]
     public void ShouldWork()
     {
-        var s = 6.5f + "";
+        var s = 6.5f.ToString(CultureInfo.InvariantCulture);
         var a = float.Parse(s, CultureInfo.InvariantCulture);
+        Assert.Equal(6.5f, a);
+
+        s = 6.5f + "";
+        a = float.Parse(s, CultureInfo.CurrentCulture);
         Assert.Equal(6.5f, a);
     }
 

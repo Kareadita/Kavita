@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ public static class MigrateInitialInstallData
         {
             var fi = directoryService.FileSystem.FileInfo.New(dbFile);
             var setting = settings.First(s => s.Key == ServerSettingKey.FirstInstallDate);
-            setting.Value = fi.CreationTimeUtc.ToString();
+            setting.Value = fi.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
             await dataContext.SaveChangesAsync();
         }
 
