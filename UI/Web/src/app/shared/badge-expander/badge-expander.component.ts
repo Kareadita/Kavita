@@ -29,6 +29,10 @@ export class BadgeExpanderComponent implements OnInit, OnChanges {
   @Input() allowToggle: boolean = true;
   @Input() includeComma: boolean = true;
   /**
+   * If should be expanded by default. Defaults to false.
+   */
+  @Input() defaultExpanded: boolean = false;
+  /**
    * Invoked when the "and more" is clicked
    */
   @Output() toggle = new EventEmitter<void>();
@@ -39,10 +43,20 @@ export class BadgeExpanderComponent implements OnInit, OnChanges {
   isCollapsed: boolean = false;
 
   get itemsLeft() {
+    if (this.defaultExpanded) return 0;
+
     return Math.max(this.items.length - this.itemsTillExpander, 0);
   }
 
   ngOnInit(): void {
+
+    if (this.defaultExpanded) {
+      this.isCollapsed = false;
+      this.visibleItems = this.items;
+      this.cdRef.markForCheck();
+      return;
+    }
+
     this.visibleItems = this.items.slice(0, this.itemsTillExpander);
     this.cdRef.markForCheck();
   }
