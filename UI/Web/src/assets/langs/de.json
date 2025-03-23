@@ -371,8 +371,8 @@
         "title": "Top Leser",
         "time-selection-label": "Zeitfenster",
         "comics-label": "Comics: {{value}} Std",
-        "manga-label": "Manga: {{value}} Std.",
-        "books-label": "Bücher: {{value}} Std.",
+        "manga-label": "Manga: {{value}} Std",
+        "books-label": "Bücher: {{value}} Std",
         "this-week": "{{time-periods.this-week}}",
         "last-7-days": "{{time-periods.last-7-days}}",
         "last-30-days": "{{time-periods.last-30-days}}",
@@ -467,7 +467,7 @@
     },
     "relationship-pipe": {
         "adaptation": "Adaption",
-        "alternative-setting": "Alternative Einstellungen",
+        "alternative-setting": "Alternativer Schauplatz",
         "alternative-version": "Alternative Version",
         "character": "Charakter",
         "contains": "Beinhaltet",
@@ -495,7 +495,7 @@
         "cover-artist": "{{artist}}",
         "editor": "Editor",
         "inker": "Einfärber",
-        "letterer": "Letterer",
+        "letterer": "Schriftsetzer",
         "penciller": "Zeichner",
         "publisher": "Herausgeber",
         "writer": "Autor",
@@ -642,7 +642,7 @@
         "valid-tooltip": "Gültig",
         "invalid-tooltip": "Ungültig",
         "reset-label": "Zurücksetzen",
-        "reset-tooltip": "Dadurch wird die Serverinstanz zurückgesetzt, an welche die Kavita+-Lizenz gebunden ist. E-Mail-Adresse und Lizenzschlüssel erforderlich.",
+        "reset-tooltip": "Dadurch wird die Serverinstanz zurückgesetzt, an welche die Kavita+-Lizenz gebunden ist. E-Mail-Adresse und Lizenzschlüssel erforderlich",
         "delete-label": "Lizenz entfernen",
         "manage-tooltip": "Zahlungsinformationen aktualisieren, Abonnement kündigen/pausieren usw",
         "faq-title": "FAQ",
@@ -1389,7 +1389,7 @@
         "cbl-import": "CBL-Leseliste",
         "mal-stack-import": "MAL Stack",
         "admin-email-history": "E-Mail-Verlauf",
-        "admin-matched-metadata": "Abgeglichene Metadaten",
+        "admin-matched-metadata": "Passende Metadaten",
         "admin-manage-tokens": "Verwalte Benutzertoken",
         "scrobble-holds": "Scrobble-Holds",
         "admin-metadata": "Verwalte Metadaten"
@@ -1429,7 +1429,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Veröffentlicht: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -2523,7 +2524,7 @@
         "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
-        "title": "Abgeglichene Metadaten",
+        "title": "Passende Metadaten",
         "description": "Alle anwendbaren Serien, die mit externen Metadaten abgeglichen werden können, befinden sich hier. Kavita ruft die Metadaten der Serien im Voraus ab oder aktualisiert sie, 50 Serien pro Tag innerhalb von 24 Stunden.",
         "status-header": "Status",
         "series-name-header": "Serie",
@@ -2553,8 +2554,8 @@
         "enabled-label": "Metadaten-Download aktivieren",
         "enabled-tooltip": "Erlaube Kavita, Metadaten herunterzuladen und in ihre Datenbank zu schreiben.",
         "summary-label": "Zusammenfassung",
-        "enable-relations-tooltip": "</b> Erlaube </b> das Hinzufügen von Serienbeziehungen.",
-        "enable-people-tooltip": "Erlaube das <b>Hinzufügen<b> von Personen (Charaktere, Autoren usw.). Alle Personen enthalten Bilder.",
+        "enable-relations-tooltip": "Das <b>Hinzufügen</b> von Serienbeziehungen zulassen.",
+        "enable-people-tooltip": "Erlaube das <b>Hinzufügen</b> von Personen (Charaktere, Autoren usw.). Alle Personen enthalten Bilder.",
         "enable-start-date-tooltip": "Erlaube, dass das Startdatum der Serie in die Serie geschrieben wird",
         "enable-genres-label": "Genres",
         "enable-genres-tooltip": "Erlaube das Schreiben von Serien-Genres.",

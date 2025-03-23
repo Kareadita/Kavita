@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "Войти",
+        "title": "Войти в свой аккаунт",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Забыли пароль?",
-        "submit": "{{common.submit}}"
+        "submit": "Войти"
     },
     "dashboard": {
         "no-libraries": "Библиотеки пока не настроены. Настройте некоторые из них в",
@@ -24,12 +24,14 @@
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Сохранение…",
-        "update": "Обновление"
+        "update": "Обновление",
+        "invalid-email-warning": "Недействительный адрес электронной почты заблокирует некоторые функции Kavita",
+        "account-detail-title": "Детали учетной записи"
     },
     "user-scrobble-history": {
         "title": "История Скроббла",
         "description": "Здесь вы найдете все события скроббла, связанные с вашей учетной записью. Для того чтобы события существовали, у вас должен быть настроен активный поставщик скробблинга. Все события, которые были обработаны, будут удалены через месяц. Если есть необработанные события, то, скорее всего, они не смогут сформировать совпадения выше по потоку. Пожалуйста, обратитесь к своему администратору, чтобы они были исправлены.",
-        "filter-label": "{{common.filter}}",
+        "filter-label": "{{общий.фильтр}}",
         "created-header": "Создано",
         "last-modified-header": "Последнее изменение",
         "type-header": "Тип",
@@ -44,7 +46,8 @@
         "not-applicable": "Непригодный",
         "processed": "Обработанный",
         "not-processed": "Не обработано",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "not-read-warning": "Поставщики услуг верхнего уровня всегда будут иметь наибольшее количество"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Прогресс чтения",

@@ -1429,7 +1429,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Lançado: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",

@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "저장중…",
         "update": "업데이트",
-        "account-detail-title": "계정 자세히보기"
+        "account-detail-title": "계정 자세히보기",
+        "invalid-email-warning": "유효하지 않은 이메일은 Kavita의 일부 기능을 차단합니다"
     },
     "user-scrobble-history": {
         "title": "스크로블 이력",
@@ -38,7 +39,7 @@
         "series-header": "시리즈",
         "data-header": "데이터",
         "is-processed-header": "처리됨",
-        "no-data": "데이터 없음",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "{{v}}권 {{n}}화",
         "volume-num": "{{num}}권",
         "chapter-num": "{{num}}화",
@@ -46,7 +47,10 @@
         "not-applicable": "해당 사항 없음",
         "processed": "처리됨",
         "not-processed": "처리되지 않음",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "계정 설정에서 스크로블링이 비활성화되어 있습니다.",
+        "generate-scrobble-events": "채우기 이벤트",
+        "token-expired": "AniList 토큰이 만료되었습니다! 계정 페이지에서 갱신하기 전까지는 Scrobbling 이벤트가 처리되지 않습니다."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
@@ -167,12 +171,20 @@
         "clients-api-key-label": "API 키",
         "clients-opds-url-tooltip": "지원되는 OPDS 클라이언트 목록을 확인하세요. ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "anilist-scrobbling-label": "AniList 스크로블링",
+        "anilist-scrobbling-tooltip": "Kavita가 AniList에 읽기 진행 상황 및 평가를 스크로블(단방향 동기화)하도록 허용",
+        "want-to-read-sync-label": "읽고 싶은 동기화",
+        "want-to-read-sync-tooltip": "Kavita가 AniList 및 MAL의 보류 중인 읽기 목록에 있는 시리즈를 기반으로 '읽고 싶은 목록'에 항목을 추가하도록 허용합니다",
+        "kavitaplus-settings-title": "Kavita+"
     },
     "user-holds": {
         "title": "스크러블 홀드",
-        "description": "이것은 업스트림 공급자에게 스크로블되지 않는 시리즈의 사용자 관리 목록입니다. 언제든지 시리즈를 제거할 수 있으며 다음 스크로블 가능 이벤트(읽기 진행률, 평점, 읽고 싶어요 상태)가 이벤트를 트리거합니다.",
-        "no-data": "{{typeahead.no-data}}"
+        "description": "이것은 업스트림 공급자에게 스크로블되지 않는 시리즈의 사용자 관리 목록입니다. 언제든지 시리즈를 제거할 수 있으며 다음 스크로블 가능 이벤트(읽기 진행률, 평점, 읽고 싶어요 상태)가 스크로블링을 트리거합니다.",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "title": "테마 관리자",
@@ -312,14 +324,20 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "anilist-first-description": "AniList 토큰이 이제 설정되었습니다. 이 토큰은 1년 동안 지속되며 Kavita는 만료되기 전에 여기에서 새로 고침하라고 알려줍니다. 이를 통해 Kavita는 귀하의 독서 기록, 읽고 싶은 것, 평가에서 스크러블(동기화) 이벤트를 생성합니다. 지금 또는 나중에 시작할 수 있습니다. 스크러블하지 않으려는 시리즈가 있는 경우 나중에를 선택하고 스크러블 보류를 설정합니다. 이 작업은 한 번만 실행하면 됩니다. 그 후 Kavita가 귀하를 대신하여 동기화를 처리합니다. <br/>'나중에'를 선택하면 스크러블 페이지에서 버튼을 찾을 수 있습니다.",
+        "anilist-used-for": "AniList는 스크로블링(데이터 동기화) 및 '읽고 싶은 목록' 동기화에 사용됩니다.",
+        "mal-used-for": "MyAnimeList는 스마트 컬렉션 및 '읽고 싶은 목록' 동기화에 사용됩니다.",
+        "anilist-first-header": "AniList 토큰이 저장되었습니다",
+        "anilist-first-later": "나중에",
+        "anilist-first-now": "지금"
     },
     "typeahead": {
         "locked-field": "필드가 잠겨 있습니다",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "추가 {{item}}…",
-        "no-data": "데이터 없음",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", 사용자 정의 목록을 추가하려면 입력하세요"
     },
     "generic-list-modal": {
@@ -606,14 +624,35 @@
         "activate-discordId-tooltip": "Kavita+와 Discord 계정을 연결하세요. 이렇게 하면 Kavita를 형성하는 데 도움이 되는 숨겨진 채널에 액세스할 수 있습니다.",
         "discord-validation": "이것은 유효한 Discord 사용자 ID가 아닙니다. 사용자 ID는 Discord 사용자 이름이 아닙니다.",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "라이센스 초기화",
         "activate-reset-tooltip": "라이센스를 사용하여 이전 등록을 무효화합니다. 라이센스와 이메일이 모두 필요합니다",
         "activate-save": "{{common.save}}",
         "kavita+-desc-part-1": "Kavita+는 이 Kavita 인스턴스의 모든 사용자를 위한 기능을 잠금 해제하는 프리미엄 구독 서비스입니다. 잠금 해제하려면 구독을 구매하세요 ",
         "kavita+-desc-part-2": "프리미엄 혜택",
         "kavita+-desc-part-3": "오늘!",
-        "kavita+-requirement": "Kavita+는 최신 릴리스(2개 버전)에서만 작동하도록 설계되었습니다. 그 밖의 모든 것은 작동하지 않을 수 있습니다.",
-        "help-label": "{{common.help}}"
+        "kavita+-requirement": "Kavita+는 최신 3개의 릴리스 버전에서만 작동하도록 설계되었습니다. 그 외 버전에서는 작동하지 않을 수 있습니다.",
+        "help-label": "{{common.help}}",
+        "delete-label": "라이선스 삭제",
+        "delete-tooltip": "이 작업은 Kavita에서 라이선스를 제거하여 Kavita가 Kavita+와 통신하지 않도록 합니다. 구독을 취소하지는 않습니다. 먼저 '관리'를 사용하여 구독을 취소하십시오.",
+        "manage-tooltip": "결제 정보 업데이트, 구독 취소/일시 중지 등",
+        "email-label": "등록된 이메일",
+        "k+-already-registered-header": "라이선스가 이미 등록되었습니다",
+        "overwrite": "덮어쓰기",
+        "k+-unlocked": "Kavita+ 잠금 해제됨!",
+        "faq-title": "FAQ",
+        "license-mismatch": "라이선스가 다른 Kavita 인스턴스에 등록되었을 수 있습니다. 재등록하여 문제를 해결하십시오.",
+        "k+-unlocked-description": "Kavita+에 오신 것을 환영합니다! 계정에서 스크로블 제공자를 등록하면 Kavita는 진행 상황, 평점 및 읽고 싶은 항목에서 스크로블 이벤트를 생성합니다. 스크로블하고 싶지 않은 시리즈에 대해 스크로블 보류를 설정하는 데 시간을 할애하십시오.",
+        "reset-tooltip": "이 작업은 Kavita+ 라이선스가 연결된 서버 인스턴스를 초기화합니다. 이메일과 라이선스 키가 필요합니다",
+        "total-subbed-months-label": "총 구독 개월 수",
+        "k+-license-overwrite": "라이선스가 다른 Kavita 인스턴스에 등록되어 있습니다. 이는 재설치 시 또는 드물게 시스템 업데이트로 인해 발생할 수 있습니다. 덮어쓰기를 선택하여 이 인스턴스가 Kavita+에 강제로 등록되도록 합니다.",
+        "supported-version-label": "지원되는 Kavita 버전 사용 중",
+        "expiration-label": "만료",
+        "reset-label": "리셋",
+        "info-title": "라이센스 정보",
+        "actions-title": "액션",
+        "license-active-label": "라이선스 활성화됨",
+        "valid-tooltip": "유효",
+        "invalid-tooltip": "무효"
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -867,7 +906,9 @@
         "file-type-group-tooltip": "\"Kavita\"이(가) 무엇을 스캔해야 하는지에 따라 다양한 파일 유형이 있을 수 있습니다. 아카이브 파일은 일반적으로 cb*, zip, rar 등을 포함합니다.",
         "exclude-patterns-label": "패턴 제외",
         "exclude-patterns-tooltip": "디렉터리를 스캔할 때 Kavita가 일치시킬 패턴 집합(Glob 구문)을 구성하고, 스캐너 결과에서 제외할 수 있도록 설정하세요.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-tooltip": "Kavita가 이 라이브러리 내의 시리즈에 대한 메타데이터를 다운로드해야 합니까? 이는 서버에 활성 Kavita+ 구독이 있는 경우에만 발생합니다.",
+        "allow-metadata-matching-label": "메타데이터 일치 허용"
     },
     "file-type-group-pipe": {
         "archive": "아카이브",
@@ -964,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "{{url}}을(를) 입력하세요",
@@ -1023,7 +1065,7 @@
         "file-header": "파일",
         "comment-header": "댓글",
         "created-header": "생성됨",
-        "no-data": "데이터 없음"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "장치로 보내기와 같은 Kavita의 일부 기능을 사용하려면 이메일 공급자를 설정해야 합니다. 비밀번호 분실과 같은 다른 기능은 이메일 설정 없이 관리자 개입이 필요합니다.",
@@ -1324,7 +1366,7 @@
         "server-section-title": "서버",
         "info-section-title": "정보",
         "import-section-title": "가져오기",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "일반",
         "admin-users": "유저",
         "admin-libraries": "라이브러리",
@@ -1335,7 +1377,7 @@
         "admin-tasks": "작업",
         "admin-statistics": "통계",
         "admin-system": "시스템",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "라이센스",
         "account": "계정",
         "preferences": "환경설정",
         "clients": "API 키 / OPDS",
@@ -1345,7 +1387,12 @@
         "theme": "테마",
         "customize": "커스터마이즈",
         "cbl-import": "CBL 읽기 목록",
-        "mal-stack-import": "MAL 스택"
+        "mal-stack-import": "MAL 스택",
+        "admin-manage-tokens": "사용자 토큰 관리",
+        "admin-metadata": "메타데이터 관리",
+        "scrobble-holds": "스크러블 홀드",
+        "admin-email-history": "이메일 기록",
+        "admin-matched-metadata": "일치하는 메타데이터"
     },
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
@@ -1382,7 +1429,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "출시: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1821,7 +1869,7 @@
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Kavita+ 메타데이터 분석",
         "description": "Kavita는 대상 시리즈에 대한 메타데이터(평점, 리뷰, 추천 등)를 시간이 지남에 따라 천천히 가져옵니다.",
-        "no-data": "데이터 없음",
+        "no-data": "{{common.no-data}}",
         "errored-series-label": "오류가 있는 시리즈",
         "completed-series-label": "완료된 시리즈",
         "complete": "모든 시리즈에는 메타데이터가 있습니다"
@@ -2116,7 +2164,7 @@
         "email-not-sent": "파일에 있는 이메일이 유효한 이메일이 아니므로 보낼 수 없습니다. 로그에 링크가 기록되었습니다. 관리자는 이 링크를 제공하여 프로세스를 완료할 수 있습니다.",
         "k+-license-saved": "라이선스 키가 저장되었지만 유효하지 않습니다. 가입을 재확인하려면 확인을 클릭하십시오. 처음 등록하는 경우 전파하는 데 1분 정도 걸릴 수 있습니다.",
         "k+-error": "라이선스를 활성화하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
-        "k+-delete-key": "이렇게 하면 Kavita의 라이선스 키만 삭제되고 구매 링크가 표시됩니다. 이것은 구독을 취소하지 않습니다! 지원팀에서 지시하는 경우에만 사용하세요!",
+        "k+-delete-key": "이렇게 하면 Kavita 라이선스 키만 삭제되고 구매 링크가 표시됩니다. <b>구독은 취소되지 않습니다!</b> 먼저 관리를 사용하여 구독을 취소하세요.",
         "k+-reset-key": "이렇게 하면 라이선스를 사용한 이전 등록이 무효화되고 Kavita 인스턴스를 다시 등록할 수 있습니다.",
         "k+-reset-key-success": "라이선스가 등록 해제되었습니다. 인스턴스를 다시 등록하고 Kavita+를 다시 활성화하려면 수정 버튼을 사용하세요",
         "library-deleted": "라이브러리 {{name}}이(가) 제거되었습니다",
@@ -2179,7 +2227,10 @@
         "bulk-scan": "여러 라이브러리를 스캔하는 것은 순차적으로 진행됩니다. 라이브러리 크기에 따라 시간이 오래 걸리거나 완료되지 않을 수 있습니다.",
         "bulk-covers": "여러 라이브러리에서 커버를 새로 고침하는 것은 많은 리소스를 소모하며 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
         "person-image-downloaded": "인물 표지를 다운로드하여 적용했습니다.",
-        "confirm-delete-multiple-chapters": "{{count}}개의 챕터/볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다."
+        "confirm-delete-multiple-chapters": "{{count}}개의 챕터/볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
+        "bulk-delete-libraries": "{{count}}개의 라이브러리를 삭제하시겠습니까?",
+        "webtoon-override": "웹툰을 나타내는 이미지가 있어 웹툰 모드로 전환합니다.",
+        "match-success": "시리즈가 올바르게 일치함"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2249,7 +2300,9 @@
         "multiple-selections": "다중 선택",
         "back-to": "{{action}}으로 돌아가기",
         "title": "작업",
-        "copy-settings": "설정 복사하기"
+        "copy-settings": "설정 복사하기",
+        "match": "일치",
+        "match-tooltip": "Kavita+에서 시리즈를 수동으로 일치시키기"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2366,11 +2419,16 @@
         "issue-nums": "이슈",
         "chapter-nums": "챕터",
         "volume-nums": "볼륨",
-        "author-count": "{{num}} 저자"
+        "author-count": "{{num}} 저자",
+        "no-data": "데이터 없음",
+        "chapter-count": "{{num}} 챕터"
     },
     "confirm": {
         "alert": "경고",
-        "confirm": "확인"
+        "confirm": "확인",
+        "info": "정보",
+        "cancel": "{{common.cancel}}",
+        "ok": "Ok"
     },
     "browse-authors": {
         "author-count": "{{num}} 사람",
@@ -2382,7 +2440,8 @@
         "individual-role-title": "{{role}} 로서",
         "browse-person-title": "{{name}}의 모든 작품",
         "all-roles": "역할",
-        "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품"
+        "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "edit-person-modal": {
         "general-tab": "{{edit-series-modal.general-tab}}",
@@ -2406,5 +2465,140 @@
         "hardcover-id-label": "Hardcover Id",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "description-label": "설명"
+    },
+    "changelog-update-item": {
+        "known-issues": "알려진 문제",
+        "removed": "삭제됨",
+        "feature-requests": "기능 요청",
+        "download": "다운로드",
+        "added": "추가됨",
+        "changed": "변경됨",
+        "fixed": "수정됨",
+        "developer": "개발자",
+        "theme": "테마",
+        "api": "API",
+        "published-label": "게시된 날짜: ",
+        "installed": "{{changelog.installed}}"
+    },
+    "new-version-modal": {
+        "known-issues": "{{changelog.known-issues}}",
+        "close": "{{common.close}}",
+        "theme": "{{changelog.theme}}",
+        "changed": "{{changelog.changed}}",
+        "refresh": "새로고침",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "removed": "{{changelog.removed}}",
+        "api": "{{changelog.api}}",
+        "title": "Kavita가 업데이트되었습니다!",
+        "description": "Kavita의 새 버전이 출시되었습니다. 업데이트하려면 새로 고침하세요.",
+        "added": "{{changelog.added}}"
+    },
+    "manage-matched-metadata": {
+        "title": "일치하는 메타데이터",
+        "library-name-header": "라이브러리",
+        "valid-until-header": "다음 새로 고침",
+        "actions-header": "액션",
+        "matched-status-label": "일치함",
+        "unmatched-status-label": "일치하지 않음",
+        "no-data": "{{common.no-data}}",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "dont-match-label": "일치하지 않음",
+        "description": "외부 메타데이터와 일치할 수 있는 모든 해당 시리즈는 여기에 있습니다. Kavita는 매일 24시간당 50개 시리즈의 시리즈 메타데이터를 사전 페치하거나 새로 고칩니다.",
+        "match-alt": "일치 {{seriesName}}",
+        "status-header": "상태",
+        "series-name-header": "시리즈",
+        "blacklist-status-label": "수동 일치 필요",
+        "all-status-label": "모두"
+    },
+    "manage-user-tokens": {
+        "username-header": "사용자 이름",
+        "anilist-header": "AniList",
+        "no-data": "{{common.no-data}}",
+        "token-set-label": "토큰 셋",
+        "description": "스크로블링 토큰을 보유한 사용자는 가끔 갱신해야 할 수 있습니다. 이메일이 설정되어 있고 유효한 이메일이 있는 경우 Kavita가 자동으로 이메일을 보냅니다.",
+        "mal-header": "MAL",
+        "expires-label": "만료: {{date}}"
+    },
+    "manage-metadata-settings": {
+        "derive-publication-status-label": "출판현황",
+        "enable-relations-label": "관계",
+        "enable-relations-tooltip": "시리즈 관계를 <b>추가</b>할 수 있도록 허용합니다.",
+        "enable-cover-image-tooltip": "Kavita가 시리즈의 표지 이미지를 작성하도록 허용합니다",
+        "enable-tags-label": "태그",
+        "enable-tags-tooltip": "시리즈 태그 작성을 허용합니다.",
+        "first-last-name-tooltip": "사람들의 이름이 먼저 쓰여지고 그 다음에 성으로 쓰여지도록 하세요",
+        "summary-label": "요약",
+        "whitelist-tooltip": "이 목록의 문자열만 <b>태그</b>에 대해 작성되는 것을 허용합니다. 쉼표로 구분해야 합니다.",
+        "age-rating-mapping-description": "장르나 태그에서 왼쪽의 문자열이 발견되면 해당 시리즈의 연령 등급이 설정됩니다.",
+        "add-age-rating-mapping-label": "연령 등급 매핑 추가",
+        "field-mapping-title": "필드 매핑",
+        "remove-source-tag-label": "소스 태그 제거",
+        "first-last-name-label": "이름 성",
+        "person-roles-label": "역할",
+        "enabled-label": "메타데이터 다운로드 활성화",
+        "enable-people-label": "사람들",
+        "derive-publication-status-tooltip": "총 장/권 수를 기준으로 출판 상태를 도출할 수 있습니다.",
+        "field-mapping-description": "장르/태그 필드에서 발견된 특정 문자열에 대한 설정 규칙을 장르/태그의 새 문자열에 매핑하고 선택적으로 소스 목록에서 제거합니다. 장르/태그를 쓸 수 있는 경우에만 적용됩니다.",
+        "blacklist-label": "블랙리스트 장르/태그",
+        "enabled-tooltip": "Kavita가 메타데이터를 다운로드하고 데이터베이스에 쓸 수 있도록 허용합니다.",
+        "summary-tooltip": "필드 잠금이 해제되면 요약을 쓸 수 있도록 허용합니다.",
+        "enable-people-tooltip": "사람(캐릭터, 작가 등)을 <b>추가</b>할 수 있도록 허용합니다. 모든 사람은 이미지를 포함합니다.",
+        "add-field-mapping-label": "필드 매핑 추가",
+        "localized-name-label": "현지화된 시리즈 이름",
+        "localized-name-tooltip": "필드가 잠금 해제되면 Localized Name을 쓸 수 있도록 허용합니다. Kavita는 최선의 추측을 시도합니다.",
+        "enable-cover-image-label": "표지 이미지",
+        "description": "Kavita+는 일부 제한된 메타데이터를 다운로드하여 데이터베이스에 쓸 수 있는 기능이 있습니다. 이 페이지에서는 범위에 있는 것을 토글할 수 있습니다.",
+        "tag": "태그",
+        "overrides-description": "Kavita가 잠긴 필드 위에 쓸 수 있도록 허용합니다.",
+        "overrides-label": "재정의",
+        "blacklist-tooltip": "이 목록의 모든 항목은 장르 및 태그 처리에서 모두 제거됩니다. 여기는 <b>쓰지 않으려는</b> 장르/태그를 추가하는 곳입니다. 쉼표로 구분해야 합니다.",
+        "enable-start-date-label": "시작일",
+        "enable-start-date-tooltip": "시리즈 시작 날짜를 시리즈에 쓸 수 있도록 허용",
+        "enable-genres-label": "장르",
+        "enable-genres-tooltip": "시리즈 장르를 작성할 수 있도록 허용합니다.",
+        "whitelist-label": "화이트리스트 태그",
+        "age-rating-mapping-title": "연령 등급 매핑",
+        "genre": "장르"
+    },
+    "match-series-modal": {
+        "search": "검색",
+        "dont-match-tooltip": "이 시리즈를 매칭 및 스크로블링에서 제외합니다",
+        "save": "{{common.save}}",
+        "title": "일치 {{seriesName}}",
+        "dont-match-label": "일치하지 않음",
+        "description": "Kavita+ 메타데이터를 다시 연결하고 스크로블 이벤트를 재생성하려면 매치를 선택하세요. Don't Match를 사용하면 Kavita가 메타데이터를 일치시키고 스크로블링하는 것을 제한할 수 있습니다.",
+        "close": "{{common.close}}",
+        "query-label": "쿼리",
+        "no-results": "일치하는 항목을 찾을 수 없습니다. 지원되는 공급자의 URL을 추가하고 다시 시도해 보세요.",
+        "query-tooltip": "시리즈 이름, AniList/MyAnimeList url을 입력하세요. url은 직접 조회를 사용합니다."
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "details": "페이지 보기",
+        "updating-metadata-status": "메타데이터 업데이트",
+        "releasing": "출시",
+        "chapter-count": "{{common.chapter-count}}"
+    },
+    "email-history": {
+        "sent-header": "성공",
+        "no-data": "{{common.no-data}}",
+        "not-sent-tooltip": "전송되지 않음",
+        "sent-tooltip": "전송된",
+        "description": "여기에서 Kavita에서 보낸 모든 이메일과 해당 사용자에게 보낸 이메일을 확인할 수 있습니다.",
+        "user-header": "보낸 사람",
+        "date-header": "보내는 날짜",
+        "template-header": "템플릿"
+    },
+    "metadata-setting-field-pipe": {
+        "genres": "{{metadata-fields.genres-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "covers": "커버",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
     }
 }

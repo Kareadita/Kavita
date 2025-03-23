@@ -1368,7 +1368,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Vydáno: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",

@@ -90,7 +90,7 @@
     "user-no-access-library-from-series": "L'utente non ha accesso alla libreria a cui appartiene questa serie",
     "volume-num": "Volume {0}",
     "book-num": "Libro {0}",
-    "issue-num": "Problema {0}{1}",
+    "issue-num": "Numero {0}{1}",
     "chapter-num": "Capitolo {0}",
     "epub-malformed": "Il file è corrotto! Non posso leggere.",
     "collection-updated": "Collezione aggiornata con successo",

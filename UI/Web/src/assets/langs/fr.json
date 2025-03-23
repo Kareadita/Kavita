@@ -643,7 +643,7 @@
         "reset-tooltip": "Ceci réinitialisera l'instance du serveur Kavita+ à laquelle la licence est liée. Nécessite l'email et la clé de licence",
         "delete-label": "Supprimer la licence",
         "info-title": "Informations sur les licences",
-        "manage-tooltip": "Mise à jour des informations de paiement, annulation/pause de l'abonnement, etc.",
+        "manage-tooltip": "Mise à jour des informations de paiement, annulation/pause de l'abonnement, etc",
         "faq-title": "FAQ",
         "total-subbed-months-label": "Nombre total de mois d'abonnement",
         "email-label": "Adresse électronique enregistrée",
@@ -777,7 +777,7 @@
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
-        "release-date-title": "Publication",
+        "release-date-title": "Sortie",
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "pages-count": "{{num}} Pages",
@@ -906,7 +906,9 @@
         "file-type-group-tooltip": "Quels types de fichiers Kavita devrait-il analyser ? Par exemple, Archive inclura les fichiers cb*, zip, rar, etc.",
         "exclude-patterns-label": "xclure les modèles",
         "exclude-patterns-tooltip": "Configurez un ensemble de modèles (syntaxe Global) que Kavita fera correspondre lors du scan des répertoires et exclura des résultats du scanner.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-label": "Permettre la correspondance des métadonnées",
+        "allow-metadata-matching-tooltip": "Kavita doit-il télécharger les métadonnées des séries de cette bibliothèque ? Cela ne se produira que si le serveur dispose d'un abonnement actif à Kavita+."
     },
     "file-type-group-pipe": {
         "archive": "Archive",
@@ -1003,7 +1005,8 @@
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "Saisir une {{url}}",
@@ -1062,7 +1065,7 @@
         "file-header": "Fichier",
         "comment-header": "Commentaire",
         "created-header": "Créé",
-        "no-data": "Aucune donnée"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Afin d'utiliser certaines fonctions de Kavita comme Mot de passe oublié et Envoyer à Appareil, un fournisseur d'e-mail doit être mis en place. D'autres caractéristiques comme le changement de mot de passe sont moins sûres sans configuration Email.",
@@ -1363,7 +1366,7 @@
         "server-section-title": "Serveur",
         "info-section-title": "Info",
         "import-section-title": "Importer",
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-general": "Général",
         "admin-users": "Utilisateurs",
         "admin-libraries": "Bibliothèques",
@@ -1374,7 +1377,7 @@
         "admin-tasks": "Tâches",
         "admin-statistics": "Statistiques",
         "admin-system": "Système",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "Licence",
         "account": "Compte",
         "preferences": "Préférences",
         "clients": "Clé API / OPDS",
@@ -1384,7 +1387,12 @@
         "theme": "Thème",
         "customize": "Personnaliser",
         "cbl-import": "Liste de lecture CBL",
-        "mal-stack-import": "Pile MAL"
+        "mal-stack-import": "Pile MAL",
+        "scrobble-holds": "Mises en attente de scrobble",
+        "admin-email-history": "Historique des e-mails",
+        "admin-matched-metadata": "Métadonnées correspondantes",
+        "admin-manage-tokens": "Gérer les jetons utilisateur",
+        "admin-metadata": "Gérer les métadonnées"
     },
     "collection-detail": {
         "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
@@ -1421,7 +1429,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Sortie : {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1783,7 +1792,7 @@
         "sort-order-label": "Ordre de tri",
         "sort-order-tooltip": "L'ordre de lecture dans lequel ce chapitre est ordonné au sein du volume",
         "isbn-label": "ISBN",
-        "release-date-label": "Publication",
+        "release-date-label": "Sortie",
         "summary-label": "{{edit-series-modal.summary-label}}",
         "genres-label": "{{edit-series-modal.genres-label}}",
         "tags-label": "{{edit-series-modal.tags-label}}",
@@ -1860,7 +1869,7 @@
     "kavitaplus-metadata-breakdown-stats": {
         "title": "Décomposition des métadonnées de Kavita",
         "description": "Kavita récupère les métadonnées (évaluations, critiques, recommandations, etc.) au fur et à mesure pour les séries éligibles.",
-        "no-data": "Pas de données",
+        "no-data": "{{common.no-data}}",
         "errored-series-label": "Séries en erreur",
         "completed-series-label": "Séries complètes",
         "complete": "Toutes les séries ont des métadonnées"
@@ -2155,7 +2164,7 @@
         "email-not-sent": "L'adresse électronique figurant dans le fichier n'est pas valide et ne peut être envoyée. Un lien a été déversé dans les journaux. L'administrateur peut fournir ce lien pour compléter le flux.",
         "k+-license-saved": "La clé de licence a été enregistrée, mais elle n'est pas valide. Cliquez sur vérifier pour revalider l'abonnement. Le premier enregistrement peut prendre une minute pour se propager.",
         "k+-error": "Une erreur s'est produite lors de l'activation de votre licence. Veuillez réessayer.",
-        "k+-delete-key": "Cela supprimera uniquement la clé de licence de Kavita et permettra d'afficher un lien d'achat. Cela n'annulera pas votre abonnement ! N'utilisez cette option que si le support vous le demande !",
+        "k+-delete-key": "Cela supprimera uniquement la clé de licence de Kavita et affichera un lien d'achat. <b>Cela n'annulera pas votre abonnement !</b> Utilisez \"Gérer\" pour annuler votre abonnement en premier.",
         "k+-reset-key": "Cela invalidera un enregistrement antérieur utilisant votre licence et permettra de réenregistrer une instance Kavita.",
         "k+-reset-key-success": "Votre licence a été désenregistrée. Utilisez le bouton Modifier pour réenregistrer votre instance et réactiver Kavita+",
         "library-deleted": "La bibliothèque {{name}} a été supprimée",
@@ -2219,7 +2228,9 @@
         "must-select-library": "Au moins une bibliothèque doit être sélectionnée",
         "person-image-downloaded": "La couverture de la personne a été téléchargée et appliquée.",
         "confirm-delete-multiple-chapters": "Etes-vous sûr de vouloir supprimer {{count}} chapitres/volumes ? Cela ne modifiera pas les fichiers sur le disque.",
-        "bulk-delete-libraries": "Êtes vous sûr de vouloir supprimer {{count}} bibliothèque(s) ?"
+        "bulk-delete-libraries": "Êtes vous sûr de vouloir supprimer {{count}} bibliothèque(s) ?",
+        "webtoon-override": "Passage en mode Webtoon en raison d'images représentant un webtoon.",
+        "match-success": "Séries avec la bonne correspondance"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",
@@ -2289,7 +2300,9 @@
         "multiple-selections": "Sélections multiples",
         "back-to": "Retour à {{action}}",
         "title": "Actions",
-        "copy-settings": "Copier les paramètres depuis"
+        "copy-settings": "Copier les paramètres depuis",
+        "match-tooltip": "Associer les séries manuellement avec Kavita+",
+        "match": "Correspondance"
     },
     "preferences": {
         "left-to-right": "De gauche à droite",
@@ -2406,18 +2419,24 @@
         "issue-nums": "Numéros",
         "chapter-nums": "Chapitres",
         "volume-nums": "Volumes",
-        "author-count": "{{num}} Auteurs"
+        "author-count": "{{num}} Auteurs",
+        "chapter-count": "{{num}} chapitres",
+        "no-data": "Aucune donnée"
     },
     "confirm": {
         "alert": "Alerte",
-        "confirm": "Confirmer"
+        "confirm": "Confirmer",
+        "ok": "Ok",
+        "cancel": "{{common.cancel}}",
+        "info": "Info"
     },
     "person-detail": {
         "all-roles": "Roles",
         "browse-person-by-role-title": "Toutes les œuvres de {{name}} en tant que {{role}}",
         "known-for-title": "Connu pour",
         "individual-role-title": "En tant que {{role}}",
-        "browse-person-title": "Toutes les œuvres de {{name}}"
+        "browse-person-title": "Toutes les œuvres de {{name}}",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
     },
     "edit-person-modal": {
         "save": "{{common.save}}",
@@ -2465,7 +2484,13 @@
         "title": "Correspondance {{seriesName}}",
         "description": "Sélectionnez une correspondance pour recâbler les métadonnées de Kavita+ et régénérer les événements de scrobbling. L'option Ne pas faire correspondre peut être utilisée pour empêcher Kavita de faire correspondre les métadonnées et le scrobbler.",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "query-tooltip": "Entrez le nom de la série, l'URL AniList/MyAnimeList. Les URL utiliseront une recherche directe.",
+        "dont-match-tooltip": "Exclure cette série de la correspondance et du scrobbling",
+        "dont-match-label": "Ne pas correspondre",
+        "search": "Recherche",
+        "no-results": "Impossible de trouver une correspondance. Essayez d'ajouter l'URL d'un fournisseur pris en charge et réessayez.",
+        "query-label": "Requête"
     },
     "new-version-modal": {
         "description": "Une nouvelle version de Kavita est disponible. Actualiser pour mettre à jour.",
@@ -2492,7 +2517,7 @@
     },
     "manage-matched-metadata": {
         "description": "Toutes les séries applicables qui peuvent correspondre à des métadonnées externes résident ici. Kavita prélève ou actualise les métadonnées des séries à raison de 50 séries par jour pendant 24 heures.",
-        "matched-status-label": "Correspondance",
+        "matched-status-label": "Correspondant",
         "title": "Métadonnées correspondantes",
         "status-header": "Statut",
         "series-name-header": "Séries",
@@ -2514,6 +2539,66 @@
         "summary-label": "Résumé",
         "description": "Kavita+ a la capacité de télécharger et d'enregistrer certaines métadonnées dans la base de données. Cette page vous permet de définir les métadonnées prises en compte.",
         "localized-name-label": "Nom de séries localisé",
-        "summary-tooltip": "Permettre d'écrire un résumé lorsque le champ est déverrouillé."
+        "summary-tooltip": "Permettre d'écrire un résumé lorsque le champ est déverrouillé.",
+        "enable-tags-tooltip": "Permettre la série Étiquettes à écrire.",
+        "localized-name-tooltip": "Autoriser la saisie d’un nom localisé lorsque le champ est déverrouillé. Kavita tentera de faire la meilleure supposition.",
+        "blacklist-label": "Liste noire des Genres/Tags",
+        "derive-publication-status-label": "Statut de publication",
+        "derive-publication-status-tooltip": "Permettre de dériver le statut de publication à partir du nombre total de chapitres et de volumes.",
+        "enable-people-label": "Personnes",
+        "enable-cover-image-label": "Image de couverture",
+        "field-mapping-description": "Configurer des règles pour certaines chaînes trouvées dans le champ Genre/Tag et les mapper à une nouvelle chaîne dans Genre/Tag, avec l'option de les supprimer de la liste Source. Applicable uniquement lorsque l'écriture des Genres/Tags est activée.",
+        "person-roles-label": "Rôles",
+        "overrides-description": "Autoriser Kavita à écrire sur les champs verrouillés.",
+        "enable-genres-label": "Genres",
+        "enable-tags-label": "Tags",
+        "enable-start-date-label": "Date de début",
+        "enable-start-date-tooltip": "Permettre de remplacer la date de début des séries",
+        "enable-genres-tooltip": "Permettre l'écriture des genres de séries.",
+        "remove-source-tag-label": "Supprimer le Tag source",
+        "add-field-mapping-label": "Ajouter une correspondance de champ",
+        "genre": "Genre",
+        "tag": "Tag",
+        "add-age-rating-mapping-label": "Ajouter une correspondance de classification par âge",
+        "first-last-name-tooltip": "Assurez-vous que les noms des personnes sont écrits avec le Prénom suivi du Nom",
+        "overrides-label": "Remplacements",
+        "first-last-name-label": "Nommage Prénom Nom",
+        "enable-cover-image-tooltip": "Permettre à Kavita de remplacer l'image de couverture des séries",
+        "enable-relations-tooltip": "Permettre <b>d'ajouter</b> des relations entre les séries.",
+        "blacklist-tooltip": "Tout élément de cette liste sera supprimé du traitement des genres et des tags. C'est ici que vous pouvez ajouter les genres/tags que vous <b>ne</b> souhaitez pas voir modifiés. Assurez-vous qu'ils sont séparés par des virgules.",
+        "enable-people-tooltip": "Permettre <b>d'ajouter</b> des personnes (personnages, écrivains, etc.). Toutes les personnes contiennent des images.",
+        "whitelist-label": "Tags de la liste blanche",
+        "age-rating-mapping-description": "Toute chaîne de caractères à gauche, si elle est trouvée dans les Genres ou les Tags, définira la classification par âge de la Série.",
+        "whitelist-tooltip": "N'autoriser qu'une chaîne de cette liste à être écrite pour les <b>Tags</b>. Assurez-vous qu'elles sont séparées par des virgules.",
+        "age-rating-mapping-title": "Correspondance des classifications par âge",
+        "field-mapping-title": "Correspondance de champ"
+    },
+    "match-series-result-item": {
+        "chapter-count": "{{common.chapter-count}}",
+        "updating-metadata-status": "Mise à jour des métadonnées",
+        "volume-count": "{{server-stats.volume-count}}",
+        "releasing": "Sorties",
+        "details": "Voir la page"
+    },
+    "metadata-setting-field-pipe": {
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "covers": "Couvertures",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}"
+    },
+    "email-history": {
+        "not-sent-tooltip": "Non envoyé",
+        "description": "Ici, vous pouvez voir tous les e-mails envoyés par Kavita et à quel utilisateur.",
+        "template-header": "Modèle",
+        "date-header": "Date d'envoi",
+        "user-header": "Envoyé à",
+        "sent-header": "Réussi",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "Envoyé"
     }
 }

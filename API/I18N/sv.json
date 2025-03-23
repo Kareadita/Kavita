@@ -201,5 +201,7 @@
     "person-name-unique": "Personnamn måste vara unikt",
     "person-image-doesnt-exist": "Personen existerar inte i CoversDB",
     "generic-cover-person-save": "Kan inte spara omslagsbilden till Personen",
-    "generic-cover-volume-save": "Kan inte spara omslagsbilden till Volymen"
+    "generic-cover-volume-save": "Kan inte spara omslagsbilden till Volymen",
+    "email-taken": "E-postadressen används redan",
+    "kavitaplus-restricted": "Detta är enbart tillgängligt med Kavita+"
 }
