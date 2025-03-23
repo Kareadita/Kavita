@@ -14,13 +14,11 @@
         <button class="btn btn-primary-text" type="button" (click)="copy()" [title]="t('copy')">
           {{t('copy')}}
         </button>
+        @if (showRefresh) {
+          <button class="btn btn-danger-text" [ngbTooltip]="tipContent" (click)="refresh()">{{t('reset')}}</button>
+        }
       </div>
     </ng-template>
-    @if (showRefresh) {
-      <ng-template #titleActions>
-          <button class="btn btn-danger-outline" [ngbTooltip]="tipContent" (click)="refresh()">Reset</button>
-      </ng-template>
-    }
   </app-setting-item>
 
   <ng-template #tipContent>
