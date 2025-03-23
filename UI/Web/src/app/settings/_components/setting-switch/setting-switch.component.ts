@@ -46,7 +46,6 @@ export class SettingSwitchComponent implements AfterContentInit {
         return;
       }
 
-
       const element = this.elementRef.nativeElement;
       const inputElement = element.querySelector('input');
 

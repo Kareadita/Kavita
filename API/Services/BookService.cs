@@ -73,12 +73,27 @@ public class BookService : IBookService
     private const string BookApiUrl = "book-resources?file=";
     private readonly PdfComicInfoExtractor _pdfComicInfoExtractor;
 
+    /// <summary>
+    /// Setup the most lenient book parsing options possible as people have some really bad epubs
+    /// </summary>
     public static readonly EpubReaderOptions BookReaderOptions = new()
     {
         PackageReaderOptions = new PackageReaderOptions
         {
             IgnoreMissingToc = true,
-            SkipInvalidManifestItems = true
+            SkipInvalidManifestItems = true,
+        },
+        Epub2NcxReaderOptions = new Epub2NcxReaderOptions
+        {
+            IgnoreMissingContentForNavigationPoints = true
+        },
+        SpineReaderOptions = new SpineReaderOptions
+        {
+            IgnoreMissingManifestItems = true
+        },
+        BookCoverReaderOptions =  new BookCoverReaderOptions
+        {
+            Epub2MetadataIgnoreMissingManifestItem = true
         }
     };
 
