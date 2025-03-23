@@ -92,8 +92,8 @@
             <!-- The book mode is messy, not ready for prime time -->
             <!--          @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {-->
             <!--            <button (click)="toggleBookPageMode()" class="btn-icon toolbarButton" [ngbTooltip]="pageLayoutMode | pdfLayoutMode" [disabled]="scrollMode === ScrollModeType.page">-->
-            <!--                <i class="toolbar-icon fa-solid {{this.pageLayoutMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>-->
-            <!--                <span class="visually-hidden">{{this.pageLayoutMode | pdfLayoutMode}}</span>-->
+            <!--                <i class="toolbar-icon fa-solid {{pageLayoutMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>-->
+            <!--                <span class="visually-hidden">{{pageLayoutMode | pdfLayoutMode}}</span>-->
             <!--            </button>-->
             <!--          }-->
 
@@ -141,8 +141,8 @@
 
             <!-- This is pretty experimental, so it might not work perfectly -->
             <button (click)="toggleTheme()" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton toolbar-btn-fix">
-              <i class="toolbar-icon fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-              <span class="visually-hidden">{{this.theme === 'light' ? t('light-theme-alt') : t('dark-theme-alt')}}</span>
+              <i class="toolbar-icon fa-solid {{theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{theme === 'light' ? t('light-theme-alt') : t('dark-theme-alt')}}</span>
             </button>
 
 

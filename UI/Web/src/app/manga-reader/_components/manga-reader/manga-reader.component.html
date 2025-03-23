@@ -172,14 +172,14 @@
           </div>
           <div class="col">
             <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
-              <i class="fa {{this.readerMode | readerModeIcon}}" aria-hidden="true"></i>
+              <i class="fa {{readerMode | readerModeIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
             </button>
           </div>
           <div class="col">
-            <button class="btn btn-icon" title="{{this.isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
-              <i class="fa {{this.isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
-              <span class="visually-hidden">{{this.isFullscreen ? t('collapse') : t('fullscreen')}}</span>
+            <button class="btn btn-icon" title="{{isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
+              <i class="fa {{isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{isFullscreen ? t('collapse') : t('fullscreen')}}</span>
             </button>
           </div>
           <div class="col">

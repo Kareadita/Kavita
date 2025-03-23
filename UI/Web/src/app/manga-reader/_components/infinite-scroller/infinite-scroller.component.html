@@ -2,9 +2,9 @@
 
   @if (showDebugBar()) {
     <div class="fixed-top overlay">
-      <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
-      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
-      <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
+      <strong>Captures Scroll Events:</strong> {{!isScrolling && allImagesLoaded}}
+      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{isScrolling}}
+      <strong>All Images Loaded:</strong> {{allImagesLoaded}}
       <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
       <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
       <strong>At Top:</strong> {{atTop}}

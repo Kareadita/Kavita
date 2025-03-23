@@ -34,7 +34,7 @@
             <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }"></ng-container>
           </li>
           <li *ngIf="options.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
-            {{t('no-data')}}{{this.settings.addIfNonExisting ? t('add-custom-item') : ''}}
+            {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
           </li>
         </ul>
       </div>
