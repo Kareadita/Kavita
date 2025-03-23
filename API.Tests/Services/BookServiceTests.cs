@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
 using API.Services;
-using EasyCaching.Core;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;

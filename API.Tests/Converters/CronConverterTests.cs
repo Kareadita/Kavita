@@ -1,5 +1,4 @@
 ﻿using API.Helpers.Converters;
-using Hangfire;
 using Xunit;
 
 namespace API.Tests.Converters;

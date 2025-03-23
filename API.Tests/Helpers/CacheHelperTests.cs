@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.Threading;
-using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;

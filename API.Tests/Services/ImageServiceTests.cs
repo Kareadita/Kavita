@@ -1,14 +1,9 @@
-﻿using System.Drawing;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using API.Entities.Enums;
 using API.Services;
-using EasyCaching.Core;
-using Microsoft.Extensions.Logging;
 using NetVips;
-using NSubstitute;
 using Xunit;
 using Image = NetVips.Image;
 

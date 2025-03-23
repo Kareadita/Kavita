@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 

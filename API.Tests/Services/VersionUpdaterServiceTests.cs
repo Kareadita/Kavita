@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
 using API.DTOs.Update;
-using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
-using Flurl.Http;
 using Flurl.Http.Testing;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Logging;

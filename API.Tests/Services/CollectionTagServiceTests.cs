@@ -13,7 +13,6 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using Kavita.Common;
-using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Xunit;
 

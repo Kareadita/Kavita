@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
-using API.DTOs;
-using API.Entities;
-using API.Entities.Enums;
-using API.Helpers;
-using API.Helpers.Builders;
-using API.Services.Tasks.Scanner.Parser;
-using Xunit;
 
 namespace API.Tests.Helpers;
 

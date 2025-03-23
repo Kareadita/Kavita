@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;

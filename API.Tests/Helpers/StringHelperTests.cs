@@ -1,5 +1,4 @@
-﻿using System;
-using API.Helpers;
+﻿using API.Helpers;
 using Xunit;
 
 namespace API.Tests.Helpers;
