@@ -48,7 +48,7 @@ export class ReaderService {
   private originalBodyColor!: string;
 
 
-  private noSleep: NoSleep | null = this.createNoSleep();
+  private noSleep: NoSleep = new NoSleep();
 
   constructor(private httpClient: HttpClient, @Inject(DOCUMENT) private document: Document) {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
@@ -58,19 +58,6 @@ export class ReaderService {
       });
   }
 
-  /**
-   * Returns a NoSleep instance. Will return null if on a non-supported platform
-   */
-  createNoSleep() {
-    // if this is iOS, return null
-    const iosVersion = getIosVersion();
-    const minimumSupportedVersion = new Version(18, 2, 2); // https://github.com/Kareadita/Kavita/issues/3514
-    if (isSafari && iosVersion && iosVersion.isLessThan(minimumSupportedVersion)) {
-      return null;
-    }
-
-    return new NoSleep();
-  }
 
   enableWakeLock(element?: Element | Document) {
     // Enable wake lock.
@@ -78,11 +65,11 @@ export class ReaderService {
 
     if (!element) element = this.document;
 
-    const enableNoSleepHandler = () => {
+    const enableNoSleepHandler = async () => {
       element!.removeEventListener('click', enableNoSleepHandler, false);
       element!.removeEventListener('touchmove', enableNoSleepHandler, false);
       element!.removeEventListener('mousemove', enableNoSleepHandler, false);
-      this.noSleep?.enable();
+      await this.noSleep.enable();
     };
 
     // Enable wake lock.
@@ -93,7 +80,7 @@ export class ReaderService {
   }
 
   disableWakeLock() {
-    this.noSleep?.disable();
+    this.noSleep.disable();
   }
 
 
