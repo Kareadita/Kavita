@@ -18,7 +18,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {forkJoin, Observable, of, tap} from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
@@ -238,10 +238,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.metadataService.getAllValidLanguages().subscribe(validLanguages => {
-      this.validLanguages = validLanguages;
-      this.cdRef.markForCheck();
-    });
+
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
       if (metadata) {
@@ -437,30 +434,41 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   setupLanguageTypeahead() {
-    this.languageSettings.minCharacters = 0;
-    this.languageSettings.multiple = false;
-    this.languageSettings.id = 'language';
-    this.languageSettings.unique = true;
-    this.languageSettings.showLocked = true;
-    this.languageSettings.addIfNonExisting = false;
-    this.languageSettings.compareFn = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
-      .pipe(map(items => this.languageSettings.compareFn(items, filter)));
 
-    this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
-      return a.isoCode == b.isoCode;
-    }
 
-    const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
-    if (l !== undefined) {
-      this.languageSettings.savedData = l;
-    }
-    return of(true);
+    return this.metadataService.getAllValidLanguages()
+      .pipe(
+        tap(validLanguages => {
+          this.validLanguages = validLanguages;
+
+          this.languageSettings.minCharacters = 0;
+          this.languageSettings.multiple = false;
+          this.languageSettings.id = 'language';
+          this.languageSettings.unique = true;
+          this.languageSettings.showLocked = true;
+          this.languageSettings.addIfNonExisting = false;
+          this.languageSettings.compareFn = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filter(m.title, filter));
+          }
+          this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+          }
+          this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
+            .pipe(map(items => this.languageSettings.compareFn(items, filter)));
+
+          this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
+            return a.isoCode == b.isoCode;
+          }
+
+          const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
+          if (l !== undefined) {
+            this.languageSettings.savedData = l;
+          }
+
+          this.cdRef.markForCheck();
+        }),
+        switchMap(_ => of(true))
+    );
   }
 
   setupPersonTypeahead() {
