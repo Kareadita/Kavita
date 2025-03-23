@@ -2,7 +2,8 @@
 
   <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText" [toggleOnViewClick]="false">
     <ng-template #view>
-      <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+      <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}"
+             aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
 
       <div class="d-inline-flex">
         @if (hideData) {
@@ -15,14 +16,9 @@
           {{t('copy')}}
         </button>
         @if (showRefresh) {
-          <button class="btn btn-danger-text" [ngbTooltip]="tipContent" (click)="refresh()">{{t('reset')}}</button>
+          <button class="btn btn-danger-text" [ngbTooltip]="t('regen-warning')" (click)="refresh()">{{t('reset')}}</button>
         }
       </div>
     </ng-template>
   </app-setting-item>
-
-  <ng-template #tipContent>
-    {{t('regen-warning')}}
-  </ng-template>
-
 </ng-container>

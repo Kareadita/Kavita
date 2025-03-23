@@ -1,11 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {ServerService} from 'src/app/_services/server.service';
 import {ServerInfoSlim} from '../_models/server-info';
-import {DatePipe, NgIf} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ChangelogComponent} from "../../announcements/_components/changelog/changelog.component";
-import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
     selector: 'app-manage-system',
@@ -13,7 +11,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
     styleUrls: ['./manage-system.component.scss'],
     standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, TranslocoDirective, ChangelogComponent, DefaultDatePipe, DefaultValuePipe, DatePipe]
+  imports: [TranslocoDirective, ChangelogComponent, DatePipe]
 })
 export class ManageSystemComponent implements OnInit {
 
