@@ -8,8 +8,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './table-of-contents.component.html',
     styleUrls: ['./table-of-contents.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
-    standalone: true,
-  imports: [NgIf, NgFor, TranslocoDirective]
+    imports: [NgIf, NgFor, TranslocoDirective]
 })
 export class TableOfContentsComponent  {
 

@@ -8,12 +8,11 @@ import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
-  selector: 'app-user-holds',
-  standalone: true,
-  imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule],
-  templateUrl: './scrobbling-holds.component.html',
-  styleUrls: ['./scrobbling-holds.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-holds',
+    imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule],
+    templateUrl: './scrobbling-holds.component.html',
+    styleUrls: ['./scrobbling-holds.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrobblingHoldsComponent {
   protected readonly ColumnMode = ColumnMode;

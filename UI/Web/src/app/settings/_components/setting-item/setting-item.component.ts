@@ -14,17 +14,16 @@ import {filter, fromEvent, tap} from "rxjs";
 import {AbstractControl} from "@angular/forms";
 
 @Component({
-  selector: 'app-setting-item',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    NgTemplateOutlet,
-    SafeHtmlPipe,
-    NgClass
-  ],
-  templateUrl: './setting-item.component.html',
-  styleUrl: './setting-item.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-setting-item',
+    imports: [
+        TranslocoDirective,
+        NgTemplateOutlet,
+        SafeHtmlPipe,
+        NgClass
+    ],
+    templateUrl: './setting-item.component.html',
+    styleUrl: './setting-item.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingItemComponent implements OnChanges {
 

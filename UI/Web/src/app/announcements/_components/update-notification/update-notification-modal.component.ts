@@ -11,12 +11,11 @@ import {
 
 
 @Component({
-  selector: 'app-update-notification-modal',
-  standalone: true,
-  imports: [CommonModule, NgbModalModule, SafeHtmlPipe, TranslocoDirective, ChangelogUpdateItemComponent],
-  templateUrl: './update-notification-modal.component.html',
-  styleUrls: ['./update-notification-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-update-notification-modal',
+    imports: [CommonModule, NgbModalModule, SafeHtmlPipe, TranslocoDirective, ChangelogUpdateItemComponent],
+    templateUrl: './update-notification-modal.component.html',
+    styleUrls: ['./update-notification-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpdateNotificationModalComponent implements OnInit {
 

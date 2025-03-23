@@ -22,8 +22,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './api-key.component.html',
     styleUrls: ['./api-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbTooltip, TranslocoDirective, SettingItemComponent]
+    imports: [NgbTooltip, TranslocoDirective, SettingItemComponent]
 })
 export class ApiKeyComponent implements OnInit {
 

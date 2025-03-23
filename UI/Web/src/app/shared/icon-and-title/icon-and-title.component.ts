@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import {CommonModule} from "@angular/common";
 
 @Component({
-  selector: 'app-icon-and-title',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './icon-and-title.component.html',
-  styleUrls: ['./icon-and-title.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-icon-and-title',
+    imports: [CommonModule],
+    templateUrl: './icon-and-title.component.html',
+    styleUrls: ['./icon-and-title.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconAndTitleComponent {
   /**

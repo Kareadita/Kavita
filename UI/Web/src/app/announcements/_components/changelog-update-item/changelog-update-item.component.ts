@@ -7,18 +7,17 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 
 @Component({
-  selector: 'app-changelog-update-item',
-  standalone: true,
-  imports: [
-    SafeHtmlPipe,
-    UpdateSectionComponent,
-    AsyncPipe,
-    DatePipe,
-    TranslocoDirective
-  ],
-  templateUrl: './changelog-update-item.component.html',
-  styleUrl: './changelog-update-item.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-changelog-update-item',
+    imports: [
+        SafeHtmlPipe,
+        UpdateSectionComponent,
+        AsyncPipe,
+        DatePipe,
+        TranslocoDirective
+    ],
+    templateUrl: './changelog-update-item.component.html',
+    styleUrl: './changelog-update-item.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangelogUpdateItemComponent {
 

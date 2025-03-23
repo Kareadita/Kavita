@@ -12,7 +12,6 @@ import {ToastrService} from "ngx-toastr";
     selector: 'app-reset-password-modal',
     templateUrl: './reset-password-modal.component.html',
     styleUrls: ['./reset-password-modal.component.scss'],
-    standalone: true,
     imports: [ReactiveFormsModule, NgIf, SentenceCasePipe, TranslocoDirective]
 })
 export class ResetPasswordModalComponent {

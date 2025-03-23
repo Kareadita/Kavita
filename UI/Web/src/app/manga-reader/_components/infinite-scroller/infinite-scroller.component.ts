@@ -61,8 +61,7 @@ const enum DEBUG_MODES {
     templateUrl: './infinite-scroller.component.html',
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe, NgStyle]
+    imports: [AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe, NgStyle]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
 

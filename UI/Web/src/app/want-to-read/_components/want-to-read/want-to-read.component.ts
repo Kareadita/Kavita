@@ -45,7 +45,6 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
     templateUrl: './want-to-read.component.html',
     styleUrls: ['./want-to-read.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {

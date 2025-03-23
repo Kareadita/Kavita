@@ -9,12 +9,11 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-metadata-detail',
-  standalone: true,
-  imports: [A11yClickDirective, BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet],
-  templateUrl: './metadata-detail.component.html',
-  styleUrls: ['./metadata-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-detail',
+    imports: [A11yClickDirective, BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet],
+    templateUrl: './metadata-detail.component.html',
+    styleUrls: ['./metadata-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailComponent {
 

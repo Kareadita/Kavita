@@ -15,7 +15,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './user-stats-info-cards.component.html',
     styleUrls: ['./user-stats-info-cards.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe, TimeDurationPipe, TimeAgoPipe, TranslocoDirective]
 })
 export class UserStatsInfoCardsComponent {

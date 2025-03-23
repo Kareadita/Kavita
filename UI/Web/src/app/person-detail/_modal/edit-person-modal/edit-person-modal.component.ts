@@ -29,26 +29,25 @@ enum TabID {
 }
 
 @Component({
-  selector: 'app-edit-person-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgTemplateOutlet,
-    PersonRolePipe,
-    NgbNav,
-    NgbNavItem,
-    TranslocoDirective,
-    NgbNavLinkBase,
-    NgbNavContent,
-    NgbNavOutlet,
-    CoverImageChooserComponent,
-    CompactNumberPipe,
-    SettingItemComponent,
-    NgbNavLink
-  ],
-  templateUrl: './edit-person-modal.component.html',
-  styleUrl: './edit-person-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-person-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgTemplateOutlet,
+        PersonRolePipe,
+        NgbNav,
+        NgbNavItem,
+        TranslocoDirective,
+        NgbNavLinkBase,
+        NgbNavContent,
+        NgbNavOutlet,
+        CoverImageChooserComponent,
+        CompactNumberPipe,
+        SettingItemComponent,
+        NgbNavLink
+    ],
+    templateUrl: './edit-person-modal.component.html',
+    styleUrl: './edit-person-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditPersonModalComponent implements OnInit {
 

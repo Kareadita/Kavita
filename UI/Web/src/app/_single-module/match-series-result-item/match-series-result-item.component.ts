@@ -18,19 +18,18 @@ import {PlusMediaFormatPipe} from "../../_pipes/plus-media-format.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
-  selector: 'app-match-series-result-item',
-  standalone: true,
-  imports: [
-    ImageComponent,
-    TranslocoPercentPipe,
-    ReadMoreComponent,
-    TranslocoDirective,
-    PlusMediaFormatPipe,
-    LoadingComponent
-  ],
-  templateUrl: './match-series-result-item.component.html',
-  styleUrl: './match-series-result-item.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-match-series-result-item',
+    imports: [
+        ImageComponent,
+        TranslocoPercentPipe,
+        ReadMoreComponent,
+        TranslocoDirective,
+        PlusMediaFormatPipe,
+        LoadingComponent
+    ],
+    templateUrl: './match-series-result-item.component.html',
+    styleUrl: './match-series-result-item.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MatchSeriesResultItemComponent {
 

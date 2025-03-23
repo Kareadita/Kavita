@@ -21,8 +21,7 @@ import {SelectionModel} from "../../typeahead/_models/selection-model";
     templateUrl: './role-selector.component.html',
     styleUrls: ['./role-selector.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoDirective]
+    imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoDirective]
 })
 export class RoleSelectorComponent implements OnInit {
 

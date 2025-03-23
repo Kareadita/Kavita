@@ -12,16 +12,15 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
-  selector: 'app-setting-switch',
-  standalone: true,
-  imports: [
-    NgTemplateOutlet,
-    TranslocoDirective,
-    SafeHtmlPipe
-  ],
-  templateUrl: './setting-switch.component.html',
-  styleUrl: './setting-switch.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-setting-switch',
+    imports: [
+        NgTemplateOutlet,
+        TranslocoDirective,
+        SafeHtmlPipe
+    ],
+    templateUrl: './setting-switch.component.html',
+    styleUrl: './setting-switch.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingSwitchComponent implements AfterContentInit {
 

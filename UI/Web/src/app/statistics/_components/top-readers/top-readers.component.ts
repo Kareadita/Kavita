@@ -28,8 +28,7 @@ export const TimePeriods: Array<{title: string, value: number}> =
     templateUrl: './top-readers.component.html',
     styleUrls: ['./top-readers.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, CarouselReelComponent, DecimalPipe]
+    imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, CarouselReelComponent, DecimalPipe]
 })
 export class TopReadersComponent implements OnInit {
 

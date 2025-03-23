@@ -13,12 +13,11 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-badge-expander',
-  standalone: true,
-  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
-  templateUrl: './badge-expander.component.html',
-  styleUrls: ['./badge-expander.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-badge-expander',
+    imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
+    templateUrl: './badge-expander.component.html',
+    styleUrls: ['./badge-expander.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeExpanderComponent implements OnInit, OnChanges {
 

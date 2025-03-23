@@ -9,18 +9,17 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 
 @Component({
-  selector: 'app-nav-link-modal',
-  standalone: true,
-  imports: [
-    NgbDropdownItem,
-    RouterLink,
-    FilterPipe,
-    ReactiveFormsModule,
-    Select2Module,
-    TranslocoDirective
-  ],
-  templateUrl: './nav-link-modal.component.html',
-  styleUrl: './nav-link-modal.component.scss'
+    selector: 'app-nav-link-modal',
+    imports: [
+        NgbDropdownItem,
+        RouterLink,
+        FilterPipe,
+        ReactiveFormsModule,
+        Select2Module,
+        TranslocoDirective
+    ],
+    templateUrl: './nav-link-modal.component.html',
+    styleUrl: './nav-link-modal.component.scss'
 })
 export class NavLinkModalComponent {
 

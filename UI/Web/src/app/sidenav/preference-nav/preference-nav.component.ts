@@ -74,18 +74,17 @@ class SideNavItem {
 }
 
 @Component({
-  selector: 'app-preference-nav',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    NgClass,
-    AsyncPipe,
-    SideNavItemComponent,
-    SettingFragmentPipe
-  ],
-  templateUrl: './preference-nav.component.html',
-  styleUrl: './preference-nav.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-preference-nav',
+    imports: [
+        TranslocoDirective,
+        NgClass,
+        AsyncPipe,
+        SideNavItemComponent,
+        SettingFragmentPipe
+    ],
+    templateUrl: './preference-nav.component.html',
+    styleUrl: './preference-nav.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreferenceNavComponent implements AfterViewInit {
 

@@ -11,12 +11,11 @@ export interface TimelineStep {
 
 
 @Component({
-  selector: 'app-step-tracker',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './step-tracker.component.html',
-  styleUrls: ['./step-tracker.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-step-tracker',
+    imports: [CommonModule],
+    templateUrl: './step-tracker.component.html',
+    styleUrls: ['./step-tracker.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StepTrackerComponent {
   @Input() steps: Array<TimelineStep> = [];

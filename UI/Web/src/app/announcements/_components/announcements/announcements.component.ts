@@ -7,8 +7,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     selector: 'app-announcements',
     templateUrl: './announcements.component.html',
     styleUrls: ['./announcements.component.scss'],
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, ChangelogComponent, TranslocoDirective]
+    imports: [SideNavCompanionBarComponent, ChangelogComponent, TranslocoDirective]
 })
 export class AnnouncementsComponent {
 

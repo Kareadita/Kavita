@@ -29,7 +29,6 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     templateUrl: './manage-media-issues.component.html',
     styleUrls: ['./manage-media-issues.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule]
 })
 export class ManageMediaIssuesComponent implements OnInit {

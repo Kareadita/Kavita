@@ -15,8 +15,7 @@ import {TranslocoModule} from "@jsverse/transloco";
     templateUrl: './restriction-selector.component.html',
     styleUrls: ['./restriction-selector.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+    imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class RestrictionSelectorComponent implements OnInit, OnChanges {
 

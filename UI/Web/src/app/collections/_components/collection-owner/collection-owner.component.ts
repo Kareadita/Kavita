@@ -10,20 +10,19 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-collection-owner',
-  standalone: true,
-  imports: [
-    ProviderImagePipe,
-    ProviderNamePipe,
-    TranslocoDirective,
-    AsyncPipe,
-    JsonPipe,
-    ImageComponent,
-    NgbTooltip
-  ],
-  templateUrl: './collection-owner.component.html',
-  styleUrl: './collection-owner.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-collection-owner',
+    imports: [
+        ProviderImagePipe,
+        ProviderNamePipe,
+        TranslocoDirective,
+        AsyncPipe,
+        JsonPipe,
+        ImageComponent,
+        NgbTooltip
+    ],
+    templateUrl: './collection-owner.component.html',
+    styleUrl: './collection-owner.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CollectionOwnerComponent {
 

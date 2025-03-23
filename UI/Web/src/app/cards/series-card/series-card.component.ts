@@ -70,14 +70,13 @@ function deepClone(obj: any): any {
 }
 
 @Component({
-  selector: 'app-series-card',
-  standalone: true,
-  imports: [RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent,
-    FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective,
-    SeriesFormatComponent, DecimalPipe],
-  templateUrl: './series-card.component.html',
-  styleUrls: ['./series-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-series-card',
+    imports: [RelationshipPipe, CardActionablesComponent, DefaultValuePipe, DownloadIndicatorComponent,
+        FormsModule, ImageComponent, NgbProgressbar, NgbTooltip, RouterLink, TranslocoDirective,
+        SeriesFormatComponent, DecimalPipe],
+    templateUrl: './series-card.component.html',
+    styleUrls: ['./series-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesCardComponent implements OnInit, OnChanges {
 

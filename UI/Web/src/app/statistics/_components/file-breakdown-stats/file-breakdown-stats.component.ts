@@ -32,8 +32,7 @@ export interface StackedBarChartDataItem {
     templateUrl: './file-breakdown-stats.component.html',
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader]
+    imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader]
 })
 export class FileBreakdownStatsComponent {
 

@@ -31,14 +31,13 @@ interface AdhocTask {
 }
 
 @Component({
-  selector: 'app-manage-tasks-settings',
-  templateUrl: './manage-tasks-settings.component.html',
-  styleUrls: ['./manage-tasks-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-manage-tasks-settings',
+    templateUrl: './manage-tasks-settings.component.html',
+    styleUrls: ['./manage-tasks-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
         TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent,
-      SettingButtonComponent, NgxDatatableModule]
+        SettingButtonComponent, NgxDatatableModule]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 

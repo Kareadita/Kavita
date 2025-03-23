@@ -33,18 +33,17 @@ interface RelationControl {
 }
 
 @Component({
-  selector: 'app-edit-series-relation',
-  standalone: true,
-  imports: [
-    TypeaheadComponent,
-    CommonModule,
-    ReactiveFormsModule,
-    TranslocoModule,
-    RelationshipPipe,
-  ],
-  templateUrl: './edit-series-relation.component.html',
-  styleUrls: ['./edit-series-relation.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-series-relation',
+    imports: [
+        TypeaheadComponent,
+        CommonModule,
+        ReactiveFormsModule,
+        TranslocoModule,
+        RelationshipPipe,
+    ],
+    templateUrl: './edit-series-relation.component.html',
+    styleUrls: ['./edit-series-relation.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditSeriesRelationComponent implements OnInit {
 

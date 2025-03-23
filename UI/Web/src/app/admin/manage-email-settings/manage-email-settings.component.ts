@@ -13,12 +13,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 @Component({
-  selector: 'app-manage-email-settings',
-  templateUrl: './manage-email-settings.component.html',
-  styleUrls: ['./manage-email-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
+    selector: 'app-manage-email-settings',
+    templateUrl: './manage-email-settings.component.html',
+    styleUrls: ['./manage-email-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

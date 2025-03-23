@@ -65,14 +65,13 @@ enum StepID {
 }
 
 @Component({
-  selector: 'app-library-settings-modal',
-  standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-    SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypePipe],
-  templateUrl: './library-settings-modal.component.html',
-  styleUrls: ['./library-settings-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-settings-modal',
+    imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+        SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
+        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypePipe],
+    templateUrl: './library-settings-modal.component.html',
+    styleUrls: ['./library-settings-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySettingsModalComponent implements OnInit {
 

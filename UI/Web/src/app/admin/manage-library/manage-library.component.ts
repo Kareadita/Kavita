@@ -45,9 +45,8 @@ import {FormControl, FormGroup} from "@angular/forms";
     templateUrl: './manage-library.component.html',
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    AsyncPipe, LoadingComponent, CardActionablesComponent, Select2Module, NgTemplateOutlet]
+    imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
+        AsyncPipe, LoadingComponent, CardActionablesComponent, Select2Module, NgTemplateOutlet]
 })
 export class ManageLibraryComponent implements OnInit {
 

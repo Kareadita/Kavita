@@ -19,18 +19,17 @@ import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
 import {Select2Module} from "ng-select2-component";
 
 @Component({
-  selector: 'app-edit-device-modal',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    DevicePlatformPipe,
-    ReactiveFormsModule,
-    Select2Module,
-    NgbTooltip
-  ],
-  templateUrl: './edit-device-modal.component.html',
-  styleUrl: './edit-device-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-device-modal',
+    imports: [
+        TranslocoDirective,
+        DevicePlatformPipe,
+        ReactiveFormsModule,
+        Select2Module,
+        NgbTooltip
+    ],
+    templateUrl: './edit-device-modal.component.html',
+    styleUrl: './edit-device-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditDeviceModalComponent implements OnInit {
   protected readonly deviceService = inject(DeviceService);

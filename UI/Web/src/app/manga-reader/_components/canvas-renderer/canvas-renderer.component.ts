@@ -31,7 +31,6 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
     templateUrl: './canvas-renderer.component.html',
     styleUrls: ['./canvas-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {

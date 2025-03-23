@@ -125,21 +125,20 @@ const BooleanComparisons = [
 ]
 
 @Component({
-  selector: 'app-metadata-row-filter',
-  templateUrl: './metadata-filter-row.component.html',
-  styleUrls: ['./metadata-filter-row.component.scss'],
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    AsyncPipe,
-    FilterFieldPipe,
-    FilterComparisonPipe,
-    Select2Module,
-    NgbTooltip,
-    TranslocoDirective,
-    NgbInputDatepicker
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-row-filter',
+    templateUrl: './metadata-filter-row.component.html',
+    styleUrls: ['./metadata-filter-row.component.scss'],
+    imports: [
+        ReactiveFormsModule,
+        AsyncPipe,
+        FilterFieldPipe,
+        FilterComparisonPipe,
+        Select2Module,
+        NgbTooltip,
+        TranslocoDirective,
+        NgbInputDatepicker
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit {
 

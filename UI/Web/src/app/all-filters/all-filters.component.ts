@@ -21,12 +21,11 @@ import {ManageSmartFiltersComponent} from "../sidenav/_components/manage-smart-f
 import {DecimalPipe} from "@angular/common";
 
 @Component({
-  selector: 'app-all-filters',
-  standalone: true,
-  imports: [TranslocoDirective, CardItemComponent, SideNavCompanionBarComponent, CardDetailLayoutComponent, SafeHtmlPipe, CardActionablesComponent, RouterLink, FilterPipe, ManageSmartFiltersComponent, DecimalPipe],
-  templateUrl: './all-filters.component.html',
-  styleUrl: './all-filters.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-all-filters',
+    imports: [TranslocoDirective, CardItemComponent, SideNavCompanionBarComponent, CardDetailLayoutComponent, SafeHtmlPipe, CardActionablesComponent, RouterLink, FilterPipe, ManageSmartFiltersComponent, DecimalPipe],
+    templateUrl: './all-filters.component.html',
+    styleUrl: './all-filters.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AllFiltersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

@@ -16,12 +16,11 @@ import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-dashboard-stream-list-item',
-  standalone: true,
-  imports: [ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe, NgClass, RouterLink],
-  templateUrl: './dashboard-stream-list-item.component.html',
-  styleUrls: ['./dashboard-stream-list-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-dashboard-stream-list-item',
+    imports: [ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe, NgClass, RouterLink],
+    templateUrl: './dashboard-stream-list-item.component.html',
+    styleUrls: ['./dashboard-stream-list-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardStreamListItemComponent {
   @Input({required: true}) item!: DashboardStream;

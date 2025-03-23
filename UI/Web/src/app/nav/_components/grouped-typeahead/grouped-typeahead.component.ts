@@ -34,8 +34,7 @@ export interface SearchEvent {
     templateUrl: './grouped-typeahead.component.html',
     styleUrls: ['./grouped-typeahead.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent, AsyncPipe]
+    imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent, AsyncPipe]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

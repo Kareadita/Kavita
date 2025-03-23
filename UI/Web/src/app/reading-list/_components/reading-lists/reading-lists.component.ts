@@ -29,8 +29,7 @@ import {KEY_CODES} from "../../../shared/_services/utility.service";
     templateUrl: './reading-lists.component.html',
     styleUrls: ['./reading-lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, BulkOperationsComponent]
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, BulkOperationsComponent]
 })
 export class ReadingListsComponent implements OnInit {
 

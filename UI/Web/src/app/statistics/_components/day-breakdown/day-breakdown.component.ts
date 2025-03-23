@@ -16,8 +16,7 @@ import {tap} from "rxjs/operators";
     templateUrl: './day-breakdown.component.html',
     styleUrls: ['./day-breakdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [BarChartModule, AsyncPipe, TranslocoDirective]
+    imports: [BarChartModule, AsyncPipe, TranslocoDirective]
 })
 export class DayBreakdownComponent implements OnInit {
 

@@ -56,32 +56,31 @@ import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
 import {LicenseService} from "../../_services/license.service";
 
 @Component({
-  selector: 'app-manga-user-preferences',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    ReactiveFormsModule,
-    TitleCasePipe,
-    ColorPickerModule,
-    SettingItemComponent,
-    SettingSwitchComponent,
-    ReadingDirectionPipe,
-    ScalingOptionPipe,
-    PageSplitOptionPipe,
-    ReaderModePipe,
-    LayoutModePipe,
-    NgStyle,
-    WritingStylePipe,
-    BookPageLayoutModePipe,
-    PdfSpreadModePipe,
-    PdfThemePipe,
-    PdfScrollModePipe,
-    AsyncPipe,
-    DecimalPipe
-  ],
-  templateUrl: './manage-user-preferences.component.html',
-  styleUrl: './manage-user-preferences.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manga-user-preferences',
+    imports: [
+        TranslocoDirective,
+        ReactiveFormsModule,
+        TitleCasePipe,
+        ColorPickerModule,
+        SettingItemComponent,
+        SettingSwitchComponent,
+        ReadingDirectionPipe,
+        ScalingOptionPipe,
+        PageSplitOptionPipe,
+        ReaderModePipe,
+        LayoutModePipe,
+        NgStyle,
+        WritingStylePipe,
+        BookPageLayoutModePipe,
+        PdfSpreadModePipe,
+        PdfThemePipe,
+        PdfScrollModePipe,
+        AsyncPipe,
+        DecimalPipe
+    ],
+    templateUrl: './manage-user-preferences.component.html',
+    styleUrl: './manage-user-preferences.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageUserPreferencesComponent implements OnInit {
 

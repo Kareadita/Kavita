@@ -29,9 +29,8 @@ import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
     selector: 'app-manage-users',
     templateUrl: './manage-users.component.html',
     styleUrls: ['./manage-users.component.scss'],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe, LoadingComponent, NgIf, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe]
+    imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe, LoadingComponent, NgIf, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe]
 })
 export class ManageUsersComponent implements OnInit {
 

@@ -15,13 +15,12 @@ import {
 import {ChangelogUpdateItemComponent} from "../changelog-update-item/changelog-update-item.component";
 
 @Component({
-  selector: 'app-changelog',
-  templateUrl: './changelog.component.html',
-  styleUrls: ['./changelog.component.scss'],
-  standalone: true,
-  imports: [LoadingComponent, TranslocoDirective, NgbAccordionDirective,
-    NgbAccordionItem, NgbAccordionButton, NgbAccordionHeader, NgbAccordionCollapse, NgbAccordionBody, ChangelogUpdateItemComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-changelog',
+    templateUrl: './changelog.component.html',
+    styleUrls: ['./changelog.component.scss'],
+    imports: [LoadingComponent, TranslocoDirective, NgbAccordionDirective,
+        NgbAccordionItem, NgbAccordionButton, NgbAccordionHeader, NgbAccordionCollapse, NgbAccordionBody, ChangelogUpdateItemComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangelogComponent implements OnInit {
 

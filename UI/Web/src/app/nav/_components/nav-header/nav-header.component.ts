@@ -58,10 +58,9 @@ import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component"
     templateUrl: './nav-header.component.html',
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
-    SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent, NgTemplateOutlet]
+    imports: [RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent,
+        SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+        AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, PromotedIconComponent, NgTemplateOutlet]
 })
 export class NavHeaderComponent implements OnInit {
 

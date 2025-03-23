@@ -9,19 +9,18 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
-  selector: 'app-email-history',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    VirtualScrollerModule,
-    UtcToLocalTimePipe,
-    LoadingComponent,
-    DefaultValuePipe,
-    NgxDatatableModule
-  ],
-  templateUrl: './email-history.component.html',
-  styleUrl: './email-history.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-email-history',
+    imports: [
+        TranslocoDirective,
+        VirtualScrollerModule,
+        UtcToLocalTimePipe,
+        LoadingComponent,
+        DefaultValuePipe,
+        NgxDatatableModule
+    ],
+    templateUrl: './email-history.component.html',
+    styleUrl: './email-history.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmailHistoryComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

@@ -9,9 +9,8 @@ import {ChangelogComponent} from "../../announcements/_components/changelog/chan
     selector: 'app-manage-system',
     templateUrl: './manage-system.component.html',
     styleUrls: ['./manage-system.component.scss'],
-    standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ChangelogComponent, DatePipe]
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslocoDirective, ChangelogComponent, DatePipe]
 })
 export class ManageSystemComponent implements OnInit {
 

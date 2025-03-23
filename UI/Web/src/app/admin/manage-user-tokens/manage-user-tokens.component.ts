@@ -15,8 +15,7 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
-  selector: 'app-manage-user-tokens',
-  standalone: true,
+    selector: 'app-manage-user-tokens',
     imports: [
         TranslocoDirective,
         DefaultValuePipe,
@@ -27,9 +26,9 @@ import {ImageComponent} from "../../shared/image/image.component";
         ImageComponent,
         NgxDatatableModule
     ],
-  templateUrl: './manage-user-tokens.component.html',
-  styleUrl: './manage-user-tokens.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: './manage-user-tokens.component.html',
+    styleUrl: './manage-user-tokens.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageUserTokensComponent implements OnInit {
 

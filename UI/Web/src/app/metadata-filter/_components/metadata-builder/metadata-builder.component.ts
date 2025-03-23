@@ -25,22 +25,21 @@ import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-metadata-builder',
-  templateUrl: './metadata-builder.component.html',
-  styleUrls: ['./metadata-builder.component.scss'],
-  standalone: true,
-  imports: [
-    NgIf,
-    MetadataFilterRowComponent,
-    NgForOf,
-    CardActionablesComponent,
-    FormsModule,
-    NgbTooltip,
-    UpperCasePipe,
-    ReactiveFormsModule,
-    TranslocoDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-builder',
+    templateUrl: './metadata-builder.component.html',
+    styleUrls: ['./metadata-builder.component.scss'],
+    imports: [
+        NgIf,
+        MetadataFilterRowComponent,
+        NgForOf,
+        CardActionablesComponent,
+        FormsModule,
+        NgbTooltip,
+        UpperCasePipe,
+        ReactiveFormsModule,
+        TranslocoDirective
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataBuilderComponent implements OnInit {
 

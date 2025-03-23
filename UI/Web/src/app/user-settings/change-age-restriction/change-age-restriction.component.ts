@@ -28,9 +28,8 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './change-age-restriction.component.html',
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent,
-    ReactiveFormsModule, SettingItemComponent, NgClass]
+    imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent,
+        ReactiveFormsModule, SettingItemComponent, NgClass]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 

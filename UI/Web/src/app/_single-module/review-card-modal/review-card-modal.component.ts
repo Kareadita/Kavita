@@ -18,13 +18,12 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 
 @Component({
-  selector: 'app-review-card-modal',
-  standalone: true,
+    selector: 'app-review-card-modal',
     imports: [ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe],
-  templateUrl: './review-card-modal.component.html',
-  styleUrls: ['./review-card-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    templateUrl: './review-card-modal.component.html',
+    styleUrls: ['./review-card-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ReviewCardModalComponent implements AfterViewInit {
 

@@ -19,12 +19,11 @@ import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
-  selector: 'app-manage-settings',
-  templateUrl: './manage-settings.component.html',
-  styleUrls: ['./manage-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TitleCasePipe, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective]
+    selector: 'app-manage-settings',
+    templateUrl: './manage-settings.component.html',
+    styleUrls: ['./manage-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TitleCasePipe, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective]
 })
 export class ManageSettingsComponent implements OnInit {
 

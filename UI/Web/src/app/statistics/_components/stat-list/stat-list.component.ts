@@ -12,7 +12,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './stat-list.component.html',
     styleUrls: ['./stat-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgbTooltip, NgClass, ImageComponent, AsyncPipe, CompactNumberPipe, TranslocoDirective]
 })
 export class StatListComponent {

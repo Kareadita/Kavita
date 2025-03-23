@@ -19,12 +19,11 @@ import {Breakpoint, UtilityService} from "../../shared/_services/utility.service
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 
 @Component({
-  selector: 'app-card-actionables',
-  standalone: true,
-  imports: [NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet],
-  templateUrl: './card-actionables.component.html',
-  styleUrls: ['./card-actionables.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-card-actionables',
+    imports: [NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet],
+    templateUrl: './card-actionables.component.html',
+    styleUrls: ['./card-actionables.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardActionablesComponent implements OnInit {
 

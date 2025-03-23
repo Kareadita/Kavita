@@ -33,8 +33,7 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
     templateUrl: './events-widget.component.html',
     styleUrls: ['./events-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgClass, NgbPopover, NgStyle, CircularLoaderComponent, AsyncPipe, SentenceCasePipe, TranslocoDirective]
+    imports: [NgClass, NgbPopover, NgStyle, CircularLoaderComponent, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   public readonly downloadService = inject(DownloadService);

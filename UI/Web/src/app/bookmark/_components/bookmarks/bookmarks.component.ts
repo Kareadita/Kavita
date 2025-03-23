@@ -35,12 +35,11 @@ import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 
 @Component({
-  selector: 'app-bookmarks',
-  templateUrl: './bookmarks.component.html',
-  styleUrls: ['./bookmarks.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, NgIf]
+    selector: 'app-bookmarks',
+    templateUrl: './bookmarks.component.html',
+    styleUrls: ['./bookmarks.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, NgIf]
 })
 export class BookmarksComponent implements OnInit {
 

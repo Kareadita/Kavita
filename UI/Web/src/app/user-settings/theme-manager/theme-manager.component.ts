@@ -42,10 +42,9 @@ interface ThemeContainer {
     templateUrl: './theme-manager.component.html',
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
-    ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
-    ReactiveFormsModule, Select2Module, LoadingComponent]
+    imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
+        ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
+        ReactiveFormsModule, Select2Module, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);

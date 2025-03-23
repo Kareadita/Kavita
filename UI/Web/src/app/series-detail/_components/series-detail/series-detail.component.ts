@@ -139,15 +139,14 @@ interface StoryLineItem {
     templateUrl: './series-detail.component.html',
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
-    NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
-    NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
-    TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-    NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
-    VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent]
+    imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
+        NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
+        NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
+        NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
+        TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
+        NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
+        VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
+        PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

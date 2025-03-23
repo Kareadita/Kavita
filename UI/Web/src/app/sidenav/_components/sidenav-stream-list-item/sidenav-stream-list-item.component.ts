@@ -7,12 +7,11 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-sidenav-stream-list-item',
-  standalone: true,
-  imports: [CommonModule, StreamNamePipe, TranslocoDirective, RouterLink],
-  templateUrl: './sidenav-stream-list-item.component.html',
-  styleUrls: ['./sidenav-stream-list-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-sidenav-stream-list-item',
+    imports: [CommonModule, StreamNamePipe, TranslocoDirective, RouterLink],
+    templateUrl: './sidenav-stream-list-item.component.html',
+    styleUrls: ['./sidenav-stream-list-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidenavStreamListItemComponent {
   @Input({required: true}) item!: SideNavStream;

@@ -20,7 +20,6 @@ import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
     templateUrl: './user-stats.component.html',
     styleUrls: ['./user-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [
         NgIf,
         UserStatsInfoCardsComponent,
@@ -29,7 +28,7 @@ import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
         AsyncPipe,
         TranslocoModule,
         DayBreakdownComponent,
-    ],
+    ]
 })
 export class UserStatsComponent implements OnInit {
 

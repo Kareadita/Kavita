@@ -27,12 +27,11 @@ export interface ReviewSeriesModalCloseEvent {
 }
 
 @Component({
-  selector: 'app-review-series-modal',
-  standalone: true,
-  imports: [NgbRating, ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './review-series-modal.component.html',
-  styleUrls: ['./review-series-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-review-series-modal',
+    imports: [NgbRating, ReactiveFormsModule, TranslocoDirective],
+    templateUrl: './review-series-modal.component.html',
+    styleUrls: ['./review-series-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewSeriesModalComponent implements OnInit {
 

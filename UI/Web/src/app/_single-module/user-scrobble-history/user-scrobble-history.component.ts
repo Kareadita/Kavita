@@ -27,13 +27,12 @@ export interface DataTablePage {
 }
 
 @Component({
-  selector: 'app-user-scrobble-history',
-  standalone: true,
-  imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
-  templateUrl: './user-scrobble-history.component.html',
-  styleUrls: ['./user-scrobble-history.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-scrobble-history',
+    imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
+        DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
+    templateUrl: './user-scrobble-history.component.html',
+    styleUrls: ['./user-scrobble-history.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserScrobbleHistoryComponent implements OnInit {
 

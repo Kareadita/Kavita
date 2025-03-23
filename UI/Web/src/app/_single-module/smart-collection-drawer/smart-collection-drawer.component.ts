@@ -17,29 +17,28 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
-  selector: 'app-smart-collection-drawer',
-  standalone: true,
-  imports: [
-    ImageComponent,
-    LoadingComponent,
-    MetadataDetailComponent,
-    NgOptimizedImage,
-    NgbTooltip,
-    ProviderImagePipe,
-    PublicationStatusPipe,
-    ReadMoreComponent,
-    TranslocoDirective,
-    SafeHtmlPipe,
-    RouterLink,
-    DatePipe,
-    DefaultDatePipe,
-    UtcToLocalTimePipe,
-    SettingItemComponent,
-    DecimalPipe
-  ],
-  templateUrl: './smart-collection-drawer.component.html',
-  styleUrl: './smart-collection-drawer.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-smart-collection-drawer',
+    imports: [
+        ImageComponent,
+        LoadingComponent,
+        MetadataDetailComponent,
+        NgOptimizedImage,
+        NgbTooltip,
+        ProviderImagePipe,
+        PublicationStatusPipe,
+        ReadMoreComponent,
+        TranslocoDirective,
+        SafeHtmlPipe,
+        RouterLink,
+        DatePipe,
+        DefaultDatePipe,
+        UtcToLocalTimePipe,
+        SettingItemComponent,
+        DecimalPipe
+    ],
+    templateUrl: './smart-collection-drawer.component.html',
+    styleUrl: './smart-collection-drawer.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SmartCollectionDrawerComponent implements OnInit {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);

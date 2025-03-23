@@ -25,14 +25,13 @@ import {AsyncPipe, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 
 @Component({
-  selector: 'app-external-rating',
-  standalone: true,
-  imports: [ProviderImagePipe, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent,
-    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet],
-  templateUrl: './external-rating.component.html',
-  styleUrls: ['./external-rating.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-external-rating',
+    imports: [ProviderImagePipe, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule, ImageComponent,
+        TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet],
+    templateUrl: './external-rating.component.html',
+    styleUrls: ['./external-rating.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ExternalRatingComponent implements OnInit {
 

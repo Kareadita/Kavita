@@ -16,12 +16,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 
 @Component({
-  selector: 'app-edit-list',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Select2Module, TranslocoDirective],
-  templateUrl: './edit-list.component.html',
-  styleUrl: './edit-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-list',
+    imports: [CommonModule, ReactiveFormsModule, Select2Module, TranslocoDirective],
+    templateUrl: './edit-list.component.html',
+    styleUrl: './edit-list.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditListComponent implements OnInit {
 

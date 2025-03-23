@@ -17,8 +17,7 @@ import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
     templateUrl: './reading-list-item.component.html',
     styleUrls: ['./reading-list-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ImageComponent, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe, TranslocoDirective, SeriesFormatComponent, ReadMoreComponent]
+    imports: [ImageComponent, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe, TranslocoDirective, SeriesFormatComponent, ReadMoreComponent]
 })
 export class ReadingListItemComponent {
 

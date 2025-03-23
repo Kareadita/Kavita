@@ -40,9 +40,8 @@ import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
     templateUrl: './pdf-reader.component.html',
     styleUrls: ['./pdf-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
-    PdfLayoutModePipe, PdfScrollModeTypePipe, PdfSpreadTypePipe]
+    imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
+        PdfLayoutModePipe, PdfScrollModeTypePipe, PdfSpreadTypePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 

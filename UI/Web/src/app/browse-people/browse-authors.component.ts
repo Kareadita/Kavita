@@ -32,20 +32,19 @@ import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 
 
 @Component({
-  selector: 'app-browse-authors',
-  standalone: true,
-  imports: [
-    SideNavCompanionBarComponent,
-    TranslocoDirective,
-    CardDetailLayoutComponent,
-    DecimalPipe,
-    CardItemComponent,
-    PersonCardComponent,
-    CompactNumberPipe,
-  ],
-  templateUrl: './browse-authors.component.html',
-  styleUrl: './browse-authors.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-browse-authors',
+    imports: [
+        SideNavCompanionBarComponent,
+        TranslocoDirective,
+        CardDetailLayoutComponent,
+        DecimalPipe,
+        CardItemComponent,
+        PersonCardComponent,
+        CompactNumberPipe,
+    ],
+    templateUrl: './browse-authors.component.html',
+    styleUrl: './browse-authors.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BrowseAuthorsComponent implements OnInit {
 

@@ -48,13 +48,12 @@ enum TabID {
 }
 
 @Component({
-  selector: 'app-edit-collection-tags',
-  standalone: true,
-  imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent, SafeHtmlPipe, SafeUrlPipe, MangaFormatPipe, NgIf, SentenceCasePipe, TagBadgeComponent, DecimalPipe, UtcToLocalTimePipe],
-  templateUrl: './edit-collection-tags.component.html',
-  styleUrls: ['./edit-collection-tags.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-collection-tags',
+    imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
+        CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DatePipe, DefaultDatePipe, ReadMoreComponent, SafeHtmlPipe, SafeUrlPipe, MangaFormatPipe, NgIf, SentenceCasePipe, TagBadgeComponent, DecimalPipe, UtcToLocalTimePipe],
+    templateUrl: './edit-collection-tags.component.html',
+    styleUrls: ['./edit-collection-tags.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditCollectionTagsComponent implements OnInit {
 

@@ -24,13 +24,12 @@ import {SettingButtonComponent} from "../../settings/_components/setting-button/
 import {LicenseService} from "../../_services/license.service";
 
 @Component({
-  selector: 'app-license',
-  templateUrl: './license.component.html',
-  styleUrls: ['./license.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe]
+    selector: 'app-license',
+    templateUrl: './license.component.html',
+    styleUrls: ['./license.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
+        DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe]
 })
 export class LicenseComponent implements OnInit {
 

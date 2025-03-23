@@ -19,14 +19,13 @@ import {User} from "../../_models/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-actionable-modal',
-  standalone: true,
-  imports: [
-    TranslocoDirective
-  ],
-  templateUrl: './actionable-modal.component.html',
-  styleUrl: './actionable-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-actionable-modal',
+    imports: [
+        TranslocoDirective
+    ],
+    templateUrl: './actionable-modal.component.html',
+    styleUrl: './actionable-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActionableModalComponent implements OnInit {
 

@@ -16,12 +16,11 @@ const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
 
 @Component({
-  selector: 'app-reading-activity',
-  templateUrl: './reading-activity.component.html',
-  styleUrls: ['./reading-activity.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective, MangaFormatPipe]
+    selector: 'app-reading-activity',
+    templateUrl: './reading-activity.component.html',
+    styleUrls: ['./reading-activity.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective, MangaFormatPipe]
 })
 export class ReadingActivityComponent implements OnInit {
   /**

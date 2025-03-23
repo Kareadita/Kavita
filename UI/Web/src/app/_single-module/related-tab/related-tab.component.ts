@@ -17,17 +17,16 @@ export interface RelatedSeriesPair {
 }
 
 @Component({
-  selector: 'app-related-tab',
-  standalone: true,
-  imports: [
-    CardItemComponent,
-    CarouselReelComponent,
-    TranslocoDirective,
-    SeriesCardComponent
-  ],
-  templateUrl: './related-tab.component.html',
-  styleUrl: './related-tab.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-related-tab',
+    imports: [
+        CardItemComponent,
+        CarouselReelComponent,
+        TranslocoDirective,
+        SeriesCardComponent
+    ],
+    templateUrl: './related-tab.component.html',
+    styleUrl: './related-tab.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RelatedTabComponent {
 

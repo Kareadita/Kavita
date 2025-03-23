@@ -67,15 +67,14 @@ import {
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 @Component({
-  selector: 'app-collection-detail',
-  templateUrl: './collection-detail.component.html',
-  styleUrls: ['./collection-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
-    BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe,
-    PromotedIconComponent]
+    selector: 'app-collection-detail',
+    templateUrl: './collection-detail.component.html',
+    styleUrls: ['./collection-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
+        BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
+        SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe,
+        PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 

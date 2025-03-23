@@ -34,12 +34,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Breakpoint, KEY_CODES, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-customize-sidenav-streams',
-  standalone: true,
-  imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
-  templateUrl: './customize-sidenav-streams.component.html',
-  styleUrls: ['./customize-sidenav-streams.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-customize-sidenav-streams',
+    imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
+    templateUrl: './customize-sidenav-streams.component.html',
+    styleUrls: ['./customize-sidenav-streams.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomizeSidenavStreamsComponent implements OnDestroy {
 

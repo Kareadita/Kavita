@@ -35,12 +35,11 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
 @Component({
-  selector: 'app-all-series',
-  templateUrl: './all-series.component.html',
-  styleUrls: ['./all-series.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
+    selector: 'app-all-series',
+    templateUrl: './all-series.component.html',
+    styleUrls: ['./all-series.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class AllSeriesComponent implements OnInit {
 

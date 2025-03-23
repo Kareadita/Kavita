@@ -19,7 +19,6 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
-    standalone: true,
     imports: [NgIf, ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective, SafeHtmlPipe]
 })
 export class InviteUserComponent implements OnInit {

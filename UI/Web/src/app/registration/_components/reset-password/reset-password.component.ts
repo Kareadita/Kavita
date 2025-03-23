@@ -13,7 +13,6 @@ import {NavService} from "../../../_services/nav.service";
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, TranslocoDirective]
 })
 export class ResetPasswordComponent {

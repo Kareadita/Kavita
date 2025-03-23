@@ -6,15 +6,14 @@ import {TranslocoDirective} from "@jsverse/transloco";
  * Use with btn-sm
  */
 @Component({
-  selector: 'app-setting-button',
-  standalone: true,
-  imports: [
-    SafeHtmlPipe,
-    TranslocoDirective
-  ],
-  templateUrl: './setting-button.component.html',
-  styleUrl: './setting-button.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-setting-button',
+    imports: [
+        SafeHtmlPipe,
+        TranslocoDirective
+    ],
+    templateUrl: './setting-button.component.html',
+    styleUrl: './setting-button.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingButtonComponent {
 

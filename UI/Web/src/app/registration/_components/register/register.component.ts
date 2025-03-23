@@ -19,8 +19,7 @@ import {NavService} from "../../../_services/nav.service";
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class RegisterComponent {
 

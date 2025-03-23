@@ -25,12 +25,11 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({
-  selector: 'app-review-card',
-  standalone: true,
-  imports: [ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
-  templateUrl: './review-card.component.html',
-  styleUrls: ['./review-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-review-card',
+    imports: [ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
+    templateUrl: './review-card.component.html',
+    styleUrls: ['./review-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent implements OnInit {
   private readonly accountService = inject(AccountService);

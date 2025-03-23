@@ -31,14 +31,13 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-manage-media-settings',
-  templateUrl: './manage-media-settings.component.html',
-  styleUrls: ['./manage-media-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem,
-    NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody,
-    ManageMediaIssuesComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
+    selector: 'app-manage-media-settings',
+    templateUrl: './manage-media-settings.component.html',
+    styleUrls: ['./manage-media-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem,
+        NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody,
+        ManageMediaIssuesComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

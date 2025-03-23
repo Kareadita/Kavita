@@ -33,12 +33,11 @@ import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
 
 @Component({
-  selector: 'app-side-nav',
-  standalone: true,
-  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip, NgClass, AsyncPipe],
-  templateUrl: './side-nav.component.html',
-  styleUrls: ['./side-nav.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-side-nav',
+    imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe, NgbTooltip, NgClass, AsyncPipe],
+    templateUrl: './side-nav.component.html',
+    styleUrls: ['./side-nav.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavComponent implements OnInit {
 

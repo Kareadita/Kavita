@@ -20,12 +20,11 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 
 @Component({
-  selector: 'app-series-preview-drawer',
-  standalone: true,
+    selector: 'app-series-preview-drawer',
     imports: [TranslocoDirective, ImageComponent, LoadingComponent, SafeHtmlPipe, A11yClickDirective, MetadataDetailComponent, PersonBadgeComponent, TagBadgeComponent, PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe],
-  templateUrl: './series-preview-drawer.component.html',
-  styleUrls: ['./series-preview-drawer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: './series-preview-drawer.component.html',
+    styleUrls: ['./series-preview-drawer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesPreviewDrawerComponent implements OnInit {
 

@@ -10,21 +10,20 @@ import {ChangelogComponent} from "../changelog/changelog.component";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
-  selector: 'app-out-of-date-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgForOf,
-    NgIf,
-    NgbHighlight,
-    NgbTypeahead,
-    TranslocoDirective,
-    AsyncPipe,
-    ChangelogComponent,
-    SafeHtmlPipe
-  ],
-  templateUrl: './out-of-date-modal.component.html',
-  styleUrl: './out-of-date-modal.component.scss'
+    selector: 'app-out-of-date-modal',
+    imports: [
+        FormsModule,
+        NgForOf,
+        NgIf,
+        NgbHighlight,
+        NgbTypeahead,
+        TranslocoDirective,
+        AsyncPipe,
+        ChangelogComponent,
+        SafeHtmlPipe
+    ],
+    templateUrl: './out-of-date-modal.component.html',
+    styleUrl: './out-of-date-modal.component.scss'
 })
 export class OutOfDateModalComponent {
 

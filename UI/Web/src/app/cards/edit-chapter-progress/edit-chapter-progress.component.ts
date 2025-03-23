@@ -12,24 +12,23 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
-  selector: 'app-edit-chapter-progress',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    DefaultValuePipe,
-    NgForOf,
-    TitleCasePipe,
-    UtcToLocalTimePipe,
-    TranslocoDirective,
-    ReactiveFormsModule,
-    SentenceCasePipe,
-    DatePipe,
-    DefaultDatePipe,
-    NgxDatatableModule
-  ],
-  templateUrl: './edit-chapter-progress.component.html',
-  styleUrl: './edit-chapter-progress.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-chapter-progress',
+    imports: [
+        AsyncPipe,
+        DefaultValuePipe,
+        NgForOf,
+        TitleCasePipe,
+        UtcToLocalTimePipe,
+        TranslocoDirective,
+        ReactiveFormsModule,
+        SentenceCasePipe,
+        DatePipe,
+        DefaultDatePipe,
+        NgxDatatableModule
+    ],
+    templateUrl: './edit-chapter-progress.component.html',
+    styleUrl: './edit-chapter-progress.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditChapterProgressComponent implements OnInit {
 

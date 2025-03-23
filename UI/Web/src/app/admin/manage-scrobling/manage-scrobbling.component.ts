@@ -8,16 +8,15 @@ import {
 } from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 @Component({
-  selector: 'app-manage-scrobling',
-  standalone: true,
-  imports: [
-    ManageScrobbleErrorsComponent,
-    AsyncPipe,
-    UserScrobbleHistoryComponent
-  ],
-  templateUrl: './manage-scrobbling.component.html',
-  styleUrl: './manage-scrobbling.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-scrobling',
+    imports: [
+        ManageScrobbleErrorsComponent,
+        AsyncPipe,
+        UserScrobbleHistoryComponent
+    ],
+    templateUrl: './manage-scrobbling.component.html',
+    styleUrl: './manage-scrobbling.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageScrobblingComponent {
 

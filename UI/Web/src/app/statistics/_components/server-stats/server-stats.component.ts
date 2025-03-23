@@ -33,10 +33,9 @@ import {AccountService} from "../../../_services/account.service";
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
-    PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
-    CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
+    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
+        PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
+        CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
 })
 export class ServerStatsComponent {
 

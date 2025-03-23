@@ -45,12 +45,11 @@ import {Title} from "@angular/platform-browser";
     templateUrl: './reading-list-detail.component.html',
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
-    NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
-    PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
-    ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,
-    MetadataDetailComponent]
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
+        NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
+        PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
+        ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,
+        MetadataDetailComponent]
 })
 export class ReadingListDetailComponent implements OnInit {
 

@@ -44,25 +44,24 @@ import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 
 @Component({
-  selector: 'app-person-detail',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    ImageComponent,
-    SideNavCompanionBarComponent,
-    ReadMoreComponent,
-    TagBadgeComponent,
-    PersonRolePipe,
-    CarouselReelComponent,
-    CardItemComponent,
-    CardActionablesComponent,
-    TranslocoDirective,
-    ChapterCardComponent,
-    SafeUrlPipe
-  ],
-  templateUrl: './person-detail.component.html',
-  styleUrl: './person-detail.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-person-detail',
+    imports: [
+        AsyncPipe,
+        ImageComponent,
+        SideNavCompanionBarComponent,
+        ReadMoreComponent,
+        TagBadgeComponent,
+        PersonRolePipe,
+        CarouselReelComponent,
+        CardItemComponent,
+        CardActionablesComponent,
+        TranslocoDirective,
+        ChapterCardComponent,
+        SafeUrlPipe
+    ],
+    templateUrl: './person-detail.component.html',
+    styleUrl: './person-detail.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonDetailComponent {
   private readonly route = inject(ActivatedRoute);

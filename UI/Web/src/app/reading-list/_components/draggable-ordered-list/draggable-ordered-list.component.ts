@@ -36,9 +36,8 @@ export interface ItemRemoveEvent {
     templateUrl: './draggable-ordered-list.component.html',
     styleUrls: ['./draggable-ordered-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
-    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
+    imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
+        CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
 })
 export class DraggableOrderedListComponent {
 

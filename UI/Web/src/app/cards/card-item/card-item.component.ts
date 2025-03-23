@@ -52,31 +52,30 @@ import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 
 @Component({
-  selector: 'app-card-item',
-  standalone: true,
-  imports: [
-    ImageComponent,
-    NgbProgressbar,
-    DownloadIndicatorComponent,
-    FormsModule,
-    NgbTooltip,
-    MangaFormatPipe,
-    MangaFormatIconPipe,
-    CardActionablesComponent,
-    SentenceCasePipe,
-    RouterLink,
-    TranslocoModule,
-    SafeHtmlPipe,
-    RouterLinkActive,
-    PromotedIconComponent,
-    SeriesFormatComponent,
-    DecimalPipe,
-    NgTemplateOutlet,
-    CompactNumberPipe
-  ],
-  templateUrl: './card-item.component.html',
-  styleUrls: ['./card-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-card-item',
+    imports: [
+        ImageComponent,
+        NgbProgressbar,
+        DownloadIndicatorComponent,
+        FormsModule,
+        NgbTooltip,
+        MangaFormatPipe,
+        MangaFormatIconPipe,
+        CardActionablesComponent,
+        SentenceCasePipe,
+        RouterLink,
+        TranslocoModule,
+        SafeHtmlPipe,
+        RouterLinkActive,
+        PromotedIconComponent,
+        SeriesFormatComponent,
+        DecimalPipe,
+        NgTemplateOutlet,
+        CompactNumberPipe
+    ],
+    templateUrl: './card-item.component.html',
+    styleUrls: ['./card-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardItemComponent implements OnInit {
 

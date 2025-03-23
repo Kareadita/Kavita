@@ -118,8 +118,7 @@ interface VolumeCast extends IHasCast {
 }
 
 @Component({
-  selector: 'app-volume-detail',
-  standalone: true,
+    selector: 'app-volume-detail',
     imports: [
         LoadingComponent,
         NgbNavOutlet,
@@ -150,9 +149,9 @@ interface VolumeCast extends IHasCast {
         BulkOperationsComponent,
         CoverImageComponent
     ],
-  templateUrl: './volume-detail.component.html',
-  styleUrl: './volume-detail.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: './volume-detail.component.html',
+    styleUrl: './volume-detail.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeDetailComponent implements OnInit {
   private readonly document = inject(DOCUMENT);

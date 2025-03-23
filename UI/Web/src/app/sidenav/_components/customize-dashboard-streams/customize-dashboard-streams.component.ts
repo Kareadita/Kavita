@@ -16,12 +16,11 @@ import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-customize-dashboard-streams',
-  standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, ReactiveFormsModule, FilterPipe],
-  templateUrl: './customize-dashboard-streams.component.html',
-  styleUrls: ['./customize-dashboard-streams.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-customize-dashboard-streams',
+    imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, ReactiveFormsModule, FilterPipe],
+    templateUrl: './customize-dashboard-streams.component.html',
+    styleUrls: ['./customize-dashboard-streams.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomizeDashboardStreamsComponent {
 

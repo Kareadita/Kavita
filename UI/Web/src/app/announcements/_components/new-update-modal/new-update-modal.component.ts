@@ -11,15 +11,14 @@ import {ChangelogUpdateItemComponent} from "../changelog-update-item/changelog-u
  * This modal is used when an update occurred and the UI needs to be refreshed to get the latest JS libraries
  */
 @Component({
-  selector: 'app-new-update-modal',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    ChangelogUpdateItemComponent
-  ],
-  templateUrl: './new-update-modal.component.html',
-  styleUrl: './new-update-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-new-update-modal',
+    imports: [
+        TranslocoDirective,
+        ChangelogUpdateItemComponent
+    ],
+    templateUrl: './new-update-modal.component.html',
+    styleUrl: './new-update-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewUpdateModalComponent {
 

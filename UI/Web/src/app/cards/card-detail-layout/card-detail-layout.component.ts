@@ -44,13 +44,12 @@ import {tap} from "rxjs";
 const ANIMATION_TIME_MS = 0;
 
 @Component({
-  selector: 'app-card-detail-layout',
-  standalone: true,
-  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent,
-    TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
-  templateUrl: './card-detail-layout.component.html',
-  styleUrls: ['./card-detail-layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-card-detail-layout',
+    imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent,
+        TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
+    templateUrl: './card-detail-layout.component.html',
+    styleUrls: ['./card-detail-layout.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardDetailLayoutComponent implements OnInit, OnChanges {
 

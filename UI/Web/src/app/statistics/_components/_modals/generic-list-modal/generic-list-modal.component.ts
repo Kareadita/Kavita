@@ -8,7 +8,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
     selector: 'app-generic-list-modal',
     templateUrl: './generic-list-modal.component.html',
     styleUrls: ['./generic-list-modal.component.scss'],
-    standalone: true,
     imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective]
 })
 export class GenericListModalComponent {

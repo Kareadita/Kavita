@@ -25,27 +25,26 @@ import {AsyncPipe} from "@angular/common";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 
 @Component({
-  selector: 'app-details-tab',
-  standalone: true,
-  imports: [
-    CarouselReelComponent,
-    PersonBadgeComponent,
-    TranslocoDirective,
-    TagBadgeComponent,
-    ImageComponent,
-    SafeHtmlPipe,
-    BadgeExpanderComponent,
-    ReadTimePipe,
-    SentenceCasePipe,
-    SeriesFormatComponent,
-    MangaFormatPipe,
-    LanguageNamePipe,
-    AsyncPipe,
-    SafeUrlPipe
-  ],
-  templateUrl: './details-tab.component.html',
-  styleUrl: './details-tab.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-details-tab',
+    imports: [
+        CarouselReelComponent,
+        PersonBadgeComponent,
+        TranslocoDirective,
+        TagBadgeComponent,
+        ImageComponent,
+        SafeHtmlPipe,
+        BadgeExpanderComponent,
+        ReadTimePipe,
+        SentenceCasePipe,
+        SeriesFormatComponent,
+        MangaFormatPipe,
+        LanguageNamePipe,
+        AsyncPipe,
+        SafeUrlPipe
+    ],
+    templateUrl: './details-tab.component.html',
+    styleUrl: './details-tab.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DetailsTabComponent {
 

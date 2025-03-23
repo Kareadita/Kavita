@@ -112,10 +112,9 @@ const elementLevelStyles = ['line-height', 'font-family'];
             transition('false <=> true', animate('4000ms'))
         ])
     ],
-    standalone: true,
-  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
-    NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
+    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
+        NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
+        BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 

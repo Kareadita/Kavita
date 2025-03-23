@@ -16,8 +16,7 @@ import {take} from "rxjs/operators";
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class ConfirmEmailComponent implements OnDestroy {
   /**

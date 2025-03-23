@@ -7,12 +7,11 @@ import {CircularLoaderComponent} from "../../shared/circular-loader/circular-loa
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-download-indicator',
-  standalone: true,
-  imports: [CommonModule, CircularLoaderComponent, TranslocoDirective],
-  templateUrl: './download-indicator.component.html',
-  styleUrls: ['./download-indicator.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-download-indicator',
+    imports: [CommonModule, CircularLoaderComponent, TranslocoDirective],
+    templateUrl: './download-indicator.component.html',
+    styleUrls: ['./download-indicator.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DownloadIndicatorComponent {
 

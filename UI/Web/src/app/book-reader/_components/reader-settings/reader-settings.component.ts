@@ -89,8 +89,7 @@ const mobileBreakpointMarginOverride = 700;
     templateUrl: './reader-settings.component.html',
     styleUrls: ['./reader-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe, TranslocoDirective]
 })
 export class ReaderSettingsComponent implements OnInit {
   /**

@@ -9,12 +9,11 @@ import {Breakpoint, UtilityService} from "../../../shared/_services/utility.serv
 
 
 @Component({
-  selector: 'app-side-nav-item',
-  standalone: true,
-  imports: [RouterLink, NgOptimizedImage, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
-  templateUrl: './side-nav-item.component.html',
-  styleUrls: ['./side-nav-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-side-nav-item',
+    imports: [RouterLink, NgOptimizedImage, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
+    templateUrl: './side-nav-item.component.html',
+    styleUrls: ['./side-nav-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavItemComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

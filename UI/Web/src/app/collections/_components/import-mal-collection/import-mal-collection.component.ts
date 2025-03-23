@@ -12,17 +12,16 @@ import {DecimalPipe} from "@angular/common";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-import-mal-collection',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    LoadingComponent,
-    DecimalPipe,
-    DefaultValuePipe
-  ],
-  templateUrl: './import-mal-collection.component.html',
-  styleUrl: './import-mal-collection.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-import-mal-collection',
+    imports: [
+        TranslocoDirective,
+        LoadingComponent,
+        DecimalPipe,
+        DefaultValuePipe
+    ],
+    templateUrl: './import-mal-collection.component.html',
+    styleUrl: './import-mal-collection.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportMalCollectionComponent {
   private readonly collectionService = inject(CollectionTagService);

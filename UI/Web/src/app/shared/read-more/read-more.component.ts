@@ -4,12 +4,11 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-read-more',
-  standalone: true,
-  imports: [SafeHtmlPipe, TranslocoDirective, NgClass],
-  templateUrl: './read-more.component.html',
-  styleUrls: ['./read-more.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-read-more',
+    imports: [SafeHtmlPipe, TranslocoDirective, NgClass],
+    templateUrl: './read-more.component.html',
+    styleUrls: ['./read-more.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadMoreComponent implements OnChanges {
   private readonly cdRef = inject(ChangeDetectorRef);

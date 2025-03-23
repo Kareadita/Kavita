@@ -46,12 +46,11 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 
 @Component({
-  selector: 'app-all-collections',
-  templateUrl: './all-collections.component.html',
-  styleUrls: ['./all-collections.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, BulkOperationsComponent, SeriesCardComponent]
+    selector: 'app-all-collections',
+    templateUrl: './all-collections.component.html',
+    styleUrls: ['./all-collections.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, BulkOperationsComponent, SeriesCardComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 

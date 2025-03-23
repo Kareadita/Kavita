@@ -17,12 +17,11 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
-  selector: 'app-external-series-card',
-  standalone: true,
-  imports: [ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
-  templateUrl: './external-series-card.component.html',
-  styleUrls: ['./external-series-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-external-series-card',
+    imports: [ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
+    templateUrl: './external-series-card.component.html',
+    styleUrls: ['./external-series-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExternalSeriesCardComponent {
   private readonly offcanvasService = inject(NgbOffcanvas);

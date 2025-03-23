@@ -32,8 +32,7 @@ enum TabID {
     templateUrl: './edit-reading-list-modal.component.html',
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
+    imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
 

@@ -32,24 +32,23 @@ import {SelectionModel} from "../_models/selection-model";
 const ANIMATION_SPEED = 200;
 
 @Component({
-  selector: 'app-typeahead',
-  standalone: true,
-  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './typeahead.component.html',
-  styleUrls: ['./typeahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('slideFromTop', [
-      state('in', style({ height: '0px'})),
-      transition('void => *', [
-        style({ height: '100%', overflow: 'auto' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ height: '0px' })),
-      ])
-    ])
-  ]
+    selector: 'app-typeahead',
+    imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoDirective],
+    templateUrl: './typeahead.component.html',
+    styleUrls: ['./typeahead.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('slideFromTop', [
+            state('in', style({ height: '0px' })),
+            transition('void => *', [
+                style({ height: '100%', overflow: 'auto' }),
+                animate(ANIMATION_SPEED)
+            ]),
+            transition('* => void', [
+                animate(ANIMATION_SPEED, style({ height: '0px' })),
+            ])
+        ])
+    ]
 })
 export class TypeaheadComponent implements OnInit {
   /**

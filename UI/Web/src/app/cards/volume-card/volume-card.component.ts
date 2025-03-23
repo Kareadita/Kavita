@@ -39,25 +39,24 @@ import {Device} from "../../_models/device/device";
 import {ActionService} from "../../_services/action.service";
 
 @Component({
-  selector: 'app-volume-card',
-  standalone: true,
-  imports: [
-    CardActionablesComponent,
-    DecimalPipe,
-    DefaultValuePipe,
-    DownloadIndicatorComponent,
-    EntityTitleComponent,
-    ImageComponent,
-    NgbProgressbar,
-    NgbTooltip,
-    RouterLink,
-    Select2Module,
-    TranslocoDirective,
-    RelationshipPipe
-  ],
-  templateUrl: './volume-card.component.html',
-  styleUrl: './volume-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-volume-card',
+    imports: [
+        CardActionablesComponent,
+        DecimalPipe,
+        DefaultValuePipe,
+        DownloadIndicatorComponent,
+        EntityTitleComponent,
+        ImageComponent,
+        NgbProgressbar,
+        NgbTooltip,
+        RouterLink,
+        Select2Module,
+        TranslocoDirective,
+        RelationshipPipe
+    ],
+    templateUrl: './volume-card.component.html',
+    styleUrl: './volume-card.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeCardComponent implements OnInit {
 

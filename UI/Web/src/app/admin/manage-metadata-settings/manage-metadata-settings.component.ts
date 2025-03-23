@@ -22,23 +22,22 @@ import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 
 @Component({
-  selector: 'app-manage-metadata-settings',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    ReactiveFormsModule,
-    SettingSwitchComponent,
-    SettingItemComponent,
-    DefaultValuePipe,
-    TagBadgeComponent,
-    AgeRatingPipe,
-    PersonRolePipe,
-    MetadataSettingFiledPipe,
-    EnterBlurDirective,
-  ],
-  templateUrl: './manage-metadata-settings.component.html',
-  styleUrl: './manage-metadata-settings.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-metadata-settings',
+    imports: [
+        TranslocoDirective,
+        ReactiveFormsModule,
+        SettingSwitchComponent,
+        SettingItemComponent,
+        DefaultValuePipe,
+        TagBadgeComponent,
+        AgeRatingPipe,
+        PersonRolePipe,
+        MetadataSettingFiledPipe,
+        EnterBlurDirective,
+    ],
+    templateUrl: './manage-metadata-settings.component.html',
+    styleUrl: './manage-metadata-settings.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 

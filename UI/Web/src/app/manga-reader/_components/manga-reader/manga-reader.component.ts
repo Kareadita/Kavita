@@ -122,11 +122,10 @@ enum KeyDirection {
             ])
         ])
     ],
-    standalone: true,
-  imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
-    DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
-    NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
-    FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective]
+    imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
+        DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
+        NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
+        FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
