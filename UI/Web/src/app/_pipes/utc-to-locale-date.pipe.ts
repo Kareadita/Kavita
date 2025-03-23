@@ -11,11 +11,9 @@ import {DateTime} from "luxon";
  */
 export class UtcToLocaleDatePipe implements PipeTransform {
 
-  transform(utcDate: string | undefined | null): Date {
+  transform(utcDate: string | undefined | null): Date | null {
     if (utcDate === '' || utcDate === null || utcDate === undefined || utcDate.split('T')[0] === '0001-01-01')  {
-      // Not sure what I should return here? Unix 0?
-      // TODO: On PR review
-      return null!;
+      return null;
     }
 
     const browserLanguage = navigator.language;

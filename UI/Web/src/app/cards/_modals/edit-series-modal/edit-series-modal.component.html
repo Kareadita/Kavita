@@ -589,7 +589,7 @@
                     <div class="mb-3">
                       <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
-                          {{series.created | date:'shortDate'}}
+                          {{series.created | utcToLocalTime:'shortDate'}}
                         </ng-template>
                       </app-setting-item>
                     </div>
