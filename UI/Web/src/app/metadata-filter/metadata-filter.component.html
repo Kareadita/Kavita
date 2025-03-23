@@ -49,23 +49,14 @@
                 }
               </button>
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                @for(field of allSortFields; track field) {
-                  <option [value]="field">{{field | sortField}}</option>
+                @for(field of allSortFields; track field.value) {
+                  <option [value]="field.value">{{field.title}}</option>
                 }
               </select>
             </div>
             <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
               <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
               <input id="filter-name" type="text" class="form-control" formControlName="name">
-              <!--            <select2 [data]="smartFilters"-->
-              <!--                     id="filter-name"-->
-              <!--                     formControlName="name"-->
-              <!--                     (update)="loadSavedFilter($event)"-->
-              <!--                     (autoCreateItem)="createFilterValue($event)"-->
-              <!--                     [autoCreate]="true"-->
-              <!--                     displaySearchStatus="always"-->
-              <!--                     [resettable]="true">-->
-              <!--            </select2>-->
             </div>
 
             @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {

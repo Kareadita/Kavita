@@ -11,7 +11,7 @@ import {
   Output
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NgbCollapse, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
@@ -19,23 +19,15 @@ import {ToggleService} from '../_services/toggle.service';
 import {FilterSettings} from './filter-settings';
 import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
-import {AsyncPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
-import {translate, TranslocoModule} from "@jsverse/transloco";
+import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
+import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
-import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
-import {
-  Select2Module,
-  Select2Option,
-} from "ng-select2-component";
-import {animate, state, style, transition, trigger} from "@angular/animations";
-
-const ANIMATION_SPEED = 750;
+import {animate, style, transition, trigger} from "@angular/animations";
 
 @Component({
   selector: 'app-metadata-filter',
@@ -66,65 +58,53 @@ const ANIMATION_SPEED = 750;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe,
-    MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
+  imports: [NgTemplateOutlet, DrawerComponent,
+    ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
+    MetadataBuilderComponent, NgClass]
 })
 export class MetadataFilterComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  public readonly utilityService = inject(UtilityService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly filterService = inject(FilterService);
+  protected readonly toggleService = inject(ToggleService);
+  protected readonly translocoService = inject(TranslocoService);
+  private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
 
   /**
    * This toggles the opening/collapsing of the metadata filter code
    */
   @Input() filterOpen: EventEmitter<boolean> = new EventEmitter();
-
   /**
    * Should filtering be shown on the page
    */
   @Input() filteringDisabled: boolean = false;
-
   @Input({required: true}) filterSettings!: FilterSettings;
-
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
-
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
-  private readonly destroyRef = inject(DestroyRef);
-  public readonly utilityService = inject(UtilityService);
-  public readonly filterUtilitiesService = inject(FilterUtilitiesService);
+
 
 
    /**
    * Controls the visibility of extended controls that sit below the main header.
    */
   filteringCollapsed: boolean = true;
-
   libraries: Array<FilterItem<Library>> = [];
 
   sortGroup!: FormGroup;
   isAscendingSort: boolean = true;
-
   updateApplied: number = 0;
 
   fullyLoaded: boolean = false;
   filterV2: SeriesFilterV2 | undefined;
-  allSortFields = allSortFields;
-  allFilterFields = allFields;
 
-  smartFilters!: Array<Select2Option>;
+  protected readonly allSortFields = allSortFields.map(f => {
+    return {title: this.sortFieldPipe.transform(f), value: f};
+  }).sort((a, b) => a.title.localeCompare(b.title));
+  protected readonly allFilterFields = allFields;
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly toastr = inject(ToastrService);
-
-
-  constructor(public toggleService: ToggleService, private filterService: FilterService) {
-    this.filterService.getAllFilters().subscribe(res => {
-      this.smartFilters = res.map(r => {
-        return {
-          value: r,
-          label: r.name,
-        }
-      });
-    });
-  }
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
