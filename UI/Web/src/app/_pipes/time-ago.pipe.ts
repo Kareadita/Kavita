@@ -39,9 +39,8 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
 	constructor(private readonly changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone,
               private translocoService: TranslocoService) {}
 
-	transform(value: string) {
-
-    if (value === '' || value === null || value === undefined || value.split('T')[0] === '0001-01-01')  {
+	transform(value: string | Date | null) {
+    if (value === '' || value === null || value === undefined || (value instanceof String && value.split('T')[0] === '0001-01-01'))  {
       return this.translocoService.translate('time-ago-pipe.never');
     }
 

@@ -363,16 +363,15 @@ public class ArchiveService : IArchiveService
                     tempPath = Path.Join(tempLocation, parentDirectory ?? _directoryService.FileSystem.FileInfo.New(path).Name);
                 }
 
-                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
                 if (Tasks.Scanner.Parser.Parser.IsArchive(path))
                 {
-                    ExtractArchive(path, tempPath);
-                }
-                else
-                {
-                    _directoryService.CopyFileToDirectory(path, tempPath);
+                    // Archives don't need to be put into a subdirectory of the same name
+                    tempPath = _directoryService.GetParentDirectoryName(tempPath);
                 }
 
+                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
+
+                _directoryService.CopyFileToDirectory(path, tempPath);
                 count++;
             }
         }

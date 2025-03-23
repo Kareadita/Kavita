@@ -112,7 +112,7 @@
             <div class="row g-0 mb-2">
               <div class="col-md-6">
                 <div>{{t('last-sync-title')}}</div>
-                <div>{{tag.lastSyncUtc | utcToLocalTime | date:'shortDate' | defaultDate}}</div>
+                <div>{{tag.lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}</div>
               </div>
               <div class="col-md-6">
                 <div>{{t('source-url-title')}}</div>

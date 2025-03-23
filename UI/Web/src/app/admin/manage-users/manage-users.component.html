@@ -31,7 +31,7 @@
                 @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
                   {{t('online-now-tooltip')}}
                 } @else {
-                  {{member.lastActiveUtc | utcToLocalTime | timeAgo | sentenceCase | defaultDate}}
+                  {{member.lastActiveUtc | utcToLocaleDate | timeAgo | sentenceCase | defaultDate}}
                 }
               </span>
           </td>

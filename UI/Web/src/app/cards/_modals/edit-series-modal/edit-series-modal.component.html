@@ -589,7 +589,7 @@
                     <div class="mb-3">
                       <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
-                          {{series.created | date:'shortDate'}}
+                          {{series.created | utcToLocalTime:'shortDate'}}
                         </ng-template>
                       </app-setting-item>
                     </div>
@@ -665,7 +665,7 @@
                                 {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
                               </div>
                               <div class="col">
-                                {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime | translocoDate: {dateStyle: 'short' } | defaultDate}}
+                                {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime:'short' | defaultDate}}
                               </div>
                             </div>
                             <div class="row">

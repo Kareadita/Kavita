@@ -153,7 +153,9 @@ export class EditSeriesRelationComponent implements OnInit {
     );
 
     seriesSettings.compareFn = (options: SearchResult[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.name, filter));
+      return options.filter(m => {
+        return this.utilityService.filter(m.name, filter) || this.utilityService.filter(m.localizedName, filter);
+      });
     }
 
     seriesSettings.selectionCompareFn = (a: SearchResult, b: SearchResult) => {

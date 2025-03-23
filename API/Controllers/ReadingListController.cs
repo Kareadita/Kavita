@@ -39,9 +39,15 @@ public class ReadingListController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetList(int readingListId)
+    public async Task<ActionResult<ReadingListDto?>> GetList(int readingListId)
     {
-        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, User.GetUserId()));
+        var readingList = await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, User.GetUserId());
+        if (readingList == null)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "reading-list-restricted"));
+        }
+
+        return Ok(readingList);
     }
 
     /// <summary>
