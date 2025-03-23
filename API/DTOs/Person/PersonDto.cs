@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace API.DTOs;
 #nullable enable
 
@@ -7,12 +9,12 @@ public class PersonDto
     public required string Name { get; set; }
 
     public bool CoverImageLocked { get; set; }
-    public string PrimaryColor { get; set; }
-    public string SecondaryColor { get; set; }
+    public string? PrimaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
 
     public string? CoverImage { get; set; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
     /// <summary>
     /// ASIN for person
     /// </summary>

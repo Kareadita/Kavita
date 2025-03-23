@@ -79,8 +79,8 @@ public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     #endregion
 
     public string? CoverImage { get; set; }
-    public string PrimaryColor { get; set; }
-    public string SecondaryColor { get; set; }
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
 
     public void ResetColorScape()
     {
