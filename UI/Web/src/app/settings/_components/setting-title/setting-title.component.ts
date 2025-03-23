@@ -26,6 +26,10 @@ export class SettingTitleComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required:true}) title: string = '';
+  /**
+   * If passed, will generate a proper label element. Requires `id` to be passed as well
+   */
+  @Input() labelId: string | undefined = undefined;
   @Input() id: string | undefined = undefined;
   @Input() canEdit: boolean = true;
   @Input() isEditMode: boolean = false;
