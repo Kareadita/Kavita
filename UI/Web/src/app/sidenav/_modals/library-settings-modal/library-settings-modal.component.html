@@ -52,8 +52,8 @@
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                @for (opt of libraryTypes; track opt) {
-                  <option [value]="opt">{{opt | libraryType}}</option>
+                @for (opt of libraryTypes; track opt.value) {
+                  <option [value]="opt.value">{{opt.title}}</option>
                 }
 
               </select>

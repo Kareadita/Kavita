@@ -95,6 +95,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly WikiLink = WikiLink;
   protected readonly Action = Action;
+  protected readonly libraryTypePipe = new LibraryTypePipe();
 
   @Input({required: true}) library!: Library | undefined;
 
@@ -120,7 +121,9 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   selectedFolders: string[] = [];
   madeChanges = false;
-  libraryTypes: LibraryType[] = allLibraryTypes;
+  libraryTypes = allLibraryTypes.map(f => {
+    return {title: this.libraryTypePipe.transform(f), value: f};
+  }).sort((a, b) => a.title.localeCompare(b.title));
 
   isAddLibrary = false;
   setupStep = StepID.General;

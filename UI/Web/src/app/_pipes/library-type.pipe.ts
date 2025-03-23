@@ -11,7 +11,7 @@ import {TranslocoService} from "@jsverse/transloco";
 })
 export class LibraryTypePipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
   transform(libraryType: LibraryType): string {
     switch (libraryType) {
       case LibraryType.Book:
