@@ -44,7 +44,8 @@ export class ReviewCardModalComponent implements AfterViewInit {
 
     for (let i = 0; i < spoilers.length; i++) {
       const spoiler = spoilers[i];
-      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent);
+      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent,
+        {projectableNodes: [[document.createTextNode('')]]});
       componentRef.instance.html = spoiler.innerHTML;
       if (spoiler.parentNode != null) {
         spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);

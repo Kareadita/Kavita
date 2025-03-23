@@ -17,7 +17,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './change-email.component.html',
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbTooltip, NgbCollapse, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, ScrobbleProviderNamePipe, SettingTitleComponent, SettingItemComponent]
+    imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent]
 })
 export class ChangeEmailComponent implements OnInit {
 

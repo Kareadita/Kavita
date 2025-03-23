@@ -15,8 +15,6 @@ import {LicenseService} from "../../_services/license.service";
     imports: [
         ApiKeyComponent,
         TranslocoDirective,
-        SettingTitleComponent,
-        SettingItemComponent
     ],
     templateUrl: './manage-opds.component.html',
     styleUrl: './manage-opds.component.scss',

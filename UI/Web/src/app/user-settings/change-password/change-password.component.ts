@@ -24,7 +24,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbCollapse, ReactiveFormsModule, AsyncPipe, TranslocoDirective, SettingTitleComponent, SettingItemComponent]
+    imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
