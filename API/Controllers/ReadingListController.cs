@@ -39,7 +39,7 @@ public class ReadingListController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<ReadingListDto?>> GetList(int readingListId)
+    public async Task<ActionResult<ReadingListDto>> GetList(int readingListId)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, User.GetUserId());
         if (readingList == null)
