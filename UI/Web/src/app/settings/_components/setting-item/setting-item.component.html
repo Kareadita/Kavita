@@ -28,7 +28,7 @@
     @if (isEditMode) {
       <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
     } @else {
-      <span class="view-value" (click)="toggleEditMode()">
+      <span class="view-value" [ngClass]="{'non-selectable': (!canEdit || !showEdit)}" (click)="toggleEditMode()">
         <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
       </span>
     }
