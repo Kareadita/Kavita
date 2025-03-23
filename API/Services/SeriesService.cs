@@ -74,7 +74,7 @@ public class SeriesService : ISeriesService
     }
 
     /// <summary>
-    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
+    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc.)
     /// </summary>
     /// <param name="series">The full series with all volumes and chapters on it</param>
     /// <returns></returns>
@@ -325,7 +325,7 @@ public class SeriesService : ISeriesService
 
             await _unitOfWork.CommitAsync();
 
-            // Trigger code to cleanup tags, collections, people, etc
+            // Trigger code to clean up tags, collections, people, etc
             try
             {
                 await _taskScheduler.CleanupDbEntries();
@@ -916,19 +916,19 @@ public class SeriesService : ISeriesService
         // Calculate the time differences between consecutive chapters
         var timeDifferences = new List<TimeSpan>();
         DateTime? previousChapterTime = null;
-        foreach (var chapter in chapters)
+        foreach (var chapterCreatedUtc in chapters.Select(c => c.CreatedUtc))
         {
-            if (previousChapterTime.HasValue && (chapter.CreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
+            if (previousChapterTime.HasValue && (chapterCreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
             {
                 continue; // Skip this chapter if it's within an hour of the previous one
             }
 
-            if ((chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
+            if ((chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
             {
-                timeDifferences.Add(chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+                timeDifferences.Add(chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero);
             }
 
-            previousChapterTime = chapter.CreatedUtc;
+            previousChapterTime = chapterCreatedUtc;
         }
 
         if (timeDifferences.Count < minimumTimeDeltas)
