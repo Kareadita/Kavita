@@ -37,7 +37,7 @@ import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {forkJoin, Observable, of, tap} from "rxjs";
-import {map} from "rxjs/operators";
+import {map, switchMap} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
@@ -207,11 +207,13 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('coverImageIndex', new FormControl(0, []));
     this.editForm.addControl('coverImageLocked', new FormControl(this.chapter.coverImageLocked, []));
 
-    this.metadataService.getAllValidLanguages().subscribe(validLanguages => {
-      this.validLanguages = validLanguages;
-      this.setupLanguageTypeahead();
-      this.cdRef.markForCheck();
-    });
+    this.metadataService.getAllValidLanguages().pipe(
+      tap(validLanguages => {
+        this.validLanguages = validLanguages;
+        this.cdRef.markForCheck();
+      }),
+      switchMap(_ => this.setupLanguageTypeahead())
+    ).subscribe();
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
       this.ageRatings = ratings;
