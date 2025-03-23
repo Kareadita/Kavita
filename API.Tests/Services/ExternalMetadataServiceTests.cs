@@ -13,7 +13,6 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
-using API.Entities.Person.Person;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
@@ -24,7 +23,6 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 namespace API.Tests.Services;
 
