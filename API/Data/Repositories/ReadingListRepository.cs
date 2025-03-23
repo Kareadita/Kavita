@@ -351,8 +351,10 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId)
     {
+        var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
         return await _context.ReadingList
             .Where(r => r.Id == readingListId && (r.AppUserId == userId || r.Promoted))
+            .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }

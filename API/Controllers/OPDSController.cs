@@ -595,13 +595,7 @@ public class OpdsController : BaseApiController
             return Unauthorized();
         }
 
-        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, true, GetUserParams(pageNumber), false);
-        if (readingLists == null)
-        {
-            return Unauthorized();
-        }
-
-        var readingList = readingLists.FirstOrDefault(rl => rl.Id == readingListId);
+        var readingList = await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, user.Id);
         if (readingList == null)
         {
             return BadRequest(await _localizationService.Translate(userId, "reading-list-restricted"));
