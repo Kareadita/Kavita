@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 

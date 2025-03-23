@@ -2,6 +2,7 @@
 using API.Services.Plus;
 
 namespace API.DTOs.Scrobbling;
+#nullable enable
 
 public record MediaRecommendationDto
 {

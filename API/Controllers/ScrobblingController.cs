@@ -54,7 +54,7 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
-    /// Get the current user's MAL token & username
+    /// Get the current user's MAL token and username
     /// </summary>
     /// <returns></returns>
     [HttpGet("mal-token")]

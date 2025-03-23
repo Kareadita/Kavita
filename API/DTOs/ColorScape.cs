@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs;
+#nullable enable
 
 /// <summary>
 /// A primary and secondary color

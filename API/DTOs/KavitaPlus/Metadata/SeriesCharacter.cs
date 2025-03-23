@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.KavitaPlus.Metadata;
+#nullable enable
 
 public enum CharacterRole
 {

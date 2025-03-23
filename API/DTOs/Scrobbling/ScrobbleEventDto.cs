@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.DTOs.Scrobbling;
+#nullable enable
 
 public class ScrobbleEventDto
 {

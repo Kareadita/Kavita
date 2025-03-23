@@ -1,6 +1,7 @@
 # Editor configuration, see https://editorconfig.org
 root = true
 
+
 [*]
 charset = utf-8
 indent_style = space
@@ -22,3 +23,7 @@ indent_size = 2
 
 [*.csproj]
 indent_size = 2
+
+[*.cs]
+# Disable SonarLint warning S1075 (Don't use hardcoded url)
+dotnet_diagnostic.S1075.severity = none

@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Reader;
+#nullable enable
 
 public class CreatePersonalToCDto
 {

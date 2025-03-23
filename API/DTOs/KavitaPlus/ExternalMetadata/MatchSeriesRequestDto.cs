@@ -2,6 +2,7 @@
 using API.DTOs.Scrobbling;
 
 namespace API.DTOs.KavitaPlus.ExternalMetadata;
+#nullable enable
 
 internal class MatchSeriesRequestDto
 {

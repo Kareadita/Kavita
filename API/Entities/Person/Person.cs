@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using API.Entities.Enums;
 using API.Entities.Interfaces;
-using API.Entities.Metadata;
-using API.Services.Plus;
 
-namespace API.Entities;
+namespace API.Entities.Person;
 
 public class Person : IHasCoverImage
 {

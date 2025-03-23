@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.DTOs.Statistics;
+#nullable enable
 
 /// <summary>
 /// Represents a single User's reading event

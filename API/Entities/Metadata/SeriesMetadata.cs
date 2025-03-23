@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Metadata;

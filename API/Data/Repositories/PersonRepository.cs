@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Helpers;
@@ -14,6 +15,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IPersonRepository
 {

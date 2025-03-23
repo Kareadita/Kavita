@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;

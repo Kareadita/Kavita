@@ -92,18 +92,17 @@ public class BookServiceTests
         Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
     }
 
-    // TODO: Get the file from microtherion
-    // [Fact]
-    // public void ShouldUsePdfInfoDict()
-    // {
-    //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Books/PDFs");
-    //     var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
-    //     var comicInfo = _bookService.GetComicInfo(document);
-    //     Assert.NotNull(comicInfo);
-    //     Assert.Equal("Rollo at Work", comicInfo.Title);
-    //     Assert.Equal("Jacob Abbott", comicInfo.Writer);
-    //     Assert.Equal(2008, comicInfo.Year);
-    // }
+    [Fact]
+    public void ShouldUsePdfInfoDict()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Books/PDFs");
+        var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Rollo at Work", comicInfo.Title);
+        Assert.Equal("Jacob Abbott", comicInfo.Writer);
+        Assert.Equal(2008, comicInfo.Year);
+    }
 
     [Fact]
     public void ShouldHandleIndirectPdfObjects()

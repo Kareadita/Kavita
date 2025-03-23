@@ -12,6 +12,8 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
+using API.Entities.Person;
+using API.Entities.Person.Person;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;

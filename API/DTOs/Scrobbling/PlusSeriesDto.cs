@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Scrobbling;
+#nullable enable
 
 /// <summary>
 /// Represents information about a potential Series for Kavita+

@@ -1,6 +1,7 @@
 ﻿using API.DTOs.Scrobbling;
 
 namespace API.DTOs.KavitaPlus.ExternalMetadata;
+#nullable enable
 
 /// <summary>
 /// Used for matching and fetching metadata on a series

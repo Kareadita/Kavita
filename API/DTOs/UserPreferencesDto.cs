@@ -5,6 +5,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.DTOs;
+#nullable enable
 
 public class UserPreferencesDto
 {

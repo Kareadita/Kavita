@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs.SideNav;
+#nullable enable
 
 public class SideNavStreamDto
 {

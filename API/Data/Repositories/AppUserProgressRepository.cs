@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 #nullable enable
+
 public interface IAppUserProgressRepository
 {
     void Update(AppUserProgress userProgress);
@@ -41,7 +42,7 @@ public interface IAppUserProgressRepository
     Task UpdateAllProgressThatAreMoreThanChapterPages();
     Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0);
 }
-#nullable disable
+
 public class AppUserProgressRepository : IAppUserProgressRepository
 {
     private readonly DataContext _context;

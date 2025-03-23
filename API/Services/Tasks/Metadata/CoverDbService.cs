@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Extensions;
 using API.SignalR;
 using EasyCaching.Core;

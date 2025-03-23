@@ -3,6 +3,7 @@ using API.Entities.Enums;
 using API.Services;
 
 namespace API.DTOs.Settings;
+#nullable enable
 
 public class ServerSettingDto
 {

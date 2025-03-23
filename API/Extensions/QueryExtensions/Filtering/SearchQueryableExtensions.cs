@@ -4,7 +4,7 @@ using API.Data.Misc;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Metadata;
-using AutoMapper.QueryableExtensions;
+using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions.Filtering;
