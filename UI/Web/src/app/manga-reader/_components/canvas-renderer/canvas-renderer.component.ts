@@ -22,6 +22,7 @@ import { MangaReaderService } from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
 import { NgClass, AsyncPipe } from '@angular/common';
+import {isSafari} from "../../../_helpers/browser";
 
 const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
 
@@ -35,13 +36,21 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 
+  protected readonly isSafari = isSafari;
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly mangaReaderService = inject(MangaReaderService);
+  private readonly readerService = inject(ReaderService);
+
+
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
-  private readonly destroyRef = inject(DestroyRef);
+
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -67,7 +76,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: MangaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings$.pipe(takeUntilDestroyed(this.destroyRef), tap((value: ReaderSetting) => {
@@ -250,21 +258,11 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
    setCanvasSize() {
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) { return; }
-    const isSafari = [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod'
-    ].includes(navigator.platform)
-    // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-    const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
+    const canvasLimit = this.isSafari ? 16_777_216 : 124_992_400;
     const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
     if (needsScaling) {
-      this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
-      this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
+      this.canvas.nativeElement.width = this.isSafari ? 4_096 : 16_384;
+      this.canvas.nativeElement.height = this.isSafari ? 4_096 : 16_384;
     } else {
       this.canvas.nativeElement.width = this.canvasImage.width;
       this.canvas.nativeElement.height = this.canvasImage.height;

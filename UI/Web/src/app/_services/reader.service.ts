@@ -23,6 +23,7 @@ import {Volume} from "../_models/volume";
 import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
+import {getIosVersion, isSafari, Version} from "../_helpers/browser";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -46,7 +47,8 @@ export class ReaderService {
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  private noSleep = new NoSleep();
+
+  private noSleep: NoSleep | null = this.createNoSleep();
 
   constructor(private httpClient: HttpClient, @Inject(DOCUMENT) private document: Document) {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
@@ -54,6 +56,20 @@ export class ReaderService {
           this.encodedKey = encodeURIComponent(user.apiKey);
         }
       });
+  }
+
+  /**
+   * Returns a NoSleep instance. Will return null if on a non-supported platform
+   */
+  createNoSleep() {
+    // if this is iOS, return null
+    const iosVersion = getIosVersion();
+    const minimumSupportedVersion = new Version(18, 2, 2); // https://github.com/Kareadita/Kavita/issues/3514
+    if (isSafari && iosVersion && iosVersion.isLessThan(minimumSupportedVersion)) {
+      return null;
+    }
+
+    return new NoSleep();
   }
 
   enableWakeLock(element?: Element | Document) {
@@ -66,7 +82,7 @@ export class ReaderService {
       element!.removeEventListener('click', enableNoSleepHandler, false);
       element!.removeEventListener('touchmove', enableNoSleepHandler, false);
       element!.removeEventListener('mousemove', enableNoSleepHandler, false);
-      this.noSleep!.enable();
+      this.noSleep?.enable();
     };
 
     // Enable wake lock.
@@ -77,7 +93,7 @@ export class ReaderService {
   }
 
   disableWakeLock() {
-    this.noSleep.disable();
+    this.noSleep?.disable();
   }
 
 
