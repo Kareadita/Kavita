@@ -11,7 +11,7 @@ import {
   Output
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NgbCollapse, NgbModal, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbCollapse, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
@@ -26,18 +26,13 @@ import {translate, TranslocoModule} from "@jsverse/transloco";
 import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
-import {MetadataService} from "../_services/metadata.service";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {
-  Select2AutoCreateEvent,
   Select2Module,
   Select2Option,
-  Select2UpdateEvent,
-  Select2UpdateValue
 } from "ng-select2-component";
-import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 
 const ANIMATION_SPEED = 750;

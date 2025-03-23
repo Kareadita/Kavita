@@ -90,7 +90,7 @@
 
     <div class="row g-0 mt-2">
       @if(settingsForm.get('enableSsl'); as formControl) {
-        <app-setting-switch [title]="t('enable-ssl-label')">
+        <app-setting-switch labelId="setting-enable-ssl" [title]="t('enable-ssl-label')">
           <ng-template #switch>
             <div class="form-check form-switch float-end">
               <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableSsl">

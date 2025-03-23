@@ -7,7 +7,13 @@
         }
       </div>
       <div class="col-auto">
-        <h6 class="section-title" [id]="id || title">{{title}}</h6>
+        <h6 class="section-title" [id]="id || title">
+          @if (labelId) {
+            <label class="reset-label" [for]="labelId">{{title}}</label>
+          } @else {
+            {{title}}
+          }
+        </h6>
       </div>
 
     </div>
