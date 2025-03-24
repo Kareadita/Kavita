@@ -11,7 +11,7 @@ import {APP_BASE_HREF} from "@angular/common";
 
 @Component({
     selector: 'app-manage-smart-filters',
-    imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip, RouterLink],
+    imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, NgbTooltip],
     templateUrl: './manage-smart-filters.component.html',
     styleUrls: ['./manage-smart-filters.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -11,7 +11,6 @@ import {IHasProgress} from "../../_models/common/i-has-progress";
 @Component({
     selector: 'app-cover-image',
     imports: [
-        NgClass,
         TranslocoDirective,
         ImageComponent,
         NgbProgressbar,

@@ -68,7 +68,7 @@ enum StepID {
     selector: 'app-library-settings-modal',
     imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
         SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypePipe],
+        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
     templateUrl: './library-settings-modal.component.html',
     styleUrls: ['./library-settings-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

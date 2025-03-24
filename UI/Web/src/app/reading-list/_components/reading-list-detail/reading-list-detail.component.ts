@@ -22,8 +22,6 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {Person} from 'src/app/_models/metadata/person';
 import {ReadingListItemComponent} from '../reading-list-item/reading-list-item.component';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {A11yClickDirective} from '../../../shared/a11y-click.directive';
-import {PersonBadgeComponent} from '../../../shared/person-badge/person-badge.component';
 import {BadgeExpanderComponent} from '../../../shared/badge-expander/badge-expander.component';
 import {ReadMoreComponent} from '../../../shared/read-more/read-more.component';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
@@ -37,19 +35,17 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {MetadataDetailComponent} from "../../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {Title} from "@angular/platform-browser";
 
 @Component({
-    selector: 'app-reading-list-detail',
-    templateUrl: './reading-list-detail.component.html',
-    styleUrls: ['./reading-list-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
-        NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
-        PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
-        ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,
-        MetadataDetailComponent]
+  selector: 'app-reading-list-detail',
+  templateUrl: './reading-list-detail.component.html',
+  styleUrls: ['./reading-list-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, NgbDropdown,
+    NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
+    LoadingComponent, DraggableOrderedListComponent,
+    ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective]
 })
 export class ReadingListDetailComponent implements OnInit {
 

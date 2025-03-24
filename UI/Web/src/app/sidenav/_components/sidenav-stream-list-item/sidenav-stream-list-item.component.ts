@@ -8,7 +8,7 @@ import {RouterLink} from "@angular/router";
 
 @Component({
     selector: 'app-sidenav-stream-list-item',
-    imports: [CommonModule, StreamNamePipe, TranslocoDirective, RouterLink],
+    imports: [CommonModule, StreamNamePipe, TranslocoDirective],
     templateUrl: './sidenav-stream-list-item.component.html',
     styleUrls: ['./sidenav-stream-list-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

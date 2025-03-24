@@ -1,4 +1,4 @@
-@import '../theme/variables';
+@use '../theme/variables' as theme;
 
 .content-wrapper {
     padding: 0 0 0 10px;
@@ -59,7 +59,7 @@
   margin-left: var(--side-nav-width);
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
     ::ng-deep html {
         height: 100dvh !important;
     }

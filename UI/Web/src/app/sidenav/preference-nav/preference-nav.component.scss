@@ -1,4 +1,5 @@
-@import '../../../theme/variables';
+@use '../../../theme/variables' as theme;
+
 // TODO: Move this to a common file so it applies both ways
 .side-nav {
   // For firefox
@@ -34,7 +35,7 @@
   }
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .side-nav {
     padding: 10px 0;
     width: 55vw;
@@ -55,7 +56,7 @@
       box-shadow: none;
     }
 
-    .side-nav-item:first {
+    .side-nav-item:first-child {
       border-top-left-radius: var(--side-nav-border-radius);
       border-top-right-radius: var(--side-nav-border-radius);
     }

@@ -12,11 +12,10 @@ import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, DatePipe, NgClass, NgIf, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, NgClass, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {makeBindingParser} from "@angular/compiler";
 import {LoadingComponent} from "../../shared/loading/loading.component";
@@ -26,17 +25,13 @@ import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
-    selector: 'app-manage-users',
-    templateUrl: './manage-users.component.html',
-    styleUrls: ['./manage-users.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, ReadMoreComponent, UtcToLocalTimePipe, LoadingComponent, NgIf, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe]
+  selector: 'app-manage-users',
+  templateUrl: './manage-users.component.html',
+  styleUrls: ['./manage-users.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass, DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe]
 })
 export class ManageUsersComponent implements OnInit {
-
-  members: Member[] = [];
-  loggedInUsername = '';
-  loadingMembers = false;
 
   private readonly translocoService = inject(TranslocoService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -47,6 +42,11 @@ export class ManageUsersComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   public readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
+
+  members: Member[] = [];
+  loggedInUsername = '';
+  loadingMembers = false;
+
 
   constructor() {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {

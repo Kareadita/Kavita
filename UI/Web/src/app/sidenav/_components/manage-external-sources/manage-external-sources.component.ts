@@ -12,7 +12,7 @@ import {WikiLink} from "../../../_models/wiki";
 
 @Component({
     selector: 'app-manage-external-sources',
-    imports: [FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent, FilterPipe],
+    imports: [FormsModule, ReactiveFormsModule, TranslocoDirective, EditExternalSourceItemComponent, FilterPipe],
     templateUrl: './manage-external-sources.component.html',
     styleUrls: ['./manage-external-sources.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

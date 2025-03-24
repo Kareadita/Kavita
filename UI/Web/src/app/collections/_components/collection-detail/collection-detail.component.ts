@@ -1,4 +1,4 @@
-import {AsyncPipe, DatePipe, DOCUMENT, NgStyle} from '@angular/common';
+import {AsyncPipe, DatePipe, DOCUMENT} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -7,7 +7,6 @@ import {
   DestroyRef,
   ElementRef,
   EventEmitter,
-  HostListener,
   inject,
   Inject,
   OnInit,
@@ -22,7 +21,7 @@ import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -55,12 +54,9 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
-import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {
   SmartCollectionDrawerComponent
 } from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
@@ -71,10 +67,9 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
     templateUrl: './collection-detail.component.html',
     styleUrls: ['./collection-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
-        BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-        SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe,
-        PromotedIconComponent]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
+    BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
+    DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 

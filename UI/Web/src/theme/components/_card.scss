@@ -1,4 +1,7 @@
-@include media-breakpoint-down(md) {
+@use '../node_modules/bootstrap/scss/mixins' as mixins;
+
+
+@include mixins.media-breakpoint-down(md) {
     .card-actions {
         visibility: visible !important;
     }

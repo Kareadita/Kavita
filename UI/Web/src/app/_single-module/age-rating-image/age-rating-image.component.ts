@@ -25,7 +25,6 @@ const basePath = './assets/images/ratings/';
         ImageComponent,
         NgbTooltip,
         AgeRatingPipe,
-        AsyncPipe
     ],
     templateUrl: './age-rating-image.component.html',
     styleUrl: './age-rating-image.component.scss',

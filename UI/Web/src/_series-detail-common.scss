@@ -1,4 +1,4 @@
-@import './theme/variables';
+@use './theme/variables' as theme;
 
 .title {
   color: white;
@@ -149,7 +149,7 @@
   object-fit: contain;
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .carousel-tabs-container {
     mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
@@ -162,7 +162,7 @@
 }
 
 /* col-lg */
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .image-container.mobile-bg{
     width: 100vw;
     top: calc(var(--nav-offset) - 20px);
@@ -201,7 +201,7 @@
   font-size: 0.9rem;
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .carousel-tabs-container {
     mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);

@@ -1,4 +1,4 @@
-@import '../../../../theme/variables';
+@use '../../../../theme/variables' as theme;
 
 ::ng-deep .side-nav app-side-nav-item:first-child {
     .active-highlight {
@@ -12,7 +12,7 @@
     }
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
     ::ng-deep .side-nav app-side-nav-item:first-child {
         .side-nav-item {
             border-top-left-radius: 0px;
@@ -26,7 +26,7 @@
     }
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
     .side-nav-item {
 
         .side-nav-text {

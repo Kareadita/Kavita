@@ -4,15 +4,12 @@ import {
   Component,
   DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   OnInit
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {map, of} from 'rxjs';
-import {Observable} from 'rxjs/internal/Observable';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -32,25 +29,22 @@ import {
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 import {User} from "../../../_models/user";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {ActionService} from "../../../_services/action.service";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 
 @Component({
-    selector: 'app-all-collections',
-    templateUrl: './all-collections.component.html',
-    styleUrls: ['./all-collections.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, BulkOperationsComponent, SeriesCardComponent]
+  selector: 'app-all-collections',
+  templateUrl: './all-collections.component.html',
+  styleUrls: ['./all-collections.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe,
+    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 

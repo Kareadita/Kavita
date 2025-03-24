@@ -3,15 +3,12 @@ import {Breakpoint, UtilityService} from "../../shared/_services/utility.service
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {
   AsyncPipe,
-  DatePipe,
-  DecimalPipe,
   NgClass,
   NgTemplateOutlet,
   TitleCasePipe
 } from "@angular/common";
 import {
   NgbActiveModal,
-  NgbInputDatepicker,
   NgbNav,
   NgbNavContent,
   NgbNavItem,
@@ -99,19 +96,13 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
         SettingButtonComponent,
         CoverImageChooserComponent,
         EditChapterProgressComponent,
-        NgbInputDatepicker,
         CompactNumberPipe,
-        IconAndTitleComponent,
         DefaultDatePipe,
-        TranslocoDatePipe,
         UtcToLocalTimePipe,
         BytesPipe,
         ImageComponent,
         SafeHtmlPipe,
-        DecimalPipe,
-        DatePipe,
         ReadTimePipe,
-        SettingTitleComponent
     ],
     templateUrl: './edit-chapter-modal.component.html',
     styleUrl: './edit-chapter-modal.component.scss',

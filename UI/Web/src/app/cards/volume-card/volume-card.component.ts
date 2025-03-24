@@ -3,16 +3,16 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter, HostListener,
+  EventEmitter,
+  HostListener,
   inject,
-  Input, OnInit,
+  Input,
+  OnInit,
   Output
 } from '@angular/core';
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DecimalPipe} from "@angular/common";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {Router, RouterLink} from "@angular/router";
@@ -24,7 +24,7 @@ import {DownloadEvent, DownloadService} from "../../shared/_services/download.se
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {Action, ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
@@ -34,29 +34,25 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
-import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {ActionService} from "../../_services/action.service";
 
 @Component({
-    selector: 'app-volume-card',
-    imports: [
-        CardActionablesComponent,
-        DecimalPipe,
-        DefaultValuePipe,
-        DownloadIndicatorComponent,
-        EntityTitleComponent,
-        ImageComponent,
-        NgbProgressbar,
-        NgbTooltip,
-        RouterLink,
-        Select2Module,
-        TranslocoDirective,
-        RelationshipPipe
-    ],
-    templateUrl: './volume-card.component.html',
-    styleUrl: './volume-card.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-volume-card',
+  imports: [
+    CardActionablesComponent,
+    DecimalPipe,
+    DownloadIndicatorComponent,
+    ImageComponent,
+    NgbProgressbar,
+    NgbTooltip,
+    RouterLink,
+    Select2Module,
+    TranslocoDirective,
+  ],
+  templateUrl: './volume-card.component.html',
+  styleUrl: './volume-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeCardComponent implements OnInit {
 

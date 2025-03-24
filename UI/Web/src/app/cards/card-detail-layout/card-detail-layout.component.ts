@@ -3,7 +3,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -12,7 +13,9 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output, SimpleChange, SimpleChanges,
+  Output,
+  SimpleChange,
+  SimpleChanges,
   TemplateRef,
   TrackByFunction,
   ViewChild
@@ -29,9 +32,6 @@ import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/serie
 import {ActionItem} from 'src/app/_services/action-factory.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
-
-
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -44,12 +44,12 @@ import {tap} from "rxjs";
 const ANIMATION_TIME_MS = 0;
 
 @Component({
-    selector: 'app-card-detail-layout',
-    imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent,
-        TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
-    templateUrl: './card-detail-layout.component.html',
-    styleUrls: ['./card-detail-layout.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-card-detail-layout',
+  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent,
+    TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
+  templateUrl: './card-detail-layout.component.html',
+  styleUrls: ['./card-detail-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
