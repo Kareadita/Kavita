@@ -8,7 +8,7 @@
     </div>
     <div class="ms-1">
       <div><span class="title">{{item.series.name}}</span> <span class="me-1 float-end">({{item.matchRating | translocoPercent}})</span></div>
-      <div class="text-muted">
+      <div class="text-body-secondary">
         @for(synm of item.series.synonyms; track synm; let last = $last) {
           {{synm}}
           @if (!last) {
@@ -42,6 +42,6 @@
       <span class="me-1">{{item.series.plusMediaFormat | plusMediaFormat}}</span>
     </div>
   }
-  
+
 </div>
 </ng-container>

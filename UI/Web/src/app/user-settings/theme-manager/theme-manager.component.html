@@ -2,7 +2,7 @@
 
   <div class="position-relative">
     @if ((hasAdmin$ | async)) {
-      <button class="btn btn-primary-outline position-absolute custom-position" (click)="selectTheme(undefined)" [title]="t('add')">
+      <button class="btn btn-outline-primary position-absolute custom-position" (click)="selectTheme(undefined)" [title]="t('add')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
       </button>
     }

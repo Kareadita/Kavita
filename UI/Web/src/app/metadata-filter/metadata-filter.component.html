@@ -41,7 +41,7 @@
             </div>
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
+              <button class="btn btn-sm btn-icon" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
                 @if (isAscendingSort) {
                   <i class="fa fa-arrow-up" [title]="t('ascending-alt')"></i>
                 } @else {

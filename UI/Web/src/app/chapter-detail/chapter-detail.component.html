@@ -41,14 +41,14 @@
             <div class="row g-0">
               <div class="col-auto">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary-outline" (click)="read()">
+                  <button type="button" class="btn btn-outline-primary" (click)="read()">
                   <span>
                 <i class="fa {{chapter.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue') : t('read')}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
                       <span>

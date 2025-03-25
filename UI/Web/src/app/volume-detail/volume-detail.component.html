@@ -45,14 +45,14 @@
             <div class="row g-0">
               <div class="col-auto">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary-outline" (click)="readVolume()">
+                  <button type="button" class="btn btn-outline-primary" (click)="readVolume()">
                   <span>
                 <i class="fa {{volume.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;{{(volume.pagesRead > 0) ? t('continue') : t('read')}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="readVolume(true)">
                       <span>
@@ -69,7 +69,7 @@
 
               @if (accountService.isAdmin$ | async) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-secondary-outline" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
+                  <button class="btn btn-actions" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                   </button>
                 </div>
@@ -77,7 +77,7 @@
 
               <div class="col-auto ms-2 d-none d-md-block">
                 <div class="card-actions mt-2" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="volumeActions" [labelBy]="series.name + ' ' + volume.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-secondary-outline btn"></app-card-actionables>
+                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="volumeActions" [labelBy]="series.name + ' ' + volume.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
                 </div>
               </div>
 

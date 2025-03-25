@@ -1,9 +1,10 @@
 //Bootstrap Variables
-// NOTE: It currently isn't possible to swap out all bootstrap styles because of the scss generators. So we have some hardcoded stuff. (v5 has more css variables on the way to address this)
+// NOTE: It currently isn't possible to swap out all bootstrap styles because of the scss generators.
+// So we have some hardcoded stuff. (v5 has more css variables on the way to address this)
 
 $theme-colors: (
-  "primary": #4ac694,
-  "danger": #BD362F,
+  "primary": var(--primary-color, #4ac694),
+  "danger": var(--error-color, #BD362F),
   "secondary": #6c757d,
   "light": #f8f9fa
 );

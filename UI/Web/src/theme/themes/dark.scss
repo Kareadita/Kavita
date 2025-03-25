@@ -132,12 +132,12 @@
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
-    --btn-primary-outline-text-color: white;
-    --btn-primary-outline-bg-color: transparent;
-    --btn-primary-outline-border-color: var(--primary-color);
-    --btn-primary-outline-hover-text-color: white;
-    --btn-primary-outline-hover-bg-color: var(--primary-color-darker-shade);
-    --btn-primary-outline-hover-border-color: var(--primary-color-darker-shade);
+    --btn-outline-primary-text-color: white;
+    --btn-outline-primary-bg-color: transparent;
+    --btn-outline-primary-border-color: var(--primary-color);
+    --btn-outline-primary-hover-text-color: white;
+    --btn-outline-primary-hover-bg-color: var(--primary-color-darker-shade);
+    --btn-outline-primary-hover-border-color: var(--primary-color-darker-shade);
     --btn-secondary-text-color: white;
     --btn-secondary-bg-color: #6c757d;
     --btn-secondary-border-color: #6c757d;
@@ -173,6 +173,7 @@
     --bs-btn-disabled-border-color: transparent;
     --btn-actions-border-radius: 0.375rem;
     --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+
 
     /* Nav (Tabs) */
     --nav-item-min-width: 150px;
