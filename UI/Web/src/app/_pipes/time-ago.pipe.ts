@@ -40,7 +40,7 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
               private translocoService: TranslocoService) {}
 
 	transform(value: string | Date | null) {
-    if (value === '' || value === null || value === undefined || (value instanceof String && value.split('T')[0] === '0001-01-01'))  {
+    if (value === '' || value === null || value === undefined || (typeof value === 'string' && value.split('T')[0] === '0001-01-01'))  {
       return this.translocoService.translate('time-ago-pipe.never');
     }
 
