@@ -182,3 +182,8 @@ button i.fa {
 .btn-group.dropdown > button {
 
 }
+
+.btn-primary .btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
+  --bs-btn-active-bg: var(--primary-color-dark-shade);
+  --bs-btn-active-border-color: var(--primary-color-dark-shade);
+}

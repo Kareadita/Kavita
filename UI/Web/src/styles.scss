@@ -3,14 +3,14 @@
 @use './theme/variables' as theme;
 
 // Import themes which define the css variables we use to customize the app
-@use './theme/themes/dark' as darkTheme;
+@use './theme/themes/dark';
 
 // Import colors for overrides of bootstrap theme
 @use './theme/toastr' as toastr;
 
 
 // Bootstrap must be after _colors since we define the colors there
-@use '../node_modules/bootstrap/scss/bootstrap' as bootstrap;
+@use '../node_modules/bootstrap/scss/bootstrap';
 
 @use '../node_modules/charts.css/dist/charts.min' as charts;
 
