@@ -193,6 +193,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Where(p => p.chapter.MaxNumber != Parser.SpecialVolumeNumber)
             .Select(p => p.chapter.Volume.MaxNumber)
             .ToListAsync();
+
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
 

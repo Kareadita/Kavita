@@ -285,6 +285,9 @@ public class Startup
                     await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
                     await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
 
+                    // v0.8.6
+                    await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();

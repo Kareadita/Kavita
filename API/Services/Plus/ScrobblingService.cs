@@ -407,6 +407,12 @@ public class ScrobblingService : IScrobblingService
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             };
 
+            if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
+            {
+                // We don't process Specials because they will never match on AniList
+                return;
+            }
+
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {UserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
