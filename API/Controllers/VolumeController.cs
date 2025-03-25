@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
+#nullable enable
 
 public class VolumeController : BaseApiController
 {
@@ -23,13 +24,15 @@ public class VolumeController : BaseApiController
         _eventHub = eventHub;
     }
 
+    /// <summary>
+    /// Returns the appropriate Volume
+    /// </summary>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
+    public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        var volume =
-            await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId());
-
-        return Ok(volume);
+        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId()));
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -39,7 +42,7 @@ public class VolumeController : BaseApiController
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId,
             VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
         if (volume == null)
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
 
         _unitOfWork.VolumeRepository.Remove(volume);
 
