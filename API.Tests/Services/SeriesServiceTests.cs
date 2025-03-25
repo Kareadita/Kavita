@@ -985,6 +985,59 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.False(series.Metadata.People.Any());
     }
 
+    /// <summary>
+    /// This emulates the UI operations wrt to locking
+    /// </summary>
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveExistingPerson_AfterAdding()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
+        var g = new PersonBuilder("Existing Person").Build();
+        _context.Series.Add(s);
+
+        _context.Person.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>() {new PersonDto() {Name = "Test"}},
+                PublisherLocked = true
+            },
+
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.People.Count != 0);
+        Assert.True(series.Metadata.PublisherLocked);
+
+
+        success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>(),
+                PublisherLocked = false
+            },
+
+        });
+
+        Assert.True(success);
+        Assert.Empty(series.Metadata.People);
+        Assert.False(series.Metadata.PublisherLocked);
+    }
+
     [Fact]
     public async Task UpdateSeriesMetadata_ShouldLockIfTold()
     {

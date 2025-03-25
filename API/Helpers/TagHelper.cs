@@ -104,7 +104,7 @@ public static class TagHelper
 
     public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
     {
-        UpdateTagList(existingDbTags.Select(t => t.Title).ToList(), series, newTags, handleAdd, onModified);
+        UpdateTagList((existingDbTags ?? []).Select(t => t.Title).ToList(), series, newTags, handleAdd, onModified);
     }
 
     public static void UpdateTagList(ICollection<string>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
@@ -155,5 +155,4 @@ public static class TagHelper
             onModified();
         }
     }
-
 }
