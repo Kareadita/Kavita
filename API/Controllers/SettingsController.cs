@@ -34,29 +34,26 @@ public class SettingsController : BaseApiController
 {
     private readonly ILogger<SettingsController> _logger;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ITaskScheduler _taskScheduler;
-    private readonly IDirectoryService _directoryService;
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
-    private readonly ILibraryWatcher _libraryWatcher;
     private readonly ILocalizationService _localizationService;
     private readonly ISettingsService _settingsService;
 
-    public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-        IDirectoryService directoryService, IMapper mapper, IEmailService emailService, ILibraryWatcher libraryWatcher,
-        ILocalizationService localizationService, ISettingsService settingsService)
+    public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, IMapper mapper,
+        IEmailService emailService, ILocalizationService localizationService, ISettingsService settingsService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _taskScheduler = taskScheduler;
-        _directoryService = directoryService;
         _mapper = mapper;
         _emailService = emailService;
-        _libraryWatcher = libraryWatcher;
         _localizationService = localizationService;
         _settingsService = settingsService;
     }
 
+    /// <summary>
+    /// Returns the base url for this instance (if set)
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("base-url")]
     public async Task<ActionResult<string>> GetBaseUrl()
     {

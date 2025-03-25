@@ -11,7 +11,7 @@ import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ConfirmService} from "../../shared/confirm.service";
-import {debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
@@ -133,6 +133,8 @@ export class ManageSettingsComponent implements OnInit {
     const modelSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
+    modelSettings.installId = this.serverSettings.installId;
+    modelSettings.installVersion = this.serverSettings.installVersion;
 
     return modelSettings;
   }

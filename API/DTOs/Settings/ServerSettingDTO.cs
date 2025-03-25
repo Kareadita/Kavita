@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using API.Entities.Enums;
 using API.Services;
 
@@ -45,6 +46,7 @@ public class ServerSettingDto
     /// <summary>
     /// Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.
     /// </summary>
+
     public string InstallId { get; set; } = default!;
     /// <summary>
     /// The format that should be used when saving media for Kavita
