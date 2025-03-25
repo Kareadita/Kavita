@@ -1,26 +1,36 @@
 <ng-container *transloco="let t; read: 'table-of-contents'">
   <div class="table-of-contents">
-    <div *ngIf="chapters.length === 0">
-      <em>{{t('no-data')}}</em>
-    </div>
-    <div *ngIf="chapters.length === 1; else nestedChildren">
-      <ul>
-        <li *ngFor="let chapter of chapters[0].children">
-          <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
-        </li>
-      </ul>
-    </div>
-    <ng-template #nestedChildren>
-      <ul *ngFor="let chapterGroup of chapters" class="chapter-title">
-        <li class="{{chapterGroup.page === pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
-          {{chapterGroup.title}}
-        </li>
-        <ul *ngFor="let chapter of chapterGroup.children">
-          <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
-            <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
-          </li>
+    @if (chapters.length === 0) {
+      <div>
+        <em>{{t('no-data')}}</em>
+      </div>
+    } @else if (chapters.length === 1) {
+      <div>
+        <ul>
+          @for(chapter of chapters[0].children; track chapter.title) {
+            <li class="{{chapter.page === pageNum ? 'active': ''}}">
+              <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
+            </li>
+          }
         </ul>
-      </ul>
-    </ng-template>
+      </div>
+    } @else {
+      @for (chapterGroup of chapters; track chapterGroup.title + chapterGroup.children.length) {
+        <ul class="chapter-title">
+          <li class="{{chapterGroup.page === pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
+            {{chapterGroup.title}}
+          </li>
+          @for(chapter of chapterGroup.children; track chapter.title + chapter.part) {
+            <ul>
+              <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
+                <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
+              </li>
+            </ul>
+          }
+        </ul>
+      }
+
+    }
+
   </div>
 </ng-container>
