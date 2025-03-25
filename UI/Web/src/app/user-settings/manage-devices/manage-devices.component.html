@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read:'manage-devices'">
 
   <div class="position-relative">
-    <button class="btn btn-primary-outline position-absolute custom-position" [disabled]="isReadOnly$ | async" (click)="addDevice()">
+    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly$ | async" (click)="addDevice()">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
     </button>
   </div>

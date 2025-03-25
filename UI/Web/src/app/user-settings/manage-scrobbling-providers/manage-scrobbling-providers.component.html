@@ -3,34 +3,33 @@
   <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
 
   @if (loaded) {
-    <div class="container-fluid">
-      @if(!hasValidLicense) {
-        {{t('requires', {product: 'Kavita+'})}}
-      } @else {
-        <form [formGroup]="formGroup">
-          <div class="row">
-            <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode">
-              <ng-template #edit>
-                <p>{{t('instructions', {service: ScrobbleProvider.AniList | scrobbleProviderName})}}</p>
-                <p class="text-muted">{{t('anilist-used-for')}}</p>
-                <div class="form-group mb-3">
-                  <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
-                  <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
+    @if(!hasValidLicense) {
+      {{t('requires', {product: 'Kavita+'})}}
+    } @else {
+      <form [formGroup]="formGroup">
+        <div class="row">
+          <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode">
+            <ng-template #edit>
+              <p>{{t('instructions', {service: ScrobbleProvider.AniList | scrobbleProviderName})}}</p>
+              <p class="text-muted">{{t('anilist-used-for')}}</p>
+              <div class="form-group mb-3">
+                <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
+                <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
+              </div>
+              <div class="text-end">
+                <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                  <a class="flex-fill btn btn-secondary me-2"
+                     href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
+                     target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+                  <button type="button" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveAniListForm()">{{t('save')}}</button>
                 </div>
-                <div class="text-end">
-                  <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                    <a class="flex-fill btn btn-secondary me-2"
-                       href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
-                       target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
-                    <button type="button" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveAniListForm()">{{t('save')}}</button>
-                  </div>
-                </div>
-              </ng-template>
-            </app-scrobble-provider-item>
-          </div>
-          <div class="row mt-2">
-            <app-scrobble-provider-item [token]="malToken" [provider]="ScrobbleProvider.Mal" [isEditMode]="!isViewMode">
-              <ng-template #edit>
+              </div>
+            </ng-template>
+          </app-scrobble-provider-item>
+        </div>
+        <div class="row mt-2">
+          <app-scrobble-provider-item [token]="malToken" [provider]="ScrobbleProvider.Mal" [isEditMode]="!isViewMode">
+            <ng-template #edit>
                 <span class="md-4">
                   <p>{{t('mal-instructions', {service: ScrobbleProvider.Mal | scrobbleProviderName})}}</p>
                   <p class="text-muted">{{t('mal-used-for')}}</p>
@@ -47,12 +46,11 @@
                     <button type="button" class="flex-fill btn btn-primary" aria-describedby="mal-token-header" (click)="saveMalForm()">{{t('save')}}</button>
                   </div>
                 </span>
-              </ng-template>
-            </app-scrobble-provider-item>
-          </div>
-        </form>
-      }
-    </div>
+            </ng-template>
+          </app-scrobble-provider-item>
+        </div>
+      </form>
+    }
   } @else {
     <app-loading [loading]="!loaded" [message]="t('loading')"></app-loading>
   }
