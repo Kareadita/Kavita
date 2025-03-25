@@ -8,20 +8,19 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { Member } from 'src/app/_models/auth/member';
-import { User } from 'src/app/_models/user';
+import {Member} from 'src/app/_models/auth/member';
+import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NgFor } from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective,} from "@jsverse/transloco";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({
-    selector: 'app-role-selector',
-    templateUrl: './role-selector.component.html',
-    styleUrls: ['./role-selector.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoDirective]
+  selector: 'app-role-selector',
+  templateUrl: './role-selector.component.html',
+  styleUrls: ['./role-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective]
 })
 export class RoleSelectorComponent implements OnInit {
 

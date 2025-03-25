@@ -20,38 +20,39 @@
 
 
 // Import all the customized theme overrides
-@import './theme/components/input';
-@import './theme/components/anchors';
-@import './theme/components/nav';
-@import './theme/components/buttons';
-@import './theme/components/toast';
-@import './theme/components/checkbox';
-@import './theme/components/list';
-@import './theme/components/navbar';
-@import './theme/components/popover';
-@import './theme/components/pagination';
-@import './theme/components/dropdown';
-@import './theme/components/accordion';
-@import './theme/components/breadcrumb';
-@import './theme/components/ratingstar';
-@import './theme/components/modal';
-@import './theme/components/card';
-@import './theme/components/slider';
-@import './theme/components/radios';
-@import './theme/components/selects';
-@import './theme/components/progress';
-@import './theme/components/sidenav';
-@import './theme/components/carousel';
-@import './theme/components/offcanvas';
-@import './theme/components/table';
-@import './theme/components/alerts';
-@import './theme/components/typeahead';
+@use './theme/components/input';
+@use './theme/components/anchors';
+@use './theme/components/nav';
+@use './theme/components/badge';
+@use './theme/components/buttons';
+@use './theme/components/toast';
+@use './theme/components/checkbox';
+@use './theme/components/list';
+@use './theme/components/navbar';
+@use './theme/components/popover';
+@use './theme/components/pagination';
+@use './theme/components/dropdown';
+@use './theme/components/accordion';
+@use './theme/components/breadcrumb';
+@use './theme/components/ratingstar';
+@use './theme/components/modal';
+@use './theme/components/card';
+@use './theme/components/slider';
+@use './theme/components/radios';
+@use './theme/components/selects';
+@use './theme/components/progress';
+@use './theme/components/sidenav';
+@use './theme/components/carousel';
+@use './theme/components/offcanvas';
+@use './theme/components/table';
+@use './theme/components/alerts';
+@use './theme/components/typeahead';
 
-@import './theme/utilities/headings';
-@import './theme/utilities/utilities';
-@import './theme/utilities/animations';
-@import './theme/utilities/global';
-@import "./theme/utilities/spinners";
+@use './theme/utilities/headings';
+@use './theme/utilities/utilities';
+@use './theme/utilities/animations';
+@use './theme/utilities/global';
+@use "./theme/utilities/spinners";
 
 
 // Global Styles

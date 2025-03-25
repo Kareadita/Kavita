@@ -3,14 +3,14 @@
   <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText" [toggleOnViewClick]="false">
     <ng-template #view>
       <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}"
-             aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+             aria-describedby="button-addon4" [value]="key" (click)="selectAll()" (focus)="toggleVisibility(true)" (blur)="toggleVisibility(false)">
 
       <div class="d-inline-flex">
-        @if (hideData) {
-          <button class="btn btn-secondary-text" type="button" (click)="toggleVisibility()">
-            {{isDataHidden ? t('show') : t('hide')}}
-          </button>
-        }
+<!--        @if (hideData) {-->
+<!--          <button class="btn btn-secondary-text" type="button" (click)="toggleVisibility()">-->
+<!--            {{isDataHidden ? t('show') : t('hide')}}-->
+<!--          </button>-->
+<!--        }-->
 
         <button class="btn btn-primary-text" type="button" (click)="copy()" [title]="t('copy')">
           {{t('copy')}}

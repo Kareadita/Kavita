@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
   bookLayoutModes,
   bookWritingStyles,
@@ -21,7 +21,7 @@ import {LocalizationService} from "../../_services/localization.service";
 import {bookColorThemes} from "../../book-reader/_components/reader-settings/reader-settings.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
-import {KavitaLocale, Language} from "../../_models/metadata/language";
+import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap, tap} from "rxjs";
 import {take} from "rxjs/operators";
@@ -29,17 +29,8 @@ import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
 import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
-import {
-  NgbAccordionBody, NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader,
-  NgbAccordionItem, NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
-import {AsyncPipe, DecimalPipe, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {ColorPickerModule} from "ngx-color-picker";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {AsyncPipe, DecimalPipe, NgStyle, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ReadingDirectionPipe} from "../../_pipes/reading-direction.pipe";
 import {ScalingOptionPipe} from "../../_pipes/scaling-option.pipe";
@@ -48,39 +39,38 @@ import {ReaderModePipe} from "../../_pipes/reading-mode.pipe";
 import {LayoutModePipe} from "../../_pipes/layout-mode.pipe";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {BookPageLayoutModePipe} from "../../_pipes/book-page-layout-mode.pipe";
-import {PdfSpreadTypePipe} from "../../pdf-reader/_pipe/pdf-spread-mode.pipe";
 import {PdfSpreadModePipe} from "../../_pipes/pdf-spread-mode.pipe";
 import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
-import {PdfScrollModeTypePipe} from "../../pdf-reader/_pipe/pdf-scroll-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
 import {LicenseService} from "../../_services/license.service";
+import {ColorPickerDirective} from "ngx-color-picker";
 
 @Component({
-    selector: 'app-manga-user-preferences',
-    imports: [
-        TranslocoDirective,
-        ReactiveFormsModule,
-        TitleCasePipe,
-        ColorPickerModule,
-        SettingItemComponent,
-        SettingSwitchComponent,
-        ReadingDirectionPipe,
-        ScalingOptionPipe,
-        PageSplitOptionPipe,
-        ReaderModePipe,
-        LayoutModePipe,
-        NgStyle,
-        WritingStylePipe,
-        BookPageLayoutModePipe,
-        PdfSpreadModePipe,
-        PdfThemePipe,
-        PdfScrollModePipe,
-        AsyncPipe,
-        DecimalPipe
-    ],
-    templateUrl: './manage-user-preferences.component.html',
-    styleUrl: './manage-user-preferences.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-manga-user-preferences',
+  imports: [
+    TranslocoDirective,
+    ReactiveFormsModule,
+    TitleCasePipe,
+    SettingItemComponent,
+    SettingSwitchComponent,
+    ReadingDirectionPipe,
+    ScalingOptionPipe,
+    PageSplitOptionPipe,
+    ReaderModePipe,
+    LayoutModePipe,
+    NgStyle,
+    WritingStylePipe,
+    BookPageLayoutModePipe,
+    PdfSpreadModePipe,
+    PdfThemePipe,
+    PdfScrollModePipe,
+    AsyncPipe,
+    DecimalPipe,
+    ColorPickerDirective
+  ],
+  templateUrl: './manage-user-preferences.component.html',
+  styleUrl: './manage-user-preferences.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageUserPreferencesComponent implements OnInit {
 

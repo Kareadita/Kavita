@@ -19,19 +19,12 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
-import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Select2Module, Select2Option} from "ng-select2-component";
-import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {
-  NgbDate,
-  NgbDateParserFormatter,
-  NgbDatepicker,
-  NgbInputDatepicker,
-  NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
+import {Select2, Select2Option} from "ng-select2-component";
+import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 
 enum PredicateType {
@@ -125,20 +118,20 @@ const BooleanComparisons = [
 ]
 
 @Component({
-    selector: 'app-metadata-row-filter',
-    templateUrl: './metadata-filter-row.component.html',
-    styleUrls: ['./metadata-filter-row.component.scss'],
-    imports: [
-        ReactiveFormsModule,
-        AsyncPipe,
-        FilterFieldPipe,
-        FilterComparisonPipe,
-        Select2Module,
-        NgbTooltip,
-        TranslocoDirective,
-        NgbInputDatepicker
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-metadata-row-filter',
+  templateUrl: './metadata-filter-row.component.html',
+  styleUrls: ['./metadata-filter-row.component.scss'],
+  imports: [
+    ReactiveFormsModule,
+    AsyncPipe,
+    FilterFieldPipe,
+    FilterComparisonPipe,
+    NgbTooltip,
+    TranslocoDirective,
+    NgbInputDatepicker,
+    Select2
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit {
 

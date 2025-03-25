@@ -9,14 +9,11 @@ import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {Genre} from "../../_models/metadata/genre";
 import {Tag} from "../../_models/tag";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {ImageComponent} from "../../shared/image/image.component";
-import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ImageService} from "../../_services/image.service";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {IHasReadingTime} from "../../_models/common/i-has-reading-time";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
-import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {MangaFormat} from "../../_models/manga-format";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
@@ -25,26 +22,23 @@ import {AsyncPipe} from "@angular/common";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 
 @Component({
-    selector: 'app-details-tab',
-    imports: [
-        CarouselReelComponent,
-        PersonBadgeComponent,
-        TranslocoDirective,
-        TagBadgeComponent,
-        ImageComponent,
-        SafeHtmlPipe,
-        BadgeExpanderComponent,
-        ReadTimePipe,
-        SentenceCasePipe,
-        SeriesFormatComponent,
-        MangaFormatPipe,
-        LanguageNamePipe,
-        AsyncPipe,
-        SafeUrlPipe
-    ],
-    templateUrl: './details-tab.component.html',
-    styleUrl: './details-tab.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-details-tab',
+  imports: [
+    CarouselReelComponent,
+    PersonBadgeComponent,
+    TranslocoDirective,
+    ImageComponent,
+    BadgeExpanderComponent,
+    ReadTimePipe,
+    SeriesFormatComponent,
+    MangaFormatPipe,
+    LanguageNamePipe,
+    AsyncPipe,
+    SafeUrlPipe
+  ],
+  templateUrl: './details-tab.component.html',
+  styleUrl: './details-tab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DetailsTabComponent {
 

@@ -19,17 +19,16 @@ import {
 } from "../review-series-modal/review-series-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {ImageComponent} from "../../shared/image/image.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({
-    selector: 'app-review-card',
-    imports: [ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
-    templateUrl: './review-card.component.html',
-    styleUrls: ['./review-card.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-review-card',
+  imports: [ReadMoreComponent, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe, TranslocoDirective],
+  templateUrl: './review-card.component.html',
+  styleUrls: ['./review-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent implements OnInit {
   private readonly accountService = inject(AccountService);

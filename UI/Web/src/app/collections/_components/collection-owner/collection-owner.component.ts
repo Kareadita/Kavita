@@ -4,25 +4,24 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {UserCollection} from "../../../_models/collection-tag";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {AsyncPipe, JsonPipe} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-    selector: 'app-collection-owner',
-    imports: [
-        ProviderImagePipe,
-        ProviderNamePipe,
-        TranslocoDirective,
-        AsyncPipe,
-        JsonPipe,
-        ImageComponent,
-        NgbTooltip
-    ],
-    templateUrl: './collection-owner.component.html',
-    styleUrl: './collection-owner.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-collection-owner',
+  imports: [
+    ProviderImagePipe,
+    ProviderNamePipe,
+    TranslocoDirective,
+    AsyncPipe,
+    ImageComponent,
+    NgbTooltip
+  ],
+  templateUrl: './collection-owner.component.html',
+  styleUrl: './collection-owner.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CollectionOwnerComponent {
 

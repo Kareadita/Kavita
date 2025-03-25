@@ -1,10 +1,12 @@
-@media(max-width: $grid-breakpoints-sm) {
+@use '../variables' as theme;
+
+@media(max-width: theme.$grid-breakpoints-sm) {
     .phone-hidden {
       display: none;
     }
 }
-  
-@media(min-width: $grid-breakpoints-sm) {
+
+@media(min-width: theme.$grid-breakpoints-sm) {
     .not-phone-hidden {
       display: none;
     }

@@ -46,12 +46,16 @@
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
     --warning-color: #FFECB5;
-    --bs-body-bg: #1f2020; //#343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(255,255,255,0.3);
     --default-state-scrollbar: transparent;
     --text-muted-color: hsla(0,0%,100%,.45);
+
+    /* Override bootstrap css variables */
+    --bs-body-bg: #1f2020;
+    --bs-primary-rgb: var(--primary-color);
+
 
     /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
      * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit,
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit,} from '@angular/core';
 import {DeviceService} from "../../../_services/device.service";
 import {ToastrService} from "ngx-toastr";
 import {Device} from "../../../_models/device/device";
@@ -16,7 +8,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
-import {Select2Module} from "ng-select2-component";
 
 @Component({
     selector: 'app-edit-device-modal',
@@ -24,7 +15,6 @@ import {Select2Module} from "ng-select2-component";
         TranslocoDirective,
         DevicePlatformPipe,
         ReactiveFormsModule,
-        Select2Module,
         NgbTooltip
     ],
     templateUrl: './edit-device-modal.component.html',

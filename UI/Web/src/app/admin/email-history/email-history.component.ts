@@ -2,25 +2,21 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} f
 import {TranslocoDirective} from "@jsverse/transloco";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EmailHistory} from "../../_models/email-history";
 import {EmailService} from "../../_services/email.service";
-import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
-    selector: 'app-email-history',
-    imports: [
-        TranslocoDirective,
-        VirtualScrollerModule,
-        UtcToLocalTimePipe,
-        LoadingComponent,
-        DefaultValuePipe,
-        NgxDatatableModule
-    ],
-    templateUrl: './email-history.component.html',
-    styleUrl: './email-history.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-email-history',
+  imports: [
+    TranslocoDirective,
+    VirtualScrollerModule,
+    UtcToLocalTimePipe,
+    NgxDatatableModule
+  ],
+  templateUrl: './email-history.component.html',
+  styleUrl: './email-history.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmailHistoryComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

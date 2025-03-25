@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -10,14 +11,13 @@ import {
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 
 @Component({
     selector: 'app-edit-list',
-    imports: [CommonModule, ReactiveFormsModule, Select2Module, TranslocoDirective],
+    imports: [CommonModule, ReactiveFormsModule, TranslocoDirective],
     templateUrl: './edit-list.component.html',
     styleUrl: './edit-list.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

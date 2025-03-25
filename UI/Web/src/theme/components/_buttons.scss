@@ -12,6 +12,13 @@
   }
 }
 
+.btn-outline-primary {
+  --bs-btn-active-bg: var(--primary-color);
+  --bs-btn-active-border-color: var(--primary-color);
+  --bs-btn-color: var(--primary-color);
+  --bs-btn-border-color: var(--primary-color);
+}
+
 .btn-primary-outline {
   color: var(--btn-primary-outline-text-color);
   background-color: var(--btn-primary-outline-bg-color);

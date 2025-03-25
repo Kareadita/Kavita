@@ -16,7 +16,6 @@ import {DownloadIndicatorComponent} from "../download-indicator/download-indicat
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {Router, RouterLink} from "@angular/router";
-import {Select2Module} from "ng-select2-component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
@@ -36,6 +35,7 @@ import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
 import {Device} from "../../_models/device/device";
 import {ActionService} from "../../_services/action.service";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-volume-card',
@@ -47,8 +47,8 @@ import {ActionService} from "../../_services/action.service";
     NgbProgressbar,
     NgbTooltip,
     RouterLink,
-    Select2Module,
     TranslocoDirective,
+    FormsModule,
   ],
   templateUrl: './volume-card.component.html',
   styleUrl: './volume-card.component.scss',

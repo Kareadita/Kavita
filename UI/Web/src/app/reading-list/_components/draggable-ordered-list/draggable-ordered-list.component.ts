@@ -1,9 +1,10 @@
-import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -11,11 +12,10 @@ import {
   TemplateRef,
   TrackByFunction
 } from '@angular/core';
-import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
-import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
+import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {NgClass, NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {FormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -32,12 +32,12 @@ export interface ItemRemoveEvent {
 }
 
 @Component({
-    selector: 'app-draggable-ordered-list',
-    templateUrl: './draggable-ordered-list.component.html',
-    styleUrls: ['./draggable-ordered-list.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
-        CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
+  selector: 'app-draggable-ordered-list',
+  templateUrl: './draggable-ordered-list.component.html',
+  styleUrls: ['./draggable-ordered-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
+    CdkDragHandle, TranslocoDirective, NgClass, FormsModule]
 })
 export class DraggableOrderedListComponent {
 
