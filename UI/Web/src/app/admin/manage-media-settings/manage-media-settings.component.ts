@@ -64,7 +64,12 @@ export class ManageMediaSettingsComponent implements OnInit {
             this.toastr.info(translate('manage-media-settings.media-warning'));
           }
 
-          this.serverSettings = settings;
+          if (settings.hasOwnProperty('result') && settings.hasOwnProperty('value')) {
+            this.serverSettings = (settings as any).value;
+          } else {
+            this.serverSettings = settings;
+          }
+
           this.resetForm();
           this.cdRef.markForCheck();
         })
