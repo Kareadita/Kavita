@@ -547,6 +547,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                 // Remove "Fixed:", "Added:" etc. if present
                 var cleanedItem = CleanSectionItem(trimmedLine);
 
+                // Some sections like API/Developer/Removed don't have the title repeated, so we need to check for an additional cleaning
+                if (cleanedItem.StartsWith("- "))
+                {
+                    cleanedItem =  trimmedLine.Substring(2);
+                }
+
                 // Only add non-empty items
                 if (!string.IsNullOrWhiteSpace(cleanedItem))
                 {
