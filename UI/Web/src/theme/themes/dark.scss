@@ -146,9 +146,10 @@
     --btn-secondary-font-weight: bold;
     --btn-secondary-outline-text-color: white;
     --btn-secondary-outline-bg-color: transparent;
-    --btn-secondary-outline-border-color: transparent;
-    --btn-secondary-outline-hover-bg-color: transparent;
-    --btn-secondary-outline-hover-border-color: transparent;
+    --btn-secondary-outline-border-color: #6c757d;
+    --btn-secondary-outline-hover-text-color: #fff;
+    --btn-secondary-outline-hover-bg-color: var(--btn-secondary-bg-color);
+    --btn-secondary-outline-hover-border-color: var(--btn-secondary-bg-color);
     --btn-secondary-outline-font-weight: bold;
     --btn-primary-text-text-color: white;
     --btn-secondary-text-text-color: lightgrey;

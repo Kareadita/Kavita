@@ -5,37 +5,44 @@
       {{t('description-part-1')}} <a [href]="WikiLink.SeriesRelationships" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{{t('description-part-2')}}</a>
     </p>
 
-    <div class="row g-0" *ngIf="relations.length > 0">
-      <label class="form-label col-md-7">{{t('target-series')}}</label>
-      <label class="form-label col-md-5">{{t('relationship')}}</label>
-    </div>
+    @if (relations.length > 0) {
+      <div class="row">
+        <label class="form-label col-md-7">{{t('target-series')}}</label>
+        <label class="form-label col-md-5">{{t('relationship')}}</label>
+      </div>
+    }
 
     <form>
-      <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
-        <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
-          <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
-            <ng-template #badgeItem let-item let-position="idx">
-              {{item.name}} ({{libraryNames[item.libraryId]}})
-            </ng-template>
-            <ng-template #optionItem let-item let-position="idx" let-value="value">
-              @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
-                {{item.name}}
-              } @else {
-                {{item.localizedName}}
+      @for(relation of relations; let idx = $index; track idx) {
+        <div class="row">
+          <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
+            <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
+              <ng-template #badgeItem let-item let-position="idx">
+                {{item.name}} ({{libraryNames[item.libraryId]}})
+              </ng-template>
+              <ng-template #optionItem let-item let-position="idx" let-value="value">
+                @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
+                  {{item.name}}
+                } @else {
+                  {{item.localizedName}}
+                }
+                ({{libraryNames[item.libraryId]}})
+              </ng-template>
+            </app-typeahead>
+          </div>
+          <div class="col-sm-12 col-md-10 col-lg-3 mb-3">
+            <select class="form-select" [formControl]="relation.formControl">
+              <option [value]="RelationKind.Parent" disabled>{{t('parent')}}</option>
+              @for(opt of relationOptions; track opt) {
+                <option [value]="opt.value">{{opt.value | relationship }}</option>
               }
-              ({{libraryNames[item.libraryId]}})
-            </ng-template>
-          </app-typeahead>
+            </select>
+          </div>
+          <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)">
+            <i class="fa fa-trash" aria-hidden="true"></i><span class="visually-hidden">{{t('remove')}}</span></button>
         </div>
-        <div class="col-sm-12 col-md-10 col-lg-3 mb-3">
-          <select class="form-select" [formControl]="relation.formControl">
-            <option [value]="RelationKind.Parent" disabled>{{t('parent')}}</option>
-            <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.value | relationship }}</option>
-          </select>
-        </div>
-        <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)">
-          <i class="fa fa-trash"></i><span class="visually-hidden">{{t('remove')}}</span></button>
-      </div>
+      }
+
     </form>
 
     <div class="row g-0 mt-3 mb-3">

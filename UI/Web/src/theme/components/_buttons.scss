@@ -38,15 +38,58 @@
 }
 
 .btn-outline-secondary {
+  /**
+  --btn-secondary-text-color: white;
+    --btn-secondary-bg-color: #6c757d;
+    --btn-secondary-border-color: #6c757d;
+    --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
+    --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
+    --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
+    --btn-secondary-font-weight: bold;
+    --btn-secondary-outline-text-color: white;
+    --btn-secondary-outline-bg-color: transparent;
+    --btn-secondary-outline-border-color: #6c757d;
+    --btn-secondary-outline-hover-bg-color: transparent;
+    --btn-secondary-outline-hover-border-color: transparent;
+    --btn-secondary-outline-font-weight: bold;
+
+
+    --btn-secondary-outline-hover-bg-color
+
+    vs bootstrap
+      --bs-btn-color: var(--btn-secondary-bg-color);
+      --bs-btn-border-color: var(--btn-secondary-border-color);
+      --bs-btn-hover-color: var(--btn-secondary-hover-text-color);
+      --bs-btn-hover-bg: var(--btn-secondary-outline-hover-bg-color);
+      --bs-btn-hover-border-color: var(--btn-secondary-outline-hover-border-color);
+      --bs-btn-focus-shadow-rgb: 108, 117, 125;
+      --bs-btn-active-color: #fff;
+      --bs-btn-active-bg: #6c757d;
+      --bs-btn-active-border-color: #6c757d;
+      --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      --bs-btn-disabled-color: #6c757d;
+      --bs-btn-disabled-bg: transparent;
+      --bs-btn-disabled-border-color: #6c757d;
+      --bs-gradient: none;
+   */
+
+  // Override bootstrap variables
+  --bs-btn-color: var(--btn-secondary-bg-color);
+  --bs-btn-border-color: var(--btn-secondary-border-color);
+  --bs-btn-hover-color: var(--btn-secondary-hover-text-color);
+  --bs-btn-hover-bg: var(--btn-secondary-outline-hover-bg-color);
+  --bs-btn-hover-border-color: var(--btn-secondary-outline-hover-border-color);
+
+
   color: var(--btn-secondary-outline-text-color);
   background-color: var(--btn-secondary-outline-bg-color);
   border-color: var(--btn-secondary-outline-border-color);
-  border-radius: 0;
 
   &:hover {
     --bs-btn-color: var(--btn-secondary-outline-hover-text-color);
     --bs-btn-hover-bg: var(-btn-secondary-outline-hover-bg-color);
     --bs-btn-hover-border-color: var(--btn-secondary-outline-hover-border-color);
+    --btn-secondary-outline-text-color: var(--btn-secondary-outline-hover-bg-color);
 
     color: var(--btn-secondary-outline-hover-text-color);
     background-color: var(--btn-secondary-outline-hover-bg-color);
