@@ -7,7 +7,8 @@ import {AccountService} from "../../../_services/account.service";
 
 import {
   NgbAccordionBody,
-  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
   NgbAccordionDirective,
   NgbAccordionHeader,
   NgbAccordionItem
@@ -32,7 +33,7 @@ export class ChangelogComponent implements OnInit {
   isLoading: boolean = true;
 
   ngOnInit(): void {
-    this.serverService.getChangelog(30).subscribe(updates => {
+    this.serverService.getChangelog(7).subscribe(updates => {
       this.updates = updates;
       this.isLoading = false;
       this.cdRef.markForCheck();

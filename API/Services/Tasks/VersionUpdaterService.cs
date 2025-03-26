@@ -278,7 +278,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         // Attempt to fetch from cache
         var cachedReleases = await TryGetCachedReleases();
-        if (cachedReleases != null)
+        // If there is a cached release and the current version is within it, use it, otherwise regenerate
+        if (cachedReleases != null && cachedReleases.Any(r => IsVersionEqual(r.UpdateVersion, BuildInfo.Version.ToString())))
         {
             if (count > 0)
             {
@@ -338,6 +339,29 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return updateDtos;
     }
 
+    /// <summary>
+    /// Compares 2 versions and ensures that the minor is always there
+    /// </summary>
+    /// <param name="v1"></param>
+    /// <param name="v2"></param>
+    /// <returns></returns>
+    private static bool IsVersionEqual(string v1, string v2)
+    {
+        var versionParts = v1.Split('.');
+        if (versionParts.Length < 4)
+        {
+            v1 += ".0"; // Append missing parts
+        }
+
+        versionParts = v2.Split('.');
+        if (versionParts.Length < 4)
+        {
+            v2 += ".0"; // Append missing parts
+        }
+
+        return string.Equals(v2, v2, StringComparison.OrdinalIgnoreCase);
+    }
+
     private async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
     {
         if (!File.Exists(_cacheFilePath)) return null;
@@ -370,7 +394,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(updates, JsonOptions);
+            var json = JsonSerializer.Serialize(updates, JsonOptions);
             await File.WriteAllTextAsync(_cacheFilePath, json);
         }
         catch (Exception ex)
