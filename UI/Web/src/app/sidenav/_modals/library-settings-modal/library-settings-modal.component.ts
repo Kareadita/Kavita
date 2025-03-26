@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -244,12 +236,16 @@ export class LibrarySettingsModalComponent implements OnInit {
 
       this.madeChanges = false;
 
+      // TODO: Refactor into FormArray
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
       }
+
+      // TODO: Refactor into FormArray
       for(let glob of this.library.excludePatterns) {
         this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
       }
+
       this.excludePatterns = this.library.excludePatterns;
     } else {
       for(let fileTypeGroup of allFileTypeGroup) {
