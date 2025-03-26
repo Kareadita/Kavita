@@ -1,9 +1,10 @@
-import {DOCUMENT, AsyncPipe, NgStyle} from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgStyle} from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   inject,
@@ -14,15 +15,16 @@ import {
   OnInit,
   Output,
   Renderer2,
-  SimpleChanges, ViewChild
+  SimpleChanges,
+  ViewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { ReaderService } from '../../../_services/reader.service';
-import { PAGING_DIRECTION } from '../../_models/reader-enums';
-import { WebtoonImage } from '../../_models/webtoon-image';
-import { MangaReaderService } from '../../_service/manga-reader.service';
+import {debounceTime} from 'rxjs/operators';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {ReaderService} from '../../../_services/reader.service';
+import {PAGING_DIRECTION} from '../../_models/reader-enums';
+import {WebtoonImage} from '../../_models/webtoon-image';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
@@ -352,17 +354,17 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       this.cdRef.markForCheck();
     }
 
-    if (!this.isScrolling) {
-      // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
-      // to mark the current page and separate the prefetching code.
-      const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
-      .filter(entry => this.shouldElementCountAsCurrentPage(entry));
-
-      if (midlineImages.length > 0) {
-        this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
-      }
-    }
-
+    // if (!this.isScrolling) {
+    //   // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+    //   // to mark the current page and separate the prefetching code.
+    //   const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+    //   .filter(entry => this.shouldElementCountAsCurrentPage(entry));
+    //
+    //   if (midlineImages.length > 0) {
+    //     this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+    //   }
+    // }
+    //
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
   }
@@ -426,8 +428,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         this.checkIfShouldTriggerContinuousReader()
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) {
         // This if statement will fire once we scroll into the spacer at all
-        this.loadNextChapter.emit();
-        this.cdRef.markForCheck();
+        this.moveToNextChapter();
       }
     } else {
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
@@ -442,7 +443,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
         requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
-        // If already at top, then we moving on
+        // If already at top, then we are moving on
         this.loadPrevChapter.emit();
         this.cdRef.markForCheck();
       }
@@ -597,7 +598,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
     if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
       this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
-      this.loadNextChapter.emit();
+      this.moveToNextChapter();
     }
   }
 
@@ -615,6 +616,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         this.prefetchWebtoonImages(imagePage);
       }
     });
+  }
+
+  /**
+   * Move to the next chapter and set the page
+   */
+  moveToNextChapter() {
+    this.setPageNum(this.totalPages);
+    this.loadNextChapter.emit();
   }
 
   /**
