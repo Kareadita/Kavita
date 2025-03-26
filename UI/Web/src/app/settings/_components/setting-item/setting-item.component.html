@@ -15,7 +15,7 @@
       </div>
       <div class="col-auto text-end align-self-end justify-content-end edit-btn">
         @if (showEdit) {
-        <button type="button" class="btn btn-text btn-sm btn-alignment" (click)="toggleEditMode()" [disabled]="!canEdit">
+        <button type="button" class="btn btn-icon btn-sm btn-alignment" (click)="toggleEditMode()" [disabled]="!canEdit">
           {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
         </button>
         }

@@ -109,16 +109,20 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
-.btn-text {
-  color: var(--primary-color);
-  > i {
-    color: var(--primary-color) !important;
-  }
-
-  &:hover, &:focus {
-    color: var(--primary-color);
-  }
-}
+//.btn-text {
+//  color: var(--primary-color);
+//  > i {
+//    color: var(--primary-color) !important;
+//  }
+//
+//  &:hover, &:focus {
+//    color: var(--primary-color);
+//  }
+//
+//  &:disabled {
+//    --bs-btn-disabled-bg: transparent;
+//  }
+//}
 
 
 .btn:focus, .btn:active, .btn:active:focus {
@@ -130,6 +134,10 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   cursor: pointer;
   color: var(--body-text-color);
   border: none;
+
+  &:disabled {
+    --bs-btn-disabled-bg: transparent;
+  }
 
   &:hover, &:focus {
     color: var(--body-text-color);
