@@ -6,6 +6,7 @@ import {filter, take} from "rxjs/operators";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {NewUpdateModalComponent} from "../announcements/_components/new-update-modal/new-update-modal.component";
 import {OutOfDateModalComponent} from "../announcements/_components/out-of-date-modal/out-of-date-modal.component";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class VersionService implements OnDestroy{
   private readonly serverService = inject(ServerService);
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
+  private readonly router = inject(Router);
 
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
   public static readonly CLIENT_REFRESH_KEY = 'kavita--client-refresh-last-shown';
@@ -29,8 +31,15 @@ export class VersionService implements OnDestroy{
   // Check intervals
   private readonly VERSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
   private readonly OUT_OF_DATE_CHECK_INTERVAL = this.VERSION_CHECK_INTERVAL; // 2 * 60 * 60 * 1000; // 2 hours
-
   private readonly OUT_Of_BAND_AMOUNT = 2; // How many releases before we show "You're X releases out of date"
+
+  // Routes where version update modals should not be shown
+  private readonly EXCLUDED_ROUTES = [
+    '/manga/',
+    '/book/',
+    '/pdf/',
+    '/reader/'
+  ];
 
 
   private versionCheckSubscription?: Subscription;
@@ -38,6 +47,7 @@ export class VersionService implements OnDestroy{
   private modalOpen = false;
 
   constructor() {
+    this.startInitialVersionCheck();
     this.startVersionCheck();
     this.startOutOfDateCheck();
   }
@@ -45,6 +55,26 @@ export class VersionService implements OnDestroy{
   ngOnDestroy() {
     this.versionCheckSubscription?.unsubscribe();
     this.outOfDateCheckSubscription?.unsubscribe();
+  }
+
+  /**
+   * Initial version check to ensure localStorage is populated on first load
+   */
+  private startInitialVersionCheck(): void {
+    this.accountService.currentUser$
+      .pipe(
+        filter(user => !!user),
+        take(1),
+        switchMap(user => this.serverService.getVersion(user!.apiKey))
+      )
+      .subscribe(serverVersion => {
+        const cachedVersion = localStorage.getItem(VersionService.SERVER_VERSION_KEY);
+
+        // Always update localStorage on first load
+        localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+
+        console.log('Initial version check - Server version:', serverVersion, 'Cached version:', cachedVersion);
+      });
   }
 
   /**
@@ -77,10 +107,24 @@ export class VersionService implements OnDestroy{
   }
 
   /**
+   * Checks if the current route is in the excluded routes list
+   */
+  private isExcludedRoute(): boolean {
+    const currentUrl = this.router.url;
+    return this.EXCLUDED_ROUTES.some(route => currentUrl.includes(route));
+  }
+
+  /**
    * Handles the version check response to determine if client refresh or new update notification is needed
    */
   private handleVersionUpdate(serverVersion: string) {
     if (this.modalOpen) return;
+
+    // Validate if we are on a reader route and if so, suppress
+    if (this.isExcludedRoute()) {
+      console.log('Version update blocked due to user reading');
+      return;
+    }
 
     const cachedVersion = localStorage.getItem(VersionService.SERVER_VERSION_KEY);
     console.log('Server version:', serverVersion, 'Cached version:', cachedVersion);
