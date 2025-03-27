@@ -54,7 +54,17 @@ export class ReadMoreComponent implements OnChanges {
     this.hideToggle = false;
     if (this.isCollapsed) {
       this.currentText = text.substring(0, this.maxLength);
-      this.currentText = this.currentText.substring(0, Math.min(this.currentText.length, this.currentText.lastIndexOf(' ')));
+
+      // Find last natural breaking point: space for English, or a CJK character boundary
+      const match = this.currentText.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+$/u);
+      const lastSpace = this.currentText.lastIndexOf(' ');
+
+      if (lastSpace > 0) {
+        this.currentText = this.currentText.substring(0, lastSpace); // Prefer space for English
+      } else if (match) {
+        this.currentText = this.currentText.substring(0, this.currentText.length - match[0].length); // Trim CJK
+      }
+
       this.currentText = this.currentText + '…';
     } else if (!this.isCollapsed)  {
       this.currentText = text;
@@ -62,6 +72,7 @@ export class ReadMoreComponent implements OnChanges {
 
     this.cdRef.markForCheck();
   }
+
   ngOnChanges() {
       this.determineView();
   }
