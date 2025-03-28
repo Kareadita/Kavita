@@ -66,7 +66,7 @@
 
     <div class="card-title-container">
       <app-series-format [format]="series.format"></app-series-format>
-      <span class="card-title" [ngbTooltip]="series.name" id="{{series.id}}">
+      <span class="card-title" [ngbTooltip]="series.name" placement="top" id="{{series.id}}">
         <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
           {{series.name}}
         </a>
