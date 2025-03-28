@@ -264,6 +264,18 @@
             </ng-template>
           </app-setting-switch>
         </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch"
+                       formControlName="allowAutomaticWebtoonReaderDetection" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
       </ng-container>
 
       <div class="setting-section-break"></div>

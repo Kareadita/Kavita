@@ -110,7 +110,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
 
-    return this.locales.filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
+    return (this.locales || []).filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
   }
 
 
@@ -154,6 +154,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
       this.settingsForm.addControl('swipeToPaginate', new FormControl(this.user.preferences.swipeToPaginate, []));
       this.settingsForm.addControl('backgroundColor', new FormControl(this.user.preferences.backgroundColor, []));
+      this.settingsForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.user.preferences.allowAutomaticWebtoonReaderDetection, []));
 
       this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
       this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
@@ -226,6 +227,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('backgroundColor')?.setValue(this.user.preferences.backgroundColor, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('allowAutomaticWebtoonReaderDetection')?.setValue(this.user.preferences.allowAutomaticWebtoonReaderDetection, {onlySelf: true, emitEvent: false});
 
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize, {onlySelf: true, emitEvent: false});
@@ -265,6 +267,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
+      allowAutomaticWebtoonReaderDetection: modelSettings.allowAutomaticWebtoonReaderDetection,
       backgroundColor: modelSettings.backgroundColor || '#000',
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,

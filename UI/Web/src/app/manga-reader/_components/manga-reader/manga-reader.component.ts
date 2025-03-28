@@ -621,11 +621,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    // fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
-    //   if (event.detail > 1) return;
-    //   this.toggleMenu();
-    // });
-
     fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
       this.prevScrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
@@ -640,6 +635,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navService.showSideNav();
     this.showBookmarkEffectEvent.complete();
     if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
+
     this.readerService.disableWakeLock();
   }
 
@@ -784,6 +780,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   switchToWebtoonReaderIfPagesLikelyWebtoon() {
     if (this.readerMode === ReaderMode.Webtoon) return;
+    if (!this.user.preferences.allowAutomaticWebtoonReaderDetection) return;
 
     if (this.mangaReaderService.shouldBeWebtoonMode()) {
       this.readerMode = ReaderMode.Webtoon;

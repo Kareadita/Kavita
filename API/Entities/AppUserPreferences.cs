@@ -54,6 +54,10 @@ public class AppUserPreferences
     /// Manga Reader Option: Should swiping trigger pagination
     /// </summary>
     public bool SwipeToPaginate { get; set; }
+    /// <summary>
+    /// Manga Reader Option: Allow Automatic Webtoon detection
+    /// </summary>
+    public bool AllowAutomaticWebtoonReaderDetection { get; set; }
 
     #endregion
 

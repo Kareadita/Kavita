@@ -1,11 +1,11 @@
-import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { ChapterInfo } from '../_models/chapter-info';
-import { DimensionMap } from '../_models/file-dimension';
-import { FITTING_OPTION } from '../_models/reader-enums';
-import { BookmarkInfo } from 'src/app/_models/manga-reader/bookmark-info';
+import {ElementRef, Injectable, Renderer2, RendererFactory2} from '@angular/core';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {ChapterInfo} from '../_models/chapter-info';
+import {DimensionMap} from '../_models/file-dimension';
+import {FITTING_OPTION} from '../_models/reader-enums';
+import {BookmarkInfo} from 'src/app/_models/manga-reader/bookmark-info';
 
 @Injectable({
   providedIn: 'root'
@@ -113,10 +113,12 @@ export class MangaReaderService {
     return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
   }
 
+  /**
+   * Some pages aren't cover images but might need fit split renderings
+   * @param pageSplitOption
+   */
   shouldRenderAsFitSplit(pageSplitOption: PageSplitOption) {
-    // Some pages aren't cover images but might need fit split renderings
-    if (parseInt(pageSplitOption + '', 10) !== PageSplitOption.FitSplit) return false;
-    return true;
+    return parseInt(pageSplitOption + '', 10) === PageSplitOption.FitSplit;
   }
 
 

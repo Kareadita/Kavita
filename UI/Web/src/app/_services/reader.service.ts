@@ -1,19 +1,19 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
-import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
-import { ChapterInfo } from '../manga-reader/_models/chapter-info';
-import { Chapter } from '../_models/chapter';
-import { HourEstimateRange } from '../_models/series-detail/hour-estimate-range';
-import { MangaFormat } from '../_models/manga-format';
-import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
-import { PageBookmark } from '../_models/readers/page-bookmark';
-import { ProgressBookmark } from '../_models/readers/progress-bookmark';
-import { FileDimension } from '../manga-reader/_models/file-dimension';
+import {Router} from '@angular/router';
+import {environment} from 'src/environments/environment';
+import {ChapterInfo} from '../manga-reader/_models/chapter-info';
+import {Chapter} from '../_models/chapter';
+import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';
+import {MangaFormat} from '../_models/manga-format';
+import {BookmarkInfo} from '../_models/manga-reader/bookmark-info';
+import {PageBookmark} from '../_models/readers/page-bookmark';
+import {ProgressBookmark} from '../_models/readers/progress-bookmark';
+import {FileDimension} from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
-import { TextResonse } from '../_types/text-response';
-import { AccountService } from './account.service';
+import {TextResonse} from '../_types/text-response';
+import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
@@ -23,7 +23,6 @@ import {Volume} from "../_models/volume";
 import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
-import {getIosVersion, isSafari, Version} from "../_helpers/browser";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -111,7 +110,6 @@ export class ReaderService {
   getAllBookmarks(filter: SeriesFilterV2 | undefined) {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
-
 
   getBookmarks(chapterId: number) {
     return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/chapter-bookmarks?chapterId=' + chapterId);

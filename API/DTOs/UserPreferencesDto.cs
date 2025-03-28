@@ -64,6 +64,13 @@ public class UserPreferencesDto
     [Required]
     public bool ShowScreenHints { get; set; } = true;
     /// <summary>
+    /// Manga Reader Option: Allow Automatic Webtoon detection
+    /// </summary>
+    [Required]
+    public bool AllowAutomaticWebtoonReaderDetection { get; set; }
+
+
+    /// <summary>
     /// Book Reader Option: Override extra Margin
     /// </summary>
     [Required]

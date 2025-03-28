@@ -156,6 +156,8 @@
         "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
         "swipe-to-paginate-label": "Swipe to Paginate",
         "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
+        "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
+        "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
 
         "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",

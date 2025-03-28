@@ -1,12 +1,11 @@
-
-import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
-import { BookPageLayoutMode } from '../readers/book-page-layout-mode';
-import { PageLayoutMode } from '../page-layout-mode';
-import { PageSplitOption } from './page-split-option';
-import { ReaderMode } from './reader-mode';
-import { ReadingDirection } from './reading-direction';
-import { ScalingOption } from './scaling-option';
-import { SiteTheme } from './site-theme';
+import {LayoutMode} from 'src/app/manga-reader/_models/layout-mode';
+import {BookPageLayoutMode} from '../readers/book-page-layout-mode';
+import {PageLayoutMode} from '../page-layout-mode';
+import {PageSplitOption} from './page-split-option';
+import {ReaderMode} from './reader-mode';
+import {ReadingDirection} from './reading-direction';
+import {ScalingOption} from './scaling-option';
+import {SiteTheme} from './site-theme';
 import {WritingStyle} from "./writing-style";
 import {PdfTheme} from "./pdf-theme";
 import {PdfScrollMode} from "./pdf-scroll-mode";
@@ -14,48 +13,49 @@ import {PdfLayoutMode} from "./pdf-layout-mode";
 import {PdfSpreadMode} from "./pdf-spread-mode";
 
 export interface Preferences {
-    // Manga Reader
-    readingDirection: ReadingDirection;
-    scalingOption: ScalingOption;
-    pageSplitOption: PageSplitOption;
-    readerMode: ReaderMode;
-    autoCloseMenu: boolean;
-    layoutMode: LayoutMode;
-    backgroundColor: string;
-    showScreenHints: boolean;
-    emulateBook: boolean;
-    swipeToPaginate: boolean;
+  // Manga Reader
+  readingDirection: ReadingDirection;
+  scalingOption: ScalingOption;
+  pageSplitOption: PageSplitOption;
+  readerMode: ReaderMode;
+  autoCloseMenu: boolean;
+  layoutMode: LayoutMode;
+  backgroundColor: string;
+  showScreenHints: boolean;
+  emulateBook: boolean;
+  swipeToPaginate: boolean;
+  allowAutomaticWebtoonReaderDetection: boolean;
 
-    // Book Reader
-    bookReaderMargin: number;
-    bookReaderLineSpacing: number;
-    bookReaderFontSize: number;
-    bookReaderFontFamily: string;
-    bookReaderTapToPaginate: boolean;
-    bookReaderReadingDirection: ReadingDirection;
-    bookReaderWritingStyle: WritingStyle;
-    bookReaderThemeName: string;
-    bookReaderLayoutMode: BookPageLayoutMode;
-    bookReaderImmersiveMode: boolean;
+  // Book Reader
+  bookReaderMargin: number;
+  bookReaderLineSpacing: number;
+  bookReaderFontSize: number;
+  bookReaderFontFamily: string;
+  bookReaderTapToPaginate: boolean;
+  bookReaderReadingDirection: ReadingDirection;
+  bookReaderWritingStyle: WritingStyle;
+  bookReaderThemeName: string;
+  bookReaderLayoutMode: BookPageLayoutMode;
+  bookReaderImmersiveMode: boolean;
 
-    // PDF Reader
-    pdfTheme: PdfTheme;
-    pdfScrollMode: PdfScrollMode;
-    pdfSpreadMode: PdfSpreadMode;
+  // PDF Reader
+  pdfTheme: PdfTheme;
+  pdfScrollMode: PdfScrollMode;
+  pdfSpreadMode: PdfSpreadMode;
 
-    // Global
-    theme: SiteTheme;
-    globalPageLayoutMode: PageLayoutMode;
-    blurUnreadSummaries: boolean;
-    promptForDownloadSize: boolean;
-    noTransitions: boolean;
-    collapseSeriesRelationships: boolean;
-    shareReviews: boolean;
-    locale: string;
+  // Global
+  theme: SiteTheme;
+  globalPageLayoutMode: PageLayoutMode;
+  blurUnreadSummaries: boolean;
+  promptForDownloadSize: boolean;
+  noTransitions: boolean;
+  collapseSeriesRelationships: boolean;
+  shareReviews: boolean;
+  locale: string;
 
-    // Kavita+
-    aniListScrobblingEnabled: boolean;
-    wantToReadSync: boolean;
+  // Kavita+
+  aniListScrobblingEnabled: boolean;
+  wantToReadSync: boolean;
 }
 
 export const readingDirections = [{text: 'left-to-right', value: ReadingDirection.LeftToRight}, {text: 'right-to-left', value: ReadingDirection.RightToLeft}];
