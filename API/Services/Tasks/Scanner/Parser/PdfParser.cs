@@ -87,8 +87,14 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         if (type == LibraryType.Book && comicInfo != null)
         {
             // For books, fall back to the Title for Series.
-            ret.Series = string.IsNullOrEmpty(comicInfo.Series) ? comicInfo.Title : comicInfo.Series;
-            ret.Series = ret.Series.Trim();
+            if (!string.IsNullOrEmpty(comicInfo.Series))
+            {
+                ret.Series = comicInfo.Series.Trim();
+            }
+            else if (!string.IsNullOrEmpty(comicInfo.Title))
+            {
+                ret.Series = comicInfo.Title.Trim();
+            }
         }
 
         if (string.IsNullOrEmpty(ret.Series))
