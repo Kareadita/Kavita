@@ -731,7 +731,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Character)
@@ -743,7 +743,9 @@ public class ExternalMetadataService : IExternalMetadataService
             .ToList();
 
         if (characters.Count == 0) return false;
+
         await SeriesService.HandlePeopleUpdateAsync(series.Metadata, characters, PersonRole.Character, _unitOfWork);
+
         foreach (var spPerson in series.Metadata.People.Where(p => p.Role == PersonRole.Character))
         {
             // Set a sort order based on their role
@@ -810,7 +812,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.CoverArtist)
@@ -867,7 +869,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Writer)
