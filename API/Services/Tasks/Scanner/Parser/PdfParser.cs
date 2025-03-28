@@ -71,6 +71,11 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         // Patch in other information from ComicInfo
         UpdateFromComicInfo(ret);
 
+        if (comicInfo != null && !string.IsNullOrEmpty(comicInfo.Title))
+        {
+            ret.Title = comicInfo.Title.Trim();
+        }
+
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
