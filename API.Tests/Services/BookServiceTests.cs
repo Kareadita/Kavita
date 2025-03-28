@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using API.Entities.Enums;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -121,5 +123,23 @@ public class BookServiceTests
         var document = Path.Join(testDirectory, "encrypted.pdf");
         var comicInfo = _bookService.GetComicInfo(document);
         Assert.Null(comicInfo);
+    }
+
+    [Fact]
+    public void SeriesFallBackToMetadataTitle()
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+        var pdfParser = new PdfParser(ds);
+
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var filePath = Path.Join(testDirectory, "Bizet-Variations_Chromatiques_de_concert_Theme_A4.pdf");
+
+        var comicInfo = _bookService.GetComicInfo(filePath);
+        Assert.NotNull(comicInfo);
+
+        var parserInfo = pdfParser.Parse(filePath, testDirectory, ds.GetParentDirectoryName(testDirectory), LibraryType.Book, comicInfo);
+        Assert.NotNull(parserInfo);
+        Assert.Equal(parserInfo.Title, comicInfo.Title);
+        Assert.Equal(parserInfo.Series, comicInfo.Title);
     }
 }
