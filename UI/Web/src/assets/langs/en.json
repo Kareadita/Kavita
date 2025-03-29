@@ -1342,7 +1342,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Host Name",
-        "host-name-tooltip": "Domain Name (of Reverse Proxy). Required for email functionality. If no reverse proxy, use any url.",
+        "host-name-tooltip": "The domain name of your reverse proxy, required for email functionality. If you’re not using a reverse proxy, you can use any URL, including http://externalip:port/",
         "host-name-validation": "Host name must start with http(s) and not end in /",
 
         "sender-address-label": "Sender Address",

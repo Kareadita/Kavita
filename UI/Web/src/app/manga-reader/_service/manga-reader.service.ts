@@ -157,7 +157,6 @@ export class MangaReaderService {
    */
   shouldBeWebtoonMode() {
     const pages = Object.values(this.pageDimensions);
-    console.log('pages', pages);
 
     // Require a minimum number of pages for reliable detection
     if (pages.length < 3) {
