@@ -213,7 +213,6 @@ public class LibraryController : BaseApiController
 
         var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
         await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
-        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
 
         return Ok(ret);
     }
@@ -419,8 +418,7 @@ public class LibraryController : BaseApiController
             .Distinct()
             .Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
 
-        var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder,
-            new List<string>() {dto.FolderPath});
+        var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
         _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
 
