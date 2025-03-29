@@ -975,9 +975,11 @@
         "more-alt": "More",
         "time-left-alt": "Time Left",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "Publication",
-        "publication-status-tooltip": "Publication Status"
+        "publication-status-tooltip": "Publication Status",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
 
     "match-series-modal": {

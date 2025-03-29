@@ -89,7 +89,7 @@
 
               @if ((licenseService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling ? t('on') : t('off')})">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
