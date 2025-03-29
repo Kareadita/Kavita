@@ -167,11 +167,11 @@ public class ScrobbleRepository : IScrobbleRepository
         var query =  _context.ScrobbleEvent
             .Where(e => e.AppUserId == userId)
             .Include(e => e.Series)
-            .SortBy(filter.Field, filter.IsDescending)
             .WhereIf(!string.IsNullOrEmpty(filter.Query), s =>
                 EF.Functions.Like(s.Series.Name, $"%{filter.Query}%")
             )
             .WhereIf(!filter.IncludeReviews, e => e.ScrobbleEventType != ScrobbleEventType.Review)
+            .SortBy(filter.Field, filter.IsDescending)
             .AsSplitQuery()
             .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider);
 

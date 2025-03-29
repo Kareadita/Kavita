@@ -35,6 +35,7 @@
     [count]="pageInfo.totalElements"
     [offset]="pageInfo.pageNumber"
     [limit]="pageInfo.size"
+    [sorts]="[{prop: 'lastModifiedUtc', dir: 'desc'}]"
   >
 
     <ngx-datatable-column prop="lastModifiedUtc" [sortable]="true" [draggable]="false" [resizeable]="false">

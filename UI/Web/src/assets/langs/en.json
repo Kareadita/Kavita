@@ -2619,7 +2619,8 @@
         "person-image-downloaded": "Person cover was downloaded and applied.",
         "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
         "match-success": "Series matched correctly",
-        "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon."
+        "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
+        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services."
     },
 
     "read-time-pipe": {
