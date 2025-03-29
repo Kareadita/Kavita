@@ -48,6 +48,6 @@ public class LocaleController : BaseApiController
         var ret = _localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f);
         await _localeCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromDays(7));
 
-        return Ok();
+        return Ok(ret);
     }
 }
