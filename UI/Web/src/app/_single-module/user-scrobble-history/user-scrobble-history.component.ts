@@ -108,9 +108,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    console.log('loadPage: ', sortEvent)
-
-    // BUG: Table should be sorted by lastModifiedUtc by default
     this.scrobblingService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {

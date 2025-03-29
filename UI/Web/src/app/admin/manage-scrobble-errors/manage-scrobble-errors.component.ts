@@ -20,15 +20,13 @@ import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
 
 import {SeriesService} from "../../_services/series.service";
-import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FilterPipe} from "../../_pipes/filter.pipe";
 import {TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {ActionService} from "../../_services/action.service";
 
 @Component({
     selector: 'app-manage-scrobble-errors',
@@ -38,14 +36,20 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageScrobbleErrorsComponent implements OnInit {
-  @Output() scrobbleCount = new EventEmitter<number>();
-  @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
+  protected readonly filter = filter;
+  protected readonly ColumnMode = ColumnMode;
+
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly seriesService = inject(SeriesService);
-  private readonly modalService = inject(NgbModal);
+  private readonly actionService = inject(ActionService);
+
+
+  @Output() scrobbleCount = new EventEmitter<number>();
+  @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
+
 
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<ScrobbleError>>({column: 'created', direction: 'asc'});
@@ -57,8 +61,6 @@ export class ManageScrobbleErrorsComponent implements OnInit {
     filter: new FormControl('', [])
   });
 
-
-  constructor() {}
 
   ngOnInit() {
 
@@ -108,13 +110,13 @@ export class ManageScrobbleErrorsComponent implements OnInit {
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.details.toLowerCase().indexOf(query) >= 0;
   }
 
-  editSeries(seriesId: number) {
+  fixMatch(seriesId: number) {
     this.seriesService.getSeries(seriesId).subscribe(series => {
-      const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
-      modalRef.componentInstance.series = series;
+      this.actionService.matchSeries(series, (result) => {
+        if (!result) return;
+        this.data = [...this.data.filter(s => s.seriesId !== series.id)];
+        this.cdRef.markForCheck();
+      });
     });
   }
-
-  protected readonly filter = filter;
-  protected readonly ColumnMode = ColumnMode;
 }
