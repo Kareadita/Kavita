@@ -552,14 +552,22 @@ public class CoverDbService : ICoverDbService
 
                 series.CoverImage = filePath;
                 series.CoverImageLocked = true;
+                if (series.CoverImage == null)
+                {
+                    _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
+                }
                 _imageService.UpdateColorScape(series);
                 _unitOfWork.SeriesRepository.Update(series);
             }
         }
         else
         {
-            series.CoverImage = string.Empty;
+            series.CoverImage = null;
             series.CoverImageLocked = false;
+            if (series.CoverImage == null)
+            {
+                _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
+            }
             _imageService.UpdateColorScape(series);
             _unitOfWork.SeriesRepository.Update(series);
         }

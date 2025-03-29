@@ -222,6 +222,10 @@ public class MediaConversionService : IMediaConversionService
         {
             if (string.IsNullOrEmpty(series.CoverImage)) continue;
             series.CoverImage = series.GetCoverImage();
+            if (series.CoverImage == null)
+            {
+                _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
+            }
             _unitOfWork.SeriesRepository.Update(series);
             await _unitOfWork.CommitAsync();
         }
