@@ -76,7 +76,7 @@ public class ExternalMetadataService : IExternalMetadataService
     };
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
-    static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
+    private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService)
@@ -115,18 +115,24 @@ public class ExternalMetadataService : IExternalMetadataService
         // Find all Series that are eligible and limit
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, false);
         if (ids.Count == 0) return;
+        ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
 
-        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
         var count = 0;
+        var successfulMatches = new List<int>();
         var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids);
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
             var success = await FetchSeriesMetadata(seriesId, libraryType);
-            if (success) count++;
+            if (success)
+            {
+                count++;
+                successfulMatches.Add(seriesId);
+            }
             await Task.Delay(6000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
-        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }
 
 
@@ -146,7 +152,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
-            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
+            _logger.LogInformation("Rate Limit hit for Kavita+ prefetch");
             return false;
         }
 
