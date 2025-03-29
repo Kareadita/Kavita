@@ -304,7 +304,8 @@
         "regen-warning": "Obnovení klíče API zruší platnost všech stávajících klientů.",
         "no-key": "CHYBA – KLÍČ NENÍ NASTAVEN",
         "confirm-reset": "Tím zrušíte platnost všech konfigurací OPDS, které jste nastavili. Jste si jistý, že chcete pokračovat?",
-        "key-reset": "Obnovení klíče API"
+        "key-reset": "Obnovení klíče API",
+        "reset": "Resetovat"
     },
     "scrobbling-providers": {
         "title": "Poskytovatelé scroblingu",
@@ -514,10 +515,10 @@
     },
     "library-type-pipe": {
         "book": "Kniha",
-        "comic": "Komiks",
+        "comic": "Komiks (Odkaz)",
         "manga": "Manga",
         "image": "Obrázek",
-        "comicVine": "Comic Vine",
+        "comicVine": "Komiks",
         "lightNovel": "Lehký román"
     },
     "age-rating-pipe": {
@@ -1220,9 +1221,6 @@
         "clean-up-task-success": "Čištění dokončeno",
         "backup-database-task-success": "Úloha zálohování databáze byla zařazena do fronty",
         "download-logs-task-desc": "Zkompiluje všechny soubory záznamů do formátu zip a stáhne je.",
-        "analyze-files-task": "Analyzovat soubory",
-        "analyze-files-task-desc": "Spustí dlouhodobou úlohu, která analyzuje soubory a generuje jejich příponu a velikost. Pro verzi v0.7 by měla být spuštěna pouze jednou. Není potřeba, pokud jste nainstalovali verzi po vydání v0.7.",
-        "analyze-files-task-success": "Analýza souboru byla zařazena do fronty",
         "clear-reading-cache-task": "Vymazat vyrovnávací paměti pro čtení",
         "clear-reading-cache-task-success": "Mezipaměť byla vymazána",
         "clean-up-want-to-read-task-success": "Chci číst bylo vyčištěno",

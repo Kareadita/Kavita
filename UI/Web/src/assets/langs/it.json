@@ -304,7 +304,8 @@
         "regen-warning": "La rigenerazione della chiave API invaliderà tutti i client esistenti.",
         "no-key": "ERRORE - CHIAVE NON IMPOSTATA",
         "confirm-reset": "Ciò invaliderà tutte le configurazioni OPDS impostate. Sei sicuro di voler continuare?",
-        "key-reset": "Ripristino della chiave API"
+        "key-reset": "Ripristino della chiave API",
+        "reset": "Ripristina"
     },
     "scrobbling-providers": {
         "title": "Fornitori di Scrobbling",
@@ -1279,9 +1280,6 @@
         "backup-database-task-success": "Un lavoro per il backup del database è stato messo in coda",
         "download-logs-task": "Scarica Logs",
         "download-logs-task-desc": "Compila tutti i file di registro in un file zip e lo scarica.",
-        "analyze-files-task": "Analizza File",
-        "analyze-files-task-desc": "Esegue un'attività di lunga durata che analizzerà i file per generare estensione e dimensione. Dovrebbe essere eseguito solo una volta per la versione v0.7. Non necessario se hai installato la versione successiva alla v0.7.",
-        "analyze-files-task-success": "L'analisi del file è stata messa in coda",
         "check-for-updates-task": "Cerca Aggiornamenti",
         "check-for-updates-task-desc": "Verifica se sono disponibili versioni stabili prima della tua versione.",
         "clean-up-task": "Pulizia Generale",
@@ -1425,7 +1423,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Rilasciato: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1989,7 +1988,8 @@
         "sidenav": "Nav laterale",
         "external-sources": "Fonti esterne",
         "smart-filters": "Filtri Intelligenti",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "Puoi personalizzare diversi aspetti di Kavita riordinandoli, modificandone la visibilità e associando filtri intelligenti/fonti esterne alla home page o alla navigazione laterale."
     },
     "customize-dashboard-streams": {
         "no-data": "Tutti i filtri Smart aggiunti a Dashboard o nessuno ancora creato.",

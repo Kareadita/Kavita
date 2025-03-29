@@ -304,7 +304,8 @@
         "regen-warning": "Opätovné vygenerovanie kľúča API zruší platnosť všetkých existujúcich klientov.",
         "no-key": "CHYBA – KĽÚČ NIE JE NASTAVENÝ",
         "confirm-reset": "Toto zruší platnosť všetkých konfigurácií OPDS, ktoré ste nastavili. Ste si istý, že chcete pokračovať?",
-        "key-reset": "Obnovenie kľúča API"
+        "key-reset": "Obnovenie kľúča API",
+        "reset": "Resetovať"
     },
     "scrobbling-providers": {
         "title": "Poskytovatelia scrobbblingu",
@@ -514,11 +515,11 @@
     },
     "library-type-pipe": {
         "book": "Kniha",
-        "comic": "Komiks",
+        "comic": "Komiks (Legacy)",
         "manga": "Manga",
         "image": "Obrázok",
         "lightNovel": "Light Novel",
-        "comicVine": "Comic Vine"
+        "comicVine": "Comic"
     },
     "age-rating-pipe": {
         "unknown": "Neznámy",
@@ -866,7 +867,7 @@
         "library-name-unique": "Názov knižnice musí byť jedinečný",
         "last-scanned-label": "Naposledy skenované:",
         "type-label": "Typ",
-        "kavitaplus-eligible-tooltip": "Bude Kavita+ získavať informácie alebo podporovať Scrobbling",
+        "kavitaplus-eligible-tooltip": "Podporuje funkcie metadát Kavita+ alebo Scroblovanie",
         "folder-description": "Pridajte priečinky do svojej knižnice",
         "browse": "Prehľadávať priečinky médií",
         "help-us-part-2": "náš sprievodca",
@@ -1266,9 +1267,6 @@
         "backup-database-task-success": "Úloha na zálohovanie databázy bola zaradená do fronty",
         "download-logs-task": "Stiahnuť logy",
         "download-logs-task-desc": "Skompiluje všetky log súbory do .zip a stiahne súbor.",
-        "analyze-files-task": "Analyzovať súbory",
-        "analyze-files-task-desc": "Spustí dlhotrvajúcu úlohu, ktorá bude analyzovať súbory, aby sa vygenerovala prípona a veľkosť. Toto by malo byť spustené iba raz pre vydanie v0.7. Nie je potrebné, ak ste nainštalovali po v0.7.",
-        "analyze-files-task-success": "Analýza súborov bola zaradená do fronty",
         "check-for-updates-task": "Skontroluj aktualizácie",
         "check-for-updates-task-desc": "Zistite, či sú pred vašou verziou nejaké stabilné vydania.",
         "clean-up-task": "Všeobecné čistenie",
@@ -1416,7 +1414,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Vydané: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1947,7 +1946,8 @@
         "sidenav": "Bočná navigácia",
         "external-sources": "Externé zdroje",
         "smart-filters": "Smart Filtre",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "Rôzne aspekty Kavity si môžete prispôsobiť zmenou poradia, prepnutím viditeľnosti a naviazaním inteligentných filtrov/externých zdrojov na vašu domovskú stránku alebo bočnú navigáciu."
     },
     "customize-dashboard-streams": {
         "no-data": "Všetky smart filtre boli pridané do Dashboard-u alebo ešte neboli vytvorené.",

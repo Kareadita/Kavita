@@ -304,7 +304,8 @@
         "regen-warning": "Gerar novamente sua chave de API invalidará todos os clientes existentes.",
         "no-key": "ERRO - NENHUMA CHAVE DEFINIDA",
         "confirm-reset": "Isso invalidará todas as configurações OPDS que você configurou. Você tem certeza que quer continuar?",
-        "key-reset": "Redefinir chave API"
+        "key-reset": "Redefinir chave API",
+        "reset": "Redefinir"
     },
     "scrobbling-providers": {
         "title": "Provedores de Scrobbling",
@@ -514,9 +515,9 @@
     },
     "library-type-pipe": {
         "book": "Livro",
-        "comic": "Quadrinhos",
+        "comic": "Quadrinhos (Legado)",
         "manga": "Mangá",
-        "comicVine": "Comic Vine",
+        "comicVine": "Quadrinhos",
         "image": "Imagem",
         "lightNovel": "Light Novel"
     },
@@ -872,7 +873,7 @@
         "type-label": "Tipo",
         "type-tooltip": "O tipo de biblioteca determina como os nomes dos arquivos são analisados e se a IU mostra Capítulos (mangá) versus Números (quadrinhos). Verifique o wiki para obter mais detalhes sobre as diferenças entre os tipos de biblioteca.",
         "kavitaplus-eligible-label": "Kavita+ Elegível",
-        "kavitaplus-eligible-tooltip": "O Kavita+ extrairá informações ou oferecerá suporte ao Scrobbling",
+        "kavitaplus-eligible-tooltip": "Kavita+ suporta as capacidades de metadados ou Scrobbling",
         "folder-description": "Adicionar pastas à sua biblioteca",
         "browse": "Navegar por Pastas de Mídia",
         "help-us-part-1": "Ajude-nos seguindo ",
@@ -1284,9 +1285,6 @@
         "backup-database-task-success": "Uma tarefa para fazer backup do banco de dados foi enfileirada",
         "download-logs-task": "Registros de Download",
         "download-logs-task-desc": "Compila todos os arquivos de registro em um zip e baixa ele.",
-        "analyze-files-task": "Analisar Arquivos",
-        "analyze-files-task-desc": "Executa uma tarefa de longa duração que analisará arquivos para gerar extensão e tamanho. Isso deve ser executado apenas uma vez para a versão v0.7. Não é necessário se você instalou o pós v0.7.",
-        "analyze-files-task-success": "A análise do arquivo foi colocada na fila",
         "sync-themes-task": "Sincronizar Temas",
         "sync-themes-task-desc": "Sincronize os temas baixados com alterações upstream se a versão corresponder.",
         "sync-themes-success": "A sincronização de temas foi colocada na fila",
@@ -1578,7 +1576,7 @@
         "dry-run-step": "Funcionamento a Seco",
         "final-import-step": "Passo Final",
         "comicvine-parsing-label": "Usar a correspondência da série Comic Vine",
-        "cbl-repo": "Você pode encontrar muitas listas de leitura no repositório da <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'> comunidade</a>.",
+        "cbl-repo": "Pode encontrar muitas listas de leitura no repositório da <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>comunidade</a>.",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -1997,7 +1995,8 @@
         "sidenav": "Navegador Lateral",
         "external-sources": "Fontes Externas",
         "smart-filters": "Filtros Inteligentes",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "Pode personalizar diferentes aspectos do Kavita reordenando, alternando a visibilidade e ligando filtros inteligentes/fontes externas à sua página inicial ou navegação lateral."
     },
     "customize-dashboard-streams": {
         "no-data": "Todos os filtros inteligentes foram adicionados ao Painel de Controle ou nenhum foi criado ainda.",

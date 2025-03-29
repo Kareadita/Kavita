@@ -132,7 +132,7 @@
         "auto-close-menu-tooltip": "菜单应该自动关闭",
         "show-screen-hints-label": "显示屏幕提示",
         "show-screen-hints-tooltip": "显示一个覆盖图层以帮助了解分页区域和方向",
-        "emulate-comic-book-label": "模仿美漫",
+        "emulate-comic-book-label": "模仿漫画书",
         "emulate-comic-book-tooltip": "应用阴影效果来模拟书籍",
         "swipe-to-paginate-label": "滑动翻页",
         "swipe-to-paginate-tooltip": "在屏幕上滑动是否应触发下一页或上一页",
@@ -304,7 +304,8 @@
         "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
         "no-key": "错误-未设置密钥",
         "confirm-reset": "所有OPDS配置将会失效，您确定继续吗？",
-        "key-reset": "API密钥已重置"
+        "key-reset": "API密钥已重置",
+        "reset": "重置"
     },
     "scrobbling-providers": {
         "title": "Scrobbling服务提供商",
@@ -370,7 +371,7 @@
     "top-readers": {
         "title": "热门读者",
         "time-selection-label": "时间范围",
-        "comics-label": "美漫：{{value}} 小时",
+        "comics-label": "漫画：{{value}} 小时",
         "manga-label": "漫画(日漫)：{{value}} 小时",
         "books-label": "书籍：{{value}} 小时",
         "this-week": "{{time-periods.this-week}}",
@@ -514,9 +515,9 @@
     },
     "library-type-pipe": {
         "book": "书籍",
-        "comic": "美漫",
+        "comic": "漫画 (Legacy)",
         "manga": "漫画(日漫)",
-        "comicVine": "Comic Vine",
+        "comicVine": "漫画",
         "image": "图片",
         "lightNovel": "轻小说"
     },
@@ -872,7 +873,7 @@
         "type-label": "类型",
         "type-tooltip": "资料库类型决定了文件名的解析方式以及 UI 是否显示章节 (日漫) 或期 (美漫)。查看 wiki 了解有关资料库类型之间差异的更多详细信息。",
         "kavitaplus-eligible-label": "Kavita+ 符合条件",
-        "kavitaplus-eligible-tooltip": "Kavita+ 会提取信息还是支持 Scrobbling",
+        "kavitaplus-eligible-tooltip": "支持 Kavita+ 元数据功能或 Scrobbling",
         "folder-description": "将文件夹添加到您的资料库中",
         "browse": "浏览媒体文件夹",
         "help-us-part-1": "通过遵循我们的 ",
@@ -1284,9 +1285,6 @@
         "backup-database-task-success": "已将备份数据库的任务加入队列",
         "download-logs-task": "下载日志文件",
         "download-logs-task-desc": "将所有日志文件编译成一个 zip 文件并下载。",
-        "analyze-files-task": "分析文件",
-        "analyze-files-task-desc": "运行一个长时间运行的任务，用于分析文件以生成扩展名和大小。这只需要在v0.7版本中运行一次。如果您是在v0.7之后安装的，则不需要运行此任务。",
-        "analyze-files-task-success": "文件分析已进入队列",
         "sync-themes-task": "同步主题",
         "sync-themes-task-desc": "如果版本匹配，则将下载的主题与上游更改同步。",
         "sync-themes-success": "主题同步已排队",
@@ -1578,7 +1576,7 @@
         "dry-run-step": "模拟运行",
         "final-import-step": "最后一步",
         "comicvine-parsing-label": "使用 Comic Vine 系列搭配",
-        "cbl-repo": "您可以在社区<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>中找到更多阅读列表。",
+        "cbl-repo": "您可以在社区 <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>存储库</a>.中找到更多阅读列表。",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -1997,7 +1995,8 @@
         "sidenav": "侧边栏",
         "external-sources": "外部源",
         "smart-filters": "智能筛选",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "您可以通过重新排序、切换可见性以及将智能筛选器/外部源绑定到主页或侧边导航来定制 Kavita 的不同方面。"
     },
     "customize-dashboard-streams": {
         "no-data": "所有智能筛选已加入仪表板或尚未创建。",

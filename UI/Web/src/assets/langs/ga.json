@@ -304,7 +304,8 @@
         "regen-warning": "Cuirfidh athghiniúint d'eochair API aon chliaint atá ann cheana ó bhail.",
         "no-key": "EARRÁID - EOCHAIR GAN SOCRÚ",
         "confirm-reset": "Cuirfidh sé seo aon chumraíochtaí OPDS atá socraithe agat ó bhail. An bhfuil tú cinnte go bhfuil fonn ort leanúint ar aghaidh?",
-        "key-reset": "Athshocrú Eochair API"
+        "key-reset": "Athshocrú Eochair API",
+        "reset": "Athshocraigh"
     },
     "scrobbling-providers": {
         "title": "Soláthraithe Scrobbling",
@@ -514,9 +515,9 @@
     },
     "library-type-pipe": {
         "book": "Leabhar",
-        "comic": "Greannán",
+        "comic": "Greannán (Oidhreacht)",
         "manga": "Manga",
-        "comicVine": "Fíniúna Grinn",
+        "comicVine": "Greannán",
         "image": "Íomhá",
         "lightNovel": "Úrscéal Éadrom"
     },
@@ -872,7 +873,7 @@
         "type-label": "Cineál",
         "type-tooltip": "Cinneann cineál leabharlainne conas a dhéantar comhaid a pharsáil agus má thaispeánann an Chomhéadain Caibidlí (Manga) vs Ceisteanna (Comics). Seiceáil an vicí le haghaidh tuilleadh sonraí ar na difríochtaí idir na cineálacha leabharlainne.",
         "kavitaplus-eligible-label": "Kavita+ Incháilithe",
-        "kavitaplus-eligible-tooltip": "An dtarraingeoidh Kavita + faisnéis nó an dtacóidh sé le Scrobbling",
+        "kavitaplus-eligible-tooltip": "Tacaíonn gnéithe meiteashonraí Kavita+ nó Scrobbling",
         "folder-description": "Cuir fillteáin le do leabharlann",
         "browse": "Brabhsáil le haghaidh Fillteáin Meán",
         "help-us-part-1": "Cabhraigh linn trí na nithe seo a leanas a leanúint ",
@@ -1284,9 +1285,6 @@
         "backup-database-task-success": "Tá post chun cúltaca a dhéanamh ar an mbunachar sonraí curtha i scuaine",
         "download-logs-task": "Íosluchtaigh Logchomhaid",
         "download-logs-task-desc": "Tiomsaíonn seo gach comhad logála isteach i zip agus íoslódálann sé é.",
-        "analyze-files-task": "Déan anailís ar chomhaid",
-        "analyze-files-task-desc": "Ritheann tasc fadtréimhseach a dhéanfaidh anailís ar chomhaid chun síneadh agus méid a ghiniúint. Níor chóir é seo a reáchtáil ach uair amháin don scaoileadh v0.7. Ní gá má shuiteáil tú post v0.7.",
-        "analyze-files-task-success": "Tá anailís comhad curtha i scuaine",
         "sync-themes-task": "Téamaí Sioncronaithe",
         "sync-themes-task-desc": "Sioncrónaigh téamaí íoslódála le hathruithe in aghaidh an tsrutha má oireann an leagan.",
         "sync-themes-success": "Tá sioncronú téamaí curtha i scuaine",
@@ -1578,7 +1576,7 @@
         "dry-run-step": "Rith Tirim",
         "final-import-step": "An Chéim Dheiridh",
         "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic",
-        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>.",
+        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>stóras</a>.",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -1997,7 +1995,8 @@
         "sidenav": "Taobh Nascleanúint",
         "external-sources": "Foinsí Seachtracha",
         "smart-filters": "Scagairí Cliste",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "Is féidir leat gnéithe éagsúla de Kavita a shaincheapadh trí athordú a dhéanamh, trí infheictheacht a scoránú, agus trí scagairí cliste/foinsí seachtracha a cheangal le do leathanach baile nó le do thaobh nav."
     },
     "customize-dashboard-streams": {
         "no-data": "Gach scagairí Cliste a chuirtear le Painéal na nIonstraimí nó aon cheann a cruthaíodh go fóill.",

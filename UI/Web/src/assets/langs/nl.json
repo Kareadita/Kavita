@@ -8,7 +8,7 @@
         "submit": "Inloggen"
     },
     "dashboard": {
-        "no-libraries": "Er zijn nog geen bibliotheken ingesteld. Configureer wat in",
+        "no-libraries": "Er zijn nog geen bibliotheken ingesteld. Creëer wat in",
         "server-settings-link": "Serverinstellingen",
         "not-granted": "U heeft geen toegang gekregen tot bibliotheken.",
         "on-deck-title": "Aan het lezen",
@@ -24,7 +24,9 @@
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Opslaan…",
-        "update": "Update"
+        "update": "Update",
+        "invalid-email-warning": "Een ongeldig e-mailadres blokkeert bepaalde functionaliteiten van Kavita",
+        "account-detail-title": "Accountgegevens"
     },
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
@@ -42,7 +44,13 @@
         "not-applicable": "Niet toepasbaar",
         "processed": "Verwerkt",
         "not-processed": "Niet Verwerkt",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "Scrobbelen is uitgeschakeld in uw Accountinstellingen.",
+        "volume-num": "Deel {{num}}",
+        "chapter-num": "Hoofdstuk {{num}}",
+        "not-read-warning": "Upstream-providers behouden altijd het hoogste aantal",
+        "generate-scrobble-events": "Genereer evenementen",
+        "token-expired": "Je AniList-token is verlopen! Scrobbling-evenementen zullen niet verwerkt worden totdat je deze verlengt op de Accounts-pagina."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leesvoortgang",
@@ -72,7 +80,7 @@
     "review-card": {
         "your-review": "Dit is jouw recensie",
         "external-review": "Externe recensie",
-        "local-review": "Recensie",
+        "local-review": "Lokale recensie",
         "rating-percentage": "Beoordeling {{r}}%"
     },
     "want-to-read": {
@@ -147,7 +155,11 @@
         "clients-api-key-tooltip": "De API-sleutel is als een wachtwoord. Houd het geheim, houd het veilig.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "anilist-scrobbling-tooltip": "Laat Kavita om naar AniList uw leesvoortgang en recensies te Scrobblen (eenrichtingssynchronisatie)",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList scrobbelen",
+        "want-to-read-sync-label": "Willen Lezen Sync"
     },
     "user-holds": {
         "title": "Scrobble Holds",
@@ -1054,9 +1066,6 @@
         "backup-database-task-success": "Een taak voor het maken van een back-up van de database is in de wachtrij geplaatst",
         "download-logs-task": "Logboeken downloaden",
         "download-logs-task-desc": "Compileert alle logbestanden in een zip en downloadt deze.",
-        "analyze-files-task": "Analyseer bestanden",
-        "analyze-files-task-desc": "Voert een langlopende taak uit die bestanden analyseert om extensie en grootte te genereren. Dit mag slechts één keer worden uitgevoerd voor de v0.7-release. Niet nodig als je post v0.7 hebt geïnstalleerd.",
-        "analyze-files-task-success": "Bestandsanalyse is in de wachtrij geplaatst",
         "check-for-updates-task": "Controleer op updates",
         "check-for-updates-task-desc": "Kijk of er stabiele releases zijn vóór uw versie."
     },
