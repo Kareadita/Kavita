@@ -150,6 +150,16 @@ interface StoryLineItem {
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly FilterField = FilterField;
+  protected readonly AgeRating = AgeRating;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);
@@ -180,14 +190,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly location = inject(Location);
 
-  protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
-  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly FilterField = FilterField;
-  protected readonly AgeRating = AgeRating;
-  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -1212,6 +1214,4 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }, 10);
   }
-
-    protected readonly encodeURIComponent = encodeURIComponent;
 }

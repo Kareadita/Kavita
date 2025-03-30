@@ -20,6 +20,8 @@ import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {LanguageNamePipe} from "../../_pipes/language-name.pipe";
 import {AsyncPipe} from "@angular/common";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.component";
 
 @Component({
   selector: 'app-details-tab',
@@ -34,7 +36,8 @@ import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
     MangaFormatPipe,
     LanguageNamePipe,
     AsyncPipe,
-    SafeUrlPipe
+    SafeUrlPipe,
+    AgeRatingImageComponent
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
@@ -47,11 +50,13 @@ export class DetailsTabComponent {
 
   protected readonly PersonRole = PersonRole;
   protected readonly FilterField = FilterField;
+  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) metadata!: IHasCast;
   @Input() readingTime: IHasReadingTime | undefined;
+  @Input() ageRating: AgeRating | undefined;
   @Input() language: string | undefined;
-  @Input() format: MangaFormat = MangaFormat.UNKNOWN;
+  @Input() format: MangaFormat | undefined;
   @Input() releaseYear: number | undefined;
   @Input() genres: Array<Genre> = [];
   @Input() tags: Array<Tag> = [];
@@ -62,6 +67,4 @@ export class DetailsTabComponent {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
-
-  protected readonly MangaFormat = MangaFormat;
 }

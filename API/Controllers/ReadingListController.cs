@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.ReadingLists;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -23,13 +24,15 @@ public class ReadingListController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReadingListService _readingListService;
     private readonly ILocalizationService _localizationService;
+    private readonly IReaderService _readerService;
 
     public ReadingListController(IUnitOfWork unitOfWork, IReadingListService readingListService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, IReaderService readerService)
     {
         _unitOfWork = unitOfWork;
         _readingListService = readingListService;
         _localizationService = localizationService;
+        _readerService = readerService;
     }
 
     /// <summary>
@@ -128,7 +131,7 @@ public class ReadingListController : BaseApiController
     }
 
     /// <summary>
-    /// Deletes a list item from the list. Will reorder all item positions afterwards
+    /// Deletes a list item from the list. Item orders will update as a result.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
@@ -452,26 +455,38 @@ public class ReadingListController : BaseApiController
         return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
     }
 
+
     /// <summary>
-    /// Returns a list of characters associated with the reading list
+    /// Returns a list of a given role associated with the reading list
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <param name="role">PersonRole</param>
+    /// <returns></returns>
+    [HttpGet("people")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["readingListId", "role"])]
+    public ActionResult<IEnumerable<PersonDto>> GetPeopleByRoleForList(int readingListId, PersonRole role)
+    {
+        return Ok(_unitOfWork.ReadingListRepository.GetReadingListPeopleAsync(readingListId, role));
+    }
+
+    /// <summary>
+    /// Returns all people in given roles for a reading list
     /// </summary>
     /// <param name="readingListId"></param>
     /// <returns></returns>
-    [HttpGet("characters")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
-    public ActionResult<IEnumerable<PersonDto>> GetCharactersForList(int readingListId)
+    [HttpGet("all-people")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["readingListId"])]
+    public async Task<ActionResult<IEnumerable<PersonDto>>> GetAllPeopleForList(int readingListId)
     {
-        return Ok(_unitOfWork.ReadingListRepository.GetReadingListCharactersAsync(readingListId));
+        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListAllPeopleAsync(readingListId));
     }
-
-
 
     /// <summary>
     /// Returns the next chapter within the reading list
     /// </summary>
     /// <param name="currentChapterId"></param>
     /// <param name="readingListId"></param>
-    /// <returns>Chapter Id for next item, -1 if nothing exists</returns>
+    /// <returns>Chapter ID for next item, -1 if nothing exists</returns>
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int currentChapterId, int readingListId)
     {
@@ -576,5 +591,27 @@ public class ReadingListController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns random information about a Reading List
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [HttpGet("info")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["readingListId"])]
+    public async Task<ActionResult<ReadingListInfoDto?>> GetReadingListInfo(int readingListId)
+    {
+        var result = await _unitOfWork.ReadingListRepository.GetReadingListInfoAsync(readingListId);
+
+        if (result == null) return Ok(null);
+
+        var timeEstimate = _readerService.GetTimeEstimate(result.WordCount, result.Pages, result.IsAllEpub);
+
+        result.MinHoursToRead = timeEstimate.MinHours;
+        result.AvgHoursToRead = timeEstimate.AvgHours;
+        result.MaxHoursToRead = timeEstimate.MaxHours;
+
+        return Ok(result);
     }
 }

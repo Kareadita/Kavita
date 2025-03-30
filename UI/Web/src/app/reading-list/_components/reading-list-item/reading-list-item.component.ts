@@ -24,6 +24,8 @@ export class ReadingListItemComponent {
 
   @Input({required: true}) item!: ReadingListItem;
   @Input() position: number = 0;
+  @Input() showRemove: boolean = false;
+  @Input() showRead: boolean = true;
   @Input() libraryTypes: {[key: number]: LibraryType} = {};
   /**
    * If the Reading List is promoted or not

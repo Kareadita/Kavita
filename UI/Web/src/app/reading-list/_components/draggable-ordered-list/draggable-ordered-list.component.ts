@@ -13,7 +13,7 @@ import {
   TrackByFunction
 } from '@angular/core';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {NgClass, NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
+import {NgClass, NgFor, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {FormsModule} from "@angular/forms";
@@ -36,10 +36,14 @@ export interface ItemRemoveEvent {
   templateUrl: './draggable-ordered-list.component.html',
   styleUrls: ['./draggable-ordered-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
+  imports: [VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
     CdkDragHandle, TranslocoDirective, NgClass, FormsModule]
 })
 export class DraggableOrderedListComponent {
+
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly destroyRef = inject(DestroyRef);
+
 
   /**
    * After this many elements, drag and drop is disabled and we use a virtualized list instead
@@ -60,6 +64,10 @@ export class DraggableOrderedListComponent {
    */
   @Input() disabled: boolean = false;
   /**
+   * Disables remove button
+   */
+  @Input() disableRemove: boolean = false;
+  /**
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   @Input() bulkMode: boolean = false;
@@ -71,8 +79,6 @@ export class DraggableOrderedListComponent {
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  public readonly destroyRef = inject(DestroyRef);
 
   get BufferAmount() {
     return Math.min(this.items.length / 20, 20);

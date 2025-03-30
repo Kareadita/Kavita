@@ -28,12 +28,24 @@
     </div>
   }
 
-  <div class="mb-3 ms-1">
-    <h4 class="header">{{t('format-title')}}</h4>
-    <div class="ms-3">
-      <app-series-format [format]="format"></app-series-format> {{format | mangaFormat }}
+  @if (ageRating) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('age-rating-title')}}</h4>
+      <div class="ms-3">
+        <app-age-rating-image [rating]="ageRating" />
+      </div>
     </div>
-  </div>
+  }
+
+  @if (format) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('format-title')}}</h4>
+      <div class="ms-3">
+        <app-series-format [format]="format"></app-series-format> {{format | mangaFormat }}
+      </div>
+    </div>
+  }
+
 
   <div class="setting-section-break" aria-hidden="true"></div>
 
