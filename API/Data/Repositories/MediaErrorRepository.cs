@@ -15,10 +15,12 @@ public interface IMediaErrorRepository
 {
     void Attach(MediaError error);
     void Remove(MediaError error);
+    void Remove(IList<MediaError> errors);
     Task<MediaError> Find(string filename);
     IEnumerable<MediaErrorDto> GetAllErrorDtosAsync();
     Task<bool> ExistsAsync(MediaError error);
     Task DeleteAll();
+    Task<List<MediaError>> GetAllErrorsAsync(IList<string> comments);
 }
 
 public class MediaErrorRepository : IMediaErrorRepository
@@ -42,6 +44,11 @@ public class MediaErrorRepository : IMediaErrorRepository
     {
         if (error == null) return;
         _context.MediaError.Remove(error);
+    }
+
+    public void Remove(IList<MediaError> errors)
+    {
+        _context.MediaError.RemoveRange(errors);
     }
 
     public Task<MediaError?> Find(string filename)
@@ -70,5 +77,12 @@ public class MediaErrorRepository : IMediaErrorRepository
     {
         _context.MediaError.RemoveRange(await _context.MediaError.ToListAsync());
         await _context.SaveChangesAsync();
+    }
+
+    public Task<List<MediaError>> GetAllErrorsAsync(IList<string> comments)
+    {
+        return _context.MediaError
+            .Where(m => comments.Contains(m.Comment))
+            .ToListAsync();
     }
 }
