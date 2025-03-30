@@ -91,11 +91,13 @@
                   </div>
                 </div>
 
-                <div class="col-auto ms-2 d-none d-md-block btn-actions">
-                  <button [class]="formGroup.get('edit')?.value ? 'btn btn-primary' : 'btn btn-icon'" (click)="toggleReorder()" [ngbTooltip]="t('reorder-alt')">
-                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>
-                  </button>
-                </div>
+                @if (isOwnedReadingList) {
+                  <div class="col-auto ms-2 d-none d-md-block btn-actions">
+                    <button [class]="formGroup.get('edit')?.value ? 'btn btn-primary' : 'btn btn-icon'" (click)="toggleReorder()" [ngbTooltip]="t('reorder-alt')">
+                      <i class="fa-solid fa-list-ol" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                }
               </div>
             </div>
 
