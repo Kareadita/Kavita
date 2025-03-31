@@ -271,7 +271,7 @@ public class LocalizationService : ILocalizationService
         // This could use a lookup table or follow a naming convention
         try
         {
-            var cultureInfo = new System.Globalization.CultureInfo(fileName);
+            var cultureInfo = new System.Globalization.CultureInfo(fileName.Replace('_', '-'));
             return cultureInfo.NativeName;
         }
         catch
