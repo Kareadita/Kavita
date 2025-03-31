@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using API.Entities;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
 
@@ -12,7 +13,7 @@ public class MediaErrorBuilder : IEntityBuilder<MediaError>
     {
         _mediaError = new MediaError()
         {
-            FilePath = filePath,
+            FilePath = Parser.NormalizePath(filePath),
             Extension = Path.GetExtension(filePath).Replace(".", string.Empty).ToUpperInvariant()
         };
     }
