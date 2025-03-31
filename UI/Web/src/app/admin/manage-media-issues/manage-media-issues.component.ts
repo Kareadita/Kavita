@@ -2,22 +2,22 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
+  inject,
   OnInit,
   Output,
   QueryList,
-  ViewChildren,
-  inject,
-  DestroyRef
+  ViewChildren
 } from '@angular/core';
-import { BehaviorSubject, Observable, filter, shareReplay } from 'rxjs';
-import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
-import { KavitaMediaError } from '../_models/media-error';
-import { ServerService } from 'src/app/_services/server.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {BehaviorSubject, filter, Observable, shareReplay} from 'rxjs';
+import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
+import {KavitaMediaError} from '../_models/media-error';
+import {ServerService} from 'src/app/_services/server.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { FilterPipe } from '../../_pipes/filter.pipe';
+import {FilterPipe} from '../../_pipes/filter.pipe';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -28,8 +28,8 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     selector: 'app-manage-media-issues',
     templateUrl: './manage-media-issues.component.html',
     styleUrls: ['./manage-media-issues.component.scss'],
+    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule]
 })
 export class ManageMediaIssuesComponent implements OnInit {
 
