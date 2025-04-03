@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -11,10 +12,8 @@ import {
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
-import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
-import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
@@ -25,21 +24,17 @@ import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-    selector: 'app-metadata-builder',
-    templateUrl: './metadata-builder.component.html',
-    styleUrls: ['./metadata-builder.component.scss'],
-    imports: [
-        NgIf,
-        MetadataFilterRowComponent,
-        NgForOf,
-        CardActionablesComponent,
-        FormsModule,
-        NgbTooltip,
-        UpperCasePipe,
-        ReactiveFormsModule,
-        TranslocoDirective
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-metadata-builder',
+  templateUrl: './metadata-builder.component.html',
+  styleUrls: ['./metadata-builder.component.scss'],
+  imports: [
+      MetadataFilterRowComponent,
+      FormsModule,
+      NgbTooltip,
+      ReactiveFormsModule,
+      TranslocoDirective
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataBuilderComponent implements OnInit {
 

@@ -29,6 +29,11 @@
                            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
                            [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
         </ng-template>
+
+        <ng-template #noData>
+          <!-- TODO: Come back and figure this out -->
+          {{t('common.no-data')}}
+        </ng-template>
       </app-card-detail-layout>
     }
 

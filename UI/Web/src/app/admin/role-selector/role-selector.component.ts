@@ -14,13 +14,14 @@ import {AccountService} from 'src/app/_services/account.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective,} from "@jsverse/transloco";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
+import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 
 @Component({
   selector: 'app-role-selector',
   templateUrl: './role-selector.component.html',
   styleUrls: ['./role-selector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective]
+  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective, RoleLocalizedPipe]
 })
 export class RoleSelectorComponent implements OnInit {
 

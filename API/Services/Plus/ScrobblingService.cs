@@ -1027,7 +1027,7 @@ public class ScrobblingService : IScrobblingService
                 _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                 {
                     Comment = "AniList token has expired and needs rotating. Scrobbling wont work until then",
-                    Details = $"User: {evt.AppUser.UserName}",
+                    Details = $"User: {evt.AppUser.UserName}, Expired: {TokenService.GetTokenExpiry(evt.AppUser.AniListAccessToken)}",
                     LibraryId = evt.LibraryId,
                     SeriesId = evt.SeriesId
                 });

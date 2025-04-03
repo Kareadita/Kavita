@@ -161,7 +161,7 @@ public class ScannerService : IScannerService
         {
             if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
-                _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
+                _logger.LogTrace("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
 
@@ -186,7 +186,7 @@ public class ScannerService : IScannerService
         {
             if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
             {
-                _logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
+                _logger.LogTrace("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
             }
             BackgroundJob.Schedule(() => ScanLibrary(library.Id, false, true), TimeSpan.FromMinutes(1));

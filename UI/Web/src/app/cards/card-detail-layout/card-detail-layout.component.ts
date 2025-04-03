@@ -96,7 +96,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
-  @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
   @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;

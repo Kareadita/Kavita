@@ -1,6 +1,5 @@
-import { MangaFormat } from "../manga-format";
-import { SeriesFilterV2 } from "./v2/series-filter-v2";
-import {FilterField} from "./v2/filter-field";
+import {MangaFormat} from "../manga-format";
+import {SeriesFilterV2} from "./v2/series-filter-v2";
 
 export interface FilterItem<T> {
     title: string;
@@ -34,22 +33,22 @@ export const allSortFields = Object.keys(SortField)
 
 export const mangaFormatFilters = [
     {
-      title: 'Images',
+      title: 'images',
       value: MangaFormat.IMAGE,
       selected: false
     },
     {
-      title: 'EPUB',
+      title: 'epub',
       value: MangaFormat.EPUB,
       selected: false
     },
     {
-      title: 'PDF',
+      title: 'pdf',
       value: MangaFormat.PDF,
       selected: false
     },
     {
-      title: 'ARCHIVE',
+      title: 'archive',
       value: MangaFormat.ARCHIVE,
       selected: false
     }

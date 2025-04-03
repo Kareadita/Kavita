@@ -56,10 +56,10 @@
                   <span>{{null | defaultValue}}</span>
                 } @else {
                   @if (hasAdminRole(member)) {
-                    <app-tag-badge class="col-auto">{{t('admin')}}</app-tag-badge>
+                    <app-tag-badge class="col-auto">{{Role.Admin | roleLocalized}}</app-tag-badge>
                   } @else {
                     @for (role of roles; track role) {
-                      <app-tag-badge class="col-auto">{{role}}</app-tag-badge>
+                      <app-tag-badge class="col-auto">{{role | roleLocalized}}</app-tag-badge>
                     }
                   }
                 }

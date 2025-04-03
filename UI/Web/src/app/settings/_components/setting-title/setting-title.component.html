@@ -14,8 +14,8 @@
         </h6>
       </div>
 
-      <div class="col-auto text-end align-self-end justify-content-end edit-btn">
-        <button type="button" class="btn btn-icon btn-sm btn-alignment" (click)="toggleViewMode()" [disabled]="!canEdit">{{isEditMode ? t('common.close') : t('common.edit')}}</button>
+      <div class="col-auto text-end align-self-end justify-content-end">
+        <button type="button" class="btn btn-icon edit-btn btn-sm btn-alignment" (click)="toggleViewMode()" [disabled]="!canEdit">{{isEditMode ? t('common.close') : t('common.edit')}}</button>
       </div>
     </div>
   </div>

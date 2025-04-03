@@ -1,14 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {
-  DraggableOrderedListComponent, IndexUpdateEvent
+  DraggableOrderedListComponent,
+  IndexUpdateEvent
 } from "../../../reading-list/_components/draggable-ordered-list/draggable-ordered-list.component";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
 import {FilterService} from "../../../_services/filter.service";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -17,7 +16,8 @@ import {Breakpoint, UtilityService} from "../../../shared/_services/utility.serv
 
 @Component({
     selector: 'app-customize-dashboard-streams',
-    imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, ReactiveFormsModule, FilterPipe],
+    imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective,
+      ReactiveFormsModule, FilterPipe],
     templateUrl: './customize-dashboard-streams.component.html',
     styleUrls: ['./customize-dashboard-streams.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -162,4 +162,10 @@ public class TokenService : ITokenService
     {
         return !JwtHelper.IsTokenValid(token);
     }
+
+
+    public static DateTime GetTokenExpiry(string? token)
+    {
+        return JwtHelper.GetTokenExpiry(token);
+    }
 }

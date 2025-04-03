@@ -1217,7 +1217,8 @@
 
     "card-detail-layout": {
         "total-items": "{{count}} total items",
-        "jumpkey-count": "{{count}} Series"
+        "jumpkey-count": "{{count}} Series",
+        "no-data": "{{common.no-data}}"
     },
 
     "card-item": {
@@ -1608,7 +1609,6 @@
         "change-password-alt": "Change Password {{user}}",
         "resend": "Resend",
         "setup": "Setup",
-        "admin": "Admin",
         "last-active-header": "Last Active",
         "roles-header": "Roles",
         "name-header": "Name",
@@ -1621,6 +1621,17 @@
         "loading": "{{common.loading}}",
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email"
+    },
+
+    "role-localized-pipe": {
+        "admin": "Admin",
+        "download": "Download",
+        "change-password": "Change Password",
+        "bookmark": "Bookmark",
+        "change-restriction": "Change Restriction",
+        "login": "Login",
+        "read-only": "Read Only",
+        "promote": "Promote"
     },
 
     "edit-collection-tags": {
@@ -2392,7 +2403,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
 
     "customize-sidenav-streams": {
@@ -2507,6 +2519,14 @@
         "is-not-in-last": "Is not in last",
         "must-contains": "Must Contains",
         "is-empty": "Is Empty"
+    },
+
+    "log-level-pipe": {
+        "debug": "Debug",
+        "information": "Information",
+        "trace": "Trace",
+        "warning": "Warning",
+        "critical": "Critical"
     },
 
     "confirm": {

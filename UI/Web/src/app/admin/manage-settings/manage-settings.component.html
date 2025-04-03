@@ -170,14 +170,14 @@
         @if (settingsForm.get('loggingLevel'); as formControl) {
           <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
             <ng-template #view>
-              {{formControl.value | titlecase}}
+              {{formControl.value | logLevel}}
             </ng-template>
             <ng-template #edit>
 
               <select id="logging-level" aria-describedby="logging-level-help" class="form-select"  formControlName="loggingLevel"
                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
                 @for(level of logLevels; track level) {
-                  <option [value]="level">{{level | titlecase}}</option>
+                  <option [value]="level">{{level | logLevel}}</option>
                 }
               </select>
 
