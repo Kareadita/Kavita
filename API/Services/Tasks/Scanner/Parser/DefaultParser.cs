@@ -130,9 +130,9 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         }
 
         // Patch is SeriesSort from ComicInfo
-        if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+        if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
         {
-            info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+            info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
         }
 
     }
