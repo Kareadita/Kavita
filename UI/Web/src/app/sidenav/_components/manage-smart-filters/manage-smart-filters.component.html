@@ -21,10 +21,17 @@
           }
           <a [href]="baseUrl + 'all-series?' + f.filter" [target]="target">{{f.name}}</a>
         </span>
-        <button class="btn btn-danger float-end" (click)="deleteFilter(f)">
-          <i class="fa-solid fa-trash" aria-hidden="true"></i>
-          <span class="visually-hidden">{{t('delete')}}</span>
-        </button>
+        <div class="float-end">
+          <button class="btn btn-actions me-2" (click)="editFilter(f)">
+            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('edit')}}</span>
+          </button>
+
+          <button class="btn btn-danger float-end" (click)="deleteFilter(f)">
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('delete')}}</span>
+          </button>
+        </div>
       </li>
     } @empty {
       <li class="list-group-item">

@@ -1,13 +1,15 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input} from '@angular/core';
 import {FilterService} from "../../../_services/filter.service";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {ActionService} from "../../../_services/action.service";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {RouterLink} from "@angular/router";
 import {APP_BASE_HREF} from "@angular/common";
+import {EditSmartFilterModalComponent} from "../edit-smart-filter-modal/edit-smart-filter-modal.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-manage-smart-filters',
@@ -21,6 +23,8 @@ export class ManageSmartFiltersComponent {
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionService = inject(ActionService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly modelService = inject(NgbModal);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
   @Input() target: '_self' | '_blank' = '_blank';
@@ -60,6 +64,18 @@ export class ManageSmartFiltersComponent {
       if (!success) return;
       this.resetFilter();
       this.loadData();
+    });
+  }
+
+  editFilter(f: SmartFilter) {
+    const modalRef = this.modelService.open(EditSmartFilterModalComponent, {  size: 'xl', fullscreen: 'md' });
+    modalRef.componentInstance.smartFilter = f;
+    modalRef.componentInstance.allFilters = this.filters;
+    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result) => {
+      if (result) {
+        this.resetFilter();
+        this.loadData();
+      }
     });
   }
 
