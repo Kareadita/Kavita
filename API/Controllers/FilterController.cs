@@ -24,11 +24,13 @@ public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
+    private readonly IStreamService _streamService;
 
-    public FilterController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
+    public FilterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IStreamService streamService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
+        _streamService = streamService;
     }
 
     /// <summary>
@@ -151,6 +153,8 @@ public class FilterController : BaseApiController
         filter.Name = name.Trim();
         _unitOfWork.AppUserSmartFilterRepository.Update(filter);
         await _unitOfWork.CommitAsync();
+
+        await _streamService.RenameSmartFilterStreams(filter);
         return Ok();
     }
 }

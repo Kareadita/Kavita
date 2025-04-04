@@ -35,6 +35,7 @@ public interface IStreamService
     Task DeleteExternalSource(int userId, int externalSourceId);
     Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId);
     Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId);
+    Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter);
 }
 
 public class StreamService : IStreamService
@@ -380,6 +381,24 @@ public class StreamService : IStreamService
         }
 
         _unitOfWork.UserRepository.Delete([streams2]);
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter)
+    {
+        var sideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreamWithFilter(smartFilter.Id);
+        var dashboardStreams = await _unitOfWork.UserRepository.GetDashboardStreamWithFilter(smartFilter.Id);
+
+        foreach (var sideNavStream in sideNavStreams)
+        {
+            sideNavStream.Name = smartFilter.Name;
+        }
+
+        foreach (var dashboardStream in dashboardStreams)
+        {
+            dashboardStream.Name = smartFilter.Name;
+        }
 
         await _unitOfWork.CommitAsync();
     }
