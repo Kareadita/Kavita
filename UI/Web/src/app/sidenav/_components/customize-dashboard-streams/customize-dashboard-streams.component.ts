@@ -30,6 +30,7 @@ export class CustomizeDashboardStreamsComponent {
   private readonly utilityService = inject(UtilityService);
 
   items: DashboardStream[] = [];
+  allSmartFilters: SmartFilter[] = [];
   smartFilters: SmartFilter[] = [];
   accessibilityMode: boolean = false;
   listForm: FormGroup = new FormGroup({
@@ -54,10 +55,16 @@ export class CustomizeDashboardStreamsComponent {
         this.accessibilityMode = true;
       }
 
-      const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
-      this.smartFilters = results[1].filter(d => !smartFilterStreams.has(d.name));
+      this.allSmartFilters = results[1];
+      this.updateSmartFilters();
+
       this.cdRef.markForCheck();
     });
+  }
+
+  updateSmartFilters() {
+    const smartFilterStreams = new Set(this.items.filter(d => !d.isProvided).map(d => d.name));
+    this.smartFilters = this.allSmartFilters.filter(d => !smartFilterStreams.has(d.name));
   }
 
   addFilterToStream(filter: SmartFilter) {
@@ -77,6 +84,19 @@ export class CustomizeDashboardStreamsComponent {
     this.items[position].visible = !this.items[position].visible;
     this.cdRef.markForCheck();
     this.dashboardService.updateDashboardStream(this.items[position]).subscribe();
+  }
+
+  delete(item: DashboardStream) {
+    this.dashboardService.deleteSmartFilterStream(item.id).subscribe({
+      next: () => {
+        this.items = this.items.filter(d => d.id !== item.id);
+        this.updateSmartFilters();
+        this.cdRef.markForCheck();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
 }

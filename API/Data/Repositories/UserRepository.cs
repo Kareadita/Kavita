@@ -92,6 +92,7 @@ public interface IUserRepository
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
     Task<IList<AppUserDashboardStream>> GetAllDashboardStreams();
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
+    Task<AppUserDashboardStream?> GetDashboardStreamWithUser(int streamId);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
@@ -397,6 +398,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 
+    public async Task<AppUserDashboardStream?> GetDashboardStreamWithUser(int streamId)
+    {
+        return await _context.AppUserDashboardStream
+            .Include(d => d.SmartFilter)
+            .Include(d => d.AppUser)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
     public async Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId)
     {
         return await _context.AppUserDashboardStream
@@ -466,6 +475,7 @@ public class UserRepository : IUserRepository
             .Include(d => d.SmartFilter)
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
+
     public async Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId)
     {
         return await _context.AppUserSideNavStream

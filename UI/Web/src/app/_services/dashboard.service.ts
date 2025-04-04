@@ -26,4 +26,8 @@ export class DashboardService {
   createDashboardStream(smartFilterId: number) {
     return this.httpClient.post<DashboardStream>(this.baseUrl + 'stream/add-dashboard-stream?smartFilterId=' + smartFilterId, {});
   }
+
+  deleteSmartFilterStream(streamId: number) {
+    return this.httpClient.post(this.baseUrl + 'stream/delete-smart-filter-dashboard-stream?dashboardStreamId=' + streamId, {});
+  }
 }

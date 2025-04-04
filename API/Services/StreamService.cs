@@ -34,6 +34,7 @@ public interface IStreamService
     Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
     Task DeleteExternalSource(int userId, int externalSourceId);
     Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId);
+    Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId);
 }
 
 public class StreamService : IStreamService
@@ -92,6 +93,7 @@ public class StreamService : IStreamService
 
         var ret = new DashboardStreamDto()
         {
+            Id = createdStream.Id,
             Name = createdStream.Name,
             IsProvided = createdStream.IsProvided,
             Visible = createdStream.Visible,
@@ -346,6 +348,7 @@ public class StreamService : IStreamService
 
         await _unitOfWork.CommitAsync();
     }
+
     public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId)
     {
         var streams2 = await _unitOfWork.UserRepository.GetSideNavStreamWithUser(sideNavStreamId);
@@ -355,6 +358,23 @@ public class StreamService : IStreamService
 
 
         if (streams2.StreamType != SideNavStreamType.SmartFilter)
+        {
+            throw new KavitaException("sidenav-stream-only-delete-smart-filter");
+        }
+
+        _unitOfWork.UserRepository.Delete([streams2]);
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId)
+    {
+        var streams2 = await _unitOfWork.UserRepository.GetDashboardStreamWithUser(dashboardStreamId);
+        if (streams2 == null) throw new KavitaException("dashboard-stream-doesnt-exist");
+
+        if (streams2.AppUser.Id != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+        if (streams2.StreamType != DashboardStreamType.SmartFilter)
         {
             throw new KavitaException("sidenav-stream-only-delete-smart-filter");
         }
