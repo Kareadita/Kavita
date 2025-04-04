@@ -376,7 +376,7 @@ public class StreamService : IStreamService
 
         if (streams2.StreamType != DashboardStreamType.SmartFilter)
         {
-            throw new KavitaException("sidenav-stream-only-delete-smart-filter");
+            throw new KavitaException("dashboard-stream-only-delete-smart-filter");
         }
 
         _unitOfWork.UserRepository.Delete([streams2]);
