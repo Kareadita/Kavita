@@ -204,4 +204,12 @@ public class StreamController : BaseApiController
         await _streamService.UpdateSideNavStreamBulk(User.GetUserId(), dto);
         return Ok();
     }
+
+    [HttpPost("delete-smart-filter-side-nav-stream")]
+    public async Task<ActionResult> DeleteSmartFilterAsSideNavStream([FromQuery] int sideNavStreamId)
+    {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        await _streamService.DeleteSideNavSmartFilterStream(User.GetUserId(), sideNavStreamId);
+        return Ok();
+    }
 }

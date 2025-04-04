@@ -17,6 +17,7 @@ export class SidenavStreamListItemComponent {
   @Input({required: true}) item!: SideNavStream;
   @Input({required: true}) position: number = 0;
   @Output() hide: EventEmitter<SideNavStream> = new EventEmitter<SideNavStream>();
+  @Output() delete: EventEmitter<SideNavStream> = new EventEmitter<SideNavStream>();
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly baseUrl = inject(APP_BASE_HREF);
 }

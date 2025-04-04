@@ -93,6 +93,10 @@ export class NavService {
     return this.httpClient.post(this.baseUrl + 'stream/bulk-sidenav-stream-visibility', {ids: streamIds, visibility: targetVisibility});
   }
 
+  deleteSideNavSmartFilter(streamId: number) {
+    return this.httpClient.post(this.baseUrl + 'stream/delete-smart-filter-side-nav-stream?sideNavStreamId=' + streamId, {});
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */

@@ -95,6 +95,7 @@ public interface IUserRepository
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
+    Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
@@ -459,10 +460,17 @@ public class UserRepository : IUserRepository
         return sideNavStreams;
     }
 
-    public async Task<AppUserSideNavStream> GetSideNavStream(int streamId)
+    public async Task<AppUserSideNavStream?> GetSideNavStream(int streamId)
     {
         return await _context.AppUserSideNavStream
             .Include(d => d.SmartFilter)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+    public async Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .Include(d => d.AppUser)
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 

@@ -9,11 +9,15 @@
         }
 
         <span class="float-end">
-            <button class="btn btn-icon p-0" (click)="hide.emit(item)">
-              <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('remove')}}</span>
-            </button>
-          </span>
+          <button class="btn btn-icon p-0" (click)="hide.emit(item)">
+            <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('remove')}}</span>
+          </button>
+          <button *ngIf="item.streamType===SideNavStreamType.SmartFilter" class="btn btn-icon" (click)="delete.emit(item)">
+          <i class="fa-solid fa-trash" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('delete')}}</span>
+        </button>
+        </span>
       </h5>
       <div class="meta">
         <div class="ps-1">
