@@ -18,7 +18,7 @@ import { Action, ActionFactoryService, ActionItem } from '../../../_services/act
 import { ActionService } from '../../../_services/action.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, firstValueFrom, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
@@ -221,11 +221,12 @@ export class SideNavComponent implements OnInit {
     this.showAllSubject.next(false);
   }
 
-  drop($event: CdkDragDrop<any, any, SideNavStream>) {
+  async drop($event: CdkDragDrop<any, any, SideNavStream>) {
     const stream = $event.item.data;
-    // Offset index as the home button is included here
-    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-1).subscribe({
+    const offSet = await this.streamListOffset();
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-offSet).subscribe({
       next: () => {
+        this.showAllSubject.next(true);
         this.cdRef.markForCheck();
       },
       error: err => {
@@ -233,6 +234,29 @@ export class SideNavComponent implements OnInit {
         this.toastr.error(translate('errors.generic'));
       }
     });
+  }
+
+  // Non SideNavStream items that are part of the list
+  private async streamListOffset(): Promise<number> {
+    let offset: number = 1;
+    if (this.showAll) {
+      offset++;
+
+      if (!this.isReadOnly) {
+        offset++;
+      }
+
+      // Filter bar offset, since the blow check isn't working
+      offset++;
+
+      // Why does this only return 10 streams? Even when showAll is true?
+      //const streams = await firstValueFrom(this.navStreams$.pipe(take(1)))
+      //if (streams.length > this.ItemLimit) {
+      //  offset++;
+      //}
+    }
+
+    return offset;
   }
 
   protected readonly Breakpoint = Breakpoint;
