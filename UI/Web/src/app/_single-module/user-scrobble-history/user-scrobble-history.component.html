@@ -40,7 +40,7 @@
 
     <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('last-modified-header')}}
+        {{t('created-header')}}
       </ng-template>
       <ng-template let-value="value" ngx-datatable-cell-template>
         {{value | utcToLocalTime | defaultValue }}
