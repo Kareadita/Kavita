@@ -2,7 +2,9 @@ import {
   AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ContentChild, ElementRef,
+  Component,
+  ContentChild,
+  ElementRef,
   inject,
   Input,
   TemplateRef
@@ -47,6 +49,9 @@ export class SettingSwitchComponent implements AfterContentInit {
 
       const element = this.elementRef.nativeElement;
       const inputElement = element.querySelector('input');
+
+      // If no id, generate a random id and assign it to the input
+      inputElement.id = crypto.randomUUID();
 
       if (inputElement && inputElement.id) {
         this.labelId = inputElement.id;

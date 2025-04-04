@@ -35,10 +35,10 @@
     [count]="pageInfo.totalElements"
     [offset]="pageInfo.pageNumber"
     [limit]="pageInfo.size"
-    [sorts]="[{prop: 'lastModifiedUtc', dir: 'desc'}]"
+    [sorts]="[{prop: 'createdUtc', dir: 'desc'}]"
   >
 
-    <ngx-datatable-column prop="lastModifiedUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('last-modified-header')}}
       </ng-template>

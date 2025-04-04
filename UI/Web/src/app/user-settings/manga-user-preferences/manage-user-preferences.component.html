@@ -9,12 +9,12 @@
       <ng-container>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')">
+          <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')" labelId="locale">
             <ng-template #view>
               {{Locale | titlecase}}
             </ng-template>
             <ng-template #edit>
-              <select class="form-select" aria-describedby="global-header" formControlName="locale">
+              <select class="form-select" aria-describedby="global-header" formControlName="locale" id="locale">
                 @for(opt of locales; track opt.renderName) {
                   <option [value]="opt.fileName">{{opt.renderName | titlecase}} ({{opt.translationCompletion | number:'1.0-1'}}%)</option>
                 }
@@ -27,7 +27,7 @@
           <app-setting-switch [title]="t('blur-unread-summaries-label')" [subtitle]="t('blur-unread-summaries-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="blur-unread-summaries"
                        formControlName="blurUnreadSummaries" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -40,7 +40,7 @@
           <app-setting-switch [title]="t('prompt-on-download-label')" [subtitle]="t('prompt-on-download-tooltip', {size: '100'})">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="prompt-on-download"
                        formControlName="promptForDownloadSize" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -52,7 +52,7 @@
           <app-setting-switch [title]="t('disable-animations-label')" [subtitle]="t('disable-animations-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="disable-animations"
                        formControlName="noTransitions" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -64,7 +64,7 @@
           <app-setting-switch [title]="t('collapse-series-relationships-label')" [subtitle]="t('collapse-series-relationships-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="collapse-series-relationships"
                        formControlName="collapseSeriesRelationships" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -76,7 +76,7 @@
           <app-setting-switch [title]="t('share-series-reviews-label')" [subtitle]="t('share-series-reviews-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="share-series-reviews"
                        formControlName="shareReviews" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -96,7 +96,8 @@
             <app-setting-switch [title]="t('anilist-scrobbling-label')" [subtitle]="t('anilist-scrobbling-tooltip')">
               <ng-template #switch>
                 <div class="form-check form-switch float-end">
-                  <input id="setting-anilist-scrobbling" type="checkbox" class="form-check-input" formControlName="aniListScrobblingEnabled">
+                  <input id="setting-anilist-scrobbling" type="checkbox"
+                         class="form-check-input" formControlName="aniListScrobblingEnabled">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -245,7 +246,7 @@
           <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="emulate-comic-book"
                        formControlName="emulateBook" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -257,7 +258,7 @@
           <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="swipe-to-paginate"
                        formControlName="swipeToPaginate" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -269,7 +270,7 @@
           <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="allow-auto-webtoon-reader"
                        formControlName="allowAutomaticWebtoonReaderDetection" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
@@ -286,7 +287,7 @@
           <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch"
+                <input type="checkbox" role="switch" id="tap-to-paginate"
                        formControlName="bookReaderTapToPaginate" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
