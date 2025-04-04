@@ -134,7 +134,7 @@ bootstrapApplication(AppComponent, {
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
           storage: { useValue: localStorage },
-          ttl: 604800
+          ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
         }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

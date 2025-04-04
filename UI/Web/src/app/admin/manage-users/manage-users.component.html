@@ -36,13 +36,17 @@
               </span>
           </td>
           <td>
-            @if (!hasAdminRole(member) && member.libraries.length > 0) {
-              @if (member.libraries.length > 5) {
-                {{t('too-many-libraries')}}
-              }
-              @else {
-                @for(lib of member.libraries; track lib.name) {
-                  <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
+            @if (member.libraries.length > 0) {
+              @if (hasAdminRole(member)) {
+                {{t('all-libraries')}}
+              } @else {
+                @if (member.libraries.length > 5) {
+                  {{t('too-many-libraries')}}
+                }
+                @else {
+                  @for(lib of member.libraries; track lib.name) {
+                    <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
+                  }
                 }
               }
             } @else {
