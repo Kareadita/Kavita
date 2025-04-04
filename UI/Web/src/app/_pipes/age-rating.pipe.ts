@@ -10,7 +10,7 @@ import {TranslocoService} from "@jsverse/transloco";
 })
 export class AgeRatingPipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
 
   transform(value: AgeRating | AgeRatingDto | undefined): string {
     if (value === undefined || value === null) return this.translocoService.translate('age-rating-pipe.unknown');
