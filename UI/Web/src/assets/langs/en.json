@@ -1075,7 +1075,8 @@
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
         "more": "More",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "edit": "{{common.edit}}"
     },
 
     "browse-authors": {

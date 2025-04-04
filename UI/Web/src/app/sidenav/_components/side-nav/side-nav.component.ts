@@ -62,12 +62,14 @@ export class SideNavComponent implements OnInit {
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+  homeActions: ActionItem<void>[] = this.actionFactoryService.getSideNavHomeActions(this.handleHomeAction.bind(this));
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
     return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
   showAll: boolean = false;
+  edit: boolean = false;
   totalSize = 0;
   isReadOnly = false;
 
@@ -181,9 +183,25 @@ export class SideNavComponent implements OnInit {
     }
   }
 
+  async handleHomeAction(action: ActionItem<void>) {
+    switch (action.action) {
+      case Action.Edit:
+        this.showMore(true);
+        break;
+      default:
+        break;
+    }
+  }
+
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
       action.callback(action, library);
+    }
+  }
+
+  performHomeAction(action: ActionItem<void>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action)
     }
   }
 
@@ -211,22 +229,24 @@ export class SideNavComponent implements OnInit {
     this.navService.toggleSideNav();
   }
 
-  showMore() {
+  showMore(edit: boolean = false) {
     this.showAllSubject.next(true);
+    this.edit = edit;
   }
 
   showLess() {
     this.filterQuery = '';
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
+    this.edit = false;
   }
 
   async drop($event: CdkDragDrop<any, any, SideNavStream>) {
     const stream = $event.item.data;
-    const offSet = await this.streamListOffset();
-    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-offSet).subscribe({
+    // Offset the home, back, and customize button
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-3).subscribe({
       next: () => {
-        this.showAllSubject.next(true);
+        this.showAllSubject.next(this.showAll);
         this.cdRef.markForCheck();
       },
       error: err => {
@@ -234,29 +254,6 @@ export class SideNavComponent implements OnInit {
         this.toastr.error(translate('errors.generic'));
       }
     });
-  }
-
-  // Non SideNavStream items that are part of the list
-  private async streamListOffset(): Promise<number> {
-    let offset: number = 1;
-    if (this.showAll) {
-      offset++;
-
-      if (!this.isReadOnly) {
-        offset++;
-      }
-
-      // Filter bar offset, since the blow check isn't working
-      offset++;
-
-      // Why does this only return 10 streams? Even when showAll is true?
-      //const streams = await firstValueFrom(this.navStreams$.pipe(take(1)))
-      //if (streams.length > this.ItemLimit) {
-      //  offset++;
-      //}
-    }
-
-    return offset;
   }
 
   protected readonly Breakpoint = Breakpoint;
