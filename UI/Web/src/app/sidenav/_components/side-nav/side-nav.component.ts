@@ -23,17 +23,19 @@ import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {WikiLink} from "../../../_models/wiki";
 import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
+import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-side-nav',
-    imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip, NgClass, AsyncPipe],
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip, NgClass, AsyncPipe, CdkDropList, CdkDrag],
     templateUrl: './side-nav.component.html',
     styleUrls: ['./side-nav.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -51,6 +53,7 @@ export class SideNavComponent implements OnInit {
   public readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly toastr = inject(ToastrService)
 
   protected readonly WikiLink = WikiLink;
   protected readonly ItemLimit = 10;
@@ -88,7 +91,7 @@ export class SideNavComponent implements OnInit {
     })
   );
 
-  navStreams$ = merge(
+  navStreams$: Observable<SideNavStream[]> = merge(
     this.showAll$.pipe(
       startWith(false),
       distinctUntilChanged(),
@@ -216,6 +219,20 @@ export class SideNavComponent implements OnInit {
     this.filterQuery = '';
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
+  }
+
+  drop($event: CdkDragDrop<any, any, SideNavStream>) {
+    const stream = $event.item.data;
+    // Offset index as the home button is included here
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-1).subscribe({
+      next: () => {
+        this.cdRef.markForCheck();
+      },
+      error: err => {
+        console.error(err);
+        this.toastr.error(translate('errors.generic'));
+      }
+    });
   }
 
   protected readonly Breakpoint = Breakpoint;
