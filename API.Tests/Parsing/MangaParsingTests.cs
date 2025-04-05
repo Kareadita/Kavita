@@ -71,6 +71,7 @@ public class MangaParsingTests
     [InlineData("죽음 13회", "13")]
     [InlineData("동의보감 13장", "13")]
     [InlineData("몰?루 아카이브 7.5권", "7.5")]
+    [InlineData("주술회전 1.5권", "1.5")]
     [InlineData("63권#200", "63")]
     [InlineData("시즌34삽화2", "34")]
     [InlineData("Accel World Chapter 001 Volume 002", "2")]
