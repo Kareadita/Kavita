@@ -14,12 +14,17 @@
           <div class="row g-0">
             <div class="mb-3" style="width:100%">
               <label for="email" class="form-label">{{t('email')}}</label>
-              <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
-              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
-                <div *ngIf="email?.errors?.required">
-                  {{t('required-field')}}
+              <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required
+                     [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+              @if (inviteForm.dirty || !inviteForm.untouched) {
+                <div id="inviteForm-validations" class="invalid-feedback">
+                  @if (email?.errors?.required) {
+                    <div>
+                      {{t('required-field')}}
+                    </div>
+                  }
                 </div>
-              </div>
+              }
             </div>
           </div>
 
@@ -41,8 +46,7 @@
         </form>
       }
 
-
-      <ng-container *ngIf="emailLink !== ''">
+      @if (emailLink !== '') {
         <h4>{{t('setup-user-title')}}</h4>
         <p>{{t('setup-user-description')}}</p>
         @if (inviteError) {
@@ -52,17 +56,23 @@
         }
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
         <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
-      </ng-container>
+      }
 
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-{{invited ? 'primary' : 'secondary'}}" (click)="close()">
         {{invited ? t('cancel') : t('close')}}
       </button>
-      <button *ngIf="!invited" type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
-        <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span>{{isSending ? t('inviting') : t('invite')}}</span>
-      </button>
+
+      @if (!invited) {
+        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
+          @if (isSending) {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          }
+          <span>{{isSending ? t('inviting') : t('invite')}}</span>
+        </button>
+      }
+
     </div>
   </div>
 </ng-container>

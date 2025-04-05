@@ -1,17 +1,16 @@
 import {ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
-import { InviteUserResponse } from 'src/app/_models/auth/invite-user-response';
-import { Library } from 'src/app/_models/library/library';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
-import { AccountService } from 'src/app/_services/account.service';
-import { ApiKeyComponent } from '../../user-settings/api-key/api-key.component';
-import { RestrictionSelectorComponent } from '../../user-settings/restriction-selector/restriction-selector.component';
-import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
-import { RoleSelectorComponent } from '../role-selector/role-selector.component';
-import { NgIf } from '@angular/common';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
+import {InviteUserResponse} from 'src/app/_models/auth/invite-user-response';
+import {Library} from 'src/app/_models/library/library';
+import {AgeRating} from 'src/app/_models/metadata/age-rating';
+import {AccountService} from 'src/app/_services/account.service';
+import {ApiKeyComponent} from '../../user-settings/api-key/api-key.component';
+import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
+import {LibrarySelectorComponent} from '../library-selector/library-selector.component';
+import {RoleSelectorComponent} from '../role-selector/role-selector.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
@@ -19,9 +18,15 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
-    imports: [NgIf, ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective, SafeHtmlPipe]
+    imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent,
+      ApiKeyComponent, TranslocoDirective, SafeHtmlPipe]
 })
 export class InviteUserComponent implements OnInit {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  protected readonly modal = inject(NgbActiveModal);
 
   /**
    * Maintains if the backend is sending an email
@@ -35,15 +40,13 @@ export class InviteUserComponent implements OnInit {
   invited: boolean = false;
   inviteError: boolean = false;
 
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  makeLink: (val: string) => string = (val: string) => {return this.emailLink};
+  makeLink: (val: string) => string = (_: string) => {return this.emailLink};
 
-  public get hasAdminRoleSelected() { return this.selectedRoles.includes('Admin'); };
+  get hasAdminRoleSelected() { return this.selectedRoles.includes('Admin'); };
 
-  public get email() { return this.inviteForm.get('email'); }
+  get email() { return this.inviteForm.get('email'); }
 
-  constructor(public modal: NgbActiveModal, private accountService: AccountService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
@@ -88,14 +91,17 @@ export class InviteUserComponent implements OnInit {
 
   updateRoleSelection(roles: Array<string>) {
     this.selectedRoles = roles;
+    this.cdRef.markForCheck();
   }
 
   updateLibrarySelection(libraries: Array<Library>) {
     this.selectedLibraries = libraries.map(l => l.id);
+    this.cdRef.markForCheck();
   }
 
   updateRestrictionSelection(restriction: AgeRestriction) {
     this.selectedRestriction = restriction;
+    this.cdRef.markForCheck();
   }
 
 }

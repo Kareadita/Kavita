@@ -1,47 +1,62 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { take, debounceTime } from 'rxjs/operators';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { MessageHubService, Message, EVENTS } from 'src/app/_services/message-hub.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {debounceTime, take} from 'rxjs/operators';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { NgIf, DecimalPipe } from '@angular/common';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {DecimalPipe} from '@angular/common';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
-
 @Component({
-    selector: 'app-all-series',
-    templateUrl: './all-series.component.html',
-    styleUrls: ['./all-series.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
+  selector: 'app-all-series',
+  templateUrl: './all-series.component.html',
+  styleUrls: ['./all-series.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent,
+    DecimalPipe, TranslocoDirective],
 })
 export class AllSeriesComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly seriesService = inject(SeriesService);
+  private readonly titleService = inject(Title);
+  private readonly actionService = inject(ActionService);
+  private readonly hubService = inject(MessageHubService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
 
   title: string = translate('side-nav.all-series');
   series: Series[] = [];
@@ -53,7 +68,7 @@ export class AllSeriesComponent implements OnInit {
   filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
-  private readonly destroyRef = inject(DestroyRef);
+
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -103,13 +118,10 @@ export class AllSeriesComponent implements OnInit {
     }
   }
 
-  constructor(private router: Router, private seriesService: SeriesService,
-    private titleService: Title, private actionService: ActionService,
-    public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, private route: ActivatedRoute,
-    private filterUtilityService: FilterUtilitiesService, private jumpbarService: JumpbarService,
-    private readonly cdRef: ChangeDetectorRef) {
 
+
+
+  constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
@@ -140,7 +152,7 @@ export class AllSeriesComponent implements OnInit {
       return;
     }
 
-    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((_) => {
       this.loadPage();
     });
   }
@@ -163,5 +175,5 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }
