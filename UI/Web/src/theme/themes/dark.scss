@@ -55,6 +55,9 @@
     /* Override bootstrap css variables */
     --bs-body-bg: #1f2020;
     --bs-primary-rgb: var(--primary-color);
+    --select2-selection-text-color: var(--dropdown-item-hover-text-color);
+    --select2-option-highlighted-background: var(--dropdown-item-hover-bg-color);
+
 
 
     /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
