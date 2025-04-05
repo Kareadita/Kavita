@@ -52,6 +52,7 @@ export class SideNavComponent implements OnInit {
   protected readonly ItemLimit = 10;
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
@@ -62,7 +63,7 @@ export class SideNavComponent implements OnInit {
     return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
   showAll: boolean = false;
-  edit: boolean = false;
+  editMode: boolean = false;
   totalSize = 0;
   isReadOnly = false;
 
@@ -224,15 +225,15 @@ export class SideNavComponent implements OnInit {
 
   showMore(edit: boolean = false) {
     this.showAllSubject.next(true);
-    this.edit = edit;
+    this.editMode = edit;
     this.cdRef.markForCheck();
   }
 
   showLess() {
     this.filterQuery = '';
-    this.cdRef.markForCheck();
     this.showAllSubject.next(false);
-    this.edit = false;
+    this.editMode = false;
+    this.cdRef.markForCheck();
   }
 
   async drop($event: CdkDragDrop<any, any, SideNavStream>) {
@@ -249,6 +250,4 @@ export class SideNavComponent implements OnInit {
       }
     });
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }
