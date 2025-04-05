@@ -161,6 +161,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   updateSmartFilters() {
     const existingSmartFilterStreams = new Set(this.items.filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
     this.smartFilters = this.allSmartFilters.filter(d => !existingSmartFilterStreams.has(d.name));
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {

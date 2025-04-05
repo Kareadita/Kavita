@@ -1,24 +1,17 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
-import { ImageService } from 'src/app/_services/image.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
-import { Library, LibraryType } from '../../../_models/library/library';
-import { AccountService } from '../../../_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from '../../../_services/action-factory.service';
-import { ActionService } from '../../../_services/action.service';
-import { NavService } from '../../../_services/nav.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
+import {Library, LibraryType} from '../../../_models/library/library';
+import {AccountService} from '../../../_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from '../../../_services/action-factory.service';
+import {ActionService} from '../../../_services/action.service';
+import {NavService} from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {BehaviorSubject, firstValueFrom, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
@@ -232,6 +225,7 @@ export class SideNavComponent implements OnInit {
   showMore(edit: boolean = false) {
     this.showAllSubject.next(true);
     this.edit = edit;
+    this.cdRef.markForCheck();
   }
 
   showLess() {
@@ -244,7 +238,7 @@ export class SideNavComponent implements OnInit {
   async drop($event: CdkDragDrop<any, any, SideNavStream>) {
     const stream = $event.item.data;
     // Offset the home, back, and customize button
-    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex-3).subscribe({
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
       next: () => {
         this.showAllSubject.next(this.showAll);
         this.cdRef.markForCheck();

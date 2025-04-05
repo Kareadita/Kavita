@@ -57,7 +57,7 @@ export class EditSmartFilterModalComponent implements OnInit {
           this.smartFilterForm.get('name')!.setErrors({duplicateName: true});
         }
 
-        this.cdRef.detectChanges();
+        this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();

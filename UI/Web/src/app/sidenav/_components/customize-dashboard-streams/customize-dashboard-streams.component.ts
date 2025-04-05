@@ -1,14 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
-  DraggableOrderedListComponent, IndexUpdateEvent
+  DraggableOrderedListComponent,
+  IndexUpdateEvent
 } from "../../../reading-list/_components/draggable-ordered-list/draggable-ordered-list.component";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
 import {FilterService} from "../../../_services/filter.service";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -65,6 +65,7 @@ export class CustomizeDashboardStreamsComponent {
   updateSmartFilters() {
     const smartFilterStreams = new Set(this.items.filter(d => !d.isProvided).map(d => d.name));
     this.smartFilters = this.allSmartFilters.filter(d => !smartFilterStreams.has(d.name));
+    this.cdRef.markForCheck();
   }
 
   addFilterToStream(filter: SmartFilter) {

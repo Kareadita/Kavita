@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -11,6 +12,7 @@ using API.Helpers;
 using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -43,12 +45,14 @@ public class StreamService : IStreamService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly ILogger<StreamService> _logger;
 
-    public StreamService(IUnitOfWork unitOfWork, IEventHub eventHub, ILocalizationService localizationService)
+    public StreamService(IUnitOfWork unitOfWork, IEventHub eventHub, ILocalizationService localizationService, ILogger<StreamService>  logger)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = true)
@@ -352,37 +356,52 @@ public class StreamService : IStreamService
 
     public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId)
     {
-        var streams2 = await _unitOfWork.UserRepository.GetSideNavStreamWithUser(sideNavStreamId);
-        if (streams2 == null) throw new KavitaException("sidenav-stream-doesnt-exist");
-
-        if (streams2.AppUser.Id != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
-
-
-        if (streams2.StreamType != SideNavStreamType.SmartFilter)
+        try
         {
-            throw new KavitaException("sidenav-stream-only-delete-smart-filter");
+            var stream = await _unitOfWork.UserRepository.GetSideNavStream(sideNavStreamId);
+            if (stream == null) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+            if (stream.AppUserId != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+
+            if (stream.StreamType != SideNavStreamType.SmartFilter)
+            {
+                throw new KavitaException("sidenav-stream-only-delete-smart-filter");
+            }
+
+            _unitOfWork.UserRepository.Delete(stream);
+
+            await _unitOfWork.CommitAsync();
         }
-
-        _unitOfWork.UserRepository.Delete([streams2]);
-
-        await _unitOfWork.CommitAsync();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception deleting SideNav Smart Filter Stream: {FilterId}", sideNavStreamId);
+            throw;
+        }
     }
 
     public async Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId)
     {
-        var streams2 = await _unitOfWork.UserRepository.GetDashboardStreamWithUser(dashboardStreamId);
-        if (streams2 == null) throw new KavitaException("dashboard-stream-doesnt-exist");
-
-        if (streams2.AppUser.Id != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
-
-        if (streams2.StreamType != DashboardStreamType.SmartFilter)
+        try
         {
-            throw new KavitaException("dashboard-stream-only-delete-smart-filter");
+            var stream = await _unitOfWork.UserRepository.GetDashboardStream(dashboardStreamId);
+            if (stream == null) throw new KavitaException("dashboard-stream-doesnt-exist");
+
+            if (stream.AppUserId != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+            if (stream.StreamType != DashboardStreamType.SmartFilter)
+            {
+                throw new KavitaException("dashboard-stream-only-delete-smart-filter");
+            }
+
+            _unitOfWork.UserRepository.Delete(stream);
+
+            await _unitOfWork.CommitAsync();
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception deleting Dashboard Smart Filter Stream: {FilterId}", dashboardStreamId);
+            throw;
         }
-
-        _unitOfWork.UserRepository.Delete([streams2]);
-
-        await _unitOfWork.CommitAsync();
     }
 
     public async Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter)

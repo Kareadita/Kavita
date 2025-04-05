@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {TextResonse} from "../_types/text-response";
-import { HttpClient } from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 
@@ -28,6 +28,6 @@ export class DashboardService {
   }
 
   deleteSmartFilterStream(streamId: number) {
-    return this.httpClient.post(this.baseUrl + 'stream/delete-smart-filter-dashboard-stream?dashboardStreamId=' + streamId, {});
+    return this.httpClient.delete(this.baseUrl + 'stream/smart-filter-dashboard-stream?dashboardStreamId=' + streamId, {});
   }
 }

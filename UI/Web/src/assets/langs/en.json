@@ -1740,6 +1740,7 @@
 
     "stream-list-item": {
         "remove": "{{common.remove}}",
+        "delete": "{{common.delete}}",
         "load-filter": "Load Filter",
         "provided": "Provided",
         "smart-filter": "Smart Filter",
