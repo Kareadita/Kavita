@@ -18,7 +18,7 @@ import {
 import {DOCUMENT, NgClass, NgIf, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, fromEvent, of} from 'rxjs';
+import {forkJoin, fromEvent, merge, of} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
 import {AccountService} from 'src/app/_services/account.service';
@@ -515,7 +515,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.handleScrollEvent();
     });
 
-    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
+    const mouseMove$ = fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove');
+    const touchMove$ = fromEvent<TouchEvent>(this.bookContainerElemRef.nativeElement, 'touchmove');
+
+    merge(mouseMove$, touchMove$)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),
@@ -527,7 +530,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe();
 
-    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup')
+    const mouseUp$ = fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup');
+    const touchEnd$ = fromEvent<TouchEvent>(this.bookContainerElemRef.nativeElement, 'touchend');
+
+    merge(mouseUp$, touchEnd$)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),

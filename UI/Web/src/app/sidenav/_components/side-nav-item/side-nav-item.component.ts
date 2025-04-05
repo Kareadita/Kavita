@@ -6,11 +6,12 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {CdkDragPreview} from "@angular/cdk/drag-drop";
 
 
 @Component({
     selector: 'app-side-nav-item',
-    imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
+  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe, CdkDragPreview],
     templateUrl: './side-nav-item.component.html',
     styleUrls: ['./side-nav-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -61,6 +62,11 @@ export class SideNavItemComponent implements OnInit {
    * Optional count to pass in that will show as a red badge on the side, indicating some action needs to be taken
    */
   @Input() badgeCount: number | null = -1;
+
+  /**
+   * Optional, display item in edit mode (replaces icon with handle)
+   */
+  @Input() edit: boolean = false;
 
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';

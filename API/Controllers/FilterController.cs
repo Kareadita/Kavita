@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -24,11 +25,16 @@ public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
+    private readonly IStreamService _streamService;
+    private readonly ILogger<FilterController> _logger;
 
-    public FilterController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
+    public FilterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IStreamService streamService,
+        ILogger<FilterController> logger)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
+        _streamService = streamService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -119,5 +125,58 @@ public class FilterController : BaseApiController
     public ActionResult<FilterV2Dto> DecodeFilter(DecodeFilterDto dto)
     {
         return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
+    }
+
+    /// <summary>
+    /// Rename a Smart Filter given the filterId and new name
+    /// </summary>
+    /// <param name="filterId"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    [HttpPost("rename")]
+    public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] string name)
+    {
+        try
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
+                AppUserIncludes.SmartFilters);
+            if (user == null) return Unauthorized();
+
+            name = name.Trim();
+
+            if (User.IsInRole(PolicyConstants.ReadOnlyRole))
+            {
+                return BadRequest(await _localizationService.Translate(user.Id, "permission-denied"));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest(await _localizationService.Translate(user.Id, "smart-filter-name-required"));
+            }
+
+            if (Seed.DefaultStreams.Any(s => s.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                return BadRequest(await _localizationService.Translate(user.Id, "smart-filter-system-name"));
+            }
+
+            var filter = user.SmartFilters.FirstOrDefault(f => f.Id == filterId);
+            if (filter == null)
+            {
+                return BadRequest(await _localizationService.Translate(user.Id, "filter-not-found"));
+            }
+
+            filter.Name = name;
+            _unitOfWork.AppUserSmartFilterRepository.Update(filter);
+            await _unitOfWork.CommitAsync();
+
+            await _streamService.RenameSmartFilterStreams(filter);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception when renaming smart filter: {FilterId}", filterId);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        }
+
     }
 }

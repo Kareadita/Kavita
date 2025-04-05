@@ -1075,7 +1075,8 @@
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
         "more": "More",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "edit": "{{common.edit}}"
     },
 
     "browse-authors": {
@@ -1751,6 +1752,7 @@
 
     "stream-list-item": {
         "remove": "{{common.remove}}",
+        "delete": "{{common.delete}}",
         "load-filter": "Load Filter",
         "provided": "Provided",
         "smart-filter": "Smart Filter",
@@ -2436,7 +2438,15 @@
         "no-data": "No Smart Filters created",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "There is an encoding error in the filter. You need to recreate it."
+        "errored": "There is an encoding error in the filter. You need to recreate it.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Edit {{name}}",
+        "name-label": "Name",
+        "required-field": "Smart Filters need a name",
+        "filter-name-unique": "Smart Filter names must be unique"
     },
 
     "edit-external-source-item": {

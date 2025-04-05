@@ -1,39 +1,34 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
-import { ImageService } from 'src/app/_services/image.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
-import { Library, LibraryType } from '../../../_models/library/library';
-import { AccountService } from '../../../_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from '../../../_services/action-factory.service';
-import { ActionService } from '../../../_services/action.service';
-import { NavService } from '../../../_services/nav.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {Breakpoint, UtilityService} from '../../../shared/_services/utility.service';
+import {Library, LibraryType} from '../../../_models/library/library';
+import {AccountService} from '../../../_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from '../../../_services/action-factory.service';
+import {ActionService} from '../../../_services/action.service';
+import {NavService} from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {WikiLink} from "../../../_models/wiki";
 import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
+import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-side-nav',
-    imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip, NgClass, AsyncPipe],
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip, NgClass, AsyncPipe, CdkDropList, CdkDrag],
     templateUrl: './side-nav.component.html',
     styleUrls: ['./side-nav.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -51,6 +46,7 @@ export class SideNavComponent implements OnInit {
   public readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly toastr = inject(ToastrService)
 
   protected readonly WikiLink = WikiLink;
   protected readonly ItemLimit = 10;
@@ -59,12 +55,14 @@ export class SideNavComponent implements OnInit {
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+  homeActions: ActionItem<void>[] = this.actionFactoryService.getSideNavHomeActions(this.handleHomeAction.bind(this));
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
     return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
   showAll: boolean = false;
+  edit: boolean = false;
   totalSize = 0;
   isReadOnly = false;
 
@@ -88,7 +86,7 @@ export class SideNavComponent implements OnInit {
     })
   );
 
-  navStreams$ = merge(
+  navStreams$: Observable<SideNavStream[]> = merge(
     this.showAll$.pipe(
       startWith(false),
       distinctUntilChanged(),
@@ -178,9 +176,25 @@ export class SideNavComponent implements OnInit {
     }
   }
 
+  async handleHomeAction(action: ActionItem<void>) {
+    switch (action.action) {
+      case Action.Edit:
+        this.showMore(true);
+        break;
+      default:
+        break;
+    }
+  }
+
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
       action.callback(action, library);
+    }
+  }
+
+  performHomeAction(action: ActionItem<void>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action)
     }
   }
 
@@ -208,14 +222,32 @@ export class SideNavComponent implements OnInit {
     this.navService.toggleSideNav();
   }
 
-  showMore() {
+  showMore(edit: boolean = false) {
     this.showAllSubject.next(true);
+    this.edit = edit;
+    this.cdRef.markForCheck();
   }
 
   showLess() {
     this.filterQuery = '';
     this.cdRef.markForCheck();
     this.showAllSubject.next(false);
+    this.edit = false;
+  }
+
+  async drop($event: CdkDragDrop<any, any, SideNavStream>) {
+    const stream = $event.item.data;
+    // Offset the home, back, and customize button
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
+      next: () => {
+        this.showAllSubject.next(this.showAll);
+        this.cdRef.markForCheck();
+      },
+      error: err => {
+        console.error(err);
+        this.toastr.error(translate('errors.generic'));
+      }
+    });
   }
 
   protected readonly Breakpoint = Breakpoint;

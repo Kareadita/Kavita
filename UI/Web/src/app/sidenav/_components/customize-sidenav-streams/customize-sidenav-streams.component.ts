@@ -41,6 +41,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   public readonly utilityService = inject(UtilityService);
 
   items: SideNavStream[] = [];
+  allSmartFilters: SmartFilter[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
   virtualizeAfter = 100;
@@ -148,13 +149,19 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
-      const existingSmartFilterStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
-      this.smartFilters = results[1].filter(d => !existingSmartFilterStreams.has(d.name));
+      this.allSmartFilters = results[1];
+      this.updateSmartFilters();
 
       const existingExternalSourceStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.ExternalSource).map(d => d.name));
       this.externalSources = results[2].filter(d => !existingExternalSourceStreams.has(d.name));
       this.cdRef.markForCheck();
     });
+  }
+
+  updateSmartFilters() {
+    const existingSmartFilterStreams = new Set(this.items.filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
+    this.smartFilters = this.allSmartFilters.filter(d => !existingSmartFilterStreams.has(d.name));
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -208,6 +215,19 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     stream.visible = !stream.visible;
     this.cdRef.markForCheck();
     this.sideNavService.updateSideNavStream(stream).subscribe();
+  }
+
+  delete(item: SideNavStream) {
+    this.sideNavService.deleteSideNavSmartFilter(item.id).subscribe({
+      next: () => {
+        this.items = this.items.filter(i => i.id !== item.id);
+        this.updateSmartFilters();
+        this.cdRef.markForCheck();
+      },
+      error: err => {
+        console.error(err);
+      }
+    })
   }
 
 }

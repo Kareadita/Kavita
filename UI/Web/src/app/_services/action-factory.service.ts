@@ -170,6 +170,8 @@ export class ActionFactoryService {
   sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   smartFilterActions: Array<ActionItem<SmartFilter>> = [];
 
+  sideNavHomeActions: Array<ActionItem<void>> = [];
+
   isAdmin = false;
 
 
@@ -224,6 +226,10 @@ export class ActionFactoryService {
 
   getPersonActions(callback: ActionCallback<Person>) {
     return this.applyCallbackToList(this.personActions, callback);
+  }
+
+  getSideNavHomeActions(callback: ActionCallback<void>) {
+    return this.applyCallbackToList(this.sideNavHomeActions, callback);
   }
 
   dummyCallback(action: ActionItem<any>, data: any) {}
@@ -873,6 +879,19 @@ export class ActionFactoryService {
         children: [],
       },
     ];
+
+    this.sideNavHomeActions = [
+      {
+        action: Action.Edit,
+        title: 'edit',
+        description: '',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      }
+    ]
+
+
   }
 
   private applyCallback(action: ActionItem<any>, callback: (action: ActionItem<any>, data: any) => void) {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -11,6 +12,7 @@ using API.Helpers;
 using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -33,6 +35,9 @@ public interface IStreamService
     Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
     Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
     Task DeleteExternalSource(int userId, int externalSourceId);
+    Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId);
+    Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId);
+    Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter);
 }
 
 public class StreamService : IStreamService
@@ -40,12 +45,14 @@ public class StreamService : IStreamService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly ILogger<StreamService> _logger;
 
-    public StreamService(IUnitOfWork unitOfWork, IEventHub eventHub, ILocalizationService localizationService)
+    public StreamService(IUnitOfWork unitOfWork, IEventHub eventHub, ILocalizationService localizationService, ILogger<StreamService>  logger)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = true)
@@ -91,6 +98,7 @@ public class StreamService : IStreamService
 
         var ret = new DashboardStreamDto()
         {
+            Id = createdStream.Id,
             Name = createdStream.Name,
             IsProvided = createdStream.IsProvided,
             Visible = createdStream.Visible,
@@ -182,6 +190,7 @@ public class StreamService : IStreamService
 
         var ret = new SideNavStreamDto()
         {
+            Id = createdStream.Id,
             Name = createdStream.Name,
             IsProvided = createdStream.IsProvided,
             Visible = createdStream.Visible,
@@ -341,6 +350,74 @@ public class StreamService : IStreamService
         // Find all SideNav's with this source and delete them as well
         var streams2 = await _unitOfWork.UserRepository.GetSideNavStreamWithExternalSource(externalSourceId);
         _unitOfWork.UserRepository.Delete(streams2);
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId)
+    {
+        try
+        {
+            var stream = await _unitOfWork.UserRepository.GetSideNavStream(sideNavStreamId);
+            if (stream == null) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+            if (stream.AppUserId != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
+
+
+            if (stream.StreamType != SideNavStreamType.SmartFilter)
+            {
+                throw new KavitaException("sidenav-stream-only-delete-smart-filter");
+            }
+
+            _unitOfWork.UserRepository.Delete(stream);
+
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception deleting SideNav Smart Filter Stream: {FilterId}", sideNavStreamId);
+            throw;
+        }
+    }
+
+    public async Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId)
+    {
+        try
+        {
+            var stream = await _unitOfWork.UserRepository.GetDashboardStream(dashboardStreamId);
+            if (stream == null) throw new KavitaException("dashboard-stream-doesnt-exist");
+
+            if (stream.AppUserId != userId) throw new KavitaException("dashboard-stream-doesnt-exist");
+
+            if (stream.StreamType != DashboardStreamType.SmartFilter)
+            {
+                throw new KavitaException("dashboard-stream-only-delete-smart-filter");
+            }
+
+            _unitOfWork.UserRepository.Delete(stream);
+
+            await _unitOfWork.CommitAsync();
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception deleting Dashboard Smart Filter Stream: {FilterId}", dashboardStreamId);
+            throw;
+        }
+    }
+
+    public async Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter)
+    {
+        var sideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreamWithFilter(smartFilter.Id);
+        var dashboardStreams = await _unitOfWork.UserRepository.GetDashboardStreamWithFilter(smartFilter.Id);
+
+        foreach (var sideNavStream in sideNavStreams)
+        {
+            sideNavStream.Name = smartFilter.Name;
+        }
+
+        foreach (var dashboardStream in dashboardStreams)
+        {
+            dashboardStream.Name = smartFilter.Name;
+        }
 
         await _unitOfWork.CommitAsync();
     }

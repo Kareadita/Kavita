@@ -57,7 +57,9 @@ public interface IUserRepository
     void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
     void Delete(IEnumerable<AppUserDashboardStream> streams);
+    void Delete(AppUserDashboardStream stream);
     void Delete(IEnumerable<AppUserSideNavStream> streams);
+    void Delete(AppUserSideNavStream stream);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -95,6 +97,7 @@ public interface IUserRepository
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
+    Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
@@ -167,9 +170,19 @@ public class UserRepository : IUserRepository
         _context.AppUserDashboardStream.RemoveRange(streams);
     }
 
+    public void Delete(AppUserDashboardStream stream)
+    {
+        _context.AppUserDashboardStream.Remove(stream);
+    }
+
     public void Delete(IEnumerable<AppUserSideNavStream> streams)
     {
         _context.AppUserSideNavStream.RemoveRange(streams);
+    }
+
+    public void Delete(AppUserSideNavStream stream)
+    {
+        _context.AppUserSideNavStream.Remove(stream);
     }
 
     /// <summary>
@@ -396,6 +409,7 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 
+
     public async Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId)
     {
         return await _context.AppUserDashboardStream
@@ -432,10 +446,10 @@ public class UserRepository : IUserRepository
             .Select(d => d.LibraryId)
             .ToList();
 
-        var libraryDtos = _context.Library
+        var libraryDtos = await _context.Library
             .Where(l => libraryIds.Contains(l.Id))
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
-            .ToList();
+            .ToListAsync();
 
         foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.Library))
         {
@@ -459,10 +473,18 @@ public class UserRepository : IUserRepository
         return sideNavStreams;
     }
 
-    public async Task<AppUserSideNavStream> GetSideNavStream(int streamId)
+    public async Task<AppUserSideNavStream?> GetSideNavStream(int streamId)
     {
         return await _context.AppUserSideNavStream
             .Include(d => d.SmartFilter)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
+    public async Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .Include(d => d.AppUser)
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 
