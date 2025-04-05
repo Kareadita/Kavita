@@ -355,9 +355,17 @@ public class EmailService : IEmailService
 
         if (userEmailOptions.Attachments != null)
         {
-            foreach (var attachment in userEmailOptions.Attachments)
+            foreach (var attachmentPath in userEmailOptions.Attachments)
             {
-                await body.Attachments.AddAsync(attachment);
+                var attachment = new MimePart("application", "octet-stream")
+                {
+                    Content = new MimeContent(File.OpenRead(attachmentPath), ContentEncoding.Default),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = Path.GetFileName(attachmentPath) // only filename, no full path
+                };
+
+                body.Attachments.Add(attachment);
             }
         }
 
