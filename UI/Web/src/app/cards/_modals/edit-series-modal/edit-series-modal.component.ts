@@ -373,6 +373,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
+    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.metadata.tags) {
       this.tagsSettings.savedData = this.metadata.tags;
@@ -404,6 +405,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.genreSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
+    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.metadata.genres) {
       this.genreSettings.savedData = this.metadata.genres;
@@ -460,6 +462,7 @@ export class EditSeriesModalComponent implements OnInit {
           if (l !== undefined) {
             this.languageSettings.savedData = l;
           }
+          this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
 
           this.cdRef.markForCheck();
         }),
@@ -520,6 +523,7 @@ export class EditSeriesModalComponent implements OnInit {
     personSettings.addTransformFn = ((title: string) => {
       return {id: 0, name: title, description: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
+    personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
 
     return personSettings;
   }

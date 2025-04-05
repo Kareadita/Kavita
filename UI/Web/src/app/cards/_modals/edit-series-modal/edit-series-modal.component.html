@@ -8,7 +8,8 @@
       </div>
       <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
         <form [formGroup]="editSeriesForm">
-          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" [destroyOnHide]="false"
+              orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
             <li [ngbNavItem]="tabs[TabID.General]">
               <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
@@ -94,20 +95,22 @@
                   <div class="row">
                     <div class="col-lg-8 col-md-12 pe-2">
                       <div class="mb-3">
-                        <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
-                                           [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
-                                           (newItemAdded)="metadata.languageLocked = true">
-                              <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
-                              </ng-template>
-                              <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}} ({{item.isoCode}})
-                              </ng-template>
-                            </app-typeahead>
-                          </ng-template>
-                        </app-setting-item>
+                        @if (languageSettings) {
+                          <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                            <ng-template #view>
+                              <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
+                                             [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
+                                             (newItemAdded)="metadata.languageLocked = true">
+                                <ng-template #badgeItem let-item let-position="idx">
+                                  {{item.title}}
+                                </ng-template>
+                                <ng-template #optionItem let-item let-position="idx">
+                                  {{item.title}} ({{item.isoCode}})
+                                </ng-template>
+                              </app-typeahead>
+                            </ng-template>
+                          </app-setting-item>
+                        }
                       </div>
                     </div>
                     <div class="col-lg-4 col-md-12">
@@ -134,20 +137,22 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="mb-3">
-                        <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
-                                           [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
-                                           (newItemAdded)="metadata.genresLocked = true">
-                              <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
-                              </ng-template>
-                              <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
-                              </ng-template>
-                            </app-typeahead>
-                          </ng-template>
-                        </app-setting-item>
+                        @if (genreSettings) {
+                          <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                            <ng-template #view>
+                              <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
+                                             [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
+                                             (newItemAdded)="metadata.genresLocked = true">
+                                <ng-template #badgeItem let-item let-position="idx">
+                                  {{item.title}}
+                                </ng-template>
+                                <ng-template #optionItem let-item let-position="idx">
+                                  {{item.title}}
+                                </ng-template>
+                              </app-typeahead>
+                            </ng-template>
+                          </app-setting-item>
+                        }
                       </div>
                     </div>
                   </div>
@@ -155,20 +160,22 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="mb-3">
-                        <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsSettings"
-                                           [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
-                                           (newItemAdded)="metadata.tagsLocked = true">
-                              <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
-                              </ng-template>
-                              <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
-                              </ng-template>
-                            </app-typeahead>
-                          </ng-template>
-                        </app-setting-item>
+                        @if (tagsSettings) {
+                          <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                            <ng-template #view>
+                              <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsSettings"
+                                             [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
+                                             (newItemAdded)="metadata.tagsLocked = true">
+                                <ng-template #badgeItem let-item let-position="idx">
+                                  {{item.title}}
+                                </ng-template>
+                                <ng-template #optionItem let-item let-position="idx">
+                                  {{item.title}}
+                                </ng-template>
+                              </app-typeahead>
+                            </ng-template>
+                          </app-setting-item>
+                        }
                       </div>
                     </div>
                   </div>
@@ -217,249 +224,275 @@
               <ng-template ngbNavContent>
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="getPersonsSettings(PersonRole.Writer)"
-                                       [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
-                                       (newItemAdded)="metadata.writerLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Writer); as settings) {
+                      <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
+                                         (newItemAdded)="metadata.writerLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
-                                       [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
-                                       (newItemAdded)="metadata.coverArtistLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-
-
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="getPersonsSettings(PersonRole.Publisher)"
-                                       [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
-                                       (newItemAdded)="metadata.publisherLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="getPersonsSettings(PersonRole.Imprint)"
-                                       [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
-                                       (newItemAdded)="metadata.imprintLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="getPersonsSettings(PersonRole.Penciller)"
-                                       [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
-                                       (newItemAdded)="metadata.pencillerLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
+                      <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
+                                         (newItemAdded)="metadata.coverArtistLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
 
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="getPersonsSettings(PersonRole.Letterer)"
-                                       [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
-                                       (newItemAdded)="metadata.lettererLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="getPersonsSettings(PersonRole.Inker)"
-                                       [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
-                                       (newItemAdded)="metadata.inkerLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-
-
-
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="getPersonsSettings(PersonRole.Editor)"
-                                       [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
-                                       (newItemAdded)="metadata.editorLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="getPersonsSettings(PersonRole.Colorist)"
-                                       [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
-                                       (newItemAdded)="metadata.coloristLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Publisher); as settings) {
+                      <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
+                                         (newItemAdded)="metadata.publisherLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="getPersonsSettings(PersonRole.Translator)"
-                                       [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
-                                       (newItemAdded)="metadata.translatorLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Imprint); as settings) {
+                      <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
+                                         (newItemAdded)="metadata.imprintLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="getPersonsSettings(PersonRole.Character)"
-                                       [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
-                                       (newItemAdded)="metadata.characterLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Penciller); as settings) {
+                      <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
+                                         (newItemAdded)="metadata.pencillerLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Letterer); as settings) {
+                      <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
+                                         (newItemAdded)="metadata.lettererLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Inker); as settings) {
+                      <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
+                                         (newItemAdded)="metadata.inkerLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+
+
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Editor); as settings) {
+                      <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
+                                         (newItemAdded)="metadata.editorLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Colorist); as settings) {
+                      <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
+                                         (newItemAdded)="metadata.coloristLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="getPersonsSettings(PersonRole.Team)"
-                                       [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
-                                       (newItemAdded)="metadata.teamLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Translator); as settings) {
+                      <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="settings"
+                                         [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
+                                         (newItemAdded)="metadata.translatorLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="mb-3">
-                    <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="getPersonsSettings(PersonRole.Location)"
-                                       [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
-                                       (newItemAdded)="metadata.locationLocked = true">
-                          <ng-template #badgeItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                          <ng-template #optionItem let-item let-position="idx">
-                            {{item.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      </ng-template>
-                    </app-setting-item>
+                    @if (getPersonsSettings(PersonRole.Character); as settings) {
+                      <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
+                                         (newItemAdded)="metadata.characterLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Team); as settings) {
+                      <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="settings"
+                                         [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
+                                         (newItemAdded)="metadata.teamLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="mb-3">
+                    @if (getPersonsSettings(PersonRole.Location); as settings) {
+                      <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                        <ng-template #view>
+                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="settings"
+                                         [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
+                                         (newItemAdded)="metadata.locationLocked = true">
+                            <ng-template #badgeItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                              {{item.name}}
+                            </ng-template>
+                          </app-typeahead>
+                        </ng-template>
+                      </app-setting-item>
+                    }
                   </div>
                 </div>
 
