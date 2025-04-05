@@ -6,15 +6,14 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
-import {CdkDragPreview} from "@angular/cdk/drag-drop";
 
 
 @Component({
-    selector: 'app-side-nav-item',
-  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe, CdkDragPreview],
-    templateUrl: './side-nav-item.component.html',
-    styleUrls: ['./side-nav-item.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-side-nav-item',
+  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
+  templateUrl: './side-nav-item.component.html',
+  styleUrls: ['./side-nav-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavItemComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -66,9 +65,10 @@ export class SideNavItemComponent implements OnInit {
   /**
    * Optional, display item in edit mode (replaces icon with handle)
    */
-  @Input() edit: boolean = false;
-
-
+  @Input() editMode: boolean = false;
+  /**
+   * Comparison Method for route to determine when to highlight item based on route
+   */
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
 
 

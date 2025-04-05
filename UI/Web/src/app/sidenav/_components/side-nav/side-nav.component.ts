@@ -27,32 +27,34 @@ import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
 import {ToastrService} from "ngx-toastr";
 
 @Component({
-    selector: 'app-side-nav',
-  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip, NgClass, AsyncPipe, CdkDropList, CdkDrag],
-    templateUrl: './side-nav.component.html',
-    styleUrls: ['./side-nav.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-side-nav',
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip,
+    NgClass, AsyncPipe, CdkDropList, CdkDrag],
+  templateUrl: './side-nav.component.html',
+  styleUrls: ['./side-nav.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavComponent implements OnInit {
-
-  private readonly router = inject(Router);
-  protected readonly utilityService = inject(UtilityService);
-  private readonly messageHub = inject(MessageHubService);
-  private readonly actionService = inject(ActionService);
-  public readonly navService = inject(NavService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly imageService = inject(ImageService);
-  public readonly accountService = inject(AccountService);
-  public readonly licenseService = inject(LicenseService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly toastr = inject(ToastrService)
 
   protected readonly WikiLink = WikiLink;
   protected readonly ItemLimit = 10;
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly Breakpoint = Breakpoint;
+
+  private readonly router = inject(Router);
+  protected readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly actionService = inject(ActionService);
+  protected readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly imageService = inject(ImageService);
+  protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly toastr = inject(ToastrService)
+
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
@@ -236,7 +238,7 @@ export class SideNavComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  async drop($event: CdkDragDrop<any, any, SideNavStream>) {
+  async reorderDrop($event: CdkDragDrop<any, any, SideNavStream>) {
     const stream = $event.item.data;
     // Offset the home, back, and customize button
     this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
