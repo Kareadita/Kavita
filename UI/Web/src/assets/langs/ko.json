@@ -1311,7 +1311,6 @@
         "change-password-alt": "비밀번호 변경 {{user}}",
         "resend": "재전송",
         "setup": "설정",
-        "admin": "관리자",
         "last-active-header": "마지막 활성",
         "roles-header": "역할",
         "name-header": "이름",

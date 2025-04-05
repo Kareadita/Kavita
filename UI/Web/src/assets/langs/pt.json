@@ -1311,7 +1311,6 @@
         "change-password-alt": "Alterar Palavra Passe {{user}}",
         "resend": "Reenviar",
         "setup": "Configurar",
-        "admin": "Admin",
         "last-active-header": "Última Atividade",
         "roles-header": "Funções",
         "name-header": "Nome",

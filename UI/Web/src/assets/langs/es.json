@@ -1307,7 +1307,6 @@
         "change-password-alt": "Cambiar contraseña de {{user}}",
         "resend": "Reenviar",
         "setup": "Configuración",
-        "admin": "Administrador",
         "last-active-header": "Activo por última vez",
         "roles-header": "Roles",
         "name-header": "Nombre",

@@ -1177,7 +1177,6 @@
         "loading": "{{common.loading}}",
         "edit-user-tooltip": "編輯",
         "invite": "邀請",
-        "admin": "管理員",
         "resend-invite-alt": "重新發送邀請給 {{user}}",
         "username-pattern": "用戶名稱只能包含以下字符與空格：{{characters}}",
         "pending-title": "待處理",

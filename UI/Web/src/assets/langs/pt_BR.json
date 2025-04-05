@@ -176,7 +176,9 @@
         "anilist-scrobbling-label": "AniList Scrobbling",
         "anilist-scrobbling-tooltip": "Permitir que Kavita faça scrobble (sincronização unidirecional) de leitura e avaliações para o AniList",
         "want-to-read-sync-label": "Sincronizar Quero Ler",
-        "want-to-read-sync-tooltip": "Permitir que Kavita adicione itens à sua lista de Quero Ler com base em séries Anilist e Mal, pendentes na lista de leitura"
+        "want-to-read-sync-tooltip": "Permitir que Kavita adicione itens à sua lista de Quero Ler com base em séries Anilist e Mal, pendentes na lista de leitura",
+        "allow-auto-webtoon-reader-label": "Modo de leitor automático de Webtoon",
+        "allow-auto-webtoon-reader-tooltip": "Mudar para o modo Leitor Webtoon se as páginas parecerem um webtoon. Podem ocorrer alguns falsos positivos."
     },
     "user-holds": {
         "title": "Paradas do Scrobble",
@@ -787,9 +789,11 @@
         "more-alt": "Mais",
         "time-left-alt": "Tempo Restante",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "Publicação",
-        "publication-status-tooltip": "Estado da Publicação"
+        "publication-status-tooltip": "Estado da Publicação",
+        "off": "{{reader-settings.off}}",
+        "on": "{{reader-settings.on}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -1001,7 +1005,8 @@
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
-        "length-title": "{{edit-chapter-modal.words-label}}"
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1079,7 +1084,7 @@
         "reset": "{{common.reset}}",
         "test": "Teste",
         "host-name-label": "Nome do Host",
-        "host-name-tooltip": "Nome de domínio (de proxy reverso). Necessário para funcionalidade de e-mail. Se não houver proxy reverso, use qualquer URL.",
+        "host-name-tooltip": "O nome de domínio do seu proxy reverso, necessário para a funcionalidade de e-mail. Se não estiver a usando um proxy reverso, pode utilizar qualquer URL, incluindo http://externalip:port/",
         "host-name-validation": "O nome do host deve começar com http(s) e não terminar com /",
         "sender-address-label": "Endereço do Remetente",
         "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o e-mail. Normalmente, o endereço de e-mail associado à conta.",
@@ -1312,7 +1317,6 @@
         "change-password-alt": "Alterar Senha {{user}}",
         "resend": "Reenviar",
         "setup": "Configurar",
-        "admin": "Admin",
         "last-active-header": "Última Atividade",
         "roles-header": "Papéis",
         "name-header": "Nome",
@@ -1448,7 +1452,19 @@
         "read-options-alt": "Opções de leitura",
         "incognito-alt": "(Incógnito)",
         "no-data": "Nada adicionado",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "items-title": "Itens",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "edit-label": "Modo de Edição",
+        "date-range-title": "Faixa de Datas",
+        "reorder-alt": "Reordenar Itens",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "more-alt": "{{series-detail.more-alt}}",
+        "edit-alt": "{{common.edit}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "dnd-warning": "O arrastar e soltar não está disponível em dispositivos móveis ou quando a lista de leitura tem mais de 100 itens."
     },
     "events-widget": {
         "title-alt": "Atividade",
@@ -2229,7 +2245,8 @@
         "confirm-delete-multiple-chapters": "Tem certeza de que deseja excluir {{count}} capítulos/volumes? Não modificará arquivos no disco.",
         "bulk-delete-libraries": "Tem certeza de que deseja excluir {{count}} bibliotecas?",
         "match-success": "Série correspondida corretamente",
-        "webtoon-override": "Mudando para o modo Webtoon devido a imagens que representam um Webtoon."
+        "webtoon-override": "Mudando para o modo Webtoon devido a imagens que representam um Webtoon.",
+        "scrobble-gen-init": "Enfileirou uma tarefa para gerar eventos scrobble a partir do histórico de leitura e avaliações anteriores, sincronizando-os com serviços conectados."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",

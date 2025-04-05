@@ -176,7 +176,9 @@
         "anilist-scrobbling-label": "AniList Scrobblování",
         "anilist-scrobbling-tooltip": "Povolit Kavitě Scrobble (jednosměrná synchronizace) průběhu čtení a hodnocení do AniListu",
         "want-to-read-sync-label": "Chci číst Synchronizace",
-        "want-to-read-sync-tooltip": "Povolit Kavitě přidávat položky do seznamu Chci číst na základě AniListu a sérií MAL v seznamu čekajících čtení"
+        "want-to-read-sync-tooltip": "Povolit Kavitě přidávat položky do seznamu Chci číst na základě AniListu a sérií MAL v seznamu čekajících čtení",
+        "allow-auto-webtoon-reader-label": "Režim automatické čtečky webových komiksů",
+        "allow-auto-webtoon-reader-tooltip": "Pokud stránky vypadají jako webový komiks, přepněte se do režimu čtečky webových komiksů. Mohou se vyskytnout některé falešně pozitivní výsledky."
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -779,7 +781,7 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-tooltip": "Stav publikace",
         "release-date-title": "Vydání",
         "time-left-alt": "Zbývající čas",
@@ -789,7 +791,9 @@
         "weblinks-title": "Odkazy",
         "more-alt": "Více",
         "pages-count": "{{num}} stran",
-        "words-count": "{{num}} slov"
+        "words-count": "{{num}} slov",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -868,7 +872,7 @@
         "help": "{{common.help}}",
         "file-type-group-label": "Typy souborů",
         "allow-scrobbling-label": "Povolit scrobbling",
-        "kavitaplus-eligible-tooltip": "Bude Kavita+ stahovat informace nebo podporovat Scrobbling",
+        "kavitaplus-eligible-tooltip": "Podporuje funkce metadat Kavita+ nebo scrobblování",
         "include-in-dashboard-label": "Zahrnout do panelu",
         "include-in-dashboard-tooltip": "Měly by být série z knihovny zařazeny na hlavní panel. To se týká všech sérií, jako jsou Rozečtené, Nedávno aktualizované, Nedávno přidané nebo jakékoli vlastní přírůstky.",
         "allow-scrobbling-tooltip": "Pokud Kavita scrobble čtení události, chcete číst stav, hodnocení a recenze konfigurovaných poskytovatelů. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+.",
@@ -981,7 +985,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
-        "release-title": "{{sort-field-pipe.release-year}}"
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1047,7 +1052,7 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "save": "{{common.save}}",
         "description": "Pro použití některých funkcí Kavity, jako je například Odeslat do zařízení, je třeba nastavit poskytovatele e-mailu. Jiné funkce, jako například Zapomenuté heslo, vyžadují zásah správce bez nastavení e-mailu.",
-        "host-name-tooltip": "Název domény (reverzního proxy serveru). Vyžadováno pro funkci e-mailu. Pokud není reverzní proxy server, použijte libovolnou url adresu.",
+        "host-name-tooltip": "Název domény reverzního proxy serveru, který je vyžadován pro funkci e-mailu. Pokud nepoužíváte reverzní proxy server, můžete použít libovolnou adresu URL, včetně adresy http://externalip:port/",
         "test-warning": "Před stisknutím tlačítka Test musíte mít platná nastavení.",
         "host-tooltip": "Odchozí adresa/SMTP vašeho e-mailového serveru",
         "host-name-validation": "Název hostitele musí začínat na http(s) a nesmí končit na /",
@@ -1267,7 +1272,6 @@
         "resend-invite-alt": "Znovu poslat pozvánku {{user}}",
         "setup-user-tooltip": "Nastavení uživatele",
         "setup-user-alt": "Nastavení uživatele {{user}}",
-        "admin": "Správce",
         "name-header": "Jméno",
         "none": "Žádný",
         "online-now-tooltip": "Nyní aktivní",
@@ -1387,7 +1391,19 @@
         "order-numbers-label": "Seřadit čísla",
         "read-options-alt": "Možnosti čtení",
         "incognito-alt": "(Inkognito)",
-        "no-data": "Nic nebylo přidáno"
+        "no-data": "Nic nebylo přidáno",
+        "details-tab": "{{series-detail.details-tab}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "dnd-warning": "Funkce chyť a upusť není dostupná na mobilních zařízeních nebo v případě, že seznam čtení obsahuje více než 100 položek.",
+        "reorder-alt": "Přeuspořádat položky",
+        "edit-label": "Režim úprav",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "edit-alt": "{{common.edit}}",
+        "date-range-title": "Rozsah datumů",
+        "more-alt": "{{series-detail.more-alt}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "items-title": "Položky"
     },
     "events-widget": {
         "close": "{{common.close}}",
@@ -1816,7 +1832,8 @@
         "external-sources": "Externí zdroje",
         "title-dashboard": "Přizpůsobení ovládacího panelu",
         "dashboard": "Ovládací panel",
-        "sidenav": "Postranní navigace"
+        "sidenav": "Postranní navigace",
+        "description": "Různé aspekty Kavity můžete přizpůsobit změnou pořadí, přepínáním viditelnosti a přiřazením inteligentních filtrů/externích zdrojů k domovské stránce nebo postranní navigaci."
     },
     "customize-dashboard-streams": {
         "save": "{{common.save}}",
@@ -2424,7 +2441,8 @@
         "reading-list-promoted": "Seznam čtení propagován",
         "mal-token-required": "Je vyžadován MAL Token, nastavený v Nastavení uživatele",
         "match-success": "Správně sladěné série",
-        "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon."
+        "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon.",
+        "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",

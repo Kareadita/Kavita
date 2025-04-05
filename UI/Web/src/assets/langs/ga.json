@@ -176,7 +176,9 @@
         "anilist-scrobbling-label": "Scrobbling AniList",
         "anilist-scrobbling-tooltip": "Lig do Kavita Scrobble (sioncronú aontreo) dul chun cinn a léamh agus rátálacha chuig AniList",
         "want-to-read-sync-label": "Ag Teastáil le Léamh Sioncrónaithe",
-        "want-to-read-sync-tooltip": "Lig do Kavita míreanna a chur le do liosta Want to Read bunaithe ar shraith AniList agus MAL sa léiliosta ar feitheamh"
+        "want-to-read-sync-tooltip": "Lig do Kavita míreanna a chur le do liosta Want to Read bunaithe ar shraith AniList agus MAL sa léiliosta ar feitheamh",
+        "allow-auto-webtoon-reader-tooltip": "Athraigh isteach i mód Webtoon Reader má tá cuma ar leathanaigh ghréasáin. D’fhéadfadh roinnt rudaí dearfacha bréagacha tarlú.",
+        "allow-auto-webtoon-reader-label": "Mód Uathoibríoch Léitheoir Webtoon"
     },
     "user-holds": {
         "title": "Coinníonn Scrobble",
@@ -787,9 +789,11 @@
         "more-alt": "Tuilleadh",
         "time-left-alt": "Am Fágtha",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "Foilsiú",
-        "publication-status-tooltip": "Stádas Foilseacháin"
+        "publication-status-tooltip": "Stádas Foilseacháin",
+        "off": "{{reader-settings.off}}",
+        "on": "{{reader-settings.on}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -1001,7 +1005,8 @@
         "release-title": "{{sort-field-pipe.release-year}}",
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
-        "length-title": "{{edit-chapter-modal.words-label}}"
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1079,7 +1084,7 @@
         "reset": "{{common.reset}}",
         "test": "Tástáil",
         "host-name-label": "Ainm an Óstríomhaire",
-        "host-name-tooltip": "Ainm Fearainn (ón Seachfhreastalaí Droim ar Ais). Ag teastáil le haghaidh feidhmiúlacht ríomhphoist. Mura bhfuil seachfhreastalaí droim ar ais, úsáid url ar bith.",
+        "host-name-tooltip": "Ainm fearainn do sheachfhreastalaí droim ar ais, atá riachtanach le haghaidh feidhmiúlacht ríomhphoist. Mura bhfuil seachfhreastalaí droim ar ais á úsáid agat, is féidir leat aon URL a úsáid, lena n-áirítear http://externalip:port/",
         "host-name-validation": "Ní mór d'ainm óstach tosú le http(s) agus ní chríochnaíonn sé i /",
         "sender-address-label": "Seoladh an tSeoltóra",
         "sender-address-tooltip": "Is é seo an seoladh ríomhphoist óna bhfeicfidh an glacadóir nuair a gheobhaidh siad an ríomhphost. De ghnáth an seoladh ríomhphoist a bhaineann leis an gcuntas.",
@@ -1312,7 +1317,6 @@
         "change-password-alt": "Athraigh Pasfhocal {{user}}",
         "resend": "Athdhíol",
         "setup": "Socrú",
-        "admin": "Riarachán",
         "last-active-header": "An Gníomhach Is Déanaí",
         "roles-header": "Rólanna",
         "name-header": "Ainm",
@@ -1448,7 +1452,19 @@
         "read-options-alt": "Léigh roghanna",
         "incognito-alt": "(Go hanaithnid)",
         "no-data": "Ní chuirfear aon ní leis",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "dnd-warning": "Níl tarraing agus scaoil ar fáil ar ghléasanna soghluaiste nó nuair a bhíonn níos mó ná 100 mír ar an liosta léitheoireachta.",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "more-alt": "{{series-detail.more-alt}}",
+        "date-range-title": "Raon Dáta",
+        "edit-label": "Mód Cuir in Eagar",
+        "items-title": "Míreanna",
+        "reorder-alt": "Míreanna a Athordú",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "edit-alt": "{{common.edit}}"
     },
     "events-widget": {
         "title-alt": "Gníomhaíocht",
@@ -2229,7 +2245,8 @@
         "confirm-delete-multiple-chapters": "An bhfuil tú cinnte gur mhaith leat {{count}} chaibidil/imleabhar a scriosadh? Ní athróidh sé comhaid ar diosca.",
         "bulk-delete-libraries": "An bhfuil tú cinnte gur mhaith leat {{count}} leabharlann a scriosadh?",
         "match-success": "Sraith a mheaitseáil i gceart",
-        "webtoon-override": "Ag aistriú go mód Webtoon mar gheall ar íomhánna a léiríonn webtoon."
+        "webtoon-override": "Ag aistriú go mód Webtoon mar gheall ar íomhánna a léiríonn webtoon.",
+        "scrobble-gen-init": "Cheangail post chun teagmhais scrobble a ghiniúint ó stair léitheoireachta agus rátálacha san am a chuaigh thart, agus iad á sioncronú le seirbhísí ceangailte."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",

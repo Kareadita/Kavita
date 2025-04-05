@@ -1214,7 +1214,6 @@
         "change-password-alt": "{{user}}のパスワードを変更する",
         "resend": "再送信",
         "setup": "セットアップ",
-        "admin": "管理者",
         "none": "なし",
         "never": "もう質問しない",
         "online-now-tooltip": "オンライン",
