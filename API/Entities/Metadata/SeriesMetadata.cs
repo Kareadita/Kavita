@@ -121,6 +121,8 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// <returns></returns>
     public bool AllKavitaPlus(PersonRole role)
     {
-        return People.Where(p => p.Role == role).All(p => p.KavitaPlusConnection);
+        var people = People.Where(p => p.Role == role);
+        if (people.Any()) return people.All(p => p.KavitaPlusConnection);
+        return false;
     }
 }
