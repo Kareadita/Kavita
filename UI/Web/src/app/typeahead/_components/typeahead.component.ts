@@ -77,7 +77,7 @@ export class TypeaheadComponent implements OnInit {
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
-  private readonly destroyRef = inject(DestroyRef);
+
 
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
@@ -94,7 +94,11 @@ export class TypeaheadComponent implements OnInit {
   typeaheadControl!: FormControl;
   typeaheadForm!: FormGroup;
 
-  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer2 = inject(Renderer2);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  constructor(@Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit() {
     this.reset.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((resetToEmpty: boolean) => {
@@ -119,6 +123,7 @@ export class TypeaheadComponent implements OnInit {
     }
 
     if (this.settings.trackByIdentityFn === undefined) {
+      console.warn('No trackby function provided, falling back to an expensive implementation')
       this.settings.trackByIdentityFn = (_, value) => value;
     }
 

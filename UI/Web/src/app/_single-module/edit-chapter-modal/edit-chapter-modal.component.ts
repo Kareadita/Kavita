@@ -1,20 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {
-  AsyncPipe,
-  NgClass,
-  NgTemplateOutlet,
-  TitleCasePipe
-} from "@angular/common";
-import {
-  NgbActiveModal,
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
@@ -41,10 +29,8 @@ import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-
 import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
-import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
 import {MangaFormat} from "../../_models/manga-format";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -53,7 +39,6 @@ import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 enum TabID {
   General = 'general-tab',
@@ -258,16 +243,15 @@ export class EditChapterModalComponent implements OnInit {
     const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
+    // Patch in data from the model that is not typeahead (as those are updated during setting)
     if (model.releaseDate === '') {
       this.chapter.releaseDate = '0001-01-01T00:00:00';
     } else {
       this.chapter.releaseDate = model.releaseDate + 'T00:00:00';
     }
+
     this.chapter.ageRating = parseInt(model.ageRating + '', 10) as AgeRating;
-    this.chapter.genres = model.genres;
-    this.chapter.tags = model.tags;
     this.chapter.sortOrder = model.sortOrder;
-    this.chapter.language = model.language;
     this.chapter.titleName = model.titleName;
     this.chapter.summary = model.summary;
     this.chapter.isbn = model.isbn;
@@ -359,6 +343,7 @@ export class EditChapterModalComponent implements OnInit {
     this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
+    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.chapter.tags) {
       this.tagsSettings.savedData = this.chapter.tags;
@@ -390,6 +375,7 @@ export class EditChapterModalComponent implements OnInit {
     this.genreSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
+    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.chapter.genres) {
       this.genreSettings.savedData = this.chapter.genres;
@@ -416,6 +402,7 @@ export class EditChapterModalComponent implements OnInit {
     this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
       return a.isoCode == b.isoCode;
     }
+    this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
 
     const l = this.validLanguages.find(l => l.isoCode === this.chapter.language);
     if (l !== undefined) {
@@ -427,6 +414,7 @@ export class EditChapterModalComponent implements OnInit {
 
   updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
     const personSettings = this.createBlankPersonSettings(id, role)
+
     if (presetField && presetField.length > 0) {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
@@ -437,10 +425,11 @@ export class EditChapterModalComponent implements OnInit {
         this.cdRef.markForCheck();
         return true;
       }));
-    } else {
-      this.peopleSettings[role] = personSettings;
-      return of(true);
     }
+
+    this.peopleSettings[role] = personSettings;
+    return of(true);
+
   }
 
   setupPersonTypeahead() {
@@ -460,7 +449,7 @@ export class EditChapterModalComponent implements OnInit {
       this.updateFromPreset('translator', this.chapter.translators, PersonRole.Translator),
       this.updateFromPreset('teams', this.chapter.teams, PersonRole.Team),
       this.updateFromPreset('locations', this.chapter.locations, PersonRole.Location),
-    ]).pipe(map(results => {
+    ]).pipe(map(_ => {
       return of(true);
     }));
   }
@@ -496,6 +485,8 @@ export class EditChapterModalComponent implements OnInit {
     personSettings.addTransformFn = ((title: string) => {
       return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
+
+    personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
 
     return personSettings;
   }
