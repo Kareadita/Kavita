@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using MimeTypes;
 
 namespace API.Services;
 #nullable enable
@@ -357,12 +358,16 @@ public class EmailService : IEmailService
         {
             foreach (var attachmentPath in userEmailOptions.Attachments)
             {
-                var attachment = new MimePart("application", "octet-stream")
+                var mimeType = MimeTypeMap.GetMimeType(attachmentPath) ?? "application/octet-stream";
+                var mediaType = mimeType.Split('/')[0];
+                var mediaSubtype = mimeType.Split('/')[1];
+
+                var attachment = new MimePart(mediaType, mediaSubtype)
                 {
-                    Content = new MimeContent(File.OpenRead(attachmentPath), ContentEncoding.Default),
+                    Content = new MimeContent(File.OpenRead(attachmentPath)),
                     ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                     ContentTransferEncoding = ContentEncoding.Base64,
-                    FileName = Path.GetFileName(attachmentPath) // only filename, no full path
+                    FileName = Path.GetFileName(attachmentPath)
                 };
 
                 body.Attachments.Add(attachment);
