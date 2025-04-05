@@ -387,7 +387,7 @@ public class StreamService : IStreamService
             var stream = await _unitOfWork.UserRepository.GetDashboardStream(dashboardStreamId);
             if (stream == null) throw new KavitaException("dashboard-stream-doesnt-exist");
 
-            if (stream.AppUserId != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
+            if (stream.AppUserId != userId) throw new KavitaException("dashboard-stream-doesnt-exist");
 
             if (stream.StreamType != DashboardStreamType.SmartFilter)
             {

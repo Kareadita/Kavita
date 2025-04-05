@@ -205,7 +205,12 @@ public class StreamController : BaseApiController
         return Ok();
     }
 
-    [HttpPost("delete-smart-filter-side-nav-stream")]
+    /// <summary>
+    /// Removes a Smart Filter from a user's SideNav Streams
+    /// </summary>
+    /// <param name="sideNavStreamId"></param>
+    /// <returns></returns>
+    [HttpDelete("smart-filter-side-nav-stream")]
     public async Task<ActionResult> DeleteSmartFilterSideNavStream([FromQuery] int sideNavStreamId)
     {
         if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
@@ -213,7 +218,12 @@ public class StreamController : BaseApiController
         return Ok();
     }
 
-    [HttpPost("delete-smart-filter-dashboard-stream")]
+    /// <summary>
+    /// Removes a Smart Filter from a user's Dashboard Streams
+    /// </summary>
+    /// <param name="dashboardStreamId"></param>
+    /// <returns></returns>
+    [HttpDelete("smart-filter-dashboard-stream")]
     public async Task<ActionResult> DeleteSmartFilterDashboardStream([FromQuery] int dashboardStreamId)
     {
         if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
