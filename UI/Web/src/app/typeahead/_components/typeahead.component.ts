@@ -1,10 +1,11 @@
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -19,10 +20,10 @@ import {
   ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import { Observable, ReplaySubject } from 'rxjs';
-import { auditTime, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from '../_models/typeahead-settings';
+import {Observable, ReplaySubject} from 'rxjs';
+import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
+import {KEY_CODES} from 'src/app/shared/_services/utility.service';
+import {TypeaheadSettings} from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -32,23 +33,23 @@ import {SelectionModel} from "../_models/selection-model";
 const ANIMATION_SPEED = 200;
 
 @Component({
-    selector: 'app-typeahead',
-    imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoDirective],
-    templateUrl: './typeahead.component.html',
-    styleUrls: ['./typeahead.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger('slideFromTop', [
-            state('in', style({ height: '0px' })),
-            transition('void => *', [
-                style({ height: '100%', overflow: 'auto' }),
-                animate(ANIMATION_SPEED)
-            ]),
-            transition('* => void', [
-                animate(ANIMATION_SPEED, style({ height: '0px' })),
-            ])
-        ])
-    ]
+  selector: 'app-typeahead',
+  imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass],
+  templateUrl: './typeahead.component.html',
+  styleUrls: ['./typeahead.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+      trigger('slideFromTop', [
+          state('in', style({ height: '0px' })),
+          transition('void => *', [
+              style({ height: '100%', overflow: 'auto' }),
+              animate(ANIMATION_SPEED)
+          ]),
+          transition('* => void', [
+              animate(ANIMATION_SPEED, style({ height: '0px' })),
+          ])
+      ])
+  ]
 })
 export class TypeaheadComponent implements OnInit {
   /**
@@ -118,7 +119,7 @@ export class TypeaheadComponent implements OnInit {
     }
 
     if (this.settings.trackByIdentityFn === undefined) {
-      this.settings.trackByIdentityFn = (index, value) => value;
+      this.settings.trackByIdentityFn = (_, value) => value;
     }
 
     if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
@@ -222,9 +223,9 @@ export class TypeaheadComponent implements OnInit {
       }
       case KEY_CODES.ENTER:
       {
-        this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
+        this.document.querySelectorAll('.list-group-item').forEach((item, _) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {
+            this.filteredOptions.pipe(take(1)).subscribe((_: any[]) => {
               // This isn't giving back the filtered array, but everything
               event.preventDefault();
               event.stopPropagation();
@@ -413,7 +414,7 @@ export class TypeaheadComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  toggleLock(event: any) {
+  toggleLock(_: any) {
     if (this.disabled) return;
     this.locked = !this.locked;
     this.lockedChange.emit(this.locked);
