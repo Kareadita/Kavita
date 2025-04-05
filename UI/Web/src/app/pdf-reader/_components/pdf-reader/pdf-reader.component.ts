@@ -115,6 +115,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   pageLayoutMode: PageViewModeType = 'multiple';
   scrollMode: ScrollModeType = ScrollModeType.vertical;
   spreadMode: SpreadType = 'off';
+  isSearchOpen: boolean = false;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
@@ -351,6 +352,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   updateHandTool(event: any) {
      console.log('event.tool', event);
+  }
+
+  updateSearchOpen(event: boolean) {
+     this.isSearchOpen = event;
+     this.cdRef.markForCheck();
   }
 
   prevPage() {

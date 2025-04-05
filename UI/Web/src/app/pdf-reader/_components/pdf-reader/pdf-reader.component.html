@@ -45,13 +45,16 @@
         (progress)="updateLoadProgress($event)"
         (zoomChange)="calcScrollbarNeeded()"
         (handToolChange)="updateHandTool($event)"
+        (findbarVisibleChange)="updateSearchOpen($event)"
       >
 
       </ngx-extended-pdf-viewer>
 
       @if (scrollMode === ScrollModeType.page && !isLoading) {
-        <div class="left" (click)="prevPage()"></div>
-        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}}" (click)="nextPage()"></div>
+        @if (!isSearchOpen) {
+          <div class="left" (click)="prevPage()"></div>
+          <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}}" (click)="nextPage()"></div>
+        }
       }
 
       <ng-template #multiToolbar>

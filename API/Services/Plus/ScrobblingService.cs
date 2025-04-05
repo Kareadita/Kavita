@@ -956,6 +956,7 @@ public class ScrobblingService : IScrobblingService
         // Recalculate the highest volume/chapter
         foreach (var readEvt in readEvents)
         {
+            // Note: this causes skewing in the scrobble history because it makes it look like there are duplicate events
             readEvt.VolumeNumber =
                 (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
                     readEvt.AppUser.Id);
@@ -1124,33 +1125,22 @@ public class ScrobblingService : IScrobblingService
     private static bool CanProcessScrobbleEvent(ScrobbleEvent readEvent)
     {
         var userProviders = GetUserProviders(readEvent.AppUser);
-        if (readEvent.Series.Library.Type == LibraryType.Manga && MangaProviders.Intersect(userProviders).Any())
+        switch (readEvent.Series.Library.Type)
         {
-            return true;
+            case LibraryType.Manga when MangaProviders.Intersect(userProviders).Any():
+            case LibraryType.Comic when
+                ComicProviders.Intersect(userProviders).Any():
+            case LibraryType.Book when
+                BookProviders.Intersect(userProviders).Any():
+            case LibraryType.LightNovel when
+                LightNovelProviders.Intersect(userProviders).Any():
+                return true;
+            default:
+                return false;
         }
-
-        if (readEvent.Series.Library.Type == LibraryType.Comic &&
-            ComicProviders.Intersect(userProviders).Any())
-        {
-            return true;
-        }
-
-        if (readEvent.Series.Library.Type == LibraryType.Book &&
-            BookProviders.Intersect(userProviders).Any())
-        {
-            return true;
-        }
-
-        if (readEvent.Series.Library.Type == LibraryType.LightNovel &&
-            LightNovelProviders.Intersect(userProviders).Any())
-        {
-            return true;
-        }
-
-        return false;
     }
 
-    private static IList<ScrobbleProvider> GetUserProviders(AppUser appUser)
+    private static List<ScrobbleProvider> GetUserProviders(AppUser appUser)
     {
         var providers = new List<ScrobbleProvider>();
         if (!string.IsNullOrEmpty(appUser.AniListAccessToken)) providers.Add(ScrobbleProvider.AniList);
@@ -1227,8 +1217,7 @@ public class ScrobblingService : IScrobblingService
 
     public static string CreateUrl(string url, long? id)
     {
-        if (id is null or 0) return string.Empty;
-        return $"{url}{id}/";
+        return id is null or 0 ? string.Empty : $"{url}{id}/";
     }
 
 

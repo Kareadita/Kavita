@@ -1,11 +1,9 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, map, of, ReplaySubject, tap, throwError} from "rxjs";
+import {catchError, map, ReplaySubject, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
-import { TextResonse } from '../_types/text-response';
+import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
-import {translate} from "@jsverse/transloco";
-import {ConfirmService} from "../shared/confirm.service";
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +56,6 @@ export class LicenseService {
   }
 
   hasValidLicense(forceCheck: boolean = false) {
-    console.log('hasValidLicense being called: ', forceCheck);
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
         map(res => res === "true"),
