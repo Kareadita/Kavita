@@ -49,7 +49,7 @@
     "ng-lazyload-image": "^9.1.3",
     "ng-select2-component": "^17.2.2",
     "ngx-color-picker": "^19.0.0",
-    "ngx-extended-pdf-viewer": "^22.3.9",
+    "ngx-extended-pdf-viewer": "^23.0.0-alpha.7",
     "ngx-file-drop": "^16.0.0",
     "ngx-stars": "^1.6.5",
     "ngx-toastr": "^19.0.0",
