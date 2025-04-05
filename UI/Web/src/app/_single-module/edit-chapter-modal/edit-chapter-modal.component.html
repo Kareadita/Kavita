@@ -191,10 +191,10 @@
                                          [(locked)]="chapter.tagsLocked" (onUnlock)="chapter.tagsLocked = false"
                                          (newItemAdded)="chapter.tagsLocked = true">
                             <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
+                              {{item.title}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
+                              {{item.title}}
                             </ng-template>
                           </app-typeahead>
                         </ng-template>
