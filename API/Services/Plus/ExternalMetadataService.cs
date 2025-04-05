@@ -437,16 +437,24 @@ public class ExternalMetadataService : IExternalMetadataService
                 // Trim quotes if the response is a JSON string
                 errorMessage = errorMessage.Trim('"');
 
-                if (ex.StatusCode == 400 && errorMessage.Contains("Too many Requests"))
+                if (ex.StatusCode == 400)
                 {
-                    _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
-                    await Task.Delay(3000);
+                    if (errorMessage.Contains("Too many Requests"))
+                    {
+                        _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
+                        await Task.Delay(3000);
 
-                    result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                        .WithKavitaPlusHeaders(license, token)
-                        .PostJsonAsync(data)
-                        .ReceiveJson<
-                            SeriesDetailPlusApiDto>();
+                        result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+                            .WithKavitaPlusHeaders(license, token)
+                            .PostJsonAsync(data)
+                            .ReceiveJson<
+                                SeriesDetailPlusApiDto>();
+                    }
+                    else if (errorMessage.Contains("Unknown Series"))
+                    {
+                        series.IsBlacklisted = true;
+                        await _unitOfWork.CommitAsync();
+                    }
                 }
             }
 
