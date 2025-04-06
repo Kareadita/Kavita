@@ -37,7 +37,7 @@
           </td>
           <td>
             @if (member.libraries.length > 0) {
-              @if (hasAdminRole(member)) {
+              @if (hasAdminRole(member) || member.libraries.length === libraryCount) {
                 {{t('all-libraries')}}
               } @else {
                 @if (member.libraries.length > 5) {

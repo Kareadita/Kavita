@@ -13,7 +13,7 @@ import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
 import {AsyncPipe, NgClass, TitleCasePipe} from '@angular/common';
-import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
+import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -50,6 +50,7 @@ export class ManageUsersComponent implements OnInit {
   members: Member[] = [];
   loggedInUsername = '';
   loadingMembers = false;
+  libraryCount: number = 0;
 
 
   constructor() {
@@ -81,7 +82,11 @@ export class ManageUsersComponent implements OnInit {
         if (nameA < nameB) return -1;
         if (nameA > nameB) return 1;
         return 0;
-      })
+      });
+
+      // Get the admin and get their library count
+      this.libraryCount = this.members.filter(m => this.hasAdminRole(m))[0].libraries.length;
+
       this.loadingMembers = false;
       this.cdRef.markForCheck();
     });
@@ -142,16 +147,8 @@ export class ManageUsersComponent implements OnInit {
     modalRef.componentInstance.member = member;
   }
 
-  formatLibraries(member: Member) {
-    if (member.libraries.length === 0) {
-      return translate('manage-users.none');
-    }
-
-    return member.libraries.map(item => item.name).join(', ');
-  }
-
   hasAdminRole(member: Member) {
-    return member.roles.indexOf('Admin') >= 0;
+    return member.roles.indexOf(Role.Admin) >= 0;
   }
 
   getRoles(member: Member) {
