@@ -871,7 +871,10 @@ public class ParseScannedFiles
             var prevIssue = string.Empty;
             foreach (var chapter in chapters)
             {
-                if (float.TryParse(chapter.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
+                // Use MinNumber in case there is a range, as otherwise sort order will cause it to be processed last
+                var chapterNum =
+                    $"{Parser.Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
+                if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
                 {
                     // Parsed successfully, use the numeric value
                     counter = parsedChapter;

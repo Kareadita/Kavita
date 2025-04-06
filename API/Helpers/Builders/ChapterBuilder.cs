@@ -25,7 +25,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             MinNumber = Parser.MinNumberFromRange(number),
             MaxNumber = Parser.MaxNumberFromRange(number),
             SortOrder = Parser.MinNumberFromRange(number),
-            Files = new List<MangaFile>(),
+            Files = [],
             Pages = 1,
             CreatedUtc = DateTime.UtcNow
         };

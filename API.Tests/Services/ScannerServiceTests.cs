@@ -90,7 +90,7 @@ public class ScannerServiceTests : AbstractDbTest
     [Fact]
     public async Task ScanLibrary_FlatSeries()
     {
-        var testcase = "Flat Series - Manga.json";
+        const string testcase = "Flat Series - Manga.json";
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
@@ -106,7 +106,7 @@ public class ScannerServiceTests : AbstractDbTest
     [Fact]
     public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
     {
-        var testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
+        const string testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
@@ -121,7 +121,7 @@ public class ScannerServiceTests : AbstractDbTest
     [Fact]
     public async Task ScanLibrary_FlatSeriesWithSpecialFolder_AlternativeNaming()
     {
-        var testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
+        const string testcase = "Flat Series with Specials Folder Alt Naming - Manga.json";
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
@@ -302,38 +302,38 @@ public class ScannerServiceTests : AbstractDbTest
     }
 
 
-        [Fact]
-        public async Task ScanLibrary_PublishersInheritFromChapters()
+    [Fact]
+    public async Task ScanLibrary_PublishersInheritFromChapters()
+    {
+        const string testcase = "Flat Special - Manga.json";
+
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Uzaki-chan Wants to Hang Out! v01 (2019) (Digital) (danke-Empire).cbz", new ComicInfo()
         {
-            const string testcase = "Flat Special - Manga.json";
+            Publisher = "Correct Publisher"
+        });
+        infos.Add("Uzaki-chan Wants to Hang Out! - 2022 New Years Special SP01.cbz", new ComicInfo()
+        {
+            Publisher = "Special Publisher"
+        });
+        infos.Add("Uzaki-chan Wants to Hang Out! - Ch. 103 - Kouhai and Control.cbz", new ComicInfo()
+        {
+            Publisher = "Chapter Publisher"
+        });
 
-            var infos = new Dictionary<string, ComicInfo>();
-            infos.Add("Uzaki-chan Wants to Hang Out! v01 (2019) (Digital) (danke-Empire).cbz", new ComicInfo()
-            {
-                Publisher = "Correct Publisher"
-            });
-            infos.Add("Uzaki-chan Wants to Hang Out! - 2022 New Years Special SP01.cbz", new ComicInfo()
-            {
-                Publisher = "Special Publisher"
-            });
-            infos.Add("Uzaki-chan Wants to Hang Out! - Ch. 103 - Kouhai and Control.cbz", new ComicInfo()
-            {
-                Publisher = "Chapter Publisher"
-            });
-
-            var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
 
-            var scanner = _scannerHelper.CreateServices();
-            await scanner.ScanLibrary(library.Id);
-            var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
-            Assert.NotNull(postLib);
-            Assert.Single(postLib.Series);
-            var publishers = postLib.Series.First().Metadata.People
-                .Where(p => p.Role == PersonRole.Publisher);
-            Assert.Equal(3, publishers.Count());
-        }
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        var publishers = postLib.Series.First().Metadata.People
+            .Where(p => p.Role == PersonRole.Publisher);
+        Assert.Equal(3, publishers.Count());
+    }
 
 
     /// <summary>
@@ -907,5 +907,35 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Equal(4, spiceAndWolf.Volumes.Count);
         Assert.Equal(6, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
+    }
+
+
+    /// <summary>
+    /// Ensure when Kavita scans, the sort order of chapters is correct
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_SortOrderWorks()
+    {
+        const string testcase = "Sort Order - Manga.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+
+        // Get the loose leaf volume and confirm each chapter aligns with expectation of Sort Order
+        var series = postLib.Series.First();
+        Assert.NotNull(series);
+
+        var volume = series.Volumes.FirstOrDefault();
+        Assert.NotNull(volume);
+
+        var sortedChapters = volume.Chapters.OrderBy(c => c.SortOrder).ToList();
+        Assert.True(sortedChapters[0].SortOrder.Is(1f));
+        Assert.True(sortedChapters[1].SortOrder.Is(4f));
+        Assert.True(sortedChapters[2].SortOrder.Is(5f));
     }
 }
