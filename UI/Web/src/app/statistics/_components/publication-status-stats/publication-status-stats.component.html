@@ -16,16 +16,12 @@
       </div>
     </div>
 
+    @let statuses = publicationStatues$ | async;
 
-
-    <ng-container *ngIf="publicationStatues$ | async as statuses">
-      <ng-container *ngIf="formControl.value; else tableLayout">
-        <ngx-charts-advanced-pie-chart
-          [results]="statuses"
-        >
-        </ngx-charts-advanced-pie-chart>
-      </ng-container>
-      <ng-template #tableLayout>
+    @if (formControl.value) {
+      <ngx-charts-advanced-pie-chart [results]="statuses" />
+    } @else {
+      <div style="height: 242px; overflow-y: auto;">
         <table class="table table-striped table-striped table-sm scrollable">
           <thead>
           <tr>
@@ -48,8 +44,8 @@
           </tr>
           </tbody>
         </table>
-      </ng-template>
-    </ng-container>
+      </div>
+    }
   </div>
 
 
