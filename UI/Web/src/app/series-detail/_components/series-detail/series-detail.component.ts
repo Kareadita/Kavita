@@ -636,7 +636,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+  async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
         this.markChapterAsRead(chapter);
@@ -656,6 +656,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.SendTo):
         const device = (action._extra!.data as Device);
         this.actionService.sendToDevice([chapter.id], device);
+        break;
+      case (Action.Delete):
+        await this.actionService.deleteChapter(chapter.id, (success) => {
+          if (!success) return;
+          
+          this.chapters = this.chapters.filter(c => c.id != chapter.id);
+          this.cdRef.markForCheck();
+        });
         break;
       default:
         break;
