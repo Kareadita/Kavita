@@ -473,6 +473,7 @@ public class ReadingListService : IReadingListService
         _logger.LogInformation("Processing Reading Lists for {SeriesName}", series.Name);
         var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         series.Metadata ??= new SeriesMetadataBuilder().Build();
+
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             var pairs = new List<Tuple<string, string>>();
@@ -578,14 +579,14 @@ public class ReadingListService : IReadingListService
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
-            Results = new List<CblBookResult>(),
+            Results = [],
             SuccessfulInserts = new List<CblBookResult>()
         };
 
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        // Is there another reading list with the same name?
-        if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
+        // Is there another reading list with the same name on the user's account?
+        if (await _unitOfWork.ReadingListRepository.ReadingListExistsForUser(cblReading.Name, userId))
         {
             importSummary.Success = CblImportResult.Fail;
             importSummary.Results.Add(new CblBookResult
@@ -599,9 +600,6 @@ public class ReadingListService : IReadingListService
         var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-
-        // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
-
 
         if (userSeries.Count == 0)
         {

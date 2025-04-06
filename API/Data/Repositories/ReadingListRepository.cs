@@ -49,6 +49,7 @@ public interface IReadingListRepository
     Task<IList<string>> GetRandomCoverImagesAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
+    Task<bool> ReadingListExistsForUser(string name, int userId);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role);
     Task<ReadingListCast> GetReadingListAllPeopleAsync(int readingListId);
     Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
@@ -109,6 +110,7 @@ public class ReadingListRepository : IReadingListRepository
                 .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
                 .Where(t => !string.IsNullOrEmpty(t))
                 .ToListAsync();
+
         return data
             .OrderBy(_ => random.Next())
             .Take(4)
@@ -121,6 +123,13 @@ public class ReadingListRepository : IReadingListRepository
         var normalized = name.ToNormalized();
         return await _context.ReadingList
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
+    }
+
+    public async Task<bool> ReadingListExistsForUser(string name, int userId)
+    {
+        var normalized = name.ToNormalized();
+        return await _context.ReadingList
+            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId);
     }
 
     public IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role)
