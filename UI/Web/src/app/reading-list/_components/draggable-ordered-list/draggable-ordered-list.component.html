@@ -2,15 +2,15 @@
     @if (items.length > virtualizeAfter) {
       <div class="example-list list-group-flush">
         <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
-          <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
-
-            <div class="d-flex list-container">
-              <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }"></ng-container>
-              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-
-              <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}"></ng-container>
+          @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
+            <div class="example-box">
+              <div class="d-flex list-container">
+                <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }"></ng-container>
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}"></ng-container>
+              </div>
             </div>
-          </div>
+          }
         </virtual-scroller>
       </div>
     } @else {

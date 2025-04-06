@@ -61,6 +61,8 @@ export class DetailsTabComponent {
   @Input() genres: Array<Genre> = [];
   @Input() tags: Array<Tag> = [];
   @Input() webLinks: Array<string> = [];
+  @Input() suppressEmptyGenres: boolean = false;
+  @Input() suppressEmptyTags: boolean = false;
 
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
