@@ -31,6 +31,7 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+      console.log('settings: ', settings);
       this.serverSettings = settings;
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
@@ -100,6 +101,8 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   packData() {
     const modelSettings = Object.assign({}, this.serverSettings);
+
+
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
 

@@ -151,7 +151,8 @@ public class SettingsController : BaseApiController
 
         try
         {
-            return Ok(await _settingsService.UpdateSettings(updateSettingsDto));
+            var d = await _settingsService.UpdateSettings(updateSettingsDto);
+            return Ok(d);
         }
         catch (KavitaException ex)
         {

@@ -21,8 +21,8 @@ namespace API.Services;
 
 public interface ISettingsService
 {
-    Task<ActionResult<MetadataSettingsDto>> UpdateMetadataSettings(MetadataSettingsDto dto);
-    Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto);
+    Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto);
+    Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
 }
 
 
@@ -50,7 +50,7 @@ public class SettingsService : ISettingsService
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    public async Task<ActionResult<MetadataSettingsDto>> UpdateMetadataSettings(MetadataSettingsDto dto)
+    public async Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto)
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         existingMetadataSetting.Enabled = dto.Enabled;
@@ -108,7 +108,7 @@ public class SettingsService : ISettingsService
     /// <param name="updateSettingsDto"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
-    public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
+    public async Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
         // We do not allow CacheDirectory changes, so we will ignore.
         var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
