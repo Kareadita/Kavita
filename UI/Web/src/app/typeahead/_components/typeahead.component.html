@@ -53,7 +53,6 @@
                 <li (click)="handleOptionClick(option)"
                      class="list-group-item" role="option" [attr.data-index]="index"
                      (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-                  {{settings.trackByIdentityFn(index, option)}}
                   <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }"></ng-container>
                 </li>
               }

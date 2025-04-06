@@ -1074,7 +1074,7 @@
         "donate": "Donate",
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
-        "cancel-edit": "Cancel Edit",
+        "cancel-edit": "Close Reorder",
         "more": "More",
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}"
