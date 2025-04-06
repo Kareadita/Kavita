@@ -1,26 +1,29 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
-  QueryList, TemplateRef, ViewChild,
+  QueryList,
+  TemplateRef,
+  ViewChild,
   ViewChildren
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { PieChartModule } from '@swimlane/ngx-charts';
-import {Observable, BehaviorSubject, combineLatest, map, shareReplay, switchMap} from 'rxjs';
-import { StatisticsService } from 'src/app/_services/statistics.service';
-import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
-import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
-import { PieDataItem } from '../../_models/pie-data-item';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {PieChartModule} from '@swimlane/ngx-charts';
+import {BehaviorSubject, combineLatest, map, Observable, shareReplay} from 'rxjs';
+import {StatisticsService} from 'src/app/_services/statistics.service';
+import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
+import {FileExtension, FileExtensionBreakdown} from '../../_models/file-breakdown';
+import {PieDataItem} from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { MangaFormatPipe } from '../../../_pipes/manga-format.pipe';
-import { BytesPipe } from '../../../_pipes/bytes.pipe';
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {Pagination} from "../../../_models/pagination";
-import {DownloadService} from "../../../shared/_services/download.service";
+import {MangaFormatPipe} from '../../../_pipes/manga-format.pipe';
+import {BytesPipe} from '../../../_pipes/bytes.pipe';
+import {AsyncPipe, DecimalPipe, NgFor, NgIf} from '@angular/common';
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 export interface StackedBarChartDataItem {
   name: string,
@@ -32,7 +35,7 @@ export interface StackedBarChartDataItem {
     templateUrl: './file-breakdown-stats.component.html',
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader]
+  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule, UtcToLocalTimePipe]
 })
 export class FileBreakdownStatsComponent {
 
@@ -103,4 +106,5 @@ export class FileBreakdownStatsComponent {
       });
   }
 
+  protected readonly ColumnMode = ColumnMode;
 }

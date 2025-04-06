@@ -25,7 +25,9 @@
       </ng-container>
 
       <ng-template #tableLayout>
-        <table class="table table-striped table-striped table-sm scrollable">
+
+        <div style="height: 242px; overflow-y: auto;">
+          <table class="table table-striped table-striped table-sm scrollable">
           <thead>
           <tr>
             <th scope="col" sortable="extension" direction="asc" (sort)="onSort($event)">
@@ -70,14 +72,16 @@
           </tr>
           </tbody>
           <tfoot>
-          <tr>
-            <td>{{t('total-file-size-title')}}</td>
-            <td></td>
-            <td></td>
-            <td>{{((rawData$ | async)?.totalFileSize || 0) | bytes}}</td>
-          </tr>
+            <tr>
+              <td style="color: var(--bs-body)">{{t('total-file-size-title')}}</td>
+              <td></td>
+              <td></td>
+              <td style="color: var(--bs-body)">{{((rawData$ | async)?.totalFileSize || 0) | bytes}}</td>
+            </tr>
           </tfoot>
         </table>
+        </div>
+
       </ng-template>
     </ng-container>
 
