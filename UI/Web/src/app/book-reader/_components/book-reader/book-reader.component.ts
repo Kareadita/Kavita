@@ -722,6 +722,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Update the window Height
     this.updateWidthAndHeightCalcs();
     this.updateImageSizes();
+
     const resumeElement = this.getFirstVisibleElementXPath();
     if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
@@ -944,7 +945,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
-      this.updateSingleImagePageStyles()
+      this.updateSingleImagePageStyles();
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
 
       this.cdRef.markForCheck();
