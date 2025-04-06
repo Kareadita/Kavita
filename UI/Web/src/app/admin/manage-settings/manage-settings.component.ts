@@ -47,15 +47,15 @@ export class ManageSettingsComponent implements OnInit {
     translate('manage-settings.allow-stats-tooltip-part-2');
 
   ngOnInit(): void {
-    this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
+    this.settingsService.getTaskFrequencies().subscribe(frequencies => {
       this.taskFrequencies = frequencies;
       this.cdRef.markForCheck();
     });
-    this.settingsService.getLoggingLevels().pipe(take(1)).subscribe(levels => {
+    this.settingsService.getLoggingLevels().subscribe(levels => {
       this.logLevels = levels;
       this.cdRef.markForCheck();
     });
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
