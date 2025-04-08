@@ -222,7 +222,7 @@
         "description": "Nuair a roghnaítear iad, déanfar gach liosta sraithe agus léitheoireachta a bhfuil mír amháin ar a laghad acu atá níos mó ná an srian roghnaithe a bhriseadh ó thorthaí.",
         "not-applicable-for-admins": "Níl sé seo infheidhme maidir le admins.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "no-restriction": "Gan Srian",
+        "no-restriction": "Uimh Srianadh",
         "include-unknowns-label": "Cuir anaithnid san áireamh",
         "include-unknowns-tooltip": "Más fíor, ceadófar Anaithnid le Srian Aoise. D'fhéadfadh sé seo a bheith ina chúis le sceitheadh na meán d'úsáideoirí a bhfuil srianta Aoise orthu."
     },
@@ -860,7 +860,9 @@
         "back": "Ar ais",
         "more": "Níos mó",
         "customize": "{{settings.customize}}",
-        "browse-authors": "Brabhsáil Údair"
+        "browse-authors": "Brabhsáil Údair",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "Dún Athordú"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -979,7 +981,8 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} míreanna iomlána",
-        "jumpkey-count": "{{count}} Sraith"
+        "jumpkey-count": "{{count}} Sraith",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "Ní féidir léamh"
@@ -1251,7 +1254,7 @@
         "library-scan-tooltip": "Cé chomh minic a dhéanfaidh Kavita meiteashonraí a scanadh agus a athnuachan timpeall ar chomhaid leabharlainne.",
         "library-database-backup-label": "Cúltaca fileata",
         "library-database-backup-tooltip": "Cé chomh minic a dhéanfaidh Kavita cúltaca ar an mbunachar sonraí agus ar chomhaid ghaolmhara eile.",
-        "cleanup-label": "Glanadh",
+        "cleanup-label": "Glanta",
         "cleanup-tooltip": "Cé chomh minic a rithfidh Kavita tascanna glantacháin. D'fhéadfadh sé seo a bheith trom agus ba chóir é a dhéanamh ag meán oíche i bhformhór na gcásanna",
         "adhoc-tasks-title": "Tascanna Ad-hoc",
         "job-title-header": "Teideal an Phoist",
@@ -1328,7 +1331,8 @@
         "no-data": "Níl aon úsáideoirí eile ann.",
         "loading": "{{common.loading}}",
         "actions-header": "Gníomhartha",
-        "pending-tooltip": "Níor bhailíochtaigh an t-úsáideoir seo a ríomhphost"
+        "pending-tooltip": "Níor bhailíochtaigh an t-úsáideoir seo a ríomhphost",
+        "all-libraries": "Gach Leabharlann"
     },
     "edit-collection-tags": {
         "title": "Cuir {{collectionName}} Collection in eagar",
@@ -1440,7 +1444,8 @@
         "provided": "Ar choinníoll",
         "smart-filter": "Scagaire Cliste",
         "library": "Leabharlann",
-        "external-source": "Foinse Sheachtrach"
+        "external-source": "Foinse Sheachtrach",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -2019,7 +2024,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Gach scagairí Cliste a chuirtear le Side Nav nó aon cheann a cruthaíodh go fóill.",
@@ -2047,7 +2053,15 @@
         "no-data": "Níor cruthaíodh aon scagairí cliste",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "Tá earráid ionchódaithe sa scagaire. Ní mór duit é a athchruthú."
+        "errored": "Tá earráid ionchódaithe sa scagaire. Ní mór duit é a athchruthú.",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "name-label": "Ainm",
+        "required-field": "Teastaíonn ainm ó Scagairí Cliste",
+        "filter-name-unique": "Caithfidh ainmneacha Scagaire Cliste a bheith uathúil",
+        "cancel": "{{common.cancel}}",
+        "edit-smart-filter": "Cuir {{name}} in eagar",
+        "close": "{{common.close}}"
     },
     "edit-external-source-item": {
         "not-unique": "Tá foinse sheachtrach ann leis an óstach seo. Cinntigh nach bhfuil dúbailtí agat",
@@ -2318,7 +2332,8 @@
         "title": "Gníomhartha",
         "copy-settings": "Cóipeáil Socruithe Ó",
         "match": "Meaitseáil",
-        "match-tooltip": "Sraith Meaitseála le Kavita+ de láimh"
+        "match-tooltip": "Sraith Meaitseála le Kavita+ de láimh",
+        "reorder": "Athordú"
     },
     "preferences": {
         "left-to-right": "Clé go Deas",
@@ -2616,5 +2631,22 @@
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "summary": "{{filter-field-pipe.summary}}",
         "age-rating": "{{metadata-fields.age-rating-title}}"
+    },
+    "role-localized-pipe": {
+        "admin": "Riarachán",
+        "download": "Íosluchtaigh",
+        "change-password": "Athraigh Pasfhocal",
+        "bookmark": "Leabharmharc",
+        "change-restriction": "Srian Athraithe",
+        "login": "Logáil isteach",
+        "read-only": "Léigh Amháin",
+        "promote": "Chur chun cinn"
+    },
+    "log-level-pipe": {
+        "trace": "Rian",
+        "warning": "Rabhadh",
+        "critical": "Criticiúil",
+        "information": "Eolas",
+        "debug": "Dífhabhtaithe"
     }
 }

@@ -856,7 +856,9 @@
         "home": "Domů",
         "want-to-read": "Chci číst",
         "collections": "Sbírky",
-        "all-series": "Všechny série"
+        "all-series": "Všechny série",
+        "cancel-edit": "Zrušit úpravu",
+        "edit": "{{common.edit}}"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1277,7 +1279,8 @@
         "online-now-tooltip": "Nyní aktivní",
         "too-many-libraries": "Hodně",
         "sharing-header": "Sdílení",
-        "actions-header": "Akce"
+        "actions-header": "Akce",
+        "all-libraries": "Všechny knihovny"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1379,7 +1382,8 @@
         "smart-filter": "Chytrý filtr",
         "provided": "Poskytnuto",
         "library": "Knihovna",
-        "external-source": "Externí zdroj"
+        "external-source": "Externí zdroj",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -1840,7 +1844,8 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "no-data": "Všechny inteligentní filtry jsou přidané na ovládací panel nebo žádné dosud nebyly vytvořené."
+        "no-data": "Všechny inteligentní filtry jsou přidané na ovládací panel nebo žádné dosud nebyly vytvořené.",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
@@ -1868,7 +1873,15 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "Nevytvořeny žádné inteligentní filtry",
-        "errored": "Ve filtru došlo k chybě kódování. Je třeba jej znovu vytvořit."
+        "errored": "Ve filtru došlo k chybě kódování. Je třeba jej znovu vytvořit.",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Upravit {{name}}",
+        "name-label": "Název",
+        "required-field": "Chytré filtry potřebují název",
+        "filter-name-unique": "Názvy chytrých filtrů musí být jedinečné",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -1995,7 +2008,8 @@
         "promote-tooltip": "Zviditelnění položky pro všechny uživatele",
         "new-collection": "Nová sbírka",
         "match": "Shoda",
-        "match-tooltip": "Přiřadit série s Kavitou+ manuálně"
+        "match-tooltip": "Přiřadit série s Kavitou+ manuálně",
+        "reorder": "Přeuspořádat"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2313,7 +2327,8 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} položek celkem",
-        "jumpkey-count": "{{count}} sérií"
+        "jumpkey-count": "{{count}} sérií",
+        "no-data": "{{common.no-data}}"
     },
     "download-indicator": {
         "progress": "{{procentage}}% staženo"
@@ -2616,5 +2631,22 @@
         "genres": "{{metadata-fields.genres-title}}",
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}"
+    },
+    "role-localized-pipe": {
+        "download": "Stažené",
+        "change-password": "Změnit heslo",
+        "change-restriction": "Omezení změn",
+        "login": "Přihlášení",
+        "read-only": "Pouze pro čtení",
+        "promote": "Propagovat",
+        "bookmark": "Záložka",
+        "admin": "Správce"
+    },
+    "log-level-pipe": {
+        "debug": "Ladit",
+        "information": "Informace",
+        "trace": "Sledovat",
+        "warning": "Varování",
+        "critical": "Kritické"
     }
 }

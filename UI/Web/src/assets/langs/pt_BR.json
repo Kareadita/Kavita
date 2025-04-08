@@ -860,7 +860,9 @@
         "back": "Voltar",
         "more": "Mais",
         "customize": "{{settings.customize}}",
-        "browse-authors": "Navegar pelos Autores"
+        "browse-authors": "Navegar pelos Autores",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "Fechar Reordenar"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -979,7 +981,8 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} itens no total",
-        "jumpkey-count": "{{count}} Séries"
+        "jumpkey-count": "{{count}} Séries",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "Não foi Possível Ler"
@@ -1328,7 +1331,8 @@
         "no-data": "Não há outros usuários.",
         "loading": "{{common.loading}}",
         "actions-header": "Ações",
-        "pending-tooltip": "Este usuário não validou seu e-mail"
+        "pending-tooltip": "Este usuário não validou seu e-mail",
+        "all-libraries": "Todas as Bibliotecas"
     },
     "edit-collection-tags": {
         "title": "Editar {{collectionName}} Coleção",
@@ -1440,7 +1444,8 @@
         "provided": "Provido",
         "smart-filter": "Filtro Intelegente",
         "library": "Biblioteca",
-        "external-source": "Fonte Externa"
+        "external-source": "Fonte Externa",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -2019,7 +2024,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Todos os filtros inteligentes adicionados ao Navegador Lateral ou nenhum criado ainda.",
@@ -2047,7 +2053,15 @@
         "no-data": "Nenhum Filtro Inteligente criado",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "Há um erro de codificação no filtro. Você precisa recriá-lo."
+        "errored": "Há um erro de codificação no filtro. Você precisa recriá-lo.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Editar {{name}}",
+        "name-label": "Nome",
+        "required-field": "Filtros inteligentes precisam de um nome",
+        "filter-name-unique": "Os nomes dos Filtros Inteligentes devem ser exclusivos"
     },
     "edit-external-source-item": {
         "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
@@ -2318,7 +2332,8 @@
         "title": "Ações",
         "copy-settings": "Copiar Configurações De",
         "match": "Corresponder",
-        "match-tooltip": "Corresponder Séries com Kavita+ manualmente"
+        "match-tooltip": "Corresponder Séries com Kavita+ manualmente",
+        "reorder": "Reordenar"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2616,5 +2631,22 @@
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "people": "{{tabs.people-tab}}",
         "summary": "{{filter-field-pipe.summary}}"
+    },
+    "role-localized-pipe": {
+        "admin": "Admin",
+        "download": "Baixar",
+        "change-password": "Alterar Senha",
+        "bookmark": "Marcador",
+        "change-restriction": "Alterar Restrição",
+        "login": "Entrar",
+        "read-only": "Só para Leitura",
+        "promote": "Divulgar"
+    },
+    "log-level-pipe": {
+        "debug": "Depuração",
+        "information": "Informação",
+        "trace": "Rastro",
+        "warning": "Aviso",
+        "critical": "Crítico"
     }
 }

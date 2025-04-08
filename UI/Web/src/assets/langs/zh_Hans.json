@@ -860,7 +860,9 @@
         "back": "后退",
         "more": "更多",
         "customize": "{{settings.customize}}",
-        "browse-authors": "浏览作者"
+        "browse-authors": "浏览作者",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "取消重新排序"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -979,7 +981,8 @@
     },
     "card-detail-layout": {
         "total-items": "总共{{count}}个条目",
-        "jumpkey-count": "{{count}} 系列"
+        "jumpkey-count": "{{count}} 系列",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "无法阅读"
@@ -1328,7 +1331,8 @@
         "no-data": "没有其他用户。",
         "loading": "{{common.loading}}",
         "actions-header": "活动",
-        "pending-tooltip": "此用户尚未验证其电子邮件"
+        "pending-tooltip": "此用户尚未验证其电子邮件",
+        "all-libraries": "所有库"
     },
     "edit-collection-tags": {
         "title": "编辑 {{collectionName}} 收藏",
@@ -1440,7 +1444,8 @@
         "provided": "已提供的",
         "smart-filter": "智能筛选器",
         "library": "资料库",
-        "external-source": "外部源"
+        "external-source": "外部源",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -2019,7 +2024,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "所有智能筛选已加入侧边栏或尚未创建。",
@@ -2047,7 +2053,15 @@
         "no-data": "未创建智能筛选",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "筛选器中存在编码错误。您需要重新创建它。"
+        "errored": "筛选器中存在编码错误。您需要重新创建它。",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "edit-smart-filter": "编辑 {{name}}",
+        "name-label": "名称",
+        "filter-name-unique": "智能筛选器名称必须是唯一的",
+        "save": "{{common.save}}",
+        "required-field": "智能筛选器需要一个名称"
     },
     "edit-external-source-item": {
         "not-unique": "此主机外部源已存在，请确保您没有重复记录",
@@ -2318,7 +2332,8 @@
         "title": "活动",
         "copy-settings": "复制设置",
         "match": "匹配",
-        "match-tooltip": "使用 Kavita+ 手动匹配系列"
+        "match-tooltip": "使用 Kavita+ 手动匹配系列",
+        "reorder": "重新排序"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2441,7 +2456,7 @@
     },
     "confirm": {
         "confirm": "确认",
-        "alert": "警告",
+        "alert": "注意",
         "info": "信息",
         "cancel": "{{common.cancel}}",
         "ok": "确定"
@@ -2616,5 +2631,22 @@
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}"
+    },
+    "role-localized-pipe": {
+        "download": "下载",
+        "bookmark": "书签",
+        "change-restriction": "更改限制",
+        "login": "登录",
+        "read-only": "只读",
+        "promote": "推广",
+        "admin": "Admin",
+        "change-password": "更改密码"
+    },
+    "log-level-pipe": {
+        "debug": "调试",
+        "information": "信息",
+        "trace": "追踪",
+        "warning": "警告",
+        "critical": "严重"
     }
 }
