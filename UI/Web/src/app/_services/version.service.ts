@@ -30,8 +30,8 @@ export class VersionService implements OnDestroy{
 
   // Check intervals
   private readonly VERSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
-  private readonly OUT_OF_DATE_CHECK_INTERVAL = this.VERSION_CHECK_INTERVAL; // 2 * 60 * 60 * 1000; // 2 hours
-  private readonly OUT_Of_BAND_AMOUNT = 2; // How many releases before we show "You're X releases out of date"
+  private readonly OUT_OF_DATE_CHECK_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+  private readonly OUT_Of_BAND_AMOUNT = 3; // How many releases before we show "You're X releases out of date"
 
   // Routes where version update modals should not be shown
   private readonly EXCLUDED_ROUTES = [
