@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'reading-list-item'">
-  <div class="d-flex flex-row g-0 mb-2 reading-list-item">
+  <div class="d-flex flex-row g-0reading-list-item">
     <div class="d-none d-md-block pe-2">
       <app-image width="106px" [styles]="{'max-height': '125px'}" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
       @if (item.pagesRead === 0 && item.pagesTotal > 0) {
@@ -42,7 +42,7 @@
           <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
         </div>
 
-        <app-read-more [text]="item.summary || ''"></app-read-more>
+        <app-read-more [text]="item.summary || ''" [showToggle]="false" [maxLength]="500"></app-read-more>
 
 
         @if (item.releaseDate !== '0001-01-01T00:00:00') {
