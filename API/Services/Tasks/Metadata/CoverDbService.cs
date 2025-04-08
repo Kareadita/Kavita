@@ -536,7 +536,7 @@ public class CoverDbService : ICoverDbService
             if (!string.IsNullOrEmpty(filePath))
             {
                 // Additional check to see if downloaded image is similar and we have a higher resolution
-                if (chooseBetterImage)
+                if (chooseBetterImage && !string.IsNullOrEmpty(series.CoverImage))
                 {
                     try
                     {
