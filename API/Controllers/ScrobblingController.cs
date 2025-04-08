@@ -270,4 +270,15 @@ public class ScrobblingController : BaseApiController
         await _unitOfWork.CommitAsync();
         return Ok();
     }
+
+    /// <summary>
+    /// Has the logged in user ran scrobble generation
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("has-ran-scrobble-gen")]
+    public async Task<ActionResult<bool>> HasRanScrobbleGen()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok(user is {HasRunScrobbleEventGeneration: true});
+    }
 }

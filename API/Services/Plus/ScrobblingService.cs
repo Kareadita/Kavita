@@ -624,7 +624,14 @@ public class ScrobblingService : IScrobblingService
         {
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
             if (user == null || string.IsNullOrEmpty(user.AniListAccessToken)) return;
+            if (user.HasRunScrobbleEventGeneration)
+            {
+                _logger.LogWarning("User {UserName} has already run scrobble event generation, Kavita will not generate more events", user.UserName);
+                return;
+            }
         }
+
+
 
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
@@ -666,6 +673,14 @@ public class ScrobblingService : IScrobblingService
                 if (!libAllowsScrobbling[series.LibraryId]) continue;
                 if (series.PagesRead <= 0) continue; // Since we only scrobble when things are higher, we can
                 await ScrobbleReadingUpdate(uId, series.Id);
+            }
+
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uId);
+            if (user != null)
+            {
+                user.HasRunScrobbleEventGeneration = true;
+                user.ScrobbleEventGenerationRan = DateTime.UtcNow;
+                await _unitOfWork.CommitAsync();
             }
         }
     }

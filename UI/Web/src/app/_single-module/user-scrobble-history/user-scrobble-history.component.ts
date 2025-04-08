@@ -29,8 +29,8 @@ export interface DataTablePage {
 
 @Component({
     selector: 'app-user-scrobble-history',
-    imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-        DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
+  imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
     templateUrl: './user-scrobble-history.component.html',
     styleUrls: ['./user-scrobble-history.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -66,11 +66,17 @@ export class UserScrobbleHistoryComponent implements OnInit {
     column: 'lastModifiedUtc',
     direction: 'desc'
   };
+  hasRunScrobbleGen: boolean = false;
 
   ngOnInit() {
 
     this.pageInfo.pageNumber = 0;
     this.cdRef.markForCheck();
+
+    this.scrobblingService.hasRunScrobbleGen().subscribe(res => {
+      this.hasRunScrobbleGen = res;
+      this.cdRef.markForCheck();
+    })
 
     this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
       this.tokenExpired = hasExpired;
