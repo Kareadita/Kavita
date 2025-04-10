@@ -857,7 +857,7 @@
         "want-to-read": "Chci číst",
         "collections": "Sbírky",
         "all-series": "Všechny série",
-        "cancel-edit": "Zrušit úpravu",
+        "cancel-edit": "Zavřít úpravu",
         "edit": "{{common.edit}}"
     },
     "library-settings-modal": {
