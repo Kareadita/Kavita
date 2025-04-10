@@ -17,12 +17,8 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <div class="input-group">
-              <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-              <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
-              <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
-            </div>
+            <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
+                   [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
             @if (formControl.errors; as errors) {
               <div id="hostname-validations" class="invalid-feedback" style="display: inline-block">
@@ -69,7 +65,11 @@
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur />
+            <div class="input-group">
+              <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur />
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
+              <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
+            </div>
           </ng-template>
         </app-setting-item>
       }
