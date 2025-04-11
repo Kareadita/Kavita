@@ -7,16 +7,13 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { map, Observable, of, shareReplay } from 'rxjs';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {map, Observable, of, shareReplay} from 'rxjs';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { AsyncPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
@@ -39,7 +36,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   observableHandles: Array<any> = [];
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
-  isViewMode: boolean = true;
+  isEditMode: boolean = false;
   canEdit: boolean = false;
 
 
@@ -90,7 +87,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
       this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
-      this.isViewMode = true;
+      this.isEditMode = false;
       this.cdRef.markForCheck();
     }, err => {
       this.resetPasswordErrors = err;
@@ -99,7 +96,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   }
 
   updateEditMode(mode: boolean) {
-    this.isViewMode = !mode;
+    this.isEditMode = mode;
     this.cdRef.markForCheck();
   }
 }
