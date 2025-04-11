@@ -130,7 +130,7 @@ export class AccountService {
   }
 
   hasChangeAgeRestrictionRole(user: User) {
-    return user && user.roles.includes(Role.ChangeRestriction);
+    return user && !user.roles.includes(Role.Admin) && user.roles.includes(Role.ChangeRestriction);
   }
 
   hasDownloadRole(user: User) {
