@@ -138,6 +138,12 @@ public class AccountController : BaseApiController
                 return BadRequest(usernameValidation);
             }
 
+            // If Email is empty, default to the username
+            if (string.IsNullOrEmpty(registerDto.Email))
+            {
+                registerDto.Email = registerDto.Username;
+            }
+
             var user = new AppUserBuilder(registerDto.Username, registerDto.Email,
                 await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 

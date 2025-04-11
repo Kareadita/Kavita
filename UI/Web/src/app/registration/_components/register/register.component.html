@@ -8,11 +8,13 @@
           <label for="username" class="form-label">{{t('username-label')}}</label>
           <input id="username" class="form-control custom-input" formControlName="username" type="text" autocomplete="username"
                  [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" aria-describedby="username-validations">
-          <div id="username-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('username')?.errors?.required">
-              {{t('required-field')}}
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="username-validations" class="invalid-feedback">
+              @if (registerForm.get('username')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              }
             </div>
-          </div>
+          }
         </div>
 
         <div class="mb-3 text-start">
@@ -22,16 +24,18 @@
           <span class="visually-hidden" id="email-help">
             <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
           </span>
-          <input class="form-control custom-input" type="email" inputmode="email" id="email" autocomplete="email" formControlName="email" required aria-describedby="email-help"
+          <input class="form-control custom-input" type="email" inputmode="email" id="email" autocomplete="email" formControlName="email" aria-describedby="email-help"
                  [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-          <div id="email-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-            <div *ngIf="registerForm.get('email')?.errors?.required">
-              {{t('required-field')}}
+          @if (registerForm.dirty || registerForm.touched) {
+            <div id="email-validations" class="invalid-feedback">
+              @if (registerForm.get('email')?.errors?.required) {
+                <div>{{t('required-field')}}</div>
+              } @else if (registerForm.get('email')?.errors?.email) {
+                <div>{{t('valid-email')}}</div>
+              }
             </div>
-            <div *ngIf="registerForm.get('email')?.errors?.email">
-              {{t('valid-email')}}
-            </div>
-          </div>
+          }
+
         </div>
 
         <div class="mb-3 text-start">
