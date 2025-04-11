@@ -358,10 +358,11 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
-    public async Task<ActionResult> UpdateEmail(UpdateEmailDto? dto)
+    public async Task<ActionResult<InviteUserResponse>> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole))
+            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
@@ -370,12 +371,13 @@ public class AccountController : BaseApiController
         // Validate this user's password
         if (! await _userManager.CheckPasswordAsync(user, dto.Password))
         {
-            _logger.LogCritical("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
+            _logger.LogWarning("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         }
 
         // Validate no other users exist with this email
-        if (user.Email!.Equals(dto.Email)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Email!.Equals(dto.Email))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
@@ -392,8 +394,10 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generate-token"));
         }
 
+        var isValidEmailAddress = _emailService.IsValidEmail(user.Email);
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !isValidEmailAddress;
+
         user.EmailConfirmed = !shouldEmailUser;
         user.ConfirmationToken = token;
         await _userManager.UpdateAsync(user);
@@ -407,7 +411,8 @@ public class AccountController : BaseApiController
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = false
+                EmailSent = false,
+                InvalidEmail = !isValidEmailAddress
             });
         }
 
@@ -415,7 +420,7 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            if (!_emailService.IsValidEmail(user.Email))
+            if (!isValidEmailAddress)
             {
                 _logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email);
                 return Ok(new InviteUserResponse
@@ -447,7 +452,8 @@ public class AccountController : BaseApiController
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = true
+                EmailSent = true,
+                InvalidEmail = !isValidEmailAddress
             });
         }
         catch (Exception ex)
