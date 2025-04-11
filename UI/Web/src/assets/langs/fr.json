@@ -176,7 +176,8 @@
         "anilist-scrobbling-label": "Suivi de lecture AniList",
         "anilist-scrobbling-tooltip": "Autorise Kavita à mettre à jour le suivi de lecture et les notes sur AniList",
         "want-to-read-sync-label": "À lire : Synchroniser",
-        "want-to-read-sync-tooltip": "Permettre à Kavita d'ajouter des éléments à votre liste \"À lire\" en fonction des séries AniList et MAL de la liste de lecture \"En attente\""
+        "want-to-read-sync-tooltip": "Permettre à Kavita d'ajouter des éléments à votre liste \"À lire\" en fonction des séries AniList et MAL de la liste de lecture \"En attente\"",
+        "allow-auto-webtoon-reader-label": "Mode Lecteur Automatique Webtoon"
     },
     "user-holds": {
         "title": "Enregistrement du suivi d'activité",
