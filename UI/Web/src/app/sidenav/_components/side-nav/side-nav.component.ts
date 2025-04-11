@@ -240,7 +240,8 @@ export class SideNavComponent implements OnInit {
 
   async reorderDrop($event: CdkDragDrop<any, any, SideNavStream>) {
     // Don't allow dropping on non SideNav items
-    if ($event.currentIndex < 3) {
+    const fixedSideNavItems = 3;
+    if ($event.currentIndex < fixedSideNavItems) {
       return;
     }
 
