@@ -170,6 +170,10 @@ export class MetadataFilterRowComponent implements OnInit {
   private readonly mangaFormatPipe = new MangaFormatPipe(this.translocoService);
   private readonly ageRatingPipe = new AgeRatingPipe();
 
+  get IsEmptySelected() {
+    return parseInt(this.formGroup.get('comparison')?.value + '', 10) !== FilterComparison.IsEmpty;
+  }
+
 
   get UiLabel(): FilterRowUi | null {
     const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
@@ -348,6 +352,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue('');
         this.formGroup.get('comparison')?.patchValue(StringComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -363,10 +368,13 @@ export class MetadataFilterRowComponent implements OnInit {
 
       this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Number);
+
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
         this.formGroup.get('comparison')?.patchValue(NumberComparisons[0]);
       }
+
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -383,6 +391,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(false);
         this.formGroup.get('comparison')?.patchValue(DateComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -400,6 +409,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(false);
         this.formGroup.get('comparison')?.patchValue(BooleanComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -421,15 +431,15 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(0);
         this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
   }
 
-
-
   onDateSelect(_: NgbDate) {
     this.propagateFilterUpdate();
   }
+
   updateIfDateFilled() {
     this.propagateFilterUpdate();
   }
