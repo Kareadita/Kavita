@@ -239,6 +239,11 @@ export class SideNavComponent implements OnInit {
   }
 
   async reorderDrop($event: CdkDragDrop<any, any, SideNavStream>) {
+    // Don't allow dropping on non SideNav items
+    if ($event.currentIndex < 3) {
+      return;
+    }
+
     const stream = $event.item.data;
     // Offset the home, back, and customize button
     this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
