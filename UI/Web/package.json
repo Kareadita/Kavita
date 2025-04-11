@@ -47,7 +47,7 @@
     "luxon": "^3.6.1",
     "ng-circle-progress": "^1.7.1",
     "ng-lazyload-image": "^9.1.3",
-    "ng-select2-component": "^17.2.3",
+    "ng-select2-component": "^17.2.4",
     "ngx-color-picker": "^19.0.0",
     "ngx-extended-pdf-viewer": "^23.0.0-alpha.7",
     "ngx-file-drop": "^16.0.0",
