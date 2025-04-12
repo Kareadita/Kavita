@@ -176,7 +176,9 @@
         "want-to-read-sync-tooltip": "Permitir que o Kavita adicione itens à lista Leituras Futuras com base nas séries da lista de leitura Pendentes do AniList e/ou MAL",
         "anilist-scrobbling-tooltip": "Permitir que o Kavita faça Scrobble (sincronização unidirecional) do progresso das leituras e classificações para o AniList",
         "kavitaplus-settings-title": "Kavita+",
-        "anilist-scrobbling-label": "Scrobbling AniList"
+        "anilist-scrobbling-label": "Scrobbling AniList",
+        "allow-auto-webtoon-reader-label": "Modo Automático do Leitor Webtoon",
+        "allow-auto-webtoon-reader-tooltip": "Muda para o modo Leitor Webtoon se as páginas parecem ser um webtoon. Podem acontecer falsos positivos."
     },
     "user-holds": {
         "title": "Retenções de Scrobble",
@@ -304,7 +306,8 @@
         "regen-warning": "Se recriar a chave da API, os clientes de terceiros existentes deixarão de ter acesso.",
         "no-key": "ERRO - CHAVE NÃO DEFINIDA",
         "confirm-reset": "Isto irá invalidar todas as configurações OPDS. Tem a certeza que deseja continuar?",
-        "key-reset": "Repor chave da API"
+        "key-reset": "Repor chave da API",
+        "reset": "Restaurar"
     },
     "scrobbling-providers": {
         "title": "Fornecedores de Scrobbling",
@@ -514,9 +517,9 @@
     },
     "library-type-pipe": {
         "book": "Livro",
-        "comic": "BD",
+        "comic": "BD (Legado)",
         "manga": "Manga",
-        "comicVine": "Comic Vine",
+        "comicVine": "BD",
         "image": "Imagem",
         "lightNovel": "Light Novel"
     },
@@ -786,9 +789,11 @@
         "more-alt": "Mais",
         "time-left-alt": "Tempo Restante",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "Publicação",
-        "publication-status-tooltip": "Estado da Publicação"
+        "publication-status-tooltip": "Estado da Publicação",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -855,7 +860,9 @@
         "back": "Voltar",
         "more": "Mais",
         "customize": "{{settings.customize}}",
-        "browse-authors": "Explorar Autores"
+        "browse-authors": "Explorar Autores",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "Fechar Reordenar"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -872,7 +879,7 @@
         "type-label": "Tipo",
         "type-tooltip": "O tipo de biblioteca indica como os nomes dos ficheiros são processados e se o UI mostra Capítulos (Manga) vs Números (BDs). Verifique o wiki para mais detalhes relativamente às diferenças entre os dois tipos de bibliotecas.",
         "kavitaplus-eligible-label": "Kavita+ Elegível",
-        "kavitaplus-eligible-tooltip": "O Kavita+ extrairá informações ou oferecerá suporte ao Scrobbling",
+        "kavitaplus-eligible-tooltip": "Suporta as funcionalidades de metadados do Kavita+ ou Scrobbling",
         "folder-description": "Adicione pastas à sua biblioteca",
         "browse": "Procure as Pastas Que Pretende Adicionar",
         "help-us-part-1": "Ajude-nos e siga ",
@@ -974,7 +981,8 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} itens totais",
-        "jumpkey-count": "{{count}} Séries"
+        "jumpkey-count": "{{count}} Séries",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "Não Pode Ler"
@@ -1000,7 +1008,8 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
         "format-title": "{{metadata-filter.format-label}}",
-        "length-title": "{{edit-chapter-modal.words-label}}"
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1078,7 +1087,7 @@
         "reset": "{{common.reset}}",
         "test": "Teste",
         "host-name-label": "Nome do Host",
-        "host-name-tooltip": "Nome de domínio (do Proxy Inverso). Obrigatório para a funcionalidade de email. Se não existir proxy inverso, use qualquer url.",
+        "host-name-tooltip": "O nome de domínio do proxy inverso, necessário para a funcionalidade de email. Se não usar um proxy inverso, pode usar qualquer URL, incluindo http://externalip:port/",
         "host-name-validation": "O nome do host tem de começar por http(s) e não pode acabar com /",
         "sender-address-label": "Endereço Remetente",
         "sender-address-tooltip": "Este é o endereço de e-mail que o destinatário verá quando receber o email. Normalmente, o endereço de email associado à conta.",
@@ -1322,7 +1331,8 @@
         "no-data": "Não existem outros utilizadores.",
         "loading": "{{common.loading}}",
         "actions-header": "Ações",
-        "pending-tooltip": "Este utilizador não validou o seu email"
+        "pending-tooltip": "Este utilizador não validou o seu email",
+        "all-libraries": "Todas as Bibliotecas"
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
@@ -1425,7 +1435,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Lançamento: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1433,7 +1444,8 @@
         "provided": "Disponibilizado",
         "smart-filter": "Filtro Inteligente",
         "library": "Biblioteca",
-        "external-source": "Fonte Externa"
+        "external-source": "Fonte Externa",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -1445,7 +1457,19 @@
         "read-options-alt": "Opções de leitura",
         "incognito-alt": "(Incógnito)",
         "no-data": "Nada adicionado",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "dnd-warning": "A funcionalidade arrastar e largar está indisponível em dispositivos móveis ou quando a lista de leitura tem mais de 100 itens.",
+        "items-title": "Itens",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "edit-label": "Modo Edição",
+        "date-range-title": "Intervalo de Datas",
+        "edit-alt": "{{common.edit}}",
+        "reorder-alt": "Reordenar Itens",
+        "more-alt": "{{series-detail.more-alt}}"
     },
     "events-widget": {
         "title-alt": "Atividade",
@@ -1992,14 +2016,16 @@
         "sidenav": "Navegação Lateral",
         "external-sources": "Fontes Externas",
         "smart-filters": "Filtros Inteligentes",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "Pode personalizar diferentes aspetos do Kavita ao reordenar, mudar a visibilidade, e fixar filtros inteligentes/origens externas à sua página inicial ou navegação lateral."
     },
     "customize-dashboard-streams": {
         "no-data": "Todos os Filtros inteligentes foram adicionados ao Painel Principal ou nenhum foi ainda criado.",
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Todos os Filtros inteligentes foram adicionados à Navegação Lateral ou nenhum foi ainda criado.",
@@ -2027,7 +2053,15 @@
         "no-data": "Não foram criados Filtros Inteligentes",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "Existe um erro de encoding no filtro. Tem de ser recriado."
+        "errored": "Existe um erro de encoding no filtro. Tem de ser recriado.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Editar {{name}}",
+        "name-label": "Nome",
+        "required-field": "Os Filtros Inteligentes requerem um nome",
+        "filter-name-unique": "Os nomes dos Filtros Inteligentes têm de ser únicos"
     },
     "edit-external-source-item": {
         "not-unique": "Existe uma fonte externa com este host. Garanta que não tem duplicados",
@@ -2225,7 +2259,8 @@
         "confirm-delete-multiple-chapters": "Tem a certeza de que pretende eliminar {{count}} capítulos/volumes? Este processo não irá modificar ficheiros em disco.",
         "bulk-delete-libraries": "Tem a certeza que deseja eliminar {{count}} bibliotecas?",
         "match-success": "Séries correspondidas com sucesso",
-        "webtoon-override": "O modo Webtoon vai ser usado porque as imagens representam um webtoon."
+        "webtoon-override": "O modo Webtoon vai ser usado porque as imagens representam um webtoon.",
+        "scrobble-gen-init": "Foi colocada uma tarefa em fila para gerar eventos de scrobble a partir do historial de leitura e classificações existentes, sincronizando-as com os serviços que estão configurados."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2297,7 +2332,8 @@
         "title": "Ações",
         "copy-settings": "Copiar Definições De",
         "match": "Correspondência",
-        "match-tooltip": "Fazer a associação manual das Séries com o Kavita+"
+        "match-tooltip": "Fazer a associação manual das Séries com o Kavita+",
+        "reorder": "Reordenar"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2595,5 +2631,22 @@
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "covers": "Capas",
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
+    },
+    "role-localized-pipe": {
+        "admin": "Administrador",
+        "download": "Descarregar",
+        "change-password": "Mudar Palavra Passe",
+        "bookmark": "Marcador",
+        "change-restriction": "Mudar Restrição",
+        "login": "Login",
+        "read-only": "Só Leitura",
+        "promote": "Promover"
+    },
+    "log-level-pipe": {
+        "debug": "Debug",
+        "information": "Informação",
+        "trace": "Rastrear",
+        "warning": "Aviso",
+        "critical": "Crítico"
     }
 }

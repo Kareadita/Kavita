@@ -48,7 +48,8 @@
         "processed": "処理済み",
         "not-processed": "未処理",
         "special": "{{entity-title.special}}",
-        "scrobbling-disabled": "Scrobbleはアカウント設定で無効になっています。"
+        "scrobbling-disabled": "Scrobbleはアカウント設定で無効になっています。",
+        "token-expired": "あなたのAniListトークンは期限切れだ！アカウントページで更新するまで、イベントのスコーブリングは処理されない。"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "読書の進捗状況",
@@ -170,7 +171,8 @@
         "clients-opds-url-tooltip": "サポートされている OPDS クライアントのリストを参照してください ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "kavitaplus-settings-title": "Kavita+"
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniListへのスコア登録"
     },
     "user-holds": {
         "title": "Scrobble Holds",
