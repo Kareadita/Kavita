@@ -20,7 +20,13 @@ public static class TagHelper
     public static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, IUnitOfWork unitOfWork)
     {
         // Normalize tag names once and store them in a hash set for quick lookups
-        var normalizedTagsToAdd = new HashSet<string>(tagNames.Select(t => t.ToNormalized()));
+        // Create a dictionary: normalized => original
+        var normalizedToOriginal = tagNames
+            .Select(t => new { Original = t, Normalized = t.ToNormalized() })
+            .GroupBy(x => x.Normalized) // in case of duplicates
+            .ToDictionary(g => g.Key, g => g.First().Original);
+
+        var normalizedTagsToAdd = new HashSet<string>(normalizedToOriginal.Keys);
         var existingTagsSet = new HashSet<string>(chapter.Tags.Select(t => t.NormalizedTitle));
 
         var isModified = false;
@@ -30,7 +36,7 @@ public static class TagHelper
             .Where(t => !normalizedTagsToAdd.Contains(t.NormalizedTitle))
             .ToList();
 
-        if (tagsToRemove.Any())
+        if (tagsToRemove.Count != 0)
         {
             foreach (var tagToRemove in tagsToRemove)
             {
@@ -47,7 +53,7 @@ public static class TagHelper
         // Find missing tags that are not already in the database
         var missingTags = normalizedTagsToAdd
             .Where(nt => !existingTagTitles.ContainsKey(nt))
-            .Select(title => new TagBuilder(title).Build())
+            .Select(nt => new TagBuilder(normalizedToOriginal[nt]).Build())
             .ToList();
 
         // Add missing tags to the database if any
@@ -67,13 +73,11 @@ public static class TagHelper
         // Add the new or existing tags to the chapter
         foreach (var normalizedTitle in normalizedTagsToAdd)
         {
-            var tag = existingTagTitles[normalizedTitle];
+            if (existingTagsSet.Contains(normalizedTitle)) continue;
 
-            if (!existingTagsSet.Contains(normalizedTitle))
-            {
-                chapter.Tags.Add(tag);
-                isModified = true;
-            }
+            var tag = existingTagTitles[normalizedTitle];
+            chapter.Tags.Add(tag);
+            isModified = true;
         }
 
         // Commit changes if modifications were made to the chapter's tags
