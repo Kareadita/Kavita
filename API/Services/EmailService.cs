@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using API.Data;
@@ -11,6 +12,7 @@ using API.DTOs.Email;
 using API.Entities;
 using API.Services.Plus;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
@@ -52,6 +54,7 @@ public interface IEmailService
 
     Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider);
     Task<bool> SendTokenExpiringSoonEmail(int userId, ScrobbleProvider provider);
+    Task<bool> SendKavitaPlusDebug();
 }
 
 public class EmailService : IEmailService
@@ -72,6 +75,7 @@ public class EmailService : IEmailService
     public const string TokenExpiringSoonTemplate = "TokenExpiringSoon";
     public const string EmailConfirmTemplate = "EmailConfirm";
     public const string EmailPasswordResetTemplate = "EmailPasswordReset";
+    public const string KavitaPlusDebugTemplate = "KavitaPlusDebug";
 
     public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService,
         IHostEnvironment environment, ILocalizationService localizationService)
@@ -260,6 +264,40 @@ public class EmailService : IEmailService
     }
 
     /// <summary>
+    /// Sends information about Kavita install for Kavita+ registration
+    /// </summary>
+    /// <example>Users in China can have issues subscribing, this flow will allow me to register their instance on their behalf</example>
+    /// <returns></returns>
+    public async Task<bool> SendKavitaPlusDebug()
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!settings.IsEmailSetup()) return false;
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{InstallId}}", HashUtil.ServerToken()),
+            new ("{{Build}}", BuildInfo.Version.ToString()),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = UpdatePlaceHolders("Kavita+: A User needs manual registration", placeholders),
+            Template = KavitaPlusDebugTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(KavitaPlusDebugTemplate), placeholders),
+            Preheader = UpdatePlaceHolders("Kavita+: A User needs manual registration", placeholders),
+            ToEmails =
+            [
+                // My kavita email
+                Encoding.UTF8.GetString(Convert.FromBase64String("a2F2aXRhcmVhZGVyQGdtYWlsLmNvbQ=="))
+            ]
+        };
+
+        await SendEmail(emailOptions);
+
+        return true;
+    }
+
+    /// <summary>
     /// Sends an invite email to a user to setup their account
     /// </summary>
     /// <param name="data"></param>
@@ -304,10 +342,10 @@ public class EmailService : IEmailService
             Template = EmailPasswordResetTemplate,
             Body = UpdatePlaceHolders(await GetEmailBody(EmailPasswordResetTemplate), placeholders),
             Preheader = "Email confirmation is required for continued access. Click the button to confirm your email.",
-            ToEmails = new List<string>()
-            {
+            ToEmails =
+            [
                 dto.EmailAddress
-            }
+            ]
         };
 
         await SendEmail(emailOptions);
