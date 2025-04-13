@@ -8,7 +8,7 @@ export enum WikiLink {
   DataCollection = 'https://wiki.kavitareader.com/troubleshooting/faq#q-does-kavita-collect-any-data-on-me',
   MediaIssues = 'https://wiki.kavitareader.com/guides/admin-settings/mediaissues/',
   KavitaPlusDiscordId = 'https://wiki.kavitareader.com/guides/admin-settings/kavita+#discord-id',
-  KavitaPlus = 'https://wiki.kavitareader.com/kavita+/features/',
+  KavitaPlus = 'https://wiki.kavitareader.com/kavita+',
   KavitaPlusFAQ = 'https://wiki.kavitareader.com/kavita+/faq',
   ReadingListCBL = 'https://wiki.kavitareader.com/guides/features/readinglists#creating-a-reading-list-via-cbl',
   Donation = 'https://wiki.kavitareader.com/donating',
