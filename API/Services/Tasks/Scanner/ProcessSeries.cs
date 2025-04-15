@@ -977,26 +977,26 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        if (!chapter.ColoristLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Colorist))
         {
             var people = TagHelper.GetTagValues(comicInfo.Colorist);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Colorist);
         }
 
-        if (!chapter.CharacterLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Character))
         {
             var people = TagHelper.GetTagValues(comicInfo.Characters);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Character);
         }
 
 
-        if (!chapter.TranslatorLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Translator))
         {
             var people = TagHelper.GetTagValues(comicInfo.Translator);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Translator);
         }
 
-        if (!chapter.WriterLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Writer))
         {
             var personSw = Stopwatch.StartNew();
             var people = TagHelper.GetTagValues(comicInfo.Writer);
@@ -1004,55 +1004,55 @@ public class ProcessSeries : IProcessSeries
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process writer on Chapter: {File} for {Count} people", personSw.ElapsedMilliseconds, chapter.Files.First().FileName, people.Count);
         }
 
-        if (!chapter.EditorLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Editor))
         {
             var people = TagHelper.GetTagValues(comicInfo.Editor);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Editor);
         }
 
-        if (!chapter.InkerLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Inker))
         {
             var people = TagHelper.GetTagValues(comicInfo.Inker);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Inker);
         }
 
-        if (!chapter.LettererLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Letterer))
         {
             var people = TagHelper.GetTagValues(comicInfo.Letterer);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Letterer);
         }
 
-        if (!chapter.PencillerLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Penciller))
         {
             var people = TagHelper.GetTagValues(comicInfo.Penciller);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Penciller);
         }
 
-        if (!chapter.CoverArtistLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.CoverArtist))
         {
             var people = TagHelper.GetTagValues(comicInfo.CoverArtist);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.CoverArtist);
         }
 
-        if (!chapter.PublisherLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Publisher))
         {
             var people = TagHelper.GetTagValues(comicInfo.Publisher);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Publisher);
         }
 
-        if (!chapter.ImprintLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Imprint))
         {
             var people = TagHelper.GetTagValues(comicInfo.Imprint);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Imprint);
         }
 
-        if (!chapter.TeamLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Team))
         {
             var people = TagHelper.GetTagValues(comicInfo.Teams);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Team);
         }
 
-        if (!chapter.LocationLocked)
+        if (!chapter.IsPersonRoleLocked(PersonRole.Location))
         {
             var people = TagHelper.GetTagValues(comicInfo.Locations);
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Location);

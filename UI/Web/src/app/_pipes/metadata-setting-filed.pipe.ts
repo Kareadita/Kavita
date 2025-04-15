@@ -11,15 +11,15 @@ export class MetadataSettingFiledPipe implements PipeTransform {
   transform(value: MetadataSettingField): string {
     switch (value) {
       case MetadataSettingField.ChapterTitle:
-        return translate('metadata-setting-field-pipe.title');
+        return translate('metadata-setting-field-pipe.chapter-title');
       case MetadataSettingField.ChapterSummary:
-        return translate('metadata-setting-field-pipe.summary');
+        return translate('metadata-setting-field-pipe.chapter-summary');
       case MetadataSettingField.ChapterReleaseDate:
-        return translate('metadata-setting-field-pipe.release-date');
+        return translate('metadata-setting-field-pipe.chapter-release-date');
       case MetadataSettingField.ChapterPublisher:
-        return translate('metadata-setting-field-pipe.publisher');
+        return translate('metadata-setting-field-pipe.chapter-publisher');
       case MetadataSettingField.ChapterCovers:
-        return translate('metadata-setting-field-pipe.covers');
+        return translate('metadata-setting-field-pipe.chapter-covers');
       case MetadataSettingField.AgeRating:
         return translate('metadata-setting-field-pipe.age-rating');
       case MetadataSettingField.People:

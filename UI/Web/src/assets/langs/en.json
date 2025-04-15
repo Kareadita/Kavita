@@ -806,6 +806,17 @@
         "enable-cover-image-tooltip": "Allow Kavita to write the cover image for the Series",
         "enable-start-date-label": "Start Date",
         "enable-start-date-tooltip": "Allow Start Date of Series to be written to the Series",
+
+        "enable-chapter-title-label": "Title",
+        "enable-chapter-title-tooltip": "Allow Title of Chapter/Issue to be written",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "Release Date",
+        "enable-chapter-release-date-tooltip": "Allow Release Date of Chapter/Issue to be written",
+        "enable-chapter-publisher-label": "Publisher",
+        "enable-chapter-publisher-tooltip": "Allow Publisher of Chapter/Issue to be written",
+        "enable-chapter-cover-label": "Chapter Cover",
+        "enable-chapter-cover-tooltip": "Allow Cover of Chapter/Issue to be set",
         "enable-genres-label": "Genres",
         "enable-genres-tooltip": "Allow Series Genres to be written.",
         "enable-tags-label": "Tags",
@@ -827,7 +838,8 @@
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
         "person-roles-label": "Roles",
         "overrides-label": "Overrides",
-        "overrides-description": "Allow Kavita to write over locked fields."
+        "overrides-description": "Allow Kavita to write over locked fields.",
+        "chapter-header": "Chapter Fields"
     },
 
     "book-line-overlay": {
@@ -2686,9 +2698,11 @@
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
-        "release-date": "Release Date",
-        "publisher": "{{person-role-pipe.publisher}}",
-        "title": "Title"
+        "chapter-release-date": "Release Date (Chapter)",
+        "chapter-summary": "Summary (Chapter)",
+        "chapter-covers": "Covers (Chapter)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
+        "chapter-title": "Title (Chapter)"
     },
 
 

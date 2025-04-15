@@ -1199,18 +1199,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (staff?.Count == 0) return false;
 
-        if (chapter.CoverArtistLocked && !settings.HasOverride(MetadataSettingField.People))
+        if (chapter.IsPersonRoleLocked(role) && !settings.HasOverride(MetadataSettingField.People))
         {
             return false;
         }
 
-        if (!settings.IsPersonAllowed(role))
+        if (!settings.IsPersonAllowed(role) && role != PersonRole.Publisher)
         {
             return false;
         }
 
         chapter.People ??= [];
-        var artists = staff
+        var people = staff!
             .Select(w => new PersonDto()
             {
                 Name = w,
@@ -1227,7 +1227,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var person in chapter.People.Where(p => p.Role == role))
         {
-            var meta = artists.FirstOrDefault(c => c.Name == person.Person.Name);
+            var meta = people.FirstOrDefault(c => c.Name == person.Person.Name);
             person.OrderWeight = 0;
 
             if (meta != null)

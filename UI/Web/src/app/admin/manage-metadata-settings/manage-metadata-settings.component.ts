@@ -79,6 +79,13 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
       this.settingsForm.addControl('enableCoverImage', new FormControl(settings.enableCoverImage, []));
 
+
+      this.settingsForm.addControl('enableChapterTitle', new FormControl(settings.enableChapterTitle, []));
+      this.settingsForm.addControl('enableChapterSummary', new FormControl(settings.enableChapterSummary, []));
+      this.settingsForm.addControl('enableChapterReleaseDate', new FormControl(settings.enableChapterReleaseDate, []));
+      this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
+      this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
+
       this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
       this.settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));

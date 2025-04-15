@@ -306,6 +306,8 @@ public class ChapterRepository : IChapterRepository
             .Where(c => c.Volume.SeriesId == seriesId)
             .OrderBy(c => c.SortOrder)
             .Include(c => c.Volume)
+            .Include(c => c.People)
+            .ThenInclude(cp => cp.Person)
             .ToListAsync();
     }
 }

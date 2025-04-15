@@ -89,6 +89,70 @@
         }
       </div>
 
+      <div class="setting-section-break"></div>
+
+      <!-- Chapter-based fields -->
+      <h5>{{t('chapter-header')}}</h5>
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableChapterTitle'); as formControl) {
+          <app-setting-switch [title]="t('enable-chapter-title-label')" [subtitle]="t('enable-chapter-title-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-chapter-title" type="checkbox" class="form-check-input" formControlName="enableChapterTitle">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableChapterSummary'); as formControl) {
+          <app-setting-switch [title]="t('enable-chapter-summary-label')" [subtitle]="t('enable-chapter-summary-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-chapter-summary" type="checkbox" class="form-check-input" formControlName="enableChapterSummary">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableChapterReleaseDate'); as formControl) {
+          <app-setting-switch [title]="t('enable-chapter-release-date-label')" [subtitle]="t('enable-chapter-release-date-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-chapter-release-date" type="checkbox" class="form-check-input" formControlName="enableChapterReleaseDate">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableChapterPublisher'); as formControl) {
+          <app-setting-switch [title]="t('enable-chapter-publisher-label')" [subtitle]="t('enable-chapter-publisher-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-chapter-publisher" type="checkbox" class="form-check-input" formControlName="enableChapterPublisher">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableChapterCoverImage'); as formControl) {
+          <app-setting-switch [title]="t('enable-chapter-cover-label')" [subtitle]="t('enable-chapter-cover-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-chapter-cover" type="checkbox" class="form-check-input" formControlName="enableChapterCoverImage">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
       @if(settingsForm.get('enablePeople'); as formControl) {
         <div class="setting-section-break"></div>
 
@@ -130,6 +194,7 @@
           </div>
         }
       }
+
 
 
 
