@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -46,15 +46,21 @@ export class ManageEmailSettingsComponent implements OnInit {
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
-        debounceTime(300),
         distinctUntilChanged(),
+        debounceTime(300),
         filter(_ => this.settingsForm.valid),
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return;
+          }
           this.serverSettings = settings;
           this.cdRef.markForCheck();
         })
