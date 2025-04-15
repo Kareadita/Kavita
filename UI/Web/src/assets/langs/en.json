@@ -2685,7 +2685,10 @@
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "localized-name": "{{edit-series-modal.localized-name-label}}"
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "release-date": "Release Date",
+        "publisher": "{{person-role-pipe.publisher}}",
+        "title": "Title"
     },
 
 

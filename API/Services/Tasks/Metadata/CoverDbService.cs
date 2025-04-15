@@ -32,6 +32,7 @@ public interface ICoverDbService
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
     Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
+    Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
 
 
@@ -577,6 +578,51 @@ public class CoverDbService : ICoverDbService
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+        }
+    }
+
+    public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    {
+        if (!string.IsNullOrEmpty(url))
+        {
+            var filePath = await CreateThumbnail(url, $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}", fromBase64);
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                // Additional check to see if downloaded image is similar and we have a higher resolution
+                if (chooseBetterImage && !string.IsNullOrEmpty(chapter.CoverImage))
+                {
+                    try
+                    {
+                        var betterImage = Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage)
+                            .GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
+                        filePath = Path.GetFileName(betterImage);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue trying to choose a better cover image for Chapter: {FileName} ({ChapterId})", chapter.Range, chapter.Id);
+                    }
+                }
+
+                chapter.CoverImage = filePath;
+                chapter.CoverImageLocked = true;
+                _imageService.UpdateColorScape(chapter);
+                _unitOfWork.ChapterRepository.Update(chapter);
+            }
+        }
+        else
+        {
+            chapter.CoverImage = null;
+            chapter.CoverImageLocked = false;
+            _imageService.UpdateColorScape(chapter);
+            _unitOfWork.ChapterRepository.Update(chapter);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
         }
     }
 

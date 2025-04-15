@@ -7,7 +7,14 @@ export enum MetadataSettingField {
   LocalizedName = 6,
   Covers = 7,
   AgeRating = 8,
-  People = 9
+  People = 9,
+
+  // Chapter fields
+  ChapterTitle = 10,
+  ChapterSummary = 11,
+  ChapterReleaseDate = 12,
+  ChapterPublisher = 13,
+  ChapterCovers = 14,
 }
 
 export const allMetadataSettingField = Object.keys(MetadataSettingField)

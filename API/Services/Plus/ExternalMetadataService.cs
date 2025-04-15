@@ -1075,51 +1075,171 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogDebug("Updating {ChapterNumber} with metadata", chapter.Range);
 
             // Write the metadata
-            if (!string.IsNullOrEmpty(potentialMatch.Title) && !potentialMatch.Title.Contains(series.Name))
-            {
-                chapter.Title = potentialMatch.Title;
-                _unitOfWork.ChapterRepository.Update(chapter);
-                madeModification = true;
-            }
+            madeModification = UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name) || madeModification;
+            madeModification = UpdateChapterSummary(chapter, settings, potentialMatch.Summary) || madeModification;
+            madeModification = UpdateChapterReleaseDate(chapter, settings, potentialMatch.ReleaseDate) || madeModification;
+            madeModification = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher) || madeModification;
 
-            if (!chapter.SummaryLocked && string.IsNullOrEmpty(chapter.Summary) & !string.IsNullOrEmpty(potentialMatch.Summary))
-            {
-                chapter.Summary = potentialMatch.Summary;
-                _unitOfWork.ChapterRepository.Update(chapter);
-                madeModification = true;
-            }
+            madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.CoverArtist, potentialMatch.Artists) || madeModification;
+            madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.Writer, potentialMatch.Writers) || madeModification;
 
-            // ReleaseDate
-            // Cover Image
+            madeModification = await UpdateChapterCoverImage(chapter, settings, potentialMatch.CoverImageUrl) || madeModification;
 
-
-            // Update People (Writer/Artist/Publisher)
-            if (!chapter.PublisherLocked)
-            {
-                // Update publisher
-            }
-
-            //var artists = potentialMatch.Artists.Select(p => new PersonDto())
-
-            //     await SeriesService.HandlePeopleUpdateAsync(series.Metadata, artists, PersonRole.CoverArtist, _unitOfWork);
-            //
-            // foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.CoverArtist))
-            // {
-            //     var meta = upstreamArtists.FirstOrDefault(c => c.Name == person.Person.Name);
-            //     person.OrderWeight = 0;
-            //     if (meta != null)
-            //     {
-            //         person.KavitaPlusConnection = true;
-            //     }
-            // }
+            _unitOfWork.ChapterRepository.Update(chapter);
+            await _unitOfWork.CommitAsync();
         }
 
 
+        return madeModification;
+    }
 
-        _unitOfWork.SeriesRepository.Update(series);
+
+    private static bool UpdateChapterSummary(Chapter chapter, MetadataSettingsDto settings, string? summary)
+    {
+        if (!settings.EnableChapterSummary) return false;
+
+        if (string.IsNullOrEmpty(summary)) return false;
+
+        if (chapter.SummaryLocked && !settings.HasOverride(MetadataSettingField.ChapterSummary))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(summary) && !settings.HasOverride(MetadataSettingField.ChapterSummary))
+        {
+            return false;
+        }
+
+        chapter.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary));
+        return true;
+    }
+
+    private static bool UpdateChapterTitle(Chapter chapter, MetadataSettingsDto settings, string? title, string seriesName)
+    {
+        if (!settings.EnableChapterTitle) return false;
+
+        if (string.IsNullOrEmpty(title)) return false;
+
+        if (chapter.TitleNameLocked && !settings.HasOverride(MetadataSettingField.ChapterTitle))
+        {
+            return false;
+        }
+
+        if (!title.Contains(seriesName) && !settings.HasOverride(MetadataSettingField.ChapterTitle))
+        {
+            return false;
+        }
+
+        chapter.TitleName = title;
+        return true;
+    }
+
+    private static bool UpdateChapterReleaseDate(Chapter chapter, MetadataSettingsDto settings, DateTime? releaseDate)
+    {
+        if (!settings.EnableChapterReleaseDate) return false;
+
+        if (releaseDate == null || releaseDate == DateTime.MinValue) return false;
+
+        if (chapter.ReleaseDateLocked && !settings.HasOverride(MetadataSettingField.ChapterReleaseDate))
+        {
+            return false;
+        }
+
+        if (!settings.HasOverride(MetadataSettingField.ChapterReleaseDate))
+        {
+            return false;
+        }
+
+        chapter.ReleaseDate = releaseDate.Value;
+        return true;
+    }
+
+    private async Task<bool> UpdateChapterPublisher(Chapter chapter, MetadataSettingsDto settings, string? publisher)
+    {
+        if (!settings.EnableChapterPublisher) return false;
+
+        if (string.IsNullOrEmpty(publisher)) return false;
+
+        if (chapter.PublisherLocked && !settings.HasOverride(MetadataSettingField.ChapterPublisher))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(publisher) && !settings.HasOverride(MetadataSettingField.ChapterPublisher))
+        {
+            return false;
+        }
+
+        return await UpdateChapterPeople(chapter, settings, PersonRole.Publisher, [publisher]);
+    }
+
+    private async Task<bool> UpdateChapterCoverImage(Chapter chapter, MetadataSettingsDto settings, string? coverUrl)
+    {
+        if (!settings.EnableChapterCoverImage) return false;
+
+        if (string.IsNullOrEmpty(coverUrl)) return false;
+
+        if (chapter.CoverImageLocked && !settings.HasOverride(MetadataSettingField.ChapterCovers))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(coverUrl))
+        {
+            return false;
+        }
+
+        await DownloadChapterCovers(chapter, coverUrl);
+        return true;
+    }
+
+    private async Task<bool> UpdateChapterPeople(Chapter chapter, MetadataSettingsDto settings, PersonRole role, IList<string>? staff)
+    {
+        if (!settings.EnablePeople) return false;
+
+        if (staff?.Count == 0) return false;
+
+        if (chapter.CoverArtistLocked && !settings.HasOverride(MetadataSettingField.People))
+        {
+            return false;
+        }
+
+        if (!settings.IsPersonAllowed(role))
+        {
+            return false;
+        }
+
+        chapter.People ??= [];
+        var artists = staff
+            .Select(w => new PersonDto()
+            {
+                Name = w,
+            })
+            .Concat(chapter.People
+                .Where(p => p.Role == role)
+                .Where(p => !p.KavitaPlusConnection)
+                .Select(p => _mapper.Map<PersonDto>(p.Person))
+            )
+            .DistinctBy(p => Parser.Normalize(p.Name))
+            .ToList();
+
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, staff, role, _unitOfWork);
+
+        foreach (var person in chapter.People.Where(p => p.Role == role))
+        {
+            var meta = artists.FirstOrDefault(c => c.Name == person.Person.Name);
+            person.OrderWeight = 0;
+
+            if (meta != null)
+            {
+                person.KavitaPlusConnection = true;
+            }
+        }
+
+        _unitOfWork.ChapterRepository.Update(chapter);
         await _unitOfWork.CommitAsync();
 
-        return madeModification;
+        return true;
     }
 
     private async Task<bool> UpdateCoverImage(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
@@ -1241,6 +1361,18 @@ public class ExternalMetadataService : IExternalMetadataService
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception downloading cover image for Series {SeriesName} ({SeriesId})", series.Name, series.Id);
+        }
+    }
+
+    private async Task DownloadChapterCovers(Chapter chapter, string coverUrl)
+    {
+        try
+        {
+            await _coverDbService.SetChapterCoverByUrl(chapter, coverUrl, false, true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception downloading cover image for Chapter {ChapterName} ({SeriesId})", chapter.Range, chapter.Id);
         }
     }
 
