@@ -40,6 +40,7 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+  isDocker: boolean = false;
 
   allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
     WikiLink.DataCollection +
@@ -94,6 +95,7 @@ export class ManageSettingsComponent implements OnInit {
       ).subscribe();
 
       this.serverService.getServerInfo().subscribe(info => {
+        this.isDocker = info.isDocker;
         if (info.isDocker) {
           this.settingsForm.get('ipAddresses')?.disable();
           this.settingsForm.get('port')?.disable();
@@ -130,11 +132,17 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   packData() {
-    const modelSettings = this.settingsForm.value;
+    const modelSettings: ServerSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
     modelSettings.installId = this.serverSettings.installId;
     modelSettings.installVersion = this.serverSettings.installVersion;
+
+    // Disabled FormControls are not added to the value
+    if (this.isDocker) {
+      modelSettings.ipAddresses = this.serverSettings.ipAddresses;
+      modelSettings.port = this.serverSettings.port;
+    }
 
     return modelSettings;
   }
