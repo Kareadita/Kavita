@@ -26,6 +26,7 @@ public class ExternalSeriesMetadata
     public int AverageExternalRating { get; set; } = -1;
 
     public int AniListId { get; set; }
+    public int CbrId { get; set; }
     public long MalId { get; set; }
     public string GoogleBooksId { get; set; }
 

@@ -503,7 +503,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
             if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
-            //TODO: if (result.CbrId.HasValue) externalSeriesMetadata.CbrId = result.CbrId.Value;
+            if (result.CbrId.HasValue) externalSeriesMetadata.CbrId = result.CbrId.Value;
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
