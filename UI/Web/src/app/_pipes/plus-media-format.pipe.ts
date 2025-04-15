@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {PlusMediaFormat} from "../_models/series-detail/external-series-detail";
 import {translate} from "@jsverse/transloco";
 
@@ -13,7 +13,7 @@ export class PlusMediaFormatPipe implements PipeTransform {
       case PlusMediaFormat.Manga:
         return translate('library-type-pipe.manga');
       case PlusMediaFormat.Comic:
-        return translate('library-type-pipe.comic');
+        return translate('library-type-pipe.comicVine');
       case PlusMediaFormat.LightNovel:
         return translate('library-type-pipe.lightNovel');
       case PlusMediaFormat.Book:
