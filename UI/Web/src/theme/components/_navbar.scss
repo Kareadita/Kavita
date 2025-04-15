@@ -1,4 +1,4 @@
-@import '../variables';
+@use '../variables' as theme;
 
 .navbar {
   background-color: var(--navbar-bg-color);
@@ -20,7 +20,7 @@ i.fa.nav {
   transform: scaleY(0);
 }
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .navbar {
     margin: var(--navbar-header-mobile-x-margin) var(--navbar-header-mobile-y-margin);
   }

@@ -73,8 +73,7 @@ enum TabID {
 }
 
 @Component({
-  selector: 'app-chapter-detail',
-  standalone: true,
+    selector: 'app-chapter-detail',
     imports: [
         AsyncPipe,
         CardActionablesComponent,
@@ -105,9 +104,9 @@ enum TabID {
         DefaultDatePipe,
         CoverImageComponent
     ],
-  templateUrl: './chapter-detail.component.html',
-  styleUrl: './chapter-detail.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: './chapter-detail.component.html',
+    styleUrl: './chapter-detail.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterDetailComponent implements OnInit {
 

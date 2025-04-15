@@ -23,7 +23,6 @@ import {MessageHubService} from "../_services/message-hub.service";
 import {UtilityService} from "../shared/_services/utility.service";
 import {PersonService} from "../_services/person.service";
 import {BrowsePerson} from "../_models/person/browse-person";
-import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {JumpbarService} from "../_services/jumpbar.service";
 import {PersonCardComponent} from "../cards/person-card/person-card.component";
 import {ImageService} from "../_services/image.service";
@@ -33,13 +32,11 @@ import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
 
 @Component({
   selector: 'app-browse-authors',
-  standalone: true,
   imports: [
     SideNavCompanionBarComponent,
     TranslocoDirective,
     CardDetailLayoutComponent,
     DecimalPipe,
-    CardItemComponent,
     PersonCardComponent,
     CompactNumberPipe,
   ],

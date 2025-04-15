@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
-  ElementRef, inject,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
   Input,
   OnInit,
   ViewChild
@@ -12,8 +14,7 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {AccountService} from 'src/app/_services/account.service';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf } from '@angular/common';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
@@ -22,8 +23,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './api-key.component.html',
     styleUrls: ['./api-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbTooltip, TranslocoDirective, SettingItemComponent]
+    imports: [NgbTooltip, TranslocoDirective, SettingItemComponent]
 })
 export class ApiKeyComponent implements OnInit {
 
@@ -94,8 +94,15 @@ export class ApiKeyComponent implements OnInit {
     }
   }
 
-  toggleVisibility() {
-    this.isDataHidden = !this.isDataHidden;
+  toggleVisibility(forceState: boolean | null = null) {
+    if (!this.hideData) return;
+    
+    if (forceState == null) {
+      this.isDataHidden = !this.isDataHidden;
+    } else {
+      this.isDataHidden = !forceState;
+    }
+
     this.cdRef.markForCheck();
   }
 

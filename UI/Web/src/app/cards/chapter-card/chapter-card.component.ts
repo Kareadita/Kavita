@@ -38,23 +38,22 @@ import {ActionService} from "../../_services/action.service";
 import {MangaFormat} from "../../_models/manga-format";
 
 @Component({
-  selector: 'app-chapter-card',
-  standalone: true,
-  imports: [
-    NgbTooltip,
-    NgbProgressbar,
-    DecimalPipe,
-    ImageComponent,
-    DownloadIndicatorComponent,
-    FormsModule,
-    EntityTitleComponent,
-    CardActionablesComponent,
-    RouterLink,
-    TranslocoDirective
-  ],
-  templateUrl: './chapter-card.component.html',
-  styleUrl: './chapter-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-chapter-card',
+    imports: [
+        NgbTooltip,
+        NgbProgressbar,
+        DecimalPipe,
+        ImageComponent,
+        DownloadIndicatorComponent,
+        FormsModule,
+        EntityTitleComponent,
+        CardActionablesComponent,
+        RouterLink,
+        TranslocoDirective
+    ],
+    templateUrl: './chapter-card.component.html',
+    styleUrl: './chapter-card.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterCardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

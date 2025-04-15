@@ -95,7 +95,7 @@
     "bookmark-permission": "ブックマーク/ブックマークを解除する権限があなたにはありません｡",
     "valid-number": "有効なページ番号である必要があります",
     "duplicate-bookmark": "重複したブックマークエントリーがすでに存在します",
-    "send-to-size-limit": "送信しようとしているファイルはメーラーにとっては大きすぎます｡",
+    "send-to-size-limit": "送信しようとしているファイルはあなたのメールプロバイダにとっては大きすぎます｡",
     "series-doesnt-exist": "シリーズが存在しません",
     "pdf-doesnt-exist": "PDFが存在すべきですが存在しません｡",
     "generic-reading-list-create": "リーディングリストを作成している際に問題が発生しました",
@@ -180,10 +180,16 @@
     "generic-create-temp-archive": "一時アーカイブの作成中に問題が発生しました",
     "user-no-access-library-from-series": "ユーザーは、このシリーズが所属するライブラリにアクセス権限がありません",
     "collection-tag-duplicate": "この名前のコレクションは既に存在しています",
-    "account-email-invalid": "管理者アカウントに登録されている電子メールは有効な電子メールではありません。 テストメールを送信できませんでした。",
+    "account-email-invalid": "管理者アカウントに登録されている電子メールは有効な電子メールではありません。 テストメールを送信できません。",
     "check-updates": "アップデートをチェックする",
     "license-check": "ライセンスを確認",
     "collection-already-exists": "コレクションは既に存在しています",
     "email-settings-invalid": "メール設定に不足している情報があります。すべてのメール設定が保存されていることを確認してください。",
-    "email-taken": "メールアドレスは既に使われています"
+    "email-taken": "メールアドレスは既に使われています",
+    "person-doesnt-exist": "人物は存在しません",
+    "person-name-unique": "人名は一意でなければなりません",
+    "person-name-required": "人物の名前は必須であり、空にすることはできません",
+    "person-image-doesnt-exist": "人物はCoversDBに存在しません",
+    "generic-cover-person-save": "カバー画像を人物に保存できません",
+    "generic-cover-volume-save": "カバー画像を巻に保存できません"
 }

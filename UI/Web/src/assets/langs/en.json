@@ -156,6 +156,8 @@
         "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
         "swipe-to-paginate-label": "Swipe to Paginate",
         "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
+        "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
+        "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
 
         "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",
@@ -337,7 +339,8 @@
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
-        "key-reset": "API Key reset"
+        "key-reset": "API Key reset",
+        "reset": "Reset"
     },
 
     "scrobbling-providers": {
@@ -571,9 +574,9 @@
 
     "library-type-pipe": {
         "book": "Book",
-        "comic": "Comic",
+        "comic": "Comic (Legacy)",
         "manga": "Manga",
-        "comicVine": "Comic Vine",
+        "comicVine": "Comic",
         "image": "Image",
         "lightNovel": "Light Novel"
     },
@@ -972,9 +975,11 @@
         "more-alt": "More",
         "time-left-alt": "Time Left",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "Publication",
-        "publication-status-tooltip": "Publication Status"
+        "publication-status-tooltip": "Publication Status",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
 
     "match-series-modal": {
@@ -1069,8 +1074,10 @@
         "donate": "Donate",
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
         "back": "Back",
+        "cancel-edit": "Close Reorder",
         "more": "More",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "edit": "{{common.edit}}"
     },
 
     "browse-authors": {
@@ -1103,7 +1110,7 @@
         "type-label": "Type",
         "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Check the wiki for more details on the differences between the library types.",
         "kavitaplus-eligible-label": "Kavita+ Eligible",
-        "kavitaplus-eligible-tooltip": "Will Kavita+ pull information or support Scrobbling",
+        "kavitaplus-eligible-tooltip": "Supports Kavita+ metadata features or Scrobbling",
         "folder-description": "Add folders to your library",
         "browse": "Browse for Media Folders",
         "help-us-part-1": "Help us out by following ",
@@ -1212,7 +1219,8 @@
 
     "card-detail-layout": {
         "total-items": "{{count}} total items",
-        "jumpkey-count": "{{count}} Series"
+        "jumpkey-count": "{{count}} Series",
+        "no-data": "{{common.no-data}}"
     },
 
     "card-item": {
@@ -1240,7 +1248,8 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
         "format-title": "{{metadata-filter.format-label}}",
-        "length-title": "{{edit-chapter-modal.words-label}}"
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
 
     "related-tab": {
@@ -1339,7 +1348,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Host Name",
-        "host-name-tooltip": "Domain Name (of Reverse Proxy). Required for email functionality. If no reverse proxy, use any url.",
+        "host-name-tooltip": "The domain name of your reverse proxy, required for email functionality. If you’re not using a reverse proxy, you can use any URL, including http://externalip:port/",
         "host-name-validation": "Host name must start with http(s) and not end in /",
 
         "sender-address-label": "Sender Address",
@@ -1576,10 +1585,6 @@
         "download-logs-task": "Download Logs",
         "download-logs-task-desc": "Compiles all log files into a zip and downloads it.",
 
-        "analyze-files-task": "Analyze Files",
-        "analyze-files-task-desc": "Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.",
-        "analyze-files-task-success": "File analysis has been queued",
-
         "sync-themes-task": "Sync Themes",
         "sync-themes-task-desc": "Synchronize downloaded themes with upstream changes if version matches.",
         "sync-themes-success": "Synchronization of themes has been queued",
@@ -1606,19 +1611,30 @@
         "change-password-alt": "Change Password {{user}}",
         "resend": "Resend",
         "setup": "Setup",
-        "admin": "Admin",
         "last-active-header": "Last Active",
         "roles-header": "Roles",
         "name-header": "Name",
         "none": "None",
         "never": "Never",
         "online-now-tooltip": "Online Now",
+        "all-libraries": "All Libraries",
         "too-many-libraries": "A lot",
         "sharing-header": "Sharing",
         "no-data": "There are no other users.",
         "loading": "{{common.loading}}",
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email"
+    },
+
+    "role-localized-pipe": {
+        "admin": "Admin",
+        "download": "Download",
+        "change-password": "Change Password",
+        "bookmark": "Bookmark",
+        "change-restriction": "Change Restriction",
+        "login": "Login",
+        "read-only": "Read Only",
+        "promote": "Promote"
     },
 
     "edit-collection-tags": {
@@ -1731,11 +1747,13 @@
 
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Released: {{date}}"
     },
 
     "stream-list-item": {
         "remove": "{{common.remove}}",
+        "delete": "{{common.delete}}",
         "load-filter": "Load Filter",
         "provided": "Provided",
         "smart-filter": "Smart Filter",
@@ -1753,7 +1771,19 @@
         "read-options-alt": "Read options",
         "incognito-alt": "(Incognito)",
         "no-data": "Nothing added",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "items-title": "Items",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "edit-alt": "{{common.edit}}",
+        "edit-label": "Edit Mode",
+        "date-range-title": "Date Range",
+        "more-alt": "{{series-detail.more-alt}}",
+        "reorder-alt": "Reorder Items",
+        "dnd-warning": "Drag and drop is unavailable on mobile devices or when the reading list has more than 100 items."
     },
 
     "events-widget": {
@@ -1895,7 +1925,7 @@
         "dry-run-step": "Dry Run",
         "final-import-step": "Final Step",
         "comicvine-parsing-label": "Use Comic Vine Series matching",
-        "cbl-repo": "You can find many reading lists in the community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
+        "cbl-repo": "You can find many reading lists in the community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>."
     },
 
     "pdf-reader": {
@@ -2368,7 +2398,8 @@
         "sidenav": "Side Nav",
         "external-sources": "External Sources",
         "smart-filters": "Smart Filters",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "You can customize different aspects of Kavita by reordering, toggling visibility, and binding smart filters/external sources to your home page or side nav."
     },
 
     "customize-dashboard-streams": {
@@ -2376,7 +2407,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
 
     "customize-sidenav-streams": {
@@ -2407,7 +2439,15 @@
         "no-data": "No Smart Filters created",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "There is an encoding error in the filter. You need to recreate it."
+        "errored": "There is an encoding error in the filter. You need to recreate it.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Edit {{name}}",
+        "name-label": "Name",
+        "required-field": "Smart Filters need a name",
+        "filter-name-unique": "Smart Filter names must be unique"
     },
 
     "edit-external-source-item": {
@@ -2491,6 +2531,14 @@
         "is-not-in-last": "Is not in last",
         "must-contains": "Must Contains",
         "is-empty": "Is Empty"
+    },
+
+    "log-level-pipe": {
+        "debug": "Debug",
+        "information": "Information",
+        "trace": "Trace",
+        "warning": "Warning",
+        "critical": "Critical"
     },
 
     "confirm": {
@@ -2618,7 +2666,8 @@
         "person-image-downloaded": "Person cover was downloaded and applied.",
         "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
         "match-success": "Series matched correctly",
-        "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon."
+        "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
+        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services."
     },
 
     "read-time-pipe": {
@@ -2706,7 +2755,8 @@
         "title": "Actions",
         "copy-settings": "Copy Settings From",
         "match": "Match",
-        "match-tooltip": "Match Series with Kavita+ manually"
+        "match-tooltip": "Match Series with Kavita+ manually",
+        "reorder": "Reorder"
     },
 
     "preferences": {

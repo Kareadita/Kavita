@@ -45,13 +45,12 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 
 @Component({
-  selector: 'app-library-detail',
-  templateUrl: './library-detail.component.html',
-  styleUrls: ['./library-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent,
-    CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent]
+    selector: 'app-library-detail',
+    templateUrl: './library-detail.component.html',
+    styleUrls: ['./library-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent,
+        CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent]
 })
 export class LibraryDetailComponent implements OnInit {
 

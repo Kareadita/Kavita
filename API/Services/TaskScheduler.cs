@@ -7,6 +7,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Helpers.Converters;
 using API.Services.Plus;
 using API.Services.Tasks;
@@ -33,7 +34,6 @@ public interface ITaskScheduler
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
-    void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
     void CovertAllCoversToEncoding();
@@ -266,11 +266,6 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), RecurringJobOptions);
     }
 
-    public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
-    {
-        _logger.LogInformation("Enqueuing library file analysis for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
-    }
 
     /// <summary>
     /// Upon cancelling stat, we do report to the Stat service that we are no longer going to be reporting
@@ -334,7 +329,7 @@ public class TaskScheduler : ITaskScheduler
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, normalizedOriginal]) ||
             HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
-            _logger.LogDebug("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
             return;
         }
@@ -351,7 +346,7 @@ public class TaskScheduler : ITaskScheduler
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
         {
-            _logger.LogDebug("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
             return;
         }

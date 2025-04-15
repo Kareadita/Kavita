@@ -12,23 +12,15 @@
   cursor: pointer;
 }
 
-//.setting-title.no-anim.edit:hover ~ .edit-btn {
-//  opacity: 1;
-//  transition: none;
-//}
-//
-//.edit-btn {
-//  opacity: 0;
-//  transition: opacity 0.5s ease-out;
-//  transition-delay: 0.5s;
-//
-//  &:hover {
-//    opacity: 1;
-//    transition: opacity 0.3s ease-out;
-//  }
-//}
-//
-//.setting-title.no-anim + .edit-btn,
-//.setting-title.no-anim.edit:hover ~ .edit-btn {
-//  transition: none !important;
-//}
+.non-selectable {
+  cursor: default;
+}
+
+.btn-alignment {
+  padding-bottom: 0.5rem; // Align with h6
+  padding-top: 0;
+}
+
+.edit-btn {
+  color: var(--primary-color);
+}

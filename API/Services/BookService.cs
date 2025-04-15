@@ -73,12 +73,48 @@ public class BookService : IBookService
     private const string BookApiUrl = "book-resources?file=";
     private readonly PdfComicInfoExtractor _pdfComicInfoExtractor;
 
+    /// <summary>
+    /// Setup the most lenient book parsing options possible as people have some really bad epubs
+    /// </summary>
     public static readonly EpubReaderOptions BookReaderOptions = new()
     {
         PackageReaderOptions = new PackageReaderOptions
         {
             IgnoreMissingToc = true,
-            SkipInvalidManifestItems = true
+            SkipInvalidManifestItems = true,
+        },
+        Epub2NcxReaderOptions = new Epub2NcxReaderOptions
+        {
+            IgnoreMissingContentForNavigationPoints = false
+        },
+        SpineReaderOptions = new SpineReaderOptions
+        {
+            IgnoreMissingManifestItems = false
+        },
+        BookCoverReaderOptions =  new BookCoverReaderOptions
+        {
+            Epub2MetadataIgnoreMissingManifestItem = false
+        }
+    };
+
+    public static readonly EpubReaderOptions LenientBookReaderOptions = new()
+    {
+        PackageReaderOptions = new PackageReaderOptions
+        {
+            IgnoreMissingToc = true,
+            SkipInvalidManifestItems = true,
+        },
+        Epub2NcxReaderOptions = new Epub2NcxReaderOptions
+        {
+            IgnoreMissingContentForNavigationPoints = false
+        },
+        SpineReaderOptions = new SpineReaderOptions
+        {
+            IgnoreMissingManifestItems = false
+        },
+        BookCoverReaderOptions =  new BookCoverReaderOptions
+        {
+            Epub2MetadataIgnoreMissingManifestItem = true
         }
     };
 
@@ -440,9 +476,12 @@ public class BookService : IBookService
 
     private ComicInfo? GetEpubComicInfo(string filePath)
     {
+        EpubBookRef? epubBook = null;
+
         try
         {
-            using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
+            epubBook = OpenEpubWithFallback(filePath, epubBook);
+
             var publicationDate =
                 epubBook.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
 
@@ -450,6 +489,7 @@ public class BookService : IBookService
             {
                 publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
             }
+
             var (year, month, day) = GetPublicationDate(publicationDate);
 
             var summary = epubBook.Schema.Package.Metadata.Descriptions.FirstOrDefault();
@@ -461,7 +501,8 @@ public class BookService : IBookService
                 Day = day,
                 Year = year,
                 Title = epubBook.Title,
-                Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim())),
+                Genre = string.Join(",",
+                    epubBook.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim())),
                 LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages
                     .Select(l => l.Language)
                     .FirstOrDefault())
@@ -472,7 +513,8 @@ public class BookService : IBookService
             foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
             {
                 if (string.IsNullOrEmpty(identifier.Identifier)) continue;
-                if (!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
+                if (!string.IsNullOrEmpty(identifier.Scheme) &&
+                    identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
                     if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
@@ -480,11 +522,13 @@ public class BookService : IBookService
                         _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
                         continue;
                     }
+
                     info.Isbn = isbn;
                 }
 
-                if ((!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
-                     identifier.Identifier.StartsWith("url:"))
+                if ((!string.IsNullOrEmpty(identifier.Scheme) &&
+                     identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
+                    identifier.Identifier.StartsWith("url:"))
                 {
                     var url = identifier.Identifier.Replace("url:", string.Empty);
                     weblinks.Add(url.Trim());
@@ -514,6 +558,7 @@ public class BookService : IBookService
                         {
                             info.SeriesSort = metadataItem.Content;
                         }
+
                         break;
                     case "calibre:series_index":
                         info.Volume = metadataItem.Content;
@@ -533,6 +578,7 @@ public class BookService : IBookService
                         {
                             info.SeriesSort = metadataItem.Content;
                         }
+
                         break;
                     case "collection-type":
                         // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
@@ -563,7 +609,8 @@ public class BookService : IBookService
             }
 
             // If this is a single book and not a collection, set publication status to Completed
-            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
+            if (string.IsNullOrEmpty(info.Volume) &&
+                Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
             {
                 info.Count = 1;
             }
@@ -575,7 +622,8 @@ public class BookService : IBookService
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title, LibraryType.Manga)
                 .Equals(Parser.LooseLeafVolume);
 
-            if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
+            if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries &&
+                (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
             {
                 // This is likely a light novel for which we can set series from parsed title
                 info.Series = Parser.ParseSeries(info.Title, LibraryType.Manga);
@@ -586,12 +634,38 @@ public class BookService : IBookService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[GetComicInfo] There was an exception parsing metadata");
+            _logger.LogWarning(ex, "[GetComicInfo] There was an exception parsing metadata: {FilePath}", filePath);
             _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
                 "There was an exception parsing metadata", ex);
         }
+        finally
+        {
+            epubBook?.Dispose();
+        }
 
         return null;
+    }
+
+    private EpubBookRef? OpenEpubWithFallback(string filePath, EpubBookRef? epubBook)
+    {
+        try
+        {
+            epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "[GetComicInfo] There was an exception parsing metadata, falling back to a more lenient parsing method: {FilePath}",
+                filePath);
+            _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
+                "There was an exception parsing metadata", ex);
+        }
+        finally
+        {
+            epubBook ??= EpubReader.OpenBook(filePath, LenientBookReaderOptions);
+        }
+
+        return epubBook;
     }
 
     public ComicInfo? GetComicInfo(string filePath)
@@ -695,7 +769,7 @@ public class BookService : IBookService
         var month = 0;
         var day = 0;
         if (string.IsNullOrEmpty(publicationDate)) return (year, month, day);
-        switch (DateTime.TryParse(publicationDate, out var date))
+        switch (DateTime.TryParse(publicationDate, CultureInfo.InvariantCulture, out var date))
         {
             case true:
                 year = date.Year;
@@ -750,7 +824,7 @@ public class BookService : IBookService
                 return docReader.GetPageCount();
             }
 
-            using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
+            using var epubBook = EpubReader.OpenBook(filePath, LenientBookReaderOptions);
             return epubBook.GetReadingOrder().Count;
         }
         catch (Exception ex)
@@ -808,7 +882,7 @@ public class BookService : IBookService
 
         try
         {
-            using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
+            using var epubBook = EpubReader.OpenBook(filePath, LenientBookReaderOptions);
 
             // <meta content="The Dark Tower" name="calibre:series"/>
             // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
@@ -1012,7 +1086,7 @@ public class BookService : IBookService
     /// <returns></returns>
     public async Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter)
     {
-        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookReaderOptions);
+        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book);
 
         var navItems = await book.GetNavigationAsync();
@@ -1140,7 +1214,7 @@ public class BookService : IBookService
     /// <exception cref="KavitaException">All exceptions throw this</exception>
     public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl)
     {
-        using var book = await EpubReader.OpenBookAsync(cachedEpubPath, BookReaderOptions);
+        using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book);
         var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
 
@@ -1242,7 +1316,7 @@ public class BookService : IBookService
             return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat, size);
         }
 
-        using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
+        using var epubBook = EpubReader.OpenBook(fileFilePath, LenientBookReaderOptions);
 
         try
         {

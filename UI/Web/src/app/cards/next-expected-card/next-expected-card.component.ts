@@ -6,12 +6,11 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-next-expected-card',
-  standalone: true,
-  imports: [ImageComponent, SafeHtmlPipe, TranslocoDirective],
-  templateUrl: './next-expected-card.component.html',
-  styleUrl: './next-expected-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-next-expected-card',
+    imports: [ImageComponent, SafeHtmlPipe, TranslocoDirective],
+    templateUrl: './next-expected-card.component.html',
+    styleUrl: './next-expected-card.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NextExpectedCardComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

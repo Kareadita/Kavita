@@ -1,11 +1,9 @@
-using System.Collections;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Helpers;
@@ -14,6 +12,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IPersonRepository
 {
@@ -29,15 +28,13 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
     Task RemoveAllPeopleNoLongerAssociated();
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null);
-    Task<int> GetCountAsync();
 
-    Task<string> GetCoverImageAsync(int personId);
+    Task<string?> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
     Task<Person?> GetPersonById(int personId);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId);
-    Task<Person> GetPersonByName(string name);
     Task<bool> IsNameUnique(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
@@ -124,12 +121,8 @@ public class PersonRepository : IPersonRepository
             .ToListAsync();
     }
 
-    public async Task<int> GetCountAsync()
-    {
-        return await _context.Person.CountAsync();
-    }
 
-    public async Task<string> GetCoverImageAsync(int personId)
+    public async Task<string?> GetCoverImageAsync(int personId)
     {
         return await _context.Person
             .Where(c => c.Id == personId)
@@ -137,7 +130,7 @@ public class PersonRepository : IPersonRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<string> GetCoverImageByNameAsync(string name)
+    public async Task<string?> GetCoverImageByNameAsync(string name)
     {
         var normalized = name.ToNormalized();
         return await _context.Person
@@ -206,7 +199,7 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<PersonDto> GetPersonDtoByName(string name, int userId)
+    public async Task<PersonDto?> GetPersonDtoByName(string name, int userId)
     {
         var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
@@ -216,11 +209,6 @@ public class PersonRepository : IPersonRepository
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
-    }
-
-    public async Task<Person> GetPersonByName(string name)
-    {
-        return await _context.Person.FirstOrDefaultAsync(p => p.NormalizedName == name.ToNormalized());
     }
 
     public async Task<bool> IsNameUnique(string name)

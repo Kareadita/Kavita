@@ -2,7 +2,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -15,12 +16,11 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
+import {KEY_CODES} from 'src/app/shared/_services/utility.service';
+import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {map, startWith, tap} from "rxjs";
 import {AccountService} from "../../../_services/account.service";
 
@@ -30,12 +30,11 @@ export interface SearchEvent {
 }
 
 @Component({
-    selector: 'app-grouped-typeahead',
-    templateUrl: './grouped-typeahead.component.html',
-    styleUrls: ['./grouped-typeahead.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, LoadingComponent, AsyncPipe]
+  selector: 'app-grouped-typeahead',
+  templateUrl: './grouped-typeahead.component.html',
+  styleUrls: ['./grouped-typeahead.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

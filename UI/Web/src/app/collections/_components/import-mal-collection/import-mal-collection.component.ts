@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {ToastrService} from "ngx-toastr";
@@ -9,20 +9,17 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {forkJoin} from "rxjs";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {DecimalPipe} from "@angular/common";
-import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-import-mal-collection',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    LoadingComponent,
-    DecimalPipe,
-    DefaultValuePipe
-  ],
-  templateUrl: './import-mal-collection.component.html',
-  styleUrl: './import-mal-collection.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-import-mal-collection',
+    imports: [
+        TranslocoDirective,
+        LoadingComponent,
+        DecimalPipe
+    ],
+    templateUrl: './import-mal-collection.component.html',
+    styleUrl: './import-mal-collection.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportMalCollectionComponent {
   private readonly collectionService = inject(CollectionTagService);

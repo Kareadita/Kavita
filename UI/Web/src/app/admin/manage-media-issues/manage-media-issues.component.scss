@@ -1,13 +1,13 @@
-@import "../../../theme/variables";
+@use "../../../theme/variables" as theme;
 
 .table {
-    @media (max-width: $grid-breakpoints-sm) {
+    @media (max-width: theme.$grid-breakpoints-sm) {
         overflow-x: auto;
         width: 100% !important;
         display: block;
     }
     .btn-container {
-        @media (max-width: $grid-breakpoints-lg) {
+        @media (max-width: theme.$grid-breakpoints-lg) {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;

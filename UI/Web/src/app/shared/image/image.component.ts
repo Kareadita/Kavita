@@ -21,12 +21,11 @@ import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
  * This is used for images with placeholder fallback.
  */
 @Component({
-  selector: 'app-image',
-  standalone: true,
-  imports: [LazyLoadImageModule],
-  templateUrl: './image.component.html',
-  styleUrls: ['./image.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-image',
+    imports: [LazyLoadImageModule],
+    templateUrl: './image.component.html',
+    styleUrls: ['./image.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImageComponent implements OnChanges {
 

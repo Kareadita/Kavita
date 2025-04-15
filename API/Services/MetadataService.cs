@@ -199,6 +199,10 @@ public class MetadataService : IMetadataService
 
         series.Volumes ??= [];
         series.CoverImage = series.GetCoverImage();
+        if (series.CoverImage == null)
+        {
+            _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
+        }
 
         _imageService.UpdateColorScape(series);
 

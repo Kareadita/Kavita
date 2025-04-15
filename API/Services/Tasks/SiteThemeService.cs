@@ -302,7 +302,8 @@ public class ThemeService : IThemeService
         var existingThemes = _directoryService.ScanFiles(_directoryService.SiteThemeDirectory, string.Empty);
         if (existingThemes.Any(f => Path.GetFileName(f) == dto.CssFile))
         {
-            throw new KavitaException("Cannot download file, file already on disk");
+            // This can happen if you delete then immediately download (to refresh). We should just delete the old file and download. Users can always rollback their version with github directly
+            _directoryService.DeleteFiles(existingThemes.Where(f => Path.GetFileName(f) == dto.CssFile));
         }
 
         var finalLocation = await DownloadSiteTheme(dto);

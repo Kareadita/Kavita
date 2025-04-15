@@ -23,4 +23,8 @@ export class FilterService {
     return this.httpClient.delete(this.baseUrl + 'filter?filterId=' + filterId);
   }
 
+  renameSmartFilter(filter: SmartFilter) {
+    return this.httpClient.post(this.baseUrl + `filter/rename?filterId=${filter.id}&name=${filter.name.trim()}`, {});
+  }
+
 }

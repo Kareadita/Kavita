@@ -19,16 +19,15 @@ import {Volume} from "../../../_models/volume";
 import {Series} from "../../../_models/series";
 
 @Component({
-  selector: 'app-download-button',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    NgbTooltip,
-    TranslocoDirective
-  ],
-  templateUrl: './download-button.component.html',
-  styleUrl: './download-button.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-download-button',
+    imports: [
+        AsyncPipe,
+        NgbTooltip,
+        TranslocoDirective
+    ],
+    templateUrl: './download-button.component.html',
+    styleUrl: './download-button.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DownloadButtonComponent implements OnInit {
 

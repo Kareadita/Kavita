@@ -1,29 +1,22 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {JumpKey} from "../_models/jumpbar/jump-key";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {FilterService} from "../_services/filter.service";
-import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
-import {SafeHtmlPipe} from "../_pipes/safe-html.pipe";
-import {Router, RouterLink} from "@angular/router";
+import {Router} from "@angular/router";
 import {Series} from "../_models/series";
 import {JumpbarService} from "../_services/jumpbar.service";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {ActionService} from "../_services/action.service";
-import {FilterPipe} from "../_pipes/filter.pipe";
-import {filter} from "rxjs";
 import {ManageSmartFiltersComponent} from "../sidenav/_components/manage-smart-filters/manage-smart-filters.component";
 import {DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-all-filters',
-  standalone: true,
-  imports: [TranslocoDirective, CardItemComponent, SideNavCompanionBarComponent, CardDetailLayoutComponent, SafeHtmlPipe, CardActionablesComponent, RouterLink, FilterPipe, ManageSmartFiltersComponent, DecimalPipe],
+  imports: [TranslocoDirective, SideNavCompanionBarComponent, ManageSmartFiltersComponent, DecimalPipe],
   templateUrl: './all-filters.component.html',
   styleUrl: './all-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

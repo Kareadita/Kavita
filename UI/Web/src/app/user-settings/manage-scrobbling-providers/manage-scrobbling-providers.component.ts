@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
@@ -14,19 +13,17 @@ import {LicenseService} from "../../_services/license.service";
 import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
-  selector: 'app-manage-scrobbling-providers',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    Select2Module,
-    TranslocoDirective,
-    LoadingComponent,
-    ScrobbleProviderItemComponent,
-    ScrobbleProviderNamePipe,
-    SettingTitleComponent,
-  ],
-  templateUrl: './manage-scrobbling-providers.component.html',
-  styleUrl: './manage-scrobbling-providers.component.scss'
+    selector: 'app-manage-scrobbling-providers',
+    imports: [
+        ReactiveFormsModule,
+        TranslocoDirective,
+        LoadingComponent,
+        ScrobbleProviderItemComponent,
+        ScrobbleProviderNamePipe,
+        SettingTitleComponent,
+    ],
+    templateUrl: './manage-scrobbling-providers.component.html',
+    styleUrl: './manage-scrobbling-providers.component.scss'
 })
 export class ManageScrobblingProvidersComponent implements OnInit {
   public readonly accountService = inject(AccountService);

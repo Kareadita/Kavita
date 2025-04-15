@@ -4,6 +4,7 @@ using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 
 namespace API.Extensions;
+#nullable enable
 
 public static class FlurlExtensions
 {

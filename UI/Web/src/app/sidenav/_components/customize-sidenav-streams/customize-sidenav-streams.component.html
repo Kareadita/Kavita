@@ -37,7 +37,10 @@
                                   [virtualizeAfter]="virtualizeAfter"
       >
         <ng-template #draggableItem let-position="idx" let-item>
-          <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>
+          <app-sidenav-stream-list-item [item]="item" [position]="position"
+                                        (hide)="updateVisibility($event, position)"
+                                        (delete)="delete($event)"
+          />
         </ng-template>
       </app-draggable-ordered-list>
     </div>

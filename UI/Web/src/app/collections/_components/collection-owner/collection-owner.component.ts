@@ -11,7 +11,6 @@ import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.p
 
 @Component({
   selector: 'app-collection-owner',
-  standalone: true,
   imports: [
     ProviderImagePipe,
     TranslocoDirective,

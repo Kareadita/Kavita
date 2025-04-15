@@ -2,8 +2,10 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
-  ElementRef, EventEmitter,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
   HostListener,
   inject,
   Inject,
@@ -13,39 +15,48 @@ import {
   RendererStyleFlags2,
   ViewChild
 } from '@angular/core';
-import { DOCUMENT, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { forkJoin, fromEvent, of } from 'rxjs';
-import {catchError, debounceTime, distinctUntilChanged, map, take, tap} from 'rxjs/operators';
-import { Chapter } from 'src/app/_models/chapter';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService } from 'src/app/_services/reader.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BookService } from '../../_services/book.service';
-import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
-import { BookChapterItem } from '../../_models/book-chapter-item';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Stack } from 'src/app/shared/data-structures/stack';
-import { MemberService } from 'src/app/_services/member.service';
-import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
+import {DOCUMENT, NgClass, NgIf, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {forkJoin, fromEvent, merge, of} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, take, tap} from 'rxjs/operators';
+import {Chapter} from 'src/app/_models/chapter';
+import {AccountService} from 'src/app/_services/account.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'src/app/_services/reader.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {BookService} from '../../_services/book.service';
+import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {BookChapterItem} from '../../_models/book-chapter-item';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {Stack} from 'src/app/shared/data-structures/stack';
+import {MemberService} from 'src/app/_services/member.service';
+import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {WritingStyle} from "../../../_models/preferences/writing-style";
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { LibraryService } from 'src/app/_services/library.service';
-import { LibraryType } from 'src/app/_models/library/library';
-import { BookTheme } from 'src/app/_models/preferences/book-theme';
-import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { PageStyle, ReaderSettingsComponent } from '../reader-settings/reader-settings.component';
-import { User } from 'src/app/_models/user';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {LibraryService} from 'src/app/_services/library.service';
+import {LibraryType} from 'src/app/_models/library/library';
+import {BookTheme} from 'src/app/_models/preferences/book-theme';
+import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
+import {PageStyle, ReaderSettingsComponent} from '../reader-settings/reader-settings.component';
+import {User} from 'src/app/_models/user';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { TableOfContentsComponent } from '../table-of-contents/table-of-contents.component';
-import { NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { DrawerComponent } from '../../../shared/drawer/drawer.component';
+import {TableOfContentsComponent} from '../table-of-contents/table-of-contents.component';
+import {
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbProgressbar,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import {DrawerComponent} from '../../../shared/drawer/drawer.component';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {
   PersonalTableOfContentsComponent,
@@ -101,10 +112,9 @@ const elementLevelStyles = ['line-height', 'font-family'];
             transition('false <=> true', animate('4000ms'))
         ])
     ],
-    standalone: true,
-  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
-    NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
+    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
+        NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
+        BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -505,7 +515,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.handleScrollEvent();
     });
 
-    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
+    const mouseMove$ = fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove');
+    const touchMove$ = fromEvent<TouchEvent>(this.bookContainerElemRef.nativeElement, 'touchmove');
+
+    merge(mouseMove$, touchMove$)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),
@@ -517,7 +530,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe();
 
-    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup')
+    const mouseUp$ = fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mouseup');
+    const touchEnd$ = fromEvent<TouchEvent>(this.bookContainerElemRef.nativeElement, 'touchend');
+
+    merge(mouseUp$, touchEnd$)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),
@@ -706,6 +722,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Update the window Height
     this.updateWidthAndHeightCalcs();
     this.updateImageSizes();
+
     const resumeElement = this.getFirstVisibleElementXPath();
     if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
@@ -928,9 +945,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
-      this.updateSingleImagePageStyles()
+      this.updateSingleImagePageStyles();
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
-
 
       this.cdRef.markForCheck();
 
@@ -1030,6 +1046,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
     this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
+    this.addEmptyPageIfRequired();
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
@@ -1038,13 +1055,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
-      this.scrollService.scrollTo(scrollTop, this.reader.nativeElement);
+      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
     } else if ((this.writingStyle === WritingStyle.Vertical) && (this.layoutMode === BookPageLayoutMode.Default)) {
        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
     } else {
 
       if (this.layoutMode === BookPageLayoutMode.Default) {
-        this.scrollService.scrollTo(0, this.reader.nativeElement);
+        setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       } else if (this.writingStyle === WritingStyle.Vertical) {
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
             setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
@@ -1067,6 +1084,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saveProgress();
     this.isLoading = false;
     this.cdRef.markForCheck();
+  }
+
+  private addEmptyPageIfRequired(): void {
+    if (this.layoutMode !== BookPageLayoutMode.Column2 || this.isSingleImagePage) {
+      return;
+    }
+
+    const [,, pageWidth] = this.getVirtualPage();
+    const actualWidth = this.bookContentElemRef.nativeElement.scrollWidth;
+    const lastPageWidth = actualWidth % pageWidth;
+
+    if (lastPageWidth >= pageWidth / 2 || lastPageWidth === 0) {
+      // The last page needs more than one column, no pages will be duplicated
+      return;
+    }
+
+    // Need to adjust height with the column gap to ensure we don't have too much extra page
+    const columnHeight = this.getPageHeight() - COLUMN_GAP;
+    const emptyPage = this.renderer.createElement('div');
+
+    this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
+    this.renderer.setStyle(emptyPage, 'width', this.ColumnWidth);
+    this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
   }
 
 
@@ -1222,7 +1262,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * currentVirtualPage starts at 1
-   * @returns
+   * @returns currentVirtualPage, totalVirtualPages, pageSize
    */
   getVirtualPage() {
     if (!this.bookContentElemRef || !this.readingSectionElemRef) return [1, 1, 0];

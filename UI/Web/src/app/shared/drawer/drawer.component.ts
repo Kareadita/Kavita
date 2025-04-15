@@ -10,13 +10,12 @@ export class DrawerOptions {
 }
 
 @Component({
-  selector: 'app-drawer',
-  standalone: true,
-  imports: [CommonModule, TranslocoDirective],
-  templateUrl: './drawer.component.html',
-  styleUrls: ['./drawer.component.scss'],
-  exportAs: "drawer",
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-drawer',
+    imports: [CommonModule, TranslocoDirective],
+    templateUrl: './drawer.component.html',
+    styleUrls: ['./drawer.component.scss'],
+    exportAs: "drawer",
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DrawerComponent {
   @Input() isOpen = false;

@@ -20,7 +20,7 @@
         <div class="form-check">
           <input id="role-{{i}}" type="checkbox" class="form-check-input"
                  [(ngModel)]="role.selected" [disabled]="role.disabled" name="role" (ngModelChange)="handleModelUpdate()">
-          <label for="role-{{i}}" class="form-check-label">{{role.data}}</label>
+          <label for="role-{{i}}" class="form-check-label">{{role.data | roleLocalized}}</label>
         </div>
       </li>
     }

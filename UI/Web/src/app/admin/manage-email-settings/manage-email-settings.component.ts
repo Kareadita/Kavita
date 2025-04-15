@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -13,12 +13,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 @Component({
-  selector: 'app-manage-email-settings',
-  templateUrl: './manage-email-settings.component.html',
-  styleUrls: ['./manage-email-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
+    selector: 'app-manage-email-settings',
+    templateUrl: './manage-email-settings.component.html',
+    styleUrls: ['./manage-email-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -31,7 +30,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
 
   ngOnInit(): void {
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
@@ -101,6 +100,8 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   packData() {
     const modelSettings = Object.assign({}, this.serverSettings);
+
+
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
 

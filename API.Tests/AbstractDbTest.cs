@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -12,7 +10,6 @@ using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
 using Hangfire;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -21,23 +18,12 @@ using NSubstitute;
 
 namespace API.Tests;
 
-public abstract class AbstractDbTest : IDisposable
+public abstract class AbstractDbTest : AbstractFsTest , IDisposable
 {
     protected readonly DbConnection _connection;
     protected readonly DataContext _context;
     protected readonly IUnitOfWork _unitOfWork;
     protected readonly IMapper _mapper;
-
-
-    protected const string CacheDirectory = "C:/kavita/config/cache/";
-    protected const string CacheLongDirectory = "C:/kavita/config/cache-long/";
-    protected const string CoverImageDirectory = "C:/kavita/config/covers/";
-    protected const string BackupDirectory = "C:/kavita/config/backups/";
-    protected const string LogDirectory = "C:/kavita/config/logs/";
-    protected const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
-    protected const string TempDirectory = "C:/kavita/config/temp/";
-    protected const string DataDirectory = "C:/data/";
 
     protected AbstractDbTest()
     {
@@ -113,27 +99,24 @@ public abstract class AbstractDbTest : IDisposable
 
     protected abstract Task ResetDb();
 
-    protected static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CacheLongDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(SiteThemeDirectory);
-        fileSystem.AddDirectory(LogDirectory);
-        fileSystem.AddDirectory(TempDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
-
     public void Dispose()
     {
         _context.Dispose();
         _connection.Dispose();
+    }
+
+    /// <summary>
+    /// Add a role to an existing User. Commits.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="roleName"></param>
+    protected async Task AddUserWithRole(int userId, string roleName)
+    {
+        var role = new AppRole { Id = userId, Name = roleName, NormalizedName = roleName.ToUpper() };
+
+        await _context.Roles.AddAsync(role);
+        await _context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
+
+        await _context.SaveChangesAsync();
     }
 }

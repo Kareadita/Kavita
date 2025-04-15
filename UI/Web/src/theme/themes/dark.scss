@@ -1,4 +1,4 @@
-@import '../variables';
+@use '../variables' as theme;
 
 :root, :root .default {
 
@@ -46,12 +46,19 @@
     --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
     --warning-color: #FFECB5;
-    --bs-body-bg: #1f2020; //#343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(255,255,255,0.3);
     --default-state-scrollbar: transparent;
     --text-muted-color: hsla(0,0%,100%,.45);
+
+    /* Override bootstrap css variables */
+    --bs-body-bg: #1f2020;
+    --bs-primary-rgb: var(--primary-color);
+    --select2-selection-text-color: var(--dropdown-item-hover-text-color);
+    --select2-option-highlighted-background: var(--dropdown-item-hover-bg-color);
+
+
 
     /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
      * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should
@@ -128,12 +135,12 @@
     --btn-primary-hover-text-color: white;
     --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
     --btn-primary-hover-border-color: var(--primary-color-darker-shade);
-    --btn-primary-outline-text-color: white;
-    --btn-primary-outline-bg-color: transparent;
-    --btn-primary-outline-border-color: var(--primary-color);
-    --btn-primary-outline-hover-text-color: white;
-    --btn-primary-outline-hover-bg-color: var(--primary-color-darker-shade);
-    --btn-primary-outline-hover-border-color: var(--primary-color-darker-shade);
+    --btn-outline-primary-text-color: white;
+    --btn-outline-primary-bg-color: transparent;
+    --btn-outline-primary-border-color: var(--primary-color);
+    --btn-outline-primary-hover-text-color: white;
+    --btn-outline-primary-hover-bg-color: var(--primary-color-darker-shade);
+    --btn-outline-primary-hover-border-color: var(--primary-color-darker-shade);
     --btn-secondary-text-color: white;
     --btn-secondary-bg-color: #6c757d;
     --btn-secondary-border-color: #6c757d;
@@ -142,9 +149,10 @@
     --btn-secondary-font-weight: bold;
     --btn-secondary-outline-text-color: white;
     --btn-secondary-outline-bg-color: transparent;
-    --btn-secondary-outline-border-color: transparent;
-    --btn-secondary-outline-hover-bg-color: transparent;
-    --btn-secondary-outline-hover-border-color: transparent;
+    --btn-secondary-outline-border-color: #6c757d;
+    --btn-secondary-outline-hover-text-color: #fff;
+    --btn-secondary-outline-hover-bg-color: var(--btn-secondary-bg-color);
+    --btn-secondary-outline-hover-border-color: var(--btn-secondary-bg-color);
     --btn-secondary-outline-font-weight: bold;
     --btn-primary-text-text-color: white;
     --btn-secondary-text-text-color: lightgrey;
@@ -169,6 +177,7 @@
     --bs-btn-disabled-border-color: transparent;
     --btn-actions-border-radius: 0.375rem;
     --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+
 
     /* Nav (Tabs) */
     --nav-item-min-width: 150px;
@@ -325,11 +334,11 @@
     --hr-color: rgba(239, 239, 239, 0.125);
     --accent-bg-color: rgba(1, 4, 9, 0.5);
     --accent-text-color: lightgrey;
-    --grid-breakpoints-xs: $grid-breakpoints-xs;
-    --grid-breakpoints-sm: $grid-breakpoints-sm;
-    --grid-breakpoints-md: $grid-breakpoints-md;
-    --grid-breakpoints-lg: $grid-breakpoints-lg;
-    --grid-breakpoints-xl: $grid-breakpoints-xl;
+    --grid-breakpoints-xs: theme.$grid-breakpoints-xs;
+    --grid-breakpoints-sm: theme.$grid-breakpoints-sm;
+    --grid-breakpoints-md: theme.$grid-breakpoints-md;
+    --grid-breakpoints-lg: theme.$grid-breakpoints-lg;
+    --grid-breakpoints-xl: theme.$grid-breakpoints-xl;
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
     --html-font-size: 16px;

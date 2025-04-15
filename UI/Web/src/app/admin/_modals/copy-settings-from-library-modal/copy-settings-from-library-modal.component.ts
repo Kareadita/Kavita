@@ -5,15 +5,14 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-copy-settings-from-library-modal',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    ReactiveFormsModule,
-  ],
-  templateUrl: './copy-settings-from-library-modal.component.html',
-  styleUrl: './copy-settings-from-library-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-copy-settings-from-library-modal',
+    imports: [
+        TranslocoDirective,
+        ReactiveFormsModule,
+    ],
+    templateUrl: './copy-settings-from-library-modal.component.html',
+    styleUrl: './copy-settings-from-library-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CopySettingsFromLibraryModalComponent {
   protected readonly modal = inject(NgbActiveModal);

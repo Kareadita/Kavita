@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'manage-settings'">
 
   <div class="position-relative">
-    <button type="button" class="btn btn-primary-outline position-absolute custom-position" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+    <button type="button" class="btn btn-outline-primary position-absolute custom-position" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
   </div>
 
 
@@ -170,14 +170,14 @@
         @if (settingsForm.get('loggingLevel'); as formControl) {
           <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
             <ng-template #view>
-              {{formControl.value | titlecase}}
+              {{formControl.value | logLevel}}
             </ng-template>
             <ng-template #edit>
 
               <select id="logging-level" aria-describedby="logging-level-help" class="form-select"  formControlName="loggingLevel"
                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
                 @for(level of logLevels; track level) {
-                  <option [value]="level">{{level | titlecase}}</option>
+                  <option [value]="level">{{level | logLevel}}</option>
                 }
               </select>
 

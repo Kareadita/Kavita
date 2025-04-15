@@ -15,12 +15,11 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-carousel-reel',
-  templateUrl: './carousel-reel.component.html',
-  styleUrls: ['./carousel-reel.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [NgClass, SwiperModule, NgTemplateOutlet, TranslocoDirective]
+    selector: 'app-carousel-reel',
+    templateUrl: './carousel-reel.component.html',
+    styleUrls: ['./carousel-reel.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgClass, SwiperModule, NgTemplateOutlet, TranslocoDirective]
 })
 export class CarouselReelComponent {
 

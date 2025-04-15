@@ -1,34 +1,28 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  HostListener,
-  inject,
-  OnInit
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { ConfirmService } from 'src/app/shared/confirm.service';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {ConfirmService} from 'src/app/shared/confirm.service';
 import {DownloadService} from 'src/app/shared/_services/download.service';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ReaderService } from 'src/app/_services/reader.service';
-import {DecimalPipe, NgIf} from '@angular/common';
-import { CardItemComponent } from '../../../cards/card-item/card-item.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {DecimalPipe} from '@angular/common';
+import {CardItemComponent} from '../../../cards/card-item/card-item.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
@@ -39,8 +33,7 @@ import {WikiLink} from "../../../_models/wiki";
   templateUrl: './bookmarks.component.html',
   styleUrls: ['./bookmarks.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, NgIf]
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective]
 })
 export class BookmarksComponent implements OnInit {
 

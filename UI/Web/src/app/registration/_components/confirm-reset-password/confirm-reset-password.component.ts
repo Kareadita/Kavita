@@ -14,7 +14,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './confirm-reset-password.component.html',
     styleUrls: ['./confirm-reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgIf, TranslocoDirective]
 })
 export class ConfirmResetPasswordComponent {

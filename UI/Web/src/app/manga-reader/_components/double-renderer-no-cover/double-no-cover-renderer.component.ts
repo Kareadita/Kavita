@@ -30,7 +30,6 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-no-cover-renderer.component.html',
     styleUrls: ['./double-no-cover-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {

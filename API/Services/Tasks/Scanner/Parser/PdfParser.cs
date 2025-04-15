@@ -71,12 +71,30 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         // Patch in other information from ComicInfo
         UpdateFromComicInfo(ret);
 
+        if (comicInfo != null && !string.IsNullOrEmpty(comicInfo.Title))
+        {
+            ret.Title = comicInfo.Title.Trim();
+        }
+
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
             ret.Chapters = Parser.DefaultChapter;
             ret.Volumes = Parser.SpecialVolume;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+        }
+
+        if (type == LibraryType.Book && comicInfo != null)
+        {
+            // For books, fall back to the Title for Series.
+            if (!string.IsNullOrEmpty(comicInfo.Series))
+            {
+                ret.Series = comicInfo.Series.Trim();
+            }
+            else if (!string.IsNullOrEmpty(comicInfo.Title))
+            {
+                ret.Series = comicInfo.Title.Trim();
+            }
         }
 
         if (string.IsNullOrEmpty(ret.Series))

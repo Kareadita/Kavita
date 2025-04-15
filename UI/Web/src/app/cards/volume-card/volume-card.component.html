@@ -52,12 +52,15 @@
       }
     </div>
 
-    @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
+    @if (libraryType !== LibraryType.Images) {
       <div class="card-body meta-title">
-        <span class="card-format">
-        </span>
+        <span class="card-format"></span>
         <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-          {{volume.name}}
+          @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
+            {{volume.name}}
+          } @else {
+            {{volume.chapters[0].titleName}}
+          }
         </div>
 
         @if (actions && actions.length > 0) {

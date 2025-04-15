@@ -1,8 +1,15 @@
-@include media-breakpoint-down(md) {
-    .card-actions {
-        visibility: visible !important;
-    }
-}
+//@use 'bootstrap/scss/functions' as functions;
+//@use 'bootstrap/scss/variables' as variables;
+//@use './theme/variables' as theme;
+//@use 'bootstrap/scss/mixins/breakpoints' as breakpoints;
+
+//
+//// TODO: Rewrite this because it's not working with breakpoints - doesn't seem to do anything either
+//@include breakpoints.media-breakpoint-down(md) {
+//    .card-actions {
+//        visibility: visible !important;
+//    }
+//}
 
 .card {
     background-color: var(--card-bg-color);

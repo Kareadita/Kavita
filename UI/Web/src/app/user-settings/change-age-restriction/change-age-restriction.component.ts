@@ -1,26 +1,24 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   OnInit
 } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Observable, of, shareReplay, map, take } from 'rxjs';
-import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {ToastrService} from 'ngx-toastr';
+import {map, Observable, of, shareReplay, take} from 'rxjs';
+import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
+import {AgeRating} from 'src/app/_models/metadata/age-rating';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { AgeRatingPipe } from '../../_pipes/age-rating.pipe';
-import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
-import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
+import {RestrictionSelectorComponent} from '../restriction-selector/restriction-selector.component';
+import {NgClass} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {ReactiveFormsModule} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
@@ -28,9 +26,8 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     templateUrl: './change-age-restriction.component.html',
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective, SettingTitleComponent,
-    ReactiveFormsModule, SettingItemComponent, NgClass]
+    imports: [RestrictionSelectorComponent, AgeRatingPipe, TranslocoDirective,
+        ReactiveFormsModule, SettingItemComponent, NgClass]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 

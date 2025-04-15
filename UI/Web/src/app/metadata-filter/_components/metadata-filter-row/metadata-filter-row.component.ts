@@ -19,20 +19,15 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
-import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Select2Module, Select2Option} from "ng-select2-component";
-import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {
-  NgbDate,
-  NgbDateParserFormatter,
-  NgbDatepicker,
-  NgbInputDatepicker,
-  NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {Select2, Select2Option} from "ng-select2-component";
+import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
 
 enum PredicateType {
   Text = 1,
@@ -128,20 +123,31 @@ const BooleanComparisons = [
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
   styleUrls: ['./metadata-filter-row.component.scss'],
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     AsyncPipe,
     FilterFieldPipe,
     FilterComparisonPipe,
-    Select2Module,
     NgbTooltip,
     TranslocoDirective,
-    NgbInputDatepicker
+    NgbInputDatepicker,
+    Select2
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit {
+
+  protected readonly FilterComparison = FilterComparison;
+  protected readonly PredicateType = PredicateType;
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dateParser = inject(NgbDateParserFormatter);
+  private readonly metadataService = inject(MetadataService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly collectionTagService = inject(CollectionTagService);
+  private readonly translocoService = inject(TranslocoService);
+
 
   @Input() index: number = 0; // This is only for debugging
   /**
@@ -152,12 +158,6 @@ export class MetadataFilterRowComponent implements OnInit {
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly dateParser = inject(NgbDateParserFormatter);
-
-  protected readonly FilterComparison = FilterComparison;
-
   formGroup: FormGroup = new FormGroup({
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
     'filterValue': new FormControl<string | number>('', []),
@@ -167,7 +167,13 @@ export class MetadataFilterRowComponent implements OnInit {
   dropdownOptions$ = of<Select2Option[]>([]);
 
   loaded: boolean = false;
-  protected readonly PredicateType = PredicateType;
+  private readonly mangaFormatPipe = new MangaFormatPipe(this.translocoService);
+  private readonly ageRatingPipe = new AgeRatingPipe();
+
+  get IsEmptySelected() {
+    return parseInt(this.formGroup.get('comparison')?.value + '', 10) !== FilterComparison.IsEmpty;
+  }
+
 
   get UiLabel(): FilterRowUi | null {
     const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
@@ -180,8 +186,6 @@ export class MetadataFilterRowComponent implements OnInit {
     return comp === FilterComparison.Contains || comp === FilterComparison.NotContains || comp === FilterComparison.MustContains;
   }
 
-  constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService,
-    private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
@@ -280,7 +284,7 @@ export class MetadataFilterRowComponent implements OnInit {
           })));
         case FilterField.AgeRating:
           return this.metadataService.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
-            return {value: rating.value, label: rating.title}
+            return {value: rating.value, label: this.ageRatingPipe.transform(rating.value)}
           })));
         case FilterField.Genres:
           return this.metadataService.getAllGenres().pipe(map(genres => genres.map(genre => {
@@ -292,7 +296,7 @@ export class MetadataFilterRowComponent implements OnInit {
           })));
         case FilterField.Formats:
           return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
-            return {value: status.value, label: status.title}
+            return {value: status.value, label: this.mangaFormatPipe.transform(status.value)}
           })));
         case FilterField.Libraries:
           return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
@@ -348,6 +352,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue('');
         this.formGroup.get('comparison')?.patchValue(StringComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -363,10 +368,13 @@ export class MetadataFilterRowComponent implements OnInit {
 
       this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Number);
+
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
         this.formGroup.get('comparison')?.patchValue(NumberComparisons[0]);
       }
+
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -383,6 +391,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(false);
         this.formGroup.get('comparison')?.patchValue(DateComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -400,6 +409,7 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(false);
         this.formGroup.get('comparison')?.patchValue(BooleanComparisons[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -421,15 +431,15 @@ export class MetadataFilterRowComponent implements OnInit {
         this.formGroup.get('filterValue')?.patchValue(0);
         this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
+      this.cdRef.markForCheck();
       return;
     }
   }
 
-
-
   onDateSelect(_: NgbDate) {
     this.propagateFilterUpdate();
   }
+
   updateIfDateFilled() {
     this.propagateFilterUpdate();
   }

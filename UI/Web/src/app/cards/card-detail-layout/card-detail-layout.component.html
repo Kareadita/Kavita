@@ -1,4 +1,5 @@
 <ng-container *transloco="let t; read: 'card-detail-layout'">
+  <app-loading [loading]="isLoading"></app-loading>
 
   @if (header.length > 0) {
     <div class="row mt-2 g-0 pb-2">
@@ -12,7 +13,7 @@
 
           <span>
               {{header}}&nbsp;
-            @if (pagination !== undefined) {
+            @if (pagination) {
               <span class="badge bg-primary rounded-pill"
                     [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
             }
@@ -26,7 +27,7 @@
   <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
-      <div class="card-container mt-">
+      <div class="card-container">
         @if (items.length === 0 && !isLoading) {
           <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
         }
@@ -62,14 +63,16 @@
     @if (items.length === 0 && !isLoading) {
       <div class="mx-auto" style="width: 200px;">
         <p>
-          <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+          @if (noDataTemplate) {
+            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+          } @else {
+            {{t('no-data')}}
+          }
         </p>
       </div>
     }
 
   </ng-template>
-
-  <app-loading [loading]="isLoading"></app-loading>
 
   <ng-template #jumpBar>
     <div class="jump-bar">

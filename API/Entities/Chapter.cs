@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
@@ -177,8 +178,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
             MinNumber = Parser.DefaultChapterNumber;
             MaxNumber = Parser.DefaultChapterNumber;
         }
-        // NOTE: This doesn't work well for all because Pdf usually should use into.Title or even filename
-        Title = (IsSpecial && info.Format == MangaFormat.Epub)
+        Title = (IsSpecial && info.Format is MangaFormat.Epub or MangaFormat.Pdf)
             ? info.Title
             : Parser.RemoveExtensionIfSupported(Range);
 

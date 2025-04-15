@@ -1,23 +1,27 @@
 import {inject, Injectable} from '@angular/core';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
-import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
-import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
-import { ConfirmService } from '../shared/confirm.service';
-import { LibrarySettingsModalComponent } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
-import { Chapter } from '../_models/chapter';
-import { Device } from '../_models/device/device';
-import { Library } from '../_models/library/library';
-import { ReadingList } from '../_models/reading-list';
-import { Series } from '../_models/series';
-import { Volume } from '../_models/volume';
-import { DeviceService } from './device.service';
-import { LibraryService } from './library.service';
-import { MemberService } from './member.service';
-import { ReaderService } from './reader.service';
-import { SeriesService } from './series.service';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {BulkAddToCollectionComponent} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
+import {ADD_FLOW, AddToListModalComponent} from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
+import {
+  EditReadingListModalComponent
+} from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
+import {ConfirmService} from '../shared/confirm.service';
+import {
+  LibrarySettingsModalComponent
+} from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
+import {Chapter} from '../_models/chapter';
+import {Device} from '../_models/device/device';
+import {Library} from '../_models/library/library';
+import {ReadingList} from '../_models/reading-list';
+import {Series} from '../_models/series';
+import {Volume} from '../_models/volume';
+import {DeviceService} from './device.service';
+import {LibraryService} from './library.service';
+import {MemberService} from './member.service';
+import {ReaderService} from './reader.service';
+import {SeriesService} from './series.service';
 import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
@@ -652,7 +656,7 @@ export class ActionService {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, DefaultModalOptions);
     readingListModalRef.componentInstance.readingList = readingList;
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {
@@ -773,7 +777,7 @@ export class ActionService {
   }
 
   matchSeries(series: Series, callback?: BooleanActionCallback) {
-   const ref = this.modalService.open(MatchSeriesModalComponent, {size: 'lg'});
+   const ref = this.modalService.open(MatchSeriesModalComponent, DefaultModalOptions);
    ref.componentInstance.series = series;
    ref.closed.subscribe(saved => {
      if (callback) {

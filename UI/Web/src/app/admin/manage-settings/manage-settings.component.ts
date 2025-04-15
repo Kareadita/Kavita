@@ -5,26 +5,25 @@ import {take} from 'rxjs/operators';
 import {ServerService} from 'src/app/_services/server.service';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ConfirmService} from "../../shared/confirm.service";
-import {debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {LogLevelPipe} from "../../_pipes/log-level.pipe";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
-  selector: 'app-manage-settings',
-  templateUrl: './manage-settings.component.html',
-  styleUrls: ['./manage-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TitleCasePipe, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective]
+    selector: 'app-manage-settings',
+    templateUrl: './manage-settings.component.html',
+    styleUrls: ['./manage-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective, LogLevelPipe]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -48,15 +47,15 @@ export class ManageSettingsComponent implements OnInit {
     translate('manage-settings.allow-stats-tooltip-part-2');
 
   ngOnInit(): void {
-    this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
+    this.settingsService.getTaskFrequencies().subscribe(frequencies => {
       this.taskFrequencies = frequencies;
       this.cdRef.markForCheck();
     });
-    this.settingsService.getLoggingLevels().pipe(take(1)).subscribe(levels => {
+    this.settingsService.getLoggingLevels().subscribe(levels => {
       this.logLevels = levels;
       this.cdRef.markForCheck();
     });
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
@@ -134,6 +133,8 @@ export class ManageSettingsComponent implements OnInit {
     const modelSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
+    modelSettings.installId = this.serverSettings.installId;
+    modelSettings.installVersion = this.serverSettings.installVersion;
 
     return modelSettings;
   }

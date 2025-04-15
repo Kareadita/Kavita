@@ -20,22 +20,21 @@ import {SeriesFormatComponent} from "../../../shared/series-format/series-format
 import {PublisherFlipperComponent} from "../../../_single-module/publisher-flipper/publisher-flipper.component";
 
 @Component({
-  selector: 'app-metadata-detail-row',
-  standalone: true,
-  imports: [
-    AgeRatingImageComponent,
-    CompactNumberPipe,
-    ReadTimeLeftPipe,
-    ReadTimePipe,
-    NgbTooltip,
-    TranslocoDirective,
-    ImageComponent,
-    SeriesFormatComponent,
-    PublisherFlipperComponent
-  ],
-  templateUrl: './metadata-detail-row.component.html',
-  styleUrl: './metadata-detail-row.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-detail-row',
+    imports: [
+        AgeRatingImageComponent,
+        CompactNumberPipe,
+        ReadTimeLeftPipe,
+        ReadTimePipe,
+        NgbTooltip,
+        TranslocoDirective,
+        ImageComponent,
+        SeriesFormatComponent,
+        PublisherFlipperComponent
+    ],
+    templateUrl: './metadata-detail-row.component.html',
+    styleUrl: './metadata-detail-row.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailRowComponent {
   protected readonly imageService = inject(ImageService);

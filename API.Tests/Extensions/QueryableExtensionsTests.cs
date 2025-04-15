@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using API.Data;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
-using API.Extensions;
+using API.Entities.Person;
 using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using Xunit;

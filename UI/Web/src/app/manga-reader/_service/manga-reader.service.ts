@@ -1,11 +1,11 @@
-import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { ChapterInfo } from '../_models/chapter-info';
-import { DimensionMap } from '../_models/file-dimension';
-import { FITTING_OPTION } from '../_models/reader-enums';
-import { BookmarkInfo } from 'src/app/_models/manga-reader/bookmark-info';
+import {ElementRef, Injectable, Renderer2, RendererFactory2} from '@angular/core';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {ChapterInfo} from '../_models/chapter-info';
+import {DimensionMap} from '../_models/file-dimension';
+import {FITTING_OPTION} from '../_models/reader-enums';
+import {BookmarkInfo} from 'src/app/_models/manga-reader/bookmark-info';
 
 @Injectable({
   providedIn: 'root'
@@ -113,10 +113,12 @@ export class MangaReaderService {
     return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
   }
 
+  /**
+   * Some pages aren't cover images but might need fit split renderings
+   * @param pageSplitOption
+   */
   shouldRenderAsFitSplit(pageSplitOption: PageSplitOption) {
-    // Some pages aren't cover images but might need fit split renderings
-    if (parseInt(pageSplitOption + '', 10) !== PageSplitOption.FitSplit) return false;
-    return true;
+    return parseInt(pageSplitOption + '', 10) === PageSplitOption.FitSplit;
   }
 
 
@@ -156,27 +158,97 @@ export class MangaReaderService {
   shouldBeWebtoonMode() {
     const pages = Object.values(this.pageDimensions);
 
+    // Require a minimum number of pages for reliable detection
+    if (pages.length < 3) {
+      return false;
+    }
+
+    // Get statistical properties across all pages
+    const aspectRatios = pages.map(info => info.height / info.width);
+    const avgAspectRatio = aspectRatios.reduce((sum, ratio) => sum + ratio, 0) / pages.length;
+    const stdDevAspectRatio = Math.sqrt(
+      aspectRatios.reduce((sum, ratio) => sum + Math.pow(ratio - avgAspectRatio, 2), 0) / pages.length
+    );
+
+    // Consider page dimensions consistency
+    const widths = pages.map(info => info.width);
+    const heights = pages.map(info => info.height);
+    const avgWidth = widths.reduce((sum, w) => sum + w, 0) / pages.length;
+    const avgHeight = heights.reduce((sum, h) => sum + h, 0) / pages.length;
+
+    // Calculate variation coefficients for width and height
+    const widthVariation = Math.sqrt(
+      widths.reduce((sum, w) => sum + Math.pow(w - avgWidth, 2), 0) / pages.length
+    ) / avgWidth;
+
+    // Calculate individual scores for each page
     let webtoonScore = 0;
+    let strongIndicatorCount = 0;
+
     pages.forEach(info => {
       const aspectRatio = info.height / info.width;
       let score = 0;
 
       // Strong webtoon indicator: If aspect ratio is at least 2:1
-      if (aspectRatio >= 2) {
+      if (aspectRatio >= 2.2) {
         score += 1;
+        strongIndicatorCount++;
+      } else if (aspectRatio >= 1.8 && aspectRatio < 2.2) {
+        // Moderate indicator
+        score += 0.5;
+      } else if (aspectRatio >= 1.5 && aspectRatio < 1.8) {
+        // Weak indicator - many regular manga/comics have ratios in this range
+        score += 0.2;
       }
 
-      // Boost score if width is small (≤ 800px, common in webtoons)
+      // Penalize pages that are too square-like (common in traditional comics)
+      if (aspectRatio < 1.2) {
+        score -= 0.5;
+      }
+
+      // Consider width but with less weight than before
       if (info.width <= 750) {
-        score += 0.5; // Adjust weight as needed
+        score += 0.2;
+      }
+
+      // Consider absolute height (long strips tend to be very tall)
+      if (info.height > 2000) {
+        score += 0.5;
+      } else if (info.height > 1500) {
+        score += 0.3;
+      }
+
+      // Consider absolute page area - webtoons tend to have larger total area
+      const area = info.width * info.height;
+      if (area > 1500000) { // e.g., 1000×1500 or larger
+        score += 0.3;
       }
 
       webtoonScore += score;
     });
 
+    const averageScore = webtoonScore / pages.length;
 
-    // If at least 50% of the pages fit the webtoon criteria, switch to Webtoon mode.
-    return webtoonScore / pages.length >= 0.5;
+    // Multiple criteria for more robust detection
+    // Check for typical manga/comic dimensions that should NOT be webtoon mode
+    const isMangaLikeSize = avgHeight < 1200 && avgAspectRatio < 1.7 && avgWidth < 700;
+
+    // Main detection criteria
+    return (
+      // Primary criterion: average score threshold (increased)
+      averageScore >= 0.7 &&
+      // Not resembling typical manga/comic dimensions
+      !isMangaLikeSize &&
+      // Secondary criteria (any one can satisfy)
+      (
+        // Most pages should have high aspect ratio
+        (strongIndicatorCount / pages.length >= 0.4) ||
+        // Average aspect ratio is high enough (increased threshold)
+        (avgAspectRatio >= 2.0) ||
+        // Pages have consistent width AND very high aspect ratio
+        (widthVariation < 0.15 && avgAspectRatio > 1.8)
+      )
+    );
   }
 
 

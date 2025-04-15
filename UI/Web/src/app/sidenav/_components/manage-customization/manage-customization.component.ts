@@ -16,23 +16,22 @@ enum TabID {
 }
 
 @Component({
-  selector: 'app-manage-customization',
-  standalone: true,
-  imports: [
-    CustomizeDashboardStreamsComponent,
-    CustomizeSidenavStreamsComponent,
-    ManageExternalSourcesComponent,
-    ManageSmartFiltersComponent,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLink,
-    TranslocoDirective,
-    NgbNavItem,
-    NgbNavOutlet
-  ],
-  templateUrl: './manage-customization.component.html',
-  styleUrl: './manage-customization.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-customization',
+    imports: [
+        CustomizeDashboardStreamsComponent,
+        CustomizeSidenavStreamsComponent,
+        ManageExternalSourcesComponent,
+        ManageSmartFiltersComponent,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLink,
+        TranslocoDirective,
+        NgbNavItem,
+        NgbNavOutlet
+    ],
+    templateUrl: './manage-customization.component.html',
+    styleUrl: './manage-customization.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageCustomizationComponent {
   private readonly cdRef = inject(ChangeDetectorRef);

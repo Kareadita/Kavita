@@ -932,7 +932,8 @@ public class SeriesFilterTests : AbstractDbTest
 
         var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>(),
+            Substitute.For<IReadingListService>());
 
         // Select 0 Rating
         var zeroRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);

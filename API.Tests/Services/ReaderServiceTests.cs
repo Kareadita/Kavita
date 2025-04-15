@@ -1,25 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
-using System.Globalization;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
 using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
-using API.Services.Tasks;
 using API.SignalR;
-using API.Tests.Helpers;
 using AutoMapper;
 using Hangfire;
 using Hangfire.InMemory;
@@ -32,17 +27,12 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ReaderServiceTests
+public class ReaderServiceTests: AbstractFsTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
     private readonly ReaderService _readerService;
-
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
 
     public ReaderServiceTests(ITestOutputHelper testOutputHelper)
     {
@@ -99,19 +89,6 @@ public class ReaderServiceTests
         _context.Series.RemoveRange(_context.Series.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
     }
 
     #endregion

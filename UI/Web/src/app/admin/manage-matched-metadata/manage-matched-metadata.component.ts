@@ -10,7 +10,6 @@ import {ManageService} from "../../_services/manage.service";
 import {ManageMatchSeries} from "../../_models/kavitaplus/manage-match-series";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
 import {ManageMatchFilter} from "../../_models/kavitaplus/manage-match-filter";
 import {allMatchStates, MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 import {MatchStateOptionPipe} from "../../_pipes/match-state.pipe";
@@ -25,19 +24,17 @@ import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
 
 @Component({
   selector: 'app-manage-matched-metadata',
-  standalone: true,
   imports: [
-    TranslocoDirective,
-    ImageComponent,
-    VirtualScrollerModule,
-    ReactiveFormsModule,
-    Select2Module,
-    MatchStateOptionPipe,
-    UtcToLocalTimePipe,
-    DefaultValuePipe,
-    NgxDatatableModule,
-    LibraryNamePipe,
-    AsyncPipe,
+      TranslocoDirective,
+      ImageComponent,
+      VirtualScrollerModule,
+      ReactiveFormsModule,
+      MatchStateOptionPipe,
+      UtcToLocalTimePipe,
+      DefaultValuePipe,
+      NgxDatatableModule,
+      LibraryNamePipe,
+      AsyncPipe,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',

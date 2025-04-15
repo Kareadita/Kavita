@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -9,32 +10,32 @@ import {
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  NgbActiveModal, NgbCollapse,
+  NgbActiveModal,
+  NgbCollapse,
   NgbNav,
   NgbNavContent,
   NgbNavItem,
   NgbNavLink,
-  NgbNavOutlet,
-  NgbTooltip
+  NgbNavOutlet
 } from '@ng-bootstrap/ng-bootstrap';
 import {forkJoin, Observable, of, tap} from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
+import {map, switchMap} from 'rxjs/operators';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
-import { Genre } from 'src/app/_models/metadata/genre';
-import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
-import { Language } from 'src/app/_models/metadata/language';
-import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
-import { Person, PersonRole } from 'src/app/_models/metadata/person';
-import { Series } from 'src/app/_models/series';
-import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
-import { Tag } from 'src/app/_models/tag';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { UploadService } from 'src/app/_services/upload.service';
+import {Genre} from 'src/app/_models/metadata/genre';
+import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
+import {Language} from 'src/app/_models/metadata/language';
+import {PublicationStatusDto} from 'src/app/_models/metadata/publication-status-dto';
+import {Person, PersonRole} from 'src/app/_models/metadata/person';
+import {Series} from 'src/app/_models/series';
+import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
+import {Tag} from 'src/app/_models/tag';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {MetadataService} from 'src/app/_services/metadata.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
@@ -44,13 +45,11 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
-import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {translate, TranslocoModule} from "@jsverse/transloco";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
@@ -61,7 +60,6 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {ReadTimePipe} from "../../../_pipes/read-time.pipe";
 import {LicenseService} from "../../../_services/license.service";
 
 enum TabID {
@@ -88,7 +86,6 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
 
 @Component({
   selector: 'app-edit-series-modal',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     NgbNav,
@@ -110,7 +107,6 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     NgbNavOutlet,
     DefaultValuePipe,
     TranslocoModule,
-    TranslocoDatePipe,
     UtcToLocalTimePipe,
     EditListComponent,
     SettingButtonComponent,
@@ -238,10 +234,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.metadataService.getAllValidLanguages().subscribe(validLanguages => {
-      this.validLanguages = validLanguages;
-      this.cdRef.markForCheck();
-    });
+
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
       if (metadata) {
@@ -380,6 +373,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
+    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.metadata.tags) {
       this.tagsSettings.savedData = this.metadata.tags;
@@ -411,6 +405,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.genreSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
+    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.metadata.genres) {
       this.genreSettings.savedData = this.metadata.genres;
@@ -437,30 +432,42 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   setupLanguageTypeahead() {
-    this.languageSettings.minCharacters = 0;
-    this.languageSettings.multiple = false;
-    this.languageSettings.id = 'language';
-    this.languageSettings.unique = true;
-    this.languageSettings.showLocked = true;
-    this.languageSettings.addIfNonExisting = false;
-    this.languageSettings.compareFn = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
-      .pipe(map(items => this.languageSettings.compareFn(items, filter)));
 
-    this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
-      return a.isoCode == b.isoCode;
-    }
 
-    const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
-    if (l !== undefined) {
-      this.languageSettings.savedData = l;
-    }
-    return of(true);
+    return this.metadataService.getAllValidLanguages()
+      .pipe(
+        tap(validLanguages => {
+          this.validLanguages = validLanguages;
+
+          this.languageSettings.minCharacters = 0;
+          this.languageSettings.multiple = false;
+          this.languageSettings.id = 'language';
+          this.languageSettings.unique = true;
+          this.languageSettings.showLocked = true;
+          this.languageSettings.addIfNonExisting = false;
+          this.languageSettings.compareFn = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filter(m.title, filter));
+          }
+          this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+          }
+          this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
+            .pipe(map(items => this.languageSettings.compareFn(items, filter)));
+
+          this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
+            return a.isoCode == b.isoCode;
+          }
+
+          const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
+          if (l !== undefined) {
+            this.languageSettings.savedData = l;
+          }
+          this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
+
+          this.cdRef.markForCheck();
+        }),
+        switchMap(_ => of(true))
+    );
   }
 
   setupPersonTypeahead() {
@@ -516,6 +523,7 @@ export class EditSeriesModalComponent implements OnInit {
     personSettings.addTransformFn = ((title: string) => {
       return {id: 0, name: title, description: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
+    personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
 
     return personSettings;
   }

@@ -20,9 +20,8 @@ import {SelectionModel} from "../../typeahead/_models/selection-model";
     selector: 'app-library-selector',
     templateUrl: './library-selector.component.html',
     styleUrls: ['./library-selector.component.scss'],
-    standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective, LoadingComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [ReactiveFormsModule, FormsModule, TranslocoDirective, LoadingComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySelectorComponent implements OnInit {
 

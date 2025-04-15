@@ -11,12 +11,11 @@ import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {WikiLink} from "../../../_models/wiki";
 
 @Component({
-  selector: 'app-manage-external-sources',
-  standalone: true,
-  imports: [FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent, FilterPipe],
-  templateUrl: './manage-external-sources.component.html',
-  styleUrls: ['./manage-external-sources.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-external-sources',
+    imports: [FormsModule, ReactiveFormsModule, TranslocoDirective, EditExternalSourceItemComponent, FilterPipe],
+    templateUrl: './manage-external-sources.component.html',
+    styleUrls: ['./manage-external-sources.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageExternalSourcesComponent {
 

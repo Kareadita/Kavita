@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs;
+#nullable enable
 
 public class MangaFileDto
 {

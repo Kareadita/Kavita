@@ -1,57 +1,58 @@
-@import '../node_modules/swiper/swiper';
+@use '../node_modules/swiper/swiper' as swiper;
 
-@import './theme/variables';
+@use './theme/variables' as theme;
 
 // Import themes which define the css variables we use to customize the app
-@import './theme/themes/dark';
+@use './theme/themes/dark';
 
 // Import colors for overrides of bootstrap theme
-@import './theme/toastr';
+@use './theme/toastr' as toastr;
 
 
 // Bootstrap must be after _colors since we define the colors there
-@import '../node_modules/bootstrap/scss/bootstrap';
+@use '../node_modules/bootstrap/scss/bootstrap';
 
-@import '../node_modules/charts.css/dist/charts.min';
+@use '../node_modules/charts.css/dist/charts.min' as charts;
 
-@import '../node_modules/@siemens/ngx-datatable/index.css';
-@import '../node_modules/@siemens/ngx-datatable/themes/bootstrap.css';
-@import '../node_modules/@siemens/ngx-datatable/assets/icons.css';
+@use '../node_modules/@siemens/ngx-datatable/index.css' as ngxDatatable;
+@use '../node_modules/@siemens/ngx-datatable/themes/bootstrap.css' as ngxDatatableBootstrap;
+@use '../node_modules/@siemens/ngx-datatable/assets/icons.css' as ngxDatatableIcons;
 
 
 // Import all the customized theme overrides
-@import './theme/components/input';
-@import './theme/components/anchors';
-@import './theme/components/nav';
-@import './theme/components/buttons';
-@import './theme/components/toast';
-@import './theme/components/checkbox';
-@import './theme/components/list';
-@import './theme/components/navbar';
-@import './theme/components/popover';
-@import './theme/components/pagination';
-@import './theme/components/dropdown';
-@import './theme/components/accordion';
-@import './theme/components/breadcrumb';
-@import './theme/components/ratingstar';
-@import './theme/components/modal';
-@import './theme/components/card';
-@import './theme/components/slider';
-@import './theme/components/radios';
-@import './theme/components/selects';
-@import './theme/components/progress';
-@import './theme/components/sidenav';
-@import './theme/components/carousel';
-@import './theme/components/offcanvas';
-@import './theme/components/table';
-@import './theme/components/alerts';
-@import './theme/components/typeahead';
+@use './theme/components/input';
+@use './theme/components/anchors';
+@use './theme/components/nav';
+@use './theme/components/badge';
+@use './theme/components/buttons';
+@use './theme/components/toast';
+@use './theme/components/checkbox';
+@use './theme/components/list';
+@use './theme/components/navbar';
+@use './theme/components/popover';
+@use './theme/components/pagination';
+@use './theme/components/dropdown';
+@use './theme/components/accordion';
+@use './theme/components/breadcrumb';
+@use './theme/components/ratingstar';
+@use './theme/components/modal';
+@use './theme/components/card';
+@use './theme/components/slider';
+@use './theme/components/radios';
+@use './theme/components/selects';
+@use './theme/components/progress';
+@use './theme/components/sidenav';
+@use './theme/components/carousel';
+@use './theme/components/offcanvas';
+@use './theme/components/table';
+@use './theme/components/alerts';
+@use './theme/components/typeahead';
 
-@import './theme/utilities/headings';
-@import './theme/utilities/utilities';
-@import './theme/utilities/animations';
-@import './theme/utilities/global';
-@import "./theme/utilities/spinners";
+@use './theme/utilities/headings';
+@use './theme/utilities/utilities';
+@use './theme/utilities/animations';
+@use './theme/utilities/global';
+@use "./theme/utilities/spinners";
 
 
 // Global Styles
@@ -93,9 +94,6 @@ app-root {
   scrollbar-color: rgba(255,255,255,0.3);
 }
 
-::-webkit-scrollbar {
-  width: 10px !important;
-}
 
 ::-webkit-scrollbar-thumb {
   background-clip: padding-box;
@@ -112,7 +110,7 @@ body {
   padding: 0;
   margin: 0;
 
-  @media (max-width: $grid-breakpoints-lg) {
+  @media (max-width: theme.$grid-breakpoints-lg) {
     /* Setting this break the readers */
     //margin-top: var(--nav-mobile-offset) !important;
     //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;

@@ -1,4 +1,5 @@
 ﻿using System;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.DTOs.ReadingLists;
@@ -43,6 +44,10 @@ public class ReadingListDto : IHasCoverImage
     /// Maximum Month the Reading List starts
     /// </summary>
     public int EndingMonth { get; set; }
+    /// <summary>
+    /// The highest age rating from all Series within the reading list
+    /// </summary>
+    public required AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
     public void ResetColorScape()
     {

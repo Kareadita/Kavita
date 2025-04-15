@@ -64,7 +64,7 @@ export class ManageLogsComponent implements OnInit, OnDestroy {
     // unsubscribe from signalr connection
     if (this.hubConnection) {
       this.hubConnection.stop().catch(err => console.error(err));
-      console.log('Stoping log connection');
+      console.log('Stopping log connection');
     }
   }
 

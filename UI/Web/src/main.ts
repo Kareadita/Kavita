@@ -1,36 +1,25 @@
 /// <reference types="@angular/localize" />
-import {
-  APP_INITIALIZER, ApplicationConfig,
-  importProvidersFrom,
-
-} from '@angular/core';
-import { AppComponent } from './app/app.component';
-import { NgCircleProgressModule } from 'ng-circle-progress';
-import { ToastrModule } from 'ngx-toastr';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AppRoutingModule } from './app/app-routing.module';
-import { Title, BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
-import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
-import { HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
-import {
-    provideTransloco, TranslocoConfig,
-    TranslocoService
-} from "@jsverse/transloco";
+import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom,} from '@angular/core';
+import {AppComponent} from './app/app.component';
+import {NgCircleProgressModule} from 'ng-circle-progress';
+import {ToastrModule} from 'ngx-toastr';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {AppRoutingModule} from './app/app-routing.module';
+import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
+import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
+import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
-import {HttpLoader} from "./httpLoader";
-import {
-  provideTranslocoPersistLang,
-} from "@jsverse/transloco-persist-lang";
 import {AccountService} from "./app/_services/account.service";
 import {switchMap} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
-import {provideTranslocoPersistTranslations} from "@jsverse/transloco-persist-translations";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
-import {provideTranslocoDefaultLocale} from "@jsverse/transloco-locale/lib/transloco-locale.providers";
+import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
+import {HttpLoader} from "./httpLoader";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -145,12 +134,7 @@ bootstrapApplication(AppComponent, {
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
           storage: { useValue: localStorage },
-          ttl: 604800
-        }),
-        provideTranslocoPersistLang({
-          storage: {
-            useValue: localStorage,
-          },
+          ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
         }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

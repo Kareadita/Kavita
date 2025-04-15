@@ -238,7 +238,8 @@ public class SeriesController : BaseApiController
             // Trigger a refresh when we are moving from a locked image to a non-locked
             needsRefreshMetadata = true;
             series.CoverImage = null;
-            series.CoverImageLocked = updateSeries.CoverImageLocked;
+            series.CoverImageLocked = false;
+            _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
             series.ResetColorScape();
 
         }

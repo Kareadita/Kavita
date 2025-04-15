@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'license'">
 
   <div class="position-relative">
-    <a class="position-absolute custom-position btn btn-primary-outline" [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">{{t('faq-title')}}</a>
+    <a class="position-absolute custom-position btn btn-outline-primary" [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow">{{t('faq-title')}}</a>
   </div>
 
   <div>
@@ -99,9 +99,9 @@
           <ng-template #titleActions>
             @if (hasLicense) {
               @if (licenseInfo?.isActive) {
-                <a class="btn btn-primary-outline btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+                <a class="btn btn-outline-primary btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
               } @else {
-                <a class="btn btn-primary-outline btn-sm me-1"
+                <a class="btn btn-outline-primary btn-sm me-1"
                    [ngbTooltip]="t('invalid-license-tooltip')"
                    href="mailto:kavitareader@gmail.com?subject=Kavita+Subscription+Renewal&body=Description%3A%0D%0A%0D%0ALicense%20Key%3A%0D%0A%0D%0AYour%20Email%3A"
                 >{{t('renew')}}</a>

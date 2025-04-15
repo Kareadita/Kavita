@@ -1,14 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgTemplateOutlet} from "@angular/common";
-import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
-import {Person, PersonRole} from "../../../_models/metadata/person";
+import {Person} from "../../../_models/metadata/person";
 import {
   NgbActiveModal,
   NgbNav,
   NgbNavContent,
-  NgbNavItem, NgbNavLink,
+  NgbNavItem,
+  NgbNavLink,
   NgbNavLinkBase,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
@@ -17,10 +16,8 @@ import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {forkJoin} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
-import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
-import {User} from "../../../_models/user";
 import {ToastrService} from "ngx-toastr";
 
 enum TabID {
@@ -30,11 +27,8 @@ enum TabID {
 
 @Component({
   selector: 'app-edit-person-modal',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgTemplateOutlet,
-    PersonRolePipe,
     NgbNav,
     NgbNavItem,
     TranslocoDirective,
@@ -42,7 +36,6 @@ enum TabID {
     NgbNavContent,
     NgbNavOutlet,
     CoverImageChooserComponent,
-    CompactNumberPipe,
     SettingItemComponent,
     NgbNavLink
   ],

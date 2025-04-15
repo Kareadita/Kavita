@@ -1,19 +1,4 @@
-﻿using System.IO;
-using API.Data;
-using API.Data.Metadata;
-using API.Entities;
-using API.Entities.Enums;
-using API.Helpers;
-using API.Helpers.Builders;
-using API.Services;
-using API.Services.Tasks.Metadata;
-using API.Services.Tasks.Scanner;
-using API.SignalR;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
-
-namespace API.Tests.Services;
+﻿namespace API.Tests.Services;
 
 public class ProcessSeriesTests
 {

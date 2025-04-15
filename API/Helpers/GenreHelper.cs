@@ -19,7 +19,12 @@ public static class GenreHelper
     public static async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames, IUnitOfWork unitOfWork)
     {
         // Normalize genre names once and store them in a hash set for quick lookups
-        var normalizedGenresToAdd = new HashSet<string>(genreNames.Select(g => g.ToNormalized()));
+        var normalizedToOriginal = genreNames
+            .Select(g => new { Original = g, Normalized = g.ToNormalized() })
+            .GroupBy(x => x.Normalized)
+            .ToDictionary(g => g.Key, g => g.First().Original);
+
+        var normalizedGenresToAdd = new HashSet<string>(normalizedToOriginal.Keys);
 
         // Remove genres that are no longer in the new list
         var genresToRemove = chapter.Genres
@@ -42,7 +47,7 @@ public static class GenreHelper
         // Find missing genres that are not in the database
         var missingGenres = normalizedGenresToAdd
             .Where(nt => !existingGenreTitles.ContainsKey(nt))
-            .Select(title => new GenreBuilder(title).Build())
+            .Select(nt => new GenreBuilder(normalizedToOriginal[nt]).Build())
             .ToList();
 
         // Add missing genres to the database

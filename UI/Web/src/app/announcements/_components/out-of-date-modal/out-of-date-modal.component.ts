@@ -1,26 +1,14 @@
-import {Component, DestroyRef, inject, Input} from '@angular/core';
+import {Component, inject, Input} from '@angular/core';
 import {FormsModule} from "@angular/forms";
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
-import {NgbActiveModal, NgbHighlight, NgbModal, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ServerService} from "../../../_services/server.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs/operators";
-import {ChangelogComponent} from "../changelog/changelog.component";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-out-of-date-modal',
-  standalone: true,
   imports: [
     FormsModule,
-    NgForOf,
-    NgIf,
-    NgbHighlight,
-    NgbTypeahead,
     TranslocoDirective,
-    AsyncPipe,
-    ChangelogComponent,
     SafeHtmlPipe
   ],
   templateUrl: './out-of-date-modal.component.html',

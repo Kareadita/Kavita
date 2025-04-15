@@ -11,6 +11,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
@@ -50,6 +51,7 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IReadingListService _readingListService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -59,7 +61,8 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
+        IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -67,10 +70,11 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _readingListService = readingListService;
     }
 
     /// <summary>
-    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
+    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc.)
     /// </summary>
     /// <param name="series">The full series with all volumes and chapters on it</param>
     /// <returns></returns>
@@ -191,6 +195,7 @@ public class SeriesService : ISeriesService
             {
                 series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata?.AgeRating ?? AgeRating.Unknown;
                 series.Metadata.AgeRatingLocked = true;
+                await _readingListService.UpdateReadingListAgeRatingForSeries(series.Id, series.Metadata.AgeRating);
             }
             else
             {
@@ -206,90 +211,87 @@ public class SeriesService : ISeriesService
                 }
             }
 
+            // Update people and locks
             if (updateSeriesMetadataDto.SeriesMetadata != null)
             {
-                if (PersonHelper.HasAnyPeople(updateSeriesMetadataDto.SeriesMetadata))
+                series.Metadata.People ??= [];
+
+                // Writers
+                if (!series.Metadata.WriterLocked || !updateSeriesMetadataDto.SeriesMetadata.WriterLocked)
                 {
-                    series.Metadata.People ??= [];
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Writers, PersonRole.Writer, _unitOfWork);
+                }
 
-                    // Writers
-                    if (!series.Metadata.WriterLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Writers, PersonRole.Writer, _unitOfWork);
-                    }
+                // Cover Artists
+                if (!series.Metadata.CoverArtistLocked || !updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, PersonRole.CoverArtist, _unitOfWork);
+                }
 
-                    // Cover Artists
-                    if (!series.Metadata.CoverArtistLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, PersonRole.CoverArtist, _unitOfWork);
-                    }
+                // Colorists
+                if (!series.Metadata.ColoristLocked || !updateSeriesMetadataDto.SeriesMetadata.ColoristLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Colorists, PersonRole.Colorist, _unitOfWork);
+                }
 
-                    // Colorists
-                    if (!series.Metadata.ColoristLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Colorists, PersonRole.Colorist, _unitOfWork);
-                    }
+                // Editors
+                if (!series.Metadata.EditorLocked || !updateSeriesMetadataDto.SeriesMetadata.EditorLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Editors, PersonRole.Editor, _unitOfWork);
+                }
 
-                    // Editors
-                    if (!series.Metadata.EditorLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Editors, PersonRole.Editor, _unitOfWork);
-                    }
+                // Inkers
+                if (!series.Metadata.InkerLocked || !updateSeriesMetadataDto.SeriesMetadata.InkerLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Inkers, PersonRole.Inker, _unitOfWork);
+                }
 
-                    // Inkers
-                    if (!series.Metadata.InkerLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Inkers, PersonRole.Inker, _unitOfWork);
-                    }
+                // Letterers
+                if (!series.Metadata.LettererLocked || !updateSeriesMetadataDto.SeriesMetadata.LettererLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Letterers, PersonRole.Letterer, _unitOfWork);
+                }
 
-                    // Letterers
-                    if (!series.Metadata.LettererLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Letterers, PersonRole.Letterer, _unitOfWork);
-                    }
+                // Pencillers
+                if (!series.Metadata.PencillerLocked || !updateSeriesMetadataDto.SeriesMetadata.PencillerLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Pencillers, PersonRole.Penciller, _unitOfWork);
+                }
 
-                    // Pencillers
-                    if (!series.Metadata.PencillerLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Pencillers, PersonRole.Penciller, _unitOfWork);
-                    }
+                // Publishers
+                if (!series.Metadata.PublisherLocked || !updateSeriesMetadataDto.SeriesMetadata.PublisherLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Publishers, PersonRole.Publisher, _unitOfWork);
+                }
 
-                    // Publishers
-                    if (!series.Metadata.PublisherLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Publishers, PersonRole.Publisher, _unitOfWork);
-                    }
+                // Imprints
+                if (!series.Metadata.ImprintLocked || !updateSeriesMetadataDto.SeriesMetadata.ImprintLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Imprints, PersonRole.Imprint, _unitOfWork);
+                }
 
-                    // Imprints
-                    if (!series.Metadata.ImprintLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Imprints, PersonRole.Imprint, _unitOfWork);
-                    }
+                // Teams
+                if (!series.Metadata.TeamLocked || !updateSeriesMetadataDto.SeriesMetadata.TeamLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Teams, PersonRole.Team, _unitOfWork);
+                }
 
-                    // Teams
-                    if (!series.Metadata.TeamLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Teams, PersonRole.Team, _unitOfWork);
-                    }
+                // Locations
+                if (!series.Metadata.LocationLocked || !updateSeriesMetadataDto.SeriesMetadata.LocationLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Locations, PersonRole.Location, _unitOfWork);
+                }
 
-                    // Locations
-                    if (!series.Metadata.LocationLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Locations, PersonRole.Location, _unitOfWork);
-                    }
+                // Translators
+                if (!series.Metadata.TranslatorLocked || !updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Translators, PersonRole.Translator, _unitOfWork);
+                }
 
-                    // Translators
-                    if (!series.Metadata.TranslatorLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Translators, PersonRole.Translator, _unitOfWork);
-                    }
-
-                    // Characters
-                    if (!series.Metadata.CharacterLocked)
-                    {
-                        await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Characters, PersonRole.Character, _unitOfWork);
-                    }
-
+                // Characters
+                if (!series.Metadata.CharacterLocked || !updateSeriesMetadataDto.SeriesMetadata.CharacterLocked)
+                {
+                    await HandlePeopleUpdateAsync(series.Metadata, updateSeriesMetadataDto.SeriesMetadata.Characters, PersonRole.Character, _unitOfWork);
                 }
 
                 series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
@@ -320,7 +322,7 @@ public class SeriesService : ISeriesService
 
             await _unitOfWork.CommitAsync();
 
-            // Trigger code to cleanup tags, collections, people, etc
+            // Trigger code to clean up tags, collections, people, etc
             try
             {
                 await _taskScheduler.CleanupDbEntries();
@@ -911,19 +913,19 @@ public class SeriesService : ISeriesService
         // Calculate the time differences between consecutive chapters
         var timeDifferences = new List<TimeSpan>();
         DateTime? previousChapterTime = null;
-        foreach (var chapter in chapters)
+        foreach (var chapterCreatedUtc in chapters.Select(c => c.CreatedUtc))
         {
-            if (previousChapterTime.HasValue && (chapter.CreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
+            if (previousChapterTime.HasValue && (chapterCreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
             {
                 continue; // Skip this chapter if it's within an hour of the previous one
             }
 
-            if ((chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
+            if ((chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
             {
-                timeDifferences.Add(chapter.CreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+                timeDifferences.Add(chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero);
             }
 
-            previousChapterTime = chapter.CreatedUtc;
+            previousChapterTime = chapterCreatedUtc;
         }
 
         if (timeDifferences.Count < minimumTimeDeltas)

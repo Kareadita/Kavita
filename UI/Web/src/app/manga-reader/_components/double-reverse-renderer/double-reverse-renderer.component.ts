@@ -31,7 +31,6 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-reverse-renderer.component.html',
     styleUrls: ['./double-reverse-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {

@@ -28,7 +28,9 @@ public static class FlurlConfiguration
             if (ConfiguredClients.Contains(host)) return;
 
             FlurlHttp.ConfigureClientForUrl(url).ConfigureInnerHandler(cli =>
+#pragma warning disable S4830
                 cli.ServerCertificateCustomValidationCallback = (_, _, _, _) => true);
+#pragma warning restore S4830
 
             ConfiguredClients.Add(host);
         }

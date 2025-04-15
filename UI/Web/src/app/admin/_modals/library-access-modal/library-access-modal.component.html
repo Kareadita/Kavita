@@ -14,16 +14,19 @@
         <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
       </div>
       <ul>
-        <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">
-          <div class="form-check">
-            <input id="library-{{i}}" type="checkbox" class="form-check-input"
-                   [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
-            <label for="library-{{i}}" class="form-check-label">{{library.name}}</label>
-          </div>
-        </li>
-        <li class="list-group-item" *ngIf="allLibraries.length === 0">
-          {{t('no-data')}}
-        </li>
+        @for (library of allLibraries; track library.name; let i = $index) {
+          <li class="list-group-item">
+            <div class="form-check">
+              <input id="library-{{i}}" type="checkbox" class="form-check-input"
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+              <label for="library-{{i}}" class="form-check-label">{{library.name}}</label>
+            </div>
+          </li>
+        } @empty {
+          <li class="list-group-item">
+            {{t('no-data')}}
+          </li>
+        }
       </ul>
     </div>
   </div>

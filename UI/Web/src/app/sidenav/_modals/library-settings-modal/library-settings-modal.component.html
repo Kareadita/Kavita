@@ -20,8 +20,8 @@
             <div class="mb-3">
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
               @if (libraryForm.get('name'); as formControl) {
-                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
-                @if (libraryForm.dirty || libraryForm.touched) {
+                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                @if (libraryForm.dirty || !libraryForm.untouched) {
                   <div id="inviteForm-validations" class="invalid-feedback">
                     @if (formControl.errors?.required) {
                       <div>{{t('required-field')}}</div>
@@ -52,8 +52,8 @@
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                @for (opt of libraryTypes; track opt; let i = $index) {
-                  <option [value]="i">{{opt}}</option>
+                @for (opt of libraryTypes; track opt.value) {
+                  <option [value]="opt.value">{{opt.title}}</option>
                 }
 
               </select>

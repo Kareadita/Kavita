@@ -70,7 +70,6 @@ public class FileService : IFileService
         // Compute SHA hash
         var checksum = SHA256.HashData(Encoding.UTF8.GetBytes(content));
 
-        return BitConverter.ToString(checksum).Replace("-", string.Empty).Equals(sha);
-
+        return Convert.ToHexString(checksum).Equals(sha);
     }
 }

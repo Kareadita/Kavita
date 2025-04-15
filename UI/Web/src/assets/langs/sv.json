@@ -142,7 +142,14 @@
         "page-splitting-tooltip": "Hur man delar en fullbreddsbild (dvs både den vänsta och högra bilden är sammanfogade)",
         "reading-mode-tooltip": "Ändra läsaren till att paginera (numrera) vertikalt, horisontellt, eller att ha oändlig bläddring",
         "writing-style-label": "Skrivstil",
-        "layout-mode-tooltip": "Återge en enstaka bild på skärmen eller två sida-vid-sida-bilder"
+        "layout-mode-tooltip": "Återge en enstaka bild på skärmen eller två sida-vid-sida-bilder",
+        "pdf-theme-label": "Utseende",
+        "clients-opds-url-label": "OPDS-länk",
+        "clients-api-key-label": "API-nyckel",
+        "clients-opds-url-tooltip": "Se en lista av kompatibla OPDS klienter. ",
+        "clients-opds-description": "Alla tredje partens klienter kommer använda antingen API-nyckeln eller Anslutnings-länken nedan. Dessa är som lösenord, håll dem hemliga.",
+        "clients-opds-alert": "OPDS är inte aktiverat på denna server. Detta kommer inte påverka Tachiyomi användare.",
+        "pdf-theme-tooltip": "Läsarens färgschema"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}"
@@ -153,7 +160,12 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "set-default": "Sätt standard",
+        "default-theme": "Standard",
+        "downloadable": "Nedladdningsbar",
+        "downloaded": "Nedladdade",
+        "active-theme": "Aktiv"
     },
     "restriction-selector": {
         "age-rating-label": "{{metadata-fields.age-rating-title}}"

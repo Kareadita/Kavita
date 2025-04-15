@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read:'change-age-restriction'">
   @if (user) {
-    <app-setting-item [title]="t('age-restriction-label')" [canEdit]="accountService.hasChangeAgeRestrictionRole(user) || accountService.hasAdminRole(user)">
+    <app-setting-item [title]="t('age-restriction-label')" [canEdit]="accountService.hasChangeAgeRestrictionRole(user)">
       <ng-template #view>
         <span class="col-12" [ngClass]="{'disabled': !accountService.hasChangeAgeRestrictionRole(user) && !accountService.hasAdminRole(user)}">{{user.ageRestriction.ageRating | ageRating }}
           @if (user.ageRestriction.ageRating !== AgeRating.NotApplicable && user.ageRestriction.includeUnknowns) {

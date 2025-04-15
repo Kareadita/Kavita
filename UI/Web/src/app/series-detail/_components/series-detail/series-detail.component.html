@@ -9,7 +9,7 @@
           <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()"></app-cover-image>
         </div>
 
-        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
+        <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
           <h4 class="title mb-2">
             <span>{{series.name}}
 
@@ -51,14 +51,14 @@
             <div class="row g-0" style="align-items: center;">
               <div class="col-auto">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary-outline" (click)="read()">
+                  <button type="button" class="btn btn-outline-primary" (click)="read()">
                     <span>
                       <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                       <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
@@ -89,13 +89,13 @@
 
               @if ((licenseService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling ? t('on') : t('off')})">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
               }
 
-              <div class="col-auto ms-2 d-none d-md-block">
+              <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
                   <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>

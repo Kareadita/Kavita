@@ -203,5 +203,9 @@
     "person-name-unique": "Der Name der Person muss eindeutig sein",
     "person-image-doesnt-exist": "Die Person existiert nicht in CoversDB",
     "email-taken": "E-Mail bereits in Gebrauch",
-    "kavitaplus-restricted": "Dies ist nur auf Kavita+ beschränkt"
+    "kavitaplus-restricted": "Dies ist nur auf Kavita+ beschränkt",
+    "sidenav-stream-only-delete-smart-filter": "Nur Smart-Filter-Streams können aus der Seitennavigation gelöscht werden",
+    "dashboard-stream-only-delete-smart-filter": "Nur Smart-Filter-Streams können aus dem Dashboard gelöscht werden",
+    "smart-filter-system-name": "Du kannst den Namen eines vom System bereitgestellten Streams nicht verwenden",
+    "smart-filter-name-required": "Name des Smart Filters erforderlich"
 }

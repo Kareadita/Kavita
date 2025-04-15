@@ -5,15 +5,13 @@ import { CompactNumberPipe } from '../../../_pipes/compact-number.pipe';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgClass, AsyncPipe } from '@angular/common';
-import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
     selector: 'app-stat-list',
     templateUrl: './stat-list.component.html',
     styleUrls: ['./stat-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [NgbTooltip, NgClass, ImageComponent, AsyncPipe, CompactNumberPipe, TranslocoDirective]
+    imports: [NgbTooltip, NgClass, ImageComponent, AsyncPipe, CompactNumberPipe]
 })
 export class StatListComponent {
 

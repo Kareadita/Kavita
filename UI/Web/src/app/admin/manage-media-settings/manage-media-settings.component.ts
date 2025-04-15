@@ -5,25 +5,11 @@ import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from '
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem,
-  NgbAccordionToggle,
-  NgbCollapse,
-  NgbModal,
-  NgbTooltip
-} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
-import {ManageMediaIssuesComponent} from '../manage-media-issues/manage-media-issues.component';
-import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
 import {pageLayoutModes} from "../../_models/preferences/preferences";
-import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
 import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
@@ -35,10 +21,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem,
-    NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody,
-    ManageMediaIssuesComponent, TranslocoDirective, PageLayoutModePipe, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -81,7 +64,12 @@ export class ManageMediaSettingsComponent implements OnInit {
             this.toastr.info(translate('manage-media-settings.media-warning'));
           }
 
-          this.serverSettings = settings;
+          if (settings.hasOwnProperty('result') && settings.hasOwnProperty('value')) {
+            this.serverSettings = (settings as any).value;
+          } else {
+            this.serverSettings = settings;
+          }
+
           this.resetForm();
           this.cdRef.markForCheck();
         })

@@ -17,19 +17,18 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 import {KEY_CODES} from "../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-bulk-operations',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    CardActionablesComponent,
-    TranslocoModule,
-    NgbTooltip,
-    NgStyle,
-    DecimalPipe
-  ],
-  templateUrl: './bulk-operations.component.html',
-  styleUrls: ['./bulk-operations.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-bulk-operations',
+    imports: [
+        AsyncPipe,
+        CardActionablesComponent,
+        TranslocoModule,
+        NgbTooltip,
+        NgStyle,
+        DecimalPipe
+    ],
+    templateUrl: './bulk-operations.component.html',
+    styleUrls: ['./bulk-operations.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BulkOperationsComponent implements OnInit {
 

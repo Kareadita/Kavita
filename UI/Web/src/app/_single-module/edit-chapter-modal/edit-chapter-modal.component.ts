@@ -1,23 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {
-  AsyncPipe,
-  DatePipe,
-  DecimalPipe,
-  NgClass,
-  NgTemplateOutlet,
-  TitleCasePipe
-} from "@angular/common";
-import {
-  NgbActiveModal,
-  NgbInputDatepicker,
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
@@ -37,17 +22,15 @@ import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {forkJoin, Observable, of, tap} from "rxjs";
-import {map} from "rxjs/operators";
+import {map, switchMap} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
-import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
 import {MangaFormat} from "../../_models/manga-format";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -56,7 +39,6 @@ import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 
 enum TabID {
   General = 'general-tab',
@@ -79,44 +61,37 @@ export interface EditChapterModalCloseResult {
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
-  selector: 'app-edit-chapter-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLink,
-    TranslocoDirective,
-    AsyncPipe,
-    NgbNavOutlet,
-    ReactiveFormsModule,
-    NgbNavItem,
-    SettingItemComponent,
-    NgTemplateOutlet,
-    NgClass,
-    TypeaheadComponent,
-    EntityTitleComponent,
-    TitleCasePipe,
-    SettingButtonComponent,
-    CoverImageChooserComponent,
-    EditChapterProgressComponent,
-    NgbInputDatepicker,
-    CompactNumberPipe,
-    IconAndTitleComponent,
-    DefaultDatePipe,
-    TranslocoDatePipe,
-    UtcToLocalTimePipe,
-    BytesPipe,
-    ImageComponent,
-    SafeHtmlPipe,
-    DecimalPipe,
-    DatePipe,
-    ReadTimePipe,
-    SettingTitleComponent
-  ],
-  templateUrl: './edit-chapter-modal.component.html',
-  styleUrl: './edit-chapter-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-chapter-modal',
+    imports: [
+        FormsModule,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLink,
+        TranslocoDirective,
+        AsyncPipe,
+        NgbNavOutlet,
+        ReactiveFormsModule,
+        NgbNavItem,
+        SettingItemComponent,
+        NgTemplateOutlet,
+        NgClass,
+        TypeaheadComponent,
+        EntityTitleComponent,
+        TitleCasePipe,
+        SettingButtonComponent,
+        CoverImageChooserComponent,
+        EditChapterProgressComponent,
+        CompactNumberPipe,
+        DefaultDatePipe,
+        UtcToLocalTimePipe,
+        BytesPipe,
+        ImageComponent,
+        SafeHtmlPipe,
+        ReadTimePipe,
+    ],
+    templateUrl: './edit-chapter-modal.component.html',
+    styleUrl: './edit-chapter-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditChapterModalComponent implements OnInit {
 
@@ -197,7 +172,12 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
-    this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate, []));
+
+    if (this.chapter.releaseDate !== '0001-01-01T00:00:00') {
+      this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));
+    } else {
+      this.editForm.addControl('releaseDate', new FormControl('', []));
+    }
 
 
     this.editForm.addControl('genres', new FormControl(this.chapter.genres, []));
@@ -207,11 +187,13 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('coverImageIndex', new FormControl(0, []));
     this.editForm.addControl('coverImageLocked', new FormControl(this.chapter.coverImageLocked, []));
 
-    this.metadataService.getAllValidLanguages().subscribe(validLanguages => {
-      this.validLanguages = validLanguages;
-      this.setupLanguageTypeahead();
-      this.cdRef.markForCheck();
-    });
+    this.metadataService.getAllValidLanguages().pipe(
+      tap(validLanguages => {
+        this.validLanguages = validLanguages;
+        this.cdRef.markForCheck();
+      }),
+      switchMap(_ => this.setupLanguageTypeahead())
+    ).subscribe();
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
       this.ageRatings = ratings;
@@ -261,12 +243,15 @@ export class EditChapterModalComponent implements OnInit {
     const model = this.editForm.value;
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
-    this.chapter.releaseDate = model.releaseDate;
+    // Patch in data from the model that is not typeahead (as those are updated during setting)
+    if (model.releaseDate === '') {
+      this.chapter.releaseDate = '0001-01-01T00:00:00';
+    } else {
+      this.chapter.releaseDate = model.releaseDate + 'T00:00:00';
+    }
+
     this.chapter.ageRating = parseInt(model.ageRating + '', 10) as AgeRating;
-    this.chapter.genres = model.genres;
-    this.chapter.tags = model.tags;
     this.chapter.sortOrder = model.sortOrder;
-    this.chapter.language = model.language;
     this.chapter.titleName = model.titleName;
     this.chapter.summary = model.summary;
     this.chapter.isbn = model.isbn;
@@ -358,6 +343,7 @@ export class EditChapterModalComponent implements OnInit {
     this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
+    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.chapter.tags) {
       this.tagsSettings.savedData = this.chapter.tags;
@@ -389,6 +375,7 @@ export class EditChapterModalComponent implements OnInit {
     this.genreSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
+    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
 
     if (this.chapter.genres) {
       this.genreSettings.savedData = this.chapter.genres;
@@ -415,6 +402,7 @@ export class EditChapterModalComponent implements OnInit {
     this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
       return a.isoCode == b.isoCode;
     }
+    this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
 
     const l = this.validLanguages.find(l => l.isoCode === this.chapter.language);
     if (l !== undefined) {
@@ -426,6 +414,7 @@ export class EditChapterModalComponent implements OnInit {
 
   updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
     const personSettings = this.createBlankPersonSettings(id, role)
+
     if (presetField && presetField.length > 0) {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
@@ -436,10 +425,11 @@ export class EditChapterModalComponent implements OnInit {
         this.cdRef.markForCheck();
         return true;
       }));
-    } else {
-      this.peopleSettings[role] = personSettings;
-      return of(true);
     }
+
+    this.peopleSettings[role] = personSettings;
+    return of(true);
+
   }
 
   setupPersonTypeahead() {
@@ -459,7 +449,7 @@ export class EditChapterModalComponent implements OnInit {
       this.updateFromPreset('translator', this.chapter.translators, PersonRole.Translator),
       this.updateFromPreset('teams', this.chapter.teams, PersonRole.Team),
       this.updateFromPreset('locations', this.chapter.locations, PersonRole.Location),
-    ]).pipe(map(results => {
+    ]).pipe(map(_ => {
       return of(true);
     }));
   }
@@ -495,6 +485,8 @@ export class EditChapterModalComponent implements OnInit {
     personSettings.addTransformFn = ((title: string) => {
       return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
+
+    personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
 
     return personSettings;
   }

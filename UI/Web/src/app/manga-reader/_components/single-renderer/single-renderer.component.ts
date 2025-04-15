@@ -26,7 +26,6 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './single-renderer.component.html',
     styleUrls: ['./single-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [AsyncPipe, SafeStylePipe]
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {

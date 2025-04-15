@@ -14,6 +14,8 @@ public static partial class StringHelper
     private static partial Regex BrMultipleRegex();
     [GeneratedRegex(@"\s+")]
     private static partial Regex WhiteSpaceRegex();
+    [GeneratedRegex("&amp;#64;")]
+    private static partial Regex HtmlEncodedAtSymbolRegex();
     #endregion
 
     /// <summary>
@@ -51,5 +53,17 @@ public static partial class StringHelper
         if (string.IsNullOrEmpty(description)) return description;
 
         return SourceRegex().Replace(description, string.Empty).Trim();
+    }
+
+    /// <summary>
+    /// Replaces some HTML encoded characters in urls with the proper symbol. This is common in People Description's
+    /// </summary>
+    /// <param name="description"></param>
+    /// <returns></returns>
+    public static string? CorrectUrls(string? description)
+    {
+        if (string.IsNullOrEmpty(description)) return description;
+
+        return HtmlEncodedAtSymbolRegex().Replace(description, "@");
     }
 }

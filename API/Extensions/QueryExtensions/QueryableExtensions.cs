@@ -255,6 +255,7 @@ public static class QueryableExtensions
                 ScrobbleEventSortField.Type => query.OrderByDescending(s => s.ScrobbleEventType),
                 ScrobbleEventSortField.Series => query.OrderByDescending(s => s.Series.NormalizedName),
                 ScrobbleEventSortField.IsProcessed => query.OrderByDescending(s => s.IsProcessed),
+                ScrobbleEventSortField.ScrobbleEventFilter => query.OrderByDescending(s => s.ScrobbleEventType),
                 _ => query
             };
         }
@@ -267,6 +268,7 @@ public static class QueryableExtensions
             ScrobbleEventSortField.Type => query.OrderBy(s => s.ScrobbleEventType),
             ScrobbleEventSortField.Series => query.OrderBy(s => s.Series.NormalizedName),
             ScrobbleEventSortField.IsProcessed => query.OrderBy(s => s.IsProcessed),
+            ScrobbleEventSortField.ScrobbleEventFilter => query.OrderBy(s => s.ScrobbleEventType),
             _ => query
         };
     }

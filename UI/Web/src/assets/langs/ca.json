@@ -1,0 +1,530 @@
+{
+    "login": {
+        "forgot-password": "Heu oblidat la contrasenya?"
+    },
+    "dashboard": {
+        "no-libraries": "Encara no s'ha configurat cap biblioteca. Creeu-ne una de nova a",
+        "server-settings-link": "Paràmetres del servidor",
+        "recently-updated-title": "Sèries actualitzades recentment",
+        "recently-added-title": "Sèries afegides recentment",
+        "not-granted": "No se us ha atorgat cap accés a biblioteques."
+    },
+    "edit-user": {
+        "update": "Actualitza",
+        "account-detail-title": "Detalls del compte",
+        "saving": "S'està desant…"
+    },
+    "user-scrobble-history": {
+        "last-modified-header": "Darrera modificació",
+        "type-header": "Tipus",
+        "series-header": "Sèrie",
+        "volume-and-chapter-num": "Volum {{v}}, capítol {{n}}",
+        "volume-num": "Volum {{num}}",
+        "chapter-num": "Capítol {{num}}",
+        "rating": "Valoració {{r}}",
+        "data-header": "Dades"
+    },
+    "want-to-read": {
+        "title": "Vull llegir"
+    },
+    "user-preferences": {
+        "success-toast": "S'han actualitzat les preferències d'ús",
+        "global-settings-title": "Paràmetres globals",
+        "locale-label": "Configuració local",
+        "scaling-option-label": "Opcions d'escala",
+        "background-color-label": "Color de fons",
+        "writing-style-label": "Estil d'escriptura",
+        "font-size-book-label": "Mida de la lletra",
+        "line-height-book-label": "Interlineat",
+        "pdf-scroll-mode-label": "Mode de desplaçament",
+        "pdf-theme-label": "Tema",
+        "immersive-mode-label": "Mode immersiu",
+        "locale-tooltip": "La llengua que ha d'usar el Kavita",
+        "prompt-on-download-label": "Pregunta en baixar",
+        "disable-animations-label": "Desactiva les animacions",
+        "auto-close-menu-label": "Tanca automàticament el menú",
+        "font-family-label": "Família tipogràfica",
+        "margin-book-label": "Marge",
+        "clients-api-key-label": "Clau de l'API",
+        "clients-api-key-tooltip": "La clau de l'API és com una contrasenya. Reinicialitzar-la invalidarà tots els clients existents.",
+        "image-reader-settings-title": "Lector d'imatges",
+        "reading-direction-label": "Direcció de lectura",
+        "layout-mode-label": "Mode de disposició",
+        "book-reader-settings-title": "Lector de llibres",
+        "reading-direction-book-label": "Direcció de lectura",
+        "layout-mode-book-label": "Mode de disposició",
+        "pdf-reader-settings-title": "Lector de PDF"
+    },
+    "theme-manager": {
+        "title": "Gestor de temes",
+        "site-themes": "Temes del lloc",
+        "default-theme": "Per defecte",
+        "upload-continued": "un fitxer CSS",
+        "active-theme": "Actiu",
+        "downloadable": "Baixables",
+        "downloaded": "Baixats",
+        "applied": "Aplicat",
+        "preview-default": "Seleccioneu un tema primer",
+        "preview-title": "Previsualització"
+    },
+    "theme": {
+        "theme-dark": "Fosc",
+        "theme-black": "Negre",
+        "theme-paper": "Paper",
+        "theme-white": "Blanc"
+    },
+    "manage-devices": {
+        "email-label": "Adreça electrònica",
+        "title": "Gestor de dispositius",
+        "platform-label": "Plataforma",
+        "devices-title": "Dispositius",
+        "no-devices": "Encara no s'ha configurat cap dispositiu",
+        "name-label": "Nom"
+    },
+    "changelog-update-item": {
+        "known-issues": "Problemes coneguts",
+        "api": "API",
+        "theme": "Tema"
+    },
+    "new-version-modal": {
+        "title": "S'ha actualitzat el Kavita.",
+        "refresh": "Actualitza"
+    },
+    "change-password": {
+        "current-password-label": "Contrasenya actual",
+        "confirm-password-label": "Confirmeu la contrasenya",
+        "new-password-label": "Contrasenya nova"
+    },
+    "change-email": {
+        "current-password-label": "Contrasenya actual",
+        "email-title": "Adreça electrònica",
+        "email-label": "Adreça electrònica nova"
+    },
+    "api-key": {
+        "show": "Mostra",
+        "hide": "Amaga",
+        "copy": "Copia"
+    },
+    "scrobbling-providers": {
+        "no-token-set": "No s'ha definit cap testimoni",
+        "anilist-first-later": "Més tard",
+        "anilist-first-now": "Ara",
+        "generate": "Genera",
+        "token-valid": "El testimoni és vàlid",
+        "token-set": "S'ha definit el testimoni",
+        "token-expired": "El testimoni ha caducat"
+    },
+    "directory-picker": {
+        "title": "Trieu una carpeta",
+        "path-label": "Camí",
+        "share": "Comparteix"
+    },
+    "library-access-modal": {
+        "title": "Accés a la biblioteca",
+        "no-data": "Encara no s'ha configurat cap biblioteca."
+    },
+    "time-periods": {
+        "last-year": "L'any passat",
+        "this-week": "Aquesta setmana"
+    },
+    "device-platform-pipe": {
+        "custom": "Personalitzat"
+    },
+    "time-duration-pipe": {
+        "minutes": "{{value}} minuts",
+        "months": "{{value}} mesos",
+        "days": "{{value}} dies",
+        "years": "{{value}} anys"
+    },
+    "time-ago-pipe": {
+        "just-now": "ara mateix",
+        "mins-ago": "fa {{value}} minuts",
+        "hour-ago": "fa una hora",
+        "hours-ago": "fa {{value}} hores",
+        "day-ago": "ahir",
+        "days-ago": "fa {{value}} dies",
+        "month-ago": "fa un mes",
+        "months-ago": "fa {{value}} mesos",
+        "year-ago": "fa un any",
+        "never": "Mai",
+        "min-ago": "fa un minut",
+        "years-ago": "fa {{value}} anys"
+    },
+    "relationship-pipe": {
+        "adaptation": "Adaptació",
+        "alternative-setting": "Ambientació alternativa",
+        "sequel": "Seqüela",
+        "prequel": "Preqüela",
+        "edition": "Edició",
+        "alternative-version": "Versió alternativa",
+        "character": "Personatge",
+        "contains": "Conté"
+    },
+    "person-role-pipe": {
+        "imprint": "Segell"
+    },
+    "manga-format-pipe": {
+        "epub": "EPUB",
+        "archive": "Arxiu",
+        "image": "Imatge",
+        "pdf": "PDF",
+        "unknown": "Desconegut"
+    },
+    "library-type-pipe": {
+        "image": "Imatge",
+        "book": "Llibre",
+        "comic": "Còmic",
+        "manga": "Manga",
+        "comicVine": "Comic Vine"
+    },
+    "book-reader": {
+        "settings-header": "Paràmetres",
+        "virtual-pages": "pàgines virtuals",
+        "toc-header": "Sumari",
+        "loading-book": "S'està carregant el llibre…",
+        "go-back": "Ves enrere",
+        "previous": "Anterior",
+        "go-to-page-prompt": "Hi ha {{totalPages}} pàgines. A quina pàgina voleu anar?",
+        "incognito-mode-label": "Mode incògnit",
+        "go-to-page": "Ves a la pàgina",
+        "pagination-header": "Secció",
+        "go-to-last-page": "Ves a l'última pàgina",
+        "next": "Següent",
+        "table-of-contents-header": "Sumari",
+        "prev-chapter": "Capítol/volum anterior",
+        "next-chapter": "Capítol/volum següent",
+        "page-label": "Pàgina",
+        "title": "Paràmetres del llibre"
+    },
+    "personal-table-of-contents": {
+        "page": "Pàgina {{value}}",
+        "delete": "Suprimeix {{bookmarkName}}"
+    },
+    "confirm-email": {
+        "error-label": "Error:"
+    },
+    "series-detail": {
+        "page-settings-title": "Paràmetres de pàgina",
+        "layout-mode-option-card": "Targeta",
+        "incognito": "Incògnit",
+        "continue-incognito": "Continua en incògnit",
+        "send-to": "S'ha enviat el fitxer a {{deviceName}}",
+        "no-chapters": "No hi ha capítols en aquest volum. No es pot llegir.",
+        "edit-series-alt": "Edita la informació",
+        "continue": "Continua",
+        "read-incognito": "Llegeix en incògnit",
+        "layout-mode-option-list": "Llista",
+        "weblinks-title": "Enllaços",
+        "more-alt": "Més",
+        "pages-count": "{{num}} pàgines",
+        "words-count": "{{num}} mots",
+        "publication-status-tooltip": "Estat de publicació"
+    },
+    "match-series-modal": {
+        "search": "Cerca"
+    },
+    "metadata-fields": {
+        "genres-title": "Gèneres",
+        "cover-artists-title": "Artistes",
+        "characters-title": "Personatges",
+        "imprints-title": "Segells",
+        "tags-title": "Etiquetes"
+    },
+    "side-nav": {
+        "want-to-read": "Vull llegir",
+        "collections": "Col·leccions"
+    },
+    "cover-image-chooser": {
+        "url": "URL",
+        "upload": "Carrega",
+        "upload-continued": "una imatge",
+        "enter-an-url-pre-title": "Introduïu un {{url}}",
+        "url-label": "URL"
+    },
+    "all-collections": {
+        "title": "Col·leccions"
+    },
+    "stream-list-item": {
+        "smart-filter": "Filtre intel·ligent",
+        "library": "Biblioteca",
+        "external-source": "Font externa"
+    },
+    "reading-list-detail": {
+        "page-settings-title": "Paràmetres de pàgina",
+        "continue": "Continua"
+    },
+    "events-widget": {
+        "title-alt": "Activitat"
+    },
+    "grouped-typeahead": {
+        "tags": "Etiquetes",
+        "files": "Fitxers",
+        "chapters": "Capítols",
+        "people": "Persones",
+        "libraries": "Biblioteques",
+        "collections": "Col·leccions"
+    },
+    "nav-header": {
+        "search-alt": "Cerca…",
+        "server-settings": "Paràmetres del servidor",
+        "settings": "Paràmetres",
+        "all-filters": "Filtres intel·ligents",
+        "nav-link-header": "Opcions de navegació",
+        "no-data": "No s'ha trobat cap resultat"
+    },
+    "pdf-reader": {
+        "incognito-mode": "Mode incògnit",
+        "light-theme-alt": "Tema clar",
+        "dark-theme-alt": "Tema fosc"
+    },
+    "metadata-filter": {
+        "descending-alt": "Descendent",
+        "collections-label": "Col·leccions",
+        "format-label": "Format",
+        "sort-by-label": "Ordena per",
+        "filter-name-label": "Nom del filtre",
+        "ascending-alt": "Ascendent",
+        "series-name-label": "Nom de la sèrie",
+        "publication-status-label": "Estat de publicació"
+    },
+    "edit-series-modal": {
+        "format-title": "Format",
+        "summary-label": "Resum",
+        "library-title": "Biblioteca",
+        "publication-status-title": "Estat de publicació"
+    },
+    "file-breakdown-stats": {
+        "format-title": "Format",
+        "format-header": "Format",
+        "total-files-header": "Fitxers totals"
+    },
+    "manga-format-stats": {
+        "data-table-label": "Taula de dades",
+        "count-header": "Recompte",
+        "title": "Format",
+        "visualisation-label": "Visualització",
+        "format-header": "Format"
+    },
+    "publication-status-stats": {
+        "visualisation-label": "Visualització",
+        "data-table-label": "Taula de dades",
+        "year-header": "Any",
+        "count-header": "Recompte",
+        "title": "Estat de publicació"
+    },
+    "server-stats": {
+        "total-series-label": "Sèries totals",
+        "total-series-tooltip": "Sèries totals: {{count}}",
+        "total-volumes-label": "Volums totals",
+        "total-volumes-tooltip": "Volums totals: {{count}}",
+        "total-size-label": "Mida total",
+        "total-genres-label": "Gèneres totals",
+        "total-genres-tooltip": "Gèneres totals: {{count}}",
+        "total-tags-label": "Etiquetes totals",
+        "total-tags-tooltip": "Etiquetes totals: {{count}}",
+        "total-people-label": "Persones totals",
+        "total-people-tooltip": "Persones totals: {{count}}",
+        "total-read-time-label": "Temps de lectura total",
+        "total-read-time-tooltip": "Temps de lectura total: {{count}}",
+        "series": "sèries",
+        "reads": "lectures",
+        "popular-series-title": "Sèries populars",
+        "series-count": "{{num}} sèries",
+        "volume-count": "{{num}} volums",
+        "file-count": "{{num}} fitxers",
+        "genre-count": "{{num}} gèneres",
+        "tag-count": "{{num}} etiquetes",
+        "people-count": "{{num}} persones",
+        "total-files-label": "Fitxers totals",
+        "total-files-tooltip": "Fitxers totals: {{count}}",
+        "popular-libraries-title": "Biblioteques populars"
+    },
+    "errors": {
+        "not-found": "Aquest URL no existeix"
+    },
+    "customize-sidenav-streams": {
+        "smart-filters-title": "Filtres intel·ligents"
+    },
+    "manage-external-sources": {
+        "add-source": "Afegeix",
+        "help-link": "Més informació",
+        "no-data": "No hi ha cap font externa"
+    },
+    "edit-external-source-item": {
+        "title": "Font externa nova",
+        "host-label": "Amfitrió",
+        "name-label": "Nom",
+        "api-key-label": "Clau de l'API",
+        "pattern": "L'amfitrió ha d'indicar-se com un URL http(s):// vàlid"
+    },
+    "filter-field-pipe": {
+        "collection-tags": "Etiquetes de la col·lecció",
+        "formats": "Formats",
+        "team": "Equip",
+        "location": "Ubicació",
+        "languages": "Llengües",
+        "libraries": "Biblioteques",
+        "publication-status": "Estat de publicació",
+        "imprint": "Segell",
+        "publisher": "Editorial",
+        "series-name": "Nom de la sèrie",
+        "summary": "Resum",
+        "want-to-read": "Vull llegir",
+        "path": "Camí",
+        "file-path": "Camí del fitxer"
+    },
+    "filter-comparison-pipe": {
+        "contains": "Conté",
+        "does-not-contain": "No conté",
+        "must-contains": "Ha de contenir"
+    },
+    "entity-type": {
+        "series": "sèrie",
+        "volume": "volum",
+        "logs": "registres",
+        "chapter": "capítol"
+    },
+    "tabs": {
+        "related-tab": "Relacionats",
+        "specials-tab": "Especials",
+        "details-tab": "Detalls",
+        "progress-tab": "Progrés",
+        "info-tab": "Informació",
+        "recommendations-tab": "Recomanacions",
+        "tasks-tab": "Tasques",
+        "advanced-tab": "Avançat",
+        "cover-tab": "Imatge de coberta",
+        "folder-tab": "Carpeta",
+        "general-tab": "Generals",
+        "tags-tab": "Etiquetes",
+        "account-tab": "Compte",
+        "stats-tab": "Estadístiques",
+        "devices-tab": "Dispositius",
+        "preferences-tab": "Preferències",
+        "series-tab": "Sèrie",
+        "people-tab": "Persones",
+        "theme-tab": "Tema",
+        "metadata-tab": "Metadades",
+        "weblink-tab": "Enllaços web",
+        "smart-filters-tab": "Filtres intel·ligents",
+        "volumes-tab": "Volums",
+        "books-tab": "Llibres"
+    },
+    "common": {
+        "close": "Tanca",
+        "save": "Desa",
+        "reset": "Reinicialitza",
+        "create": "Crea",
+        "cancel": "Cancel·la",
+        "filter": "Filtra",
+        "clear": "Neteja",
+        "remove": "Elimina",
+        "delete": "Suprimeix",
+        "apply": "Aplica",
+        "add": "Afegeix",
+        "help": "Ajuda",
+        "edit": "Edita",
+        "select-all": "Selecciona-ho tot",
+        "password": "Contrasenya",
+        "username": "Nom d'usuari",
+        "loading": "S'està carregant…",
+        "issue-num": "Número",
+        "issue-hash-num": "Número",
+        "series-count": "{{num}} sèries",
+        "author-count": "{{num}} autors",
+        "item-count": "{{num}} elements",
+        "book-num": "Llibre",
+        "chapter-num": "Capítol",
+        "chapter-num-shorthand": "Cap. {{num}}",
+        "book-num-shorthand": "Llibre {{num}}",
+        "volume-num": "Volum",
+        "book-nums": "Llibres",
+        "issue-nums": "Números",
+        "chapter-nums": "Capítols",
+        "volume-nums": "Volums",
+        "chapter-count": "{{num}} capítols"
+    },
+    "edit-device-modal": {
+        "device-platform-label": "Plataforma del dispositiu",
+        "title": "Edita el dispositiu"
+    },
+    "typeahead": {
+        "add-item": "Afegeix {{item}}…"
+    },
+    "user-stats-info-cards": {
+        "words-count": "{{num}} mots",
+        "pages-count": "{{num}} pàgines"
+    },
+    "confirm": {
+        "ok": "D'acord",
+        "info": "Informació"
+    },
+    "manage-smart-filters": {
+        "no-data": "No s'ha creat cap filtre intel·ligent",
+        "errored": "Hi ha un error de codificació en el filtre. Cal recrear-lo."
+    },
+    "customize-dashboard-modal": {
+        "smart-filters": "Filtres intel·ligents",
+        "title-smart-filters": "Filtres intel·ligents"
+    },
+    "import-cbl-modal": {
+        "restart": "Reinicia",
+        "next": "Següent"
+    },
+    "all-filters": {
+        "title": "Tots els filtres intel·ligents"
+    },
+    "toasts": {
+        "confirm-delete-smart-filter": "Segur que voleu suprimir aquest filtre intel·ligent?",
+        "smart-filter-deleted": "S'ha suprimit el filtre intel·ligent",
+        "no-updates": "No hi ha cap actualització disponible",
+        "confirm-delete-user": "Segur que voleu suprimir aquest compte?",
+        "copied-to-clipboard": "S'ha copiat al porta-retalls",
+        "delete-device": "Segur que voleu suprimir aquest dispositiu?",
+        "confirm-delete-series": "Segur que voleu suprimir aquesta sèrie? No es modificaran els fitxers al disc.",
+        "confirm-delete-volume": "Segur que voleu suprimir aquest volum? No es modificaran els fitxers al disc.",
+        "confirm-delete-chapter": "Segur que voleu suprimir aquest capítol? No es modificaran els fitxers al disc.",
+        "list-doesnt-exist": "Aquesta llista no existeix"
+    },
+    "infinite-scroller": {
+        "continuous-reading-next-chapter": "Capítol següent",
+        "continuous-reading-prev-chapter": "Capítol anterior"
+    },
+    "manga-reader": {
+        "incognito-title": "Mode incògnit:",
+        "next-page-tooltip": "Pàgina següent",
+        "back": "Enrere",
+        "save-globally": "Desa globalment"
+    },
+    "pdf-scroll-mode-pipe": {
+        "vertical": "Vertical",
+        "horizontal": "Horitzontal"
+    },
+    "book-line-overlay": {
+        "copy": "Copia"
+    },
+    "manage-matched-metadata": {
+        "library-name-header": "Biblioteca"
+    },
+    "manage-metadata-settings": {
+        "summary-label": "Resum",
+        "derive-publication-status-label": "Estat de publicació"
+    },
+    "edit-collection-tags": {
+        "summary-label": "Resum"
+    },
+    "edit-reading-list-modal": {
+        "summary-label": "Resum",
+        "year-label": "Any",
+        "month-label": "Mes"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Progrés de lectura"
+    },
+    "site-theme-provider-pipe": {
+        "system": "Sistema"
+    },
+    "restriction-selector": {
+        "no-restriction": "Cap restricció"
+    }
+}

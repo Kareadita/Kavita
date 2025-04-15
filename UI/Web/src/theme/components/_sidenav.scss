@@ -1,4 +1,4 @@
-@import "../variables";
+@use "../variables" as theme;
 
 //START sidebar container
 .side-nav-container {
@@ -299,7 +299,7 @@
 }
 //END kavita+ subscription bottom heart button
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   .side-nav-container {
     padding: 0.625rem 0;
     padding-left: 0.3125rem;

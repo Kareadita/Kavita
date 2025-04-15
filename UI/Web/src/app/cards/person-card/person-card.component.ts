@@ -27,19 +27,18 @@ import {TranslocoDirective} from "@jsverse/transloco";
 
 
 @Component({
-  selector: 'app-person-card',
-  standalone: true,
-  imports: [
-    NgbTooltip,
-    CardActionablesComponent,
-    NgTemplateOutlet,
-    FormsModule,
-    ImageComponent,
-    TranslocoDirective
-  ],
-  templateUrl: './person-card.component.html',
-  styleUrl: './person-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-person-card',
+    imports: [
+        NgbTooltip,
+        CardActionablesComponent,
+        NgTemplateOutlet,
+        FormsModule,
+        ImageComponent,
+        TranslocoDirective
+    ],
+    templateUrl: './person-card.component.html',
+    styleUrl: './person-card.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonCardComponent {
 

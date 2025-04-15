@@ -4,7 +4,8 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef, HostListener,
+  ElementRef,
+  HostListener,
   inject,
   Inject,
   OnInit,
@@ -48,14 +49,13 @@ import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
 
 @Component({
-    selector: 'app-nav-header',
-    templateUrl: './nav-header.component.html',
-    styleUrls: ['./nav-header.component.scss'],
-    standalone: true,
-    imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
-      SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-      AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-nav-header',
+  templateUrl: './nav-header.component.html',
+  styleUrls: ['./nav-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
+    SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 

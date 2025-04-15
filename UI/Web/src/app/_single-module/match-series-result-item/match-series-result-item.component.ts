@@ -8,9 +8,7 @@ import {
   Output
 } from '@angular/core';
 import {ImageComponent} from "../../shared/image/image.component";
-import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
-import {PercentPipe} from "@angular/common";
 import {TranslocoPercentPipe} from "@jsverse/transloco-locale";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -19,14 +17,13 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-match-series-result-item',
-  standalone: true,
   imports: [
-    ImageComponent,
-    TranslocoPercentPipe,
-    ReadMoreComponent,
-    TranslocoDirective,
-    PlusMediaFormatPipe,
-    LoadingComponent
+      ImageComponent,
+      TranslocoPercentPipe,
+      ReadMoreComponent,
+      TranslocoDirective,
+      PlusMediaFormatPipe,
+      LoadingComponent
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',

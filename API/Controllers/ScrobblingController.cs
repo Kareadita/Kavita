@@ -54,7 +54,7 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
-    /// Get the current user's MAL token & username
+    /// Get the current user's MAL token and username
     /// </summary>
     /// <returns></returns>
     [HttpGet("mal-token")]
@@ -269,5 +269,16 @@ public class ScrobblingController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
         return Ok();
+    }
+
+    /// <summary>
+    /// Has the logged in user ran scrobble generation
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("has-ran-scrobble-gen")]
+    public async Task<ActionResult<bool>> HasRanScrobbleGen()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok(user is {HasRunScrobbleEventGeneration: true});
     }
 }

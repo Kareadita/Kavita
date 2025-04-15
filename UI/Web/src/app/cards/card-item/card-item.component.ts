@@ -1,41 +1,42 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ContentChild, DestroyRef,
+  Component,
+  ContentChild,
+  DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
-  Output, TemplateRef
+  Output,
+  TemplateRef
 } from '@angular/core';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
-import { UserCollection } from 'src/app/_models/collection-tag';
-import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
-import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
-import { Series } from 'src/app/_models/series';
-import { User } from 'src/app/_models/user';
-import { Volume } from 'src/app/_models/volume';
-import { AccountService } from 'src/app/_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { BulkSelectionService } from '../bulk-selection.service';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
+import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {Chapter} from 'src/app/_models/chapter';
+import {UserCollection} from 'src/app/_models/collection-tag';
+import {UserProgressUpdateEvent} from 'src/app/_models/events/user-progress-update-event';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
+import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
+import {Series} from 'src/app/_models/series';
+import {User} from 'src/app/_models/user';
+import {Volume} from 'src/app/_models/volume';
+import {AccountService} from 'src/app/_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
 import {FormsModule} from "@angular/forms";
-import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
-import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {RouterLink, RouterLinkActive} from "@angular/router";
@@ -43,7 +44,6 @@ import {TranslocoModule} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {BrowsePerson} from "../../_models/person/browse-person";
@@ -53,20 +53,16 @@ export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookma
 
 @Component({
   selector: 'app-card-item',
-  standalone: true,
   imports: [
     ImageComponent,
     NgbProgressbar,
     DownloadIndicatorComponent,
     FormsModule,
     NgbTooltip,
-    MangaFormatPipe,
-    MangaFormatIconPipe,
     CardActionablesComponent,
     SentenceCasePipe,
     RouterLink,
     TranslocoModule,
-    SafeHtmlPipe,
     RouterLinkActive,
     PromotedIconComponent,
     SeriesFormatComponent,

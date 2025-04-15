@@ -16,8 +16,9 @@ public static class Configuration
     public const long DefaultCacheMemory = 75;
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
-    public static string KavitaPlusApiUrl = "https://plus.kavitareader.com";
-    public static string StatsApiUrl = "https://stats.kavitareader.com";
+    public static readonly string KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
+        ?  "http://localhost:5020" : "https://plus.kavitareader.com";
+    public static readonly string StatsApiUrl = "https://stats.kavitareader.com";
 
     public static int Port
     {
@@ -315,6 +316,7 @@ public static class Configuration
     {
         public string TokenKey { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
+#pragma warning disable S3218
         public int Port { get; set; } = DefaultHttpPort;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string IpAddresses { get; set; } = string.Empty;
@@ -323,6 +325,7 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public bool AllowIFraming { get; set; } = false;
+        public bool AllowIFraming { get; init; } = false;
+#pragma warning restore S3218
     }
 }

@@ -203,5 +203,9 @@
     "person-name-unique": "Jméno osoby musí být unikátní",
     "person-image-doesnt-exist": "Osoba neexistuje v databázi CoversDB",
     "email-taken": "Email je již používán",
-    "kavitaplus-restricted": "Toto je omezeno pouze na Kavita+"
+    "kavitaplus-restricted": "Toto je omezeno pouze na Kavita+",
+    "dashboard-stream-only-delete-smart-filter": "Z ovládacího panelu lze odstranit pouze streamy chytrých filtrů",
+    "smart-filter-name-required": "Vyžaduje se název chytrého filtru",
+    "smart-filter-system-name": "Nelze použít název streamu poskytovaného systémem",
+    "sidenav-stream-only-delete-smart-filter": "Z postranní navigace lze odstranit pouze streamy chytrých filtrů"
 }

@@ -29,7 +29,7 @@
         "invalid-email-warning": "无效的电子邮件将阻止 Kavita 的某些功能"
     },
     "user-scrobble-history": {
-        "title": "Scrobble历史",
+        "title": "Scrobble 历史",
         "description": "在这里您将找到与您的帐户关联的所有Scrobble事件。为了确保Scrobble事件存在，您必须配置一个可用的Scrobble服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法在上游进行匹配，请联系您的管理员进行修正。",
         "not-read-warning": "上游供应商将始终保持最高数量",
         "filter-label": "{{common.filter}}",
@@ -132,7 +132,7 @@
         "auto-close-menu-tooltip": "菜单应该自动关闭",
         "show-screen-hints-label": "显示屏幕提示",
         "show-screen-hints-tooltip": "显示一个覆盖图层以帮助了解分页区域和方向",
-        "emulate-comic-book-label": "模仿美漫",
+        "emulate-comic-book-label": "模仿漫画书",
         "emulate-comic-book-tooltip": "应用阴影效果来模拟书籍",
         "swipe-to-paginate-label": "滑动翻页",
         "swipe-to-paginate-tooltip": "在屏幕上滑动是否应触发下一页或上一页",
@@ -176,7 +176,9 @@
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
         "want-to-read-sync-label": "想要阅读同步",
-        "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中"
+        "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中",
+        "allow-auto-webtoon-reader-tooltip": "如果页面看起来像网络漫画，请切换到网络漫画阅读器模式。可能会出现一些误报。",
+        "allow-auto-webtoon-reader-label": "自动网络漫画阅读器模式"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -304,7 +306,8 @@
         "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
         "no-key": "错误-未设置密钥",
         "confirm-reset": "所有OPDS配置将会失效，您确定继续吗？",
-        "key-reset": "API密钥已重置"
+        "key-reset": "API密钥已重置",
+        "reset": "重置"
     },
     "scrobbling-providers": {
         "title": "Scrobbling服务提供商",
@@ -370,7 +373,7 @@
     "top-readers": {
         "title": "热门读者",
         "time-selection-label": "时间范围",
-        "comics-label": "美漫：{{value}} 小时",
+        "comics-label": "漫画：{{value}} 小时",
         "manga-label": "漫画(日漫)：{{value}} 小时",
         "books-label": "书籍：{{value}} 小时",
         "this-week": "{{time-periods.this-week}}",
@@ -514,9 +517,9 @@
     },
     "library-type-pipe": {
         "book": "书籍",
-        "comic": "美漫",
+        "comic": "漫画 (Legacy)",
         "manga": "漫画(日漫)",
-        "comicVine": "Comic Vine",
+        "comicVine": "漫画",
         "image": "图片",
         "lightNovel": "轻小说"
     },
@@ -786,9 +789,11 @@
         "more-alt": "更多",
         "time-left-alt": "剩余时间",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "出版",
-        "publication-status-tooltip": "出版状态"
+        "publication-status-tooltip": "出版状态",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -855,7 +860,9 @@
         "back": "后退",
         "more": "更多",
         "customize": "{{settings.customize}}",
-        "browse-authors": "浏览作者"
+        "browse-authors": "浏览作者",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "取消重新排序"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -872,7 +879,7 @@
         "type-label": "类型",
         "type-tooltip": "资料库类型决定了文件名的解析方式以及 UI 是否显示章节 (日漫) 或期 (美漫)。查看 wiki 了解有关资料库类型之间差异的更多详细信息。",
         "kavitaplus-eligible-label": "Kavita+ 符合条件",
-        "kavitaplus-eligible-tooltip": "Kavita+ 会提取信息还是支持 Scrobbling",
+        "kavitaplus-eligible-tooltip": "支持 Kavita+ 元数据功能或 Scrobbling",
         "folder-description": "将文件夹添加到您的资料库中",
         "browse": "浏览媒体文件夹",
         "help-us-part-1": "通过遵循我们的 ",
@@ -974,7 +981,8 @@
     },
     "card-detail-layout": {
         "total-items": "总共{{count}}个条目",
-        "jumpkey-count": "{{count}} 系列"
+        "jumpkey-count": "{{count}} 系列",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "无法阅读"
@@ -1000,7 +1008,8 @@
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
-        "format-title": "{{metadata-filter.format-label}}"
+        "format-title": "{{metadata-filter.format-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1078,7 +1087,7 @@
         "reset": "{{common.reset}}",
         "test": "测试",
         "host-name-label": "主机名",
-        "host-name-tooltip": "域名（反向代理）。电子邮件功能所需。如果没有反向代理，则使用任意网址。",
+        "host-name-tooltip": "反向代理的域名，电子邮件功能所需。如果您不使用反向代理，则可以使用任何网址，包括 http://externalip:port/",
         "host-name-validation": "主机名必须以http(s)开头，不能以 / 结尾",
         "sender-address-label": "发件人地址",
         "sender-address-tooltip": "这是收件人收到电子邮件时将看到的电子邮件地址。通常是与帐户关联的电子邮件地址。",
@@ -1284,9 +1293,6 @@
         "backup-database-task-success": "已将备份数据库的任务加入队列",
         "download-logs-task": "下载日志文件",
         "download-logs-task-desc": "将所有日志文件编译成一个 zip 文件并下载。",
-        "analyze-files-task": "分析文件",
-        "analyze-files-task-desc": "运行一个长时间运行的任务，用于分析文件以生成扩展名和大小。这只需要在v0.7版本中运行一次。如果您是在v0.7之后安装的，则不需要运行此任务。",
-        "analyze-files-task-success": "文件分析已进入队列",
         "sync-themes-task": "同步主题",
         "sync-themes-task-desc": "如果版本匹配，则将下载的主题与上游更改同步。",
         "sync-themes-success": "主题同步已排队",
@@ -1314,7 +1320,6 @@
         "change-password-alt": "更改密码 {{user}}",
         "resend": "重新发送",
         "setup": "设置",
-        "admin": "管理员",
         "last-active-header": "最后活动",
         "roles-header": "角色",
         "name-header": "名称",
@@ -1326,7 +1331,8 @@
         "no-data": "没有其他用户。",
         "loading": "{{common.loading}}",
         "actions-header": "活动",
-        "pending-tooltip": "此用户尚未验证其电子邮件"
+        "pending-tooltip": "此用户尚未验证其电子邮件",
+        "all-libraries": "所有库"
     },
     "edit-collection-tags": {
         "title": "编辑 {{collectionName}} 收藏",
@@ -1429,7 +1435,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "发布日期：{{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1437,7 +1444,8 @@
         "provided": "已提供的",
         "smart-filter": "智能筛选器",
         "library": "资料库",
-        "external-source": "外部源"
+        "external-source": "外部源",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -1449,7 +1457,19 @@
         "read-options-alt": "阅读选项",
         "incognito-alt": "（隐身）",
         "no-data": "未添加任何内容",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "items-title": "项目",
+        "edit-alt": "{{common.edit}}",
+        "date-range-title": "日期范围",
+        "reorder-alt": "重新排序项目",
+        "details-tab": "{{series-detail.details-tab}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "edit-label": "编辑模式",
+        "more-alt": "{{series-detail.more-alt}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "dnd-warning": "在移动设备上或阅读列表超过 100 个项目时，无法进行拖放操作。"
     },
     "events-widget": {
         "title-alt": "活动",
@@ -1577,7 +1597,7 @@
         "dry-run-step": "模拟运行",
         "final-import-step": "最后一步",
         "comicvine-parsing-label": "使用 Comic Vine 系列搭配",
-        "cbl-repo": "您可以在社区<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>中找到更多阅读列表。",
+        "cbl-repo": "您可以在社区 <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>存储库</a>.中找到更多阅读列表。",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -1693,7 +1713,7 @@
     },
     "metadata-filter-row": {
         "unit-reading-date": "日期",
-        "unit-average-rating": "Kavita+ 外部评级，百分比",
+        "unit-average-rating": "Kavita+ 外部评分，百分比",
         "unit-reading-progress": "百分比",
         "unit-user-rating": "0.0 - 5.0 星",
         "unit-read-last": "从今天起"
@@ -1996,14 +2016,16 @@
         "sidenav": "侧边栏",
         "external-sources": "外部源",
         "smart-filters": "智能筛选",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "您可以通过重新排序、切换可见性以及将智能筛选器/外部源绑定到主页或侧边导航来定制 Kavita 的不同方面。"
     },
     "customize-dashboard-streams": {
         "no-data": "所有智能筛选已加入仪表板或尚未创建。",
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "所有智能筛选已加入侧边栏或尚未创建。",
@@ -2031,7 +2053,15 @@
         "no-data": "未创建智能筛选",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "筛选器中存在编码错误。您需要重新创建它。"
+        "errored": "筛选器中存在编码错误。您需要重新创建它。",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "edit-smart-filter": "编辑 {{name}}",
+        "name-label": "名称",
+        "filter-name-unique": "智能筛选器名称必须是唯一的",
+        "save": "{{common.save}}",
+        "required-field": "智能筛选器需要一个名称"
     },
     "edit-external-source-item": {
         "not-unique": "此主机外部源已存在，请确保您没有重复记录",
@@ -2229,7 +2259,8 @@
         "confirm-delete-multiple-chapters": "您确定要删除 {{count}} 章节/卷吗？它不会修改磁盘上的文件。",
         "bulk-delete-libraries": "您确定要删除 {{count}} 个资料库吗？",
         "match-success": "系列匹配正确",
-        "webtoon-override": "由于图片为条漫形式，正在切换至条漫模式。"
+        "webtoon-override": "由于图片代表网络漫画，因此切换到网络漫画模式。",
+        "scrobble-gen-init": "将一项任务加入队列，该任务将根据过去的阅读历史和评分生成 scrobble 事件，并将其与已连接的服务同步。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2301,7 +2332,8 @@
         "title": "活动",
         "copy-settings": "复制设置",
         "match": "匹配",
-        "match-tooltip": "使用 Kavita+ 手动匹配系列"
+        "match-tooltip": "使用 Kavita+ 手动匹配系列",
+        "reorder": "重新排序"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2316,7 +2348,7 @@
         "split-right-to-left": "从右到左拆分",
         "split-left-to-right": "从左到右拆分",
         "no-split": "不拆分",
-        "webtoon": "条漫",
+        "webtoon": "网络漫画",
         "single": "单页",
         "double": "双页",
         "double-manga": "双页 (日漫)",
@@ -2424,7 +2456,7 @@
     },
     "confirm": {
         "confirm": "确认",
-        "alert": "警告",
+        "alert": "注意",
         "info": "信息",
         "cancel": "{{common.cancel}}",
         "ok": "确定"
@@ -2599,5 +2631,22 @@
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}"
+    },
+    "role-localized-pipe": {
+        "download": "下载",
+        "bookmark": "书签",
+        "change-restriction": "更改限制",
+        "login": "登录",
+        "read-only": "只读",
+        "promote": "推广",
+        "admin": "Admin",
+        "change-password": "更改密码"
+    },
+    "log-level-pipe": {
+        "debug": "调试",
+        "information": "信息",
+        "trace": "追踪",
+        "warning": "警告",
+        "critical": "严重"
     }
 }

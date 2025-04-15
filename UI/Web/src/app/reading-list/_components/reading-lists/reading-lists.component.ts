@@ -1,43 +1,43 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, inject, OnInit} from '@angular/core';
-import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
-import { ReadingList } from 'src/app/_models/reading-list';
-import { AccountService } from 'src/app/_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { CardItemComponent } from '../../../cards/card-item/card-item.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { NgIf, DecimalPipe } from '@angular/common';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
+import {ReadingList} from 'src/app/_models/reading-list';
+import {AccountService} from 'src/app/_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ReadingListService} from 'src/app/_services/reading-list.service';
+import {CardItemComponent} from '../../../cards/card-item/card-item.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {DecimalPipe} from '@angular/common';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 @Component({
     selector: 'app-reading-lists',
     templateUrl: './reading-lists.component.html',
     styleUrls: ['./reading-lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, BulkOperationsComponent]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, BulkOperationsComponent]
 })
 export class ReadingListsComponent implements OnInit {
-
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  public readonly actionService = inject(ActionService);
-
   protected readonly WikiLink = WikiLink;
+
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly actionService = inject(ActionService);
+  
 
   lists: ReadingList[] = [];
   loadingLists = false;

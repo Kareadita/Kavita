@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -56,9 +55,6 @@ public class Program
             RandomNumberGenerator.Create().GetBytes(rBytes);
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
-
-        Configuration.KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
-            ?  "http://localhost:5020" : "https://plus.kavitareader.com";
 
         try
         {

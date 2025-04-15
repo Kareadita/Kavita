@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -50,7 +51,7 @@ public interface IVersionUpdaterService
     Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
     Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0);
-    Task<int> GetNumberOfReleasesBehind();
+    Task<int> GetNumberOfReleasesBehind(bool stableOnly = false);
 }
 
 
@@ -111,6 +112,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return dto;
     }
 
+    /// <summary>
+    /// Will add any extra (nightly) updates from the latest stable. Does not back-fill anything prior to the latest stable.
+    /// </summary>
+    /// <param name="dtos"></param>
     private async Task EnrichWithNightlyInfo(List<UpdateNotificationDto> dtos)
     {
         var dto = dtos[0]; // Latest version
@@ -253,7 +258,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                             {
                                 Version = version,
                                 PrNumber = prNumber,
-                                Date = DateTime.Parse(commit.Commit.Author.Date)
+                                Date = DateTime.Parse(commit.Commit.Author.Date, CultureInfo.InvariantCulture)
                             });
                         }
                     }
@@ -273,7 +278,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         // Attempt to fetch from cache
         var cachedReleases = await TryGetCachedReleases();
-        if (cachedReleases != null)
+        // If there is a cached release and the current version is within it, use it, otherwise regenerate
+        if (cachedReleases != null && cachedReleases.Any(r => IsVersionEqual(r.UpdateVersion, BuildInfo.Version.ToString())))
         {
             if (count > 0)
             {
@@ -300,7 +306,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
 
         // If we're on a nightly build, enrich the information
-        if (updateDtos.Count != 0 && BuildInfo.Version > new Version(updateDtos[0].UpdateVersion))
+        if (updateDtos.Count != 0) // && BuildInfo.Version > new Version(updateDtos[0].UpdateVersion)
         {
             await EnrichWithNightlyInfo(updateDtos);
         }
@@ -333,6 +339,29 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return updateDtos;
     }
 
+    /// <summary>
+    /// Compares 2 versions and ensures that the minor is always there
+    /// </summary>
+    /// <param name="v1"></param>
+    /// <param name="v2"></param>
+    /// <returns></returns>
+    private static bool IsVersionEqual(string v1, string v2)
+    {
+        var versionParts = v1.Split('.');
+        if (versionParts.Length < 4)
+        {
+            v1 += ".0"; // Append missing parts
+        }
+
+        versionParts = v2.Split('.');
+        if (versionParts.Length < 4)
+        {
+            v2 += ".0"; // Append missing parts
+        }
+
+        return string.Equals(v2, v2, StringComparison.OrdinalIgnoreCase);
+    }
+
     private async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
     {
         if (!File.Exists(_cacheFilePath)) return null;
@@ -341,7 +370,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
         {
             var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
-            return System.Text.Json.JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
+            return JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
         }
 
         return null;
@@ -365,7 +394,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(updates, JsonOptions);
+            var json = JsonSerializer.Serialize(updates, JsonOptions);
             await File.WriteAllTextAsync(_cacheFilePath, json);
         }
         catch (Exception ex)
@@ -396,22 +425,25 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     }
 
 
-    public async Task<int> GetNumberOfReleasesBehind()
+    /// <summary>
+    /// Returns the number of releases ahead of this install version. If this install version is on a nightly,
+    /// then include nightly releases, otherwise only count Stable releases.
+    /// </summary>
+    /// <param name="stableOnly">Only count Stable releases </param>
+    /// <returns></returns>
+    public async Task<int> GetNumberOfReleasesBehind(bool stableOnly = false)
     {
         var updates = await GetAllReleases();
 
         // If the user is on nightly, then we need to handle releases behind differently
-        if (updates[0].IsPrerelease)
+        if (!stableOnly && (updates[0].IsPrerelease || updates[0].IsOnNightlyInRelease))
         {
-            return Math.Min(0, updates
-                .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
-                .Count() - 1);
+            return updates.Count(u => u.IsReleaseNewer);
         }
 
-        return Math.Min(0, updates
+        return updates
             .Where(update => !update.IsPrerelease)
-            .TakeWhile(update => update.UpdateVersion != update.CurrentVersion)
-            .Count());
+            .Count(u => u.IsReleaseNewer);
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
@@ -538,6 +570,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             {
                 // Remove "Fixed:", "Added:" etc. if present
                 var cleanedItem = CleanSectionItem(trimmedLine);
+
+                // Some sections like API/Developer/Removed don't have the title repeated, so we need to check for an additional cleaning
+                if (cleanedItem.StartsWith("- "))
+                {
+                    cleanedItem =  trimmedLine.Substring(2);
+                }
 
                 // Only add non-empty items
                 if (!string.IsNullOrWhiteSpace(cleanedItem))

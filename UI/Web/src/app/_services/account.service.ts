@@ -1,22 +1,20 @@
-import { HttpClient } from '@angular/common/http';
-import {DestroyRef, inject, Injectable } from '@angular/core';
-import {catchError, Observable, of, ReplaySubject, shareReplay, throwError} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {DestroyRef, inject, Injectable} from '@angular/core';
+import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { Preferences } from '../_models/preferences/preferences';
-import { User } from '../_models/user';
-import { Router } from '@angular/router';
-import { EVENTS, MessageHubService } from './message-hub.service';
-import { ThemeService } from './theme.service';
-import { InviteUserResponse } from '../_models/auth/invite-user-response';
-import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRestriction } from '../_models/metadata/age-restriction';
-import { TextResonse } from '../_types/text-response';
+import {environment} from 'src/environments/environment';
+import {Preferences} from '../_models/preferences/preferences';
+import {User} from '../_models/user';
+import {Router} from '@angular/router';
+import {EVENTS, MessageHubService} from './message-hub.service';
+import {ThemeService} from './theme.service';
+import {InviteUserResponse} from '../_models/auth/invite-user-response';
+import {UserUpdateEvent} from '../_models/events/user-update-event';
+import {AgeRating} from '../_models/metadata/age-rating';
+import {AgeRestriction} from '../_models/metadata/age-restriction';
+import {TextResonse} from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
-import {CoverImageSize} from "../admin/_models/cover-image-size";
-import {LicenseInfo} from "../_models/kavitaplus/license-info";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 
@@ -132,7 +130,7 @@ export class AccountService {
   }
 
   hasChangeAgeRestrictionRole(user: User) {
-    return user && user.roles.includes(Role.ChangeRestriction);
+    return user && !user.roles.includes(Role.Admin) && user.roles.includes(Role.ChangeRestriction);
   }
 
   hasDownloadRole(user: User) {
@@ -199,9 +197,9 @@ export class AccountService {
     if (this.currentUser) {
       // BUG: StopHubConnection has a promise in it, this needs to be async
       // But that really messes everything up
-      this.messageHub.stopHubConnection();
-      this.messageHub.createHubConnection(this.currentUser);
       if (!isSameUser) {
+        this.messageHub.stopHubConnection();
+        this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
       this.startRefreshTokenTimer();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Person;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
@@ -56,8 +58,9 @@ public class SeriesServiceTests : AbstractDbTest
 
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), locService);
+            Substitute.For<IScrobblingService>(), locService, Substitute.For<IReadingListService>());
     }
+
     #region Setup
 
     protected override async Task ResetDb()
@@ -807,6 +810,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre".SentenceCase()));
         Assert.False(series.Metadata.GenresLocked); // GenreLocked is false unless the UI Explicitly says it should be locked
@@ -845,6 +849,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
         Assert.False(series.Metadata.PublisherLocked); // PublisherLocked is false unless the UI Explicitly says it should be locked
@@ -885,6 +890,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
         Assert.True(series.Metadata.PublisherLocked);
@@ -974,8 +980,62 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.False(series.Metadata.People.Any());
+    }
+
+    /// <summary>
+    /// This emulates the UI operations wrt to locking
+    /// </summary>
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveExistingPerson_AfterAdding()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
+        var g = new PersonBuilder("Existing Person").Build();
+        _context.Series.Add(s);
+
+        _context.Person.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>() {new PersonDto() {Name = "Test"}},
+                PublisherLocked = true
+            },
+
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.People.Count != 0);
+        Assert.True(series.Metadata.PublisherLocked);
+
+
+        success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
+        {
+            SeriesMetadata = new SeriesMetadataDto
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>(),
+                PublisherLocked = false
+            },
+
+        });
+
+        Assert.True(success);
+        Assert.Empty(series.Metadata.People);
+        Assert.False(series.Metadata.PublisherLocked);
     }
 
     [Fact]
@@ -1008,6 +1068,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre".SentenceCase()));
         Assert.True(series.Metadata.GenresLocked);
@@ -1037,6 +1098,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Equal(0, series.Metadata.ReleaseYear);
         Assert.False(series.Metadata.ReleaseYearLocked);
@@ -1069,6 +1131,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
         Assert.False(series.Metadata.GenresLocked); // Ensure the lock is not activated unless specified.
@@ -1102,6 +1165,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.DoesNotContain("Existing Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
@@ -1135,6 +1199,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Empty(series.Metadata.Genres);
     }
@@ -1166,6 +1231,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
     }
@@ -1198,6 +1264,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.DoesNotContain("Existing Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
         Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
@@ -1231,6 +1298,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Empty(series.Metadata.Tags);
     }
@@ -1361,7 +1429,7 @@ public class SeriesServiceTests : AbstractDbTest
 
     #endregion
 
-    #region SeriesRelation
+    #region Series Relation
     [Fact]
     public async Task UpdateRelatedSeries_ShouldAddAllRelations()
     {
@@ -1429,6 +1497,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Sequels.Add(2);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
         Assert.NotNull(series1);
+        Assert.NotNull(series2);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
         Assert.Equal(1, series2.Relations.Single(s => s.TargetSeriesId == 1).TargetSeriesId);
     }
@@ -1471,8 +1540,9 @@ public class SeriesServiceTests : AbstractDbTest
         // Remove relations
         var removeRelationDto = CreateRelationsDto(series1);
         await _seriesService.UpdateRelatedSeries(removeRelationDto);
-        Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 1));
-        Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 2));
+        Assert.NotNull(series1);
+        Assert.DoesNotContain(series1.Relations, s => s.TargetSeriesId == 1);
+        Assert.DoesNotContain(series1.Relations, s => s.TargetSeriesId == 2);
     }
 
 
@@ -1505,6 +1575,8 @@ public class SeriesServiceTests : AbstractDbTest
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
+
+        Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
 
         _context.Series.Remove(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
@@ -2080,7 +2152,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task GetEstimatedChapterCreationDate_NextChapter_ChaptersMonthApart()
     {
         await ResetDb();
-        var now = DateTime.Parse("2021-01-01"); // 10/31/2024 can trigger an edge case bug
+        var now = DateTime.Parse("2021-01-01", CultureInfo.InvariantCulture); // 10/31/2024 can trigger an edge case bug
 
         _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())

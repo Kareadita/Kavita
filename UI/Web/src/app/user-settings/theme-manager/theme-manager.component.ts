@@ -1,19 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-} from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject,} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
 import {distinctUntilChanged, map, take, tap} from 'rxjs';
-import { ThemeService } from 'src/app/_services/theme.service';
+import {ThemeService} from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import { AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
+import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -24,7 +18,6 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {ReactiveFormsModule} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
@@ -42,10 +35,9 @@ interface ThemeContainer {
     templateUrl: './theme-manager.component.html',
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
-    ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
-    ReactiveFormsModule, Select2Module, LoadingComponent]
+    imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
+        ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
+        ReactiveFormsModule, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);

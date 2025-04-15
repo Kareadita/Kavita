@@ -30,9 +30,8 @@ import {LocalizationService} from "./_services/localization.service";
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-    standalone: true,
-  imports: [NgClass, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [NgClass, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent, PreferenceNavComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
@@ -97,6 +96,7 @@ export class AppComponent implements OnInit {
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
 
+    this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
 
   }
 
@@ -113,7 +113,6 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
     this.setCurrentUser();
     this.themeService.setColorScape('');
-    this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
   }
 
 

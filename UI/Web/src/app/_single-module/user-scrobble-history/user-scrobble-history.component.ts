@@ -10,7 +10,7 @@ import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult} from "../../_models/pagination";
 import {SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {TranslocoModule} from "@jsverse/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -18,6 +18,7 @@ import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapt
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AsyncPipe} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
+import {ToastrService} from "ngx-toastr";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -27,13 +28,12 @@ export interface DataTablePage {
 }
 
 @Component({
-  selector: 'app-user-scrobble-history',
-  standalone: true,
+    selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe],
-  templateUrl: './user-scrobble-history.component.html',
-  styleUrls: ['./user-scrobble-history.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: './user-scrobble-history.component.html',
+    styleUrls: ['./user-scrobble-history.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserScrobbleHistoryComponent implements OnInit {
 
@@ -45,6 +45,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
 
 
@@ -61,11 +62,21 @@ export class UserScrobbleHistoryComponent implements OnInit {
     totalElements: 0,
     totalPages: 0
   }
+  private currentSort: SortEvent<ScrobbleEvent> = {
+    column: 'lastModifiedUtc',
+    direction: 'desc'
+  };
+  hasRunScrobbleGen: boolean = false;
 
   ngOnInit() {
 
     this.pageInfo.pageNumber = 0;
     this.cdRef.markForCheck();
+
+    this.scrobblingService.hasRunScrobbleGen().subscribe(res => {
+      this.hasRunScrobbleGen = res;
+      this.cdRef.markForCheck();
+    })
 
     this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
       this.tokenExpired = hasExpired;
@@ -74,26 +85,26 @@ export class UserScrobbleHistoryComponent implements OnInit {
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(query => {
       this.loadPage();
-    })
+    });
+
+    this.loadPage(this.currentSort);
   }
 
   onPageChange(pageInfo: any) {
     this.pageInfo.pageNumber = pageInfo.offset;
     this.cdRef.markForCheck();
 
-    this.loadPage();
+    this.loadPage(this.currentSort);
   }
 
   updateSort(data: any) {
-    this.loadPage({column: data.column.prop, direction: data.newValue});
+    this.currentSort = {
+      column: data.column.prop,
+      direction: data.newValue
+    };
   }
 
   loadPage(sortEvent?: SortEvent<ScrobbleEvent>) {
-    if (sortEvent && this.pageInfo) {
-      this.pageInfo.pageNumber = 1;
-      this.cdRef.markForCheck();
-    }
-
     const page = (this.pageInfo?.pageNumber || 0) + 1;
     const pageSize = this.pageInfo?.size || 0;
     const isDescending = sortEvent?.direction === 'desc';
@@ -103,7 +114,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    // BUG: Table should be sorted by lastModifiedUtc by default
     this.scrobblingService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {
@@ -123,13 +133,14 @@ export class UserScrobbleHistoryComponent implements OnInit {
       case 'isProcessed': return ScrobbleEventSortField.IsProcessed;
       case 'lastModifiedUtc': return ScrobbleEventSortField.LastModified;
       case 'seriesName': return ScrobbleEventSortField.Series;
+      case 'scrobbleEventType': return ScrobbleEventSortField.ScrobbleEvent;
     }
     return ScrobbleEventSortField.None;
   }
 
   generateScrobbleEvents() {
     this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
-
+      this.toastr.info(translate('toasts.scrobble-gen-init'))
     });
   }
 }

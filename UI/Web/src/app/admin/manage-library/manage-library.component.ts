@@ -33,21 +33,19 @@ import {Action, ActionFactoryService, ActionItem} from "../../_services/action-f
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {BehaviorSubject, catchError, Observable} from "rxjs";
-import {Select2Module} from "ng-select2-component";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-    selector: 'app-manage-library',
-    templateUrl: './manage-library.component.html',
-    styleUrls: ['./manage-library.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-manage-library',
+  templateUrl: './manage-library.component.html',
+  styleUrls: ['./manage-library.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    AsyncPipe, LoadingComponent, CardActionablesComponent, Select2Module, NgTemplateOutlet]
+    AsyncPipe, LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule]
 })
 export class ManageLibraryComponent implements OnInit {
 

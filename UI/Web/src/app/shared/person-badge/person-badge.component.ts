@@ -7,12 +7,11 @@ import {ImageService} from "../../_services/image.service";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-person-badge',
-  standalone: true,
-  imports: [ImageComponent, RouterLink],
-  templateUrl: './person-badge.component.html',
-  styleUrls: ['./person-badge.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-person-badge',
+    imports: [ImageComponent, RouterLink],
+    templateUrl: './person-badge.component.html',
+    styleUrls: ['./person-badge.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonBadgeComponent implements OnInit {
 

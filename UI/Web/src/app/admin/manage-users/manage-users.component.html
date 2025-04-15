@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'manage-users'">
   <div class="position-relative">
-    <button class="btn btn-primary-outline position-absolute custom-position" (click)="inviteUser()">
+    <button class="btn btn-outline-primary position-absolute custom-position" (click)="inviteUser()">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span>
     </button>
   </div>
@@ -31,18 +31,22 @@
                 @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
                   {{t('online-now-tooltip')}}
                 } @else {
-                  {{member.lastActiveUtc | utcToLocalTime | timeAgo | sentenceCase | defaultDate}}
+                  {{member.lastActiveUtc | utcToLocaleDate | timeAgo | sentenceCase | defaultDate}}
                 }
               </span>
           </td>
           <td>
-            @if (!hasAdminRole(member) && member.libraries.length > 0) {
-              @if (member.libraries.length > 5) {
-                {{t('too-many-libraries')}}
-              }
-              @else {
-                @for(lib of member.libraries; track lib.name) {
-                  <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
+            @if (member.libraries.length > 0) {
+              @if (hasAdminRole(member) || member.libraries.length === libraryCount) {
+                {{t('all-libraries')}}
+              } @else {
+                @if (member.libraries.length > 5) {
+                  {{t('too-many-libraries')}}
+                }
+                @else {
+                  @for(lib of member.libraries; track lib.name) {
+                    <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
+                  }
                 }
               }
             } @else {
@@ -56,10 +60,10 @@
                   <span>{{null | defaultValue}}</span>
                 } @else {
                   @if (hasAdminRole(member)) {
-                    <app-tag-badge class="col-auto">{{t('admin')}}</app-tag-badge>
+                    <app-tag-badge class="col-auto">{{Role.Admin | roleLocalized}}</app-tag-badge>
                   } @else {
                     @for (role of roles; track role) {
-                      <app-tag-badge class="col-auto">{{role}}</app-tag-badge>
+                      <app-tag-badge class="col-auto">{{role | roleLocalized}}</app-tag-badge>
                     }
                   }
                 }

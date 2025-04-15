@@ -22,18 +22,17 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-cover-image-chooser',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgxFileDropModule,
-    ImageComponent,
-    TranslocoModule,
-    NgClass
-  ],
-  templateUrl: './cover-image-chooser.component.html',
-  styleUrls: ['./cover-image-chooser.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-cover-image-chooser',
+    imports: [
+        ReactiveFormsModule,
+        NgxFileDropModule,
+        ImageComponent,
+        TranslocoModule,
+        NgClass
+    ],
+    templateUrl: './cover-image-chooser.component.html',
+    styleUrls: ['./cover-image-chooser.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CoverImageChooserComponent implements OnInit {
 

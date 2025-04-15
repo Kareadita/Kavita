@@ -1,52 +1,49 @@
 <ng-container *transloco="let t; read:'manage-user-tokens'">
-  <div class="container-fluid">
-    <p>{{t('description')}}</p>
+  <p>{{t('description')}}</p>
 
 
-    <ngx-datatable
-      class="bootstrap"
-      [rows]="users"
-      [columnMode]="ColumnMode.force"
-      rowHeight="auto"
-      [footerHeight]="50"
-    >
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="users"
+    [columnMode]="ColumnMode.force"
+    rowHeight="auto"
+    [footerHeight]="50"
+  >
 
-      <ngx-datatable-column prop="username" [sortable]="true" [draggable]="false" [resizeable]="false">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('username-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          {{item.username}}
-        </ng-template>
-      </ngx-datatable-column>
+    <ngx-datatable-column prop="username" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('username-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.username}}
+      </ng-template>
+    </ngx-datatable-column>
 
 
-      <ngx-datatable-column prop="aniListValidUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('anilist-header')}}
-        </ng-template>
-        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-          @if (item.isAniListTokenSet) {
-            {{t('token-set-label')}} <span class="text-muted ms-1">{{t('expires-label', {date: item.aniListValidUntilUtc | utcToLocalTime})}}</span>
-          } @else {
-            {{null | defaultValue}}
-          }
-        </ng-template>
-      </ngx-datatable-column>
+    <ngx-datatable-column prop="aniListValidUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('anilist-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        @if (item.isAniListTokenSet) {
+          {{t('token-set-label')}} <span class="text-muted ms-1">{{t('expires-label', {date: item.aniListValidUntilUtc | utcToLocalTime})}}</span>
+        } @else {
+          {{null | defaultValue}}
+        }
+      </ng-template>
+    </ngx-datatable-column>
 
-      <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('mal-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          @if (item.isMalTokenSet) {
-            {{t('token-set-label')}}
-          } @else {
-            {{null | defaultValue}}
-          }
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
-
-  </div>
+    <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('mal-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        @if (item.isMalTokenSet) {
+          {{t('token-set-label')}}
+        } @else {
+          {{null | defaultValue}}
+        }
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
 </ng-container>

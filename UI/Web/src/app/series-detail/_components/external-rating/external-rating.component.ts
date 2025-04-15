@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   inject,
   Input,
   OnInit,
@@ -26,9 +27,8 @@ import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.p
 
 @Component({
   selector: 'app-external-rating',
-  standalone: true,
-  imports: [ScrobbleProviderNamePipe, NgbPopover, LoadingComponent, NgxStarsModule, ImageComponent,
-    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet, ProviderImagePipe],
+  imports: [ProviderImagePipe, NgbPopover, LoadingComponent, NgxStarsModule, ImageComponent,
+    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, AsyncPipe, NgTemplateOutlet, ScrobbleProviderNamePipe],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

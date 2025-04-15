@@ -1,6 +1,7 @@
 ﻿using API.Entities.Enums;
 
 namespace API.DTOs;
+#nullable enable
 
 /// <summary>
 /// Used on Person Profile page

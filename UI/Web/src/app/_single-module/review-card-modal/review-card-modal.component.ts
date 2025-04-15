@@ -1,9 +1,11 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  Component, inject,
+  Component,
+  inject,
   Inject,
-  Input, ViewChild,
+  Input,
+  ViewChild,
   ViewContainerRef,
   ViewEncapsulation
 } from '@angular/core';
@@ -14,17 +16,15 @@ import {UserReview} from "../review-card/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 
 @Component({
   selector: 'app-review-card-modal',
-  standalone: true,
-    imports: [ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe],
+  imports: [ReactiveFormsModule, SafeHtmlPipe, TranslocoDirective, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
 export class ReviewCardModalComponent implements AfterViewInit {
 
@@ -45,7 +45,8 @@ export class ReviewCardModalComponent implements AfterViewInit {
 
     for (let i = 0; i < spoilers.length; i++) {
       const spoiler = spoilers[i];
-      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent);
+      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent,
+        {projectableNodes: [[document.createTextNode('')]]});
       componentRef.instance.html = spoiler.innerHTML;
       if (spoiler.parentNode != null) {
         spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);

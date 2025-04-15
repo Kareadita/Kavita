@@ -186,6 +186,10 @@
     "external-source-required": "ApiKey and Host required",
     "external-source-doesnt-exist": "External Source doesn't exist",
     "external-source-already-in-use": "There is an existing stream with this External Source",
+    "sidenav-stream-only-delete-smart-filter": "Only smart filter streams can be deleted from the SideNav",
+    "dashboard-stream-only-delete-smart-filter": "Only smart filter streams can be deleted from the dashboard",
+    "smart-filter-name-required": "Smart Filter name required",
+    "smart-filter-system-name": "You cannot use the name of a system provided stream",
 
     "not-authenticated": "User is not authenticated",
     "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",

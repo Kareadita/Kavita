@@ -1,5 +1,4 @@
 import {FileTypeGroup} from "./file-type-group.enum";
-import {IHasCover} from "../common/i-has-cover";
 
 export enum LibraryType {
     Manga = 0,
@@ -9,6 +8,8 @@ export enum LibraryType {
     LightNovel = 4,
     ComicVine = 5
 }
+
+export const allLibraryTypes = [LibraryType.Manga, LibraryType.ComicVine, LibraryType.Comic, LibraryType.Book, LibraryType.LightNovel, LibraryType.Images];
 
 export interface Library {
     id: number;

@@ -179,7 +179,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         var pageCounter = 1;
                         try
                         {
-                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.BookReaderOptions);
+                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.LenientBookReaderOptions);
 
                             var totalPages = book.Content.Html.Local;
                             foreach (var bookPage in totalPages)

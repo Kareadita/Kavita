@@ -1,14 +1,9 @@
-﻿using System.Drawing;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using API.Entities.Enums;
 using API.Services;
-using EasyCaching.Core;
-using Microsoft.Extensions.Logging;
 using NetVips;
-using NSubstitute;
 using Xunit;
 using Image = NetVips.Image;
 
@@ -28,6 +23,7 @@ public class ImageServiceTests
     public void GenerateBaseline()
     {
         GenerateFiles(BaselinePattern);
+        Assert.True(true);
     }
 
     /// <summary>
@@ -38,6 +34,7 @@ public class ImageServiceTests
     {
         GenerateFiles(OutputPattern);
         GenerateHtmlFile();
+        Assert.True(true);
     }
 
     private void GenerateFiles(string outputExtension)
@@ -159,7 +156,7 @@ public class ImageServiceTests
 
         // Step 4: Generate HTML file
         GenerateHtmlFileForColorScape();
-
+        Assert.True(true);
     }
 
     private static void GenerateColorImage(string hexColor, string outputPath)

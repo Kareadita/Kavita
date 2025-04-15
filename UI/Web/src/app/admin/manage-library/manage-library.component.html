@@ -1,11 +1,11 @@
 <ng-container *transloco="let t; read: 'manage-library'">
   <div class="position-relative">
     <div class="position-absolute custom-position-2">
-      <app-card-actionables [actions]="bulkActions" btnClass="btn-primary-outline ms-1" [label]="t('bulk-action-label')" [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null)">
+      <app-card-actionables [actions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')" [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null)">
       </app-card-actionables>
     </div>
 
-    <button class="btn btn-primary-outline position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')">
+    <button class="btn btn-outline-primary position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
     </button>
   </div>
@@ -83,9 +83,9 @@
       }
       @empty {
         @if (loading) {
-          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loading"></app-loading></td></tr>
+          <tr><td colspan="6" style="text-align: center;"><app-loading [loading]="loading"></app-loading></td></tr>
         } @else {
-          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+          <tr><td colspan="6" style="text-align: center;">{{t('no-data')}}</td></tr>
         }
       }
     </tbody>

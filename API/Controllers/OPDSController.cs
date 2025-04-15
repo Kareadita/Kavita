@@ -27,6 +27,7 @@ using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MimeTypes;
 
 namespace API.Controllers;
@@ -36,6 +37,7 @@ namespace API.Controllers;
 [AllowAnonymous]
 public class OpdsController : BaseApiController
 {
+    private readonly ILogger<OpdsController> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDownloadService _downloadService;
     private readonly IDirectoryService _directoryService;
@@ -82,7 +84,7 @@ public class OpdsController : BaseApiController
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
         IAccountService accountService, ILocalizationService localizationService,
-        IMapper mapper)
+        IMapper mapper, ILogger<OpdsController> logger)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -93,6 +95,7 @@ public class OpdsController : BaseApiController
         _accountService = accountService;
         _localizationService = localizationService;
         _mapper = mapper;
+        _logger = logger;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -580,19 +583,25 @@ public class OpdsController : BaseApiController
     public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = await GetUser(apiKey);
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
-        if (userWithLists == null) return Unauthorized();
-        var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+        {
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        }
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var readingList = await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, user.Id);
         if (readingList == null)
         {
             return BadRequest(await _localizationService.Translate(userId, "reading-list-restricted"));
         }
 
+        var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
   bookLayoutModes,
   bookWritingStyles,
@@ -21,7 +21,7 @@ import {LocalizationService} from "../../_services/localization.service";
 import {bookColorThemes} from "../../book-reader/_components/reader-settings/reader-settings.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
-import {KavitaLocale, Language} from "../../_models/metadata/language";
+import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap, tap} from "rxjs";
 import {take} from "rxjs/operators";
@@ -29,17 +29,8 @@ import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
 import {PdfSpreadMode} from "../../_models/preferences/pdf-spread-mode";
-import {
-  NgbAccordionBody, NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader,
-  NgbAccordionItem, NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
-import {AsyncPipe, DecimalPipe, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {ColorPickerModule} from "ngx-color-picker";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {AsyncPipe, DecimalPipe, NgStyle, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {PageLayoutModePipe} from "../../_pipes/page-layout-mode.pipe";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ReadingDirectionPipe} from "../../_pipes/reading-direction.pipe";
 import {ScalingOptionPipe} from "../../_pipes/scaling-option.pipe";
@@ -48,21 +39,18 @@ import {ReaderModePipe} from "../../_pipes/reading-mode.pipe";
 import {LayoutModePipe} from "../../_pipes/layout-mode.pipe";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {BookPageLayoutModePipe} from "../../_pipes/book-page-layout-mode.pipe";
-import {PdfSpreadTypePipe} from "../../pdf-reader/_pipe/pdf-spread-mode.pipe";
 import {PdfSpreadModePipe} from "../../_pipes/pdf-spread-mode.pipe";
 import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
-import {PdfScrollModeTypePipe} from "../../pdf-reader/_pipe/pdf-scroll-mode.pipe";
 import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
 import {LicenseService} from "../../_services/license.service";
+import {ColorPickerDirective} from "ngx-color-picker";
 
 @Component({
   selector: 'app-manga-user-preferences',
-  standalone: true,
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
     TitleCasePipe,
-    ColorPickerModule,
     SettingItemComponent,
     SettingSwitchComponent,
     ReadingDirectionPipe,
@@ -77,7 +65,8 @@ import {LicenseService} from "../../_services/license.service";
     PdfThemePipe,
     PdfScrollModePipe,
     AsyncPipe,
-    DecimalPipe
+    DecimalPipe,
+    ColorPickerDirective
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -121,7 +110,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
 
-    return this.locales.filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
+    return (this.locales || []).filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
   }
 
 
@@ -129,7 +118,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
-    this.localizationService.locales$.subscribe(res => {
+    this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
 
       this.cdRef.markForCheck();
@@ -165,6 +154,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
       this.settingsForm.addControl('swipeToPaginate', new FormControl(this.user.preferences.swipeToPaginate, []));
       this.settingsForm.addControl('backgroundColor', new FormControl(this.user.preferences.backgroundColor, []));
+      this.settingsForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.user.preferences.allowAutomaticWebtoonReaderDetection, []));
 
       this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
       this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
@@ -237,6 +227,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('backgroundColor')?.setValue(this.user.preferences.backgroundColor, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('allowAutomaticWebtoonReaderDetection')?.setValue(this.user.preferences.allowAutomaticWebtoonReaderDetection, {onlySelf: true, emitEvent: false});
 
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize, {onlySelf: true, emitEvent: false});
@@ -276,6 +267,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
+      allowAutomaticWebtoonReaderDetection: modelSettings.allowAutomaticWebtoonReaderDetection,
       backgroundColor: modelSettings.backgroundColor || '#000',
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,

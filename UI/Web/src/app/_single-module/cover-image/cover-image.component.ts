@@ -9,19 +9,17 @@ import {IHasProgress} from "../../_models/common/i-has-progress";
  * Used for the Series/Volume/Chapter Detail pages
  */
 @Component({
-  selector: 'app-cover-image',
-  standalone: true,
-  imports: [
-    NgClass,
-    TranslocoDirective,
-    ImageComponent,
-    NgbProgressbar,
-    DecimalPipe,
-    NgbTooltip
-  ],
-  templateUrl: './cover-image.component.html',
-  styleUrl: './cover-image.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-cover-image',
+    imports: [
+        TranslocoDirective,
+        ImageComponent,
+        NgbProgressbar,
+        DecimalPipe,
+        NgbTooltip
+    ],
+    templateUrl: './cover-image.component.html',
+    styleUrl: './cover-image.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CoverImageComponent {
 

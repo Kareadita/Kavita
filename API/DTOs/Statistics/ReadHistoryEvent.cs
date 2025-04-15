@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.DTOs.Statistics;
+#nullable enable
 
 /// <summary>
 /// Represents a single User's reading event
@@ -13,6 +14,7 @@ public class ReadHistoryEvent
     public int SeriesId { get; set; }
     public required string SeriesName { get; set; } = default!;
     public DateTime ReadDate { get; set; }
+    public DateTime ReadDateUtc { get; set; }
     public int ChapterId { get; set; }
     public required float ChapterNumber { get; set; } = default!;
 }

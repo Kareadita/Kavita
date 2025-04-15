@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -11,6 +10,8 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
@@ -20,8 +21,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 namespace API.Tests.Services;
 
@@ -30,17 +29,14 @@ namespace API.Tests.Services;
 /// </summary>
 public class ExternalMetadataServiceTests : AbstractDbTest
 {
-    private readonly ITestOutputHelper _testOutputHelper;
     private readonly ExternalMetadataService _externalMetadataService;
     private readonly Dictionary<string, Genre> _genreLookup = new Dictionary<string, Genre>();
     private readonly Dictionary<string, Tag> _tagLookup = new Dictionary<string, Tag>();
     private readonly Dictionary<string, Person> _personLookup = new Dictionary<string, Person>();
 
 
-    public ExternalMetadataServiceTests(ITestOutputHelper testOutputHelper)
+    public ExternalMetadataServiceTests()
     {
-        _testOutputHelper = testOutputHelper;
-
         // Set up Hangfire to use in-memory storage for testing
         GlobalConfiguration.Configuration.UseInMemoryStorage();
 

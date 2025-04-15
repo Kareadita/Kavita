@@ -1,13 +1,13 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { UtilityService } from '../shared/_services/utility.service';
-import { Person } from '../_models/metadata/person';
-import { PaginatedResult } from '../_models/pagination';
-import { ReadingList, ReadingListItem } from '../_models/reading-list';
-import { CblImportSummary } from '../_models/reading-list/cbl/cbl-import-summary';
-import { TextResonse } from '../_types/text-response';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {map} from 'rxjs/operators';
+import {environment} from 'src/environments/environment';
+import {UtilityService} from '../shared/_services/utility.service';
+import {Person, PersonRole} from '../_models/metadata/person';
+import {PaginatedResult} from '../_models/pagination';
+import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '../_models/reading-list';
+import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
+import {TextResonse} from '../_types/text-response';
 import {Action, ActionItem} from './action-factory.service';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class ReadingListService {
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getReadingList(readingListId: number) {
-    return this.httpClient.get<ReadingList>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
+    return this.httpClient.get<ReadingList | null>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
   }
 
   getReadingLists(includePromoted: boolean = true, sortByLastModified: boolean = false, pageNum?: number, itemsPerPage?: number) {
@@ -114,9 +114,19 @@ export class ReadingListService {
     return this.httpClient.post<CblImportSummary>(this.baseUrl + `cbl/import?dryRun=${dryRun}&useComicVineMatching=${useComicVineMatching}`, form);
   }
 
-  getCharacters(readingListId: number) {
-    return this.httpClient.get<Array<Person>>(this.baseUrl + 'readinglist/characters?readingListId=' + readingListId);
+  getPeople(readingListId: number, role: PersonRole) {
+    return this.httpClient.get<Array<Person>>(this.baseUrl + `readinglist/people?readingListId=${readingListId}&role=${role}`);
   }
+
+  getAllPeople(readingListId: number) {
+    return this.httpClient.get<ReadingListCast>(this.baseUrl + `readinglist/all-people?readingListId=${readingListId}`);
+  }
+
+
+  getReadingListInfo(readingListId: number) {
+    return this.httpClient.get<ReadingListInfo>(this.baseUrl + `readinglist/info?readingListId=${readingListId}`);
+  }
+
 
   promoteMultipleReadingLists(listIds: Array<number>, promoted: boolean) {
     return this.httpClient.post(this.baseUrl + 'readinglist/promote-multiple', {readingListIds: listIds, promoted}, TextResonse);

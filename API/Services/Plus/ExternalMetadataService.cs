@@ -16,6 +16,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Helpers;
 using API.Services.Tasks.Metadata;
@@ -75,7 +76,7 @@ public class ExternalMetadataService : IExternalMetadataService
     };
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
-    static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
+    private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService)
@@ -114,18 +115,24 @@ public class ExternalMetadataService : IExternalMetadataService
         // Find all Series that are eligible and limit
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, false);
         if (ids.Count == 0) return;
+        ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
 
-        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+", ids.Count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
         var count = 0;
+        var successfulMatches = new List<int>();
         var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids);
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
             var success = await FetchSeriesMetadata(seriesId, libraryType);
-            if (success) count++;
+            if (success)
+            {
+                count++;
+                successfulMatches.Add(seriesId);
+            }
             await Task.Delay(6000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
-        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} series data from Kavita+", count);
+        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }
 
 
@@ -145,7 +152,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
-            _logger.LogDebug("Rate Limit hit for Kavita+ prefetch");
+            _logger.LogInformation("Rate Limit hit for Kavita+ prefetch");
             return false;
         }
 
@@ -433,15 +440,24 @@ public class ExternalMetadataService : IExternalMetadataService
                 // Trim quotes if the response is a JSON string
                 errorMessage = errorMessage.Trim('"');
 
-                if (ex.StatusCode == 400 && errorMessage.Contains("Too many Requests"))
+                if (ex.StatusCode == 400)
                 {
-                    _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
-                    await Task.Delay(3000);
+                    if (errorMessage.Contains("Too many Requests"))
+                    {
+                        _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
+                        await Task.Delay(3000);
 
-                    result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                        .WithKavitaPlusHeaders(license, token)
-                        .PostJsonAsync(data)
-                        .ReceiveJson<SeriesDetailPlusApiDto>();
+                        result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+                            .WithKavitaPlusHeaders(license, token)
+                            .PostJsonAsync(data)
+                            .ReceiveJson<
+                                SeriesDetailPlusApiDto>();
+                    }
+                    else if (errorMessage.Contains("Unknown Series"))
+                    {
+                        series.IsBlacklisted = true;
+                        await _unitOfWork.CommitAsync();
+                    }
                 }
             }
 
@@ -735,7 +751,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Character)
@@ -747,7 +763,9 @@ public class ExternalMetadataService : IExternalMetadataService
             .ToList();
 
         if (characters.Count == 0) return false;
+
         await SeriesService.HandlePeopleUpdateAsync(series.Metadata, characters, PersonRole.Character, _unitOfWork);
+
         foreach (var spPerson in series.Metadata.People.Where(p => p.Role == PersonRole.Character))
         {
             // Set a sort order based on their role
@@ -814,7 +832,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.CoverArtist)
@@ -870,7 +888,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name,
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
-                Description = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description)),
+                Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
                 .Where(p => p.Role == PersonRole.Writer)

@@ -8,8 +8,10 @@ using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -35,6 +37,9 @@ public interface ICleanupService
     Task CleanupWantToRead();
 
     Task ConsolidateProgress();
+
+    Task CleanupMediaErrors();
+
 }
 /// <summary>
 /// Cleans up after operations on reoccurring basis
@@ -88,8 +93,10 @@ public class CleanupService : ICleanupService
         await CleanupBackups();
 
         await SendProgress(0.35F, "Consolidating Progress Events");
-        _logger.LogInformation("Consolidating Progress Events");
         await ConsolidateProgress();
+
+        await SendProgress(0.4F, "Consolidating Media Errors");
+        await CleanupMediaErrors();
 
         await SendProgress(0.50F, "Cleaning deleted cover images");
         _logger.LogInformation("Cleaning deleted cover images");
@@ -241,6 +248,7 @@ public class CleanupService : ICleanupService
     /// </summary>
     public async Task ConsolidateProgress()
     {
+        _logger.LogInformation("Consolidating Progress Events");
         // AppUserProgress
         var allProgress = await _unitOfWork.AppUserProgressRepository.GetAllProgress();
 
@@ -289,6 +297,52 @@ public class CleanupService : ICleanupService
 
         // Save changes
         await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Scans through Media Error and removes any entries that have been fixed and are within the DB (proper files where wordcount/pagecount > 0)
+    /// </summary>
+    public async Task CleanupMediaErrors()
+    {
+        try
+        {
+            List<string> errorStrings = ["This archive cannot be read or not supported", "File format not supported"];
+            var mediaErrors = await _unitOfWork.MediaErrorRepository.GetAllErrorsAsync(errorStrings);
+            _logger.LogInformation("Beginning consolidation of {Count} Media Errors", mediaErrors.Count);
+
+            var pathToErrorMap = mediaErrors
+                .GroupBy(me => Parser.NormalizePath(me.FilePath))
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.ToList() // The same file can be duplicated (rare issue when network drives die out midscan)
+                );
+
+            var normalizedPaths = pathToErrorMap.Keys.ToList();
+
+            // Find all files that are valid
+            var validFiles = await _unitOfWork.DataContext.MangaFile
+                .Where(f => normalizedPaths.Contains(f.FilePath) && f.Pages > 0)
+                .Select(f => f.FilePath)
+                .ToListAsync();
+
+            var removalCount = 0;
+            foreach (var validFilePath in validFiles)
+            {
+                if (!pathToErrorMap.TryGetValue(validFilePath, out var mediaError)) continue;
+
+                _unitOfWork.MediaErrorRepository.Remove(mediaError);
+                removalCount++;
+            }
+
+            await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Finished consolidation of {Count} Media Errors, Removed: {RemovalCount}",
+                mediaErrors.Count, removalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception consolidating media errors");
+        }
     }
 
     public async Task CleanupLogs()

@@ -3,7 +3,7 @@
 }
 
 .progress-bar {
-  background-color: var(--progress-bar-color);
+  background-color: var(--progress-bar-color) !important;
 }
 
 .progress-bar.text-bg-success {

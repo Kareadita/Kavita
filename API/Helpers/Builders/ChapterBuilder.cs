@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
@@ -24,7 +25,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             MinNumber = Parser.MinNumberFromRange(number),
             MaxNumber = Parser.MaxNumberFromRange(number),
             SortOrder = Parser.MinNumberFromRange(number),
-            Files = new List<MangaFile>(),
+            Files = [],
             Pages = 1,
             CreatedUtc = DateTime.UtcNow
         };
@@ -38,9 +39,9 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
 
         return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters)!)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
-            .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
+            .WithTitle(specialTreatment && info.Format is MangaFormat.Epub or MangaFormat.Pdf
             ? info.Title
-            : specialTitle)
+            : specialTitle ?? string.Empty)
             .WithIsSpecial(specialTreatment);
     }
 

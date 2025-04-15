@@ -1,7 +1,8 @@
 <ng-container *transloco="let t; read:'change-email'">
 
-  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit">
-    <ng-template #extra>
+  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit" [isEditMode]="isEditMode" (editMode)="updateEditMode($event)">
+    <ng-template #view>
+      <span>{{user?.email}}</span>
       @if(emailConfirmed) {
         <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
         <span class="visually-hidden">{{t('email-confirmed')}}</span>
@@ -9,10 +10,6 @@
         <i class="fa-solid fa-exclamation-circle ms-1 confirm-icon error" aria-hidden="true" [ngbTooltip]="t('email-not-confirmed')"></i>
         <span class="visually-hidden">{{t('email-not-confirmed')}}</span>
       }
-    </ng-template>
-
-    <ng-template #view>
-      <span>{{user?.email}}</span>
     </ng-template>
 
     <ng-template #edit>

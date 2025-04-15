@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace API.Extensions;
+namespace API.Helpers;
 
 public static class DayOfWeekHelper
 {

@@ -26,7 +26,6 @@ import {AsyncPipe} from "@angular/common";
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule]
 })
 export class ManageDevicesComponent implements OnInit {

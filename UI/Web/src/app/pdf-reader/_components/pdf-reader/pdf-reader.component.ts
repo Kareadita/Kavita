@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   inject,
@@ -31,18 +32,16 @@ import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
 import {PdfTheme} from "../../../_models/preferences/pdf-theme";
 import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
 import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
-import {PdfLayoutModePipe} from "../../_pipe/pdf-layout-mode.pipe";
 import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 
 @Component({
-    selector: 'app-pdf-reader',
-    templateUrl: './pdf-reader.component.html',
-    styleUrls: ['./pdf-reader.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
+  selector: 'app-pdf-reader',
+  templateUrl: './pdf-reader.component.html',
+  styleUrls: ['./pdf-reader.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
-    PdfLayoutModePipe, PdfScrollModeTypePipe, PdfSpreadTypePipe]
+    PdfScrollModeTypePipe, PdfSpreadTypePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
@@ -116,6 +115,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   pageLayoutMode: PageViewModeType = 'multiple';
   scrollMode: ScrollModeType = ScrollModeType.vertical;
   spreadMode: SpreadType = 'off';
+  isSearchOpen: boolean = false;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
@@ -352,6 +352,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   updateHandTool(event: any) {
      console.log('event.tool', event);
+  }
+
+  updateSearchOpen(event: boolean) {
+     this.isSearchOpen = event;
+     this.cdRef.markForCheck();
   }
 
   prevPage() {

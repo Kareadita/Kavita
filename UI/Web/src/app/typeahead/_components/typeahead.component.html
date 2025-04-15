@@ -1,44 +1,71 @@
 <ng-container *transloco="let t; read:'typeahead'">
-  <form [formGroup]="typeaheadForm">
-    <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">
-      <ng-container *ngIf="settings.showLocked">
-      <span class="input-group-text clickable" (click)="toggleLock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
-        <span class="visually-hidden">{{t('locked-field')}}</span>
-    </span>
-      </ng-container>
-      <div class="typeahead-input" [ngClass]="{'disabled': disabled}" (click)="onInputFocus($event)">
-        <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index" fillStyle="filled">
-          <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
-          <i class="fa fa-times" *ngIf="!disabled" (click)="toggleSelection(option)" tabindex="0" [attr.aria-label]="t('close')"></i>
-        </app-tag-badge>
-        <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead" *ngIf="!disabled">
-        <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status" *ngIf="isLoadingOptions">
-          <span class="visually-hidden">{{t('loading')}}</span>
+  @if(settings) {
+    <form [formGroup]="typeaheadForm">
+      <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">
+        @if (settings.showLocked) {
+          <span class="input-group-text clickable" (click)="toggleLock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('locked-field')}}</span>
+        </span>
+        }
+
+        <div class="typeahead-input" [ngClass]="{'disabled': disabled}" (click)="onInputFocus($event)">
+          @if (optionSelection) {
+            @for (option of optionSelection.selected(); track option; let i = $index) {
+              <app-tag-badge fillStyle="filled">
+                <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i, value:  typeaheadControl.value }"></ng-container>
+                @if (!disabled) {
+                  <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" [attr.aria-label]="t('close')"></i>
+                }
+              </app-tag-badge>
+            }
+          }
+
+          @if (!disabled) {
+            <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead">
+          }
+
+
+          @if (isLoadingOptions) {
+            <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          }
+
+          @if (!disabled && settings.multiple && (selectedData | async); as selected) {
+            @if (selected.length > 0) {
+              <button class="btn btn-close float-end mt-2" style="font-size: 0.8rem;" (click)="clearSelections(true);$event.stopPropagation()"></button>
+            }
+          }
         </div>
-        <ng-container *ngIf="!disabled && settings.multiple && (selectedData | async) as selected">
-          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections(true);$event.stopPropagation()"></button>
-        </ng-container>
       </div>
-    </div>
 
-    <ng-container *ngIf="filteredOptions | async as options">
-      <div class="dropdown" *ngIf="hasFocus" [@slideFromTop]="hasFocus">
-        <ul class="list-group results" #results>
-          <li *ngIf="showAddItem"
-              class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
-            {{t('add-item', {item: typeaheadControl.value})}}
-          </li>
-          <li *ngFor="let option of options; let index = index; trackBy: settings.trackByIdentityFn" (click)="handleOptionClick(option)"
-              class="list-group-item" role="option" [attr.data-index]="index"
-              (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-            <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-          </li>
-          <li *ngIf="options.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
-            {{t('no-data')}}{{this.settings.addIfNonExisting ? t('add-custom-item') : ''}}
-          </li>
-        </ul>
-      </div>
-    </ng-container>
-  </form>
+      @if (filteredOptions | async; as options) {
+        @if (hasFocus) {
+          <div class="dropdown" [@slideFromTop]="hasFocus">
+            <ul class="list-group results" #results>
+              @if (showAddItem) {
+                <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+                  {{t('add-item', {item: typeaheadControl.value})}}
+                </li>
+              }
 
+              @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
+                <li (click)="handleOptionClick(option)"
+                     class="list-group-item" role="option" [attr.data-index]="index"
+                     (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+                  <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }"></ng-container>
+                </li>
+              }
+
+              @if (options.length === 0 && !showAddItem) {
+                <li class="list-group-item no-hover" role="listitem">
+                  {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      }
+    </form>
+  }
 </ng-container>

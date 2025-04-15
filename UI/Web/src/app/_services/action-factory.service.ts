@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { map, Observable, shareReplay } from 'rxjs';
-import { Chapter } from '../_models/chapter';
+import {Injectable} from '@angular/core';
+import {map, Observable, shareReplay} from 'rxjs';
+import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
-import { Device } from '../_models/device/device';
-import { Library } from '../_models/library/library';
-import { ReadingList } from '../_models/reading-list';
-import { Series } from '../_models/series';
-import { Volume } from '../_models/volume';
-import { AccountService } from './account.service';
-import { DeviceService } from './device.service';
+import {Device} from '../_models/device/device';
+import {Library} from '../_models/library/library';
+import {ReadingList} from '../_models/reading-list';
+import {Series} from '../_models/series';
+import {Volume} from '../_models/volume';
+import {AccountService} from './account.service';
+import {DeviceService} from './device.service';
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {translate} from "@jsverse/transloco";
@@ -170,6 +170,8 @@ export class ActionFactoryService {
   sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   smartFilterActions: Array<ActionItem<SmartFilter>> = [];
 
+  sideNavHomeActions: Array<ActionItem<void>> = [];
+
   isAdmin = false;
 
 
@@ -224,6 +226,10 @@ export class ActionFactoryService {
 
   getPersonActions(callback: ActionCallback<Person>) {
     return this.applyCallbackToList(this.personActions, callback);
+  }
+
+  getSideNavHomeActions(callback: ActionCallback<void>) {
+    return this.applyCallbackToList(this.sideNavHomeActions, callback);
   }
 
   dummyCallback(action: ActionItem<any>, data: any) {}
@@ -873,6 +879,19 @@ export class ActionFactoryService {
         children: [],
       },
     ];
+
+    this.sideNavHomeActions = [
+      {
+        action: Action.Edit,
+        title: 'reorder',
+        description: '',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      }
+    ]
+
+
   }
 
   private applyCallback(action: ActionItem<any>, callback: (action: ActionItem<any>, data: any) => void) {

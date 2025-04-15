@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 
@@ -11,8 +10,12 @@ public class ParsingTests
     [Fact]
     public void ShouldWork()
     {
-        var s = 6.5f + "";
+        var s = 6.5f.ToString(CultureInfo.InvariantCulture);
         var a = float.Parse(s, CultureInfo.InvariantCulture);
+        Assert.Equal(6.5f, a);
+
+        s = 6.5f + "";
+        a = float.Parse(s, CultureInfo.CurrentCulture);
         Assert.Equal(6.5f, a);
     }
 
@@ -40,6 +43,7 @@ public class ParsingTests
     [InlineData("DEAD Tube Prologue", "DEAD Tube Prologue")]
     [InlineData("DEAD Tube Prologue SP01", "DEAD Tube Prologue")]
     [InlineData("DEAD_Tube_Prologue SP01", "DEAD Tube Prologue")]
+    [InlineData("SP01 1. DEAD Tube Prologue", "1. DEAD Tube Prologue")]
     public void CleanSpecialTitleTest(string input, string expected)
     {
         Assert.Equal(expected, CleanSpecialTitle(input));
@@ -247,6 +251,7 @@ public class ParsingTests
     [InlineData("ch1/backcover.png", false)]
     [InlineData("backcover.png", false)]
     [InlineData("back_cover.png", false)]
+    [InlineData("LD Blacklands #1 35 (back cover).png", false)]
     public void IsCoverImageTest(string inputPath, bool expected)
     {
         Assert.Equal(expected, IsCoverImage(inputPath));

@@ -22,9 +22,8 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-    standalone: true,
-  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
 

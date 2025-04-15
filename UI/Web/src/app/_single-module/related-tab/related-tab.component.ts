@@ -17,19 +17,18 @@ export interface RelatedSeriesPair {
 }
 
 @Component({
-  selector: 'app-related-tab',
-  standalone: true,
-  imports: [
-    CardItemComponent,
-    CarouselReelComponent,
-    TranslocoDirective,
-    SeriesCardComponent
-  ],
-  templateUrl: './related-tab.component.html',
-  styleUrl: './related-tab.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-related-tab',
+    imports: [
+        CardItemComponent,
+        CarouselReelComponent,
+        TranslocoDirective,
+        SeriesCardComponent
+    ],
+    templateUrl: './related-tab.component.html',
+    styleUrl: './related-tab.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RelatedTabComponent implements OnInit {
+export class RelatedTabComponent {
 
   protected readonly imageService = inject(ImageService);
   protected readonly router = inject(Router);
@@ -39,10 +38,6 @@ export class RelatedTabComponent implements OnInit {
   @Input() relations: Array<RelatedSeriesPair> = [];
   @Input() bookmarks: Array<PageBookmark> = [];
   @Input() libraryId!: number;
-
-  ngOnInit() {
-    console.log('bookmarks: ', this.bookmarks);
-  }
 
   openReadingList(readingList: ReadingList) {
     this.router.navigate(['lists', readingList.id]);

@@ -3,7 +3,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -12,7 +13,9 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output, SimpleChange, SimpleChanges,
+  Output,
+  SimpleChange,
+  SimpleChanges,
   TemplateRef,
   TrackByFunction,
   ViewChild
@@ -29,9 +32,6 @@ import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/serie
 import {ActionItem} from 'src/app/_services/action-factory.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
-
-
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -45,12 +45,11 @@ const ANIMATION_TIME_MS = 0;
 
 @Component({
   selector: 'app-card-detail-layout',
-  standalone: true,
-  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent,
+  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent,
     TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
@@ -97,7 +96,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
-  @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
   @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;

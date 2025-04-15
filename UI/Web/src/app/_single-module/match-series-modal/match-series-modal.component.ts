@@ -14,20 +14,19 @@ import { ThemeService } from 'src/app/_services/theme.service';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-match-series-modal',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    TranslocoDirective,
-    MatchSeriesResultItemComponent,
-    LoadingComponent,
-    ReactiveFormsModule,
-    SettingItemComponent,
-    SettingSwitchComponent
-  ],
-  templateUrl: './match-series-modal.component.html',
-  styleUrl: './match-series-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-match-series-modal',
+    imports: [
+        AsyncPipe,
+        TranslocoDirective,
+        MatchSeriesResultItemComponent,
+        LoadingComponent,
+        ReactiveFormsModule,
+        SettingItemComponent,
+        SettingSwitchComponent
+    ],
+    templateUrl: './match-series-modal.component.html',
+    styleUrl: './match-series-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MatchSeriesModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

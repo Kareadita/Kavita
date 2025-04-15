@@ -2,6 +2,7 @@
 using API.DTOs.Recommendation;
 
 namespace API.DTOs.SeriesDetail;
+#nullable enable
 
 /// <summary>
 /// All the data from Kavita+ for Series Detail

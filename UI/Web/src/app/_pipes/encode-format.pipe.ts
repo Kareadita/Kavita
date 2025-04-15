@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {EncodeFormat} from "../admin/_models/encode-format";
 
 @Pipe({

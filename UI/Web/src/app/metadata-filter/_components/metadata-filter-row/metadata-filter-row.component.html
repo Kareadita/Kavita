@@ -18,7 +18,7 @@
             </div>
 
             <div class="col-md-4 col-10 mb-2">
-              @if (formGroup.get('comparison')?.value !== FilterComparison.IsEmpty) {
+              @if (IsEmptySelected) {
                 @if (predicateType$ | async; as predicateType) {
                   @switch (predicateType) {
                     @case (PredicateType.Text) {

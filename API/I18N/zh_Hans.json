@@ -203,5 +203,9 @@
     "person-name-unique": "人名必须是唯一的",
     "person-image-doesnt-exist": "CoversDB 中不存在此人",
     "email-taken": "电子邮件已被使用",
-    "kavitaplus-restricted": "仅限 Kavita+"
+    "kavitaplus-restricted": "仅限 Kavita+",
+    "dashboard-stream-only-delete-smart-filter": "只能从仪表板中删除智能筛选器流",
+    "smart-filter-name-required": "需要智能筛选器名称",
+    "smart-filter-system-name": "您不能使用系统提供的流名称",
+    "sidenav-stream-only-delete-smart-filter": "只能从侧边栏删除智能筛选器流"
 }

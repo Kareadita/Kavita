@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace API.DTOs.Stats;
+#nullable enable
 
 /// <summary>
 /// This is just for the Server tab on UI

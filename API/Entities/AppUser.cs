@@ -76,6 +76,16 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public string? MalAccessToken { get; set; }
 
+    /// <summary>
+    /// Has the user ran Scrobble Event Generation
+    /// </summary>
+    /// <remarks>Only applicable for Kavita+ and when a Token is present</remarks>
+    public bool HasRunScrobbleEventGeneration { get; set; }
+    /// <summary>
+    /// The timestamp of when Scrobble Event Generation ran (Utc)
+    /// </summary>
+    /// <remarks>Kavita+ only</remarks>
+    public DateTime ScrobbleEventGenerationRan { get; set; }
 
 
     /// <summary>

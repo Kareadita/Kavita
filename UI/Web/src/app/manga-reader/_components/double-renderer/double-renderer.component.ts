@@ -30,7 +30,6 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-renderer.component.html',
     styleUrls: ['./double-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {

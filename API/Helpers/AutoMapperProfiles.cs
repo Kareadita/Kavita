@@ -29,6 +29,8 @@ using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
@@ -336,7 +338,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<UserReviewDto, ExternalReview>()
             .ForMember(dest => dest.BodyJustText,
                 opt =>
-                    opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
+                    opt.MapFrom(src => ReviewHelper.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
         CreateMap<Series, ManageMatchSeriesDto>()

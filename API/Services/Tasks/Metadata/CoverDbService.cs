@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Extensions;
 using API.SignalR;
 using EasyCaching.Core;
@@ -535,7 +536,7 @@ public class CoverDbService : ICoverDbService
             if (!string.IsNullOrEmpty(filePath))
             {
                 // Additional check to see if downloaded image is similar and we have a higher resolution
-                if (chooseBetterImage)
+                if (chooseBetterImage && !string.IsNullOrEmpty(series.CoverImage))
                 {
                     try
                     {
@@ -551,14 +552,22 @@ public class CoverDbService : ICoverDbService
 
                 series.CoverImage = filePath;
                 series.CoverImageLocked = true;
+                if (series.CoverImage == null)
+                {
+                    _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
+                }
                 _imageService.UpdateColorScape(series);
                 _unitOfWork.SeriesRepository.Update(series);
             }
         }
         else
         {
-            series.CoverImage = string.Empty;
+            series.CoverImage = null;
             series.CoverImageLocked = false;
+            if (series.CoverImage == null)
+            {
+                _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
+            }
             _imageService.UpdateColorScape(series);
             _unitOfWork.SeriesRepository.Update(series);
         }

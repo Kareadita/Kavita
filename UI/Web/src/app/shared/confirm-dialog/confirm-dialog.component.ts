@@ -8,11 +8,10 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
 
 @Component({
-  selector: 'app-confirm-dialog',
-  standalone: true,
-  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe],
-  templateUrl: './confirm-dialog.component.html',
-  styleUrls: ['./confirm-dialog.component.scss']
+    selector: 'app-confirm-dialog',
+    imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe],
+    templateUrl: './confirm-dialog.component.html',
+    styleUrls: ['./confirm-dialog.component.scss']
 })
 export class ConfirmDialogComponent implements OnInit {
 

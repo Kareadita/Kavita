@@ -5,16 +5,15 @@ import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-series-format',
-  standalone: true,
-  imports: [
-    MangaFormatIconPipe,
-    MangaFormatPipe,
-    NgbTooltip
-  ],
-  templateUrl: './series-format.component.html',
-  styleUrls: ['./series-format.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-series-format',
+    imports: [
+        MangaFormatIconPipe,
+        MangaFormatPipe,
+        NgbTooltip
+    ],
+    templateUrl: './series-format.component.html',
+    styleUrls: ['./series-format.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesFormatComponent {
 

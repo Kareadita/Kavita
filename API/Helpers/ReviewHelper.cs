@@ -5,10 +5,9 @@ using System.Text.RegularExpressions;
 using API.DTOs.SeriesDetail;
 using HtmlAgilityPack;
 
+namespace API.Helpers;
 
-namespace API.Services;
-
-public static class ReviewService
+public static class ReviewHelper
 {
     private const int BodyTextLimit = 175;
     public static IEnumerable<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
@@ -60,6 +59,9 @@ public static class ReviewService
             .Where(s => !s.Equals("\n")));
 
         // Clean any leftover markdown out
+        plainText = Regex.Replace(plainText, @"\*\*(.*?)\*\*", "$1"); // Bold with **
+        plainText = Regex.Replace(plainText, @"_(.*?)_", "$1"); // Italic with _
+        plainText = Regex.Replace(plainText, @"\[(.*?)\]\((.*?)\)", "$1"); // Links [text](url)
         plainText = Regex.Replace(plainText, @"[_*\[\]~]", string.Empty);
         plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
         plainText = Regex.Replace(plainText, @"~~~(.*?)~~~", "$1");
@@ -67,6 +69,7 @@ public static class ReviewService
         plainText = Regex.Replace(plainText, @"~~(.*?)~~", "$1");
         plainText = Regex.Replace(plainText, @"__(.*?)__", "$1");
         plainText = Regex.Replace(plainText, @"#\s(.*?)", "$1");
+
 
         // Just strip symbols
         plainText = Regex.Replace(plainText, @"[_*\[\]~]", string.Empty);

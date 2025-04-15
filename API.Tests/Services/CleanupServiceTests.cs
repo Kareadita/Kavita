@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
@@ -30,11 +27,10 @@ public class CleanupServiceTests : AbstractDbTest
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
     private readonly IReaderService _readerService;
 
-
     public CleanupServiceTests() : base()
     {
         _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
             .Build());
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),

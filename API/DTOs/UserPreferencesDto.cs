@@ -5,6 +5,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.DTOs;
+#nullable enable
 
 public class UserPreferencesDto
 {
@@ -62,6 +63,13 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool ShowScreenHints { get; set; } = true;
+    /// <summary>
+    /// Manga Reader Option: Allow Automatic Webtoon detection
+    /// </summary>
+    [Required]
+    public bool AllowAutomaticWebtoonReaderDetection { get; set; }
+
+
     /// <summary>
     /// Book Reader Option: Override extra Margin
     /// </summary>

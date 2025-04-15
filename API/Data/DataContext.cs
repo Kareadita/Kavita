@@ -11,6 +11,8 @@ using API.Entities.Enums.UserPreferences;
 using API.Entities.History;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -130,6 +132,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
         builder.Entity<AppUserPreferences>()
             .Property(b => b.WantToReadSync)
+            .HasDefaultValue(true);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.AllowAutomaticWebtoonReaderDetection)
             .HasDefaultValue(true);
 
         builder.Entity<Library>()

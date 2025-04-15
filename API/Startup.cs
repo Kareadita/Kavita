@@ -41,6 +41,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API;
@@ -138,8 +139,8 @@ public class Startup
             c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Version = "3.1.0",
-                Title = "Kavita",
-                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version.ToString()}",
+                Title = $"Kavita (v{BuildInfo.Version})",
+                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version}",
                 License = new OpenApiLicense
                 {
                     Name = "GPL-3.0",
@@ -283,6 +284,10 @@ public class Startup
                     await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
                     await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
                     await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
+
+                    // v0.8.6
+                    await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
+                    await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

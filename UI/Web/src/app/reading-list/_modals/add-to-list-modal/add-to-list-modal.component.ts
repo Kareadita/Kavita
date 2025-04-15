@@ -17,11 +17,10 @@ export enum ADD_FLOW {
 }
 
 @Component({
-  selector: 'app-add-to-list-modal',
-  templateUrl: './add-to-list-modal.component.html',
-  styleUrls: ['./add-to-list-modal.component.scss'],
-  standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
+    selector: 'app-add-to-list-modal',
+    templateUrl: './add-to-list-modal.component.html',
+    styleUrls: ['./add-to-list-modal.component.scss'],
+    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
 

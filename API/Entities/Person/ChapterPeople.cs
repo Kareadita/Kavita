@@ -1,6 +1,6 @@
 ﻿using API.Entities.Enums;
 
-namespace API.Entities;
+namespace API.Entities.Person;
 
 public class ChapterPeople
 {

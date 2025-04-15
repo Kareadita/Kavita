@@ -11,6 +11,7 @@ using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Services;
 using Kavita.Common;

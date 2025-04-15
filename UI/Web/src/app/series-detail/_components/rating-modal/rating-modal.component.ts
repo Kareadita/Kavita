@@ -7,15 +7,14 @@ import {ThemeService} from "../../../_services/theme.service";
 import {SeriesService} from "../../../_services/series.service";
 
 @Component({
-  selector: 'app-rating-modal',
-  standalone: true,
-  imports: [
-    TranslocoDirective,
-    NgxStarsModule
-  ],
-  templateUrl: './rating-modal.component.html',
-  styleUrl: './rating-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-rating-modal',
+    imports: [
+        TranslocoDirective,
+        NgxStarsModule
+    ],
+    templateUrl: './rating-modal.component.html',
+    styleUrl: './rating-modal.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RatingModalComponent {
 

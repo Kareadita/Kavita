@@ -3,15 +3,14 @@ import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {filter, map, tap} from 'rxjs';
 import {NavService} from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, NgClass, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 
 @Component({
   selector: 'app-side-nav-item',
-  standalone: true,
-  imports: [RouterLink, NgOptimizedImage, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
+  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -63,7 +62,13 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() badgeCount: number | null = -1;
 
-
+  /**
+   * Optional, display item in edit mode (replaces icon with handle)
+   */
+  @Input() editMode: boolean = false;
+  /**
+   * Comparison Method for route to determine when to highlight item based on route
+   */
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
 
 

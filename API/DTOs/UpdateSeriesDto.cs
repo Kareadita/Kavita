@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs;
+#nullable enable
 
 public class UpdateSeriesDto
 {

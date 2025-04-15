@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs;
+#nullable enable
 
 public class RegisterDto
 {
@@ -9,7 +10,7 @@ public class RegisterDto
     /// <summary>
     /// An email to register with. Optional. Provides Forgot Password functionality
     /// </summary>
-    public string Email { get; init; } = default!;
+    public string? Email { get; set; } = default!;
     [Required]
     [StringLength(256, MinimumLength = 6)]
     public string Password { get; set; } = default!;

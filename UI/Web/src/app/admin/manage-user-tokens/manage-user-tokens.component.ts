@@ -2,31 +2,20 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} f
 import {TranslocoDirective} from "@jsverse/transloco";
 import {MemberService} from "../../_services/member.service";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {LoadingComponent} from "../../shared/loading/loading.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UserTokenInfo} from "../../_models/kavitaplus/user-token-info";
-import {ServerService} from "../../_services/server.service";
-import {SettingsService} from "../settings.service";
-import {MessageHubService} from "../../_services/message-hub.service";
-import {ConfirmService} from "../../shared/confirm.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
   selector: 'app-manage-user-tokens',
-  standalone: true,
-    imports: [
-        TranslocoDirective,
-        DefaultValuePipe,
-        LoadingComponent,
-        UtcToLocalTimePipe,
-        VirtualScrollerModule,
-        CardActionablesComponent,
-        ImageComponent,
-        NgxDatatableModule
-    ],
+  imports: [
+    TranslocoDirective,
+    DefaultValuePipe,
+    UtcToLocalTimePipe,
+    VirtualScrollerModule,
+    NgxDatatableModule
+  ],
   templateUrl: './manage-user-tokens.component.html',
   styleUrl: './manage-user-tokens.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

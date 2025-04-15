@@ -213,7 +213,6 @@ public class LibraryController : BaseApiController
 
         var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
         await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
-        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
 
         return Ok(ret);
     }
@@ -351,27 +350,6 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("analyze")]
-    public ActionResult Analyze(int libraryId)
-    {
-        _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
-        return Ok();
-    }
-
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpPost("analyze-multiple")]
-    public ActionResult AnalyzeMultiple(BulkActionDto dto)
-    {
-        foreach (var libraryId in dto.Ids)
-        {
-            _taskScheduler.AnalyzeFilesForLibrary(libraryId, dto.Force ?? false);
-        }
-
-        return Ok();
-    }
-
-
     /// <summary>
     /// Copy the library settings (adv tab + optional type) to a set of other libraries.
     /// </summary>
@@ -440,8 +418,7 @@ public class LibraryController : BaseApiController
             .Distinct()
             .Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
 
-        var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder,
-            new List<string>() {dto.FolderPath});
+        var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
         _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
 

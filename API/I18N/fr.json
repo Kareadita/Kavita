@@ -203,5 +203,9 @@
     "person-doesnt-exist": "La personne n'existe pas",
     "person-name-required": "Le nom de la personne est obligatoire et ne doit pas être nul",
     "email-taken": "Email déjà existant",
-    "kavitaplus-restricted": "Ce service est réservé à Kavita+"
+    "kavitaplus-restricted": "Ce service est réservé à Kavita+",
+    "sidenav-stream-only-delete-smart-filter": "Seuls les flux de filtres intelligents peuvent être supprimés de la SideNav",
+    "dashboard-stream-only-delete-smart-filter": "Seuls les flux de filtres intelligents peuvent être supprimés du tableau de bord",
+    "smart-filter-name-required": "Nom du filtre intelligent requis",
+    "smart-filter-system-name": "Vous ne pouvez pas utiliser le nom d'un flux fourni par le système"
 }

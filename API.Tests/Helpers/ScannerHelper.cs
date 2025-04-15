@@ -26,6 +26,7 @@ using NSubstitute;
 using Xunit.Abstractions;
 
 namespace API.Tests.Helpers;
+#nullable enable
 
 public class ScannerHelper
 {

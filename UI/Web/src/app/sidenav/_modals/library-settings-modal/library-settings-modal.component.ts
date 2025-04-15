@@ -20,7 +20,7 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Library, LibraryType} from 'src/app/_models/library/library';
+import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -39,6 +39,7 @@ import {SettingSwitchComponent} from "../../../settings/_components/setting-swit
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {ActionService} from "../../../_services/action.service";
+import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -56,14 +57,13 @@ enum StepID {
 }
 
 @Component({
-  selector: 'app-library-settings-modal',
-  standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-    SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
-  templateUrl: './library-settings-modal.component.html',
-  styleUrls: ['./library-settings-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-settings-modal',
+    imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+        SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
+        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
+    templateUrl: './library-settings-modal.component.html',
+    styleUrls: ['./library-settings-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
@@ -86,6 +86,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly WikiLink = WikiLink;
   protected readonly Action = Action;
+  protected readonly libraryTypePipe = new LibraryTypePipe();
 
   @Input({required: true}) library!: Library | undefined;
 
@@ -111,7 +112,9 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   selectedFolders: string[] = [];
   madeChanges = false;
-  libraryTypes: string[] = []
+  libraryTypes = allLibraryTypes.map(f => {
+    return {title: this.libraryTypePipe.transform(f), value: f};
+  }).sort((a, b) => a.title.localeCompare(b.title));
 
   isAddLibrary = false;
   setupStep = StepID.General;
@@ -131,11 +134,6 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingService.getLibraryTypes().subscribe((types) => {
-      this.libraryTypes = types;
-      this.cdRef.markForCheck();
-    });
-
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
@@ -256,12 +254,16 @@ export class LibrarySettingsModalComponent implements OnInit {
 
       this.madeChanges = false;
 
+      // TODO: Refactor into FormArray
       for(let fileTypeGroup of allFileTypeGroup) {
         this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
       }
+
+      // TODO: Refactor into FormArray
       for(let glob of this.library.excludePatterns) {
         this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
       }
+
       this.excludePatterns = this.library.excludePatterns;
     } else {
       for(let fileTypeGroup of allFileTypeGroup) {
