@@ -2628,6 +2628,7 @@
         "alert-long-running": "This is a long running process. Please give it the time to complete before invoking again.",
         "confirm-delete-multiple-series": "Are you sure you want to delete {{count}} series? It will not modify files on disk.",
         "confirm-delete-multiple-chapters": "Are you sure you want to delete {{count}} chapter/volumes? It will not modify files on disk.",
+        "confirm-delete-multiple-volumes": "Are you sure you want to delete {{count}} volumes? It will not modify files on disk.",
         "confirm-delete-series": "Are you sure you want to delete this series? It will not modify files on disk.",
         "confirm-delete-chapter": "Are you sure you want to delete this chapter? It will not modify files on disk.",
         "confirm-delete-volume": "Are you sure you want to delete this volume? It will not modify files on disk.",

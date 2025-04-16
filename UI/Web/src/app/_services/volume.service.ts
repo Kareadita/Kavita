@@ -21,6 +21,10 @@ export class VolumeService {
     return this.httpClient.delete<boolean>(this.baseUrl + 'volume?volumeId=' + volumeId);
   }
 
+  deleteMultipleVolumes(volumeIds: number[]) {
+    return this.httpClient.post<boolean>(this.baseUrl + "volume/multiple", volumeIds)
+  }
+
   updateVolume(volume: any) {
     return this.httpClient.post(this.baseUrl + 'volume/update', volume, TextResonse);
   }

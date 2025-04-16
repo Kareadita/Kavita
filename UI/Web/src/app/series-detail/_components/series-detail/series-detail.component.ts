@@ -353,11 +353,25 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
         break;
       case Action.Delete:
-        await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
-          // No need to update the page as the backend will spam volume/chapter deletions
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
+        if (chapters.length > 0) {
+          await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
+            // No need to update the page as the backend will spam volume/chapter deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+
+          // It's not possible to select both chapters and volumes
+          break;
+        }
+
+        if (selectedVolumeIds.length > 0) {
+          await this.actionService.deleteMultipleVolumes(selectedVolumeIds, () => {
+            // No need to update the page as the backend will spam volume deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+        }
+
         break;
     }
   }
@@ -660,7 +674,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.Delete):
         await this.actionService.deleteChapter(chapter.id, (success) => {
           if (!success) return;
-          
+
           this.chapters = this.chapters.filter(c => c.id != chapter.id);
           this.cdRef.markForCheck();
         });
