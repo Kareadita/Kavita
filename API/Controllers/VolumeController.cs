@@ -61,7 +61,7 @@ public class VolumeController : BaseApiController
     [HttpPost("multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
     {
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesById(volumesIds)).ToList();
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
         if (volumes.Count != volumesIds.Length)
         {
             return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));

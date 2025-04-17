@@ -44,7 +44,7 @@ public interface IVolumeRepository
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
-    Task<IEnumerable<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None);
+    Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
     Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync();
@@ -186,7 +186,7 @@ public class VolumeRepository : IVolumeRepository
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync();
     }
-    public async Task<IEnumerable<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None)
+    public async Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None)
     {
         return await _context.Volume
             .Where(vol => volumeIds.Contains(vol.Id))
