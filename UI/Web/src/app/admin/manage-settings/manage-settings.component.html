@@ -75,7 +75,7 @@
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="ipaddresses-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
+                  @if (formControl.errors?.emptyOrPattern) {
                     <div>{{t('ip-address-validation')}}</div>
                   }
                 </div>
