@@ -82,7 +82,7 @@ export class DraggableOrderedListComponent {
 
 
   get BufferAmount() {
-    return Math.min(this.items.length / 20, 20);
+    return Math.floor(Math.min(this.items.length / 20, 20));
   }
 
   constructor() {
