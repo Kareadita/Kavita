@@ -178,7 +178,6 @@ public class StatsService : IStatsService
             var sw = Stopwatch.StartNew();
             var response = await (Configuration.StatsApiUrl + "/api/health/")
                 .WithBasicHeaders(ApiKey)
-                .WithTimeout(TimeSpan.FromSeconds(30))
                 .GetAsync();
 
             if (response.StatusCode == StatusCodes.Status200OK)
@@ -197,7 +196,7 @@ public class StatsService : IStatsService
 
     private async Task<int> MaxSeriesInAnyLibrary()
     {
-        // If first time flow, just return 0
+        // If first time flow, return 0
         if (!await _context.Series.AnyAsync()) return 0;
         return await _context.Series
             .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series!).Count())
