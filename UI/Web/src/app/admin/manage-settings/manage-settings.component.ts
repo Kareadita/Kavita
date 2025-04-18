@@ -77,6 +77,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
+
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
