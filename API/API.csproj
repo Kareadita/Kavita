@@ -115,6 +115,7 @@
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="cache\**" />
+    <None Remove="cache-long\**" />
     <None Remove="backups\**" />
     <None Remove="logs\**" />
     <None Remove="temp\**" />
