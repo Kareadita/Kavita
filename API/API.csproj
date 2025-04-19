@@ -5,8 +5,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <TieredPGO>true</TieredPGO>
-    <TieredCompilation>true</TieredCompilation>
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <Nullable>warnings</Nullable>
     <LangVersion>latestmajor</LangVersion>
