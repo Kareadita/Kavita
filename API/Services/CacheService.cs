@@ -186,6 +186,7 @@ public class CacheService : ICacheService
                 }
                 else
                 {
+                    // Potential BUG: If the folder is left here and there are no files within, this could theoretically return without proper cache
                     return chapter;
                 }
             }

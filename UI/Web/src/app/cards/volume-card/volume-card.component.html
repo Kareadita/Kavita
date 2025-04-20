@@ -53,22 +53,21 @@
     </div>
 
     @if (libraryType !== LibraryType.Images) {
-      <div class="card-body meta-title">
-        <span class="card-format"></span>
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-          @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
-            {{volume.name}}
-          } @else {
-            {{volume.chapters[0].titleName}}
-          }
-        </div>
-
-        @if (actions && actions.length > 0) {
-          <span class="card-actions">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
-          </span>
+      @if ((libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book)) {
+        @if (volume.name) {
+          <div class="card-body meta-title">
+            <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+              {{volume.name}}
+            </div>
+          </div>
         }
-      </div>
+      } @else if (volume.chapters[0].titleName) {
+        <div class="card-body meta-title">
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+            {{volume.chapters[0].titleName}}
+          </div>
+        </div>
+      }
     }
 
     <div class="card-title-container">

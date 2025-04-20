@@ -4,7 +4,18 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay} from 'rxjs/operators';
-import {debounceTime, defer, distinctUntilChanged, filter, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  defer,
+  distinctUntilChanged,
+  filter,
+  forkJoin,
+  Observable,
+  of,
+  switchMap,
+  tap
+} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {UpdateNotificationModalComponent} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
@@ -173,9 +184,15 @@ export class ManageTasksSettingsComponent implements OnInit {
         // }),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return;
+          }
           this.serverSettings = settings;
 
           this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());

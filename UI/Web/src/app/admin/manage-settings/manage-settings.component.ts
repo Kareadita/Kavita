@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {ServerService} from 'src/app/_services/server.service';
@@ -10,7 +10,7 @@ import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ConfirmService} from "../../shared/confirm.service";
-import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
@@ -40,6 +40,7 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+  isDocker: boolean = false;
 
   allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
     WikiLink.DataCollection +
@@ -61,7 +62,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
       this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
-      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
+      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [this.emptyOrPattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
@@ -76,6 +77,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
+
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
@@ -84,9 +86,16 @@ export class ManageSettingsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return
+          }
+
           this.serverSettings = settings;
           this.resetForm();
           this.cdRef.markForCheck();
@@ -94,6 +103,7 @@ export class ManageSettingsComponent implements OnInit {
       ).subscribe();
 
       this.serverService.getServerInfo().subscribe(info => {
+        this.isDocker = info.isDocker;
         if (info.isDocker) {
           this.settingsForm.get('ipAddresses')?.disable();
           this.settingsForm.get('port')?.disable();
@@ -130,11 +140,17 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   packData() {
-    const modelSettings = this.settingsForm.value;
+    const modelSettings: ServerSettings = this.settingsForm.value;
     modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
     modelSettings.installId = this.serverSettings.installId;
     modelSettings.installVersion = this.serverSettings.installVersion;
+
+    // Disabled FormControls are not added to the value
+    if (this.isDocker) {
+      modelSettings.ipAddresses = this.serverSettings.ipAddresses;
+      modelSettings.port = this.serverSettings.port;
+    }
 
     return modelSettings;
   }
@@ -171,4 +187,19 @@ export class ManageSettingsComponent implements OnInit {
       console.error('error: ', err);
     });
   }
+
+  emptyOrPattern(pattern: RegExp): ValidatorFn {
+    return (control) => {
+      if (!control.value || control.value.length === 0) {
+        return null;
+      }
+
+      if (pattern.test(control.value)) {
+        return null;
+      }
+
+      return { 'emptyOrPattern': { 'requiredPattern': pattern.toString(), 'actualValue': control.value } };
+    }
+  }
+
 }

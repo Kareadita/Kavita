@@ -204,8 +204,8 @@
     "person-image-doesnt-exist": "Osoba nie istnieje w CoversDB",
     "email-taken": "Adres e-mail jest już używany",
     "kavitaplus-restricted": "Jest to dostępne tylko dla Kavita+",
-    "smart-filter-name-required": "Strona internetowa",
-    "sidenav-stream-only-delete-smart-filter": "Jedynie filtry filtrowe mogą zostać usunięte z SideNav",
-    "dashboard-stream-only-delete-smart-filter": "Tylko inteligentne strumienie filtrów mogą zostać usunięte z rozdzielczości",
+    "smart-filter-name-required": "Inteligentny filtr wymaga nazwy",
+    "sidenav-stream-only-delete-smart-filter": "Tylko inteligentne filtry mogą zostać usunięte z panelu bocznego",
+    "dashboard-stream-only-delete-smart-filter": "Tylko inteligentne strumienie filtrów może zostać usunięte z głównego panelu",
     "smart-filter-system-name": "Nie można użyć nazwy systemu dostarczanego strumieniem"
 }

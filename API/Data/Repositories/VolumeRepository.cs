@@ -35,6 +35,7 @@ public interface IVolumeRepository
     void Add(Volume volume);
     void Update(Volume volume);
     void Remove(Volume volume);
+    void Remove(IList<Volume> volumes);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
@@ -43,6 +44,7 @@ public interface IVolumeRepository
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
+    Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
     Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync();
@@ -71,6 +73,10 @@ public class VolumeRepository : IVolumeRepository
     public void Remove(Volume volume)
     {
         _context.Volume.Remove(volume);
+    }
+    public void Remove(IList<Volume> volumes)
+    {
+        _context.Volume.RemoveRange(volumes);
     }
 
     /// <summary>
@@ -176,6 +182,15 @@ public class VolumeRepository : IVolumeRepository
         return await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
             .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
+            .AsSplitQuery()
+            .OrderBy(vol => vol.MinNumber)
+            .ToListAsync();
+    }
+    public async Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None)
+    {
+        return await _context.Volume
+            .Where(vol => volumeIds.Contains(vol.Id))
+            .Includes(includes)
             .AsSplitQuery()
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync();

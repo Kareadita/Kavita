@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -53,5 +55,30 @@ public class VolumeController : BaseApiController
         }
 
         return Ok(false);
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("multiple")]
+    public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
+    {
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
+        if (volumes.Count != volumesIds.Length)
+        {
+            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+        }
+
+        _unitOfWork.VolumeRepository.Remove(volumes);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            return Ok(false);
+        }
+
+        foreach (var volume in volumes)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(volume.Id, volume.SeriesId), false);
+        }
+
+        return Ok(true);
     }
 }

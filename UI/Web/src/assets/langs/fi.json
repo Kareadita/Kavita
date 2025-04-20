@@ -10,7 +10,7 @@
         "devices-tab": "{{tabs.devices-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
         "success-toast": "Käyttäjäasetukset päivitetty",
-        "global-settings-title": "Laajamittaiset asetukset",
+        "global-settings-title": "Yleisesti pätevät asetukset",
         "page-layout-mode-label": "Sivun asettelutila",
         "page-layout-mode-tooltip": "Näytä kohteet kortteina tai luettelonäkymänä Sarjojen yksityiskohdat -sivulla.",
         "locale-label": "Kieliasetus",

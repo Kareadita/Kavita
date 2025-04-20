@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, take, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
@@ -55,9 +55,15 @@ export class ManageMediaSettingsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return;
+          }
 
           const encodingChanged = this.serverSettings.encodeMediaAs !== settings.encodeMediaAs;
           if (encodingChanged) {

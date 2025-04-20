@@ -64,7 +64,7 @@
         @if (settingsForm.get('ipAddresses'); as formControl) {
           <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
             <ng-template #view>
-              {{formControl.value}}
+              {{formControl.value | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <div class="input-group">
@@ -75,7 +75,7 @@
 
               @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="ipaddresses-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
+                  @if (formControl.errors?.emptyOrPattern) {
                     <div>{{t('ip-address-validation')}}</div>
                   }
                 </div>

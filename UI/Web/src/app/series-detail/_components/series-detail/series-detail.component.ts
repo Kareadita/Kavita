@@ -115,6 +115,7 @@ import {CoverImageComponent} from "../../../_single-module/cover-image/cover-ima
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
+import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
 
 
 enum TabID {
@@ -353,11 +354,25 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
         break;
       case Action.Delete:
-        await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
-          // No need to update the page as the backend will spam volume/chapter deletions
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
+        if (chapters.length > 0) {
+          await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
+            // No need to update the page as the backend will spam volume/chapter deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+
+          // It's not possible to select both chapters and volumes
+          break;
+        }
+
+        if (selectedVolumeIds.length > 0) {
+          await this.actionService.deleteMultipleVolumes(selectedVolumeIds, () => {
+            // No need to update the page as the backend will spam volume deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+        }
+
         break;
     }
   }
@@ -486,6 +501,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         const removedEvent = event.payload as ChapterRemovedEvent;
         if (removedEvent.seriesId !== this.seriesId) return;
         this.loadPageSource.next(false);
+      } else if (event.event === EVENTS.VolumeRemoved) {
+        const volumeRemoveEvent = event.payload as VolumeRemovedEvent;
+        if (volumeRemoveEvent.seriesId === this.seriesId) {
+          this.loadPageSource.next(false);
+        }
       }
     });
 
@@ -660,7 +680,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.Delete):
         await this.actionService.deleteChapter(chapter.id, (success) => {
           if (!success) return;
-          
+
           this.chapters = this.chapters.filter(c => c.id != chapter.id);
           this.cdRef.markForCheck();
         });

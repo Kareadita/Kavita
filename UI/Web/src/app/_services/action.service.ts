@@ -472,8 +472,19 @@ export class ActionService {
     });
   }
 
+  async deleteMultipleVolumes(volumes: Array<Volume>, callback?: BooleanActionCallback) {
+    // TODO: Change translation key back to "toasts.confirm-delete-multiple-volumes"
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters', {count: volumes.length}))) return;
+
+    this.volumeService.deleteMultipleVolumes(volumes.map(v => v.id)).subscribe((success) => {
+      if (callback) {
+        callback(success);
+      }
+    })
+  }
+
   async deleteMultipleChapters(seriesId: number, chapterIds: Array<Chapter>, callback?: BooleanActionCallback) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters'))) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters', {count: chapterIds.length}))) return;
 
     this.chapterService.deleteMultipleChapters(seriesId, chapterIds.map(c => c.id)).subscribe(() => {
       if (callback) {
