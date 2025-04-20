@@ -41,7 +41,7 @@ your reading collection with your friends and family!
 
 ## Demo
 If you want to try out Kavita, a demo is available:
-[https://demo.kavitareader.com/](https://demo.kavitareader.com/)
+[https://demo.kavitareader.com/](https://demo.kavitareader.com/login?apiKey=9003cf99-9213-4206-a787-af2fe4cc5f1f)
 ```
 Username: demouser
 Password: Demouser64
