@@ -161,9 +161,9 @@ public class ImageServiceTests
 
     private static void GenerateColorImage(string hexColor, string outputPath)
     {
-        var color = ImageService.HexToRgb(hexColor);
+        var (r, g, b) = ImageService.HexToRgb(hexColor);
         using var blackImage = Image.Black(200, 100);
-        using var colorImage = blackImage.NewFromImage(color.R, color.G, color.B);
+        using var colorImage = blackImage.NewFromImage(r, g, b);
         colorImage.WriteToFile(outputPath);
     }
 
