@@ -157,8 +157,8 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
                 .OrderByDescending(r => r.Score);
         }
 
-        IEnumerable<RatingDto> ratings = new List<RatingDto>();
-        if (seriesDetailDto.ExternalRatings != null && seriesDetailDto.ExternalRatings.Any())
+        IEnumerable<RatingDto> ratings = [];
+        if (seriesDetailDto.ExternalRatings != null && seriesDetailDto.ExternalRatings.Count != 0)
         {
             ratings = seriesDetailDto.ExternalRatings
                 .Select(r => _mapper.Map<RatingDto>(r));

@@ -485,6 +485,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 var rating = _mapper.Map<ExternalRating>(r);
                 rating.SeriesId = externalSeriesMetadata.SeriesId;
+                rating.ProviderUrl = r.ProviderUrl;
                 return rating;
             }).ToList();
 
