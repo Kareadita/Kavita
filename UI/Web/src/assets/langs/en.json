@@ -2757,7 +2757,9 @@
         "copy-settings": "Copy Settings From",
         "match": "Match",
         "match-tooltip": "Match Series with Kavita+ manually",
-        "reorder": "Reorder"
+        "reorder": "Reorder",
+        "rename": "Rename",
+        "rename-tooltip": "Rename the Smart Filter"
     },
 
     "preferences": {

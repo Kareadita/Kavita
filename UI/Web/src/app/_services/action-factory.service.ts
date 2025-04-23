@@ -871,6 +871,14 @@ export class ActionFactoryService {
 
     this.smartFilterActions = [
       {
+        action: Action.Edit,
+        title: 'rename',
+        description: 'rename-tooltip',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',

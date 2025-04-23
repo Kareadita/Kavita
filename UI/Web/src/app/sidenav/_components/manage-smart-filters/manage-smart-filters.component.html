@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read:'manage-smart-filters'">
   <form [formGroup]="listForm">
-    @if (filters.length >= 3) {
+    @if (filters.length >= 5) {
       <div class="mb-3">
         <label for="filter" class="form-label">{{t('filter')}}</label>
         <div class="input-group">
@@ -12,27 +12,24 @@
   </form>
 
   <ul>
-    @for(f of filters | filter: filterList; track f.name) {
-      <li class="list-group-item">
-        <span>
-          @if (isErrored(f)) {
-            <i class="fa-solid fa-triangle-exclamation red me-2" [ngbTooltip]="t('errored')"></i>
-            <span class="visually-hidden">{{t('errored')}}</span>
-          }
-          <a [href]="baseUrl + 'all-series?' + f.filter" [target]="target">{{f.name}}</a>
-        </span>
-        <div class="float-end">
-          <button class="btn btn-actions me-2" (click)="editFilter(f)">
-            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('edit')}}</span>
-          </button>
+    @for(stream of filters | filter: filterList; track stream.name) {
 
-          <button class="btn btn-danger float-end" (click)="deleteFilter(f)">
-            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('delete')}}</span>
-          </button>
-        </div>
-      </li>
+      @if (isErrored(stream)) {
+        <li class="list-group-item d-block mb-3">
+          <i class="fa-solid fa-triangle-exclamation red me-2">
+            <span class="visually-hidden">{{t('errored')}}</span>
+          </i>
+          {{stream.name}} - {{t('errored')}}
+        </li>
+      } @else {
+        @if(filterApiMap[stream.name] | async; as data) {
+          <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter" [actionables]="actions" (handleAction)="handleAction($event, stream)">
+            <ng-template #carouselItem let-item>
+              <app-series-card [series]="item" [libraryId]="item.libraryId"></app-series-card>
+            </ng-template>
+          </app-carousel-reel>
+        }
+      }
     } @empty {
       <li class="list-group-item">
         {{t('no-data')}}
