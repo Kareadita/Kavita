@@ -175,6 +175,20 @@
           </li>
         }
 
+          <li [ngbNavItem]="TabID.Reviews">
+            <a ngbNavLink>
+              {{t(TabID.Reviews)}}
+              <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+            </a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+                <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
+                             [series]="series" [chapter]="chapter" [volumeId]="chapter.volumeId"
+                             reviewLocation="chapter" />
+              }
+            </ng-template>
+          </li>
+
         @if(readingLists.length > 0) {
           <li [ngbNavItem]="TabID.Related">
             <a ngbNavLink>{{t('related-tab')}}</a>

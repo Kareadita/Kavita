@@ -15,8 +15,8 @@ import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.c
 import {AccountService} from "../../_services/account.service";
 import {
   ReviewSeriesModalCloseEvent,
-  ReviewSeriesModalComponent
-} from "../review-series-modal/review-series-modal.component";
+  ReviewModalComponent
+} from "../review-modal/review-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
@@ -53,7 +53,7 @@ export class ReviewCardComponent implements OnInit {
   showModal() {
     let component;
     if (this.isMyReview) {
-      component = ReviewSeriesModalComponent;
+      component = ReviewModalComponent;
     } else {
       component = ReviewCardModalComponent;
     }

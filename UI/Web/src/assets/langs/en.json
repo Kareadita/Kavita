@@ -67,6 +67,10 @@
     "spoiler": {
         "click-to-show": "Spoiler, click to show"
     },
+    "reviews": {
+        "user-reviews-local": "Local Reviews",
+        "user-reviews-plus": "External Reviews"
+    },
 
     "review-series-modal": {
         "title": "Edit Review",
@@ -957,9 +961,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "There are no chapters to this volume. Cannot read.",
         "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.",
-
-        "user-reviews-local": "Local Reviews",
-        "user-reviews-plus": "External Reviews",
 
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",

@@ -65,6 +65,12 @@ import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {UserReview} from "../_single-module/review-card/user-review";
+import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
+import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
+import {User} from "../_models/user";
+import {ReviewModalComponent} from "../_single-module/review-modal/review-modal.component";
+import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 
 enum TabID {
   Related = 'related-tab',
@@ -74,36 +80,39 @@ enum TabID {
 
 @Component({
     selector: 'app-chapter-detail',
-    imports: [
-        AsyncPipe,
-        CardActionablesComponent,
-        LoadingComponent,
-        NgbDropdown,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdownToggle,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLink,
-        NgbTooltip,
-        VirtualScrollerModule,
-        NgStyle,
-        NgClass,
-        TranslocoDirective,
-        ReadMoreComponent,
-        NgbNavItem,
-        NgbNavOutlet,
-        DetailsTabComponent,
-        RouterLink,
-        EntityTitleComponent,
-        RelatedTabComponent,
-        BadgeExpanderComponent,
-        MetadataDetailRowComponent,
-        DownloadButtonComponent,
-        DatePipe,
-        DefaultDatePipe,
-        CoverImageComponent
-    ],
+  imports: [
+    AsyncPipe,
+    CardActionablesComponent,
+    LoadingComponent,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    NgbTooltip,
+    VirtualScrollerModule,
+    NgStyle,
+    NgClass,
+    TranslocoDirective,
+    ReadMoreComponent,
+    NgbNavItem,
+    NgbNavOutlet,
+    DetailsTabComponent,
+    RouterLink,
+    EntityTitleComponent,
+    RelatedTabComponent,
+    BadgeExpanderComponent,
+    MetadataDetailRowComponent,
+    DownloadButtonComponent,
+    DatePipe,
+    DefaultDatePipe,
+    CoverImageComponent,
+    CarouselReelComponent,
+    ReviewCardComponent,
+    ReviewsComponent
+  ],
     templateUrl: './chapter-detail.component.html',
     styleUrl: './chapter-detail.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -151,6 +160,8 @@ export class ChapterDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
+  userReviews: Array<UserReview> = [];
+  plusReviews: Array<UserReview> = [];
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
   /**

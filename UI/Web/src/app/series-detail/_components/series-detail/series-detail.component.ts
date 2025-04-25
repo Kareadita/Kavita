@@ -64,8 +64,8 @@ import {SeriesService} from 'src/app/_services/series.service';
 import {
   ReviewSeriesModalCloseAction,
   ReviewSeriesModalCloseEvent,
-  ReviewSeriesModalComponent
-} from '../../../_single-module/review-series-modal/review-series-modal.component';
+  ReviewModalComponent
+} from '../../../_single-module/review-modal/review-modal.component';
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
@@ -116,6 +116,7 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
+import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
 
 
 enum TabID {
@@ -140,14 +141,14 @@ interface StoryLineItem {
     templateUrl: './series-detail.component.html',
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
-        NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
-        NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
-        NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
-        TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-        NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
-        VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-        PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent]
+  imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
+    NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
+    NgbDropdownItem, BulkOperationsComponent,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
+    TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
+    NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
+    VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -1135,56 +1136,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPageSource.next(closeResult.updateExternal);
       }
     });
-  }
-
-  getUserReview() {
-    return this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
-  }
-
-  openReviewModal() {
-    const userReview = this.getUserReview();
-
-    const modalRef = this.modalService.open(ReviewSeriesModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.series = this.series;
-    if (userReview.length > 0) {
-      modalRef.componentInstance.review = userReview[0];
-    } else {
-      modalRef.componentInstance.review = {
-        seriesId: this.series.id,
-        tagline: '',
-        body: ''
-      };
-    }
-
-    modalRef.closed.subscribe((closeResult) => {
-      this.updateOrDeleteReview(closeResult);
-    });
-
-  }
-
-  updateOrDeleteReview(closeResult: ReviewSeriesModalCloseEvent) {
-    if (closeResult.action === ReviewSeriesModalCloseAction.Close) return;
-
-    const index = this.reviews.findIndex(r => r.username === closeResult.review!.username);
-    if (closeResult.action === ReviewSeriesModalCloseAction.Edit) {
-      if (index === -1 ) {
-        // A new series was added:
-        this.reviews = [closeResult.review, ...this.reviews];
-        this.cdRef.markForCheck();
-        return;
-      }
-      // An edit occurred
-      this.reviews[index] = closeResult.review;
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (closeResult.action === ReviewSeriesModalCloseAction.Delete) {
-      // An edit occurred
-      this.reviews = [...this.reviews.filter(r => r.username !== closeResult.review!.username)];
-      this.cdRef.markForCheck();
-      return;
-    }
   }
 
 

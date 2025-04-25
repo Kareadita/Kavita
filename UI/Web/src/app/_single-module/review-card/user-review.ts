@@ -3,6 +3,8 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 export interface UserReview {
   seriesId: number;
   libraryId: number;
+  volumeId?: number;
+  chapterId?: number;
   score: number;
   username: string;
   body: string;

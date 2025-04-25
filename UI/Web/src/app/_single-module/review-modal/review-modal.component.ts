@@ -6,6 +6,7 @@ import {UserReview} from "../review-card/user-review";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
+import {ChapterService} from "../../_services/chapter.service";
 
 export enum ReviewSeriesModalCloseAction {
   Create,
@@ -22,20 +23,22 @@ export interface ReviewSeriesModalCloseEvent {
 @Component({
   selector: 'app-review-series-modal',
   imports: [ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './review-series-modal.component.html',
-  styleUrls: ['./review-series-modal.component.scss'],
+  templateUrl: './review-modal.component.html',
+  styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReviewSeriesModalComponent implements OnInit {
+export class ReviewModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
+  private readonly chapterService = inject(ChapterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
   protected readonly minLength = 5;
 
   @Input({required: true}) review!: UserReview;
+  @Input() reviewLocation: 'series' | 'chapter' = 'series';
   reviewGroup!: FormGroup;
 
   ngOnInit(): void {
@@ -51,18 +54,26 @@ export class ReviewSeriesModalComponent implements OnInit {
 
   async delete() {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
-    this.seriesService.deleteReview(this.review.seriesId).subscribe(() => {
-      this.toastr.success(translate('toasts.review-deleted'));
-      this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
-    });
+
+    if (this.reviewLocation === 'series') {
+      this.seriesService.deleteReview(this.review.seriesId).subscribe(() => {
+        this.toastr.success(translate('toasts.review-deleted'));
+        this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
+      });
+    }
+
   }
   save() {
     const model = this.reviewGroup.value;
     if (model.reviewBody.length < this.minLength) {
       return;
     }
-    this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(review => {
-      this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
-    });
+
+    if (this.reviewLocation === 'series') {
+      this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(review => {
+        this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
+      });
+    }
+
   }
 }
