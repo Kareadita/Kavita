@@ -30,7 +30,7 @@ namespace API.Services.Plus;
 /// <summary>
 /// Misleading name but is the source of data (like a review coming from AniList)
 /// </summary>
-/// <remarks>Keep <see cref="ChapterRatingProvider"/> in sync</remarks>
+/// <remarks>Keep <see cref="RatingProvider"/> in sync</remarks>
 public enum ScrobbleProvider
 {
     /// <summary>

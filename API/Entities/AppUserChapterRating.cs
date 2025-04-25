@@ -1,26 +1,16 @@
-using API.Services.Plus;
+using API.Entities.Enums;
 
 namespace API.Entities;
 
 #nullable enable
 
-public enum ChapterRatingProvider
-{
-    Kavita = 0,
-    AniList = 1,
-    Mal = 2,
-    CbrUser = 3,
-    CbrCritic = 4,
-}
-
 public class AppUserChapterRating
 {
-
     public int Id { get; set; }
     public float Rating { get; set; }
     public bool HasBeenRated { get; set; }
     public string? Review { get; set; }
-    public ChapterRatingProvider Provider {get; set; }
+    public RatingProvider Provider {get; set; }
 
     public int SeriesId { get; set; }
     public Series Series { get; set; } = null!;
