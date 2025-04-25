@@ -6,5 +6,6 @@ namespace API.DTOs.SeriesDetail;
 public class UpdateUserReviewDto
 {
     public int SeriesId { get; set; }
+    public int Rating { get; set; }
     public string Body { get; set; }
 }

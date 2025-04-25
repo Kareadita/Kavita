@@ -46,6 +46,7 @@ public class ReviewController : BaseApiController
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
             .WithTagline(string.Empty)
+            .WithRating(dto.Rating)
             .Build();
 
         if (rating.Id == 0)
@@ -83,6 +84,7 @@ public class ReviewController : BaseApiController
             .WithSeriesId(dto.SeriesId)
             .WithVolumeId(chapter.VolumeId)
             .WithChapterId(chapter.Id)
+            .WithRating(dto.Rating)
             .WithReview(dto.Body)
             .Build();
 

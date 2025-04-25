@@ -208,9 +208,9 @@ export class SeriesService {
   deleteReview(seriesId: number) {
     return this.httpClient.delete(this.baseUrl + 'review?seriesId=' + seriesId);
   }
-  updateReview(seriesId: number, body: string) {
+  updateReview(seriesId: number, body: string, rating: number) {
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, body
+      seriesId, body, rating
     });
   }
 

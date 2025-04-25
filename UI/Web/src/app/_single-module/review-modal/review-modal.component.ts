@@ -8,6 +8,8 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
 import {ChapterService} from "../../_services/chapter.service";
 import {of} from "rxjs";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../_services/theme.service";
 
 export enum ReviewSeriesModalCloseAction {
   Create,
@@ -23,7 +25,7 @@ export interface ReviewSeriesModalCloseEvent {
 
 @Component({
   selector: 'app-review-series-modal',
-  imports: [ReactiveFormsModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule],
   templateUrl: './review-modal.component.html',
   styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,16 +38,23 @@ export class ReviewModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
+  private readonly themeService = inject(ThemeService);
   protected readonly minLength = 5;
 
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
+
+  starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
       reviewBody: new FormControl(this.review.body, [Validators.required, Validators.minLength(this.minLength)]),
     });
     this.cdRef.markForCheck();
+  }
+
+  updateRating($event: number) {
+    this.review.rating = $event;
   }
 
   close() {
@@ -76,9 +85,9 @@ export class ReviewModalComponent implements OnInit {
 
     let obs;
     if (!this.review.chapterId) {
-      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody);
+      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody, this.review.rating);
     } else {
-      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody);
+      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody, this.review.rating);
     }
 
     obs?.subscribe(review => {

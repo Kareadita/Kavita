@@ -5,6 +5,7 @@ export interface UserReview {
   libraryId: number;
   volumeId?: number;
   chapterId?: number;
+  rating: number;
   score: number;
   username: string;
   body: string;
