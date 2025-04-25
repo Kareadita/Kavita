@@ -26,6 +26,8 @@ public class UserReviewDto
     /// The series this is for
     /// </summary>
     public int SeriesId { get; set; }
+    public int? VolumeId { get; set; }
+    public int? ChapterId { get; set; }
     /// <summary>
     /// The library this series belongs in
     /// </summary>

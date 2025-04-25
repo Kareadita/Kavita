@@ -101,6 +101,12 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.LibraryId,
                 opt =>
                     opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.VolumeId,
+                opt =>
+                    opt.MapFrom(src => src.VolumeId))
+            .ForMember(dest => dest.ChapterId,
+                opt =>
+                    opt.MapFrom(src => src.ChapterId))
             .ForMember(dest => dest.Body,
                 opt =>
                     opt.MapFrom(src => src.Review))

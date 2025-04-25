@@ -35,6 +35,7 @@ export class ReviewCardComponent implements OnInit {
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   @Input({required: true}) review!: UserReview;
+  @Input() reviewLocation: 'series' | 'chapter' = 'series';
   @Output() refresh = new EventEmitter<ReviewSeriesModalCloseEvent>();
 
   isMyReview: boolean = false;
@@ -44,7 +45,7 @@ export class ReviewCardComponent implements OnInit {
   ngOnInit() {
     this.accountService.currentUser$.subscribe(u => {
       if (u) {
-        this.isMyReview = this.review.username === u.username;
+        this.isMyReview = this.review.username === u.username && !this.review.isExternal;
         this.cdRef.markForCheck();
       }
     });
@@ -58,6 +59,11 @@ export class ReviewCardComponent implements OnInit {
       component = ReviewCardModalComponent;
     }
     const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
+
+    if (this.isMyReview) {
+      ref.componentInstance.reviewLocation = this.reviewLocation;
+    }
+
     ref.componentInstance.review = this.review;
     ref.closed.subscribe((res: ReviewSeriesModalCloseEvent | undefined) => {
       if (res) {

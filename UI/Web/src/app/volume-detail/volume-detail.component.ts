@@ -78,6 +78,8 @@ import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/ed
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {UserReview} from "../_single-module/review-card/user-review";
+import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 
 enum TabID {
 
@@ -119,36 +121,37 @@ interface VolumeCast extends IHasCast {
 
 @Component({
     selector: 'app-volume-detail',
-    imports: [
-        LoadingComponent,
-        NgbNavOutlet,
-        DetailsTabComponent,
-        NgbNavItem,
-        NgbNavLink,
-        NgbNavContent,
-        NgbNav,
-        ReadMoreComponent,
-        AsyncPipe,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdown,
-        NgbDropdownToggle,
-        EntityTitleComponent,
-        RouterLink,
-        NgbTooltip,
-        NgStyle,
-        NgClass,
-        TranslocoDirective,
-        VirtualScrollerModule,
-        ChapterCardComponent,
-        RelatedTabComponent,
-        BadgeExpanderComponent,
-        MetadataDetailRowComponent,
-        DownloadButtonComponent,
-        CardActionablesComponent,
-        BulkOperationsComponent,
-        CoverImageComponent
-    ],
+  imports: [
+    LoadingComponent,
+    NgbNavOutlet,
+    DetailsTabComponent,
+    NgbNavItem,
+    NgbNavLink,
+    NgbNavContent,
+    NgbNav,
+    ReadMoreComponent,
+    AsyncPipe,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdown,
+    NgbDropdownToggle,
+    EntityTitleComponent,
+    RouterLink,
+    NgbTooltip,
+    NgStyle,
+    NgClass,
+    TranslocoDirective,
+    VirtualScrollerModule,
+    ChapterCardComponent,
+    RelatedTabComponent,
+    BadgeExpanderComponent,
+    MetadataDetailRowComponent,
+    DownloadButtonComponent,
+    CardActionablesComponent,
+    BulkOperationsComponent,
+    CoverImageComponent,
+    ReviewsComponent
+  ],
     templateUrl: './volume-detail.component.html',
     styleUrl: './volume-detail.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -196,6 +199,8 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
+  userReviews: Array<UserReview> = [];
+  plusReviews: Array<UserReview> = [];
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
@@ -374,7 +379,8 @@ export class VolumeDetailComponent implements OnInit {
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
       volume: this.volumeService.getVolumeMetadata(this.volumeId),
-      libraryType: this.libraryService.getLibraryType(this.libraryId)
+      libraryType: this.libraryService.getLibraryType(this.libraryId),
+      reviews: this.volumeService.volumeReviews(this.volumeId),
     }).subscribe(results => {
 
       if (results.volume === null) {
@@ -385,6 +391,8 @@ export class VolumeDetailComponent implements OnInit {
       this.series = results.series;
       this.volume = results.volume;
       this.libraryType = results.libraryType;
+      this.userReviews = results.reviews.filter(r => !r.isExternal);
+      this.plusReviews = results.reviews.filter(r => r.isExternal);
 
       this.themeService.setColorScape(this.volume!.primaryColor, this.volume!.secondaryColor);
 

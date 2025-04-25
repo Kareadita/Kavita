@@ -50,6 +50,26 @@ export class ReviewsComponent {
     });
   }
 
+  iconClasses(): string {
+    let classes = 'fa-solid';
+    if (this.canEditOrAdd()) {
+      classes += 'fa-' + (this.getUserReviews().length > 0 ? 'pen' : 'plus');
+    }
+    return classes;
+  }
+
+  canEditOrAdd(): boolean {
+    if (this.reviewLocation === 'series') {
+      return true;
+    }
+
+    if (this.reviewLocation === 'chapter') {
+      return this.chapter !== undefined;
+    }
+
+    return false;
+  }
+
   openReviewModal() {
     const userReview = this.getUserReviews();
 
