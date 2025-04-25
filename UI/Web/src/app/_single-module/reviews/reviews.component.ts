@@ -53,7 +53,7 @@ export class ReviewsComponent {
   iconClasses(): string {
     let classes = 'fa-solid';
     if (this.canEditOrAdd()) {
-      classes += 'fa-' + (this.getUserReviews().length > 0 ? 'pen' : 'plus');
+      classes += ' fa-' + (this.getUserReviews().length > 0 ? 'pen' : 'plus');
     }
     return classes;
   }
