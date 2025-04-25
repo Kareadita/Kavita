@@ -6,6 +6,7 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
@@ -391,6 +392,15 @@ public class ChapterController : BaseApiController
         return Ok();
     }
 
-
+    /// <summary>
+    /// Get all reviews for this chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("review")]
+    public async Task<IList<UserReviewDto>> ChapterReviews([FromQuery] int chapterId)
+    {
+        return await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId());
+    }
 
 }

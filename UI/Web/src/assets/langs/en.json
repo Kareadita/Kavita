@@ -72,7 +72,7 @@
         "user-reviews-plus": "External Reviews"
     },
 
-    "review-series-modal": {
+    "review-modal": {
         "title": "Edit Review",
         "review-label": "Review",
         "close": "{{common.close}}",

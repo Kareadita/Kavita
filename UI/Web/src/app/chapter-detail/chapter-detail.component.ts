@@ -222,7 +222,8 @@ export class ChapterDetailComponent implements OnInit {
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
-      libraryType: this.libraryService.getLibraryType(this.libraryId)
+      libraryType: this.libraryService.getLibraryType(this.libraryId),
+      reviews: this.chapterService.chapterReviews(this.chapterId),
     }).subscribe(results => {
 
       if (results.chapter === null) {
@@ -234,6 +235,8 @@ export class ChapterDetailComponent implements OnInit {
       this.chapter = results.chapter;
       this.weblinks = this.chapter.webLinks.split(',');
       this.libraryType = results.libraryType;
+      this.userReviews = results.reviews.filter(r => !r.isExternal);
+      this.plusReviews = results.reviews.filter(r => r.isExternal);
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 

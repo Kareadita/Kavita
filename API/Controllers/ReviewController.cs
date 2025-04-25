@@ -63,6 +63,45 @@ public class ReviewController : BaseApiController
     }
 
     /// <summary>
+    /// Updates the review for a given series
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpPost("chapter/{chapterId}")]
+    public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(int chapterId, UpdateUserReviewDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ChapterRatings);
+        if (user == null) return Unauthorized();
+
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ChapterIncludes.None);
+        if (chapter == null) return BadRequest();
+
+        var builder = new ChapterRatingBuilder(user.ChapterRatings.FirstOrDefault(r => r.SeriesId == dto.SeriesId));
+
+        var rating = builder
+            .WithSeriesId(dto.SeriesId)
+            .WithVolumeId(chapter.VolumeId)
+            .WithChapterId(chapter.Id)
+            .WithReview(dto.Body)
+            .Build();
+
+        if (rating.Id == 0)
+        {
+            user.ChapterRatings.Add(rating);
+        }
+        _unitOfWork.UserRepository.Update(user);
+
+        await _unitOfWork.CommitAsync();
+
+        // Do I need this?
+        //BackgroundJob.Enqueue(() =>
+        //    _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
+        return Ok(_mapper.Map<UserReviewDto>(rating));
+    }
+
+
+    /// <summary>
     /// Deletes the user's review for the given series
     /// </summary>
     /// <returns></returns>
@@ -73,6 +112,26 @@ public class ReviewController : BaseApiController
         if (user == null) return Unauthorized();
 
         user.Ratings = user.Ratings.Where(r => r.SeriesId != seriesId).ToList();
+
+        _unitOfWork.UserRepository.Update(user);
+
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Deletes the user's review for a given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpDelete("chapter/{chapterId}")]
+    public async Task<IActionResult> DeleteChapterReview(int chapterId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ChapterRatings);
+        if (user == null) return Unauthorized();
+
+        user.ChapterRatings = user.ChapterRatings.Where(c => c.ChapterId != chapterId).ToList();
 
         _unitOfWork.UserRepository.Update(user);
 

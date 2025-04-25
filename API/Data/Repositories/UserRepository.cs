@@ -42,7 +42,8 @@ public enum AppUserIncludes
     DashboardStreams = 2048,
     SideNavStreams = 4096,
     ExternalSources = 8192,
-    Collections = 16384 // 2^14
+    Collections = 16384, // 2^14
+    ChapterRatings =  1 << 15,
 }
 
 public interface IUserRepository
@@ -66,6 +67,7 @@ public interface IUserRepository
     Task<IList<string>> GetRoles(int userId);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
+    Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
@@ -595,6 +597,19 @@ public class UserRepository : IUserRepository
         return await _context.AppUserRating
             .Include(r => r.AppUser)
             .Where(r => r.SeriesId == seriesId)
+            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .OrderBy(r => r.AppUserId == userId)
+            .ThenBy(r => r.Rating)
+            .AsSplitQuery()
+            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId)
+    {
+        return await _context.AppUserChapterRating
+            .Include(r => r.AppUser)
+            .Where(r => r.ChapterId == chapterId)
             .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
             .OrderBy(r => r.AppUserId == userId)
             .ThenBy(r => r.Rating)

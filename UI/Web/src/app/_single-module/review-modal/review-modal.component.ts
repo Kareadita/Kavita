@@ -7,6 +7,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
 import {ChapterService} from "../../_services/chapter.service";
+import {of} from "rxjs";
 
 export enum ReviewSeriesModalCloseAction {
   Create,
@@ -55,12 +56,18 @@ export class ReviewModalComponent implements OnInit {
   async delete() {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
 
+    let obs;
     if (this.reviewLocation === 'series') {
-      this.seriesService.deleteReview(this.review.seriesId).subscribe(() => {
-        this.toastr.success(translate('toasts.review-deleted'));
-        this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
-      });
+      obs = this.seriesService.deleteReview(this.review.seriesId);
     }
+    if (this.reviewLocation === 'chapter') {
+      obs = this.chapterService.deleteChapterReview(this.review.chapterId!)
+    }
+
+    obs?.subscribe(() => {
+      this.toastr.success(translate('toasts.review-deleted'));
+      this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
+    });
 
   }
   save() {
@@ -69,11 +76,17 @@ export class ReviewModalComponent implements OnInit {
       return;
     }
 
+    let obs;
     if (this.reviewLocation === 'series') {
-      this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(review => {
-        this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
-      });
+      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody);
     }
+    if (this.reviewLocation === 'chapter') {
+      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId!, model.reviewBody);
+    }
+
+    obs?.subscribe(review => {
+      this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
+    });
 
   }
 }

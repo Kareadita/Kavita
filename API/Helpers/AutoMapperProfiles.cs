@@ -97,6 +97,16 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Username,
                 opt =>
                     opt.MapFrom(src => src.AppUser.UserName));
+        CreateMap<AppUserChapterRating, UserReviewDto>()
+            .ForMember(dest => dest.LibraryId,
+                opt =>
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Body,
+                opt =>
+                    opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.Username,
+                opt =>
+                    opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<AppUserProgress, ProgressDto>()
             .ForMember(dest => dest.PageNum,
