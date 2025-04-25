@@ -1171,6 +1171,14 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
+        // Some publishers (CBR) can be represented as Boom! Studios/Boom! Town imprint, so let's handle that appropriately
+        if (publisher.Contains('/') || publisher.Contains("imprint", StringComparison.InvariantCultureIgnoreCase))
+        {
+            var imprint = publisher.Split('/')[1].Replace("imprint", string.Empty);
+            return await UpdateChapterPeople(chapter, settings, PersonRole.Publisher, [publisher]) ||
+                await UpdateChapterPeople(chapter, settings, PersonRole.Imprint, [imprint]);
+        }
+
         return await UpdateChapterPeople(chapter, settings, PersonRole.Publisher, [publisher]);
     }
 
