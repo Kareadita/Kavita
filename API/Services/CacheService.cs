@@ -80,7 +80,6 @@ public class CacheService : ICacheService
     /// <returns></returns>
     public IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath)
     {
-        var sw = Stopwatch.StartNew();
         var files = _directoryService.GetFilesWithExtension(cachePath, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
@@ -186,8 +185,15 @@ public class CacheService : ICacheService
                 }
                 else
                 {
-                    // Potential BUG: If the folder is left here and there are no files within, this could theoretically return without proper cache
-                    return chapter;
+                    // Do an explicit check for files since rarely a "permission denied" error on deleting
+                    // the file can occur, thus leaving an empty folder and we would never re-cache the files.
+                    if (_directoryService.GetFiles(extractPath).Any())
+                    {
+                        return chapter;
+                    }
+
+                    // Delete the extractPath as ExtractArchive will return if the directory already exists
+                    _directoryService.ClearAndDeleteDirectory(extractPath);
                 }
             }
 
@@ -210,13 +216,13 @@ public class CacheService : ICacheService
     /// <returns></returns>
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
     {
-        if (files == null) return;
+        if (files == null || files.Count == 0) return;
         var removeNonImages = true;
         var fileCount = files.Count;
         var extraPath = string.Empty;
         var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
 
-        if (files.Count > 0 && files[0].Format == MangaFormat.Image)
+        if (files[0].Format == MangaFormat.Image)
         {
             // Check if all the files are Images. If so, do a directory copy, else do the normal copy
             if (files.All(f => f.Format == MangaFormat.Image))
