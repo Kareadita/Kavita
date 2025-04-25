@@ -1,9 +1,9 @@
 <div class="mb-3" *transloco="let t;prefix:'reviews'">
   <app-carousel-reel [items]="userReviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
-                     [iconClasses]=iconClasses()
-                     [clickableTitle]="canEditOrAdd()" (sectionClick)="openReviewModal()">
+                     iconClasses="fa-solid fa-{{this.getUserReviews().length > 0 ? 'pen' : 'plus'}}"
+                     [clickableTitle]=true (sectionClick)="openReviewModal()">
     <ng-template #carouselItem let-item let-position="idx">
-      <app-review-card [reviewLocation]="reviewLocation" [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
     </ng-template>
   </app-carousel-reel>
 </div>

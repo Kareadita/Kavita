@@ -39,7 +39,6 @@ export class ReviewModalComponent implements OnInit {
   protected readonly minLength = 5;
 
   @Input({required: true}) review!: UserReview;
-  @Input() reviewLocation: 'series' | 'chapter' = 'series';
   reviewGroup!: FormGroup;
 
   ngOnInit(): void {
@@ -57,11 +56,10 @@ export class ReviewModalComponent implements OnInit {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
 
     let obs;
-    if (this.reviewLocation === 'series') {
+    if (!this.review.chapterId) {
       obs = this.seriesService.deleteReview(this.review.seriesId);
-    }
-    if (this.reviewLocation === 'chapter') {
-      obs = this.chapterService.deleteChapterReview(this.review.chapterId!)
+    } else {
+      obs = this.chapterService.deleteChapterReview(this.review.chapterId)
     }
 
     obs?.subscribe(() => {
@@ -77,11 +75,10 @@ export class ReviewModalComponent implements OnInit {
     }
 
     let obs;
-    if (this.reviewLocation === 'series') {
+    if (!this.review.chapterId) {
       obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody);
-    }
-    if (this.reviewLocation === 'chapter') {
-      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId!, model.reviewBody);
+    } else {
+      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody);
     }
 
     obs?.subscribe(review => {

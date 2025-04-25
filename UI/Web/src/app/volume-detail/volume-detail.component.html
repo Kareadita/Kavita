@@ -200,8 +200,7 @@
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
                   <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
-                               [series]="series" [volumeId]="volumeId" [chapter]="volume.chapters[0]"
-                               reviewLocation="chapter" />
+                               [series]="series" [volumeId]="volumeId" [chapter]="volume.chapters[0]" />
                 }
               </ng-template>
             </li>

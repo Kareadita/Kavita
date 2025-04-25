@@ -34,8 +34,6 @@ export class ReviewsComponent {
   @Input() volumeId: number | undefined;
   @Input() chapter: Chapter | undefined;
 
-  @Input() reviewLocation: 'series' | 'chapter' = 'series';
-
   user: User | undefined;
 
   constructor(
@@ -50,31 +48,10 @@ export class ReviewsComponent {
     });
   }
 
-  iconClasses(): string {
-    let classes = 'fa-solid';
-    if (this.canEditOrAdd()) {
-      classes += ' fa-' + (this.getUserReviews().length > 0 ? 'pen' : 'plus');
-    }
-    return classes;
-  }
-
-  canEditOrAdd(): boolean {
-    if (this.reviewLocation === 'series') {
-      return true;
-    }
-
-    if (this.reviewLocation === 'chapter') {
-      return this.chapter !== undefined;
-    }
-
-    return false;
-  }
-
   openReviewModal() {
     const userReview = this.getUserReviews();
 
     const modalRef = this.modalService.open(ReviewModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.reviewLocation = this.reviewLocation;
 
     if (userReview.length > 0) {
       modalRef.componentInstance.review = userReview[0];
