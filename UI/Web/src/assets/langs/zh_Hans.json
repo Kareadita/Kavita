@@ -2260,7 +2260,8 @@
         "bulk-delete-libraries": "您确定要删除 {{count}} 个资料库吗？",
         "match-success": "系列匹配正确",
         "webtoon-override": "由于图片代表网络漫画，因此切换到网络漫画模式。",
-        "scrobble-gen-init": "将一项任务加入队列，该任务将根据过去的阅读历史和评分生成 scrobble 事件，并将其与已连接的服务同步。"
+        "scrobble-gen-init": "将一项任务加入队列，该任务将根据过去的阅读历史和评分生成 scrobble 事件，并将其与已连接的服务同步。",
+        "confirm-delete-multiple-volumes": "您确定要删除这 {{count}} 个卷吗？这不会修改磁盘上的文件。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2333,7 +2334,9 @@
         "copy-settings": "复制设置",
         "match": "匹配",
         "match-tooltip": "使用 Kavita+ 手动匹配系列",
-        "reorder": "重新排序"
+        "reorder": "重新排序",
+        "rename-tooltip": "重命名智能筛选",
+        "rename": "重命名"
     },
     "preferences": {
         "left-to-right": "从左到右",

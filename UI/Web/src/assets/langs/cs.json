@@ -2457,7 +2457,8 @@
         "mal-token-required": "Je vyžadován MAL Token, nastavený v Nastavení uživatele",
         "match-success": "Správně sladěné série",
         "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon.",
-        "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami."
+        "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami.",
+        "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",

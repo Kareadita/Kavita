@@ -176,7 +176,9 @@
         "anilist-scrobbling-tooltip": "Kavita가 AniList에 읽기 진행 상황 및 평가를 스크로블(단방향 동기화)하도록 허용",
         "want-to-read-sync-label": "읽고 싶은 동기화",
         "want-to-read-sync-tooltip": "Kavita가 AniList 및 MAL의 보류 중인 읽기 목록에 있는 시리즈를 기반으로 '읽고 싶은 목록'에 항목을 추가하도록 허용합니다",
-        "kavitaplus-settings-title": "Kavita+"
+        "kavitaplus-settings-title": "Kavita+",
+        "allow-auto-webtoon-reader-label": "자동 웹툰 리더 모드",
+        "allow-auto-webtoon-reader-tooltip": "페이지가 웹툰 형식으로 판단될 경우 웹툰 리더 모드로 전환합니다. 일부 잘못된 전환이 일어날 수 있습니다."
     },
     "user-holds": {
         "title": "스크러블 홀드",
@@ -304,7 +306,8 @@
         "regen-warning": "API 키를 재생성하면 기존 클라이언트가 무효화됩니다.",
         "no-key": "오류 - 키가 설정되지 않음",
         "confirm-reset": "이렇게 하면 설정한 모든 OPDS 구성이 무효화됩니다. 정말 계속 하시겠습니까?",
-        "key-reset": "API 키 재설정"
+        "key-reset": "API 키 재설정",
+        "reset": "재설정"
     },
     "scrobbling-providers": {
         "title": "스크로블링 공급자",
@@ -788,7 +791,9 @@
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
         "scrobbling-tooltip": "{{settings.scrobbling}}",
         "publication-status-title": "출판",
-        "publication-status-tooltip": "출판현황"
+        "publication-status-tooltip": "출판현황",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -855,7 +860,8 @@
         "back": "뒤로가기",
         "more": "더 보기",
         "customize": "{{settings.customize}}",
-        "browse-authors": "작가 찾아보기"
+        "browse-authors": "작가 찾아보기",
+        "edit": "{{common.edit}}"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -974,7 +980,8 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} 총 항목",
-        "jumpkey-count": "{{count}} 시리즈"
+        "jumpkey-count": "{{count}} 시리즈",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
         "cannot-read": "읽을 수 없음"
@@ -1000,7 +1007,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
-        "release-title": "{{sort-field-pipe.release-year}}"
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1322,7 +1330,8 @@
         "no-data": "다른 사용자가 없습니다.",
         "loading": "{{common.loading}}",
         "actions-header": "작업",
-        "pending-tooltip": "이 사용자는 이메일을 확인하지 않았습니다"
+        "pending-tooltip": "이 사용자는 이메일을 확인하지 않았습니다",
+        "all-libraries": "모든 라이브러리"
     },
     "edit-collection-tags": {
         "title": "편집 {{collectionName}} 컬렉션",
@@ -1434,7 +1443,8 @@
         "provided": "제공",
         "smart-filter": "스마트 필터",
         "library": "라이브러리",
-        "external-source": "외부 소스"
+        "external-source": "외부 소스",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -1446,7 +1456,19 @@
         "read-options-alt": "읽기 옵션",
         "incognito-alt": "(시크릿 모드)",
         "no-data": "추가된 사항 없음",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "edit-alt": "{{common.edit}}",
+        "edit-label": "편집 모드",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "items-title": "항목",
+        "date-range-title": "날짜 범위",
+        "more-alt": "{{series-detail.more-alt}}",
+        "reorder-alt": "항목 재정렬",
+        "dnd-warning": "드래그 앤 드롭은 모바일 기기나 읽기 목록에 100개 이상의 항목이 있을 경우 사용할 수 없습니다.",
+        "details-tab": "{{series-detail.details-tab}}"
     },
     "events-widget": {
         "title-alt": "활동",
@@ -2000,7 +2022,8 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "no-data": "모든 스마트 필터가 사이드 내비게이션에 추가되었거나 아직 생성되지 않았습니다.",
@@ -2028,7 +2051,15 @@
         "no-data": "스마트 필터가 생성되지 않았습니다",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "errored": "필터에 인코딩 오류가 있습니다. 다시 생성해야 합니다."
+        "errored": "필터에 인코딩 오류가 있습니다. 다시 생성해야 합니다.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "편집 {{name}}",
+        "name-label": "이름",
+        "required-field": "스마트 필터에 이름 필요",
+        "filter-name-unique": "스마트 필터 이름은 고유해야 합니다",
+        "edit": "{{common.edit}}"
     },
     "edit-external-source-item": {
         "not-unique": "이 호스트에 외부 소스가 존재합니다. 중복이 없는지 확인하세요",
@@ -2226,7 +2257,8 @@
         "confirm-delete-multiple-chapters": "{{count}}개의 챕터/볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
         "bulk-delete-libraries": "{{count}}개의 라이브러리를 삭제하시겠습니까?",
         "webtoon-override": "웹툰을 나타내는 이미지가 있어 웹툰 모드로 전환합니다.",
-        "match-success": "시리즈가 올바르게 일치함"
+        "match-success": "시리즈가 올바르게 일치함",
+        "confirm-delete-multiple-volumes": "{{count}}개의 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2420,7 +2452,7 @@
         "chapter-count": "{{num}} 챕터"
     },
     "confirm": {
-        "alert": "경고",
+        "alert": "긴급",
         "confirm": "확인",
         "info": "정보",
         "cancel": "{{common.cancel}}",
@@ -2596,5 +2628,22 @@
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
+    },
+    "role-localized-pipe": {
+        "admin": "관리자",
+        "download": "다운로드",
+        "change-password": "패스워드 변경",
+        "bookmark": "북마크",
+        "change-restriction": "제한 변경",
+        "login": "로그인",
+        "read-only": "읽기 전용",
+        "promote": "홍보"
+    },
+    "log-level-pipe": {
+        "debug": "디버그",
+        "information": "정보",
+        "trace": "추적",
+        "warning": "경고",
+        "critical": "치명적"
     }
 }
