@@ -32,7 +32,7 @@
             <app-external-rating [seriesId]="series.id"
                                  [ratings]="[]"
                                  [userRating]="rating?.rating || 0"
-                                 [hasUserRated]="rating !== undefined"
+                                 [hasUserRated]="rating !== undefined && rating.hasBeenRated"
                                  [libraryType]="libraryType!"
                                  [chapterId]="chapterId"
             >
