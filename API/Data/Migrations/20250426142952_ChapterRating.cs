@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ChapterRatings : Migration
+    public partial class ChapterRating : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,6 +20,7 @@ namespace API.Data.Migrations
                     HasBeenRated = table.Column<bool>(type: "INTEGER", nullable: false),
                     Review = table.Column<string>(type: "TEXT", nullable: true),
                     Provider = table.Column<int>(type: "INTEGER", nullable: false),
+                    Authority = table.Column<int>(type: "INTEGER", nullable: false),
                     SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
                     ChapterId = table.Column<int>(type: "INTEGER", nullable: false),
                     VolumeId = table.Column<int>(type: "INTEGER", nullable: false),

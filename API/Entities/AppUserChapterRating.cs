@@ -1,8 +1,15 @@
 using API.Entities.Enums;
+using API.Services.Plus;
 
 namespace API.Entities;
 
 #nullable enable
+
+public enum ReviewAuthority
+{
+    User = 0,
+    Critic = 1,
+}
 
 public class AppUserChapterRating
 {
@@ -10,7 +17,8 @@ public class AppUserChapterRating
     public float Rating { get; set; }
     public bool HasBeenRated { get; set; }
     public string? Review { get; set; }
-    public RatingProvider Provider {get; set; }
+    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
+    public ReviewAuthority Authority { get; set; } = ReviewAuthority.User;
 
     public int SeriesId { get; set; }
     public Series Series { get; set; } = null!;

@@ -1,6 +1,7 @@
 using System;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Plus;
 
 namespace API.Helpers.Builders;
 
@@ -47,7 +48,7 @@ public class ChapterRatingBuilder
         return this;
     }
 
-    public ChapterRatingBuilder WithProvider(RatingProvider provider)
+    public ChapterRatingBuilder WithProvider(ScrobbleProvider provider)
     {
         _rating.Provider = provider;
         return this;

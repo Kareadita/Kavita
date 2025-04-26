@@ -204,6 +204,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Authority")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 

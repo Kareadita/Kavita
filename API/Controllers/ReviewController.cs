@@ -87,7 +87,7 @@ public class ReviewController : BaseApiController
             .WithChapterId(chapter.Id)
             .WithRating(dto.Rating)
             .WithReview(dto.Body)
-            .WithProvider(RatingProvider.Kavita)
+            .WithProvider(ScrobbleProvider.Kavita)
             .Build();
 
         if (rating.Id == 0)

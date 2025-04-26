@@ -1,4 +1,5 @@
-﻿using API.Services.Plus;
+﻿using API.Entities;
+using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;
 #nullable enable
@@ -56,4 +57,5 @@ public class UserReviewDto
     /// If this review is External, which Provider did it come from
     /// </summary>
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
+    public ReviewAuthority Authority { get; set; } = ReviewAuthority.User;
 }
