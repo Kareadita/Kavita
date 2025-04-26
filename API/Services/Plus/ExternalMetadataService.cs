@@ -113,7 +113,7 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task FetchExternalDataTask()
     {
         // Find all Series that are eligible and limit
-        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, false);
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25);
         if (ids.Count == 0) return;
         ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
 
@@ -444,7 +444,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 {
                     if (errorMessage.Contains("Too many Requests"))
                     {
-                        _logger.LogInformation("Hit rate limit, will retry in 3 seconds");
+                        _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
                         await Task.Delay(3000);
 
                         result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
@@ -673,7 +673,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var relation in externalMetadataRelations.Where(r => r.Relation != RelationKind.Parent))
         {
-            var names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle};
+            List<string> names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle}.Where(s => !string.IsNullOrEmpty(s)).ToList()!;
             var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
                 names,
                 relation.PlusMediaFormat.GetMangaFormats(),
@@ -1232,7 +1232,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .DistinctBy(p => Parser.Normalize(p.Name))
             .ToList();
 
-        await PersonHelper.UpdateChapterPeopleAsync(chapter, staff, role, _unitOfWork);
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, staff ?? [], role, _unitOfWork);
 
         foreach (var person in chapter.People.Where(p => p.Role == role))
         {

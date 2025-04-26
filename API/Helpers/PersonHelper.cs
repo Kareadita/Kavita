@@ -80,7 +80,6 @@ public static class PersonHelper
                     // If not, create a new Person entity using the real name
                     dbPerson = new PersonBuilder(personName).Build();
                     peopleToAttach.Add(dbPerson); // Add new person to the list to be attached
-                    modification = true;
                 }
 
                 // Add the person to the SeriesMetadataPeople collection
