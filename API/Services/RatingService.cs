@@ -13,7 +13,13 @@ namespace API.Services;
 
 public interface IRatingService
 {
-    Task<bool> UpdateRating(int userId, UpdateRatingDto updateRatingDto);
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="user">Should include ratings</param>
+    /// <param name="updateRatingDto"></param>
+    /// <returns></returns>
+    Task<bool> UpdateRating(AppUser user, UpdateRatingDto updateRatingDto);
 }
 
 public class RatingService: IRatingService
@@ -30,17 +36,8 @@ public class RatingService: IRatingService
         _logger = logger;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="updateRatingDto"></param>
-    /// <returns></returns>
-    public async Task<bool> UpdateRating(int userId, UpdateRatingDto updateRatingDto)
+    public async Task<bool> UpdateRating(AppUser user, UpdateRatingDto updateRatingDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Ratings);
-        if (user == null) throw new UnauthorizedAccessException();
-
         var userRating =
             await _unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id, updateRatingDto.ChapterId) ??
             new AppUserRating();

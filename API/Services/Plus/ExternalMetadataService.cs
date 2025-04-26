@@ -1086,12 +1086,26 @@ public class ExternalMetadataService : IExternalMetadataService
 
             madeModification = await UpdateChapterCoverImage(chapter, settings, potentialMatch.CoverImageUrl) || madeModification;
 
+            madeModification = await UpdateChapterReviews(chapter, settings, potentialMatch) || madeModification;
+
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
         }
 
 
         return madeModification;
+    }
+
+    private async Task<bool> UpdateChapterReviews(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
+    {
+        if (!settings.Enabled) return false;
+
+        if (metadata.UserReviews.Count == 0 && metadata.CriticReviews.Count == 0) return false;
+
+        // Clear current ratings
+        chapter.Ratings.Clear();
+
+        return true;
     }
 
 

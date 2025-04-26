@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
 using API.Services;
@@ -35,7 +36,10 @@ public class RatingController : BaseApiController
     [HttpPost]
     public async Task<ActionResult> UpdateRating(UpdateRatingDto updateRating)
     {
-        if (await _ratingService.UpdateRating(User.GetUserId(), updateRating))
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        if (user == null) throw new UnauthorizedAccessException();
+
+        if (await _ratingService.UpdateRating(user, updateRating))
         {
             return Ok();
         }

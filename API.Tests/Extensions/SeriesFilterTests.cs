@@ -929,17 +929,13 @@ public class SeriesFilterTests : AbstractDbTest
         _context.Library.Add(library);
         await _context.SaveChangesAsync();
 
-
-        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>(),
-            Substitute.For<IReadingListService>());
+        var ratingService = new RatingService(_unitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
 
         // Select 0 Rating
         var zeroRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
         Assert.NotNull(zeroRating);
 
-        Assert.True(await seriesService.UpdateRating(user, new UpdateRatingDto()
+        Assert.True(await ratingService.UpdateRating(user, new UpdateRatingDto()
         {
             SeriesId = zeroRating.Id,
             UserRating = 0
@@ -948,7 +944,7 @@ public class SeriesFilterTests : AbstractDbTest
         // Select 4.5 Rating
         var partialRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
 
-        Assert.True(await seriesService.UpdateRating(user, new UpdateRatingDto()
+        Assert.True(await ratingService.UpdateRating(user, new UpdateRatingDto()
         {
             SeriesId = partialRating.Id,
             UserRating = 4.5f
