@@ -191,21 +191,6 @@ public class SeriesController : BaseApiController
         return Ok(await _unitOfWork.ChapterRepository.GetChapterMetadataDtoAsync(chapterId));
     }
 
-
-    /// <summary>
-    /// Update the user rating for the given series
-    /// </summary>
-    /// <param name="updateSeriesRatingDto"></param>
-    /// <returns></returns>
-    [HttpPost("update-rating")]
-    public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-        if (!await _seriesService.UpdateRating(user!, updateSeriesRatingDto))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
-        return Ok();
-    }
-
     /// <summary>
     /// Updates the Series
     /// </summary>

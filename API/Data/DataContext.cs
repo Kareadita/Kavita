@@ -40,7 +40,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<MangaFile> MangaFile { get; set; } = null!;
     public DbSet<AppUserProgress> AppUserProgresses { get; set; } = null!;
     public DbSet<AppUserRating> AppUserRating { get; set; } = null!;
-    public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;

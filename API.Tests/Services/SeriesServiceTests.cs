@@ -617,7 +617,7 @@ public class SeriesServiceTests : AbstractDbTest
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         JobStorage.Current = new InMemoryStorage();
-        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto
+        var result = await _seriesService.UpdateRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 3,
@@ -651,7 +651,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto
+        var result = await _seriesService.UpdateRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 3,
@@ -667,7 +667,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         // Update the DB again
 
-        var result2 = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto
+        var result2 = await _seriesService.UpdateRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 5,
@@ -701,7 +701,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto
+        var result = await _seriesService.UpdateRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 10,
@@ -736,7 +736,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto
+        var result = await _seriesService.UpdateRating(user, new UpdateRatingDto
         {
             SeriesId = 2,
             UserRating = 5,

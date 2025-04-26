@@ -29,13 +29,11 @@ public interface ISeriesService
 {
     Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId);
     Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
-    Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
     Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
-
     Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle,
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
@@ -446,57 +444,6 @@ public class SeriesService : ISeriesService
         }
     }
 
-
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="user">User with Ratings includes</param>
-    /// <param name="updateSeriesRatingDto"></param>
-    /// <returns></returns>
-    public async Task<bool> UpdateRating(AppUser? user, UpdateSeriesRatingDto updateSeriesRatingDto)
-    {
-        if (user == null)
-        {
-            _logger.LogError("Cannot update rating of null user");
-            return false;
-        }
-
-        var userRating =
-            await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
-            new AppUserRating();
-        try
-        {
-            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0f, 5f);
-            userRating.HasBeenRated = true;
-            userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-            if (userRating.Id == 0)
-            {
-                user.Ratings ??= new List<AppUserRating>();
-                user.Ratings.Add(userRating);
-            }
-
-            _unitOfWork.UserRepository.Update(user);
-
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
-            {
-                BackgroundJob.Enqueue(() =>
-                    _scrobblingService.ScrobbleRatingUpdate(user.Id, updateSeriesRatingDto.SeriesId,
-                        userRating.Rating));
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an exception saving rating");
-        }
-
-        await _unitOfWork.RollbackAsync();
-        user.Ratings?.Remove(userRating);
-
-        return false;
-    }
 
     public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds)
     {

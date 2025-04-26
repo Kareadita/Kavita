@@ -6,6 +6,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.Extensions;
+using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -21,31 +22,45 @@ namespace API.Controllers;
 public class RatingController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IRatingService _ratingService;
+    private readonly ILocalizationService _localizationService;
 
-    public RatingController(IUnitOfWork unitOfWork)
+    public RatingController(IUnitOfWork unitOfWork, IRatingService ratingService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
+        _ratingService = ratingService;
+        _localizationService = localizationService;
+    }
 
+    [HttpPost]
+    public async Task<ActionResult> UpdateRating(UpdateRatingDto updateRating)
+    {
+        if (await _ratingService.UpdateRating(User.GetUserId(), updateRating))
+        {
+            return Ok();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
     }
 
     [HttpGet("overall")]
-    public async Task<ActionResult<RatingDto>> GetOverallRating(int seriesId)
+    public async Task<ActionResult<RatingDto>> GetOverallRating(int seriesId, [FromQuery] int? chapterId)
     {
+        int average;
+        if (chapterId != null)
+        {
+            average = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId.Value, User.GetUserId());
+        }
+        else
+        {
+            average = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId());
+        }
+
+
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId()),
-            FavoriteCount = 0
-        });
-    }
-
-    [HttpGet("overall/chapter")]
-    public async Task<ActionResult<RatingDto>> GetOverallChapterRating([FromQuery] int chapterId)
-    {
-        return Ok(new RatingDto
-        {
-            Provider = ScrobbleProvider.Kavita,
-            AverageScore = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, User.GetUserId()),
+            AverageScore = average,
             FavoriteCount = 0,
         });
     }

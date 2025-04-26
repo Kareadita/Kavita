@@ -43,7 +43,6 @@ public enum AppUserIncludes
     SideNavStreams = 4096,
     ExternalSources = 8192,
     Collections = 16384, // 2^14
-    ChapterRatings =  1 << 15,
 }
 
 public interface IUserRepository
@@ -65,10 +64,8 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<IList<string>> GetRoles(int userId);
-    Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
-    Task<AppUserChapterRating?> GetUserChapterRatingAsync(int chapterId, int userId);
+    Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId, int? chapterId = null);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
-    Task<IList<UserReviewDto>> GetUserRatingDtosForVolumeAsync(int volumeId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
@@ -587,36 +584,18 @@ public class UserRepository : IUserRepository
         return await _userManager.GetRolesAsync(user);
     }
 
-    public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId)
+    public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId, int? chapterId = null)
     {
         return await _context.AppUserRating
-            .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
+            .Where(r => r.SeriesId == seriesId && r.AppUserId == userId && r.ChapterId == chapterId)
             .SingleOrDefaultAsync();
-    }
-    public async Task<AppUserChapterRating?> GetUserChapterRatingAsync(int chapterId, int userId)
-    {
-        return await _context.AppUserChapterRating
-            .Where(r => r.ChapterId == chapterId && r.AppUserId == userId)
-            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating
             .Include(r => r.AppUser)
-            .Where(r => r.SeriesId == seriesId)
-            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
-            .OrderBy(r => r.AppUserId == userId)
-            .ThenBy(r => r.Rating)
-            .AsSplitQuery()
-            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-    }
-    public async Task<IList<UserReviewDto>> GetUserRatingDtosForVolumeAsync(int volumeId, int userId)
-    {
-        return await _context.AppUserChapterRating
-            .Include(r => r.AppUser)
-            .Where(r => r.VolumeId == volumeId)
+            .Where(r => r.SeriesId == seriesId && r.ChapterId == null)
             .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
             .OrderBy(r => r.AppUserId == userId)
             .ThenBy(r => r.Rating)
@@ -627,7 +606,7 @@ public class UserRepository : IUserRepository
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId)
     {
-        return await _context.AppUserChapterRating
+        return await _context.AppUserRating
             .Include(r => r.AppUser)
             .Where(r => r.ChapterId == chapterId)
             .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)

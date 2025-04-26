@@ -83,15 +83,4 @@ public class VolumeController : BaseApiController
 
         return Ok(true);
     }
-
-    /// <summary>
-    /// Returns all reviews related to this volume, that is, the union of reviews of this volumes chapters
-    /// </summary>
-    /// <param name="volumeId"></param>
-    /// <returns></returns>
-    [HttpGet("review")]
-    public async Task<IList<UserReviewDto>> VolumeReviews([FromQuery] int volumeId)
-    {
-        return await _unitOfWork.UserRepository.GetUserRatingDtosForVolumeAsync(volumeId, User.GetUserId());
-    }
 }

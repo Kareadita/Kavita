@@ -939,7 +939,7 @@ public class SeriesFilterTests : AbstractDbTest
         var zeroRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
         Assert.NotNull(zeroRating);
 
-        Assert.True(await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        Assert.True(await seriesService.UpdateRating(user, new UpdateRatingDto()
         {
             SeriesId = zeroRating.Id,
             UserRating = 0
@@ -948,7 +948,7 @@ public class SeriesFilterTests : AbstractDbTest
         // Select 4.5 Rating
         var partialRating = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
 
-        Assert.True(await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        Assert.True(await seriesService.UpdateRating(user, new UpdateRatingDto()
         {
             SeriesId = partialRating.Id,
             UserRating = 4.5f

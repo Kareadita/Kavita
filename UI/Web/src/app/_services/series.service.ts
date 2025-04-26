@@ -203,26 +203,8 @@ export class SeriesService {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
   }
 
-
-
-  deleteReview(seriesId: number) {
-    return this.httpClient.delete(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
-  updateReview(seriesId: number, body: string, rating: number) {
-    return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, rating, body
-    });
-  }
-
-  getReviews(seriesId: number) {
-    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
-
   getRatings(seriesId: number) {
     return this.httpClient.get<Array<Rating>>(this.baseUrl + 'rating?seriesId=' + seriesId);
-  }
-  getOverallRating(seriesId: number) {
-    return this.httpClient.get<Rating>(this.baseUrl + 'rating/overall?seriesId=' + seriesId);
   }
 
   removeFromOnDeck(seriesId: number) {

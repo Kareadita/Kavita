@@ -315,14 +315,14 @@ public class ChapterRepository : IChapterRepository
     public async Task<int> GetAverageUserRating(int chapterId, int userId)
     {
         // If there is 0 or 1 rating and that rating is you, return 0 back
-        var countOfRatingsThatAreUser = await _context.AppUserChapterRating
+        var countOfRatingsThatAreUser = await _context.AppUserRating
             .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
             .CountAsync(u => u.AppUserId == userId);
         if (countOfRatingsThatAreUser == 1)
         {
             return 0;
         }
-        var avg = (await _context.AppUserChapterRating
+        var avg = (await _context.AppUserRating
             .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
             .AverageAsync(r => (int?) r.Rating));
         return avg.HasValue ? (int) (avg.Value * 20) : 0;

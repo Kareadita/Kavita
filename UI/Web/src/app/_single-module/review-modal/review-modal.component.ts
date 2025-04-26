@@ -10,6 +10,7 @@ import {ChapterService} from "../../_services/chapter.service";
 import {of} from "rxjs";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../_services/theme.service";
+import {ReviewService} from "../../_services/review.service";
 
 export enum ReviewModalCloseAction {
   Create,
@@ -33,8 +34,8 @@ export interface ReviewModalCloseEvent {
 export class ReviewModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
+  private readonly reviewService = inject(ReviewService);
   private readonly seriesService = inject(SeriesService);
-  private readonly chapterService = inject(ChapterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
@@ -66,14 +67,7 @@ export class ReviewModalComponent implements OnInit {
   async delete() {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
 
-    let obs;
-    if (!this.review.chapterId) {
-      obs = this.seriesService.deleteReview(this.review.seriesId);
-    } else {
-      obs = this.chapterService.deleteChapterReview(this.review.chapterId)
-    }
-
-    obs?.subscribe(() => {
+    this.reviewService.deleteReview(this.review.seriesId, this.review.chapterId).subscribe(() => {
       this.toastr.success(translate('toasts.review-deleted'));
       this.modal.close({success: true, review: this.review, action: ReviewModalCloseAction.Delete});
     });
@@ -85,14 +79,7 @@ export class ReviewModalComponent implements OnInit {
       return;
     }
 
-    let obs;
-    if (!this.review.chapterId) {
-      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody, this.rating);
-    } else {
-      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody, this.rating);
-    }
-
-    obs?.subscribe(review => {
+    this.reviewService.updateReview(this.review.seriesId, model.reviewBody, this.rating, this.review.chapterId).subscribe(review => {
       this.modal.close({success: true, review: review, action: ReviewModalCloseAction.Edit});
     });
 

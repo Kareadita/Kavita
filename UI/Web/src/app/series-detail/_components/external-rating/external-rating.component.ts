@@ -25,6 +25,7 @@ import {AsyncPipe, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {ChapterService} from "../../../_services/chapter.service";
+import {ReviewService} from "../../../_services/review.service";
 
 @Component({
   selector: 'app-external-rating',
@@ -38,8 +39,7 @@ import {ChapterService} from "../../../_services/chapter.service";
 export class ExternalRatingComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly seriesService = inject(SeriesService);
-  private readonly chapterService = inject(ChapterService);
+  private readonly reviewService = inject(ReviewService);
   private readonly themeService = inject(ThemeService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
@@ -61,24 +61,13 @@ export class ExternalRatingComponent implements OnInit {
   starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit() {
-    let obs;
-    if (this.chapterId) {
-      obs = this.chapterService.overallRating(this.chapterId);
-    } else {
-      obs = this.seriesService.getOverallRating(this.seriesId);
-    }
-    obs?.subscribe(r => this.overallRating = r.averageScore);
+    this.reviewService.overallRating(this.seriesId, this.chapterId).subscribe(r => {
+        this.overallRating = r.averageScore;
+      });
   }
 
   updateRating(rating: number) {
-    let obs;
-    if (this.chapterId) {
-      obs = this.chapterService.updateRating(this.chapterId, rating);
-    } else {
-      obs = this.seriesService.updateRating(this.seriesId, rating);
-    }
-
-    obs?.subscribe(() => {
+    this.reviewService.updateRating(this.seriesId, rating, this.chapterId).subscribe(() => {
       this.userRating = rating;
       this.hasUserRated = true;
       this.cdRef.markForCheck();

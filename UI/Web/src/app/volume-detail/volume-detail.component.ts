@@ -82,6 +82,7 @@ import {UserReview} from "../_single-module/review-card/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {User} from "../_models/user";
+import {ReviewService} from "../_services/review.service";
 
 enum TabID {
 
@@ -182,6 +183,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
   private readonly location = inject(Location);
+  private readonly reviewService = inject(ReviewService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -391,7 +393,6 @@ export class VolumeDetailComponent implements OnInit {
       series: this.seriesService.getSeries(this.seriesId),
       volume: this.volumeService.getVolumeMetadata(this.volumeId),
       libraryType: this.libraryService.getLibraryType(this.libraryId),
-      reviews: this.volumeService.volumeReviews(this.volumeId),
     }).subscribe(results => {
 
       if (results.volume === null) {
@@ -402,8 +403,13 @@ export class VolumeDetailComponent implements OnInit {
       this.series = results.series;
       this.volume = results.volume;
       this.libraryType = results.libraryType;
-      this.userReviews = results.reviews.filter(r => !r.isExternal);
-      this.plusReviews = results.reviews.filter(r => r.isExternal);
+
+      if (this.volume.chapters.length === 1) {
+        this.reviewService.getReviews(this.seriesId, this.volume.chapters[0].id).subscribe(reviews => {
+          this.userReviews = reviews.filter(r => !r.isExternal);
+          this.plusReviews = reviews.filter(r => r.isExternal);
+        });
+      }
 
       this.themeService.setColorScape(this.volume!.primaryColor, this.volume!.secondaryColor);
 

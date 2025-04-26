@@ -253,11 +253,6 @@ public static class IncludesExtensions
                 .ThenInclude(c => c.Items);
         }
 
-        if (includeFlags.HasFlag(AppUserIncludes.ChapterRatings))
-        {
-            query = query.Include(u => u.ChapterRatings);
-        }
-
         return query.AsSplitQuery();
     }
 

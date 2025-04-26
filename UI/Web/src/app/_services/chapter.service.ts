@@ -35,20 +35,4 @@ export class ChapterService {
     return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'chapter/review?chapterId='+chapterId);
   }
 
-  updateChapterReview(seriesId: number, chapterId: number, body: string, rating: number) {
-    return this.httpClient.post<UserReview>(this.baseUrl + 'review/chapter/'+chapterId, {seriesId, rating, body});
-  }
-
-  deleteChapterReview(chapterId: number) {
-    return this.httpClient.delete(this.baseUrl + 'review/chapter/'+chapterId);
-  }
-
-  overallRating(chapterId: number) {
-    return this.httpClient.get<Rating>(this.baseUrl + 'rating/overall?chapterId='+chapterId);
-  }
-
-  updateRating(chapterId: number, rating: number) {
-    return this.httpClient.post(this.baseUrl + 'chapter/update-rating', {chapterId, rating});
-  }
-
 }
