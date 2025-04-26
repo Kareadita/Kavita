@@ -11,16 +11,16 @@ import {of} from "rxjs";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../_services/theme.service";
 
-export enum ReviewSeriesModalCloseAction {
+export enum ReviewModalCloseAction {
   Create,
   Edit,
   Delete,
   Close
 }
-export interface ReviewSeriesModalCloseEvent {
+export interface ReviewModalCloseEvent {
   success: boolean,
   review: UserReview;
-  action: ReviewSeriesModalCloseAction
+  action: ReviewModalCloseAction
 }
 
 @Component({
@@ -43,6 +43,7 @@ export class ReviewModalComponent implements OnInit {
 
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
+  rating: number = 0;
 
   starColor = this.themeService.getCssVariable('--rating-star-color');
 
@@ -50,15 +51,16 @@ export class ReviewModalComponent implements OnInit {
     this.reviewGroup = new FormGroup({
       reviewBody: new FormControl(this.review.body, [Validators.required, Validators.minLength(this.minLength)]),
     });
+    this.rating = this.review.rating;
     this.cdRef.markForCheck();
   }
 
   updateRating($event: number) {
-    this.review.rating = $event;
+    this.rating = $event;
   }
 
   close() {
-    this.modal.close({success: false, review: this.review, action: ReviewSeriesModalCloseAction.Close});
+    this.modal.close({success: false, review: this.review, action: ReviewModalCloseAction.Close});
   }
 
   async delete() {
@@ -73,7 +75,7 @@ export class ReviewModalComponent implements OnInit {
 
     obs?.subscribe(() => {
       this.toastr.success(translate('toasts.review-deleted'));
-      this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
+      this.modal.close({success: true, review: this.review, action: ReviewModalCloseAction.Delete});
     });
 
   }
@@ -85,13 +87,13 @@ export class ReviewModalComponent implements OnInit {
 
     let obs;
     if (!this.review.chapterId) {
-      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody, this.review.rating);
+      obs = this.seriesService.updateReview(this.review.seriesId, model.reviewBody, this.rating);
     } else {
-      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody, this.review.rating);
+      obs = this.chapterService.updateChapterReview(this.review.seriesId, this.review.chapterId, model.reviewBody, this.rating);
     }
 
     obs?.subscribe(review => {
-      this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
+      this.modal.close({success: true, review: review, action: ReviewModalCloseAction.Edit});
     });
 
   }

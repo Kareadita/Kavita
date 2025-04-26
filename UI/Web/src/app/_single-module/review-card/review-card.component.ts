@@ -14,7 +14,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {
-  ReviewSeriesModalCloseEvent,
+  ReviewModalCloseEvent,
   ReviewModalComponent
 } from "../review-modal/review-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
@@ -35,7 +35,7 @@ export class ReviewCardComponent implements OnInit {
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   @Input({required: true}) review!: UserReview;
-  @Output() refresh = new EventEmitter<ReviewSeriesModalCloseEvent>();
+  @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
 
   isMyReview: boolean = false;
 
@@ -60,7 +60,7 @@ export class ReviewCardComponent implements OnInit {
     const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
 
     ref.componentInstance.review = this.review;
-    ref.closed.subscribe((res: ReviewSeriesModalCloseEvent | undefined) => {
+    ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {
       if (res) {
         this.refresh.emit(res);
       }

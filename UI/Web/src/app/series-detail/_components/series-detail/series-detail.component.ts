@@ -62,8 +62,8 @@ import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {
-  ReviewSeriesModalCloseAction,
-  ReviewSeriesModalCloseEvent,
+  ReviewModalCloseAction,
+  ReviewModalCloseEvent,
   ReviewModalComponent
 } from '../../../_single-module/review-modal/review-modal.component';
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';

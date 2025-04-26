@@ -80,6 +80,8 @@ import {CoverImageComponent} from "../_single-module/cover-image/cover-image.com
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {UserReview} from "../_single-module/review-card/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
+import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
+import {User} from "../_models/user";
 
 enum TabID {
 
@@ -150,7 +152,8 @@ interface VolumeCast extends IHasCast {
     CardActionablesComponent,
     BulkOperationsComponent,
     CoverImageComponent,
-    ReviewsComponent
+    ReviewsComponent,
+    ExternalRatingComponent
   ],
     templateUrl: './volume-detail.component.html',
     styleUrl: './volume-detail.component.scss',
@@ -203,6 +206,8 @@ export class VolumeDetailComponent implements OnInit {
   plusReviews: Array<UserReview> = [];
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
+
+  user: User | undefined;
 
   volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
@@ -337,6 +342,12 @@ export class VolumeDetailComponent implements OnInit {
 
 
   ngOnInit() {
+    this.accountService.currentUser$.subscribe(user => {
+      if (user) {
+        this.user = user;
+      }
+    })
+
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const volumeId = this.route.snapshot.paramMap.get('volumeId');
@@ -673,6 +684,10 @@ export class VolumeDetailComponent implements OnInit {
     } else {
       this.currentlyReadingChapter = undefined;
     }
+  }
+
+  userRating() {
+    return this.userReviews.find(r => r.username === this.user?.username && !r.isExternal);
   }
 
   protected readonly encodeURIComponent = encodeURIComponent;

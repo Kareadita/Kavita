@@ -210,7 +210,7 @@ export class SeriesService {
   }
   updateReview(seriesId: number, body: string, rating: number) {
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, body, rating
+      seriesId, rating, body
     });
   }
 

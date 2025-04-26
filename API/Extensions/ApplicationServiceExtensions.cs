@@ -52,6 +52,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IStreamService, StreamService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();

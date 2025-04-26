@@ -48,6 +48,7 @@ public interface IChapterRepository
     Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter);
     IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
+    Task<int> GetAverageUserRating(int chapterId, int userId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -309,5 +310,21 @@ public class ChapterRepository : IChapterRepository
             .Include(c => c.People)
             .ThenInclude(cp => cp.Person)
             .ToListAsync();
+    }
+
+    public async Task<int> GetAverageUserRating(int chapterId, int userId)
+    {
+        // If there is 0 or 1 rating and that rating is you, return 0 back
+        var countOfRatingsThatAreUser = await _context.AppUserChapterRating
+            .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
+            .CountAsync(u => u.AppUserId == userId);
+        if (countOfRatingsThatAreUser == 1)
+        {
+            return 0;
+        }
+        var avg = (await _context.AppUserChapterRating
+            .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
+            .AverageAsync(r => (int?) r.Rating));
+        return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }
 }

@@ -6,8 +6,8 @@ import {UserReview} from "../review-card/user-review";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
 import {
-  ReviewModalComponent, ReviewSeriesModalCloseAction,
-  ReviewSeriesModalCloseEvent
+  ReviewModalComponent, ReviewModalCloseAction,
+  ReviewModalCloseEvent
 } from "../review-modal/review-modal.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -71,11 +71,11 @@ export class ReviewsComponent {
 
   }
 
-  updateOrDeleteReview(closeResult: ReviewSeriesModalCloseEvent) {
-    if (closeResult.action === ReviewSeriesModalCloseAction.Close) return;
+  updateOrDeleteReview(closeResult: ReviewModalCloseEvent) {
+    if (closeResult.action === ReviewModalCloseAction.Close) return;
 
     const index = this.userReviews.findIndex(r => r.username === closeResult.review!.username);
-    if (closeResult.action === ReviewSeriesModalCloseAction.Edit) {
+    if (closeResult.action === ReviewModalCloseAction.Edit) {
       if (index === -1 ) {
         this.userReviews = [closeResult.review, ...this.userReviews];
         this.cdRef.markForCheck();
@@ -86,7 +86,7 @@ export class ReviewsComponent {
       return;
     }
 
-    if (closeResult.action === ReviewSeriesModalCloseAction.Delete) {
+    if (closeResult.action === ReviewModalCloseAction.Delete) {
       this.userReviews = [...this.userReviews.filter(r => r.username !== closeResult.review!.username)];
       this.cdRef.markForCheck();
       return;

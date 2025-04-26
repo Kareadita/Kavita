@@ -38,4 +38,15 @@ public class RatingController : BaseApiController
             FavoriteCount = 0
         });
     }
+
+    [HttpGet("overall/chapter")]
+    public async Task<ActionResult<RatingDto>> GetOverallChapterRating([FromQuery] int chapterId)
+    {
+        return Ok(new RatingDto
+        {
+            Provider = ScrobbleProvider.Kavita,
+            AverageScore = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, User.GetUserId()),
+            FavoriteCount = 0,
+        });
+    }
 }

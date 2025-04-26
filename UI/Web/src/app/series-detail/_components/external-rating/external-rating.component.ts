@@ -24,6 +24,7 @@ import {ImageService} from "../../../_services/image.service";
 import {AsyncPipe, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
+import {ChapterService} from "../../../_services/chapter.service";
 
 @Component({
   selector: 'app-external-rating',
@@ -38,6 +39,7 @@ export class ExternalRatingComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
+  private readonly chapterService = inject(ChapterService);
   private readonly themeService = inject(ThemeService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
@@ -47,6 +49,7 @@ export class ExternalRatingComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
 
   @Input({required: true}) seriesId!: number;
+  @Input() chapterId: number | undefined;
   @Input({required: true}) userRating!: number;
   @Input({required: true}) hasUserRated!: boolean;
   @Input({required: true}) libraryType!: LibraryType;
@@ -58,11 +61,24 @@ export class ExternalRatingComponent implements OnInit {
   starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit() {
-    this.seriesService.getOverallRating(this.seriesId).subscribe(r => this.overallRating = r.averageScore);
+    let obs;
+    if (this.chapterId) {
+      obs = this.chapterService.overallRating(this.chapterId);
+    } else {
+      obs = this.seriesService.getOverallRating(this.seriesId);
+    }
+    obs?.subscribe(r => this.overallRating = r.averageScore);
   }
 
   updateRating(rating: number) {
-    this.seriesService.updateRating(this.seriesId, rating).subscribe(() => {
+    let obs;
+    if (this.chapterId) {
+      obs = this.chapterService.updateRating(this.chapterId, rating);
+    } else {
+      obs = this.seriesService.updateRating(this.seriesId, rating);
+    }
+
+    obs?.subscribe(() => {
       this.userRating = rating;
       this.hasUserRated = true;
       this.cdRef.markForCheck();

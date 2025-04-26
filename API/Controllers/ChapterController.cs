@@ -28,13 +28,16 @@ public class ChapterController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ChapterController> _logger;
+    private readonly IRatingService _ratingService;
 
-    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger)
+    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger,
+        IRatingService ratingService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _eventHub = eventHub;
         _logger = logger;
+        _ratingService = ratingService;
     }
 
     /// <summary>
@@ -401,6 +404,17 @@ public class ChapterController : BaseApiController
     public async Task<IList<UserReviewDto>> ChapterReviews([FromQuery] int chapterId)
     {
         return await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId());
+    }
+
+    [HttpPost("update-rating")]
+    public async Task<ActionResult> UpdateRating(UpdateChapterRatingDto dto)
+    {
+        if (await _ratingService.UpdateChapterRating(User.GetUserId(), dto))
+        {
+            return Ok();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
     }
 
 }

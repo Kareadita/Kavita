@@ -66,6 +66,7 @@ public interface IUserRepository
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<IList<string>> GetRoles(int userId);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
+    Task<AppUserChapterRating?> GetUserChapterRatingAsync(int chapterId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForVolumeAsync(int volumeId, int userId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId);
@@ -591,6 +592,12 @@ public class UserRepository : IUserRepository
         return await _context.AppUserRating
             .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
+    }
+    public async Task<AppUserChapterRating?> GetUserChapterRatingAsync(int chapterId, int userId)
+    {
+        return await _context.AppUserChapterRating
+            .Where(r => r.ChapterId == chapterId && r.AppUserId == userId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)

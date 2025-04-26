@@ -71,6 +71,8 @@ import {ReviewCardComponent} from "../_single-module/review-card/review-card.com
 import {User} from "../_models/user";
 import {ReviewModalComponent} from "../_single-module/review-modal/review-modal.component";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
+import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
+import {Rating} from "../_models/rating";
 
 enum TabID {
   Related = 'related-tab',
@@ -111,7 +113,8 @@ enum TabID {
     CoverImageComponent,
     CarouselReelComponent,
     ReviewCardComponent,
-    ReviewsComponent
+    ReviewsComponent,
+    ExternalRatingComponent
   ],
     templateUrl: './chapter-detail.component.html',
     styleUrl: './chapter-detail.component.scss',
@@ -174,6 +177,7 @@ export class ChapterDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+  user: User | undefined;
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -188,6 +192,12 @@ export class ChapterDetailComponent implements OnInit {
 
 
   ngOnInit() {
+    this.accountService.currentUser$.subscribe(user => {
+      if (user) {
+        this.user = user;
+      }
+    });
+
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
@@ -374,6 +384,10 @@ export class ChapterDetailComponent implements OnInit {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
         break;
     }
+  }
+
+  userRating() {
+    return this.userReviews.find(r => r.username == this.user?.username && !r.isExternal)
   }
 
   protected readonly LibraryType = LibraryType;
