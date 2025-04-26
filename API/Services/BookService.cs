@@ -399,11 +399,14 @@ public class BookService : IBookService
     {
         // Check if any classes on the html node (some r2l books do this) and move them to body tag for scoping
         var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
-        if (htmlNode == null || !htmlNode.Attributes.Contains("class")) return body.InnerHtml;
+        if (htmlNode == null) return body.InnerHtml;
 
         var bodyClasses = body.Attributes.Contains("class") ? body.Attributes["class"].Value : string.Empty;
-        var classes = htmlNode.Attributes["class"].Value + " " + bodyClasses;
-        body.Attributes.Add("class", $"{classes}");
+        var htmlClasses = htmlNode.Attributes.Contains("class") ? htmlNode.Attributes["class"].Value : string.Empty;
+
+        body.Attributes.Add("class", $"{htmlClasses} {bodyClasses}");
+
+
         // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
         return $"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>";
     }
