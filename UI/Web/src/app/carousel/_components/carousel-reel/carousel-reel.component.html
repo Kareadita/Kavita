@@ -7,7 +7,12 @@
           <app-card-actionables [actions]="actionables" (actionHandler)="performAction($event)"></app-card-actionables>
         }
         <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
-          <a [href]="titleLink !== '' ? titleLink : 'javascript:void(0)'" class="section-title">{{title}}</a>
+          @if (titleLink !== '') {
+            <a [href]="titleLink | safeUrl" class="section-title">{{title}}</a>
+          } @else {
+            <a href="javascript:void(0)" class="section-title">{{title}}</a>
+          }
+
           @if (iconClasses !== '') {
             <i class="{{iconClasses}} title-icon ms-1" aria-hidden="true"></i>
           }

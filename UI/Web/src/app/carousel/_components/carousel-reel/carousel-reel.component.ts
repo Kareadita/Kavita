@@ -15,13 +15,14 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {ActionItem} from "../../../_services/action-factory.service";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
     selector: 'app-carousel-reel',
     templateUrl: './carousel-reel.component.html',
     styleUrls: ['./carousel-reel.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, SwiperModule, NgTemplateOutlet, TranslocoDirective, CardActionablesComponent]
+  imports: [NgClass, SwiperModule, NgTemplateOutlet, TranslocoDirective, CardActionablesComponent, SafeUrlPipe]
 })
 export class CarouselReelComponent {
 
