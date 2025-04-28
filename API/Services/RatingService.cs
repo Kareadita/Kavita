@@ -38,8 +38,18 @@ public class RatingService: IRatingService
 
     public async Task<bool> UpdateRating(AppUser user, UpdateRatingDto updateRatingDto)
     {
+        if (updateRatingDto.ChapterId != null)
+        {
+            return await UpdateChapterRating(user, updateRatingDto);
+        }
+
+        return await UpdateSeriesRating(user, updateRatingDto);
+    }
+
+    private async Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto)
+    {
         var userRating =
-            await _unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id, updateRatingDto.ChapterId) ??
+            await _unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id) ??
             new AppUserRating();
 
         try
@@ -47,7 +57,6 @@ public class RatingService: IRatingService
             userRating.Rating = Math.Clamp(updateRatingDto.UserRating, 0f, 5f);
             userRating.HasBeenRated = true;
             userRating.SeriesId = updateRatingDto.SeriesId;
-            userRating.ChapterId = updateRatingDto.ChapterId;
 
             if (userRating.Id == 0)
             {
@@ -75,4 +84,45 @@ public class RatingService: IRatingService
 
         return false;
     }
+
+    private async Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto)
+    {
+        if (updateRatingDto.ChapterId == null)
+        {
+            return false;
+        }
+
+        var userRating =
+            await _unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, updateRatingDto.ChapterId.Value) ??
+            new AppUserChapterRating();
+
+        try
+        {
+            userRating.Rating = Math.Clamp(updateRatingDto.UserRating, 0f, 5f);
+            userRating.HasBeenRated = true;
+            userRating.SeriesId = updateRatingDto.SeriesId;
+            userRating.ChapterId = updateRatingDto.ChapterId.Value;
+
+            if (userRating.Id == 0)
+            {
+                user.ChapterRatings ??= new List<AppUserChapterRating>();
+                user.ChapterRatings.Add(userRating);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            await _unitOfWork.CommitAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception saving rating");
+        }
+
+        await _unitOfWork.RollbackAsync();
+        user.ChapterRatings?.Remove(userRating);
+
+        return false;
+    }
+
 }

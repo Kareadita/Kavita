@@ -161,7 +161,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
-    public ICollection<AppUserRating> Ratings { get; set; } = [];
+    public ICollection<AppUserChapterRating> Ratings { get; set; } = [];
 
     public ICollection<AppUserProgress> UserProgress { get; set; }
 

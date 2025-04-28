@@ -195,6 +195,41 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserBookmark");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserChapterRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasBeenRated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Review")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("AppUserChapterRating");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserCollection", b =>
                 {
                     b.Property<int>("Id")
@@ -550,9 +585,6 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ChapterId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("HasBeenRated")
                         .HasColumnType("INTEGER");
 
@@ -571,8 +603,6 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("ChapterId");
 
                     b.HasIndex("SeriesId");
 
@@ -2702,6 +2732,33 @@ namespace API.Data.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserChapterRating", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ChapterRatings")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Chapter", "Chapter")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("Series");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserCollection", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -2808,10 +2865,6 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Entities.Chapter", "Chapter")
-                        .WithMany("Ratings")
-                        .HasForeignKey("ChapterId");
-
                     b.HasOne("API.Entities.Series", "Series")
                         .WithMany("Ratings")
                         .HasForeignKey("SeriesId")
@@ -2819,8 +2872,6 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
-
-                    b.Navigation("Chapter");
 
                     b.Navigation("Series");
                 });
@@ -3445,6 +3496,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
                     b.Navigation("Bookmarks");
+
+                    b.Navigation("ChapterRatings");
 
                     b.Navigation("Collections");
 

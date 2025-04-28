@@ -1,9 +1,6 @@
-﻿
-using System;
-
 namespace API.Entities;
-#nullable enable
-public class AppUserRating
+
+public class AppUserChapterRating
 {
     public int Id { get; set; }
     /// <summary>
@@ -21,10 +18,11 @@ public class AppUserRating
     /// <summary>
     /// An optional tagline for the review
     /// </summary>
-    [Obsolete("No longer used")]
-    public string? Tagline { get; set; }
     public int SeriesId { get; set; }
     public Series Series { get; set; } = null!;
+
+    public int ChapterId { get; set; }
+    public Chapter Chapter { get; set; } = null!;
 
     // Relationships
     public int AppUserId { get; set; }

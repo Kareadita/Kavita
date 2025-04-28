@@ -10,11 +10,41 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "ChapterId",
-                table: "AppUserRating",
-                type: "INTEGER",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "AppUserChapterRating",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Rating = table.Column<float>(type: "REAL", nullable: false),
+                    HasBeenRated = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Review = table.Column<string>(type: "TEXT", nullable: true),
+                    SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChapterId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserChapterRating", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppUserChapterRating_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserChapterRating_Chapter_ChapterId",
+                        column: x => x.ChapterId,
+                        principalTable: "Chapter",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserChapterRating_Series_SeriesId",
+                        column: x => x.SeriesId,
+                        principalTable: "Series",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateTable(
                 name: "ExternalChapterMetadata",
@@ -84,9 +114,19 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppUserRating_ChapterId",
-                table: "AppUserRating",
+                name: "IX_AppUserChapterRating_AppUserId",
+                table: "AppUserChapterRating",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserChapterRating_ChapterId",
+                table: "AppUserChapterRating",
                 column: "ChapterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserChapterRating_SeriesId",
+                table: "AppUserChapterRating",
+                column: "SeriesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExternalChapterMetadata_ChapterId",
@@ -98,21 +138,13 @@ namespace API.Data.Migrations
                 name: "IX_ExternalChapterMetadataExternalChapterReview_ExternalReviewsId",
                 table: "ExternalChapterMetadataExternalChapterReview",
                 column: "ExternalReviewsId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AppUserRating_Chapter_ChapterId",
-                table: "AppUserRating",
-                column: "ChapterId",
-                principalTable: "Chapter",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_AppUserRating_Chapter_ChapterId",
-                table: "AppUserRating");
+            migrationBuilder.DropTable(
+                name: "AppUserChapterRating");
 
             migrationBuilder.DropTable(
                 name: "ExternalChapterMetadataExternalChapterReview");
@@ -122,14 +154,6 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ExternalChapterReview");
-
-            migrationBuilder.DropIndex(
-                name: "IX_AppUserRating_ChapterId",
-                table: "AppUserRating");
-
-            migrationBuilder.DropColumn(
-                name: "ChapterId",
-                table: "AppUserRating");
         }
     }
 }

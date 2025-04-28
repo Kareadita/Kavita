@@ -399,7 +399,7 @@ public class ChapterController : BaseApiController
 
 
     [HttpGet("chapter-detail-plus")]
-    public async Task<ChapterDetailPlusDto> ChapterDetailPlus([FromQuery] int seriesId, [FromQuery] int chapterId)
+    public async Task<ChapterDetailPlusDto> ChapterDetailPlus([FromQuery] int chapterId)
     {
         var ret = new ChapterDetailPlusDto();
 
@@ -408,7 +408,7 @@ public class ChapterController : BaseApiController
             .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
             .ToList();
 
-        var ownRating = await _unitOfWork.UserRepository.GetUserRatingAsync(seriesId, User.GetUserId(), chapterId);
+        var ownRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(User.GetUserId(), chapterId);
         if (ownRating != null)
         {
             ret.Rating = ownRating.Rating;

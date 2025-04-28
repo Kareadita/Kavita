@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.SeriesDetail;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
@@ -39,15 +40,37 @@ public class ReviewController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<UserReviewDto>> UpdateReview(UpdateUserReviewDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) return Unauthorized();
 
-        var ratingBuilder = new RatingBuilder(await _unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id, dto.ChapterId));
+        UserReviewDto review;
+        if (dto.ChapterId != null)
+        {
+            review = await UpdateChapterReview(user, dto, dto.ChapterId.Value);
+        }
+        else
+        {
+            review = await UpdateSeriesReview(user, dto);
+        }
+        _unitOfWork.UserRepository.Update(user);
+
+        await _unitOfWork.CommitAsync();
+
+        if (dto.ChapterId == null)
+        {
+            BackgroundJob.Enqueue(() =>
+                _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
+        }
+        return Ok(review);
+    }
+
+    private async Task<UserReviewDto> UpdateSeriesReview(AppUser user, UpdateUserReviewDto dto)
+    {
+        var ratingBuilder = new RatingBuilder(await _unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id));
 
         var rating = ratingBuilder
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
-            .WithChapterId(dto.ChapterId)
             .WithTagline(string.Empty)
             .Build();
 
@@ -55,14 +78,24 @@ public class ReviewController : BaseApiController
         {
             user.Ratings.Add(rating);
         }
-        _unitOfWork.UserRepository.Update(user);
+        return _mapper.Map<UserReviewDto>(rating);
+    }
 
-        await _unitOfWork.CommitAsync();
+    private async Task<UserReviewDto> UpdateChapterReview(AppUser user, UpdateUserReviewDto dto, int chapterId)
+    {
+        var ratingBuilder = new ChapterRatingBuilder(await _unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId));
 
+        var rating = ratingBuilder
+            .WithBody(dto.Body)
+            .WithSeriesId(dto.SeriesId)
+            .WithChapterId(chapterId)
+            .Build();
 
-        BackgroundJob.Enqueue(() =>
-            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
-        return Ok(_mapper.Map<UserReviewDto>(rating));
+        if (rating.Id == 0)
+        {
+            user.ChapterRatings.Add(rating);
+        }
+        return _mapper.Map<UserReviewDto>(rating);
     }
 
 
@@ -76,7 +109,14 @@ public class ReviewController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
         if (user == null) return Unauthorized();
 
-        user.Ratings = user.Ratings.Where(r => !(r.SeriesId == seriesId && r.ChapterId == chapterId)).ToList();
+        if (chapterId != null)
+        {
+            user.ChapterRatings = user.ChapterRatings.Where(r => r.ChapterId != chapterId).ToList();
+        }
+        else
+        {
+            user.Ratings = user.Ratings.Where(r => r.SeriesId != seriesId).ToList();
+        }
 
         _unitOfWork.UserRepository.Update(user);
 
