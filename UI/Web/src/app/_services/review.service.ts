@@ -13,13 +13,6 @@ export class ReviewService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getReviews(seriesId: number, chapterId?: number) {
-    if (chapterId) {
-      return this.httpClient.get<UserReview[]>(this.baseUrl + `review?chapterId=${chapterId}&seriesId=${seriesId}`);
-    }
-    return this.httpClient.get<UserReview[]>(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
-
   deleteReview(seriesId: number, chapterId?: number) {
     if (chapterId) {
       return this.httpClient.delete(this.baseUrl + `review?chapterId=${chapterId}&seriesId=${seriesId}`);
@@ -28,15 +21,15 @@ export class ReviewService {
     return this.httpClient.delete(this.baseUrl + 'review?seriesId=' + seriesId);
   }
 
-  updateReview(seriesId: number, body: string, rating: number, chapterId?: number) {
+  updateReview(seriesId: number, body: string, chapterId?: number) {
     if (chapterId) {
-      return this.httpClient.post<UserReview>(this.baseUrl + `review?chapterId=${chapterId}&seriesId=${seriesId}`, {
-        rating, body
+      return this.httpClient.post<UserReview>(this.baseUrl + `review`, {
+        seriesId, chapterId, body
       });
     }
 
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, rating, body
+      seriesId, body
     });
   }
 

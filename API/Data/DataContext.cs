@@ -78,6 +78,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
+    public DbSet<ExternalChapterReview> ExternalChapterReview { get; set; } = null!;
+    public DbSet<ExternalChapterMetadata> ExternalChapterMetadata { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

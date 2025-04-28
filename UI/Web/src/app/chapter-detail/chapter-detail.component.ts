@@ -73,10 +73,11 @@ import {ReviewModalComponent} from "../_single-module/review-modal/review-modal.
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {Rating} from "../_models/rating";
+import {ReviewService} from "../_services/review.service";
 
 enum TabID {
   Related = 'related-tab',
-  Reviews = 'review-tab', // Only applicable for books
+  Reviews = 'review-tab',
   Details = 'details-tab'
 }
 
@@ -111,8 +112,6 @@ enum TabID {
     DatePipe,
     DefaultDatePipe,
     CoverImageComponent,
-    CarouselReelComponent,
-    ReviewCardComponent,
     ReviewsComponent,
     ExternalRatingComponent
   ],
@@ -165,6 +164,9 @@ export class ChapterDetailComponent implements OnInit {
   hasReadingProgress = false;
   userReviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
+  rating: number = 0;
+  hasBeenRated: boolean = false;
+
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
   /**
@@ -233,7 +235,7 @@ export class ChapterDetailComponent implements OnInit {
       series: this.seriesService.getSeries(this.seriesId),
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
       libraryType: this.libraryService.getLibraryType(this.libraryId),
-      reviews: this.chapterService.chapterReviews(this.chapterId),
+      chapterDetail: this.chapterService.chapterDetailPlus(this.seriesId, this.chapterId),
     }).subscribe(results => {
 
       if (results.chapter === null) {
@@ -245,8 +247,10 @@ export class ChapterDetailComponent implements OnInit {
       this.chapter = results.chapter;
       this.weblinks = this.chapter.webLinks.split(',');
       this.libraryType = results.libraryType;
-      this.userReviews = results.reviews.filter(r => !r.isExternal);
-      this.plusReviews = results.reviews.filter(r => r.isExternal);
+      this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);
+      this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
+      this.rating = results.chapterDetail.rating;
+      this.hasBeenRated = results.chapterDetail.hasBeenRated;
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
@@ -384,10 +388,6 @@ export class ChapterDetailComponent implements OnInit {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
         break;
     }
-  }
-
-  userRating() {
-    return this.userReviews.find(r => r.username == this.user?.username && !r.isExternal)
   }
 
   protected readonly LibraryType = LibraryType;

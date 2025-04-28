@@ -28,11 +28,10 @@
 
 
           <div class="mt-2 mb-2">
-            @let rating = userRating();
             <app-external-rating [seriesId]="series.id"
                                  [ratings]="[]"
-                                 [userRating]="rating?.rating || 0"
-                                 [hasUserRated]="rating !== undefined && rating.hasBeenRated"
+                                 [userRating]="rating"
+                                 [hasUserRated]="hasBeenRated"
                                  [libraryType]="libraryType!"
                                  [chapterId]="chapterId"
             >

@@ -20,6 +20,12 @@ public class RatingBuilder : IEntityBuilder<AppUserRating>
         return this;
     }
 
+    public RatingBuilder WithChapterId(int? chapterId)
+    {
+        _rating.ChapterId = chapterId;
+        return this;
+    }
+
     public RatingBuilder WithRating(int rating)
     {
         _rating.Rating = Math.Clamp(rating, 0, 5);

@@ -1,4 +1,5 @@
 ﻿using API.Entities;
+using API.Entities.Enums;
 using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;
@@ -38,7 +39,6 @@ public class UserReviewDto
     /// </summary>
     public string Username { get; set; }
     public int TotalVotes { get; set; }
-    public float Rating { get; set; }
     public bool HasBeenRated { get; set; }
     public string? RawBody { get; set; }
     /// <summary>
@@ -58,4 +58,5 @@ public class UserReviewDto
     /// If this review is External, which Provider did it come from
     /// </summary>
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
+    public RatingAuthority Authority { get; set; } = RatingAuthority.User;
 }

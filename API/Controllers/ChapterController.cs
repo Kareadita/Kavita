@@ -15,8 +15,10 @@ using API.Helpers;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
@@ -28,13 +30,16 @@ public class ChapterController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ChapterController> _logger;
+    private readonly IMapper _mapper;
 
-    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger)
+    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger,
+        IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _eventHub = eventHub;
         _logger = logger;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -392,15 +397,34 @@ public class ChapterController : BaseApiController
         return Ok();
     }
 
-    /// <summary>
-    /// Get all reviews for this chapter
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    [HttpGet("review")]
-    public async Task<IList<UserReviewDto>> ChapterReviews([FromQuery] int chapterId)
+
+    [HttpGet("chapter-detail-plus")]
+    public async Task<ChapterDetailPlusDto> ChapterDetailPlus([FromQuery] int seriesId, [FromQuery] int chapterId)
     {
-        return await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId());
+        var ret = new ChapterDetailPlusDto();
+
+        var userReviews = (await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId()))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
+            .ToList();
+
+        var ownRating = await _unitOfWork.UserRepository.GetUserRatingAsync(seriesId, User.GetUserId(), chapterId);
+        if (ownRating != null)
+        {
+            ret.Rating = ownRating.Rating;
+            ret.HasBeenRated = ownRating.HasBeenRated;
+        }
+
+        var externalMetadata = await _unitOfWork.ExternalChapterMetadataRepository.Get(chapterId);
+        if (externalMetadata != null && externalMetadata.ExternalReviews.Count > 0)
+        {
+            var dtos = externalMetadata.ExternalReviews.Select(ex => _mapper.Map<UserReviewDto>(ex)).ToList();
+            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(dtos));
+        }
+
+        ret.Reviews = userReviews;
+
+        return ret;
     }
 
 }

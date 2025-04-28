@@ -83,6 +83,7 @@ import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {User} from "../_models/user";
 import {ReviewService} from "../_services/review.service";
+import {ChapterService} from "../_services/chapter.service";
 
 enum TabID {
 
@@ -183,7 +184,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
   private readonly location = inject(Location);
-  private readonly reviewService = inject(ReviewService);
+  private readonly chapterService = inject(ChapterService);
 
 
   protected readonly AgeRating = AgeRating;
@@ -204,8 +205,13 @@ export class VolumeDetailComponent implements OnInit {
   libraryType: LibraryType | null = null;
   activeTabId = TabID.Chapters;
   readingLists: ReadingList[] = [];
+
+  // Only populated if the volume has exactly one chapter
   userReviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
+  rating: number = 0;
+  hasBeenRated: boolean = false;
+
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
@@ -405,9 +411,11 @@ export class VolumeDetailComponent implements OnInit {
       this.libraryType = results.libraryType;
 
       if (this.volume.chapters.length === 1) {
-        this.reviewService.getReviews(this.seriesId, this.volume.chapters[0].id).subscribe(reviews => {
-          this.userReviews = reviews.filter(r => !r.isExternal);
-          this.plusReviews = reviews.filter(r => r.isExternal);
+        this.chapterService.chapterDetailPlus(this.seriesId, this.volume.chapters[0].id).subscribe(detail => {
+          this.userReviews = detail.reviews.filter(r => !r.isExternal);
+          this.plusReviews = detail.reviews.filter(r => r.isExternal);
+          this.rating = detail.rating;
+          this.hasBeenRated = detail.hasBeenRated;
         });
       }
 
@@ -690,10 +698,6 @@ export class VolumeDetailComponent implements OnInit {
     } else {
       this.currentlyReadingChapter = undefined;
     }
-  }
-
-  userRating() {
-    return this.userReviews.find(r => r.username === this.user?.username && !r.isExternal);
   }
 
   protected readonly encodeURIComponent = encodeURIComponent;

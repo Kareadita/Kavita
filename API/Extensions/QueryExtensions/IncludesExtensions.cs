@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using API.Data.Repositories;
 using API.Entities;
+using API.Entities.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
@@ -299,6 +300,16 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(LibraryIncludes.ExcludePatterns))
         {
             query = query.Include(l => l.LibraryExcludePatterns);
+        }
+
+        return query.AsSplitQuery();
+    }
+
+    public static IQueryable<ExternalChapterMetadata> Includes(this IQueryable<ExternalChapterMetadata> query, ExternalChapterMetadataIncludes includeFlags)
+    {
+        if (includeFlags.HasFlag(ExternalChapterMetadataIncludes.ExternalReviews))
+        {
+            query = query.Include(e => e.ExternalReviews);
         }
 
         return query.AsSplitQuery();

@@ -5,6 +5,7 @@ import {Chapter} from "../_models/chapter";
 import {TextResonse} from "../_types/text-response";
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";
+import {ChapterDetail} from "../_models/chapter-detail";
 
 @Injectable({
   providedIn: 'root'
@@ -31,8 +32,8 @@ export class ChapterService {
     return this.httpClient.post(this.baseUrl + 'chapter/update', chapter, TextResonse);
   }
 
-  chapterReviews(chapterId: number) {
-    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'chapter/review?chapterId='+chapterId);
+  chapterDetailPlus(seriesId: number, chapterId: number) {
+    return this.httpClient.get<ChapterDetail>(this.baseUrl + `chapter/chapter-detail-plus?chapterId=${chapterId}&seriesId=${seriesId}`);
   }
 
 }

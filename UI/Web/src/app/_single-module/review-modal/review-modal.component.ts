@@ -35,29 +35,19 @@ export class ReviewModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
   private readonly reviewService = inject(ReviewService);
-  private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
-  private readonly themeService = inject(ThemeService);
   protected readonly minLength = 5;
 
   @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
-  rating: number = 0;
-
-  starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
       reviewBody: new FormControl(this.review.body, [Validators.required, Validators.minLength(this.minLength)]),
     });
-    this.rating = this.review.rating;
     this.cdRef.markForCheck();
-  }
-
-  updateRating($event: number) {
-    this.rating = $event;
   }
 
   close() {
@@ -79,7 +69,7 @@ export class ReviewModalComponent implements OnInit {
       return;
     }
 
-    this.reviewService.updateReview(this.review.seriesId, model.reviewBody, this.rating, this.review.chapterId).subscribe(review => {
+    this.reviewService.updateReview(this.review.seriesId, model.reviewBody, this.review.chapterId).subscribe(review => {
       this.modal.close({success: true, review: review, action: ReviewModalCloseAction.Edit});
     });
 

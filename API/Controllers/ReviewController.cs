@@ -30,21 +30,6 @@ public class ReviewController : BaseApiController
         _scrobblingService = scrobblingService;
     }
 
-    /// <summary>
-    /// Get all reviews for the series, or chapter
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    public async Task<IList<UserReviewDto>> GetReviews([FromQuery] int seriesId, [FromQuery] int? chapterId)
-    {
-        if (chapterId == null)
-        {
-            return await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, User.GetUserId());
-        }
-
-        return await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId.Value, User.GetUserId());
-    }
-
 
     /// <summary>
     /// Updates the review for a given series, or chapter
@@ -62,8 +47,8 @@ public class ReviewController : BaseApiController
         var rating = ratingBuilder
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
+            .WithChapterId(dto.ChapterId)
             .WithTagline(string.Empty)
-            .WithRating(dto.Rating)
             .Build();
 
         if (rating.Id == 0)

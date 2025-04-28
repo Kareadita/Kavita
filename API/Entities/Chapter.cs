@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
@@ -168,6 +169,8 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     // Relationships
     public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
+
+    public ExternalChapterMetadata ExternalChapterMetadata { get; set; } = null!;
 
     public void UpdateFrom(ParserInfo info)
     {

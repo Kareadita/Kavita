@@ -1085,26 +1085,52 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.Writer, potentialMatch.Writers) || madeModification;
 
             madeModification = await UpdateChapterCoverImage(chapter, settings, potentialMatch.CoverImageUrl) || madeModification;
-
-            madeModification = await UpdateChapterReviews(chapter, settings, potentialMatch) || madeModification;
+            madeModification = await UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
 
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
         }
 
-
         return madeModification;
     }
 
-    private async Task<bool> UpdateChapterReviews(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
+    private async Task<bool> UpdateExternalChapterMetadata(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
     {
         if (!settings.Enabled) return false;
 
-        if (metadata.UserReviews.Count == 0 && metadata.CriticReviews.Count == 0) return false;
+        if (metadata.UserReviews.Count == 0 && metadata.CriticReviews.Count == 0)
+        {
+            _logger.LogDebug("No external reviews found for chapter {ChapterID}", chapter.Id);
+            return false;
+        }
 
-        // Clear current ratings
-        chapter.Ratings.Clear();
+        var exteralChapterMetadata = await GetOrCreateExternalChapterMetadataForChapter(chapter.Id, chapter);
+        _unitOfWork.ExternalChapterMetadataRepository.Remove(exteralChapterMetadata.ExternalReviews);
 
+        List<ExternalChapterReview> externalReviews = [];
+
+        externalReviews.AddRange(metadata.CriticReviews
+            .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
+            .Select(r =>
+            {
+                var review = _mapper.Map<ExternalChapterReview>(r);
+                review.ChapterId = chapter.Id;
+                review.Authority = RatingAuthority.Critic;
+                return review;
+            }));
+        externalReviews.AddRange(metadata.UserReviews
+            .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
+            .Select(r =>
+            {
+                var review = _mapper.Map<ExternalChapterReview>(r);
+                review.ChapterId = chapter.Id;
+                review.Authority = RatingAuthority.User;
+                return review;
+            }));
+
+        chapter.ExternalChapterMetadata.ExternalReviews = externalReviews;
+
+        _logger.LogDebug("Added {Count} reviews for chapter {ChapterId}", externalReviews.Count, chapter.Id);
         return true;
     }
 
@@ -1560,6 +1586,28 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
 
         return externalSeriesMetadata;
+    }
+
+    /// <summary>
+    /// Gets from DB or creates a new one with just ChapterId
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="chapter"></param>
+    /// <returns></returns>
+    private async Task<ExternalChapterMetadata> GetOrCreateExternalChapterMetadataForChapter(int chapterId, Chapter chapter)
+    {
+        var externalChapterMetadata = await _unitOfWork.ExternalChapterMetadataRepository.Get(chapterId);
+        if (externalChapterMetadata != null) return externalChapterMetadata;
+
+        externalChapterMetadata = new ExternalChapterMetadata()
+        {
+            ChapterId = chapterId,
+        };
+
+        chapter.ExternalChapterMetadata = externalChapterMetadata;
+        _unitOfWork.ExternalChapterMetadataRepository.Attach(externalChapterMetadata);
+
+        return externalChapterMetadata;
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,
