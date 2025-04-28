@@ -38,7 +38,7 @@ public class UserReviewDto
     /// </summary>
     public string Username { get; set; }
     public int TotalVotes { get; set; }
-    public bool HasBeenRated { get; set; }
+    public float Rating { get; set; }
     public string? RawBody { get; set; }
     /// <summary>
     /// How many upvotes this review has gotten

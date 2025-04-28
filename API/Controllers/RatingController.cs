@@ -36,7 +36,7 @@ public class RatingController : BaseApiController
     [HttpPost]
     public async Task<ActionResult> UpdateRating(UpdateRatingDto updateRating)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
         if (await _ratingService.UpdateRating(user, updateRating))

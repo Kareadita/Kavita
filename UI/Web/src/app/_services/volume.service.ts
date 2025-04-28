@@ -3,7 +3,6 @@ import {environment} from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import {Volume} from "../_models/volume";
 import {TextResonse} from "../_types/text-response";
-import {UserReview} from "../_single-module/review-card/user-review";
 
 @Injectable({
   providedIn: 'root'
@@ -28,10 +27,6 @@ export class VolumeService {
 
   updateVolume(volume: any) {
     return this.httpClient.post(this.baseUrl + 'volume/update', volume, TextResonse);
-  }
-
-  volumeReviews(volumeId: number) {
-    return this.httpClient.get<UserReview[]>(this.baseUrl + 'volume/review?volumeId='+volumeId);
   }
 
 }
