@@ -399,7 +399,7 @@ public class ChapterController : BaseApiController
 
 
     [HttpGet("chapter-detail-plus")]
-    public async Task<ChapterDetailPlusDto> ChapterDetailPlus([FromQuery] int chapterId)
+    public async Task<ActionResult<ChapterDetailPlusDto>> ChapterDetailPlus([FromQuery] int chapterId)
     {
         var ret = new ChapterDetailPlusDto();
 
@@ -415,11 +415,10 @@ public class ChapterController : BaseApiController
             ret.HasBeenRated = ownRating.HasBeenRated;
         }
 
-        var externalMetadata = await _unitOfWork.ExternalChapterMetadataRepository.Get(chapterId);
-        if (externalMetadata != null && externalMetadata.ExternalReviews.Count > 0)
+        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviews(chapterId);
+        if (externalReviews.Count > 0)
         {
-            var dtos = externalMetadata.ExternalReviews.Select(ex => _mapper.Map<UserReviewDto>(ex)).ToList();
-            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(dtos));
+            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(externalReviews));
         }
 
         ret.Reviews = userReviews;

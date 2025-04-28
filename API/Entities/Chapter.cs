@@ -170,7 +170,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
 
-    public ExternalChapterMetadata ExternalChapterMetadata { get; set; } = null!;
+    public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
 
     public void UpdateFrom(ParserInfo info)
     {

@@ -14,12 +14,20 @@ namespace API.Services;
 public interface IRatingService
 {
     /// <summary>
-    ///
+    /// Updates the users' rating for a given series
     /// </summary>
     /// <param name="user">Should include ratings</param>
     /// <param name="updateRatingDto"></param>
     /// <returns></returns>
-    Task<bool> UpdateRating(AppUser user, UpdateRatingDto updateRatingDto);
+    Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto);
+
+    /// <summary>
+    /// Updates the users' rating for a given chapter
+    /// </summary>
+    /// <param name="user">Should include ratings</param>
+    /// <param name="updateRatingDto">chapterId must be set</param>
+    /// <returns></returns>
+    Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto);
 }
 
 public class RatingService: IRatingService
@@ -36,17 +44,7 @@ public class RatingService: IRatingService
         _logger = logger;
     }
 
-    public async Task<bool> UpdateRating(AppUser user, UpdateRatingDto updateRatingDto)
-    {
-        if (updateRatingDto.ChapterId != null)
-        {
-            return await UpdateChapterRating(user, updateRatingDto);
-        }
-
-        return await UpdateSeriesRating(user, updateRatingDto);
-    }
-
-    private async Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto)
+    public async Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto)
     {
         var userRating =
             await _unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id) ??
@@ -85,7 +83,7 @@ public class RatingService: IRatingService
         return false;
     }
 
-    private async Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto)
+    public async Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto)
     {
         if (updateRatingDto.ChapterId == null)
         {

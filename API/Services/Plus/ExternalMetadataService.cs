@@ -1104,16 +1104,15 @@ public class ExternalMetadataService : IExternalMetadataService
             return false;
         }
 
-        var exteralChapterMetadata = await GetOrCreateExternalChapterMetadataForChapter(chapter.Id, chapter);
-        _unitOfWork.ExternalChapterMetadataRepository.Remove(exteralChapterMetadata.ExternalReviews);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(chapter.ExternalReviews);
 
-        List<ExternalChapterReview> externalReviews = [];
+        List<ExternalReview> externalReviews = [];
 
         externalReviews.AddRange(metadata.CriticReviews
             .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
             .Select(r =>
             {
-                var review = _mapper.Map<ExternalChapterReview>(r);
+                var review = _mapper.Map<ExternalReview>(r);
                 review.ChapterId = chapter.Id;
                 review.Authority = RatingAuthority.Critic;
                 return review;
@@ -1122,13 +1121,13 @@ public class ExternalMetadataService : IExternalMetadataService
             .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
             .Select(r =>
             {
-                var review = _mapper.Map<ExternalChapterReview>(r);
+                var review = _mapper.Map<ExternalReview>(r);
                 review.ChapterId = chapter.Id;
                 review.Authority = RatingAuthority.User;
                 return review;
             }));
 
-        chapter.ExternalChapterMetadata.ExternalReviews = externalReviews;
+        chapter.ExternalReviews = externalReviews;
 
         _logger.LogDebug("Added {Count} reviews for chapter {ChapterId}", externalReviews.Count, chapter.Id);
         return true;
@@ -1586,28 +1585,6 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.ExternalSeriesMetadataRepository.Attach(externalSeriesMetadata);
 
         return externalSeriesMetadata;
-    }
-
-    /// <summary>
-    /// Gets from DB or creates a new one with just ChapterId
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <param name="chapter"></param>
-    /// <returns></returns>
-    private async Task<ExternalChapterMetadata> GetOrCreateExternalChapterMetadataForChapter(int chapterId, Chapter chapter)
-    {
-        var externalChapterMetadata = await _unitOfWork.ExternalChapterMetadataRepository.Get(chapterId);
-        if (externalChapterMetadata != null) return externalChapterMetadata;
-
-        externalChapterMetadata = new ExternalChapterMetadata()
-        {
-            ChapterId = chapterId,
-        };
-
-        chapter.ExternalChapterMetadata = externalChapterMetadata;
-        _unitOfWork.ExternalChapterMetadataRepository.Attach(externalChapterMetadata);
-
-        return externalChapterMetadata;
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,

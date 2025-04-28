@@ -45,7 +45,7 @@ public class RatingServiceTests: AbstractDbTest
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         JobStorage.Current = new InMemoryStorage();
-        var result = await _ratingService.UpdateRating(user, new UpdateRatingDto
+        var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 3,
@@ -79,7 +79,7 @@ public class RatingServiceTests: AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _ratingService.UpdateRating(user, new UpdateRatingDto
+        var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 3,
@@ -95,7 +95,7 @@ public class RatingServiceTests: AbstractDbTest
 
         // Update the DB again
 
-        var result2 = await _ratingService.UpdateRating(user, new UpdateRatingDto
+        var result2 = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 5,
@@ -129,7 +129,7 @@ public class RatingServiceTests: AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _ratingService.UpdateRating(user, new UpdateRatingDto
+        var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
             SeriesId = 1,
             UserRating = 10,
@@ -164,7 +164,7 @@ public class RatingServiceTests: AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await _ratingService.UpdateRating(user, new UpdateRatingDto
+        var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
             SeriesId = 2,
             UserRating = 5,

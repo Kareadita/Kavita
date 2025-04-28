@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
-using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -33,13 +28,19 @@ public class RatingController : BaseApiController
         _localizationService = localizationService;
     }
 
-    [HttpPost]
-    public async Task<ActionResult> UpdateRating(UpdateRatingDto updateRating)
+    /// <summary>
+    /// Update the users' rating of the given series
+    /// </summary>
+    /// <param name="updateRating"></param>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    [HttpPost("series")]
+    public async Task<ActionResult> UpdateSeriesRating(UpdateRatingDto updateRating)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (await _ratingService.UpdateRating(user, updateRating))
+        if (await _ratingService.UpdateSeriesRating(user, updateRating))
         {
             return Ok();
         }
@@ -47,24 +48,44 @@ public class RatingController : BaseApiController
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
     }
 
-    [HttpGet("overall")]
-    public async Task<ActionResult<RatingDto>> GetOverallRating(int seriesId, [FromQuery] int? chapterId)
+    /// <summary>
+    /// Update the users' rating of the given chapter
+    /// </summary>
+    /// <param name="updateRating">chapterId must be set</param>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    [HttpPost("chapter")]
+    public async Task<ActionResult> UpdateChapterRating(UpdateRatingDto updateRating)
     {
-        int average;
-        if (chapterId != null)
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
+        if (user == null) throw new UnauthorizedAccessException();
+
+        if (await _ratingService.UpdateChapterRating(user, updateRating))
         {
-            average = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId.Value, User.GetUserId());
-        }
-        else
-        {
-            average = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId());
+            return Ok();
         }
 
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+    }
 
+    [HttpGet("overall-series")]
+    public async Task<ActionResult<RatingDto>> GetOverallSeriesRating(int seriesId)
+    {
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = average,
+            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId()),
+            FavoriteCount = 0,
+        });
+    }
+
+    [HttpGet("overall-chapter")]
+    public async Task<ActionResult<RatingDto>> GetOverallChapterRating(int chapterId)
+    {
+        return Ok(new RatingDto()
+        {
+            Provider = ScrobbleProvider.Kavita,
+            AverageScore = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, User.GetUserId()),
             FavoriteCount = 0,
         });
     }

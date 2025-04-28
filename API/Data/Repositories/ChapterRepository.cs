@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -24,7 +25,8 @@ public enum ChapterIncludes
     Files = 4,
     People = 8,
     Genres = 16,
-    Tags = 32
+    Tags = 32,
+    ExternalReviews = 1 << 6,
 }
 
 public interface IChapterRepository
@@ -49,6 +51,7 @@ public interface IChapterRepository
     IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
+    Task<IList<UserReviewDto>> GetExternalChapterReviews(int chapterId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -326,5 +329,15 @@ public class ChapterRepository : IChapterRepository
             .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
             .AverageAsync(r => (int?) r.Rating));
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
+    }
+
+    public async Task<IList<UserReviewDto>> GetExternalChapterReviews(int chapterId)
+    {
+        return await _context.Chapter
+            .Where(c => c.Id == chapterId)
+            .SelectMany(c => c.ExternalReviews)
+            // Don't use ProjectTo, it fails to map int to float (??)
+            .Select(r => _mapper.Map<UserReviewDto>(r))
+            .ToListAsync();
     }
 }

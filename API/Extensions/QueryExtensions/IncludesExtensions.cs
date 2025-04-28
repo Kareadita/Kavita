@@ -73,6 +73,12 @@ public static class IncludesExtensions
                 .Include(c => c.Tags);
         }
 
+        if (includes.HasFlag(ChapterIncludes.ExternalReviews))
+        {
+            queryable = queryable
+                .Include(c => c.ExternalReviews);
+        }
+
         return queryable.AsSplitQuery();
     }
 
@@ -305,16 +311,6 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(LibraryIncludes.ExcludePatterns))
         {
             query = query.Include(l => l.LibraryExcludePatterns);
-        }
-
-        return query.AsSplitQuery();
-    }
-
-    public static IQueryable<ExternalChapterMetadata> Includes(this IQueryable<ExternalChapterMetadata> query, ExternalChapterMetadataIncludes includeFlags)
-    {
-        if (includeFlags.HasFlag(ExternalChapterMetadataIncludes.ExternalReviews))
-        {
-            query = query.Include(e => e.ExternalReviews);
         }
 
         return query.AsSplitQuery();

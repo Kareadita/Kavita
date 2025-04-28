@@ -344,16 +344,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.IsExternal,
                 opt =>
                     opt.MapFrom(src => true));
-        CreateMap<ExternalChapterReview, UserReviewDto>()
-            .ForMember(dest => dest.IsExternal,
-                opt =>
-                    opt.MapFrom(src => true));
 
         CreateMap<UserReviewDto, ExternalReview>()
-            .ForMember(dest => dest.BodyJustText,
-                opt =>
-                    opt.MapFrom(src => ReviewHelper.GetCharacters(src.Body)));
-        CreateMap<UserReviewDto, ExternalChapterReview>()
             .ForMember(dest => dest.BodyJustText,
                 opt =>
                     opt.MapFrom(src => ReviewHelper.GetCharacters(src.Body)));
