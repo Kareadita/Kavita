@@ -186,6 +186,8 @@ public class CoverDbService : ICoverDbService
     {
         try
         {
+            // Sanitize user input
+            publisherName = publisherName.Replace(Environment.NewLine, string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
             var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Publisher);
             var res = await provider.GetAsync<string>(publisherName);
             if (res.HasValue)
