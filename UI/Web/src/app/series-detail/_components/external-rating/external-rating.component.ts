@@ -8,8 +8,7 @@ import {
   OnInit,
   ViewEncapsulation
 } from '@angular/core';
-import {SeriesService} from "../../../_services/series.service";
-import {Rating} from "../../../_models/rating";
+import {Rating, RatingAuthority} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {NgbModal, NgbPopover} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
@@ -18,13 +17,12 @@ import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {ImageService} from "../../../_services/image.service";
 import {AsyncPipe, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
 import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
-import {ChapterService} from "../../../_services/chapter.service";
 import {ReviewService} from "../../../_services/review.service";
 
 @Component({
@@ -86,4 +84,14 @@ export class ExternalRatingComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+  getAuthorityTitle(rating: Rating) {
+    if (rating.authority === RatingAuthority.Critic) {
+      return ` (${translate('external-rating.critic')})`;
+    }
+
+    return '';
+  }
+
+  protected readonly RatingAuthority = RatingAuthority;
 }

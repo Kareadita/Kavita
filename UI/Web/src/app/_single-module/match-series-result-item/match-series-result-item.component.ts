@@ -14,6 +14,7 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {PlusMediaFormatPipe} from "../../_pipes/plus-media-format.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -47,4 +48,5 @@ export class MatchSeriesResultItemComponent {
     this.selected.emit(this.item);
   }
 
+  protected readonly PlusMediaFormat = PlusMediaFormat;
 }

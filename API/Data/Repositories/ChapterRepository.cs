@@ -52,6 +52,7 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
     Task<IList<UserReviewDto>> GetExternalChapterReviews(int chapterId);
+    Task<IList<RatingDto>> GetExternalChapterRatings(int chapterId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -338,6 +339,15 @@ public class ChapterRepository : IChapterRepository
             .SelectMany(c => c.ExternalReviews)
             // Don't use ProjectTo, it fails to map int to float (??)
             .Select(r => _mapper.Map<UserReviewDto>(r))
+            .ToListAsync();
+    }
+
+    public async Task<IList<RatingDto>> GetExternalChapterRatings(int chapterId)
+    {
+        return await _context.Chapter
+            .Where(c => c.Id == chapterId)
+            .SelectMany(c => c.ExternalRatings)
+            .ProjectTo<RatingDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 }

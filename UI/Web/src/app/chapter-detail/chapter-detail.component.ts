@@ -1,23 +1,28 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   inject,
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, NgStyle, NgClass, DatePipe, Location} from "@angular/common";
+import {AsyncPipe, DatePipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
-  NgbDropdownToggle, NgbModal,
-  NgbNav, NgbNavChangeEvent,
-  NgbNavContent, NgbNavItem,
-  NgbNavLink, NgbNavOutlet,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbNav,
+  NgbNavChangeEvent,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
@@ -66,14 +71,10 @@ import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {UserReview} from "../_single-module/review-card/user-review";
-import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
-import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
 import {User} from "../_models/user";
-import {ReviewModalComponent} from "../_single-module/review-modal/review-modal.component";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {Rating} from "../_models/rating";
-import {ReviewService} from "../_services/review.service";
 
 enum TabID {
   Related = 'related-tab',
@@ -149,6 +150,8 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly LibraryType = LibraryType;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -165,6 +168,7 @@ export class ChapterDetailComponent implements OnInit {
   userReviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
   rating: number = 0;
+  ratings: Array<Rating> = [];
   hasBeenRated: boolean = false;
 
   weblinks: Array<string> = [];
@@ -251,6 +255,7 @@ export class ChapterDetailComponent implements OnInit {
       this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
       this.rating = results.chapterDetail.rating;
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
+      this.ratings = results.chapterDetail.ratings;
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
@@ -389,7 +394,4 @@ export class ChapterDetailComponent implements OnInit {
         break;
     }
   }
-
-  protected readonly LibraryType = LibraryType;
-    protected readonly encodeURIComponent = encodeURIComponent;
 }

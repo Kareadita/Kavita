@@ -57,5 +57,8 @@ public class UserReviewDto
     /// If this review is External, which Provider did it come from
     /// </summary>
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
+    /// <summary>
+    /// Source of the Rating
+    /// </summary>
     public RatingAuthority Authority { get; set; } = RatingAuthority.User;
 }

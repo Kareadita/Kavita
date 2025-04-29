@@ -423,6 +423,8 @@ public class ChapterController : BaseApiController
 
         ret.Reviews = userReviews;
 
+        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapterId);
+
         return ret;
     }
 

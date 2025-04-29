@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ChapterRating : Migration
+    public partial class ChapterRatingAndReviews : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,6 +22,26 @@ namespace API.Data.Migrations
                 table: "ExternalReview",
                 type: "INTEGER",
                 nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "Authority",
+                table: "ExternalRating",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ChapterId",
+                table: "ExternalRating",
+                type: "INTEGER",
+                nullable: true);
+
+            migrationBuilder.AddColumn<float>(
+                name: "AverageExternalRating",
+                table: "Chapter",
+                type: "REAL",
+                nullable: false,
+                defaultValue: 0f);
 
             migrationBuilder.CreateTable(
                 name: "AppUserChapterRating",
@@ -65,6 +85,11 @@ namespace API.Data.Migrations
                 column: "ChapterId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExternalRating_ChapterId",
+                table: "ExternalRating",
+                column: "ChapterId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppUserChapterRating_AppUserId",
                 table: "AppUserChapterRating",
                 column: "AppUserId");
@@ -80,6 +105,13 @@ namespace API.Data.Migrations
                 column: "SeriesId");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_ExternalRating_Chapter_ChapterId",
+                table: "ExternalRating",
+                column: "ChapterId",
+                principalTable: "Chapter",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_ExternalReview_Chapter_ChapterId",
                 table: "ExternalReview",
                 column: "ChapterId",
@@ -91,6 +123,10 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_ExternalRating_Chapter_ChapterId",
+                table: "ExternalRating");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_ExternalReview_Chapter_ChapterId",
                 table: "ExternalReview");
 
@@ -101,6 +137,10 @@ namespace API.Data.Migrations
                 name: "IX_ExternalReview_ChapterId",
                 table: "ExternalReview");
 
+            migrationBuilder.DropIndex(
+                name: "IX_ExternalRating_ChapterId",
+                table: "ExternalRating");
+
             migrationBuilder.DropColumn(
                 name: "Authority",
                 table: "ExternalReview");
@@ -108,6 +148,18 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "ChapterId",
                 table: "ExternalReview");
+
+            migrationBuilder.DropColumn(
+                name: "Authority",
+                table: "ExternalRating");
+
+            migrationBuilder.DropColumn(
+                name: "ChapterId",
+                table: "ExternalRating");
+
+            migrationBuilder.DropColumn(
+                name: "AverageExternalRating",
+                table: "Chapter");
         }
     }
 }

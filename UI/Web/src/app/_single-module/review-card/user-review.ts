@@ -1,9 +1,6 @@
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {RatingAuthority} from "../../_models/rating";
 
-export enum RatingAuthority {
-  User = 0,
-  Critic = 1
-}
 
 export interface UserReview {
   seriesId: number;

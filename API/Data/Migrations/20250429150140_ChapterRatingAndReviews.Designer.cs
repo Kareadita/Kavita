@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250428180534_ChapterRating")]
-    partial class ChapterRating
+    [Migration("20250429150140_ChapterRatingAndReviews")]
+    partial class ChapterRatingAndReviews
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -790,6 +790,9 @@ namespace API.Data.Migrations
                     b.Property<string>("AlternateSeries")
                         .HasColumnType("TEXT");
 
+                    b.Property<float>("AverageExternalRating")
+                        .HasColumnType("REAL");
+
                     b.Property<float>("AvgHoursToRead")
                         .HasColumnType("REAL");
 
@@ -1354,7 +1357,13 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Authority")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("AverageScore")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ChapterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("FavoriteCount")
@@ -1370,6 +1379,8 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
 
                     b.ToTable("ExternalRating");
                 });
@@ -2978,6 +2989,13 @@ namespace API.Data.Migrations
                     b.Navigation("Chapter");
                 });
 
+            modelBuilder.Entity("API.Entities.Metadata.ExternalRating", b =>
+                {
+                    b.HasOne("API.Entities.Chapter", null)
+                        .WithMany("ExternalRatings")
+                        .HasForeignKey("ChapterId");
+                });
+
             modelBuilder.Entity("API.Entities.Metadata.ExternalReview", b =>
                 {
                     b.HasOne("API.Entities.Chapter", null)
@@ -3445,6 +3463,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
+                    b.Navigation("ExternalRatings");
+
                     b.Navigation("ExternalReviews");
 
                     b.Navigation("Files");

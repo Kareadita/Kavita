@@ -126,6 +126,11 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public string WebLinks { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
 
+    /// <summary>
+    /// (Kavita+) Average rating from Kavita+ metadata
+    /// </summary>
+    public float AverageExternalRating { get; set; } = 0f;
+
     #region Locks
 
     public bool AgeRatingLocked { get; set; }
@@ -171,6 +176,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public int VolumeId { get; set; }
 
     public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
+    public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
 
     public void UpdateFrom(ParserInfo info)
     {
@@ -196,8 +202,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        // BUG: TODO: On non-english locales, for floats, the range will be 20,5 but the NumberTitle will return 20.5
-        // Have I fixed this with TryParse CultureInvariant
         try
         {
             if (MinNumber.Is(MaxNumber))

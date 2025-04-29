@@ -9,6 +9,6 @@ public class ChapterDetailPlusDto
     public float Rating { get; set; }
     public bool HasBeenRated { get; set; }
 
-    public List<UserReviewDto> Reviews { get; set; }
-    public List<RatingDto>? Ratings { get; set; }
+    public IList<UserReviewDto> Reviews { get; set; } = [];
+    public IList<RatingDto> Ratings { get; set; } = [];
 }

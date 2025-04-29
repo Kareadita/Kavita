@@ -17,7 +17,7 @@
 
     @for (rating of ratings; track rating.provider + rating.averageScore) {
       <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
-           [popoverTitle]="rating.provider | scrobbleProviderName" popoverClass="sm-popover">
+           [popoverTitle]="(rating.provider | scrobbleProviderName) + getAuthorityTitle(rating)" popoverClass="sm-popover">
         <span class="badge rounded-pill me-1">
           <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
           {{rating.averageScore}}%
@@ -69,6 +69,7 @@
         <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
       </div>
     }
+
 
     @if (rating.providerUrl) {
       <a [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">{{t('entry-label')}}</a>
