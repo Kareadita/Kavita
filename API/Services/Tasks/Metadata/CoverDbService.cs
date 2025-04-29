@@ -45,6 +45,7 @@ public class CoverDbService : ICoverDbService
     private readonly IImageService _imageService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
+    private TimeSpan _cacheTime = TimeSpan.FromDays(10);
 
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
 
@@ -97,7 +98,7 @@ public class CoverDbService : ICoverDbService
             throw new KavitaException($"Kavita has already tried to fetch from {sanitizedBaseUrl} and failed. Skipping duplicate check");
         }
 
-        await provider.SetAsync(baseUrl, string.Empty, TimeSpan.FromDays(10));
+        await provider.SetAsync(baseUrl, string.Empty, _cacheTime);
         if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
         {
             url = value;
@@ -185,6 +186,15 @@ public class CoverDbService : ICoverDbService
     {
         try
         {
+            var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Publisher);
+            var res = await provider.GetAsync<string>(publisherName);
+            if (res.HasValue)
+            {
+                _logger.LogInformation("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
+                throw new KavitaException($"Kavita has already tried to fetch Publisher: {publisherName} and failed. Skipping duplicate check");
+            }
+
+            await provider.SetAsync(publisherName, string.Empty, _cacheTime);
             var publisherLink = await FallbackToKavitaReaderPublisher(publisherName);
             if (string.IsNullOrEmpty(publisherLink))
             {

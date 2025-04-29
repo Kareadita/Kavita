@@ -590,14 +590,14 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserRating
             .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<AppUserChapterRating?> GetUserChapterRatingAsync(int userId, int chapterId)
     {
         return await _context.AppUserChapterRating
             .Where(r => r.AppUserId == userId && r.ChapterId == chapterId)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)

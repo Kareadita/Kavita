@@ -8,6 +8,10 @@ public static class EasyCacheProfiles
     public const string RevokedJwt = "revokedJWT";
     public const string Favicon = "favicon";
     /// <summary>
+    /// Images for Publishers
+    /// </summary>
+    public const string Publisher = "publisherImages";
+    /// <summary>
     /// If a user's license is valid
     /// </summary>
     public const string License = "license";

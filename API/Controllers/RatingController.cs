@@ -68,6 +68,11 @@ public class RatingController : BaseApiController
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
     }
 
+    /// <summary>
+    /// Overall rating from all Kavita users for a given Series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     [HttpGet("overall-series")]
     public async Task<ActionResult<RatingDto>> GetOverallSeriesRating(int seriesId)
     {
@@ -79,6 +84,11 @@ public class RatingController : BaseApiController
         });
     }
 
+    /// <summary>
+    /// Overall rating from all Kavita users for a given Chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
     [HttpGet("overall-chapter")]
     public async Task<ActionResult<RatingDto>> GetOverallChapterRating(int chapterId)
     {

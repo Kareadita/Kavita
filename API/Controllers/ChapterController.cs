@@ -397,7 +397,11 @@ public class ChapterController : BaseApiController
         return Ok();
     }
 
-
+    /// <summary>
+    /// Returns Ratings and Reviews for an individual Chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
     [HttpGet("chapter-detail-plus")]
     public async Task<ActionResult<ChapterDetailPlusDto>> ChapterDetailPlus([FromQuery] int chapterId)
     {
@@ -425,7 +429,7 @@ public class ChapterController : BaseApiController
 
         ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapterId);
 
-        return ret;
+        return Ok(ret);
     }
 
 }
