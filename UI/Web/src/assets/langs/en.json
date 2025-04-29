@@ -1051,7 +1051,7 @@
         "kavita-tooltip": "Your Rating + Overall",
         "kavita-rating-title": "Your Rating",
         "close": "{{common.close}}",
-        "critic": "Critic"
+        "critic": "{{review-card.critic}}"
     },
 
     "badge-expander": {

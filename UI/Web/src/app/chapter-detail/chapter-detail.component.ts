@@ -279,6 +279,7 @@ export class ChapterDetailComponent implements OnInit {
 
       this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 ||
         (this.chapter.tags || []).length > 0 || this.chapter.webLinks.length > 0;
+      
       this.isLoading = false;
       this.cdRef.markForCheck();
     });

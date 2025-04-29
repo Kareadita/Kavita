@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, NgStyle, NgClass, Location} from "@angular/common";
+import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -54,9 +54,7 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
-import {
-  EditVolumeModalComponent
-} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
+import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
 import {Tag} from "../_models/tag";
 import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
@@ -81,8 +79,6 @@ import {DefaultModalOptions} from "../_models/default-modal-options";
 import {UserReview} from "../_single-module/review-card/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
-import {User} from "../_models/user";
-import {ReviewService} from "../_services/review.service";
 import {ChapterService} from "../_services/chapter.service";
 
 enum TabID {
@@ -214,8 +210,6 @@ export class VolumeDetailComponent implements OnInit {
 
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
-
-  user: User | undefined;
 
   volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
@@ -350,12 +344,6 @@ export class VolumeDetailComponent implements OnInit {
 
 
   ngOnInit() {
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.user = user;
-      }
-    })
-
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const volumeId = this.route.snapshot.paramMap.get('volumeId');
