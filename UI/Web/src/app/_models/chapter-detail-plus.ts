@@ -1,7 +1,7 @@
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "./rating";
 
-export type ChapterDetail = {
+export type ChapterDetailPlus = {
   rating: number;
   hasBeenRated: boolean;
   reviews: UserReview[];
