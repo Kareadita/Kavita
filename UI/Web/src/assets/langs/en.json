@@ -93,7 +93,8 @@
         "your-review": "This is your review",
         "external-review": "External Review",
         "local-review": "Local Review",
-        "rating-percentage": "Rating {{r}}%"
+        "rating-percentage": "Rating {{r}}%",
+        "critic": "critic"
     },
 
     "want-to-read": {

@@ -13,15 +13,13 @@ import {UserReview} from "./user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
-import {
-  ReviewModalCloseEvent,
-  ReviewModalComponent
-} from "../review-modal/review-modal.component";
+import {ReviewModalCloseEvent, ReviewModalComponent} from "../review-modal/review-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {RatingAuthority} from "../../_models/rating";
 
 @Component({
   selector: 'app-review-card',
@@ -66,4 +64,6 @@ export class ReviewCardComponent implements OnInit {
       }
     })
   }
+
+  protected readonly RatingAuthority = RatingAuthority;
 }
