@@ -563,7 +563,13 @@ public class SeriesRepository : ISeriesRepository
 
         if (!fullSeries) return await query.ToListAsync();
 
-        return await query.Include(s => s.Volumes)
+        return await query
+            .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.ExternalRatings)
+            .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.ExternalReviews)
             .Include(s => s.Relations)
             .Include(s => s.Metadata)
 
