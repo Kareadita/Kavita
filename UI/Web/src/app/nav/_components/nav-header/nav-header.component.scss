@@ -126,6 +126,17 @@
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
+  :host ::ng-deep {
+    .navbar-nav {
+      .nav-item.search {
+        .ng-autocomplete {
+          input {
+            font-size: 1rem !important;
+          }
+        }
+      }
+    }
+  }
   .navbar-nav {
     width: 0;
   }
