@@ -458,7 +458,7 @@ public class SeriesService : ISeriesService
                 allChapterIds.AddRange(mapping.Value);
             }
 
-            // BUG: This isn't getting all the people and whatnot currently
+            // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
             _unitOfWork.SeriesRepository.Remove(series);
 
@@ -481,6 +481,7 @@ public class SeriesService : ISeriesService
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
             await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
             _taskScheduler.CleanupChapters([.. allChapterIds]);
+
             return true;
         }
         catch (Exception ex)

@@ -1085,7 +1085,7 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.Writer, potentialMatch.Writers) || madeModification;
 
             madeModification = await UpdateChapterCoverImage(chapter, settings, potentialMatch.CoverImageUrl) || madeModification;
-            madeModification = UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
+            madeModification = await UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
 
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
@@ -1094,7 +1094,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return madeModification;
     }
 
-    private bool UpdateExternalChapterMetadata(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
+    private async Task<bool> UpdateExternalChapterMetadata(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
     {
         if (!settings.Enabled) return false;
 
@@ -1106,7 +1106,12 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
 
         #region Review
-        _unitOfWork.ExternalSeriesMetadataRepository.Remove(chapter.ExternalReviews);
+
+        // Remove existing Reviews
+        var existingReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReview(chapter.Id);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(existingReviews);
+
+
         List<ExternalReview> externalReviews = [];
         externalReviews.AddRange(metadata.CriticReviews
             .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
@@ -1139,7 +1144,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var averageCriticRating = metadata.CriticReviews.Average(r => r.Rating);
         var averageUserRating = metadata.UserReviews.Average(r => r.Rating);
 
-        _unitOfWork.ExternalSeriesMetadataRepository.Remove(chapter.ExternalRatings);
+        var existingRatings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapter.Id);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(existingRatings);
+
         chapter.ExternalRatings =
         [
             new ExternalRating

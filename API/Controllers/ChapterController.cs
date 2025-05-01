@@ -419,7 +419,7 @@ public class ChapterController : BaseApiController
             ret.HasBeenRated = ownRating.HasBeenRated;
         }
 
-        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviews(chapterId);
+        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviewDtos(chapterId);
         if (externalReviews.Count > 0)
         {
             userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(externalReviews));
@@ -427,7 +427,7 @@ public class ChapterController : BaseApiController
 
         ret.Reviews = userReviews;
 
-        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapterId);
+        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatingDtos(chapterId);
 
         return Ok(ret);
     }

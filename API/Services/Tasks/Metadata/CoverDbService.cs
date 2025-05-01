@@ -308,6 +308,7 @@ public class CoverDbService : ICoverDbService
             .AllowHttpStatus("2xx,304")
             .GetStreamAsync();
 
+
         using var image = Image.NewFromStream(personStream);
         switch (encodeFormat)
         {
@@ -553,6 +554,7 @@ public class CoverDbService : ICoverDbService
                 {
                     try
                     {
+                        // BUG: There might be a bug here where it's comparing the same 2 images
                         var betterImage = Path.Join(_directoryService.CoverImageDirectory, series.CoverImage)
                             .GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
                         filePath = Path.GetFileName(betterImage);
