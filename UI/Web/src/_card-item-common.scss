@@ -9,7 +9,6 @@ $image-width: 160px;
   color: white;
   text-transform: uppercase;
   text-align: center;
-
   position: absolute;
   top: 0px;
   right: 0px;
@@ -62,9 +61,10 @@ $image-width: 160px;
 
 .bulk-mode {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 0;
+  left: 0;
   visibility: hidden;
+  transition: all ease-in-out 300ms;
 
   &.always-show {
     visibility: visible !important;
@@ -76,6 +76,36 @@ $image-width: 160px;
     width: 20px;
     height: 20px;
     color: var(--checkbox-bg-color);
+    border-radius: 50%;
+    border: 2px solid #f0f0f0;
+    background-color: var(--elevation-layer11-dark);
+    transform: scale(0.85);
+    transition: all ease-in-out 300ms;
+    left: 7px;
+    position: relative;
+    top: 5px;
+    box-shadow: 0 0 5px 2px hsl(0deg 0% 0% / 69%);
+    
+    &:hover {
+      cursor: pointer;
+    }
+    
+    &:checked {
+      border: unset;
+      transform: scale(1);
+      background-color: var(--primary-color);
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+    
+    &:focus {
+      box-shadow: 0 0 5px 2px hsl(0deg 0% 0% / 69%);
+    }
+  }
+  
+  &:hover {
+    ~ .card-overlay {
+      background-color: var(--card-overlay-hover-bg-color);
+    }
   }
 }
 
@@ -114,7 +144,7 @@ $image-width: 160px;
       left: 0;
       width: 100%;
       height: 232.91px;
-      transition: all 0.2s;
+      transition: 300ms ease-in-out all;
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
 
@@ -126,7 +156,7 @@ $image-width: 160px;
       .overlay-information--centered {
         position: absolute;
         background-color: rgba(0, 0, 0, 0.7);
-        border-radius: 50px;
+        border-radius: 15px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
