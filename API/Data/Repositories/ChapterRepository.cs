@@ -28,6 +28,7 @@ public enum ChapterIncludes
     Genres = 16,
     Tags = 32,
     ExternalReviews = 1 << 6,
+    ExternalRatings = 1 << 7
 }
 
 public interface IChapterRepository

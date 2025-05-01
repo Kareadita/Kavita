@@ -57,6 +57,8 @@ public enum SeriesIncludes
     ExternalRatings = 128,
     ExternalRecommendations = 256,
     ExternalMetadata = 512,
+
+    ExternalData = ExternalMetadata | ExternalReviews | ExternalRatings | ExternalRecommendations,
 }
 
 /// <summary>

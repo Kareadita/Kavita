@@ -79,6 +79,12 @@ public static class IncludesExtensions
                 .Include(c => c.ExternalReviews);
         }
 
+        if (includes.HasFlag(ChapterIncludes.ExternalRatings))
+        {
+            queryable = queryable
+                .Include(c => c.ExternalRatings);
+        }
+
         return queryable.AsSplitQuery();
     }
 
