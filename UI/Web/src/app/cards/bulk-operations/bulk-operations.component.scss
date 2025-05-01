@@ -2,18 +2,112 @@
     z-index: 1;
     top: 0;
     position: sticky;
+    margin-right: 29px;
 
     .bulk-select {
         background-color: var(--bulk-selection-bg-color);
-        border-bottom: 2px solid var(--primary-color);
-        color: var(--bulk-selection-text-color) !important;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(20px);
+        padding: 2px;
+        
+        div {
+            justify-content: space-between;
+            margin: 0 12px;
+            
+            .highlight {
+                color: var(--primary-color);
+                font-size: 0.8125rem;
+            }
+            
+            .selection-actions {
+                display:  flex;
+                align-items: center;
 
-        .btn-icon {
-            color: var(--bulk-selection-text-color);
+                .btn-icon {
+                    color: var(--bulk-selection-text-color);
+                    padding: 0 1rem;
+                    margin-right: 6px;
+                    font-size: 21px;
+                    display: flex;
+                    min-height: 40px;
+                    align-items:  center;
+                    
+                    &:hover {
+                        background-color: #ffffff2e;
+                    }
+                }
+            }
+            
+            .btn.deselect {
+                font-size: 12px;
+                color: var(--text-light-muted-color);
+                transition: 300ms ease-in-out all;
+                i {
+                    color: var(--text-light-muted-color);
+                    transition: 300ms ease-in-out all;
+                }
+                &:hover {
+                    color: var(--bulk-selection-text-color);
+                    i {
+                        color: var(--bulk-selection-text-color);
+                    }
+                }
+            }
+        }
+
+        > button.btn {
+            font-size: 0.75rem;
         }
     }
 }
 
-.highlight {
-    color: var(--bulk-selection-highlight-text-color) !important;
+:host ::ng-deep .bulk-select-container {
+    .bulk-select {
+        div {
+            .selection-actions {
+                .actionables {
+                    .btn {
+                        padding: 0 1rem;
+                        font-size: 21px;
+                        display: flex;
+                        min-height: 40px;
+                        align-items:  center;
+                        border-radius: 6px;
+
+                        &:hover {
+                            background-color: #ffffff2e;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 687px) {
+    .bulk-select-container {
+        margin: unset;
+    }
+}
+
+@media (max-width: 428px) {
+    .bulk-select-container {
+        .bulk-select {
+            div {
+                .highlight {
+                    font-size: 0.6875rem;
+                }
+                .selection-actions {
+                    .btn {
+                        font-size: 1.0625rem;
+                        padding: 0.625rem;
+                    }
+                }
+                .btn.deselect {
+                    font-size: 0.6875rem;
+                }
+            }
+        }
+    }
 }
