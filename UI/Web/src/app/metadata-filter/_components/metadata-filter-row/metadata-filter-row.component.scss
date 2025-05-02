@@ -1,5 +1,5 @@
 ::ng-deep .select2-selection__rendered {
-  padding-top: 4px !important;
+  padding-top: 0.25rem !important;
 }
 
 
@@ -19,5 +19,5 @@
 
 ::ng-deep [ngbDatepickerDayView]:hover:not(.bg-primary), [ngbDatepickerDayView].active:not(.bg-primary) {
   background: var(--primary-color-dark-shade) !important;
-  outline: 1px solid var(--primary-color-dark-shade) !important;
+  outline: 0.0625rem solid var(--primary-color-dark-shade) !important;
 }

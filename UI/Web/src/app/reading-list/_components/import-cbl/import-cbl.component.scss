@@ -30,10 +30,10 @@ file-upload {
 
 ::ng-deep .remove-btn {
   background: #C0392B;
-  border-radius: 3px;
+  border-radius: 0.1875rem;
   color: var(--input-text-color) !important;
   font-weight: bold;
-  padding: 3px 5px;
+  padding: 0.1875rem 0.3125rem;
 }
 
 ::ng-deep .reading-list-success--item {

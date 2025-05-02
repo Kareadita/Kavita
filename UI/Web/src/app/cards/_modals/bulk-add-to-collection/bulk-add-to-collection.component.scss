@@ -6,11 +6,11 @@
     overflow: auto;
     .modal-body {
     max-height: calc(100vh - 235px);
-    min-height: 150px;
+    min-height: 9.375rem;
         .list-group {
             overflow: auto;
             max-height: calc(100vh - 355px);
-            min-height: 32px;
+            min-height: 2.0rem;
         }
     }
 }

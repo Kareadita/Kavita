@@ -1,18 +1,18 @@
 @use "../../../theme/variables" as theme;
 
 .custom-position {
-    right: 15px;
-    top: -42px;
+    right: 0.9375rem;
+    top: -2.625rem;
 }
 
 .custom-position-2 {
-  right: 160px;
-  top: -42px;
+  right: 10.0rem;
+  top: -2.625rem;
 }
 
-@media(max-width: 576px) {
+@media(max-width: 36.0rem) {
   .custom-position-2 {
-    right: 65px;
+    right: 4.0625rem;
   }
 }
 
@@ -42,7 +42,7 @@
             justify-content: center;
         }
         .btn {
-            width: 32px;
+            width: 2.0rem;
         }
     }
 }

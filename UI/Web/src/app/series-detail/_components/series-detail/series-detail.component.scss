@@ -2,24 +2,24 @@
 
 .to-read-counter {
   position: absolute;
-  top: 15px;
-  left: 20px;
+  top: 0.9375rem;
+  left: 1.25rem;
 }
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  grid-template-columns: repeat(auto-fill, 10.0rem);
   grid-gap: 0.5rem;
   justify-content: space-around;
-  padding-bottom: 20px;
+  padding-bottom: 1.25rem;
 }
 
 ::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen {
-  border-width: 1px;
+  border-width: 0.0625rem;
   border-style: solid;
-  border-radius: 5px;
+  border-radius: 0.3125rem;
   border-color: var(--primary-color);
-  padding: 5px;
+  padding: 0.3125rem;
   vertical-align: middle;
 
   &:hover {

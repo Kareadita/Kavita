@@ -2,12 +2,12 @@
   position: absolute;
   top: 50%; 
   left: 46%;
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .indicator {
   font-weight: 500;
-  margin-left: 2px;
+  margin-left: 0.125rem;
   z-index: 10;
   color: var(--primary-color);
   animation: MoveUpDown 1s linear infinite;

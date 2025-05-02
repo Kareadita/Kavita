@@ -21,7 +21,7 @@
     <div class="mb-3">
       <app-setting-item [title]="t('edit-collection-tags.series-tab')" [showEdit]="false" [canEdit]="false">
         <ng-template #titleExtra>
-          <span class="badge rounded-pill text-bg-primary ms-1" style="font-size: 11px">{{collection.totalSourceCount - series.length}} / {{collection.totalSourceCount | number}}</span>
+          <span class="badge rounded-pill text-bg-primary ms-1" style="font-size: 0.6875rem">{{collection.totalSourceCount - series.length}} / {{collection.totalSourceCount | number}}</span>
         </ng-template>
 
         <ng-template #view>

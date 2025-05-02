@@ -1,13 +1,13 @@
 @use '../theme/variables' as theme;
 
 .content-wrapper {
-    padding: 0 0 0 10px;
+    padding: 0 0 0 0.625rem;
     height: calc(var(--vh)* 100 - var(--nav-offset));
 }
 
 .companion-bar {
     transition: all var(--side-nav-companion-bar-transistion);
-    margin-left: 45px;
+    margin-left: 2.8125rem;
     overflow-y: hidden;
     overflow-x: hidden;
     height: calc(var(--vh)* 100 - var(--nav-mobile-offset));
@@ -86,7 +86,7 @@
         height: calc(var(--vh) * 100 - var(--nav-mobile-offset));
         scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
         scrollbar-width: thin;
-        margin-bottom: 20px;
+        margin-bottom: 1.25rem;
         overflow-y: auto;
     }
 
@@ -120,7 +120,7 @@
   z-index: -1;
   pointer-events: none;
   background-color: var(--bs-body-bg);
-  filter: blur(20px);
+  filter: blur(1.25rem);
   object-fit: contain;
   transform: scale(1.1);
   mix-blend-mode: color;

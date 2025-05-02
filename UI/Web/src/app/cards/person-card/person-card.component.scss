@@ -1,4 +1,4 @@
-$image-height: 160px;
+$image-height: 10.0rem;
 @use '../../../card-item-common';
 
 // Override so we can have square cards
@@ -11,7 +11,7 @@ $image-height: 160px;
 
 .card-item-container {
   background-color: unset;
-  border: 1px solid transparent;
+  border: 0.0625rem solid transparent;
   transition: all ease-in-out 300ms;
 
   .overlay {
@@ -34,7 +34,7 @@ $image-height: 160px;
     bottom: 0;
     background-color: transparent;
     position: unset !important;
-    margin-bottom: 5px;
+    margin-bottom: 0.3125rem;
     display: flex;
     flex-direction: column;
 

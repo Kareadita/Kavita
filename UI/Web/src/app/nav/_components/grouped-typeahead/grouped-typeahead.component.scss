@@ -3,16 +3,16 @@
 }
 
 .btn-close {
-    margin-top: 8px;
+    margin-top: 0.5rem;
     font-size: 0.8rem;
     position: absolute;
-    right: 5px;
+    right: 0.3125rem;
 }
 
 
 .typeahead-input {
-  border: 1px solid transparent;
-  border-radius: 4px;
+  border: 0.0625rem solid transparent;
+  border-radius: 0.25rem;
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -21,7 +21,7 @@
   cursor: text;
   background-color: var(--searchbar-bg-color);
   color: var(--body-text-color);
-  min-height: 32px;
+  min-height: 2.0rem;
   transition-property: all;
   transition-duration: 0.3s;
   display: block;
@@ -30,23 +30,23 @@
   .search {
     display: flex;
     position: relative;
-    min-height: 32px;
+    min-height: 2.0rem;
 
     .btn-close {
       position: unset;
       margin-top: unset;
       align-self: center;
-      margin: 0 8px;
+      margin: 0 0.5rem;
     }
   }
 
 
   input {
     width: 100%;
-    padding: 0px 6px;
+    padding: 0.0rem 0.375rem;
     outline: 0 !important;
     border-radius: .28571429rem;
-    margin: 0px !important;
+    margin: 0.0rem !important;
     text-indent: 0 !important;
     line-height: inherit !important;
     box-shadow: none !important;
@@ -55,7 +55,7 @@
     display: block;
     opacity: 1;
     position: relative;
-    left: 4px;
+    left: 0.25rem;
     border: none;
     background-color: transparent;
 
@@ -75,7 +75,7 @@
 }
 
 
-@media only screen and (max-width: 980px) {
+@media only screen and (max-width: 61.25rem) {
   .typeahead-input {
     width: 65%;
   }
@@ -83,14 +83,14 @@
 
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) {
+@media only screen and (max-width:40.625rem) {
     .typeahead-input {
         width: 75%;
         margin: 0 auto;
     }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 31.25rem) {
   .typeahead-input {
     width: 100%;
   }
@@ -113,18 +113,18 @@
 
 .dropdown {
     width: 100vw;
-    top: 55px; //header offset
+    top: 3.4375rem; //header offset
     position: fixed;
     justify-content: center;
     left: 0;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 9px;
+    margin-top: 0.5625rem;
 }
 
 .list-group {
-    max-width: 600px;
+    max-width: 37.5rem;
     z-index:1000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -138,31 +138,31 @@
     max-height: unset;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 37.5rem) {
     .list-group {
         max-width: unset;
     }
 }
 
 .list-group-item {
-    padding: 5px 10px;
+    padding: 0.3125rem 0.625rem;
 }
 
 
 li {
     list-style: none;
-    border-radius: 0px !important;
+    border-radius: 0.0rem !important;
     margin: 0 !important;
 }
 
 ul ul {
-    border-radius: 0px !important;
+    border-radius: 0.0rem !important;
 }
 
 
 .spinner-border {
     position: absolute;
-    right: 10px;
+    right: 0.625rem;
     margin: auto;
     cursor: pointer;
     top: 30%;

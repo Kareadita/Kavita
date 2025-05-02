@@ -1,8 +1,8 @@
 .tagbadge {
     transition: all .3s ease-out;
-    margin: 3px 5px 3px 0px;
-    padding: 2px 10px;
-    border-radius: 6px;
+    margin: 0.1875rem 0.3125rem 0.1875rem 0.0rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 0.375rem;
     font-size: 0.9rem;
     display: inline-block;
     cursor: default;
@@ -11,7 +11,7 @@
     i {
         font-size: 0.9rem;
         font-weight: bold;
-        margin-right: 0px;
+        margin-right: 0.0rem;
         cursor: pointer;
     }
 }
@@ -41,13 +41,13 @@
 }
 
 .filled {
-    border: 1px solid var(--tagbadge-filled-border-color);
+    border: 0.0625rem solid var(--tagbadge-filled-border-color);
     color: var(--tagbadge-filled-text-color);
     background-color: var(--tagbadge-filled-bg-color);
 }
 
 .outline {
-    border: 1px solid var(--tagbadge-border-color);
+    border: 0.0625rem solid var(--tagbadge-border-color);
     color: var(--tagbadge-text-color);
     background-color: var(--tagbadge-bg-color);
 }

@@ -29,7 +29,7 @@
     </div>
 
 
-    <div style="max-height: 500px; overflow-y: auto">
+    <div style="max-height: 31.25rem; overflow-y: auto">
       <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
                                   [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
                                   [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')!.value"

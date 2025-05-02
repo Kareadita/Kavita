@@ -41,14 +41,14 @@
             </div>
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <button class="btn btn-sm btn-icon" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
+              <button class="btn btn-sm btn-icon" (click)="updateSortOrder()" style="height: 1.5625rem; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
                 @if (isAscendingSort) {
                   <i class="fa fa-arrow-up" [title]="t('ascending-alt')"></i>
                 } @else {
                   <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
                 }
               </button>
-              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
+              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 2.375rem;">
                 @for(field of allSortFields; track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
                 }

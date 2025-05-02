@@ -64,7 +64,7 @@
 
 $dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
-$action-bar-height: 38px;
+$action-bar-height: 2.375rem;
 
 .reader-container {
   &::-webkit-scrollbar {
@@ -85,13 +85,13 @@ $action-bar-height: 38px;
 
 // Drawer
 .control-container {
-    padding-bottom: 5px;
+    padding-bottom: 0.3125rem;
 }
 
 .page-stub {
-    margin-top: 6px;
-    padding-left: 2px;
-    padding-right: 2px;
+    margin-top: 0.375rem;
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
 }
 
 .drawer-body {
@@ -102,7 +102,7 @@ $action-bar-height: 38px;
         margin: 0 0.25rem;
 
         li a {
-            border: 1px solid var(--primary-color);
+            border: 0.0625rem solid var(--primary-color);
             margin: 0 0.25rem;
 
             .active {
@@ -127,7 +127,7 @@ $action-bar-height: 38px;
 .action-bar {
     background-color: var(--br-actionbar-bg-color);
     overflow: hidden;
-    box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
+    box-shadow: 0 0 0.375rem 0 rgb(0 0 0 / 70%);
     max-height: $action-bar-height;
     height: $action-bar-height;
 
@@ -140,14 +140,14 @@ $action-bar-height: 38px;
         overflow: hidden;
     }
 
-    @media(max-width: 875px) {
+    @media(max-width: 54.6875rem) {
         .book-title {
             display: none;
         }
     }
 
     .book-title {
-        margin-top: 10px;
+        margin-top: 0.625rem;
         text-align: center;
         text-transform: capitalize;
         max-height: inherit;
@@ -199,8 +199,8 @@ $action-bar-height: 38px;
 
     &.immersive {
         height: calc((var(--vh, 1vh) * 100));
-        //padding-top: 0px;
-        //padding-bottom: 0px;
+        //padding-top: 0.0rem;
+        //padding-bottom: 0.0rem;
     }
 
     &.writing-style-vertical {
@@ -232,14 +232,14 @@ $action-bar-height: 38px;
 .book-content {
   position: relative;
   margin: 0 0;
-  padding: 20px 0px;
+  padding: 1.25rem 0.0rem;
 
   &.column-layout-1 {
       height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
       &.writing-style-vertical {
-          padding: 0 10px 0 0;
-          margin: 20px 0;
+          padding: 0 0.625rem 0 0;
+          margin: 1.25rem 0;
       }
     }
 
@@ -247,8 +247,8 @@ $action-bar-height: 38px;
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
         &.writing-style-vertical {
-            padding: 0 10px 0 0;
-            margin: 20px 0;
+            padding: 0 0.625rem 0 0;
+            margin: 1.25rem 0;
         }
     }
 
@@ -270,23 +270,23 @@ $action-bar-height: 38px;
 
 .pagination-cont {
     background: var(--br-actionbar-bg-color);
-    border-radius: 5px;
-    padding: 5px 15px;
-    margin: 0 0 5px;
+    border-radius: 0.3125rem;
+    padding: 0.3125rem 0.9375rem;
+    margin: 0 0 0.3125rem;
     border: var(--drawer-pagination-border);
 }
 
 .virt-pagination-cont {
-    padding-bottom: 5px;
-    margin-bottom: 5px;
+    padding-bottom: 0.3125rem;
+    margin-bottom: 0.3125rem;
     box-shadow: var(--drawer-pagination-horizontal-rule);
 }
 
 .bottom-bar {
     position: fixed;
     width: 100%;
-    bottom: 0px;
-    left: 0px;
+    bottom: 0.0rem;
+    left: 0.0rem;
     writing-mode: horizontal-tb;
 }
 
@@ -296,7 +296,7 @@ $action-bar-height: 38px;
 .column-layout-1 {
     .book-content {
         column-count: 1;
-        column-gap: 20px;
+        column-gap: 1.25rem;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -306,7 +306,7 @@ $action-bar-height: 38px;
 .column-layout-2 {
     .book-content {
         column-count: 2;
-        column-gap: 20px;
+        column-gap: 1.25rem;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -358,7 +358,7 @@ $pagination-opacity: 0;
 
 .right {
     position: absolute;
-    right: 0px;
+    right: 0.0rem;
     top: $action-bar-height;
     width: 20vw;
     z-index: 3;
@@ -369,7 +369,7 @@ $pagination-opacity: 0;
     outline: none;
 
     &.immersive {
-        top: 0px;
+        top: 0.0rem;
     }
 
     &.no-pointer-events {
@@ -380,7 +380,7 @@ $pagination-opacity: 0;
 // This class pushes the click area to the left a bit to let users click the scrollbar
 .right-with-scrollbar {
     position: absolute;
-    right: 17px;
+    right: 1.0625rem;
     top: $action-bar-height;
     width: 18%;
     z-index: 3;
@@ -392,13 +392,13 @@ $pagination-opacity: 0;
     cursor: pointer;
 
     &.immersive {
-        top: 0px;
+        top: 0.0rem;
     }
 }
 
 .left {
     position: absolute;
-    left: 0px;
+    left: 0.0rem;
     top: $action-bar-height;
     width: 20vw;
     background: $pagination-color;
@@ -411,7 +411,7 @@ $pagination-opacity: 0;
     cursor: pointer;
 
     &.immersive {
-        top: 0px;
+        top: 0.0rem;
     }
 }
 

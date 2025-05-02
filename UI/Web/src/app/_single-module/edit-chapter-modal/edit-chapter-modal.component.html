@@ -9,7 +9,7 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills"
             [destroyOnHide]="false"
-            orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+            orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
           <!-- General Tab -->
           @if (user && accountService.hasAdminRole(user))

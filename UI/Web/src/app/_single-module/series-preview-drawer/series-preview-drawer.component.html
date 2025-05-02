@@ -8,7 +8,7 @@
 
   <div class="offcanvas-body">
     @if (CoverUrl; as coverUrl) {
-      <div style="width: 160px" class="mx-auto mb-3">
+      <div style="width: 10.0rem" class="mx-auto mb-3">
         @if (coverUrl) {
           <app-image height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="coverUrl"></app-image>
         }
@@ -64,13 +64,13 @@
                   @if (item.imageUrl && !item.imageUrl.endsWith('default.jpg')) {
                     <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
                   } @else {
-                    <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>
+                    <i class="fa fa-user-circle align-self-center person-img" style="font-size: 1.75rem;" aria-hidden="true"></i>
                   }
                 </div>
                 <div class="col-md-9">
                   <div class="card-body">
                     <h6 class="card-title">{{item.name}}</h6>
-                    <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
+                    <p class="card-text" style="font-size: 0.875rem"><small class="text-muted">{{item.role}}</small></p>
                   </div>
                 </div>
               </div>
@@ -113,12 +113,12 @@
             <div class="card mb-3">
               <div class="row g-0">
                 <div class="col-md-4">
-                  <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>
+                  <i class="fa fa-user-circle align-self-center" style="font-size: 1.75rem; margin-top: 1.5rem; margin-left: 1.5rem" aria-hidden="true"></i>
                 </div>
                 <div class="col-md-8">
                   <div class="card-body">
                     <h6 class="card-title">{{item.name}}</h6>
-                    <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
+                    <p class="card-text" style="font-size: 0.875rem"><small class="text-muted">{{item.role}}</small></p>
                   </div>
                 </div>
               </div>

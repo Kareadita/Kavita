@@ -50,7 +50,7 @@
     display: inherit;
   }
 
-  @media only screen and (max-width:300px) {
+  @media only screen and (max-width:18.75rem) {
     .xs-only {
       display: inherit;
     }
@@ -103,7 +103,7 @@
   }
 
   .ng-autocomplete {
-    margin-bottom: 0px;
+    margin-bottom: 0.0rem;
   }
 
   .primary-text {
@@ -125,7 +125,7 @@
   }
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) {
+@media only screen and (max-width:40.625rem) {
   .navbar-nav {
     width: 0;
   }

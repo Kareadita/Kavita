@@ -25,7 +25,7 @@
     border-color: transparent;
     .nav-item {
         border-color: transparent;
-        border-width: 0 0 1px 0;
+        border-width: 0 0 0.0625rem 0;
     }
     .nav-link {
         color: var(--nav-link-text-color);
@@ -33,7 +33,7 @@
         border-width: var(--nav-tab-border-width);
         border-radius: 0;
         text-align: center;
-        padding: 8px 20px;
+        padding: 0.5rem 1.25rem;
 
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);

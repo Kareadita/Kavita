@@ -61,14 +61,14 @@
 
     @if (chapter.isSpecial) {
       <div class="card-body meta-title" [ngbTooltip]="chapter.title.length > 34 ? chapter.title : null">
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
           {{chapter.title || chapter.range}}
         </div>
       </div>
 
     } @else if (chapter.titleName) {
       <div class="card-body meta-title" [ngbTooltip]="chapter.titleName.length > 34 ? chapter.titleName : null">
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
           {{chapter.titleName}}
         </div>
       </div>

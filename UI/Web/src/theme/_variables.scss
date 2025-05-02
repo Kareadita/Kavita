@@ -16,9 +16,9 @@ $accordion-icon-active-color: #cecece;
 
 
 $grid-breakpoints-xs: 0;
-$grid-breakpoints-sm: 576px;
-$grid-breakpoints-md: 768px;
-$grid-breakpoints-lg: 992px;
-$grid-breakpoints-xl: 1200px;
+$grid-breakpoints-sm: 36.0rem;
+$grid-breakpoints-md: 48.0rem;
+$grid-breakpoints-lg: 62.0rem;
+$grid-breakpoints-xl: 75.0rem;
 
 $grid-breakpoints: (xs: $grid-breakpoints-xs, sm: $grid-breakpoints-sm, md: $grid-breakpoints-md, lg: $grid-breakpoints-lg, xl: $grid-breakpoints-xl);
