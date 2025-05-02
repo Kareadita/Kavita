@@ -2,18 +2,17 @@
     z-index: 1;
     top: 0;
     position: sticky;
-    margin-right: 29px;
+    margin-right: 1.8125rem;
 
     .bulk-select {
         background-color: var(--bulk-selection-bg-color);
-        border: 2px solid var(--primary-color);
-        box-shadow: 0 4px 30px rgba(0,0,0,0.1);
-        backdrop-filter: blur(20px);
-        padding: 2px;
+        border: 0.125rem solid var(--primary-color);
+        box-shadow: 0 0.25rem 1.875rem rgba(0,0,0,0.1);
+        padding: 0.125rem;
         
         div {
             justify-content: space-between;
-            margin: 0 12px;
+            margin: 0 0.75rem;
             
             .highlight {
                 color: var(--primary-color);
@@ -27,10 +26,10 @@
                 .btn-icon {
                     color: var(--bulk-selection-text-color);
                     padding: 0 1rem;
-                    margin-right: 6px;
-                    font-size: 21px;
+                    margin-right: 0.375rem;
+                    font-size: 1.125rem;
                     display: flex;
-                    min-height: 40px;
+                    min-height: 2.5rem;
                     align-items:  center;
                     
                     &:hover {
@@ -40,7 +39,7 @@
             }
             
             .btn.deselect {
-                font-size: 12px;
+                font-size: 0.75rem;
                 color: var(--text-light-muted-color);
                 transition: 300ms ease-in-out all;
                 i {
@@ -69,11 +68,11 @@
                 .actionables {
                     .btn {
                         padding: 0 1rem;
-                        font-size: 21px;
+                        font-size: 1.3125rem;
                         display: flex;
-                        min-height: 40px;
+                        min-height: 2.5rem;
                         align-items:  center;
-                        border-radius: 6px;
+                        border-radius: 0.375rem;
 
                         &:hover {
                             background-color: #ffffff2e;
