@@ -20,7 +20,7 @@ public class RatingServiceTests: AbstractDbTest
 
     public RatingServiceTests()
     {
-        _ratingService = new RatingService(_unitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
+        _ratingService = new RatingService(UnitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class RatingServiceTests: AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -39,10 +39,10 @@ public class RatingServiceTests: AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         JobStorage.Current = new InMemoryStorage();
         var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
@@ -53,7 +53,7 @@ public class RatingServiceTests: AbstractDbTest
 
         Assert.True(result);
 
-        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))!
+        var ratings = (await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))!
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(3, ratings.First().Rating);
@@ -64,7 +64,7 @@ public class RatingServiceTests: AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -75,9 +75,9 @@ public class RatingServiceTests: AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
@@ -88,7 +88,7 @@ public class RatingServiceTests: AbstractDbTest
         Assert.True(result);
 
         JobStorage.Current = new InMemoryStorage();
-        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+        var ratings = (await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(3, ratings.First().Rating);
@@ -103,7 +103,7 @@ public class RatingServiceTests: AbstractDbTest
 
         Assert.True(result2);
 
-        var ratings2 = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+        var ratings2 = (await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
             .Ratings;
         Assert.NotEmpty(ratings2);
         Assert.True(ratings2.Count == 1);
@@ -115,7 +115,7 @@ public class RatingServiceTests: AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -125,9 +125,9 @@ public class RatingServiceTests: AbstractDbTest
                 .Build())
             .Build());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
@@ -138,7 +138,7 @@ public class RatingServiceTests: AbstractDbTest
         Assert.True(result);
 
         JobStorage.Current = new InMemoryStorage();
-        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007",
+        var ratings = (await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007",
                 AppUserIncludes.Ratings)!)
             .Ratings;
         Assert.NotEmpty(ratings);
@@ -150,7 +150,7 @@ public class RatingServiceTests: AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -160,9 +160,9 @@ public class RatingServiceTests: AbstractDbTest
                 .Build())
             .Build());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
         var result = await _ratingService.UpdateSeriesRating(user, new UpdateRatingDto
         {
@@ -177,13 +177,13 @@ public class RatingServiceTests: AbstractDbTest
     }
     protected override async Task ResetDb()
     {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
-        _context.Genre.RemoveRange(_context.Genre.ToList());
-        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
-        _context.Person.RemoveRange(_context.Person.ToList());
-        _context.Library.RemoveRange(_context.Library.ToList());
+        Context.Series.RemoveRange(Context.Series.ToList());
+        Context.AppUserRating.RemoveRange(Context.AppUserRating.ToList());
+        Context.Genre.RemoveRange(Context.Genre.ToList());
+        Context.CollectionTag.RemoveRange(Context.CollectionTag.ToList());
+        Context.Person.RemoveRange(Context.Person.ToList());
+        Context.Library.RemoveRange(Context.Library.ToList());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
     }
 }

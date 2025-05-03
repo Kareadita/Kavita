@@ -16,19 +16,15 @@ namespace API.Tests.Services;
 
 public class VersionUpdaterServiceTests : IDisposable
 {
-    private readonly ILogger<VersionUpdaterService> _logger;
-    private readonly IEventHub _eventHub;
-    private readonly IDirectoryService _directoryService;
+    private readonly ILogger<VersionUpdaterService> _logger = Substitute.For<ILogger<VersionUpdaterService>>();
+    private readonly IEventHub _eventHub = Substitute.For<IEventHub>();
+    private readonly IDirectoryService _directoryService = Substitute.For<IDirectoryService>();
     private readonly VersionUpdaterService _service;
     private readonly string _tempPath;
     private readonly HttpTest _httpTest;
 
     public VersionUpdaterServiceTests()
     {
-        _logger = Substitute.For<ILogger<VersionUpdaterService>>();
-        _eventHub = Substitute.For<IEventHub>();
-        _directoryService = Substitute.For<IDirectoryService>();
-
         // Create temp directory for cache
         _tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(_tempPath);
@@ -55,6 +51,7 @@ public class VersionUpdaterServiceTests : IDisposable
 
         // Reset BuildInfo.Version
         typeof(BuildInfo).GetProperty(nameof(BuildInfo.Version))?.SetValue(null, null);
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
@@ -302,7 +299,7 @@ public class VersionUpdaterServiceTests : IDisposable
         var result = await _service.GetAllReleases();
 
 
-        Assert.Equal(1, result.Count);
+        Assert.Single(result);
         Assert.Equal("0.7.0.0", result[0].UpdateVersion);
         Assert.NotEmpty(_httpTest.CallLog); // HTTP call was made
     }

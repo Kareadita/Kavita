@@ -23,24 +23,24 @@ public class CollectionTagServiceTests : AbstractDbTest
     private readonly ICollectionTagService _service;
     public CollectionTagServiceTests()
     {
-        _service = new CollectionTagService(_unitOfWork, Substitute.For<IEventHub>());
+        _service = new CollectionTagService(UnitOfWork, Substitute.For<IEventHub>());
     }
 
     protected override async Task ResetDb()
     {
-        _context.AppUserCollection.RemoveRange(_context.AppUserCollection.ToList());
-        _context.Library.RemoveRange(_context.Library.ToList());
+        Context.AppUserCollection.RemoveRange(Context.AppUserCollection.ToList());
+        Context.Library.RemoveRange(Context.Library.ToList());
 
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
     }
 
     private async Task SeedSeries()
     {
-        if (_context.AppUserCollection.Any()) return;
+        if (Context.AppUserCollection.Any()) return;
 
         var s1 = new SeriesBuilder("Series 1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Mature).Build()).Build();
         var s2 = new SeriesBuilder("Series 2").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.G).Build()).Build();
-        _context.Library.Add(new LibraryBuilder("Library 2", LibraryType.Manga)
+        Context.Library.Add(new LibraryBuilder("Library 2", LibraryType.Manga)
             .WithSeries(s1)
             .WithSeries(s2)
             .Build());
@@ -51,9 +51,9 @@ public class CollectionTagServiceTests : AbstractDbTest
             new AppUserCollectionBuilder("Tag 1").WithItems(new []{s1}).Build(),
             new AppUserCollectionBuilder("Tag 2").WithItems(new []{s1, s2}).WithIsPromoted(true).Build()
         };
-        _unitOfWork.UserRepository.Add(user);
+        UnitOfWork.UserRepository.Add(user);
 
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
     }
 
     #region DeleteTag
@@ -64,7 +64,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         // Arrange
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Act
@@ -72,7 +72,7 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Assert
         Assert.True(result);
-        var deletedTag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var deletedTag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.Null(deletedTag);
         Assert.Single(user.Collections);  // Only one collection should remain
     }
@@ -82,7 +82,7 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         // Arrange
         await SeedSeries();
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Act - Try to delete a non-existent tag
@@ -98,7 +98,7 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         // Arrange
         await SeedSeries();
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Act
@@ -106,7 +106,7 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Assert
         Assert.True(result);
-        var remainingTag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        var remainingTag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(2);
         Assert.NotNull(remainingTag);
         Assert.Equal("Tag 2", remainingTag.Title);
         Assert.True(remainingTag.Promoted);
@@ -121,12 +121,12 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         user.Collections.Add(new AppUserCollectionBuilder("UpdateTag_ShouldUpdateFields").WithIsPromoted(true).Build());
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.UserRepository.Update(user);
+        await UnitOfWork.CommitAsync();
 
         await _service.UpdateTag(new AppUserCollectionDto()
         {
@@ -137,7 +137,7 @@ public class CollectionTagServiceTests : AbstractDbTest
             AgeRating = AgeRating.Unknown
         }, 1);
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(3);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(3);
         Assert.NotNull(tag);
         Assert.True(tag.Promoted);
         Assert.False(string.IsNullOrEmpty(tag.Summary));
@@ -151,12 +151,12 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         user.Collections.Add(new AppUserCollectionBuilder("UpdateTag_ShouldNotChangeTitle_WhenNotKavitaSource").WithSource(ScrobbleProvider.Mal).Build());
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.UserRepository.Update(user);
+        await UnitOfWork.CommitAsync();
 
         await _service.UpdateTag(new AppUserCollectionDto()
         {
@@ -167,7 +167,7 @@ public class CollectionTagServiceTests : AbstractDbTest
             AgeRating = AgeRating.Unknown
         }, 1);
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(3);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(3);
         Assert.NotNull(tag);
         Assert.Equal("UpdateTag_ShouldNotChangeTitle_WhenNotKavitaSource", tag.Title);
         Assert.False(string.IsNullOrEmpty(tag.Summary));
@@ -198,8 +198,8 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Create a second user
         var user2 = new AppUserBuilder("user2", "user2", Seed.DefaultThemes.First()).Build();
-        _unitOfWork.UserRepository.Add(user2);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.UserRepository.Add(user2);
+        await UnitOfWork.CommitAsync();
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<KavitaException>(() => _service.UpdateTag(new AppUserCollectionDto()
@@ -261,7 +261,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         }, 1);
 
         // Assert
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.True(tag.CoverImageLocked);
 
@@ -273,7 +273,7 @@ public class CollectionTagServiceTests : AbstractDbTest
             CoverImageLocked = false
         }, 1);
 
-        tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.False(tag.CoverImageLocked);
         Assert.Equal(string.Empty, tag.CoverImage);
@@ -286,7 +286,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         await SeedSeries();
 
         // Setup a user with admin role
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
         await AddUserWithRole(user.Id, PolicyConstants.AdminRole);
 
@@ -300,7 +300,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         }, 1);
 
         // Assert
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.True(tag.Promoted);
     }
@@ -312,7 +312,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         await SeedSeries();
 
         // Setup a user with promote role
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Mock to return promote role for the user
@@ -327,7 +327,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         }, 1);
 
         // Assert
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.True(tag.Promoted);
     }
@@ -339,7 +339,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         await SeedSeries();
 
         // Setup a user with no special roles
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Act - Try to promote a tag without proper role
@@ -351,7 +351,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         }, 1);
 
         // Assert
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.False(tag.Promoted); // Should remain unpromoted
     }
@@ -365,15 +365,15 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Tag 2 has 2 series
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(2);
         Assert.NotNull(tag);
 
         await _service.RemoveTagFromSeries(tag, new[] {1});
-        var userCollections = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var userCollections = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.Equal(2, userCollections!.Collections.Count);
         Assert.Single(tag.Items);
         Assert.Equal(2, tag.Items.First().Id);
@@ -387,11 +387,11 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Tag 2 has 2 series
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(2);
         Assert.NotNull(tag);
 
         await _service.RemoveTagFromSeries(tag, new[] {1});
@@ -407,15 +407,15 @@ public class CollectionTagServiceTests : AbstractDbTest
     {
         await SeedSeries();
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Tag 1 has 1 series
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
 
         await _service.RemoveTagFromSeries(tag, new[] {1});
-        var tag2 = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag2 = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.Null(tag2);
     }
 
@@ -435,7 +435,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         // Arrange
         await SeedSeries();
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         var initialItemCount = tag.Items.Count;
 
@@ -444,7 +444,7 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Assert
         Assert.True(result);
-        tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.Equal(initialItemCount, tag.Items.Count); // No items should be removed
     }
@@ -455,7 +455,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         // Arrange
         await SeedSeries();
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         var initialItemCount = tag.Items.Count;
 
@@ -464,7 +464,7 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Assert
         Assert.True(result);
-        tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.Equal(initialItemCount, tag.Items.Count); // No items should be removed
     }
@@ -475,13 +475,13 @@ public class CollectionTagServiceTests : AbstractDbTest
         // Arrange
         await SeedSeries();
 
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
 
         // Force null items list
         tag.Items = null;
-        _unitOfWork.CollectionTagRepository.Update(tag);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.CollectionTagRepository.Update(tag);
+        await UnitOfWork.CommitAsync();
 
         // Act
         var result = await _service.RemoveTagFromSeries(tag, [1]);
@@ -489,7 +489,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         // Assert
         Assert.True(result);
         // The tag should not be removed since the items list was null, not empty
-        var tagAfter = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
+        var tagAfter = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.Null(tagAfter);
     }
 
@@ -501,21 +501,21 @@ public class CollectionTagServiceTests : AbstractDbTest
 
         // Add a third series with a different age rating
         var s3 = new SeriesBuilder("Series 3").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.PG).Build()).Build();
-        _context.Library.First().Series.Add(s3);
-        await _unitOfWork.CommitAsync();
+        Context.Library.First().Series.Add(s3);
+        await UnitOfWork.CommitAsync();
 
         // Add series 3 to tag 2
-        var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        var tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(2);
         Assert.NotNull(tag);
         tag.Items.Add(s3);
-        _unitOfWork.CollectionTagRepository.Update(tag);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.CollectionTagRepository.Update(tag);
+        await UnitOfWork.CommitAsync();
 
         // Act - Remove the series with Mature rating
         await _service.RemoveTagFromSeries(tag, new[] {1});
 
         // Assert
-        tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(2);
+        tag = await UnitOfWork.CollectionTagRepository.GetCollectionAsync(2);
         Assert.NotNull(tag);
         Assert.Equal(2, tag.Items.Count);
 

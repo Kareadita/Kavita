@@ -7,8 +7,8 @@ public class PersonHelperTests : AbstractDbTest
 {
     protected override async Task ResetDb()
     {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        await _context.SaveChangesAsync();
+        Context.Series.RemoveRange(Context.Series.ToList());
+        await Context.SaveChangesAsync();
     }
     //
     // // 1. Test adding new people and keeping existing ones
