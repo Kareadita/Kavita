@@ -294,36 +294,46 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url)
+    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null)
     {
+        // TODO: I need to unit test this to ensure it works when overwriting, etc
+
+        // Target Directory defaults to CoverImageDirectory, but can be temp for when comparison between images is used
+        targetDirectory ??= _directoryService.CoverImageDirectory;
+
         // Create the destination file path
         var filename = filenameWithoutExtension + encodeFormat.GetExtension();
-        var targetFile = Path.Combine(_directoryService.CoverImageDirectory, filename);
+        var targetFile = Path.Combine(targetDirectory, filename);
 
-        // Ensure if file exists, we delete to overwrite
+        // if (new FileInfo(targetFile).Exists)
+        // {
+        //     File.Delete(targetFile);
+        // }
 
         _logger.LogTrace("Fetching person image from {Url}", url.Sanitize());
         // Download the file using Flurl
-        var personStream = await url
+        var imageStream = await url
             .AllowHttpStatus("2xx,304")
             .GetStreamAsync();
 
 
-        using var image = Image.NewFromStream(personStream);
-        switch (encodeFormat)
-        {
-            case EncodeFormat.PNG:
-                image.Pngsave(targetFile);
-                break;
-            case EncodeFormat.WEBP:
-                image.Webpsave(targetFile);
-                break;
-            case EncodeFormat.AVIF:
-                image.Heifsave(targetFile);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-        }
+
+        using var image = Image.NewFromStream(imageStream);
+        image.WriteToFile(targetFile);
+        // switch (encodeFormat)
+        // {
+        //     case EncodeFormat.PNG:
+        //         image.Pngsave(targetFile);
+        //         break;
+        //     case EncodeFormat.WEBP:
+        //         image.Webpsave(targetFile);
+        //         break;
+        //     case EncodeFormat.AVIF:
+        //         image.Heifsave(targetFile);
+        //         break;
+        //     default:
+        //         throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+        // }
 
         return filename;
     }
@@ -486,33 +496,67 @@ public class CoverDbService : ICoverDbService
     /// <param name="checkNoImagePlaceholder">Will check against all known null image placeholders to avoid writing it</param>
     public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false)
     {
-        // TODO: Refactor checkNoImagePlaceholder bool to an action that evaluates how to process Image
         if (!string.IsNullOrEmpty(url))
         {
-            var filePath = await CreateThumbnail(url, $"{ImageService.GetPersonFormat(person.Id)}", fromBase64);
+            var tempDir = _directoryService.TempDirectory;
+            var format = ImageService.GetPersonFormat(person.Id);
+            var finalFileName = format + ".webp";
+            var tempFileName = format + "_new";
+            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
 
-            // Additional check to see if downloaded image is similar and we have a higher resolution
-            if (checkNoImagePlaceholder)
+            if (!string.IsNullOrEmpty(tempFilePath))
             {
-                var matchRating = Path.Join(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg").GetSimilarity(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
+                var tempFullPath = Path.Combine(tempDir, tempFilePath);
+                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
 
-                if (matchRating >= 0.9f)
+                // Skip setting image if it's similar to a known placeholder
+                if (checkNoImagePlaceholder)
                 {
-                    if (string.IsNullOrEmpty(person.CoverImage))
+                    var placeholderPath = Path.Combine(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg");
+                    var similarity = placeholderPath.CalculateSimilarity(tempFullPath);
+                    if (similarity >= 0.9f)
                     {
-                        filePath = null;
+                        _logger.LogInformation("Skipped setting placeholder image for person {PersonId} due to high similarity ({Similarity})", person.Id, similarity);
+                        _directoryService.DeleteFiles([tempFullPath]);
+                        return;
+                    }
+                }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(person.CoverImage))
+                    {
+                        var existingPath = Path.Combine(_directoryService.CoverImageDirectory, person.CoverImage);
+                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+
+                        var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
+                        if (choseNewImage)
+                        {
+                            _directoryService.DeleteFiles([existingPath]);
+                            _directoryService.CopyFile(tempFullPath, finalFullPath);
+                            person.CoverImage = finalFileName;
+                        }
+                        else
+                        {
+                            _directoryService.DeleteFiles([tempFullPath]);
+                            person.CoverImage = Path.GetFileName(existingPath);
+                        }
                     }
                     else
                     {
-                        filePath = Path.GetFileName(Path.Join(_directoryService.CoverImageDirectory, person.CoverImage));
+                        _directoryService.CopyFile(tempFullPath, finalFullPath);
+                        person.CoverImage = finalFileName;
                     }
-
                 }
-            }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error choosing better image for Person: {PersonId}", person.Id);
+                    _directoryService.CopyFile(tempFullPath, finalFullPath);
+                    person.CoverImage = finalFileName;
+                }
 
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                person.CoverImage = filePath;
+                _directoryService.DeleteFiles([tempFullPath]);
+
                 person.CoverImageLocked = true;
                 _imageService.UpdateColorScape(person);
                 _unitOfWork.PersonRepository.Update(person);
@@ -545,32 +589,52 @@ public class CoverDbService : ICoverDbService
     {
         if (!string.IsNullOrEmpty(url))
         {
-            var filePath = await CreateThumbnail(url, $"{ImageService.GetSeriesFormat(series.Id)}", fromBase64);
+            var tempDir = _directoryService.TempDirectory;
+            var format = ImageService.GetSeriesFormat(series.Id);
+            var finalFileName = format + ".webp";
+            var tempFileName = format + "_new";
+            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
 
-            if (!string.IsNullOrEmpty(filePath))
+            if (!string.IsNullOrEmpty(tempFilePath))
             {
-                // Additional check to see if downloaded image is similar and we have a higher resolution
+                var tempFullPath = Path.Combine(tempDir, tempFilePath);
+                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
+
                 if (chooseBetterImage && !string.IsNullOrEmpty(series.CoverImage))
                 {
                     try
                     {
-                        // BUG: There might be a bug here where it's comparing the same 2 images
-                        var betterImage = Path.Join(_directoryService.CoverImageDirectory, series.CoverImage)
-                            .GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
-                        filePath = Path.GetFileName(betterImage);
+                        var existingPath = Path.Combine(_directoryService.CoverImageDirectory, series.CoverImage);
+                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+
+                        var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
+                        if (choseNewImage)
+                        {
+                            _directoryService.DeleteFiles([existingPath]);
+                            _directoryService.CopyFile(tempFullPath, finalFullPath);
+                            series.CoverImage = finalFileName;
+                        }
+                        else
+                        {
+                            _directoryService.DeleteFiles([tempFullPath]);
+                            series.CoverImage = Path.GetFileName(existingPath);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "There was an issue trying to choose a better cover image for Series: {SeriesName} ({SeriesId})", series.Name, series.Id);
+                        _logger.LogError(ex, "Error choosing better image for Series: {SeriesId}", series.Id);
+                        _directoryService.CopyFile(tempFullPath, finalFullPath);
+                        series.CoverImage = finalFileName;
                     }
                 }
-
-                series.CoverImage = filePath;
-                series.CoverImageLocked = true;
-                if (series.CoverImage == null)
+                else
                 {
-                    _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
+                    _directoryService.CopyFile(tempFullPath, finalFullPath);
+                    series.CoverImage = finalFileName;
                 }
+
+                _directoryService.DeleteFiles([tempFullPath]);
+                series.CoverImageLocked = true;
                 _imageService.UpdateColorScape(series);
                 _unitOfWork.SeriesRepository.Update(series);
             }
@@ -579,10 +643,7 @@ public class CoverDbService : ICoverDbService
         {
             series.CoverImage = null;
             series.CoverImageLocked = false;
-            if (series.CoverImage == null)
-            {
-                _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
-            }
+            _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
             _imageService.UpdateColorScape(series);
             _unitOfWork.SeriesRepository.Update(series);
         }
@@ -599,26 +660,51 @@ public class CoverDbService : ICoverDbService
     {
         if (!string.IsNullOrEmpty(url))
         {
-            var filePath = await CreateThumbnail(url, $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}", fromBase64);
+            var tempDirectory = _directoryService.TempDirectory;
+            var finalFileName = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + ".webp";
+            var tempFileName = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + "_new";
 
-            if (!string.IsNullOrEmpty(filePath))
+            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDirectory);
+
+            if (!string.IsNullOrEmpty(tempFilePath))
             {
-                // Additional check to see if downloaded image is similar and we have a higher resolution
+                var tempFullPath = Path.Combine(tempDirectory, tempFilePath);
+                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
+
                 if (chooseBetterImage && !string.IsNullOrEmpty(chapter.CoverImage))
                 {
                     try
                     {
-                        var betterImage = Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage)
-                            .GetBetterImage(Path.Join(_directoryService.CoverImageDirectory, filePath))!;
-                        filePath = Path.GetFileName(betterImage);
+                        var existingPath = Path.Combine(_directoryService.CoverImageDirectory, chapter.CoverImage);
+                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+                        var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
+
+                        if (choseNewImage)
+                        {
+                            _directoryService.DeleteFiles([existingPath]);
+                            _directoryService.CopyFile(tempFullPath, finalFullPath);
+                            _directoryService.DeleteFiles([tempFullPath]);
+                        }
+                        else
+                        {
+                            _directoryService.DeleteFiles([tempFullPath]);
+                        }
+
+                        chapter.CoverImage = finalFileName;
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "There was an issue trying to choose a better cover image for Chapter: {FileName} ({ChapterId})", chapter.Range, chapter.Id);
                     }
                 }
+                else
+                {
+                    // No comparison needed, just copy and rename to final
+                    _directoryService.CopyFile(tempFullPath, finalFullPath);
+                    _directoryService.DeleteFiles([tempFullPath]);
+                    chapter.CoverImage = finalFileName;
+                }
 
-                chapter.CoverImage = filePath;
                 chapter.CoverImageLocked = true;
                 _imageService.UpdateColorScape(chapter);
                 _unitOfWork.ChapterRepository.Update(chapter);
@@ -635,13 +721,26 @@ public class CoverDbService : ICoverDbService
         if (_unitOfWork.HasChanges())
         {
             await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
+            await _eventHub.SendMessageAsync(
+                MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter),
+                false
+            );
         }
     }
 
-    private async Task<string> CreateThumbnail(string url, string filename, bool fromBase64 = true)
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="filename"></param>
+    /// <param name="fromBase64"></param>
+    /// <param name="targetDirectory">Not useable with fromBase64. Allows a different directory to be written to</param>
+    /// <returns></returns>
+    private async Task<string> CreateThumbnail(string url, string filename, bool fromBase64 = true, string? targetDirectory = null)
     {
+        targetDirectory ??= _directoryService.CoverImageDirectory;
+
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
         var coverImageSize = settings.CoverImageSize;
@@ -652,6 +751,6 @@ public class CoverDbService : ICoverDbService
                 filename, encodeFormat, coverImageSize.GetDimensions().Width);
         }
 
-        return await DownloadImageFromUrl(filename, encodeFormat, url);
+        return await DownloadImageFromUrl(filename, encodeFormat, url, targetDirectory);
     }
 }

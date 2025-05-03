@@ -69,6 +69,7 @@ public interface IDirectoryService
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
     bool ExistOrCreate(string directoryPath);
     void DeleteFiles(IEnumerable<string> files);
+    void CopyFile(string sourcePath, string destinationPath, bool overwrite = true);
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);
     Task<bool> CheckWriteAccess(string directoryName);
@@ -935,6 +936,27 @@ public class DirectoryService : IDirectoryService
                 /* Swallow exception */
             }
         }
+    }
+
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite = true)
+    {
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("Source file not found", sourcePath);
+        }
+
+        var destinationDirectory = Path.GetDirectoryName(destinationPath);
+        if (string.IsNullOrEmpty(destinationDirectory))
+        {
+            throw new ArgumentException("Destination path does not contain a directory", nameof(destinationPath));
+        }
+
+        if (!Directory.Exists(destinationDirectory))
+        {
+            FileSystem.Directory.CreateDirectory(destinationDirectory);
+        }
+
+        FileSystem.File.Copy(sourcePath, destinationPath, overwrite);
     }
 
     /// <summary>
