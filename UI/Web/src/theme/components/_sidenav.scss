@@ -193,10 +193,12 @@
     .side-nav {
       overflow-x: hidden;
       padding-bottom: 0.625rem;
+      padding-left: 1.125rem;
 
       .side-nav-header {
         color: #ffffff;
         font-size: 1rem;
+        margin-left: unset;
 
         &:first-of-type {
           margin-top: 0.7rem;
@@ -207,7 +209,6 @@
         font-size: 1rem;
         min-height: 1.875rem;
         justify-content: unset;
-        margin-left: 1.125rem;
 
         &.active {
           .side-nav-text {
@@ -220,6 +221,14 @@
           margin-left: 0.75rem;
           font-size: 0.9rem;
           color: #999999;
+          
+          div {
+            display: flex;
+            
+            .badge {
+              align-self: center;
+            }
+          }
         }
 
         .card-actions {

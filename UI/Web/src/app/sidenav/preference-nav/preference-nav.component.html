@@ -9,7 +9,7 @@
 
           @for(section of sections; track section.title + section.children.length; let idx = $index;) {
             @if (hasAnyChildren(user, section)) {
-              <h5 class="side-nav-header mb-2 ms-3" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h5>
+              <h5 class="side-nav-header mb-2" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h5>
               @for(item of section.children; track item.fragment) {
                 @if (accountService.hasAnyRole(user, item.roles, item.restrictRoles)) {
                   <app-side-nav-item [id]="'nav-item-' + item.fragment" [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
