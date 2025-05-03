@@ -1112,4 +1112,23 @@ public class DirectoryService : IDirectoryService
             FlattenDirectory(root, subDirectory, ref directoryIndex);
         }
     }
+
+    /// <summary>
+    /// If the file is locked or not existing
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static bool IsFileLocked(string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath)) return false;
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+            return false; // If this works, the file is not locked
+        }
+        catch (IOException)
+        {
+            return true; // File is locked by another process
+        }
+    }
 }

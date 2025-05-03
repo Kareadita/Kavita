@@ -643,10 +643,8 @@ public class CoverDbService : ICoverDbService
 
                         if (choseNewImage)
                         {
-
-                            File.Delete(existingPath);
-
-                            //_directoryService.DeleteFiles([existingPath]);
+                            // This will fail if Cover gen is done just before this as there is a bug with files getting locked.
+                            _directoryService.DeleteFiles([existingPath]);
                             _directoryService.CopyFile(tempFullPath, finalFullPath);
                             _directoryService.DeleteFiles([tempFullPath]);
                         }
@@ -698,11 +696,11 @@ public class CoverDbService : ICoverDbService
     ///
     /// </summary>
     /// <param name="url"></param>
-    /// <param name="filename"></param>
+    /// <param name="filenameWithoutExtension">Filename without extension</param>
     /// <param name="fromBase64"></param>
     /// <param name="targetDirectory">Not useable with fromBase64. Allows a different directory to be written to</param>
     /// <returns></returns>
-    private async Task<string> CreateThumbnail(string url, string filename, bool fromBase64 = true, string? targetDirectory = null)
+    private async Task<string> CreateThumbnail(string url, string filenameWithoutExtension, bool fromBase64 = true, string? targetDirectory = null)
     {
         targetDirectory ??= _directoryService.CoverImageDirectory;
 
@@ -713,9 +711,9 @@ public class CoverDbService : ICoverDbService
         if (fromBase64)
         {
             return _imageService.CreateThumbnailFromBase64(url,
-                filename, encodeFormat, coverImageSize.GetDimensions().Width);
+                filenameWithoutExtension, encodeFormat, coverImageSize.GetDimensions().Width);
         }
 
-        return await DownloadImageFromUrl(filename, encodeFormat, url, targetDirectory);
+        return await DownloadImageFromUrl(filenameWithoutExtension, encodeFormat, url, targetDirectory);
     }
 }
