@@ -52,7 +52,7 @@ public static class ImageExtensions
         // Calculate mean squared error for pixel differences
         var mse = img1.GetMeanSquaredError(img2);
 
-        // Normalize MSE (65025 = 255² which is max possible squared difference per channel)
+        // Normalize MSE (65025 = 255², which is the max possible squared difference per channel)
         var normalizedMse = 1f - Math.Min(1f, mse / 65025f);
 
         // Final similarity score (weighted average of resolution difference and color difference)
@@ -121,8 +121,20 @@ public static class ImageExtensions
             return imagePath2;
 
         // Otherwise, we need to analyze the actual image data for both
-        var metrics1 = GetImageQualityMetrics(imagePath1);
-        var metrics2 = GetImageQualityMetrics(imagePath2);
+
+        // NOTE: We HAVE to use these scope blocks and load image here otherwise memory-mapped section exception will occur
+        ImageQualityMetrics metrics1;
+        using (var img1 = Image.Load<Rgba32>(imagePath1))
+        {
+            metrics1 = GetImageQualityMetrics(img1);
+        }
+
+        ImageQualityMetrics metrics2;
+        using (var img2 = Image.Load<Rgba32>(imagePath2))
+        {
+            metrics2 = GetImageQualityMetrics(img2);
+        }
+
 
         // If one is color, and one is grayscale, then we prefer color
         if (preferColor && metrics1.IsColor != metrics2.IsColor)
@@ -144,7 +156,7 @@ public static class ImageExtensions
     private static double CalculateOverallScore(ImageQualityMetrics metrics)
     {
         // Resolution factor (normalized to HD resolution)
-        var resolutionFactor = Math.Min(1.0, (metrics.Width * metrics.Height) / (double)(1920 * 1080));
+        var resolutionFactor = Math.Min(1.0, (metrics.Width * metrics.Height) / (double) (1920 * 1080));
 
         // Color factor
         var colorFactor = metrics.IsColor ? (0.5 + 0.5 * metrics.Colorfulness) : 0.3;
@@ -165,14 +177,11 @@ public static class ImageExtensions
     }
 
     /// <summary>
-    /// Gets quality metrics for an image using only ImageSharp
+    /// Gets quality metrics for an image
     /// </summary>
-    private static ImageQualityMetrics GetImageQualityMetrics(string imagePath)
+    private static ImageQualityMetrics GetImageQualityMetrics(Image<Rgba32> image)
     {
-        // Optimization: Use a smaller version for analysis
-        using var image = Image.Load<Rgba32>(imagePath);
-
-        // Create a smaller version if image is large to speed up analysis
+        // Create a smaller version if the image is large to speed up analysis
         Image<Rgba32> workingImage;
         if (image.Width > 512 || image.Height > 512)
         {
@@ -208,10 +217,7 @@ public static class ImageExtensions
         metrics.NoiseLevel = EstimateNoiseLevel(workingImage);
 
         // Clean up
-        if (workingImage != image)
-        {
-            workingImage.Dispose();
-        }
+        workingImage.Dispose();
 
         return metrics;
     }

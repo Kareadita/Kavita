@@ -81,6 +81,22 @@ public class CoverDbService : ICoverDbService
         _eventHub = eventHub;
     }
 
+    /// <summary>
+    /// Downloads the favicon image from a given website URL, optionally falling back to a custom method if standard methods fail.
+    /// </summary>
+    /// <param name="url">The full URL of the website to extract the favicon from.</param>
+    /// <param name="encodeFormat">The desired image encoding format for saving the favicon (e.g., WebP, PNG).</param>
+    /// <returns>
+    /// A string representing the filename of the downloaded favicon image, saved to the configured favicon directory.
+    /// </returns>
+    /// <exception cref="KavitaException">
+    /// Thrown when favicon retrieval fails or if a previously failed domain is detected in cache.
+    /// </exception>
+    /// <remarks>
+    /// This method first checks for a cached failure to avoid re-requesting bad links.
+    /// It then attempts to parse HTML for `link` tags pointing to `.png` favicons and
+    /// falls back to an internal fallback method if needed. Valid results are saved to disk.
+    /// </remarks>
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
     {
         // Parse the URL to get the domain (including subdomain)
@@ -157,23 +173,10 @@ public class CoverDbService : ICoverDbService
             // Create the destination file path
             using var image = Image.PngloadStream(faviconStream);
             var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
 
-
+            image.WriteToFile(Path.Combine(_directoryService.FaviconDirectory, filename));
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
+
             return filename;
         } catch (Exception ex)
         {
@@ -212,23 +215,10 @@ public class CoverDbService : ICoverDbService
             // Create the destination file path
             using var image = Image.NewFromStream(publisherStream);
             var filename = ImageService.GetPublisherFormat(publisherName, encodeFormat);
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.PublisherDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
 
-
+            image.WriteToFile(Path.Combine(_directoryService.PublisherDirectory, filename));
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
+
             return filename;
         } catch (Exception ex)
         {
@@ -305,40 +295,19 @@ public class CoverDbService : ICoverDbService
         var filename = filenameWithoutExtension + encodeFormat.GetExtension();
         var targetFile = Path.Combine(targetDirectory, filename);
 
-        // if (new FileInfo(targetFile).Exists)
-        // {
-        //     File.Delete(targetFile);
-        // }
-
         _logger.LogTrace("Fetching person image from {Url}", url.Sanitize());
         // Download the file using Flurl
         var imageStream = await url
             .AllowHttpStatus("2xx,304")
             .GetStreamAsync();
 
-
-
         using var image = Image.NewFromStream(imageStream);
         image.WriteToFile(targetFile);
-        // switch (encodeFormat)
-        // {
-        //     case EncodeFormat.PNG:
-        //         image.Pngsave(targetFile);
-        //         break;
-        //     case EncodeFormat.WEBP:
-        //         image.Webpsave(targetFile);
-        //         break;
-        //     case EncodeFormat.AVIF:
-        //         image.Heifsave(targetFile);
-        //         break;
-        //     default:
-        //         throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-        // }
 
         return filename;
     }
 
-    private async Task<string> GetCoverPersonImagePath(Person person)
+    private async Task<string?> GetCoverPersonImagePath(Person person)
     {
         var tempFile = Path.Join(_directoryService.LongTermCacheDirectory, "people.yml");
 
@@ -395,25 +364,22 @@ public class CoverDbService : ICoverDbService
         await CacheDataAsync(urlsFileName, allOverrides);
 
 
-        if (!string.IsNullOrEmpty(allOverrides))
+        if (string.IsNullOrEmpty(allOverrides)) return correctSizeLink;
+
+        var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
+        var externalFile = allOverrides
+            .Split("\n")
+            .FirstOrDefault(url =>
+                cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
+                cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
+                ));
+
+        if (string.IsNullOrEmpty(externalFile))
         {
-            var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
-            var externalFile = allOverrides
-                .Split("\n")
-                .FirstOrDefault(url =>
-                    cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
-                    cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
-                    ));
-
-            if (string.IsNullOrEmpty(externalFile))
-            {
-                throw new KavitaException($"Could not grab favicon from {baseUrl.Sanitize()}");
-            }
-
-            correctSizeLink = $"{NewHost}favicons/" + externalFile;
+            throw new KavitaException($"Could not grab favicon from {baseUrl.Sanitize()}");
         }
 
-        return correctSizeLink;
+        return $"{NewHost}favicons/{externalFile}";
     }
 
     private async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
@@ -426,34 +392,30 @@ public class CoverDbService : ICoverDbService
         // Cache immediately
         await CacheDataAsync(publisherFileName, allOverrides);
 
+        if (string.IsNullOrEmpty(allOverrides)) return externalLink;
 
-        if (!string.IsNullOrEmpty(allOverrides))
-        {
-            var externalFile = allOverrides
-                .Split("\n")
-                .Select(publisherLine =>
-                {
-                    var tokens = publisherLine.Split("|");
-                    if (tokens.Length != 2) return null;
-                    var aliases = tokens[0];
-                    // Multiple publisher aliases are separated by #
-                    if (aliases.Split("#").Any(name => name.ToLowerInvariant().Trim().Equals(publisherName.ToLowerInvariant().Trim())))
-                    {
-                        return tokens[1];
-                    }
-                    return null;
-                })
-                .FirstOrDefault(url => !string.IsNullOrEmpty(url));
-
-            if (string.IsNullOrEmpty(externalFile))
+        var externalFile = allOverrides
+            .Split("\n")
+            .Select(publisherLine =>
             {
-                throw new KavitaException($"Could not grab publisher image for {publisherName}");
-            }
+                var tokens = publisherLine.Split("|");
+                if (tokens.Length != 2) return null;
+                var aliases = tokens[0];
+                // Multiple publisher aliases are separated by #
+                if (aliases.Split("#").Any(name => name.ToLowerInvariant().Trim().Equals(publisherName.ToLowerInvariant().Trim())))
+                {
+                    return tokens[1];
+                }
+                return null;
+            })
+            .FirstOrDefault(url => !string.IsNullOrEmpty(url));
 
-            externalLink = $"{NewHost}publishers/" + externalFile;
+        if (string.IsNullOrEmpty(externalFile))
+        {
+            throw new KavitaException($"Could not grab publisher image for {publisherName}");
         }
 
-        return externalLink;
+        return $"{NewHost}publishers/{externalLink}";
     }
 
     private async Task CacheDataAsync(string fileName, string? content)
@@ -681,7 +643,10 @@ public class CoverDbService : ICoverDbService
 
                         if (choseNewImage)
                         {
-                            _directoryService.DeleteFiles([existingPath]);
+
+                            File.Delete(existingPath);
+
+                            //_directoryService.DeleteFiles([existingPath]);
                             _directoryService.CopyFile(tempFullPath, finalFullPath);
                             _directoryService.DeleteFiles([tempFullPath]);
                         }
