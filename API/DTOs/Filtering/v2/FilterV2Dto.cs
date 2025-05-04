@@ -6,7 +6,7 @@ namespace API.DTOs.Filtering.v2;
 /// <summary>
 /// Metadata filtering for v2 API only
 /// </summary>
-public class FilterV2Dto
+public sealed record FilterV2Dto
 {
     /// <summary>
     /// Not used in the UI.

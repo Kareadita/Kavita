@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs;
 
-public class KavitaLocale
+public sealed record KavitaLocale
 {
     public string FileName { get; set; } // Key
     public string RenderName { get; set; }

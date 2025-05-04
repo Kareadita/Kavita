@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.ReadingLists;
 
-public class UpdateReadingListByVolumeDto
+public sealed record UpdateReadingListByVolumeDto
 {
     public int VolumeId { get; init; }
     public int SeriesId { get; init; }

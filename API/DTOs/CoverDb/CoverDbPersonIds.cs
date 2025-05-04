@@ -3,7 +3,7 @@
 namespace API.DTOs.CoverDb;
 #nullable enable
 
-public class CoverDbPersonIds
+public sealed record CoverDbPersonIds
 {
     [YamlMember(Alias = "hardcover_id", ApplyNamingConventions = false)]
     public string? HardcoverId { get; set; } = null;

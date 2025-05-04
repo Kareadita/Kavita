@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.ReadingLists;
 
-public class CreateReadingListDto
+public sealed record CreateReadingListDto
 {
     public string Title { get; init; } = default!;
 }

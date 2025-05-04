@@ -3,7 +3,7 @@ namespace API.DTOs.Metadata.Matching;
 /// <summary>
 /// Used for matching a series with Kavita+ for metadata and scrobbling
 /// </summary>
-public class MatchSeriesDto
+public sealed record MatchSeriesDto
 {
     /// <summary>
     /// When set, Kavita will stop attempting to match this series and will not perform any scrobbling

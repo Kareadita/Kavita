@@ -3,7 +3,7 @@
 namespace API.DTOs.OPDS;
 
 [XmlRoot("OpenSearchDescription", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-public class OpenSearchDescription
+public sealed record OpenSearchDescription
 {
     /// <summary>
     /// Contains a brief human-readable title that identifies this search engine.

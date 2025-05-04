@@ -2,7 +2,7 @@
 
 namespace API.DTOs.ReadingLists;
 
-public class PromoteReadingListsDto
+public sealed record PromoteReadingListsDto
 {
     public IList<int> ReadingListIds { get; init; }
     public bool Promoted { get; init; }

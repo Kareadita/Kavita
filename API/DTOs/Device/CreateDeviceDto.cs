@@ -3,7 +3,7 @@ using API.Entities.Enums.Device;
 
 namespace API.DTOs.Device;
 
-public class CreateDeviceDto
+public sealed record CreateDeviceDto
 {
     [Required]
     public string Name { get; set; } = default!;

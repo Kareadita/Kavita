@@ -2,7 +2,7 @@
 
 #nullable enable
 
-public class PersonalToCDto
+public sealed record PersonalToCDto
 {
     public required int ChapterId { get; set; }
     public required int PageNumber { get; set; }

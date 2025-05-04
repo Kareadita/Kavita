@@ -7,7 +7,7 @@ namespace API.DTOs.KavitaPlus.Metadata;
 /// <summary>
 /// Information about an individual issue/chapter/book from Kavita+
 /// </summary>
-public class ExternalChapterDto
+public sealed record ExternalChapterDto
 {
     public string Title { get; set; }
 

@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs.Account;
 #nullable enable
 
-public class LoginDto
+public sealed record LoginDto
 {
     public string Username { get; init; } = default!;
     public string Password { get; set; } = default!;

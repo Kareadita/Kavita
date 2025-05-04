@@ -5,7 +5,7 @@ using API.Entities.Interfaces;
 namespace API.DTOs;
 #nullable enable
 
-public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
+public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; init; }
     public string? Name { get; init; }

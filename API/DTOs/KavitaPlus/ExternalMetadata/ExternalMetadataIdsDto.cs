@@ -6,7 +6,7 @@ namespace API.DTOs.KavitaPlus.ExternalMetadata;
 /// <summary>
 /// Used for matching and fetching metadata on a series
 /// </summary>
-internal class ExternalMetadataIdsDto
+internal sealed record ExternalMetadataIdsDto
 {
     public long? MalId { get; set; }
     public int? AniListId { get; set; }

@@ -4,7 +4,7 @@ using API.DTOs.Scrobbling;
 namespace API.DTOs.KavitaPlus.ExternalMetadata;
 #nullable enable
 
-internal class MatchSeriesRequestDto
+internal sealed record MatchSeriesRequestDto
 {
     public string SeriesName { get; set; }
     public ICollection<string> AlternativeNames { get; set; }

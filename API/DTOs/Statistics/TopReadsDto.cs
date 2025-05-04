@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs.Statistics;
 #nullable enable
 
-public class TopReadDto
+public sealed record TopReadDto
 {
     public int UserId { get; set; }
     public string? Username { get; set; } = default!;

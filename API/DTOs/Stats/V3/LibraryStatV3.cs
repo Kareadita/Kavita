@@ -4,7 +4,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Stats.V3;
 
-public class LibraryStatV3
+public sealed record LibraryStatV3
 {
     public bool IncludeInDashboard { get; set; }
     public bool IncludeInSearch { get; set; }

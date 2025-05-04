@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities;

@@ -9,7 +9,7 @@ namespace API.DTOs.SeriesDetail;
 /// Represents a User Review for a given Series
 /// </summary>
 /// <remarks>The user does not need to be a Kavita user</remarks>
-public class UserReviewDto
+public sealed record UserReviewDto
 {
     /// <summary>
     /// A tagline for the review

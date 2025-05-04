@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace API.DTOs.Theme;
 
 
-public class DownloadableSiteThemeDto
+public sealed record DownloadableSiteThemeDto
 {
     /// <summary>
     /// Theme Name

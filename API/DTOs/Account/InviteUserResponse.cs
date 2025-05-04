@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Account;
 
-public class InviteUserResponse
+public sealed record InviteUserResponse
 {
     /// <summary>
     /// Email link used to setup the user account

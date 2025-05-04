@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Reader;
 
-public class BookInfoDto : IChapterInfoDto
+public sealed record BookInfoDto : IChapterInfoDto
 {
     public string BookTitle { get; set; } = default! ;
     public int SeriesId { get; set; }

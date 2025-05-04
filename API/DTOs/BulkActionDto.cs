@@ -2,7 +2,7 @@
 
 namespace API.DTOs;
 
-public class BulkActionDto
+public sealed record BulkActionDto
 {
     public List<int> Ids { get; set; }
     /**

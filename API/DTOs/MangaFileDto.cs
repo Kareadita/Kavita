@@ -4,7 +4,7 @@ using API.Entities.Enums;
 namespace API.DTOs;
 #nullable enable
 
-public class MangaFileDto
+public sealed record MangaFileDto
 {
     public int Id { get; init; }
     /// <summary>

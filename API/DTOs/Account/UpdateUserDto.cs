@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace API.DTOs.Account;
 #nullable enable
 
-public record UpdateUserDto
+public sealed record UpdateUserDto
 {
     public int UserId { get; set; }
     public string Username { get; set; } = default!;

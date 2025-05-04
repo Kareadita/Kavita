@@ -7,7 +7,7 @@ namespace API.DTOs.SeriesDetail;
 /// This is a special DTO for a UI page in Kavita. This performs sorting and grouping and returns exactly what UI requires for layout.
 /// This is subject to change, do not rely on this Data model.
 /// </summary>
-public class SeriesDetailDto
+public sealed record SeriesDetailDto
 {
     /// <summary>
     /// Specials for the Series. These will have their title and range cleaned to remove the special marker and prepare

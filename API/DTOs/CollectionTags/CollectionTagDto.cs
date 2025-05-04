@@ -3,7 +3,7 @@
 namespace API.DTOs.CollectionTags;
 
 [Obsolete("Use AppUserCollectionDto")]
-public class CollectionTagDto
+public sealed record CollectionTagDto
 {
     public int Id { get; set; }
     public string Title { get; set; } = default!;

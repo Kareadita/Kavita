@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Uploads;
 
-public class UploadUrlDto
+public sealed record UploadUrlDto
 {
     /// <summary>
     /// External url

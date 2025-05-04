@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace API.DTOs.OPDS;
 
-public class FeedLink
+public sealed record FeedLink
 {
     [XmlIgnore]
     public bool IsPageStream { get; set; }

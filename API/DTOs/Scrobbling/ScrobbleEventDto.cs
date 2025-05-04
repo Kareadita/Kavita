@@ -3,7 +3,7 @@
 namespace API.DTOs.Scrobbling;
 #nullable enable
 
-public class ScrobbleEventDto
+public sealed record ScrobbleEventDto
 {
     public string SeriesName { get; set; }
     public int SeriesId { get; set; }

@@ -5,7 +5,7 @@ using API.Entities.Interfaces;
 namespace API.DTOs.ReadingLists;
 #nullable enable
 
-public class ReadingListDto : IHasCoverImage
+public sealed record ReadingListDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;

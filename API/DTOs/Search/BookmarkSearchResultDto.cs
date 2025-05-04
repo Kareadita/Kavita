@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Search;
 
-public class BookmarkSearchResultDto
+public sealed record BookmarkSearchResultDto
 {
     public int LibraryId { get; set; }
     public int VolumeId { get; set; }

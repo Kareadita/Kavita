@@ -138,8 +138,8 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo
             {
-                Version = "3.1.0",
-                Title = $"Kavita (v{BuildInfo.Version})",
+                Version = BuildInfo.Version.ToString(),
+                Title = $"Kavita",
                 Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version}",
                 License = new OpenApiLicense
                 {

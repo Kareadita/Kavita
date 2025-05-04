@@ -13,6 +13,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
 using API.DTOs.Recommendation;

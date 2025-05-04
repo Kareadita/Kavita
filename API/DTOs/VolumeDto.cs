@@ -8,7 +8,7 @@ using API.Services.Tasks.Scanner.Parser;
 
 namespace API.DTOs;
 
-public class VolumeDto : IHasReadTimeEstimate, IHasCoverImage
+public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <inheritdoc cref="Volume.MinNumber"/>

@@ -7,7 +7,7 @@ using API.Entities.Enums.UserPreferences;
 namespace API.DTOs;
 #nullable enable
 
-public class UserPreferencesDto
+public sealed record UserPreferencesDto
 {
     /// <summary>
     /// Manga Reader Option: What direction should the next/prev page buttons go

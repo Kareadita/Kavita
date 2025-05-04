@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Scrobbling;
 
-public class ScrobbleHoldDto
+public sealed record ScrobbleHoldDto
 {
     public string SeriesName { get; set; }
     public int SeriesId { get; set; }

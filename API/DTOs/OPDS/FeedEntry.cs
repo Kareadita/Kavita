@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace API.DTOs.OPDS;
 #nullable enable
 
-public class FeedEntry
+public sealed record FeedEntry
 {
     [XmlElement("updated")]
     public string Updated { get; init; } = DateTime.UtcNow.ToString("s");
