@@ -177,4 +177,48 @@ public class PersonHelperTests : AbstractDbTest
         Assert.Contains(chapterPeople, cp => cp.Role == PersonRole.Writer);
         Assert.Contains(chapterPeople, cp => cp.Role == PersonRole.Editor);
     }
+
+    [Fact]
+    public async Task UpdateChapterPeopleAsync_MatchOnAlias_NoChanges()
+    {
+        await ResetDb();
+
+        var library = new LibraryBuilder("My Library")
+            .Build();
+
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
+
+        var person = new PersonBuilder("Joe Doe")
+            .WithAlias("Jonny Doe")
+            .Build();
+
+        var chapter = new ChapterBuilder("1")
+            .WithPerson(person, PersonRole.Editor)
+            .Build();
+
+        var series = new SeriesBuilder("Test 1")
+            .WithLibraryId(library.Id)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(chapter)
+                .Build())
+            .Build();
+
+        UnitOfWork.SeriesRepository.Add(series);
+        await UnitOfWork.CommitAsync();
+
+        // Add on Name
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Doe" }, PersonRole.Editor, UnitOfWork);
+        await UnitOfWork.CommitAsync();
+
+        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        Assert.Single(allPeople);
+
+        // Add on alias
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Jonny Doe" }, PersonRole.Editor, UnitOfWork);
+        await UnitOfWork.CommitAsync();
+
+        allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        Assert.Single(allPeople);
+    }
 }

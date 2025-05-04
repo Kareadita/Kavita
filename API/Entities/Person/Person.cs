@@ -8,8 +8,7 @@ public class Person : IHasCoverImage
     public int Id { get; set; }
     public required string Name { get; set; }
     public required string NormalizedName { get; set; }
-
-    //public ICollection<PersonAlias> Aliases { get; set; } = default!;
+    public ICollection<PersonAlias> Aliases { get; set; } = [];
 
     public string? CoverImage { get; set; }
     public bool CoverImageLocked { get; set; }
