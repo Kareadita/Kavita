@@ -1692,6 +1692,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
                 .Build())
             .Build();
         Context.Series.Attach(series);
+        Context.Person.Add(new PersonBuilder("John Doe").Build());
         await Context.SaveChangesAsync();
 
         var metadataSettings = await UnitOfWork.SettingsRepository.GetMetadataSettings();
@@ -1706,7 +1707,50 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Staff = [CreateStaff("John", "Doe", "Story"), CreateStaff("Doe", "John", "Story")]
+            Staff = [CreateStaff("Doe", "John", "Story")]
+        }, 1);
+
+        var postSeries = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        var allWriters = postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer).ToList();
+        Assert.Single(allWriters);
+
+        var johnDoe = allWriters[0].Person;
+
+        Assert.Contains("Doe John", johnDoe.Aliases.Select(pa => pa.Alias));
+    }
+
+    [Fact]
+    public async Task PeopleAliasing_AddOnAlias()
+    {
+        await ResetDb();
+
+        const string seriesName = "Test - People - Add as Alias";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        Context.Series.Attach(series);
+
+        Context.Person.Add(new PersonBuilder("John Doe").WithAlias("Doe John").Build());
+
+        await Context.SaveChangesAsync();
+
+        var metadataSettings = await UnitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePeople = true;
+        metadataSettings.FirstLastPeopleNaming = true;
+        metadataSettings.Overrides = [MetadataSettingField.People];
+        metadataSettings.PersonRoles = [PersonRole.Writer];
+        Context.MetadataSettings.Update(metadataSettings);
+        await Context.SaveChangesAsync();
+
+        await _externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Staff = [CreateStaff("Doe", "John", "Story")]
         }, 1);
 
         var postSeries = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);

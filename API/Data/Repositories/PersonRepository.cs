@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,13 @@ using Microsoft.EntityFrameworkCore;
 namespace API.Data.Repositories;
 #nullable enable
 
+[Flags]
+public enum PersonIncludes
+{
+    None = 1 << 0,
+    Aliases = 1 << 1,
+}
+
 public interface IPersonRepository
 {
     void Attach(Person person);
@@ -23,24 +31,37 @@ public interface IPersonRepository
     void Remove(SeriesMetadataPeople person);
     void Update(Person person);
 
-    Task<IList<Person>> GetAllPeople();
-    Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
-    Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
+    Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.Aliases);
     Task RemoveAllPeopleNoLongerAssociated();
-    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null);
+    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.Aliases);
 
     Task<string?> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
-    Task<Person?> GetPersonById(int personId);
-    Task<PersonDto?> GetPersonDtoByName(string name, int userId);
+    Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases);
+    /// <summary>
+    /// Returns a person matched on normalized name or alias
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<Person?> GetPersonByNameAsync(string name, PersonIncludes includes = PersonIncludes.Aliases);
     Task<bool> IsNameUnique(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
     Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
-    Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames);
-    Task<Person?> GetPersonByAniListId(int aniListId);
+    /// <summary>
+    /// Returns all people with a matching name, or alias
+    /// </summary>
+    /// <param name="normalizedNames"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases);
 }
 
 public class PersonRepository : IPersonRepository
@@ -99,7 +120,7 @@ public class PersonRepository : IPersonRepository
     }
 
 
-    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null)
+    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.Aliases)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
@@ -113,6 +134,7 @@ public class PersonRepository : IPersonRepository
             .Where(s => userLibs.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(ageRating)
             .SelectMany(s => s.Metadata.People.Select(p => p.Person))
+            .Includes(includes)
             .Distinct()
             .OrderBy(p => p.Name)
             .AsNoTracking()
@@ -193,21 +215,32 @@ public class PersonRepository : IPersonRepository
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    public async Task<Person?> GetPersonById(int personId)
+    public async Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.Aliases)
     {
         return await _context.Person.Where(p => p.Id == personId)
+            .Includes(includes)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<PersonDto?> GetPersonDtoByName(string name, int userId)
+    public async Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases)
     {
         var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Person
             .Where(p => p.NormalizedName == normalized)
+            .Includes(includes)
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<Person?> GetPersonByNameAsync(string name, PersonIncludes includes = PersonIncludes.Aliases)
+    {
+        var normalized = name.ToNormalized();
+        return _context.Person
+            .Includes(includes)
+            .Where(p => p.NormalizedName == normalized || p.Aliases.Any(pa => pa.NormalizedAlias == normalized))
             .FirstOrDefaultAsync();
     }
 
@@ -245,45 +278,50 @@ public class PersonRepository : IPersonRepository
             .ToListAsync();
     }
 
-    public async Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames)
+    public async Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases)
     {
         return await _context.Person
-            .Where(p => normalizedNames.Contains(p.NormalizedName))
+            .Includes(includes)
+            .Where(p => normalizedNames.Contains(p.NormalizedName) || p.Aliases.Any(pa => normalizedNames.Contains(pa.NormalizedAlias)))
             .OrderBy(p => p.Name)
             .ToListAsync();
     }
 
-    public async Task<Person?> GetPersonByAniListId(int aniListId)
+    public async Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases)
     {
         return await _context.Person
             .Where(p => p.AniListId == aniListId)
+            .Includes(includes)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IList<Person>> GetAllPeople()
+    public async Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases)
     {
         return await _context.Person
+            .Includes(includes)
             .OrderBy(p => p.Name)
             .ToListAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId)
+    public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.Aliases)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Person
+            .Includes(includes)
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role)
+    public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.Aliases)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Person
             .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == role) || p.ChapterPeople.Any(cp => cp.Role == role)) // Filter by role in both series and chapters
+            .Includes(includes)
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)

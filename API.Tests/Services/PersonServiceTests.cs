@@ -1,5 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
+using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
 using API.Extensions;
@@ -86,6 +88,10 @@ public class PersonServiceTests: AbstractDbTest
         UnitOfWork.LibraryRepository.Add(library);
         await UnitOfWork.CommitAsync();
 
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library).Build();
+        UnitOfWork.UserRepository.Add(user);
+
         var person = new PersonBuilder("Jillian Cowan").Build();
 
         var person2 = new PersonBuilder("Cowan Jillian").Build();
@@ -124,9 +130,18 @@ public class PersonServiceTests: AbstractDbTest
 
         Assert.Equal("Jillian Cowan", mergedPerson.Name);
 
-        // UserId here might bug out?
         var chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(1, 1, PersonRole.Editor);
         Assert.Equal(2, chapters.Count());
+
+        chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(1, ChapterIncludes.People);
+        Assert.NotNull(chapter);
+        Assert.Single(chapter.People);
+
+        chapter2 = await UnitOfWork.ChapterRepository.GetChapterAsync(2, ChapterIncludes.People);
+        Assert.NotNull(chapter2);
+        Assert.Single(chapter2.People);
+
+        Assert.Equal(chapter.People.First().PersonId, chapter2.People.First().PersonId);
     }
 
     protected override async Task ResetDb()
