@@ -20,9 +20,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NetVips;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.AspNetCore.SignalR.Extensions;
+using Log = Serilog.Log;
 
 namespace API;
 #nullable enable
@@ -143,6 +145,8 @@ public class Program
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
 
+            InitNetVips();
+
             await host.RunAsync();
         } catch (Exception ex)
         {
@@ -225,4 +229,14 @@ public class Program
 
                 webBuilder.UseStartup<Startup>();
             });
+
+    /// <summary>
+    /// Ensure NetVips does not cache
+    /// </summary>
+    /// <remarks>https://github.com/kleisauke/net-vips/issues/6#issuecomment-394379299</remarks>
+    private static void InitNetVips()
+    {
+        Cache.MaxFiles = 0;
+
+    }
 }

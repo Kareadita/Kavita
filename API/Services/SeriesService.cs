@@ -450,7 +450,7 @@ public class SeriesService : ISeriesService
         try
         {
             var chapterMappings =
-                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(seriesIds.ToArray());
+                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync([.. seriesIds]);
 
             var allChapterIds = new List<int>();
             foreach (var mapping in chapterMappings)
@@ -458,9 +458,8 @@ public class SeriesService : ISeriesService
                 allChapterIds.AddRange(mapping.Value);
             }
 
-            // NOTE: This isn't getting all the people and whatnot currently
+            // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
-
             _unitOfWork.SeriesRepository.Remove(series);
 
             var libraryIds = series.Select(s => s.LibraryId);
@@ -481,7 +480,8 @@ public class SeriesService : ISeriesService
 
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
             await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
-            _taskScheduler.CleanupChapters(allChapterIds.ToArray());
+            _taskScheduler.CleanupChapters([.. allChapterIds]);
+
             return true;
         }
         catch (Exception ex)

@@ -12,10 +12,11 @@ public class PersonHelperTests : AbstractDbTest
 {
     protected override async Task ResetDb()
     {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.Person.RemoveRange(_context.Person.ToList());
-        _context.Library.RemoveRange(_context.Library.ToList());
-        await _context.SaveChangesAsync();
+        Context.Series.RemoveRange(Context.Series.ToList());
+        Context.Person.RemoveRange(Context.Person.ToList());
+        Context.Library.RemoveRange(Context.Library.ToList());
+        Context.Series.RemoveRange(Context.Series.ToList());
+        await Context.SaveChangesAsync();
     }
 
     // 1. Test adding new people and keeping existing ones
@@ -27,8 +28,8 @@ public class PersonHelperTests : AbstractDbTest
         var library = new LibraryBuilder("My Library")
             .Build();
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
 
         var existingPerson = new PersonBuilder("Joe Shmo").Build();
         var chapter = new ChapterBuilder("1").Build();
@@ -43,14 +44,14 @@ public class PersonHelperTests : AbstractDbTest
             .WithVolume(new VolumeBuilder("1").WithChapter(chapter).Build())
             .Build();
 
-        _unitOfWork.SeriesRepository.Add(series);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.SeriesRepository.Add(series);
+        await UnitOfWork.CommitAsync();
 
         // Call UpdateChapterPeopleAsync with one existing and one new person
-        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo", "New Person" }, PersonRole.Editor, _unitOfWork);
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo", "New Person" }, PersonRole.Editor, UnitOfWork);
 
         // Assert existing person retained and new person added
-        var people = await _unitOfWork.PersonRepository.GetAllPeople();
+        var people = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Contains(people, p => p.Name == "Joe Shmo");
         Assert.Contains(people, p => p.Name == "New Person");
 
@@ -68,8 +69,8 @@ public class PersonHelperTests : AbstractDbTest
         var library = new LibraryBuilder("My Library")
             .Build();
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
 
         var existingPerson1 = new PersonBuilder("Joe Shmo").Build();
         var existingPerson2 = new PersonBuilder("Jane Doe").Build();
@@ -85,16 +86,16 @@ public class PersonHelperTests : AbstractDbTest
                 .Build())
             .Build();
 
-        _unitOfWork.SeriesRepository.Add(series);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.SeriesRepository.Add(series);
+        await UnitOfWork.CommitAsync();
 
         // Call UpdateChapterPeopleAsync with only one person
-        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, UnitOfWork);
 
         // PersonHelper does not remove the Person from the global DbSet itself
-        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+        await UnitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
 
-        var people = await _unitOfWork.PersonRepository.GetAllPeople();
+        var people = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.DoesNotContain(people, p => p.Name == "Jane Doe");
 
         var chapterPeople = chapter.People.Select(cp => cp.Person.Name).ToList();
@@ -111,8 +112,8 @@ public class PersonHelperTests : AbstractDbTest
         var library = new LibraryBuilder("My Library")
             .Build();
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
 
         var existingPerson = new PersonBuilder("Joe Shmo").Build();
         var chapter = new ChapterBuilder("1").WithPerson(existingPerson, PersonRole.Editor).Build();
@@ -124,13 +125,13 @@ public class PersonHelperTests : AbstractDbTest
                 .Build())
             .Build();
 
-        _unitOfWork.SeriesRepository.Add(series);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.SeriesRepository.Add(series);
+        await UnitOfWork.CommitAsync();
 
         // Call UpdateChapterPeopleAsync with the same list
-        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, UnitOfWork);
 
-        var people = await _unitOfWork.PersonRepository.GetAllPeople();
+        var people = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Contains(people, p => p.Name == "Joe Shmo");
 
         var chapterPeople = chapter.People.Select(cp => cp.Person.Name).ToList();
@@ -147,8 +148,8 @@ public class PersonHelperTests : AbstractDbTest
         var library = new LibraryBuilder("My Library")
             .Build();
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
 
         var person = new PersonBuilder("Joe Shmo").Build();
         var chapter = new ChapterBuilder("1").WithPerson(person, PersonRole.Writer).Build();
@@ -160,11 +161,11 @@ public class PersonHelperTests : AbstractDbTest
                 .Build())
             .Build();
 
-        _unitOfWork.SeriesRepository.Add(series);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.SeriesRepository.Add(series);
+        await UnitOfWork.CommitAsync();
 
         // Add same person as Editor
-        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, _unitOfWork);
+        await PersonHelper.UpdateChapterPeopleAsync(chapter, new List<string> { "Joe Shmo" }, PersonRole.Editor, UnitOfWork);
 
         // Ensure that the same person is assigned with two roles
         var chapterPeople = chapter

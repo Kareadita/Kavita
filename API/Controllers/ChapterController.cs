@@ -68,7 +68,8 @@ public class ChapterController : BaseApiController
     {
         if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId,
+            ChapterIncludes.Files | ChapterIncludes.ExternalReviews | ChapterIncludes.ExternalRatings);
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
@@ -86,6 +87,15 @@ public class ChapterController : BaseApiController
             _unitOfWork.ChapterRepository.Remove(chapter);
         }
 
+        // If we removed the volume, do an additional check if we need to delete the actual series as well or not
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(vol.SeriesId, SeriesIncludes.ExternalData | SeriesIncludes.Volumes);
+        var needToRemoveSeries = needToRemoveVolume && series != null && series.Volumes.Count <= 1;
+        if (needToRemoveSeries)
+        {
+            _unitOfWork.SeriesRepository.Remove(series!);
+        }
+
+
 
         if (!await _unitOfWork.CommitAsync()) return Ok(false);
 
@@ -93,6 +103,12 @@ public class ChapterController : BaseApiController
         if (needToRemoveVolume)
         {
             await _eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(chapter.VolumeId, vol.SeriesId), false);
+        }
+
+        if (needToRemoveSeries)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                MessageFactory.SeriesRemovedEvent(series!.Id, series.Name, series.LibraryId), false);
         }
 
         return Ok(true);
@@ -419,7 +435,7 @@ public class ChapterController : BaseApiController
             ret.HasBeenRated = ownRating.HasBeenRated;
         }
 
-        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviews(chapterId);
+        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviewDtos(chapterId);
         if (externalReviews.Count > 0)
         {
             userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(externalReviews));
@@ -427,7 +443,7 @@ public class ChapterController : BaseApiController
 
         ret.Reviews = userReviews;
 
-        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapterId);
+        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatingDtos(chapterId);
 
         return Ok(ret);
     }

@@ -69,6 +69,7 @@ public interface IDirectoryService
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
     bool ExistOrCreate(string directoryPath);
     void DeleteFiles(IEnumerable<string> files);
+    void CopyFile(string sourcePath, string destinationPath, bool overwrite = true);
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);
     Task<bool> CheckWriteAccess(string directoryName);
@@ -937,6 +938,27 @@ public class DirectoryService : IDirectoryService
         }
     }
 
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite = true)
+    {
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("Source file not found", sourcePath);
+        }
+
+        var destinationDirectory = Path.GetDirectoryName(destinationPath);
+        if (string.IsNullOrEmpty(destinationDirectory))
+        {
+            throw new ArgumentException("Destination path does not contain a directory", nameof(destinationPath));
+        }
+
+        if (!Directory.Exists(destinationDirectory))
+        {
+            FileSystem.Directory.CreateDirectory(destinationDirectory);
+        }
+
+        FileSystem.File.Copy(sourcePath, destinationPath, overwrite);
+    }
+
     /// <summary>
     /// Returns the human-readable file size for an arbitrary, 64-bit file size
     /// <remarks>The default format is "0.## XB", e.g. "4.2 KB" or "1.43 GB"</remarks>
@@ -1088,6 +1110,25 @@ public class DirectoryService : IDirectoryService
             if (Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(subDirectory.FullName)) continue;
 
             FlattenDirectory(root, subDirectory, ref directoryIndex);
+        }
+    }
+
+    /// <summary>
+    /// If the file is locked or not existing
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static bool IsFileLocked(string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath)) return false;
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+            return false; // If this works, the file is not locked
+        }
+        catch (IOException)
+        {
+            return true; // File is locked by another process
         }
     }
 }

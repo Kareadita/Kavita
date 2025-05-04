@@ -142,7 +142,7 @@ public class ChapterListExtensionsTests
             CreateChapter("darker than black", "1", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), false),
         };
 
-        Assert.Equal(chapterList.First(), chapterList.GetFirstChapterWithFiles());
+        Assert.Equal(chapterList[0], chapterList.GetFirstChapterWithFiles());
     }
 
     [Fact]
@@ -150,13 +150,13 @@ public class ChapterListExtensionsTests
     {
         var chapterList = new List<Chapter>()
         {
-            CreateChapter("darker than black", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
+            CreateChapter("darker than black", Parser.DefaultChapter, CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true),
             CreateChapter("darker than black", "1", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), false),
         };
 
-        chapterList.First().Files = new List<MangaFile>();
+        chapterList[0].Files = new List<MangaFile>();
 
-        Assert.Equal(chapterList.Last(), chapterList.GetFirstChapterWithFiles());
+        Assert.Equal(chapterList[^1], chapterList.GetFirstChapterWithFiles());
     }
 
 
@@ -181,7 +181,7 @@ public class ChapterListExtensionsTests
             CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
         };
 
-        chapterList[0].ReleaseDate = new DateTime(10, 1, 1);
+        chapterList[0].ReleaseDate = new DateTime(10, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         chapterList[1].ReleaseDate = DateTime.MinValue;
 
         Assert.Equal(0, chapterList.MinimumReleaseYear());
@@ -196,8 +196,8 @@ public class ChapterListExtensionsTests
             CreateChapter("detective comics", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
         };
 
-        chapterList[0].ReleaseDate = new DateTime(2002, 1, 1);
-        chapterList[1].ReleaseDate = new DateTime(2012, 2, 1);
+        chapterList[0].ReleaseDate = new DateTime(2002, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        chapterList[1].ReleaseDate = new DateTime(2012, 2, 1, 0, 0, 0, DateTimeKind.Utc);
 
         Assert.Equal(2002, chapterList.MinimumReleaseYear());
     }
