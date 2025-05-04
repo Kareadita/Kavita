@@ -13,37 +13,24 @@ namespace API.DTOs;
 /// </summary>
 public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
 {
+    /// <inheritdoc cref="API.Entities.Chapter.Id"/>
     public int Id { get; init; }
-    /// <summary>
-    /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2". If special, will be special name.
-    /// </summary>
-    /// <remarks>This can be something like 19.HU or Alpha as some comics are like this</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.Range"/>
     public string Range { get; init; } = default!;
-    /// <summary>
-    /// Smallest number of the Range.
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.Number"/>
     [Obsolete("Use MinNumber and MaxNumber instead")]
     public string Number { get; init; } = default!;
-    /// <summary>
-    /// This may be 0 under the circumstance that the Issue is "Alpha" or other non-standard numbers.
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.MinNumber"/>
     public float MinNumber { get; init; }
+    /// <inheritdoc cref="API.Entities.Chapter.MaxNumber"/>
     public float MaxNumber { get; init; }
-    /// <summary>
-    /// The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.SortOrder"/>
     public float SortOrder { get; set; }
-    /// <summary>
-    /// Total number of pages in all MangaFiles
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.Pages"/>
     public int Pages { get; init; }
-    /// <summary>
-    /// If this Chapter contains files that could only be identified as Series or has Special Identifier from filename
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.IsSpecial"/>
     public bool IsSpecial { get; init; }
-    /// <summary>
-    /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.Title"/>
     public string Title { get; set; } = default!;
     /// <summary>
     /// The files that represent this Chapter
@@ -61,46 +48,25 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// The last time a chapter was read by current authenticated user
     /// </summary>
     public DateTime LastReadingProgress { get; set; }
-    /// <summary>
-    /// If the Cover Image is locked for this entity
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.CoverImageLocked"/>
     public bool CoverImageLocked { get; set; }
-    /// <summary>
-    /// Volume Id this Chapter belongs to
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.VolumeId"/>
     public int VolumeId { get; init; }
-    /// <summary>
-    /// When chapter was created
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.CreatedUtc"/>
     public DateTime CreatedUtc { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.LastModifiedUtc"/>
     public DateTime LastModifiedUtc { get; set; }
-    /// <summary>
-    /// When chapter was created in local server time
-    /// </summary>
-    /// <remarks>This is required for Tachiyomi Extension</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.Created"/>
     public DateTime Created { get; set; }
-    /// <summary>
-    /// When the chapter was released.
-    /// </summary>
-    /// <remarks>Metadata field</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.ReleaseDate"/>
     public DateTime ReleaseDate { get; init; }
-    /// <summary>
-    /// Title of the Chapter/Issue
-    /// </summary>
-    /// <remarks>Metadata field</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.TitleName"/>
     public string TitleName { get; set; } = default!;
-    /// <summary>
-    /// Summary of the Chapter
-    /// </summary>
-    /// <remarks>This is not set normally, only for Series Detail</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.Summary"/>
     public string Summary { get; init; } = default!;
-    /// <summary>
-    /// Age Rating for the issue/chapter
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.AgeRating"/>
     public AgeRating AgeRating { get; init; }
-    /// <summary>
-    /// Total words in a Chapter (books only)
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.WordCount"/>
     public long WordCount { get; set; } = 0L;
     /// <summary>
     /// Formatted Volume title ie) Volume 2.
@@ -113,14 +79,9 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public float AvgHoursToRead { get; set; }
-    /// <summary>
-    /// Comma-separated link of urls to external services that have some relation to the Chapter
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.WebLinks"/>
     public string WebLinks { get; set; }
-    /// <summary>
-    /// ISBN-13 (usually) of the Chapter
-    /// </summary>
-    /// <remarks>This is guaranteed to be Valid</remarks>
+    /// <inheritdoc cref="API.Entities.Chapter.ISBN"/>
     public string ISBN { get; set; }
 
     #region Metadata
@@ -146,51 +107,60 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     public PublicationStatus PublicationStatus { get; set; }
-    /// <summary>
-    /// Language for the Chapter/Issue
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.Language"/>
     public string? Language { get; set; }
-    /// <summary>
-    /// Number in the TotalCount of issues
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.Count"/>
     public int Count { get; set; }
-    /// <summary>
-    /// Total number of issues for the series
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.TotalCount"/>
     public int TotalCount { get; set; }
 
+    /// <inheritdoc cref="API.Entities.Chapter.LanguageLocked"/>
     public bool LanguageLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.SummaryLocked"/>
     public bool SummaryLocked { get; set; }
-    /// <summary>
-    /// Locked by user so metadata updates from scan loop will not override AgeRating
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Chapter.AgeRatingLocked"/>
     public bool AgeRatingLocked { get; set; }
-    /// <summary>
-    /// Locked by user so metadata updates from scan loop will not override PublicationStatus
-    /// </summary>
     public bool PublicationStatusLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.GenresLocked"/>
     public bool GenresLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.TagsLocked"/>
     public bool TagsLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.WriterLocked"/>
     public bool WriterLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.CharacterLocked"/>
     public bool CharacterLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.ColoristLocked"/>
     public bool ColoristLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.EditorLocked"/>
     public bool EditorLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.InkerLocked"/>
     public bool InkerLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.ImprintLocked"/>
     public bool ImprintLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.LettererLocked"/>
     public bool LettererLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.PencillerLocked"/>
     public bool PencillerLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.PublisherLocked"/>
     public bool PublisherLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.TranslatorLocked"/>
     public bool TranslatorLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.TeamLocked"/>
     public bool TeamLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.LocationLocked"/>
     public bool LocationLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.CoverArtistLocked"/>
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 
     #endregion
 
-    public string CoverImage { get; set; }
-    public string PrimaryColor { get; set; } = string.Empty;
-    public string SecondaryColor { get; set; } = string.Empty;
+    /// <inheritdoc cref="API.Entities.Chapter.CoverImage"/>
+    public string? CoverImage { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.PrimaryColor"/>
+    public string? PrimaryColor { get; set; } = string.Empty;
+    /// <inheritdoc cref="API.Entities.Chapter.SecondaryColor"/>
+    public string? SecondaryColor { get; set; } = string.Empty;
 
     public void ResetColorScape()
     {
