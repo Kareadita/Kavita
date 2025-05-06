@@ -4,7 +4,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs;
 
-public class UpdateLibraryDto
+public sealed record UpdateLibraryDto
 {
     [Required]
     public int Id { get; init; }

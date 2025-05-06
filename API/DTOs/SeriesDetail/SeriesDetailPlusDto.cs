@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Recommendation;
 
 namespace API.DTOs.SeriesDetail;
@@ -8,7 +9,7 @@ namespace API.DTOs.SeriesDetail;
 /// All the data from Kavita+ for Series Detail
 /// </summary>
 /// <remarks>This is what the UI sees, not what the API sends back</remarks>
-public class SeriesDetailPlusDto
+public sealed record SeriesDetailPlusDto
 {
     public RecommendationDto? Recommendations { get; set; }
     public IEnumerable<UserReviewDto> Reviews { get; set; }

@@ -10,7 +10,7 @@ namespace API.DTOs.Search;
 /// <summary>
 /// Represents all Search results for a query
 /// </summary>
-public class SearchResultGroupDto
+public sealed record SearchResultGroupDto
 {
     public IEnumerable<LibraryDto> Libraries { get; set; } = default!;
     public IEnumerable<SearchResultDto> Series { get; set; } = default!;

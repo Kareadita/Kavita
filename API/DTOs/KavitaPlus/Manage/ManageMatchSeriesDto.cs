@@ -2,7 +2,7 @@
 
 namespace API.DTOs.KavitaPlus.Manage;
 
-public class ManageMatchSeriesDto
+public sealed record ManageMatchSeriesDto
 {
     public SeriesDto Series { get; set; }
     public bool IsMatched { get; set; }

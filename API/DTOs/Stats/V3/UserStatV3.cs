@@ -5,7 +5,7 @@ using API.Entities.Enums.Device;
 
 namespace API.DTOs.Stats.V3;
 
-public class UserStatV3
+public sealed record UserStatV3
 {
     public AgeRestriction AgeRestriction { get; set; }
     /// <summary>

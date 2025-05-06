@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Reader;
 
-public class MarkReadDto
+public sealed record MarkReadDto
 {
     public int SeriesId { get; init; }
 }

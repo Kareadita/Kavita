@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Kavita (v0.8.6.6)",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.6",
+    "title": "Kavita",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.7",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "3.1.0"
+    "version": "0.8.6.7"
   },
   "servers": [
     {
@@ -17115,18 +17115,15 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
-            "description": "Smallest number of the Range.",
             "nullable": true,
             "deprecated": true
           },
           "minNumber": {
             "type": "number",
-            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
             "format": "float"
           },
           "maxNumber": {
@@ -17135,21 +17132,17 @@
           },
           "sortOrder": {
             "type": "number",
-            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "pages": {
             "type": "integer",
-            "description": "Total number of pages in all MangaFiles",
             "format": "int32"
           },
           "isSpecial": {
-            "type": "boolean",
-            "description": "If this Chapter contains files that could only be identified as Series or has Special Identifier from filename"
+            "type": "boolean"
           },
           "title": {
             "type": "string",
-            "description": "Used for books/specials to display custom title. For non-specials/books, will be set to API.DTOs.ChapterDto.Range",
             "nullable": true
           },
           "files": {
@@ -17176,17 +17169,14 @@
             "format": "date-time"
           },
           "coverImageLocked": {
-            "type": "boolean",
-            "description": "If the Cover Image is locked for this entity"
+            "type": "boolean"
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume Id this Chapter belongs to",
             "format": "int32"
           },
           "createdUtc": {
             "type": "string",
-            "description": "When chapter was created",
             "format": "date-time"
           },
           "lastModifiedUtc": {
@@ -17195,22 +17185,18 @@
           },
           "created": {
             "type": "string",
-            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "releaseDate": {
             "type": "string",
-            "description": "When the chapter was released.",
             "format": "date-time"
           },
           "titleName": {
             "type": "string",
-            "description": "Title of the Chapter/Issue",
             "nullable": true
           },
           "summary": {
             "type": "string",
-            "description": "Summary of the Chapter",
             "nullable": true
           },
           "ageRating": {
@@ -17233,12 +17219,11 @@
               -1
             ],
             "type": "integer",
-            "description": "Age Rating for the issue/chapter",
+            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total words in a Chapter (books only)",
             "format": "int64"
           },
           "volumeTitle": {
@@ -17260,12 +17245,10 @@
           },
           "webLinks": {
             "type": "string",
-            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
             "nullable": true
           },
           "isbn": {
             "type": "string",
-            "description": "ISBN-13 (usually) of the Chapter",
             "nullable": true
           },
           "writers": {
@@ -17387,17 +17370,14 @@
           },
           "language": {
             "type": "string",
-            "description": "Language for the Chapter/Issue",
             "nullable": true
           },
           "count": {
             "type": "integer",
-            "description": "Number in the TotalCount of issues",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues for the series",
             "format": "int32"
           },
           "languageLocked": {
@@ -17407,12 +17387,10 @@
             "type": "boolean"
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "publicationStatusLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+            "type": "boolean"
           },
           "genresLocked": {
             "type": "boolean"
@@ -18643,6 +18621,7 @@
               1
             ],
             "type": "integer",
+            "description": "Where this rating comes from: Critic or User",
             "format": "int32"
           },
           "providerUrl": {
@@ -22691,7 +22670,6 @@
           },
           "lastChapterAdded": {
             "type": "string",
-            "description": "DateTime representing last time a chapter was added to the Series",
             "format": "date-time"
           },
           "userRating": {
@@ -22719,9 +22697,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "nameLocked": {
-            "type": "boolean"
-          },
           "sortNameLocked": {
             "type": "boolean"
           },
@@ -22730,7 +22705,6 @@
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total number of words for the series. Only applies to epubs.",
             "format": "int64"
           },
           "libraryId": {
@@ -22755,26 +22729,21 @@
           },
           "folderPath": {
             "type": "string",
-            "description": "The highest level folder for this Series",
             "nullable": true
           },
           "lowestFolderPath": {
             "type": "string",
-            "description": "Lowest path (that is under library root) that contains all files for the series.",
             "nullable": true
           },
           "lastFolderScanned": {
             "type": "string",
-            "description": "The last time the folder for this series was scanned",
             "format": "date-time"
           },
           "dontMatch": {
-            "type": "boolean",
-            "description": "Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling."
+            "type": "boolean"
           },
           "isBlacklisted": {
-            "type": "boolean",
-            "description": "If the series was unable to match, it will be blacklisted until a manual metadata match overrides it"
+            "type": "boolean"
           },
           "coverImage": {
             "type": "string",
@@ -24023,18 +23992,15 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
-            "description": "Smallest number of the Range.",
             "nullable": true,
             "deprecated": true
           },
           "minNumber": {
             "type": "number",
-            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
             "format": "float"
           },
           "maxNumber": {
@@ -24043,21 +24009,17 @@
           },
           "sortOrder": {
             "type": "number",
-            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "pages": {
             "type": "integer",
-            "description": "Total number of pages in all MangaFiles",
             "format": "int32"
           },
           "isSpecial": {
-            "type": "boolean",
-            "description": "If this Chapter contains files that could only be identified as Series or has Special Identifier from filename"
+            "type": "boolean"
           },
           "title": {
             "type": "string",
-            "description": "Used for books/specials to display custom title. For non-specials/books, will be set to API.DTOs.ChapterDto.Range",
             "nullable": true
           },
           "files": {
@@ -24084,17 +24046,14 @@
             "format": "date-time"
           },
           "coverImageLocked": {
-            "type": "boolean",
-            "description": "If the Cover Image is locked for this entity"
+            "type": "boolean"
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume Id this Chapter belongs to",
             "format": "int32"
           },
           "createdUtc": {
             "type": "string",
-            "description": "When chapter was created",
             "format": "date-time"
           },
           "lastModifiedUtc": {
@@ -24103,22 +24062,18 @@
           },
           "created": {
             "type": "string",
-            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "releaseDate": {
             "type": "string",
-            "description": "When the chapter was released.",
             "format": "date-time"
           },
           "titleName": {
             "type": "string",
-            "description": "Title of the Chapter/Issue",
             "nullable": true
           },
           "summary": {
             "type": "string",
-            "description": "Summary of the Chapter",
             "nullable": true
           },
           "ageRating": {
@@ -24141,12 +24096,11 @@
               -1
             ],
             "type": "integer",
-            "description": "Age Rating for the issue/chapter",
+            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total words in a Chapter (books only)",
             "format": "int64"
           },
           "minHoursToRead": {
@@ -24163,12 +24117,10 @@
           },
           "webLinks": {
             "type": "string",
-            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
             "nullable": true
           },
           "isbn": {
             "type": "string",
-            "description": "ISBN-13 (usually) of the Chapter",
             "nullable": true
           },
           "writers": {
@@ -24290,17 +24242,14 @@
           },
           "language": {
             "type": "string",
-            "description": "Language for the Chapter/Issue",
             "nullable": true
           },
           "count": {
             "type": "integer",
-            "description": "Number in the TotalCount of issues",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues for the series",
             "format": "int32"
           },
           "languageLocked": {
@@ -24310,12 +24259,10 @@
             "type": "boolean"
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "publicationStatusLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+            "type": "boolean"
           },
           "genresLocked": {
             "type": "boolean"
@@ -25542,6 +25489,7 @@
             "items": {
               "type": "string"
             },
+            "description": "List of Roles to assign to user. If admin not present, Pleb will be applied.\nIf admin present, all libraries will be granted access and will ignore those from DTO.",
             "nullable": true
           },
           "libraries": {
@@ -25558,7 +25506,6 @@
           },
           "email": {
             "type": "string",
-            "description": "Email of the user",
             "nullable": true
           }
         },
@@ -25709,7 +25656,6 @@
           "locale",
           "noTransitions",
           "pageSplitOption",
-          "pdfLayoutMode",
           "pdfScrollMode",
           "pdfSpreadMode",
           "pdfTheme",
@@ -25730,7 +25676,6 @@
               1
             ],
             "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
             "format": "int32"
           },
           "scalingOption": {
@@ -25741,7 +25686,6 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
             "format": "int32"
           },
           "pageSplitOption": {
@@ -25752,7 +25696,6 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
             "format": "int32"
           },
           "readerMode": {
@@ -25762,7 +25705,6 @@
               2
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\n<example>\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\nby clicking top/bottom sides of reader.\n</example>",
             "format": "int32"
           },
           "layoutMode": {
@@ -25772,57 +25714,45 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How many pages to display in the reader at once",
             "format": "int32"
           },
           "emulateBook": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+            "type": "boolean"
           },
           "backgroundColor": {
             "minLength": 1,
-            "type": "string",
-            "description": "Manga Reader Option: Background color of the reader"
+            "type": "string"
           },
           "swipeToPaginate": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Should swiping trigger pagination"
+            "type": "boolean"
           },
           "autoCloseMenu": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
+            "type": "boolean"
           },
           "showScreenHints": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
+            "type": "boolean"
           },
           "allowAutomaticWebtoonReaderDetection": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow Automatic Webtoon detection"
+            "type": "boolean"
           },
           "bookReaderMargin": {
             "type": "integer",
-            "description": "Book Reader Option: Override extra Margin",
             "format": "int32"
           },
           "bookReaderLineSpacing": {
             "type": "integer",
-            "description": "Book Reader Option: Override line-height",
             "format": "int32"
           },
           "bookReaderFontSize": {
             "type": "integer",
-            "description": "Book Reader Option: Override font size",
             "format": "int32"
           },
           "bookReaderFontFamily": {
             "minLength": 1,
-            "type": "string",
-            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override"
+            "type": "string"
           },
           "bookReaderTapToPaginate": {
-            "type": "boolean",
-            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+            "type": "boolean"
           },
           "bookReaderReadingDirection": {
             "enum": [
@@ -25830,7 +25760,6 @@
               1
             ],
             "type": "integer",
-            "description": "Book Reader Option: What direction should the next/prev page buttons go",
             "format": "int32"
           },
           "bookReaderWritingStyle": {
@@ -25839,7 +25768,7 @@
               1
             ],
             "type": "integer",
-            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
+            "description": "Represents the writing styles for the book-reader",
             "format": "int32"
           },
           "theme": {
@@ -25859,8 +25788,7 @@
             "format": "int32"
           },
           "bookReaderImmersiveMode": {
-            "type": "boolean",
-            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+            "type": "boolean"
           },
           "globalPageLayoutMode": {
             "enum": [
@@ -25868,33 +25796,26 @@
               1
             ],
             "type": "integer",
-            "description": "Global Site Option: If the UI should layout items as Cards or List items",
             "format": "int32"
           },
           "blurUnreadSummaries": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already"
+            "type": "boolean"
           },
           "promptForDownloadSize": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB."
+            "type": "boolean"
           },
           "noTransitions": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+            "type": "boolean"
           },
           "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
+            "type": "boolean"
           },
           "shareReviews": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+            "type": "boolean"
           },
           "locale": {
             "minLength": 1,
-            "type": "string",
-            "description": "UI Site Global Setting: The language locale that should be used for the user"
+            "type": "string"
           },
           "pdfTheme": {
             "enum": [
@@ -25902,7 +25823,6 @@
               1
             ],
             "type": "integer",
-            "description": "PDF Reader: Theme of the Reader",
             "format": "int32"
           },
           "pdfScrollMode": {
@@ -25912,16 +25832,7 @@
               3
             ],
             "type": "integer",
-            "description": "PDF Reader: Scroll mode of the reader",
-            "format": "int32"
-          },
-          "pdfLayoutMode": {
-            "enum": [
-              0,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Layout Mode of the reader",
+            "description": "Enum values match PdfViewer's enums",
             "format": "int32"
           },
           "pdfSpreadMode": {
@@ -25931,16 +25842,13 @@
               2
             ],
             "type": "integer",
-            "description": "PDF Reader: Spread Mode of the reader",
             "format": "int32"
           },
           "aniListScrobblingEnabled": {
-            "type": "boolean",
-            "description": "Kavita+: Should this account have Scrobbling enabled for AniList"
+            "type": "boolean"
           },
           "wantToReadSync": {
-            "type": "boolean",
-            "description": "Kavita+: Should this account have Want to Read Sync enabled"
+            "type": "boolean"
           }
         },
         "additionalProperties": false

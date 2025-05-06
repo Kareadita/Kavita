@@ -6,7 +6,7 @@ namespace API.DTOs.Stats;
 /// <summary>
 /// This is just for the Server tab on UI
 /// </summary>
-public class ServerInfoSlimDto
+public sealed record ServerInfoSlimDto
 {
     /// <summary>
     /// Unique Id that represents a unique install

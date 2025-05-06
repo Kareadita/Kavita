@@ -36,7 +36,7 @@ public enum PlusMediaFormat
 }
 
 
-public class ScrobbleDto
+public sealed record ScrobbleDto
 {
     /// <summary>
     /// User's access token to allow us to talk on their behalf

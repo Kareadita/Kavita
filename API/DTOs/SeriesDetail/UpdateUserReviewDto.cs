@@ -2,7 +2,7 @@
 namespace API.DTOs.SeriesDetail;
 #nullable enable
 
-public class UpdateUserReviewDto
+public sealed record UpdateUserReviewDto
 {
     public int SeriesId { get; set; }
     public int? ChapterId { get; set; }

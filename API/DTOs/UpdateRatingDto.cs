@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs;
 
-public class UpdateRatingDto
+public sealed record UpdateRatingDto
 {
     public int SeriesId { get; init; }
     public int? ChapterId { get; init; }

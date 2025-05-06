@@ -9,7 +9,7 @@ namespace API.DTOs.Metadata;
 /// Exclusively metadata about a given chapter
 /// </summary>
 [Obsolete("Will not be maintained as of v0.8.1")]
-public class ChapterMetadataDto
+public sealed record ChapterMetadataDto
 {
     public int Id { get; set; }
     public int ChapterId { get; set; }

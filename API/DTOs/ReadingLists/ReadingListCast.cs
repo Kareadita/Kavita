@@ -2,7 +2,7 @@
 
 namespace API.DTOs.ReadingLists;
 
-public class ReadingListCast
+public sealed record ReadingListCast
 {
     public ICollection<PersonDto> Writers { get; set; } = [];
     public ICollection<PersonDto> CoverArtists { get; set; } = [];

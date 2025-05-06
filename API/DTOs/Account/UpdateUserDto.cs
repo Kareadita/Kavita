@@ -4,12 +4,16 @@ using System.ComponentModel.DataAnnotations;
 namespace API.DTOs.Account;
 #nullable enable
 
-public record UpdateUserDto
+public sealed record UpdateUserDto
 {
+    /// <inheritdoc cref="API.Entities.AppUser.Id"/>
     public int UserId { get; set; }
+    /// <inheritdoc cref="API.Entities.AppUser.UserName"/>
     public string Username { get; set; } = default!;
+    /// <summary>
     /// List of Roles to assign to user. If admin not present, Pleb will be applied.
     /// If admin present, all libraries will be granted access and will ignore those from DTO.
+    /// </summary>
     public IList<string> Roles { get; init; } = default!;
     /// <summary>
     /// A list of libraries to grant access to
@@ -19,8 +23,6 @@ public record UpdateUserDto
     /// An Age Rating which will limit the account to seeing everything equal to or below said rating.
     /// </summary>
     public AgeRestrictionDto AgeRestriction { get; init; } = default!;
-    /// <summary>
-    /// Email of the user
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.AppUser.Email"/>
     public string? Email { get; set; } = default!;
 }

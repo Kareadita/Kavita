@@ -2,7 +2,7 @@
 
 namespace API.DTOs.KavitaPlus.License;
 
-public class LicenseInfoDto
+public sealed record LicenseInfoDto
 {
     /// <summary>
     /// If cancelled, will represent cancellation date. If not, will represent repayment date

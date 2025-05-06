@@ -4,7 +4,7 @@
 /// <summary>
 /// Represents a range between two int/float/double
 /// </summary>
-public class Range<T>
+public sealed record Range<T>
 {
     public T? Min { get; init; }
     public T? Max { get; init; }

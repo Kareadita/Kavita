@@ -4,7 +4,7 @@ using API.Services.Plus;
 namespace API.DTOs.Scrobbling;
 #nullable enable
 
-public record MediaRecommendationDto
+public sealed record MediaRecommendationDto
 {
     public int Rating { get; set; }
     public IEnumerable<string> RecommendationNames { get; set; } = null!;

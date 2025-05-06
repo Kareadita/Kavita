@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Jobs;
 
-public class JobDto
+public sealed record JobDto
 {
     /// <summary>
     /// Job Id

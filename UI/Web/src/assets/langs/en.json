@@ -2606,6 +2606,7 @@
         "entity-unread": "{{name}} is now unread",
         "mark-read": "Marked as Read",
         "mark-unread": "Marked as Unread",
+        "series-added-want-to-read": "Series added from Want to Read list",
         "series-removed-want-to-read": "Series removed from Want to Read list",
         "series-deleted": "Series deleted",
         "delete-review": "Are you sure you want to delete your review?",

@@ -8,7 +8,7 @@ namespace API.DTOs;
 /// <summary>
 /// Represents a member of a Kavita server.
 /// </summary>
-public class MemberDto
+public sealed record MemberDto
 {
     public int Id { get; init; }
     public string? Username { get; init; }

@@ -3,7 +3,7 @@
 namespace API.DTOs.Statistics;
 #nullable enable
 
-public class ServerStatisticsDto
+public sealed record ServerStatisticsDto
 {
     public long ChapterCount { get; set; }
     public long VolumeCount { get; set; }

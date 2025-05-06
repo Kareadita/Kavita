@@ -5,7 +5,7 @@ namespace API.DTOs.ReadingLists.CBL;
 
 
 [XmlRoot(ElementName="Book")]
-public class CblBook
+public sealed record CblBook
 {
     [XmlAttribute("Series")]
     public string Series { get; set; }

@@ -536,7 +536,7 @@ export class ActionService {
 
   addMultipleSeriesToWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
     this.memberService.addSeriesToWantToRead(seriesIds).subscribe(() => {
-      this.toastr.success('Series added to Want to Read list');
+      this.toastr.success(translate('toasts.series-added-want-to-read'));
       if (callback) {
         callback();
       }

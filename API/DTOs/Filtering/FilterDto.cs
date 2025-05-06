@@ -5,7 +5,7 @@ using API.Entities.Enums;
 namespace API.DTOs.Filtering;
 #nullable enable
 
-public class FilterDto
+public sealed record FilterDto
 {
     /// <summary>
     /// The type of Formats you want to be returned. An empty list will return all formats back

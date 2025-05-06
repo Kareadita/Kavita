@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.KavitaPlus.License;
 
-public class LicenseValidDto
+public sealed record LicenseValidDto
 {
     public required string License { get; set; }
     public required string InstallId { get; set; }

@@ -5,7 +5,7 @@ using API.Services.Plus;
 
 namespace API.DTOs.KavitaPlus.Metadata;
 
-public class ALMediaTitle
+public sealed record ALMediaTitle
 {
     public string? EnglishTitle { get; set; }
     public string RomajiTitle { get; set; }
@@ -13,7 +13,7 @@ public class ALMediaTitle
     public string PreferredTitle { get; set; }
 }
 
-public class SeriesRelationship
+public sealed record SeriesRelationship
 {
     public int AniListId { get; set; }
     public int? MalId { get; set; }

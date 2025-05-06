@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs;
 #nullable enable
 
-public class LibraryDto
+public sealed record LibraryDto
 {
     public int Id { get; init; }
     public string? Name { get; init; }

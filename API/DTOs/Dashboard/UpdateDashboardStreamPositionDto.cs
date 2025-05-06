@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Dashboard;
 
-public class UpdateDashboardStreamPositionDto
+public sealed record UpdateDashboardStreamPositionDto
 {
     public int FromPosition { get; set; }
     public int ToPosition { get; set; }

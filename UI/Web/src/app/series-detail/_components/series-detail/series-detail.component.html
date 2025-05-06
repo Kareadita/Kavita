@@ -22,7 +22,7 @@
 
           </h4>
           <div class="subtitle mt-2 mb-2">
-            @if (series.localizedName !== series.name) {
+            @if (series.localizedName !== series.name && series.localizedName) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
           </div>

@@ -3,7 +3,7 @@
 namespace API.DTOs;
 #nullable enable
 
-public class UpdatePersonDto
+public sealed record UpdatePersonDto
 {
     [Required]
     public int Id { get; init; }

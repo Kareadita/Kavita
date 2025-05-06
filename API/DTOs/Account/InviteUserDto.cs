@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs.Account;
 
-public class InviteUserDto
+public sealed record InviteUserDto
 {
     [Required]
     public string Email { get; set; } = default!;

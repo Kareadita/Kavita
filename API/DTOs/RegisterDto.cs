@@ -3,7 +3,7 @@
 namespace API.DTOs;
 #nullable enable
 
-public class RegisterDto
+public sealed record RegisterDto
 {
     [Required]
     public string Username { get; init; } = default!;

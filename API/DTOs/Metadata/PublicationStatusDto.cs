@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Metadata;
 
-public class PublicationStatusDto
+public sealed record PublicationStatusDto
 {
     public PublicationStatus Value { get; set; }
     public required string Title { get; set; }

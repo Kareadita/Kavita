@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Email;
 
-public class ConfirmationEmailDto
+public sealed record ConfirmationEmailDto
 {
     public string InvitingUser { get; init; } = default!;
     public string EmailAddress { get; init; } = default!;

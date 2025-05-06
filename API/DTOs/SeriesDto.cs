@@ -5,14 +5,21 @@ using API.Entities.Interfaces;
 namespace API.DTOs;
 #nullable enable
 
-public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
+public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
 {
+    /// <inheritdoc cref="API.Entities.Series.Id"/>
     public int Id { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.Name"/>
     public string? Name { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.OriginalName"/>
     public string? OriginalName { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.LocalizedName"/>
     public string? LocalizedName { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.SortName"/>
     public string? SortName { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.Pages"/>
     public int Pages { get; init; }
+    /// <inheritdoc cref="API.Entities.Series.CoverImageLocked"/>
     public bool CoverImageLocked { get; set; }
     /// <summary>
     /// Sum of pages read from linked Volumes. Calculated at API-time.
@@ -22,9 +29,7 @@ public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     /// DateTime representing last time the series was Read. Calculated at API-time.
     /// </summary>
     public DateTime LatestReadDate { get; set; }
-    /// <summary>
-    /// DateTime representing last time a chapter was added to the Series
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.LastChapterAdded"/>
     public DateTime LastChapterAdded { get; set; }
     /// <summary>
     /// Rating from logged in user. Calculated at API-time.
@@ -35,17 +40,19 @@ public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public bool HasUserRated { get; set; }
 
+    /// <inheritdoc cref="API.Entities.Series.Format"/>
     public MangaFormat Format { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.Created"/>
     public DateTime Created { get; set; }
 
-    public bool NameLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.SortNameLocked"/>
     public bool SortNameLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.LocalizedNameLocked"/>
     public bool LocalizedNameLocked { get; set; }
-    /// <summary>
-    /// Total number of words for the series. Only applies to epubs.
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.WordCount"/>
     public long WordCount { get; set; }
 
+    /// <inheritdoc cref="API.Entities.Series.LibraryId"/>
     public int LibraryId { get; set; }
     public string LibraryName { get; set; } = default!;
     /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
@@ -54,33 +61,25 @@ public class SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public float AvgHoursToRead { get; set; }
-    /// <summary>
-    /// The highest level folder for this Series
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.FolderPath"/>
     public string FolderPath { get; set; } = default!;
-    /// <summary>
-    /// Lowest path (that is under library root) that contains all files for the series.
-    /// </summary>
-    /// <remarks><see cref="Services.Tasks.Scanner.Parser.Parser.NormalizePath"/> must be used before setting</remarks>
+    /// <inheritdoc cref="API.Entities.Series.LowestFolderPath"/>
     public string? LowestFolderPath { get; set; }
-    /// <summary>
-    /// The last time the folder for this series was scanned
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.LastFolderScanned"/>
     public DateTime LastFolderScanned { get; set; }
     #region KavitaPlus
-    /// <summary>
-    /// Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling.
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.DontMatch"/>
     public bool DontMatch { get; set; }
-    /// <summary>
-    /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
-    /// </summary>
+    /// <inheritdoc cref="API.Entities.Series.IsBlacklisted"/>
     public bool IsBlacklisted { get; set; }
     #endregion
 
+    /// <inheritdoc cref="API.Entities.Series.CoverImage"/>
     public string? CoverImage { get; set; }
-    public string PrimaryColor { get; set; } = string.Empty;
-    public string SecondaryColor { get; set; } = string.Empty;
+    /// <inheritdoc cref="API.Entities.Series.PrimaryColor"/>
+    public string? PrimaryColor { get; set; } = string.Empty;
+    /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
+    public string? SecondaryColor { get; set; } = string.Empty;
 
     public void ResetColorScape()
     {

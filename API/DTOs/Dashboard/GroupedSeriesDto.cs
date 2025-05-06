@@ -5,7 +5,7 @@ namespace API.DTOs.Dashboard;
 /// <summary>
 /// This is a representation of a Series with some amount of underlying files within it. This is used for Recently Updated Series section
 /// </summary>
-public class GroupedSeriesDto
+public sealed record GroupedSeriesDto
 {
     public string SeriesName { get; set; } = default!;
     public int SeriesId { get; set; }
