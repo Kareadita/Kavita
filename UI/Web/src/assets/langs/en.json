@@ -1103,12 +1103,14 @@
     },
 
     "person-detail": {
+        "aka": "Also known as ",
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
         "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
         "all-roles": "Roles",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "No information about this Person"
     },
 
     "library-settings-modal": {
@@ -2246,6 +2248,7 @@
         "title": "{{personName}} Details",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "aliases-tab": "Aliases",
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2263,7 +2266,9 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
-        "download-coversdb": "Download from CoversDB"
+        "download-coversdb": "Download from CoversDB",
+        "aliases-label": "Edit aliases",
+        "alias-overlap": "This alias already points towards another person, consider merging them."
     },
 
     "day-breakdown": {

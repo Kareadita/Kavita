@@ -12,6 +12,13 @@
               [formControlName]="i"
               id="item--{{i}}"
             >
+            @if (item.dirty && item.touched && errorMessage) {
+              @if (item.status === "INVALID") {
+                <div id="item--{{i}}-error" class="invalid-feedback" style="display: inline-block">
+                  {{errorMessage}}
+                </div>
+              }
+            }
           </div>
         </div>
         <div class="col-lg-2">

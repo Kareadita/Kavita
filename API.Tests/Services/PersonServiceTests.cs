@@ -144,6 +144,45 @@ public class PersonServiceTests: AbstractDbTest
         Assert.Equal(chapter.People.First().PersonId, chapter2.People.First().PersonId);
     }
 
+    [Fact]
+    public async Task PersonAddAlias_NoOverlap()
+    {
+        await ResetDb();
+
+        UnitOfWork.PersonRepository.Attach(new PersonBuilder("Jillian Cowan").Build());
+        UnitOfWork.PersonRepository.Attach(new PersonBuilder("Jilly Cowan").WithAlias("Jolly Cowan").Build());
+        await UnitOfWork.CommitAsync();
+
+        var ps = new PersonService(UnitOfWork);
+
+        var person1 = await UnitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jillian Cowan");
+        var person2 = await UnitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jilly Cowan");
+        Assert.NotNull(person1);
+        Assert.NotNull(person2);
+
+        // Overlap on Name
+        var success = await ps.UpdatePersonAliasesAsync(person1, ["Jilly Cowan"]);
+        Assert.False(success);
+
+        // Overlap on alias
+        success = await ps.UpdatePersonAliasesAsync(person1, ["Jolly Cowan"]);
+        Assert.False(success);
+
+        // No overlap
+        success = await ps.UpdatePersonAliasesAsync(person2, ["Jilly Joy Cowan"]);
+        Assert.True(success);
+
+        // Some overlap
+        success = await ps.UpdatePersonAliasesAsync(person1, ["Jolly Cowan", "Jilly Joy Cowan"]);
+        Assert.False(success);
+
+        // Some overlap
+        success = await ps.UpdatePersonAliasesAsync(person1, ["Jolly Cowan", "Jilly Joy Cowan"]);
+        Assert.True(success);
+
+        Assert.Single(person2.Aliases);
+    }
+
     protected override async Task ResetDb()
     {
         Context.Person.RemoveRange(Context.Person.ToList());

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -24,9 +25,10 @@ public class PersonController : BaseApiController
     private readonly ICoverDbService _coverDbService;
     private readonly IImageService _imageService;
     private readonly IEventHub _eventHub;
+    private readonly IPersonService _personService;
 
     public PersonController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper,
-        ICoverDbService coverDbService, IImageService imageService, IEventHub eventHub)
+        ICoverDbService coverDbService, IImageService imageService, IEventHub eventHub, IPersonService personService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
@@ -34,6 +36,7 @@ public class PersonController : BaseApiController
         _coverDbService = coverDbService;
         _imageService = imageService;
         _eventHub = eventHub;
+        _personService = personService;
     }
 
 
@@ -89,6 +92,10 @@ public class PersonController : BaseApiController
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
         }
+
+        var success = await _personService.UpdatePersonAliasesAsync(person, dto.Aliases);
+        if (!success) return BadRequest(_localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
+
 
         person.Name = dto.Name?.Trim();
         person.Description = dto.Description ?? string.Empty;
@@ -171,6 +178,37 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {
         return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, User.GetUserId(), role));
+    }
+
+    /// <summary>
+    /// Merges Persons into one, this action is irreversible
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("merge")]
+    public async Task<ActionResult> MergePersons(PersonMergeDto dto)
+    {
+        var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId);
+        if (dst == null) return BadRequest();
+
+        var src = await _unitOfWork.PersonRepository.GetPersonById(dto.SrcId);
+        if (src == null) return BadRequest();
+
+        await _personService.MergePeopleAsync(dst, src);
+        return Ok();
+    }
+
+    [HttpGet("alias/{personId}/{alias}")]
+    public async Task<ActionResult<bool>> IsValidAlias(int personId, string alias)
+    {
+        // Remove and just check against the passed value?
+        var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
+        if (person == null) return NotFound();
+
+        var other = await _unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync(alias);
+        if (other == null) return Ok(true);
+
+        return Ok(other.Id == person.Id);
     }
 
 

@@ -49,7 +49,7 @@ public interface IPersonRepository
     /// <param name="name"></param>
     /// <param name="includes"></param>
     /// <returns></returns>
-    Task<Person?> GetPersonByNameAsync(string name, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<Person?> GetPersonByNameOrAliasAsync(string name, PersonIncludes includes = PersonIncludes.Aliases);
     Task<bool> IsNameUnique(string name);
 
     Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
@@ -235,7 +235,7 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public Task<Person?> GetPersonByNameAsync(string name, PersonIncludes includes = PersonIncludes.Aliases)
+    public Task<Person?> GetPersonByNameOrAliasAsync(string name, PersonIncludes includes = PersonIncludes.Aliases)
     {
         var normalized = name.ToNormalized();
         return _context.Person
@@ -246,7 +246,10 @@ public class PersonRepository : IPersonRepository
 
     public async Task<bool> IsNameUnique(string name)
     {
-        return !(await _context.Person.AnyAsync(p => p.Name == name));
+        // Should this use Normalized to check?
+        return !(await _context.Person
+            .Includes(PersonIncludes.Aliases)
+            .AnyAsync(p => p.Name == name || p.Aliases.Any(pa => pa.Alias == name)));
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId)

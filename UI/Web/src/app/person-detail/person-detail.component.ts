@@ -88,7 +88,6 @@ export class PersonDetailComponent {
   roles$: Observable<PersonRole[]> | null = null;
   roles: PersonRole[] | null = null;
   works$: Observable<Series[]> | null = null;
-  defaultSummaryText = 'No information about this Person';
   filter: SeriesFilterV2 | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};

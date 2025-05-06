@@ -11,6 +11,7 @@ import {BrowsePerson} from "../_models/person/browse-person";
 import {Chapter} from "../_models/chapter";
 import {StandaloneChapter} from "../_models/standalone-chapter";
 import {TextResonse} from "../_types/text-response";
+import {al} from "@angular/router/router_module.d-6zbCxc1T";
 
 @Injectable({
   providedIn: 'root'
@@ -55,4 +56,9 @@ export class PersonService {
   downloadCover(personId: number) {
     return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
   }
+
+  isValidAlias(personId: number, alias: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + `person/alias/${personId}/${alias}`);
+  }
+
 }

@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Person;
+using API.Extensions;
 
 namespace API.Services;
 
@@ -13,6 +16,15 @@ public interface IPersonService
     /// <param name="src">Merged person</param>
     /// <returns></returns>
     Task MergePeopleAsync(Person dst, Person src);
+
+    /// <summary>
+    /// Adds the alias to the person, requires that the alias is not shared with anyone else
+    /// </summary>
+    /// <remarks>This method does NOT commit changes</remarks>
+    /// <param name="person"></param>
+    /// <param name="aliases"></param>
+    /// <returns></returns>
+    Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases);
 }
 
 public class PersonService(IUnitOfWork unitOfWork): IPersonService
@@ -83,5 +95,33 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         unitOfWork.PersonRepository.Remove(src);
         unitOfWork.PersonRepository.Update(dst);
         await unitOfWork.CommitAsync();
+    }
+
+    public async Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases)
+    {
+        var normalizedAliases = aliases
+            .Select(a => a.ToNormalized().Trim())
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .Where(a => a != person.NormalizedName)
+            .ToList();
+
+        if (normalizedAliases.Count == 0)
+        {
+            person.Aliases = [];
+            return true;
+        }
+
+        var others = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedAliases);
+        others = others.Where(p => p.Id != person.Id).ToList();
+
+        if (others.Count != 0) return false;
+
+        person.Aliases = aliases.Select(a => new PersonAlias
+        {
+            Alias = a.Trim(),
+            NormalizedAlias = a.Trim().ToNormalized()
+        }).ToList();
+
+        return true;
     }
 }
