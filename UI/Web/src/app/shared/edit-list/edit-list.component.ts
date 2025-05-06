@@ -43,6 +43,9 @@ export class EditListComponent implements OnInit {
 
   ngOnInit() {
     this.items.forEach(item => this.addItem(item));
+    if (this.items.length === 0) {
+      this.addItem("");
+    }
 
 
     this.form.valueChanges.pipe(

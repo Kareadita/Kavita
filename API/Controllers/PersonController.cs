@@ -94,7 +94,7 @@ public class PersonController : BaseApiController
         }
 
         var success = await _personService.UpdatePersonAliasesAsync(person, dto.Aliases);
-        if (!success) return BadRequest(_localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
+        if (!success) return BadRequest(await _localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
 
 
         person.Name = dto.Name?.Trim();
