@@ -69,6 +69,7 @@ export class EditListComponent implements OnInit {
     if (this.ItemsArray.length === 1) {
       this.ItemsArray.at(0).setValue('');
       this.emit();
+      this.cdRef.markForCheck();
       return;
     }
 

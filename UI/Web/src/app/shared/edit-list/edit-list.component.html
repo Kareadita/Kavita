@@ -1,6 +1,7 @@
 <form [formGroup]="form" *transloco="let t">
   <div formArrayName="items">
-    @for(item of ItemsArray.controls; let i = $index; track i) {
+    <!-- We are tracking items, as the index will not always point towards the same item. -->
+    @for(item of ItemsArray.controls; let i = $index; track item) {
       <div class="row g-0 mb-3">
         <div class="col-lg-10 col-md-12 pe-2">
           <div class="mb-3">
