@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
@@ -42,6 +43,14 @@ import {ToastrService} from "ngx-toastr";
 import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
+import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+
+interface PersonMergeEvent {
+  srcId: number,
+  dstId: number,
+  dstName: number,
+}
+
 
 @Component({
     selector: 'app-person-detail',
@@ -63,7 +72,7 @@ import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-perso
     styleUrl: './person-detail.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PersonDetailComponent {
+export class PersonDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -77,6 +86,7 @@ export class PersonDetailComponent {
   protected readonly licenseService = inject(LicenseService);
   private readonly themeService = inject(ThemeService);
   private readonly toastr = inject(ToastrService);
+  private readonly messageHubService = inject(MessageHubService)
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
@@ -127,6 +137,17 @@ export class PersonDetailComponent {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+  }
+
+  ngOnInit(): void {
+    this.messageHubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
+      if (message.event !== EVENTS.PersonMerged) return;
+
+      const event = message.payload as PersonMergeEvent;
+      if (event.srcId !== this.person?.id) return;
+
+      this.router.navigate(['person', event.dstName]);
+    });
   }
 
   private setPerson(person: Person) {

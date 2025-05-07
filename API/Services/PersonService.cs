@@ -65,29 +65,8 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
             dst.CoverImage = src.CoverImage;
         }
 
-        foreach (var chapter in src.ChapterPeople)
-        {
-            dst.ChapterPeople.Add(new ChapterPeople
-            {
-                Role = chapter.Role,
-                ChapterId = chapter.ChapterId,
-                Person = dst,
-                KavitaPlusConnection = chapter.KavitaPlusConnection,
-                OrderWeight = chapter.OrderWeight,
-            });
-        }
-
-        foreach (var series in src.SeriesMetadataPeople)
-        {
-            dst.SeriesMetadataPeople.Add(new SeriesMetadataPeople
-            {
-                SeriesMetadataId = series.SeriesMetadataId,
-                Role = series.Role,
-                Person = dst,
-                KavitaPlusConnection = series.KavitaPlusConnection,
-                OrderWeight = series.OrderWeight,
-            });
-        }
+        MergeChapterPeople(dst, src);
+        MergeSeriesMetadataPeople(dst, src);
 
         dst.Aliases.Add(new PersonAlias
         {
@@ -103,6 +82,44 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         unitOfWork.PersonRepository.Remove(src);
         unitOfWork.PersonRepository.Update(dst);
         await unitOfWork.CommitAsync();
+    }
+
+    private void MergeChapterPeople(Person dst, Person src)
+    {
+        foreach (var chapter in src.ChapterPeople)
+        {
+            var alreadyPresent = dst.ChapterPeople
+                .Any(x => x.ChapterId == chapter.ChapterId && x.Role == chapter.Role);
+            if (alreadyPresent) continue;
+
+            dst.ChapterPeople.Add(new ChapterPeople
+            {
+                Role = chapter.Role,
+                ChapterId = chapter.ChapterId,
+                Person = dst,
+                KavitaPlusConnection = chapter.KavitaPlusConnection,
+                OrderWeight = chapter.OrderWeight,
+            });
+        }
+    }
+
+    private void MergeSeriesMetadataPeople(Person dst, Person src)
+    {
+        foreach (var series in src.SeriesMetadataPeople)
+        {
+            var alreadyPresent = dst.SeriesMetadataPeople
+                .Any(x => x.SeriesMetadataId == series.SeriesMetadataId && x.Role == series.Role);
+            if (alreadyPresent) continue;
+
+            dst.SeriesMetadataPeople.Add(new SeriesMetadataPeople
+            {
+                SeriesMetadataId = series.SeriesMetadataId,
+                Role = series.Role,
+                Person = dst,
+                KavitaPlusConnection = series.KavitaPlusConnection,
+                OrderWeight = series.OrderWeight,
+            });
+        }
     }
 
     public async Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases)

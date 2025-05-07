@@ -196,6 +196,8 @@ public class PersonController : BaseApiController
         if (src == null) return BadRequest();
 
         await _personService.MergePeopleAsync(dst, src);
+        await _eventHub.SendMessageAsync(MessageFactory.PersonMerged, MessageFactory.PersonMergedMessage(dst, src));
+
         return Ok(_mapper.Map<PersonDto>(dst));
     }
 
