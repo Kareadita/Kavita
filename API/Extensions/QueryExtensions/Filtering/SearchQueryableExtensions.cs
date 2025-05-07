@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data.Misc;
 using API.Data.Repositories;
@@ -50,7 +51,9 @@ public static class SearchQueryableExtensions
         var peopleFromSeriesMetadata = queryable
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People)
-            .Where(p => p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
+            .Include(sp => sp.Person.Aliases)
+            .Where(p => (p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
+            || p.Person.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
             .Select(p => p.Person);
 
         // Get people from ChapterPeople by navigating through Volume -> Series
@@ -59,7 +62,9 @@ public static class SearchQueryableExtensions
             .SelectMany(sm => sm.Series.Volumes)
             .SelectMany(v => v.Chapters)
             .SelectMany(ch => ch.People)
-            .Where(cp => cp.Person.Name != null && EF.Functions.Like(cp.Person.Name, $"%{searchQuery}%"))
+            .Include(cp => cp.Person.Aliases)
+            .Where(p => (p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
+                        || p.Person.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
             .Select(cp => cp.Person);
 
         // Combine both queries and ensure distinct results
