@@ -151,6 +151,98 @@ public class PersonServiceTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task PersonMerge_NoDuplicateChaptersOrSeries()
+    {
+        await ResetDb();
+
+        var ps = new PersonService(UnitOfWork);
+
+        var library = new LibraryBuilder("My Library").Build();
+        UnitOfWork.LibraryRepository.Add(library);
+        await UnitOfWork.CommitAsync();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library).Build();
+        UnitOfWork.UserRepository.Add(user);
+
+        var person = new PersonBuilder("Jillian Cowan").Build();
+
+        var person2 = new PersonBuilder("Cowan Jillian").Build();
+
+        var chapter = new ChapterBuilder("1")
+            .WithPerson(person, PersonRole.Editor)
+            .WithPerson(person2, PersonRole.Colorist)
+            .Build();
+
+        var chapter2 = new ChapterBuilder("2")
+            .WithPerson(person2, PersonRole.Editor)
+            .WithPerson(person, PersonRole.Editor)
+            .Build();
+
+        var series = new SeriesBuilder("Test 1")
+            .WithLibraryId(library.Id)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(chapter)
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(person, PersonRole.Editor)
+                .WithPerson(person2, PersonRole.Editor)
+                .Build())
+            .Build();
+
+        var series2 = new SeriesBuilder("Test 2")
+            .WithLibraryId(library.Id)
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(chapter2)
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithPerson(person, PersonRole.Editor)
+                .WithPerson(person2, PersonRole.Colorist)
+                .Build())
+            .Build();
+
+        UnitOfWork.SeriesRepository.Add(series);
+        UnitOfWork.SeriesRepository.Add(series2);
+        await UnitOfWork.CommitAsync();
+
+        await ps.MergePeopleAsync(person, person2);
+        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        Assert.Single(allPeople);
+
+        var mergedPerson = await UnitOfWork.PersonRepository.GetPersonById(person.Id, PersonIncludes.All);
+        Assert.NotNull(mergedPerson);
+        Assert.Equal(3, mergedPerson.ChapterPeople.Count);
+        Assert.Equal(3, mergedPerson.SeriesMetadataPeople.Count);
+
+        chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(chapter.Id, ChapterIncludes.People);
+        Assert.NotNull(chapter);
+        Assert.Equal(2, chapter.People.Count);
+        Assert.Single(chapter.People.Select(p => p.Person.Id).Distinct());
+        Assert.Contains(chapter.People, p => p.Role == PersonRole.Editor);
+        Assert.Contains(chapter.People, p => p.Role == PersonRole.Colorist);
+
+        chapter2 = await UnitOfWork.ChapterRepository.GetChapterAsync(chapter2.Id, ChapterIncludes.People);
+        Assert.NotNull(chapter2);
+        Assert.Single(chapter2.People);
+        Assert.Contains(chapter2.People, p => p.Role == PersonRole.Editor);
+        Assert.DoesNotContain(chapter2.People, p => p.Role == PersonRole.Colorist);
+
+        series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata);
+        Assert.NotNull(series);
+        Assert.Single(series.Metadata.People);
+        Assert.Contains(series.Metadata.People, p => p.Role == PersonRole.Editor);
+        Assert.DoesNotContain(series.Metadata.People, p => p.Role == PersonRole.Colorist);
+
+        series2 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(series2.Id, SeriesIncludes.Metadata);
+        Assert.NotNull(series2);
+        Assert.Equal(2, series2.Metadata.People.Count);
+        Assert.Contains(series2.Metadata.People, p => p.Role == PersonRole.Editor);
+        Assert.Contains(series2.Metadata.People, p => p.Role == PersonRole.Colorist);
+
+
+    }
+
+    [Fact]
     public async Task PersonAddAlias_NoOverlap()
     {
         await ResetDb();
