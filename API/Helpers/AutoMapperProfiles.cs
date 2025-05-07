@@ -68,9 +68,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
-        CreateMap<Person, PersonDto>()
-            .ForMember(dst => dst.Aliases, opt =>
-                opt.MapFrom(src => src.Aliases.Select(pa => pa.Alias).ToList()));
+        CreateMap<Person, PersonDto>();
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -55,6 +56,17 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPersonByName(int personId)
     {
         return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, User.GetUserId()));
+    }
+
+    [HttpGet("aliases")]
+    public async Task<ActionResult<IList<string>>> GetAliasesForPerson([FromQuery] int personId)
+    {
+        var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
+        if (person == null) return NotFound();
+
+        if (person.Aliases == null || person.Aliases.Count == 0) return new List<string>();
+
+        return Ok(person.Aliases.Select(a => a.Alias).ToList());
     }
 
     /// <summary>

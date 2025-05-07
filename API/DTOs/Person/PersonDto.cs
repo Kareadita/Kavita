@@ -7,7 +7,6 @@ public class PersonDto
 {
     public int Id { get; set; }
     public required string Name { get; set; }
-    public IList<string> Aliases { get; set; } = [];
 
     public bool CoverImageLocked { get; set; }
     public string? PrimaryColor { get; set; }

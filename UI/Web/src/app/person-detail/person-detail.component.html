@@ -17,8 +17,10 @@
           </h2>
         </ng-container>
         <ng-container subtitle>
-          @if (person.aliases.length > 0) {
-            <span>{{t('aka')}} {{person.aliases.join(", ")}}</span>
+          @if (aliases$ | async; as aliases) {
+            @if (aliases.length > 0) {
+              <span>{{t('aka')}} {{aliases.join(", ")}}</span>
+            }
           }
         </ng-container>
       </app-side-nav-companion-bar>

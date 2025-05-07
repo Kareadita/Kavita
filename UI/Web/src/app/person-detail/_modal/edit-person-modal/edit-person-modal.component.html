@@ -99,9 +99,9 @@
             <li [ngbNavItem]="TabID.Aliases">
               <a ngbNavLink>{{t(TabID.Aliases)}}</a>
               <ng-template ngbNavContent>
-                <app-edit-list [items]="person.aliases"
+                <app-edit-list [items]="aliases"
                                [asyncValidators]="[aliasValidator()]"
-                               (updateItems)="person.aliases = $event"
+                               (updateItems)="aliases = $event"
                                [errorMessage]="t('alias-overlap')"
                                [label]="t('aliases-label')"/>
               </ng-template>

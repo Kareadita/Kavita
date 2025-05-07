@@ -21,7 +21,6 @@ export enum PersonRole {
 export interface Person extends IHasCover {
   id: number;
   name: string;
-  aliases: string[];
   description: string;
   coverImage?: string;
   coverImageLocked: boolean;

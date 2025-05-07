@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
-import {BehaviorSubject, EMPTY, Observable, switchMap, tap} from "rxjs";
+import {BehaviorSubject, EMPTY, Observable, of, switchMap, tap} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
 import {AsyncPipe} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
@@ -99,6 +99,8 @@ export class PersonDetailComponent implements OnInit {
   roles: PersonRole[] | null = null;
   works$: Observable<Series[]> | null = null;
   filter: SeriesFilterV2 | null = null;
+  aliases$: Observable<string[]> | null = null;
+  aliases: string[] = [];
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
   anilistUrl: string = '';
@@ -176,6 +178,12 @@ export class PersonDetailComponent implements OnInit {
     this.works$ = this.personService.getSeriesMostKnownFor(person.id).pipe(
       takeUntilDestroyed(this.destroyRef)
     );
+
+    this.aliases$ = this.personService.getAliases(person.id).pipe(
+      tap(aliases => this.aliases = aliases),
+      takeUntilDestroyed(this.destroyRef)
+    );
+
   }
 
   createFilter(roles: PersonRole[]) {
@@ -233,14 +241,17 @@ export class PersonDetailComponent implements OnInit {
       case(Action.Edit):
         const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
         ref.componentInstance.person = this.person;
+        ref.componentInstance.aliases = this.aliases;
 
         ref.closed.subscribe(r => {
           if (r.success) {
             const nameChanged = this.personName !== r.person.name;
             this.person = {...r.person};
+            this.aliases = r.person.aliases; // UpdatePersonDto does include them
             this.personName = this.person!.name;
 
             this.personSubject.next(this.person);
+            this.aliases$ = of(this.aliases);
 
             // Update the url to reflect the new name change
             if (nameChanged) {
