@@ -1,17 +1,17 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
-  Inject,
-  inject, OnInit,
+  inject,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
 import {BehaviorSubject, EMPTY, Observable, switchMap, tap} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
-import {AsyncPipe, NgStyle} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
 import {ImageService} from "../_services/image.service";
 import {
@@ -21,7 +21,6 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
-import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
@@ -42,6 +41,7 @@ import {DefaultModalOptions} from "../_models/default-modal-options";
 import {ToastrService} from "ngx-toastr";
 import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
+import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
 
 @Component({
     selector: 'app-person-detail',
@@ -117,41 +117,44 @@ export class PersonDetailComponent {
         return this.personService.get(personName);
       }),
       tap((person) => {
-
         if (person == null) {
           this.toastr.error(translate('toasts.unauthorized-1'));
           this.router.navigateByUrl('/home');
           return;
         }
 
-        this.person = person;
-        this.personSubject.next(person); // emit the person data for subscribers
-        this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
-
-        // Fetch roles and process them
-        this.roles$ = this.personService.getRolesForPerson(this.person.id).pipe(
-          tap(roles => {
-            this.roles = roles;
-            this.filter = this.createFilter(roles);
-            this.chaptersByRole = {}; // Reset chaptersByRole for each person
-
-            // Populate chapters by role
-            roles.forEach(role => {
-              this.chaptersByRole[role] = this.personService.getChaptersByRole(person.id, role)
-                .pipe(takeUntilDestroyed(this.destroyRef));
-            });
-            this.cdRef.markForCheck();
-          }),
-          takeUntilDestroyed(this.destroyRef)
-        );
-
-        // Fetch series known for this person
-        this.works$ = this.personService.getSeriesMostKnownFor(person.id).pipe(
-          takeUntilDestroyed(this.destroyRef)
-        );
+        this.setPerson(person);
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+  }
+
+  private setPerson(person: Person) {
+    this.person = person;
+    this.personSubject.next(person); // emit the person data for subscribers
+    this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
+
+    // Fetch roles and process them
+    this.roles$ = this.personService.getRolesForPerson(this.person.id).pipe(
+      tap(roles => {
+        this.roles = roles;
+        this.filter = this.createFilter(roles);
+        this.chaptersByRole = {}; // Reset chaptersByRole for each person
+
+        // Populate chapters by role
+        roles.forEach(role => {
+          this.chaptersByRole[role] = this.personService.getChaptersByRole(person.id, role)
+            .pipe(takeUntilDestroyed(this.destroyRef));
+        });
+        this.cdRef.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+
+    // Fetch series known for this person
+    this.works$ = this.personService.getSeriesMostKnownFor(person.id).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    );
   }
 
   createFilter(roles: PersonRole[]) {
@@ -228,9 +231,27 @@ export class PersonDetailComponent {
           }
         });
         break;
+      case (Action.Merge):
+        this.mergePersonAction();
+        break;
       default:
         break;
     }
+  }
+
+  private mergePersonAction() {
+    const ref = this.modalService.open(MergePersonModalComponent, DefaultModalOptions);
+    ref.componentInstance.person = this.person;
+
+    ref.closed.subscribe(r => {
+      if (r.success) {
+        // Reload the person data, as relations may have changed
+        this.personService.get(r.person.name).subscribe(person => {
+          this.setPerson(person!);
+          this.cdRef.markForCheck();
+        })
+      }
+    });
   }
 
   performAction(action: ActionItem<any>) {

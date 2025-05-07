@@ -14,11 +14,12 @@ public interface IPersonService
     /// </summary>
     /// <param name="dst">Remaining person</param>
     /// <param name="src">Merged person</param>
+    /// <remarks>The entities passed as arguments **must** include all relations</remarks>
     /// <returns></returns>
     Task MergePeopleAsync(Person dst, Person src);
 
     /// <summary>
-    /// Adds the alias to the person, requires that the alias is not shared with anyone else
+    /// Adds the alias to the person, requires that the aliases are not shared with anyone else
     /// </summary>
     /// <remarks>This method does NOT commit changes</remarks>
     /// <param name="person"></param>
@@ -32,6 +33,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
 
     public async Task MergePeopleAsync(Person dst, Person src)
     {
+        if (dst.Id == src.Id) return;
 
         if (string.IsNullOrWhiteSpace(dst.Description) && !string.IsNullOrWhiteSpace(src.Description))
         {
@@ -68,7 +70,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
             dst.ChapterPeople.Add(new ChapterPeople
             {
                 Role = chapter.Role,
-                Chapter = chapter.Chapter,
+                ChapterId = chapter.ChapterId,
                 Person = dst,
                 KavitaPlusConnection = chapter.KavitaPlusConnection,
                 OrderWeight = chapter.OrderWeight,
@@ -79,6 +81,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         {
             dst.SeriesMetadataPeople.Add(new SeriesMetadataPeople
             {
+                SeriesMetadataId = series.SeriesMetadataId,
                 Role = series.Role,
                 Person = dst,
                 KavitaPlusConnection = series.KavitaPlusConnection,
@@ -91,6 +94,11 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
             Alias = src.Name,
             NormalizedAlias = src.NormalizedName,
         });
+
+        foreach (var alias in src.Aliases)
+        {
+            dst.Aliases.Add(alias);
+        }
 
         unitOfWork.PersonRepository.Remove(src);
         unitOfWork.PersonRepository.Update(dst);

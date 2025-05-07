@@ -72,6 +72,10 @@ export class TypeaheadComponent implements OnInit {
    * When triggered, will focus the input if the passed string matches the id
    */
   @Input() focus: EventEmitter<string> | undefined;
+  /**
+   * When triggered, will unfocus the input if the passed string matches the id
+   */
+  @Input() unFocus: EventEmitter<string> | undefined;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
@@ -110,6 +114,13 @@ export class TypeaheadComponent implements OnInit {
       this.focus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
         if (this.settings.id !== id) return;
         this.onInputFocus();
+      });
+    }
+
+    if (this.unFocus) {
+      this.unFocus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
+        if (this.settings.id !== id) return;
+        this.hasFocus = false;
       });
     }
 

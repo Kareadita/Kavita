@@ -116,7 +116,11 @@ export enum Action {
   /**
    * Match an entity with an upstream system
    */
-  Match = 28
+  Match = 28,
+  /**
+   * Merge two (or more?) entities
+   */
+  Merge = 29,
 }
 
 /**
@@ -816,6 +820,14 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-person-tooltip',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
+      },
+      {
+        action: Action.Merge,
+        title: 'merge',
+        description: 'merge-person-tooltip',
         callback: this.dummyCallback,
         requiresAdmin: true,
         children: [],

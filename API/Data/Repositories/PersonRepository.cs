@@ -20,6 +20,10 @@ public enum PersonIncludes
 {
     None = 1 << 0,
     Aliases = 1 << 1,
+    ChapterPeople = 1 << 2,
+    SeriesPeople = 1 << 3,
+
+    All = Aliases | ChapterPeople | SeriesPeople,
 }
 
 public interface IPersonRepository

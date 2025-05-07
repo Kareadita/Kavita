@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Entities.Enums;
 using API.Extensions;
@@ -186,16 +187,16 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
-    public async Task<ActionResult> MergePersons(PersonMergeDto dto)
+    public async Task<ActionResult<PersonDto>> MergePersons(PersonMergeDto dto)
     {
-        var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId);
+        var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);
         if (dst == null) return BadRequest();
 
-        var src = await _unitOfWork.PersonRepository.GetPersonById(dto.SrcId);
+        var src = await _unitOfWork.PersonRepository.GetPersonById(dto.SrcId, PersonIncludes.All);
         if (src == null) return BadRequest();
 
         await _personService.MergePeopleAsync(dst, src);
-        return Ok();
+        return Ok(_mapper.Map<PersonDto>(dst));
     }
 
     [HttpGet("alias/{personId}/{alias}")]

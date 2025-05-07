@@ -2271,6 +2271,15 @@
         "alias-overlap": "This alias already points towards another person, consider merging them."
     },
 
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Merge Person",
+        "merge-warning": "If you proceed, the selected person will be removed. If the target person has no existing names, the selected person's name will be added as their first name. Otherwise, the selected person's name will be added as an additional alias.",
+        "alias-title": "New aliases"
+    },
+
     "day-breakdown": {
         "title": "Day Breakdown",
         "no-data": "No progress, get to reading",
@@ -2786,7 +2795,8 @@
         "match-tooltip": "Match Series with Kavita+ manually",
         "reorder": "Reorder",
         "rename": "Rename",
-        "rename-tooltip": "Rename the Smart Filter"
+        "rename-tooltip": "Rename the Smart Filter",
+        "merge": "Merge"
     },
 
     "preferences": {

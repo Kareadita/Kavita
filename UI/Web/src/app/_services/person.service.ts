@@ -61,4 +61,8 @@ export class PersonService {
     return this.httpClient.get<boolean>(this.baseUrl + `person/alias/${personId}/${alias}`);
   }
 
+  mergePerson(destId: number, srcId: number) {
+    return this.httpClient.post<Person>(this.baseUrl + 'person/merge', {destId, srcId});
+  }
+
 }

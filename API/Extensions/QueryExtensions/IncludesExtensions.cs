@@ -331,6 +331,16 @@ public static class IncludesExtensions
             queryable = queryable.Include(p => p.Aliases);
         }
 
+        if (includeFlags.HasFlag(PersonIncludes.ChapterPeople))
+        {
+            queryable = queryable.Include(p => p.ChapterPeople);
+        }
+
+        if (includeFlags.HasFlag(PersonIncludes.SeriesPeople))
+        {
+            queryable = queryable.Include(p => p.SeriesMetadataPeople);
+        }
+
         return queryable;
     }
 }

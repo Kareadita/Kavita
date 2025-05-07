@@ -32,6 +32,11 @@ public class PersonServiceTests: AbstractDbTest
             Name= "Delores Casey",
             NormalizedName = "Delores Casey".ToNormalized(),
             Description = "Hi, I'm Delores Casey!",
+            Aliases = [new PersonAlias
+            {
+                Alias = "Casey, Delores",
+                NormalizedAlias = "Casey, Delores".ToNormalized(),
+            }],
             AniListId = 27,
         };
 
@@ -51,6 +56,7 @@ public class PersonServiceTests: AbstractDbTest
         Assert.NotNull(person.HardcoverId);
         Assert.NotEmpty(person.HardcoverId);
         Assert.Contains(person.Aliases, pa => pa.Alias == "Delores Casey");
+        Assert.Contains(person.Aliases, pa => pa.Alias == "Casey, Delores");
     }
 
     [Fact]
@@ -178,7 +184,7 @@ public class PersonServiceTests: AbstractDbTest
 
         // Some overlap
         success = await ps.UpdatePersonAliasesAsync(person1, ["Jolly Cowan", "Jilly Joy Cowan"]);
-        Assert.True(success);
+        Assert.False(success);
 
         Assert.Single(person2.Aliases);
     }
