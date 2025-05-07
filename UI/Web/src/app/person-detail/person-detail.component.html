@@ -16,6 +16,11 @@
             }
           </h2>
         </ng-container>
+        <ng-container subtitle>
+          @if (person.aliases.length > 0) {
+            <span>{{t('aka')}} {{person.aliases.join(", ")}}</span>
+          }
+        </ng-container>
       </app-side-nav-companion-bar>
     </div>
 
@@ -43,10 +48,6 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            @if (person.aliases.length > 0) {
-              <!-- I can't UI, help! -->
-              <span>{{t('aka')}} {{person.aliases.join(", ")}}</span>
-            }
             <app-read-more [text]="person.description || t('no-info')"></app-read-more>
 
             @if (roles$ | async; as roles) {

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using API.Data.Repositories;
 using API.Entities;
-using API.Entities.Metadata;
 using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 

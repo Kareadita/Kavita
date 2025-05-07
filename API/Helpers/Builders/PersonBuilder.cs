@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using API.Entities;
-using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Entities.Person;
 using API.Extensions;
 
@@ -37,7 +34,7 @@ public class PersonBuilder : IEntityBuilder<Person>
 
     public PersonBuilder WithAlias(string alias)
     {
-        if (_person.Aliases.Any(a => a.NormalizedAlias.Equals(alias)))
+        if (_person.Aliases.Any(a => a.NormalizedAlias.Equals(alias.ToNormalized())))
         {
             return this;
         }

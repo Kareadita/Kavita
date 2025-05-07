@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -187,7 +186,7 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
-    public async Task<ActionResult<PersonDto>> MergePersons(PersonMergeDto dto)
+    public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
     {
         var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);
         if (dst == null) return BadRequest();
