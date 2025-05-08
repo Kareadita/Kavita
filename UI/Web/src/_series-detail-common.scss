@@ -5,9 +5,6 @@
   margin-top: 0.9375rem;
   
   .info-container {
-    .image-container-background.series {
-      display: none;
-    }
     .info-grid-container {
       display: grid;
       grid-template-columns: 20% 80%;
@@ -64,11 +61,64 @@
   }
 }
 
+.btn-group > .btn.dropdown-toggle-split:not(first-child){
+  border-top-right-radius: var(--bs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-border-radius) !important;
+  border-width: 0.0625rem 0.0625rem 0.0625rem 0 !important;
+}
+
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+  border-width: 0.0625rem 0 0.0625rem 0.0625rem !important;
+}
+
+.carousel-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+:host ::ng-deep .info-container {
+  .info-grid-container {
+    .image-container {
+      app-image {
+        img {
+          max-height: 100dvh !important;
+          object-fit: cover !important;
+        }
+      }
+      .progress-banner {
+        display: block;
+      }
+      .under-image {
+        display: block;
+      }
+      .overlay-information {
+        left: 0;
+        width: 100%;
+      }
+    }
+  }
+}
+
 @media (max-width: theme.$grid-breakpoints-lg) {
   .main-container {
     .info-container {
       .info-grid-container {
         grid-template-columns: 30% 70%;
+        overflow: hidden;
+        padding-bottom: 1.5rem;
+      }
+    }
+    .carousel-tabs-container {
+      mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .main-container {
+    .info-container {
+      .info-grid-container {
+        grid-template-columns: 35% 65%;
       }
     }
   }
@@ -80,6 +130,7 @@
       .info-grid-container {
         grid-template-columns: 35% 65%;
         grid-template-rows: auto auto;
+        padding-bottom: unset;
 
         .image-container {
           display: block !important;
@@ -105,9 +156,7 @@
         .metadata-details-lower {
           grid-column: 1 / 3;
           grid-row: 2;
-          .continue-container {
-            margin-top: 1rem;
-          }
+          margin-top: 2rem;
         }
       }
     }
@@ -125,7 +174,22 @@
   .main-container {
     .info-container {
       .info-grid-container {
+        .image-container.mobile-background {
+          width: 100vw;
+          top: calc(var(--nav-offset) - 1.25rem);
+          left: 0;
+          pointer-events: none;
+          position: fixed !important;
+          display: block !important;
+          max-height: unset !important;
+          max-width: unset !important;
+          height: 100dvh !important;
+        }
+        .metadata-details-upper {
+          grid-column: 1 / 3;
+        }
         .metadata-details-lower {
+          margin-top: 0rem;
           .continue-container {
             flex-direction: column;
             .actions-row {
@@ -136,108 +200,48 @@
       }
     }
   }
-}
-
-::ng-deep .badge-expander .content a {
-  font-size: 0.8rem;
-}
-
-.btn-group > .btn.dropdown-toggle-split:not(first-child){
-  border-top-right-radius: var(--bs-border-radius) !important;
-  border-bottom-right-radius: var(--bs-border-radius) !important;
-  border-width: 0.0625rem 0.0625rem 0.0625rem 0 !important;
-}
-
-.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
-  border-width: 0.0625rem 0 0.0625rem 0.0625rem !important;
-}
-
-.card-body > div:nth-child(2) {
-  height: 3.125rem;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-}
-
-.carousel-tabs-container::-webkit-scrollbar {
-  display: none;
-}
-
-::ng-deep .carousel-container .header i.fa-plus, ::ng-deep .carousel-container .header i.fa-pen{
-  border-width: 0.0625rem;
-  border-style: solid;
-  border-radius: 0.3125rem;
-  border-color: var(--primary-color);
-  padding: 0.3125rem;
-  vertical-align: middle;
-
-  &:hover {
-    background-color: var(--primary-color-dark-shade);
+  :host ::ng-deep {
+    .main-container {
+      .info-container {
+        .info-grid-container {
+          .image-container.mobile-background {
+            app-image {
+              img {
+                max-height: unset !important;
+                opacity: 0.05 !important;
+                filter: blur(0.3125rem) !important;
+                max-width: 100dvw;
+                height: 100dvh !important;
+                overflow: hidden;
+                position: absolute;
+                top: 0;
+                left: 0;
+                object-fit: cover;
+              }
+            }
+          }
+        }
+      }
+    }
   }
-}
-
-::ng-deep .image-container-background.mobile-bg app-image img {
-  max-height: 25rem;
-  object-fit: contain;
-}
-
-@media (max-width: theme.$grid-breakpoints-lg) {
-  .carousel-tabs-container {
-    mask-image: linear-gradient(transparent, black 0%, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
-  }
-}
-
-::ng-deep .image-container-background.mobile-bg app-image img {
-  max-height: 100dvh !important;
-  object-fit: cover !important;
-}
-
-/* col-lg */
-@media (max-width: theme.$grid-breakpoints-lg) {
-  .image-container-background.mobile-bg{
-    width: 100vw;
-    top: calc(var(--nav-offset) - 1.25rem);
-    left: 0;
-    pointer-events: none;
-    position: fixed !important;
-    display: block !important;
-    max-height: unset !important;
-    max-width: unset !important;
-    height: 100dvh !important;
-  }
-
-  ::ng-deep .image-container-background.mobile-bg app-image img {
-    max-height: unset !important;
-    opacity: 0.05 !important;
-    filter: blur(0.3125rem) !important;
-    max-width: 100dvw;
-    height: 100dvh !important;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    object-fit: cover;
-  }
-
   .progress-banner {
     display:none;
+    background: red;
   }
 
   .under-image {
     display: none;
   }
-
-}
-.upper-details {
-  font-size: 0.9rem;
-}
-
-@media (max-width: theme.$grid-breakpoints-lg) {
-  .carousel-tabs-container {
-    mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 0%, black 90%, transparent 100%);
+  :host ::ng-deep .info-container {
+    .info-grid-container {
+      .image-container {
+        .progress-banner {
+          display: none;
+        }
+        .under-image {
+          display: none;
+        }
+      }
+    }
   }
 }
