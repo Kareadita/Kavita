@@ -66,54 +66,58 @@
   display: none;
 }
 
-:host ::ng-deep .info-container {
-  .info-grid-container {
-    .image-container {
-      app-image {
-        img {
-          max-height: 100dvh !important;
-          object-fit: cover !important;
-        }
-      }
-      .progress-banner {
-        display: block;
-      }
-      .under-image {
-        display: block;
-      }
-      .overlay-information {
-        left: 0;
-        width: 100%;
-      }
-    }
-    .metadata-details-lower {
-      .continue-container {
-        .btn-group {
-          >.btn {
-            border: unset;
-            background-color: var(--primary-color-dark-shade);
-            &:hover {
-              border: unset;
-              background-color: var(--primary-color-darker-shade);
-            }
-            span {
-              i {
-                padding-right: 0.2rem;
-              }
+:host ::ng-deep {
+  .main-container {
+    .info-container {
+      .info-grid-container {
+        .image-container {
+          app-image {
+            img {
+              max-height: 100dvh !important;
+              object-fit: cover !important;
             }
           }
-          .dropdown {
-            .dropdown-toggle-split {
-              border-top-right-radius: var(--bs-border-radius);
-              border-bottom-right-radius: var(--bs-border-radius);
-              background-color: var(--primary-color-dark-shade);
-              border: unset;
-              box-shadow: inset 1px 0 1px 0 rgba(0,0,0,0.1);
-              &:hover {
-                background-color: var(--primary-color-darker-shade);
+          .progress-banner {
+            display: block;
+          }
+          .under-image {
+            display: block;
+          }
+          .overlay-information {
+            left: 0;
+            width: 100%;
+          }
+        }
+        .metadata-details-lower {
+          .continue-container {
+            .btn-group {
+              >.btn {
+                border: unset;
+                background-color: var(--primary-color-dark-shade);
+                &:hover {
+                  border: unset;
+                  background-color: var(--primary-color-darker-shade);
+                }
+                span {
+                  i {
+                    padding-right: 0.2rem;
+                  }
+                }
               }
-              &::after {
-                vertical-align: 0.11rem;
+              .dropdown {
+                .dropdown-toggle-split {
+                  border-top-right-radius: var(--bs-border-radius);
+                  border-bottom-right-radius: var(--bs-border-radius);
+                  background-color: var(--primary-color-dark-shade);
+                  border: unset;
+                  box-shadow: inset 1px 0 1px 0 rgba(0,0,0,0.1);
+                  &:hover {
+                    background-color: var(--primary-color-darker-shade);
+                  }
+                  &::after {
+                    vertical-align: 0.11rem;
+                  }
+                }
               }
             }
           }
