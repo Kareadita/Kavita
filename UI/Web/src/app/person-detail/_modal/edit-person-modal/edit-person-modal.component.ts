@@ -68,7 +68,6 @@ export class EditPersonModalComponent implements OnInit {
   protected readonly TabID = TabID;
 
   @Input({required: true}) person!: Person;
-  @Input({required: true}) aliases!: string[];
 
   active = TabID.General;
   editForm: FormGroup = new FormGroup({
@@ -118,8 +117,7 @@ export class EditPersonModalComponent implements OnInit {
       apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
     }
 
-    // UpdatePersonDto allows for aliases
-    const person: Person & { aliases: string[] } = {
+    const person: Person = {
       id: this.person.id,
       coverImageLocked: this.person.coverImageLocked,
       name: this.editForm.get('name')!.value || '',
@@ -130,7 +128,7 @@ export class EditPersonModalComponent implements OnInit {
       // @ts-ignore
       malId: this.editForm.get('malId')!.value === '' ? null : parseInt(this.editForm.get('malId').value, 10),
       hardcoverId: this.editForm.get('hardcoverId')!.value || '',
-      aliases: this.aliases,
+      aliases: this.person.aliases,
     };
     apis.push(this.personService.updatePerson(person));
 

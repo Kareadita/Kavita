@@ -59,16 +59,6 @@ public class PersonController : BaseApiController
         return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, User.GetUserId()));
     }
 
-    [HttpGet("aliases")]
-    public async Task<ActionResult<IList<string>>> GetAliasesForPerson([FromQuery] int personId)
-    {
-        var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
-        if (person == null) return NotFound();
-
-        if (person.Aliases == null || person.Aliases.Count == 0) return new List<string>();
-
-        return Ok(person.Aliases.Select(a => a.Alias).ToList());
-    }
 
     /// <summary>
     /// Returns a list of authors and artists for browsing
@@ -207,7 +197,7 @@ public class PersonController : BaseApiController
         var src = await _unitOfWork.PersonRepository.GetPersonById(dto.SrcId, PersonIncludes.All);
         if (src == null) return BadRequest();
 
-        await _personService.MergePeopleAsync(dst, src);
+        await _personService.MergePeopleAsync(src, dst);
         await _eventHub.SendMessageAsync(MessageFactory.PersonMerged, MessageFactory.PersonMergedMessage(dst, src));
 
         return Ok(_mapper.Map<PersonDto>(dst));

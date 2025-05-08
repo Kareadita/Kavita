@@ -40,7 +40,7 @@ public class PersonServiceTests: AbstractDbTest
         UnitOfWork.PersonRepository.Attach(person2);
         await UnitOfWork.CommitAsync();
 
-        await ps.MergePeopleAsync(person1, person2);
+        await ps.MergePeopleAsync(person2, person1);
 
         var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
@@ -76,7 +76,7 @@ public class PersonServiceTests: AbstractDbTest
         UnitOfWork.PersonRepository.Attach(person2);
         await UnitOfWork.CommitAsync();
 
-        await ps.MergePeopleAsync(person1, person2);
+        await ps.MergePeopleAsync(person2, person1);
         var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
     }
@@ -124,7 +124,7 @@ public class PersonServiceTests: AbstractDbTest
         UnitOfWork.SeriesRepository.Add(series2);
         await UnitOfWork.CommitAsync();
 
-        await ps.MergePeopleAsync(person, person2);
+        await ps.MergePeopleAsync(person2, person);
 
         var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
@@ -201,7 +201,7 @@ public class PersonServiceTests: AbstractDbTest
         UnitOfWork.SeriesRepository.Add(series2);
         await UnitOfWork.CommitAsync();
 
-        await ps.MergePeopleAsync(person, person2);
+        await ps.MergePeopleAsync(person2, person);
         var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
 

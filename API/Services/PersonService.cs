@@ -13,11 +13,11 @@ public interface IPersonService
     /// <summary>
     /// Adds src as an alias to dst, this is a destructive operation
     /// </summary>
-    /// <param name="dst">Remaining person</param>
     /// <param name="src">Merged person</param>
+    /// <param name="dst">Remaining person</param>
     /// <remarks>The entities passed as arguments **must** include all relations</remarks>
     /// <returns></returns>
-    Task MergePeopleAsync(Person dst, Person src);
+    Task MergePeopleAsync(Person src, Person dst);
 
     /// <summary>
     /// Adds the alias to the person, requires that the aliases are not shared with anyone else
@@ -32,7 +32,7 @@ public interface IPersonService
 public class PersonService(IUnitOfWork unitOfWork): IPersonService
 {
 
-    public async Task MergePeopleAsync(Person dst, Person src)
+    public async Task MergePeopleAsync(Person src, Person dst)
     {
         if (dst.Id == src.Id) return;
 

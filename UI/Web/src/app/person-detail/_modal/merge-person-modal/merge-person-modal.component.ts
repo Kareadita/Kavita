@@ -38,7 +38,6 @@ export class MergePersonModalComponent implements OnInit {
   @Input({required: true}) person!: Person;
 
   mergee: Person | null = null;
-  aliases: string[] = [];
 
   save() {
     if (!this.mergee) {
@@ -81,9 +80,6 @@ export class MergePersonModalComponent implements OnInit {
 
     this.typeAheadUnfocus.emit(this.typeAheadSettings.id);
     this.mergee = people[0];
-    this.personService.getAliases(this.mergee.id).subscribe(aliases => {
-      this.aliases = aliases;
-    });
   }
 
   protected readonly FilterField = FilterField;
@@ -91,6 +87,6 @@ export class MergePersonModalComponent implements OnInit {
   allNewAliases() {
     if (!this.mergee) return [];
 
-    return [this.mergee.name, ...this.aliases]
+    return [this.mergee.name, ...this.mergee.aliases]
   }
 }
