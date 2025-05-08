@@ -10,6 +10,7 @@ using API.DTOs.Collection;
 using API.DTOs.KavitaPlus.ExternalMetadata;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata.Matching;
+using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -20,6 +21,7 @@ using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -657,11 +659,7 @@ public class ExternalMetadataService : IExternalMetadataService
             if (existingPeopleDictionary.TryGetValue(mapping.AlternativeName.ToNormalized(), out var person))
             {
                 modified = true;
-                person.Aliases.Add(new PersonAlias
-                {
-                    Alias = mapping.PreferredName,
-                    NormalizedAlias = mapping.PreferredName.ToNormalized(),
-                });
+                person.Aliases.Add(new PersonAliasBuilder(mapping.PreferredName).Build());
             }
         }
 

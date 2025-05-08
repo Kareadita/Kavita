@@ -50,27 +50,26 @@ public static class SearchQueryableExtensions
         // Get people from SeriesMetadata
         var peopleFromSeriesMetadata = queryable
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People)
-            .Include(sp => sp.Person.Aliases)
-            .Where(p => (p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
-            || p.Person.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
-            .Select(p => p.Person);
+            .SelectMany(sm => sm.People.Select(sp => sp.Person))
+            .Where(p =>
+                EF.Functions.Like(p.Name, $"%{searchQuery}%") ||
+                p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%"))
+            );
 
-        // Get people from ChapterPeople by navigating through Volume -> Series
         var peopleFromChapterPeople = queryable
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Series.Volumes)
             .SelectMany(v => v.Chapters)
-            .SelectMany(ch => ch.People)
-            .Include(cp => cp.Person.Aliases)
-            .Where(p => (p.Person.Name != null && EF.Functions.Like(p.Person.Name, $"%{searchQuery}%"))
-                        || p.Person.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
-            .Select(cp => cp.Person);
+            .SelectMany(ch => ch.People.Select(cp => cp.Person))
+            .Where(p =>
+                EF.Functions.Like(p.Name, $"%{searchQuery}%") ||
+                p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%"))
+            );
 
         // Combine both queries and ensure distinct results
         return peopleFromSeriesMetadata
             .Union(peopleFromChapterPeople)
-            .Distinct()
+            .Select(p => p)
             .OrderBy(p => p.NormalizedName);
     }
 

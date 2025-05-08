@@ -32,11 +32,7 @@ public class PersonServiceTests: AbstractDbTest
             Name= "Delores Casey",
             NormalizedName = "Delores Casey".ToNormalized(),
             Description = "Hi, I'm Delores Casey!",
-            Aliases = [new PersonAlias
-            {
-                Alias = "Casey, Delores",
-                NormalizedAlias = "Casey, Delores".ToNormalized(),
-            }],
+            Aliases = [new PersonAliasBuilder("Casey, Delores").Build()],
             AniListId = 27,
         };
 

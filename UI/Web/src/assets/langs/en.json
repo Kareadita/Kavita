@@ -1103,7 +1103,7 @@
     },
 
     "person-detail": {
-        "aka": "Also known as ",
+        "aka-title": "Also known as ",
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
@@ -1859,7 +1859,8 @@
         "logout": "Logout",
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-label": "{{person-detail.aka-title}}:"
     },
 
     "promoted-icon": {

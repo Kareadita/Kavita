@@ -22,6 +22,7 @@ export interface Person extends IHasCover {
   id: number;
   name: string;
   description: string;
+  aliases: Array<string>;
   coverImage?: string;
   coverImageLocked: boolean;
   malId?: number;

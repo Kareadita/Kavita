@@ -18,7 +18,7 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Alias = table.Column<string>(type: "TEXT", nullable: true),
                     NormalizedAlias = table.Column<string>(type: "TEXT", nullable: true),
-                    PersonId = table.Column<int>(type: "INTEGER", nullable: true)
+                    PersonId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -27,7 +27,8 @@ namespace API.Data.Migrations
                         name: "FK_PersonAlias_Person_PersonId",
                         column: x => x.PersonId,
                         principalTable: "Person",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

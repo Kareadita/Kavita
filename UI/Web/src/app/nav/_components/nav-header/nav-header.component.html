@@ -119,6 +119,18 @@
                   </div>
                   <div class="ms-1">
                     <div>{{item.name}}</div>
+                    @if (item.aliases.length > 0) {
+
+                      <span class="small-text">
+                        {{t('person-aka-label')}}
+                        @for(alias of item.aliases; track alias; let last = $last) {
+                          <span>{{alias}}</span>
+                          @if (!last) {
+                            <span>, </span>
+                          }
+                        }
+                      </span>
+                    }
                   </div>
                 </div>
               </ng-template>
@@ -206,7 +218,7 @@
               </div>
             }
           }
-        
+
 
       </div>
     </nav>

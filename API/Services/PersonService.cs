@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Person;
 using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Services;
 
@@ -68,11 +69,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         MergeChapterPeople(dst, src);
         MergeSeriesMetadataPeople(dst, src);
 
-        dst.Aliases.Add(new PersonAlias
-        {
-            Alias = src.Name,
-            NormalizedAlias = src.NormalizedName,
-        });
+        dst.Aliases.Add(new PersonAliasBuilder(src.Name).Build());
 
         foreach (var alias in src.Aliases)
         {
@@ -84,12 +81,14 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         await unitOfWork.CommitAsync();
     }
 
-    private void MergeChapterPeople(Person dst, Person src)
+    private static void MergeChapterPeople(Person dst, Person src)
     {
+
         foreach (var chapter in src.ChapterPeople)
         {
             var alreadyPresent = dst.ChapterPeople
                 .Any(x => x.ChapterId == chapter.ChapterId && x.Role == chapter.Role);
+
             if (alreadyPresent) continue;
 
             dst.ChapterPeople.Add(new ChapterPeople
@@ -103,12 +102,13 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         }
     }
 
-    private void MergeSeriesMetadataPeople(Person dst, Person src)
+    private static void MergeSeriesMetadataPeople(Person dst, Person src)
     {
         foreach (var series in src.SeriesMetadataPeople)
         {
             var alreadyPresent = dst.SeriesMetadataPeople
                 .Any(x => x.SeriesMetadataId == series.SeriesMetadataId && x.Role == series.Role);
+
             if (alreadyPresent) continue;
 
             dst.SeriesMetadataPeople.Add(new SeriesMetadataPeople
@@ -125,9 +125,8 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
     public async Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases)
     {
         var normalizedAliases = aliases
-            .Select(a => a.ToNormalized().Trim())
-            .Where(a => !string.IsNullOrWhiteSpace(a))
-            .Where(a => a != person.NormalizedName)
+            .Select(a => a.ToNormalized())
+            .Where(a => !string.IsNullOrEmpty(a) && a != person.NormalizedName)
             .ToList();
 
         if (normalizedAliases.Count == 0)
@@ -141,11 +140,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
 
         if (others.Count != 0) return false;
 
-        person.Aliases = aliases.Select(a => new PersonAlias
-        {
-            Alias = a.Trim(),
-            NormalizedAlias = a.Trim().ToNormalized()
-        }).ToList();
+        person.Aliases = aliases.Select(a => new PersonAliasBuilder(a).Build()).ToList();
 
         return true;
     }

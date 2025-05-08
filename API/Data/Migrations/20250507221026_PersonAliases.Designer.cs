@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250504212806_PersonAliases")]
+    [Migration("20250507221026_PersonAliases")]
     partial class PersonAliases
     {
         /// <inheritdoc />
@@ -1851,7 +1851,7 @@ namespace API.Data.Migrations
                     b.Property<string>("NormalizedAlias")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("PersonId")
+                    b.Property<int>("PersonId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -3109,9 +3109,13 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Person.PersonAlias", b =>
                 {
-                    b.HasOne("API.Entities.Person.Person", null)
+                    b.HasOne("API.Entities.Person.Person", "Person")
                         .WithMany("Aliases")
-                        .HasForeignKey("PersonId");
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("API.Entities.Person.SeriesMetadataPeople", b =>

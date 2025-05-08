@@ -39,11 +39,8 @@ public class PersonBuilder : IEntityBuilder<Person>
             return this;
         }
 
-        _person.Aliases.Add(new PersonAlias()
-        {
-            Alias = alias,
-            NormalizedAlias = alias.ToNormalized(),
-        });
+        _person.Aliases.Add(new PersonAliasBuilder(alias).Build());
+
         return this;
     }
 

@@ -46,8 +46,8 @@ public class Person : IHasCoverImage
     //public long MetronId { get; set; } = 0;
 
     // Relationships
-    public ICollection<ChapterPeople> ChapterPeople { get; set; } = new List<ChapterPeople>();
-    public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = new List<SeriesMetadataPeople>();
+    public ICollection<ChapterPeople> ChapterPeople { get; set; } = [];
+    public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = [];
 
 
     public void ResetColorScape()

@@ -25,7 +25,7 @@ import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carou
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
-import {allPeople, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
+import {allPeople, FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
@@ -44,6 +44,7 @@ import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -53,24 +54,25 @@ interface PersonMergeEvent {
 
 
 @Component({
-    selector: 'app-person-detail',
-    imports: [
-        AsyncPipe,
-        ImageComponent,
-        SideNavCompanionBarComponent,
-        ReadMoreComponent,
-        TagBadgeComponent,
-        PersonRolePipe,
-        CarouselReelComponent,
-        CardItemComponent,
-        CardActionablesComponent,
-        TranslocoDirective,
-        ChapterCardComponent,
-        SafeUrlPipe
-    ],
-    templateUrl: './person-detail.component.html',
-    styleUrl: './person-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-person-detail',
+  imports: [
+    AsyncPipe,
+    ImageComponent,
+    SideNavCompanionBarComponent,
+    ReadMoreComponent,
+    TagBadgeComponent,
+    PersonRolePipe,
+    CarouselReelComponent,
+    CardItemComponent,
+    CardActionablesComponent,
+    TranslocoDirective,
+    ChapterCardComponent,
+    SafeUrlPipe,
+    BadgeExpanderComponent
+  ],
+  templateUrl: './person-detail.component.html',
+  styleUrl: './person-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -104,6 +106,7 @@ export class PersonDetailComponent implements OnInit {
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
   anilistUrl: string = '';
+
   private readonly personSubject = new BehaviorSubject<Person | null>(null);
   protected readonly person$ = this.personSubject.asObservable().pipe(tap(p => {
     if (p?.aniListId) {
@@ -291,4 +294,6 @@ export class PersonDetailComponent implements OnInit {
       action.callback(action, this.person);
     }
   }
+
+  protected readonly FilterField = FilterField;
 }

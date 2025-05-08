@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.DTOs.Person;
 using API.Entities.Enums;
 
 namespace API.DTOs.Metadata;
