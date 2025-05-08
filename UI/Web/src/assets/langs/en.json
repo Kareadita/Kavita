@@ -1860,7 +1860,7 @@
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
         "close": "{{common.close}}",
-        "person-aka-label": "{{person-detail.aka-title}}:"
+        "person-aka-status": "Matches an alias"
     },
 
     "promoted-icon": {

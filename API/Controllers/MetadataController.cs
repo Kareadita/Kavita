@@ -74,6 +74,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         {
             return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId(), ids));
         }
+
         return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId()));
     }
 
