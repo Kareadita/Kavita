@@ -30,8 +30,8 @@ export class PersonService {
     return this.httpClient.get<Person | null>(this.baseUrl + `person?name=${name}`);
   }
 
-  getAliases(personId: number) {
-    return this.httpClient.get<Array<string>>(this.baseUrl + `person/aliases?personId=${personId}`);
+  searchPerson(name: string) {
+    return this.httpClient.get<Array<Person>>(this.baseUrl + `person/search-people?name=${name}`);
   }
 
   getRolesForPerson(personId: number) {

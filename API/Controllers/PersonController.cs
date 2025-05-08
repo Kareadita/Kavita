@@ -48,6 +48,13 @@ public class PersonController : BaseApiController
         return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
     }
 
+    [HttpGet("search-people")]
+    public async Task<ActionResult<List<PersonDto>>> SearchPeople([FromQuery] string name)
+    {
+        var people = await _unitOfWork.PersonRepository.SearchPeople(name);
+        return Ok(people.Select(person => _mapper.Map<PersonDto>(person)).ToList());
+    }
+
     /// <summary>
     /// Returns all roles for a Person
     /// </summary>

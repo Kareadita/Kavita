@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, OnInit} from '@angular/core';
+import {Component, DestroyRef, EventEmitter, inject, Input, OnInit} from '@angular/core';
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -8,10 +8,13 @@ import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.compo
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {map} from "rxjs/operators";
 import {UtilityService} from "../../../shared/_services/utility.service";
-import {MetadataService} from "../../../_services/metadata.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {Observable, of} from "rxjs";
+import {Series} from "../../../_models/series";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-merge-person-modal',
@@ -19,7 +22,8 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
     TranslocoDirective,
     TypeaheadComponent,
     SettingItemComponent,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    AsyncPipe
   ],
   templateUrl: './merge-person-modal.component.html',
   styleUrl: './merge-person-modal.component.scss'
@@ -28,7 +32,7 @@ export class MergePersonModalComponent implements OnInit {
 
   private readonly personService = inject(PersonService);
   public readonly utilityService = inject(UtilityService);
-  private readonly metadataService = inject(MetadataService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly modal = inject(NgbActiveModal);
   protected readonly toastr = inject(ToastrService);
 
@@ -38,6 +42,7 @@ export class MergePersonModalComponent implements OnInit {
   @Input({required: true}) person!: Person;
 
   mergee: Person | null = null;
+  knownFor$: Observable<Series[]> | null = null;
 
   save() {
     if (!this.mergee) {
@@ -67,7 +72,8 @@ export class MergePersonModalComponent implements OnInit {
       return a.name == b.name;
     }
     this.typeAheadSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllPeople().pipe(map(people => {
+      if (filter.length == 0) return of([]);
+      return this.personService.searchPerson(filter).pipe(map(people => {
         return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person.id);
       }));
     };
@@ -80,6 +86,8 @@ export class MergePersonModalComponent implements OnInit {
 
     this.typeAheadUnfocus.emit(this.typeAheadSettings.id);
     this.mergee = people[0];
+    this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee.id)
+        .pipe(takeUntilDestroyed(this.destroyRef));
   }
 
   protected readonly FilterField = FilterField;

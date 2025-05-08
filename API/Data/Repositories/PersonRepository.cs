@@ -67,6 +67,8 @@ public interface IPersonRepository
     /// <returns></returns>
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases);
     Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases);
+
+    Task<IList<Person>> SearchPeople(string query, PersonIncludes includes = PersonIncludes.Aliases);
 }
 
 public class PersonRepository : IPersonRepository
@@ -301,6 +303,15 @@ public class PersonRepository : IPersonRepository
             .Where(p => p.AniListId == aniListId)
             .Includes(includes)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<IList<Person>> SearchPeople(string query, PersonIncludes includes = PersonIncludes.Aliases)
+    {
+        return await _context.Person
+            .Includes(includes)
+            .Where(p => EF.Functions.Like(p.Name, $"%{query}%")
+            || p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{query}%")))
+            .ToListAsync();
     }
 
     public async Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases)

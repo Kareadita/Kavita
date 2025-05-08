@@ -2278,7 +2278,8 @@
         "save": "{{common.save}}",
         "src": "Merge Person",
         "merge-warning": "If you proceed, the selected person will be removed. If the target person has no existing names, the selected person's name will be added as their first name. Otherwise, the selected person's name will be added as an additional alias.",
-        "alias-title": "New aliases"
+        "alias-title": "New aliases",
+        "known-for-title": "Known for"
     },
 
     "day-breakdown": {

@@ -41,6 +41,15 @@
               </ng-template>
             </app-badge-expander>
 
+            @if (knownFor$ | async; as knownFor) {
+              <h5 class="mt-2">{{t('known-for-title')}}</h5>
+
+              <app-badge-expander [items]="knownFor">
+                <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                  {{item.name}}
+                </ng-template>
+              </app-badge-expander>
+            }
           </div>
         </div>
       </div>
