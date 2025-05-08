@@ -253,21 +253,19 @@
       }
     }
   }
-  .progress-banner {
-    display:none;
-  }
-
-  .under-image {
-    display: none;
-  }
-  :host ::ng-deep .info-container {
-    .info-grid-container {
-      .image-container {
-        .progress-banner {
-          display: none;
-        }
-        .under-image {
-          display: none;
+  
+  :host ::ng-deep {
+    .main-container {
+      .info-container {
+        .info-grid-container {
+          .image-container {
+            .progress-banner {
+              display: none;
+            }
+            .under-image {
+              display: none;
+            }
+          }
         }
       }
     }
