@@ -79,7 +79,7 @@ export class MergePersonModalComponent implements OnInit {
       }));
     };
 
-    this.typeAheadSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
+    this.typeAheadSettings.trackByIdentityFn = (index, value) => `${value.name}_${value.id}`;
   }
 
   updatePerson(people: Person[]) {

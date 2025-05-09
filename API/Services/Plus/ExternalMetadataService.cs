@@ -654,7 +654,10 @@ public class ExternalMetadataService : IExternalMetadataService
             mapping.Staff.Name = mapping.PreferredName;
 
             if (existingPeopleDictionary.ContainsKey(mapping.PreferredName.ToNormalized()))
+            {
                 continue;
+            }
+
 
             if (existingPeopleDictionary.TryGetValue(mapping.AlternativeName.ToNormalized(), out var person))
             {
@@ -665,8 +668,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (modified)
         {
-            // Can I do this? Is this safe? Am I commiting other stuff to early
-            // Tests do fail without
             await _unitOfWork.CommitAsync();
         }
 

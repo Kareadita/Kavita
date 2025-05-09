@@ -189,7 +189,7 @@ export class EditPersonModalComponent implements OnInit {
           return null;
         }
 
-        return { 'inValidAlias': {'alias': name} } as ValidationErrors;
+        return { 'invalidAlias': {'alias': name} } as ValidationErrors;
       }));
     }
   }

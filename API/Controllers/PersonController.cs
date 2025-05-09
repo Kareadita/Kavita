@@ -56,8 +56,7 @@ public class PersonController : BaseApiController
     [HttpGet("search")]
     public async Task<ActionResult<List<PersonDto>>> SearchPeople([FromQuery] string queryString)
     {
-        var people = await _unitOfWork.PersonRepository.SearchPeople(queryString);
-        return Ok(people.Select(person => _mapper.Map<PersonDto>(person)).ToList());
+        return Ok(await _unitOfWork.PersonRepository.SearchPeople(queryString));
     }
 
     /// <summary>
@@ -96,7 +95,7 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
         // This needs to get all people and update them equally
-        var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id);
+        var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases);
         if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
         if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-required"));
@@ -215,17 +214,20 @@ public class PersonController : BaseApiController
         return Ok(_mapper.Map<PersonDto>(dst));
     }
 
-    [HttpGet("alias/{personId}/{alias}")]
+    /// <summary>
+    /// Ensure the alias is valid to be added. For example, the alias cannot be on another person or be the same as the current person name/alias.
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <param name="alias"></param>
+    /// <returns></returns>
+    [HttpGet("valid-alias")]
     public async Task<ActionResult<bool>> IsValidAlias(int personId, string alias)
     {
-        // Remove and just check against the passed value?
-        var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
+        var person = await _unitOfWork.PersonRepository.GetPersonById(personId, PersonIncludes.Aliases);
         if (person == null) return NotFound();
 
-        var other = await _unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync(alias);
-        if (other == null) return Ok(true);
-
-        return Ok(other.Id == person.Id);
+        var existingAlias = await _unitOfWork.PersonRepository.AnyAliasExist(alias);
+        return Ok(!existingAlias && person.NormalizedName != alias.ToNormalized());
     }
 
 

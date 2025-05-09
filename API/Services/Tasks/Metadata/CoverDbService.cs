@@ -579,7 +579,7 @@ public class CoverDbService : ICoverDbService
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
-                            series.CoverImage = Path.GetFileName(existingPath);
+                            return;
                         }
                     }
                     catch (Exception ex)

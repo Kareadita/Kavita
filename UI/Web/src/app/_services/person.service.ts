@@ -59,7 +59,9 @@ export class PersonService {
   }
 
   isValidAlias(personId: number, alias: string) {
-    return this.httpClient.get<boolean>(this.baseUrl + `person/alias/${personId}/${alias}`);
+    return this.httpClient.get<boolean>(this.baseUrl + `person/valid-alias?personId=${personId}&alias=${alias}`, TextResonse).pipe(
+      map(valid => valid + '' === 'true')
+    );
   }
 
   mergePerson(destId: number, srcId: number) {

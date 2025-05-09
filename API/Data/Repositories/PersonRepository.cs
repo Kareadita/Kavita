@@ -37,16 +37,16 @@ public interface IPersonRepository
     void Update(Person person);
 
     Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases);
-    Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.Aliases);
-    Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.None);
+    Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.None);
     Task RemoveAllPeopleNoLongerAssociated();
-    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.None);
 
     Task<string?> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
-    Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases);
     /// <summary>
     /// Returns a person matched on normalized name or alias
@@ -68,7 +68,9 @@ public interface IPersonRepository
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases);
     Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases);
 
-    Task<IList<Person>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<PersonDto>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases);
+
+    Task<bool> AnyAliasExist(string alias);
 }
 
 public class PersonRepository : IPersonRepository
@@ -222,7 +224,7 @@ public class PersonRepository : IPersonRepository
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    public async Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.Aliases)
+    public async Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None)
     {
         return await _context.Person.Where(p => p.Id == personId)
             .Includes(includes)
@@ -305,7 +307,7 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IList<Person>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases)
+    public async Task<IList<PersonDto>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases)
     {
         searchQuery = searchQuery.ToNormalized();
 
@@ -313,8 +315,16 @@ public class PersonRepository : IPersonRepository
             .Includes(includes)
             .Where(p => EF.Functions.Like(p.Name, $"%{searchQuery}%")
             || p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
+
+
+    public async Task<bool> AnyAliasExist(string alias)
+    {
+        return await _context.PersonAlias.AnyAsync(pa => pa.NormalizedAlias == alias.ToNormalized());
+    }
+
 
     public async Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases)
     {

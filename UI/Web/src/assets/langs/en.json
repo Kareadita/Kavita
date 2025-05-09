@@ -2269,7 +2269,7 @@
         "save": "{{common.save}}",
         "download-coversdb": "Download from CoversDB",
         "aliases-label": "Edit aliases",
-        "alias-overlap": "This alias already points towards another person, consider merging them.",
+        "alias-overlap": "This alias already points towards another person or is the name of this person, consider merging them.",
         "aliases-tooltip": "When a series is tagged with an alias of a person, the person is assigned rather than creating a new person. When deleting an alias, you'll have to rescan the series for the change to be picked up."
     },
 
