@@ -5,7 +5,8 @@ import {
   AsyncValidatorFn,
   FormControl,
   FormGroup,
-  ReactiveFormsModule, ValidationErrors,
+  ReactiveFormsModule,
+  ValidationErrors,
   Validators
 } from "@angular/forms";
 import {Person} from "../../../_models/metadata/person";
@@ -27,7 +28,6 @@ import {SettingItemComponent} from "../../../settings/_components/setting-item/s
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
-import {al} from "@angular/router/router_module.d-6zbCxc1T";
 
 enum TabID {
   General = 'general-tab',

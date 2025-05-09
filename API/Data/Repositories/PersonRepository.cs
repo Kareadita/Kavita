@@ -68,7 +68,7 @@ public interface IPersonRepository
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases);
     Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases);
 
-    Task<IList<Person>> SearchPeople(string query, PersonIncludes includes = PersonIncludes.Aliases);
+    Task<IList<Person>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases);
 }
 
 public class PersonRepository : IPersonRepository
@@ -305,12 +305,14 @@ public class PersonRepository : IPersonRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IList<Person>> SearchPeople(string query, PersonIncludes includes = PersonIncludes.Aliases)
+    public async Task<IList<Person>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases)
     {
+        searchQuery = searchQuery.ToNormalized();
+
         return await _context.Person
             .Includes(includes)
-            .Where(p => EF.Functions.Like(p.Name, $"%{query}%")
-            || p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{query}%")))
+            .Where(p => EF.Functions.Like(p.Name, $"%{searchQuery}%")
+            || p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
             .ToListAsync();
     }
 

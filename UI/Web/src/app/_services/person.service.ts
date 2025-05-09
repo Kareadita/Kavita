@@ -1,17 +1,14 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from "@angular/common/http";
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Person, PersonRole} from "../_models/metadata/person";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {PaginatedResult} from "../_models/pagination";
 import {Series} from "../_models/series";
 import {map} from "rxjs/operators";
 import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/person/browse-person";
-import {Chapter} from "../_models/chapter";
 import {StandaloneChapter} from "../_models/standalone-chapter";
 import {TextResonse} from "../_types/text-response";
-import {al} from "@angular/router/router_module.d-6zbCxc1T";
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +28,7 @@ export class PersonService {
   }
 
   searchPerson(name: string) {
-    return this.httpClient.get<Array<Person>>(this.baseUrl + `person/search-people?name=${name}`);
+    return this.httpClient.get<Array<Person>>(this.baseUrl + `person/search?queryString=${encodeURIComponent(name)}`);
   }
 
   getRolesForPerson(personId: number) {

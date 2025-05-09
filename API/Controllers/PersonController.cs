@@ -48,10 +48,15 @@ public class PersonController : BaseApiController
         return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
     }
 
-    [HttpGet("search-people")]
-    public async Task<ActionResult<List<PersonDto>>> SearchPeople([FromQuery] string name)
+    /// <summary>
+    /// Find a person by name or alias against a query string
+    /// </summary>
+    /// <param name="queryString"></param>
+    /// <returns></returns>
+    [HttpGet("search")]
+    public async Task<ActionResult<List<PersonDto>>> SearchPeople([FromQuery] string queryString)
     {
-        var people = await _unitOfWork.PersonRepository.SearchPeople(name);
+        var people = await _unitOfWork.PersonRepository.SearchPeople(queryString);
         return Ok(people.Select(person => _mapper.Map<PersonDto>(person)).ToList());
     }
 

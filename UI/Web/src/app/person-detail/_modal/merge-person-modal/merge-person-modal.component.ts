@@ -73,6 +73,7 @@ export class MergePersonModalComponent implements OnInit {
     }
     this.typeAheadSettings.fetchFn = (filter: string) => {
       if (filter.length == 0) return of([]);
+
       return this.personService.searchPerson(filter).pipe(map(people => {
         return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person.id);
       }));

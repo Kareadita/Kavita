@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
-import {BehaviorSubject, EMPTY, Observable, of, switchMap, tap} from "rxjs";
+import {BehaviorSubject, EMPTY, Observable, switchMap, tap} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
 import {AsyncPipe} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
@@ -19,7 +19,7 @@ import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {TagBadgeComponent, TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
+import {TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
