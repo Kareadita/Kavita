@@ -1003,7 +1003,7 @@
         "save": "{{common.save}}",
         "no-results": "Unable to find a match. Try adding the url from a supported provider and retry.",
         "query-label": "Query",
-        "query-tooltip": "Enter series name, AniList/MyAnimeList url. Urls will use a direct lookup.",
+        "query-tooltip": "Enter series name, AniList/MyAnimeList/ComicBookRoundup url. Urls will use a direct lookup.",
         "dont-match-label": "Do not Match",
         "dont-match-tooltip": "Opt this series from matching and scrobbling",
         "search": "Search"

@@ -130,7 +130,8 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get IsMetadataDownloadEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return libType === LibraryType.Manga || libType === LibraryType.LightNovel || libType === LibraryType.ComicVine;
+    return libType === LibraryType.Manga || libType === LibraryType.LightNovel
+      || libType === LibraryType.ComicVine || libType === LibraryType.Comic;
   }
 
   ngOnInit(): void {
