@@ -257,12 +257,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
       // TODO: Refactor into FormArray
       for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl((this.library.libraryFileTypes || []).includes(fileTypeGroup), []));
       }
 
       // TODO: Refactor into FormArray
       for(let glob of this.library.excludePatterns) {
-        this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
+        this.libraryForm.addControl('excludeGlob-', new FormControl(glob, []));
       }
 
       this.excludePatterns = this.library.excludePatterns;

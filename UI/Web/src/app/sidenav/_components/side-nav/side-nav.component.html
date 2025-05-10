@@ -43,8 +43,7 @@
                                    [imageUrl]="getLibraryImage(navStream.library!)" [title]="navStream.library!.name"
                                    [comparisonMethod]="'startsWith'">
                   <ng-container actions>
-                    <app-card-actionables [entity]="navStream" [inputActions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"
-                                          (actionHandler)="performAction($event, navStream.library!)"></app-card-actionables>
+                    <app-card-actionables [entity]="navStream.library" [inputActions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                   </ng-container>
                 </app-side-nav-item>
               }
