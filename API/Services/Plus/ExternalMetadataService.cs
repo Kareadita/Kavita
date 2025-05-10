@@ -638,8 +638,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var nameMappings = staff.Select(s => new
         {
             Staff = s,
-            PreferredName = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}".Trim() : $"{s.LastName} {s.FirstName}".Trim(),
-            AlternativeName = !settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}".Trim() : $"{s.LastName} {s.FirstName}.Trim()"
+            PreferredName = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}",
+            AlternativeName = !settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}"
         }).ToList();
 
         var preferredNames = nameMappings.Select(n => n.PreferredName.ToNormalized()).Distinct().ToList();
