@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, clicca per mostrare"
     },
-    "review-series-modal": {
-        "title": "Modifica recensione",
-        "review-label": "Recensione",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "La recensione deve avere almeno {{count}} caratteri",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Recensione di {{username}}",
@@ -780,10 +771,8 @@
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
         "scrobbling-tooltip": "{{settings.scrobbling}}",
-        "user-reviews-plus": "Recensioni Esterne",
         "words-count": "{{num}} Parole",
         "more-alt": "Ancora",
-        "user-reviews-local": "Recensioni Locali",
         "pages-count": "{{num}} Pagine",
         "weblinks-title": "Link",
         "time-left-alt": "Tempo Rimanente",

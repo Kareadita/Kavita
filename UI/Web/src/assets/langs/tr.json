@@ -49,14 +49,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, görmek için tıklayın"
     },
-    "review-series-modal": {
-        "title": "İncelemeyi düzenle",
-        "review-label": "İnceleme",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}} İncelemesi",
@@ -122,7 +114,9 @@
         "clients-api-key-tooltip": "API anahtarı bir şifre gibidir. Sıfırlamak mevcut istemcileri geçersiz kılar.",
         "clients-opds-url-tooltip": "Desteklenen OPDS istemcilerinin listesine bakın: ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "pdf-reader-settings-title": "PDF okuyucu",
+        "kavitaplus-settings-title": "Kavita+"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}"
@@ -138,7 +132,9 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "downloadable": "İndirilebilir",
+        "downloaded": "İndirildi"
     },
     "theme": {
         "theme-dark": "Karanlık",
@@ -183,7 +179,10 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "confirm-password-label": "Parola onayı",
+        "current-password-label": "Geçerli parola",
+        "new-password-label": "Yeni parola"
     },
     "change-email": {
         "required-field": "{{validation.required-field}}",
@@ -192,7 +191,10 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "setup-user-account": "Kullanıcının hesabını kur"
+        "setup-user-account": "Kullanıcının hesabını kur",
+        "email-title": "E-posta",
+        "email-label": "Yeni e-posta",
+        "current-password-label": "Geçerli parola"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
@@ -258,12 +260,16 @@
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "submit": "{{common.submit}}"
+        "submit": "{{common.submit}}",
+        "title": "Parolayı sıfırla"
     },
     "reset-password-modal": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "title": "{{username}}'ın parolasını sıfırla",
+        "new-password-label": "Yeni parola",
+        "error-label": "Hata: "
     },
     "all-series": {
         "series-count": "{{common.series-count}}"
@@ -295,7 +301,8 @@
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "Lisansı Sıfırla",
-        "activate-save": "{{common.save}}"
+        "activate-save": "{{common.save}}",
+        "reset-label": "Sıfırla"
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -317,7 +324,9 @@
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "description": "Yeni parola girin",
+        "title": "Parolayı sıfırla"
     },
     "register": {
         "username-label": "{{common.username}}",
@@ -362,7 +371,7 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}"
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -393,7 +402,8 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "force-scan": "Taramaya zorla"
     },
     "reader-settings": {
         "font-family-label": "{{user-preferences.font-family-label}}",
@@ -403,7 +413,8 @@
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "writing-style-label": "{{user-preferences.writing-style-label}}",
         "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}"
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "reset-to-defaults": "Varsayılanlara sıfırla"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -438,7 +449,8 @@
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "reset-cover-tooltip": "Kapak görselini sıfırla"
     },
     "edit-series-relation": {
         "remove": "{{common.remove}}",
@@ -747,7 +759,8 @@
     "manage-smart-filters": {
         "delete": "{{common.delete}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "cancel": "{{common.cancel}}"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -777,7 +790,8 @@
         "writers": "{{metadata-fields.writers-title}}"
     },
     "actionable": {
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "scan-library-tooltip": "Değişiklikler için kütüphaneyi tarayın. Her klasörü kontrol etmek için taramayı zorla kullanın"
     },
     "preferences": {
         "1-column": "1 Sütun",
@@ -802,18 +816,30 @@
         "username": "Kullanıcı adı",
         "password": "Parola",
         "select-all": "Tümünü Seç",
-        "book-num": "Kitap"
+        "book-num": "Kitap",
+        "cancel": "İptal",
+        "reset-to-default": "Varsayılan olarak sıfırla"
     },
     "tabs": {
         "account-tab": "Hesap"
     },
     "toasts": {
         "account-registration-complete": "Hesap kaydı tamamlandı",
-        "account-migration-complete": "Hesap taşıma tamamlandı"
+        "account-migration-complete": "Hesap taşıma tamamlandı",
+        "reset-ip-address": "IP adresleri sıfırla",
+        "password-reset": "Parola sıfırla",
+        "email-service-reset": "E-posta hizmeti sıfırla"
     },
     "api-key": {
         "hide": "Gizle",
         "show": "Göster",
-        "copy": "Kopyala"
+        "copy": "Kopyala",
+        "reset": "Sıfırla"
+    },
+    "confirm": {
+        "cancel": "{{common.cancel}}"
+    },
+    "publication-status-pipe": {
+        "cancelled": "İptal edildi"
     }
 }

@@ -55,15 +55,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, κάντε κλικ για να το δείτε"
     },
-    "review-series-modal": {
-        "title": "Επεξεργασία Κριτικής",
-        "review-label": "Κριτική",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Η κριτική πρέπει να περιέχει τουλάχιστον {{count}} χαρακτήρες",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Η κριτική του {{username}}",
@@ -290,8 +281,6 @@
         "info-tab": "{{tabs.info-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
         "no-pages": "{{toasts.no-pages}}",
-        "user-reviews-local": "Τοπικές Κριτικές",
-        "user-reviews-plus": "Εξωτερικές Κριτικές",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

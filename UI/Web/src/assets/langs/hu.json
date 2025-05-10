@@ -56,15 +56,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, kattints a megnézéshez"
     },
-    "review-series-modal": {
-        "title": "Áttekintés szerkesztése",
-        "review-label": "Áttekintés",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Az áttekintés legalább {{count}} karakter kell legyen",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}} áttekintése",

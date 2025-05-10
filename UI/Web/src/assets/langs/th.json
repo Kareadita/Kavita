@@ -55,14 +55,6 @@
     "spoiler": {
         "click-to-show": "คลิกเพื่อแสดง"
     },
-    "review-series-modal": {
-        "title": "แก้ไขรีวิว",
-        "review-label": "รีวิว",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "รีวิวของ {{username}}",
