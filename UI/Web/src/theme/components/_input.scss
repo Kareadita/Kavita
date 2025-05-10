@@ -36,3 +36,62 @@ input:not([type="range"]), .form-control {
   background-color: var(--input-bg-color);
   border-color: var(--input-border-color);
 }
+
+.form-check.form-switch {
+    display: inline-block;
+    margin-right: 0.5rem;
+
+    .form-check-input {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        box-shadow: unset;
+        border: unset;
+        background-image: unset;
+        width: 2.25rem;
+        height: 1rem;
+        border-radius: 1rem;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        transition: background-color 0.2s ease-in-out;
+        vertical-align: middle;
+
+        // The knob and icon, created using the ::after pseudo-element of the input
+        // Not Checked State Styling
+        &::after {
+            content: "×";
+            position: absolute;
+            top: 0.11875rem;
+            left: 0.1875rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            font-family: sans-serif;
+            color: #62646B;
+            line-height: 1;
+            transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        // Checked State Styling
+        &:checked {
+            background-color: var(--primary-color);
+            &::after {
+                content: "✓";
+                color: var(--primary-color);
+                transform: translateX(1.125rem);
+                font-size: 0.5625rem;
+                font-weight: 900;
+            }
+        }
+
+        &:focus-visible {
+            box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
+        }
+    }
+}
