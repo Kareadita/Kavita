@@ -638,8 +638,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var nameMappings = staff.Select(s => new
         {
             Staff = s,
-            PreferredName = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}",
-            AlternativeName = !settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}"
+            PreferredName = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}".Trim() : $"{s.LastName} {s.FirstName}".Trim(),
+            AlternativeName = !settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}".Trim() : $"{s.LastName} {s.FirstName}.Trim()"
         }).ToList();
 
         var preferredNames = nameMappings.Select(n => n.PreferredName.ToNormalized()).Distinct().ToList();
@@ -792,7 +792,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var characters = externalCharacters
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -873,7 +873,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var artists = upstreamArtists
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -929,7 +929,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var writers = upstreamWriters
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -1353,7 +1353,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var people = staff!
             .Select(w => new PersonDto()
             {
-                Name = w,
+                Name = w.Trim(),
             })
             .Concat(chapter.People
                 .Where(p => p.Role == role)
