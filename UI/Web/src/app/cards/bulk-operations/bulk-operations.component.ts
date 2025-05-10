@@ -85,8 +85,6 @@ export class BulkOperationsComponent implements OnInit {
     this.actionCallback(action, null);
   }
 
-
-
   executeAction(action: Action) {
     const foundActions = this.actions.filter(act => act.action === action);
     if (foundActions.length > 0) {

@@ -237,6 +237,7 @@ export class ActionFactoryService {
   dummyCallback(action: ActionItem<any>, entity: any) {}
   dummyShouldRender(action: ActionItem<any>, entity: any, user: User) {return true;}
   basicReadRender(action: ActionItem<any>, entity: any, user: User) {
+    if (entity === null || entity === undefined) return true;
     if (!entity.hasOwnProperty('pagesRead') && !entity.hasOwnProperty('pages')) return true;
 
     switch (action.action) {
