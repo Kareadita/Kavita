@@ -473,8 +473,7 @@ export class ActionService {
   }
 
   async deleteMultipleVolumes(volumes: Array<Volume>, callback?: BooleanActionCallback) {
-    // TODO: Change translation key back to "toasts.confirm-delete-multiple-volumes"
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters', {count: volumes.length}))) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-volumes', {count: volumes.length}))) return;
 
     this.volumeService.deleteMultipleVolumes(volumes.map(v => v.id)).subscribe((success) => {
       if (callback) {

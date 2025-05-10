@@ -1,20 +1,20 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ContentChild,
-  DestroyRef, EventEmitter,
+  Component,
+  ContentChild,
+  DestroyRef,
+  EventEmitter,
   HostListener,
   inject,
-  Input, Output, TemplateRef
+  Input,
+  Output,
+  TemplateRef
 } from '@angular/core';
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_services/action-factory.service";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {LibraryService} from "../../_services/library.service";
-import {DownloadService} from "../../shared/_services/download.service";
-import {UtilityService} from "../../shared/_services/utility.service";
 import {MessageHubService} from "../../_services/message-hub.service";
-import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -139,11 +139,6 @@ export class PersonCardComponent {
     this.clicked.emit(this.title);
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.entity);
-    }
-  }
 
   handleSelection(event?: any) {
     if (event) {

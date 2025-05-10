@@ -19,7 +19,6 @@ import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {TagBadgeCursor} from "../shared/tag-badge/tag-badge.component";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
@@ -89,7 +88,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly messageHubService = inject(MessageHubService)
 
-  protected readonly TagBadgeCursor = TagBadgeCursor;
+  protected readonly FilterField = FilterField;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -278,11 +277,4 @@ export class PersonDetailComponent implements OnInit {
     });
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.person);
-    }
-  }
-
-  protected readonly FilterField = FilterField;
 }

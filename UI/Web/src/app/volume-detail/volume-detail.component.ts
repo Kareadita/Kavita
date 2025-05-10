@@ -188,6 +188,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -571,16 +572,6 @@ export class VolumeDetailComponent implements OnInit {
     this.location.replaceState(newUrl)
   }
 
-  openPerson(field: FilterField, value: number) {
-    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
-  }
-
-  performAction(action: ActionItem<Volume>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.volume!);
-    }
-  }
-
   async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
@@ -699,6 +690,4 @@ export class VolumeDetailComponent implements OnInit {
       this.currentlyReadingChapter = undefined;
     }
   }
-
-  protected readonly encodeURIComponent = encodeURIComponent;
 }
