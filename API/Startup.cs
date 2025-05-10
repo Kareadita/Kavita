@@ -55,6 +55,9 @@ public class Startup
     {
         _config = config;
         _env = env;
+
+        // Disable Hangfire Automatic Retry
+        GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
     }
 
     // This method gets called by the runtime. Use this method to add services to the container.
