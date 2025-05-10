@@ -310,7 +310,7 @@ public class LibraryWatcher : ILibraryWatcher
         if (rootFolder.Count == 0) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
-        return Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[rootFolder.Count - 1]));
+        return Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[^1]));
     }
 
 
