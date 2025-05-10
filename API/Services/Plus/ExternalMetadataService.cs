@@ -226,7 +226,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = altNames.Where(s => !string.IsNullOrEmpty(s)).ToList(),
             Year = series.Metadata.ReleaseYear,
             AniListId = potentialAnilistId ?? ScrobblingService.GetAniListId(series),
-            MalId = potentialMalId ?? ScrobblingService.GetMalId(series),
+            MalId = potentialMalId ?? ScrobblingService.GetMalId(series)
         };
 
         var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;

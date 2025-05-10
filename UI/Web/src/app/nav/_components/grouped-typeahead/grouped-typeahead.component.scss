@@ -9,6 +9,17 @@
     right: 5px;
 }
 
+.input-hint {
+  font-size: 0.8rem;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-right: 9px;
+  border: 1px solid var(--input-hint-border-color, lightgrey);
+  color: var(--input-hint-text-color);
+  border-radius: 4px;
+  padding: 2px;
+}
+
 
 .typeahead-input {
   border: 1px solid transparent;
