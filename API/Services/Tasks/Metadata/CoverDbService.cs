@@ -501,7 +501,7 @@ public class CoverDbService : ICoverDbService
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
-                            person.CoverImage = Path.GetFileName(existingPath);
+                            return;
                         }
                     }
                     else
@@ -651,6 +651,7 @@ public class CoverDbService : ICoverDbService
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
+                            return;
                         }
 
                         chapter.CoverImage = finalFileName;
