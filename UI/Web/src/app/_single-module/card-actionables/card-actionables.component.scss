@@ -2,6 +2,22 @@
     content: none !important;
 }
 
+.submenu-wrapper {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10px;
+    width: 10px;
+    height: 100%;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+}
+
 .submenu-toggle {
     display: block;
     width: 100%;
@@ -30,9 +46,3 @@
 .btn {
     padding: 5px;
 }
-
-// Robbie added this but it broke most of the uses
-//.dropdown-toggle {
-//    padding-top: 0;
-//    padding-bottom: 0;
-//}

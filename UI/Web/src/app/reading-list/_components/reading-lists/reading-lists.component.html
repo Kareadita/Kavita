@@ -3,7 +3,7 @@
     <app-side-nav-companion-bar>
       <h4 title>
         <span>{{t('title')}}</span>
-        <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
+        <app-card-actionables [inputActions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
       </h4>
       @if (pagination) {
         <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h5>

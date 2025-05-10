@@ -42,6 +42,9 @@ export class UtilityService {
   public readonly activeBreakpointSource = new ReplaySubject<Breakpoint>(1);
   public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
 
+  // TODO: I need an isPhone/Tablet so that I can easily trigger different views
+
+
   mangaFormatKeys: string[] = [];
 
 

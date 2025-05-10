@@ -83,7 +83,7 @@ enum TabID {
 }
 
 @Component({
-    selector: 'app-chapter-detail',
+  selector: 'app-chapter-detail',
   imports: [
     AsyncPipe,
     CardActionablesComponent,
@@ -116,9 +116,9 @@ enum TabID {
     ReviewsComponent,
     ExternalRatingComponent
   ],
-    templateUrl: './chapter-detail.component.html',
-    styleUrl: './chapter-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './chapter-detail.component.html',
+  styleUrl: './chapter-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterDetailComponent implements OnInit {
 

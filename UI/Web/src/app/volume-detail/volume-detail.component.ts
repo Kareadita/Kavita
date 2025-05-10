@@ -80,6 +80,7 @@ import {UserReview} from "../_single-module/review-card/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {ChapterService} from "../_services/chapter.service";
+import {User} from "../_models/user";
 
 enum TabID {
 
@@ -211,7 +212,7 @@ export class VolumeDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this), this.shouldRenderVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
   bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
@@ -607,6 +608,17 @@ export class VolumeDetailComponent implements OnInit {
         const device = (action._extra!.data as Device);
         this.actionService.sendToDevice([chapter.id], device);
         break;
+    }
+  }
+
+  shouldRenderVolumeAction(action: ActionItem<Volume>, entity: Volume, user: User) {
+    switch (action.action) {
+      case(Action.MarkAsRead):
+        return entity.pagesRead < entity.pages;
+      case(Action.MarkAsUnread):
+        return entity.pagesRead !== 0;
+      default:
+        return true;
     }
   }
 

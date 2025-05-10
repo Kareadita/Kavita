@@ -5,7 +5,7 @@
       <app-side-nav-companion-bar>
         <ng-container title>
           <h2 class="title text-break">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            <app-card-actionables [entity]="person" [inputActions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{person.name}}</span>
 
             @if (person.aniListId) {

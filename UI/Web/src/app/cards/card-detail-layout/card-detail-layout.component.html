@@ -7,7 +7,7 @@
         <h4>
           @if (actions.length > 0) {
             <span>
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
             </span>
           }
 

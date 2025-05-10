@@ -32,7 +32,7 @@
           </span>
           @if (actions && actions.length > 0) {
             <span class="card-actions float-end">
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+              <app-card-actionables [entity]="entity" [inputActions]="actions" [labelBy]="title"></app-card-actionables>
             </span>
           }
         </div>

@@ -1,7 +1,9 @@
 <ng-container *transloco="let t; read: 'actionable'">
   <div class="modal-container">
     <div class="modal-header">
-      <h4 class="modal-title">{{t('title')}}</h4>
+      <h4 class="modal-title">
+        {{t('title')}}
+      </h4>
       <button type="button" class="btn-close" aria-label="close" (click)="modal.close()"></button>
     </div>
     <div class="modal-body scrollable-modal">
@@ -12,8 +14,6 @@
       }
 
       <div class="d-grid gap-2">
-
-
         @for (action of currentItems; track action.title) {
           @if (willRenderAction(action)) {
             <button class="btn btn-outline-primary text-start d-flex justify-content-between align-items-center w-100"

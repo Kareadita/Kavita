@@ -74,7 +74,7 @@
 
               <div class="col-auto ms-2k">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
+                  <app-card-actionables [entity]="chapter"  [inputActions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
                 </div>
               </div>
 

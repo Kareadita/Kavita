@@ -22,7 +22,6 @@ import {ActionService} from 'src/app/_services/action.service';
 import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series-modal.component';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {DecimalPipe} from "@angular/common";
-import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -30,7 +29,6 @@ import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
@@ -212,6 +210,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
             callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
             class: 'danger',
             requiresAdmin: false,
+            requiredRoles: [],
+            shouldRender: (_, _2, _3) => true,
             children: [],
           });
           this.actions[othersIndex] = othersAction;

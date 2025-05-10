@@ -10,7 +10,7 @@
                 @if(collectionTag.promoted) {
                   <span class="ms-1">(<i aria-hidden="true" class="fa fa-angle-double-up"></i>)</span>
                 }
-                <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
+                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [inputActions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
               </h4>
             }
             <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
