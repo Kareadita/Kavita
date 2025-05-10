@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -47,6 +48,16 @@ public class Program
             .CreateBootstrapLogger();
 
         var directoryService = new DirectoryService(null!, new FileSystem());
+
+
+        // Check if this is the first time running and if so, rename appsettings-init.json to appsettings.json
+        var firstRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings-init.json");
+        if (File.Exists(firstRunConfigFilePath) &&
+            !File.Exists(Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json")))
+        {
+            File.Move(firstRunConfigFilePath, Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json"));
+        }
+
 
         // Before anything, check if JWT has been generated properly or if user still has default
         if (!Configuration.CheckIfJwtTokenSet() &&

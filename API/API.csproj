@@ -111,17 +111,16 @@
 
 
   <ItemGroup>
-    <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="cache\**" />
-    <None Remove="cache-long\**" />
     <None Remove="backups\**" />
     <None Remove="logs\**" />
     <None Remove="temp\**" />
-    <None Remove="kavita.log" />
-    <None Remove="kavita.db" />
-    <None Remove="covers\**" />
+    <None Remove="config\kavita.log" />
+    <None Remove="config\kavita.db" />
+    <None Remove="config\covers\**" />
     <None Remove="wwwroot\**" />
+    <None Remove="cache\cache-long\**" />
     <None Remove="config\cache\**" />
     <None Remove="config\logs\**" />
     <None Remove="config\covers\**" />
@@ -139,6 +138,7 @@
     <Compile Remove="covers\**" />
     <Compile Remove="wwwroot\**" />
     <Compile Remove="config\cache\**" />
+    <Compile Remove="cache\cache-long\**" />
     <Compile Remove="config\logs\**" />
     <Compile Remove="config\covers\**" />
     <Compile Remove="config\bookmarks\**" />
@@ -188,7 +188,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="config\cache-long\" />
     <Folder Include="config\themes" />
     <Content Include="EmailTemplates\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
