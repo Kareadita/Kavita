@@ -103,8 +103,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    manageCollections: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
+    manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
     allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
@@ -231,6 +231,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         } else {
           this.libraryForm.get('allowMetadataMatching')?.disable();
         }
+
 
         this.cdRef.markForCheck();
       }),
