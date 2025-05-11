@@ -216,12 +216,16 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialMalId = ScrobblingService.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
 
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
-        var otherNames = ExtractAlternativeNames(dto, series);
+        var otherNames = ExtractAlternativeNames(series);
 
         var year = series.Metadata.ReleaseYear;
-        if (year == 0 && format == PlusMediaFormat.Comic)
+        if (year == 0 && format == PlusMediaFormat.Comic && !string.IsNullOrWhiteSpace(series.Name))
         {
-            year = int.Parse(Parser.ParseYear(series.Name));
+            var potentialYear = Parser.ParseYear(series.Name);
+            if (!string.IsNullOrEmpty(potentialYear))
+            {
+                year = int.Parse(potentialYear);
+            }
         }
 
         var matchRequest = new MatchSeriesRequestDto()
@@ -260,16 +264,10 @@ public class ExternalMetadataService : IExternalMetadataService
         return ArraySegment<ExternalSeriesMatchDto>.Empty;
     }
 
-    private static List<string> ExtractAlternativeNames(MatchSeriesDto dto, Series series)
+    private static List<string> ExtractAlternativeNames(Series series)
     {
         List<string> altNames = [series.LocalizedName, series.OriginalName];
-        // if (potentialAnilistId == null && potentialMalId == null && !string.IsNullOrEmpty(dto.Query))
-        // {
-        //     altNames.Add(dto.Query);
-        // }
-
-        var otherNames = altNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
-        return otherNames;
+        return altNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
     }
 
 
