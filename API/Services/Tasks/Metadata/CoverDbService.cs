@@ -632,6 +632,7 @@ public class CoverDbService : ICoverDbService
         }
     }
 
+    // TODO: Refactor this to IHasCoverImage instead of a hard entity type
     public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false)
     {
         if (!string.IsNullOrEmpty(url))

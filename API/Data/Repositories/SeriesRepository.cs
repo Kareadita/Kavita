@@ -735,6 +735,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
+            .Include(s => s.ExternalSeriesMetadata)
             .Select(series => new PlusSeriesRequestDto()
             {
                 MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -744,6 +745,7 @@ public class SeriesRepository : ISeriesRepository
                     ScrobblingService.AniListWeblinkWebsite),
                 MalId = ScrobblingService.ExtractId<long?>(series.Metadata.WebLinks,
                     ScrobblingService.MalWeblinkWebsite),
+                CbrId = series.ExternalSeriesMetadata.CbrId,
                 GoogleBooksId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
                     ScrobblingService.GoogleBooksWeblinkWebsite),
                 MangaDexId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
