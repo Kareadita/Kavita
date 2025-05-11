@@ -2911,6 +2911,7 @@
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
+        "issue-count": "{{num}} Issues",
         "no-data": "No Data",
 
         "book-num": "Book",
