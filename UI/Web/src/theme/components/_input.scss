@@ -39,7 +39,6 @@ input:not([type="range"]), .form-control {
 
 .form-check.form-switch {
     display: inline-block;
-    margin-right: 0.5rem;
 
     .form-check-input {
         appearance: none;
@@ -56,6 +55,7 @@ input:not([type="range"]), .form-control {
         outline: none;
         transition: background-color 0.2s ease-in-out;
         vertical-align: middle;
+        margin-right: 0.5rem;
 
         // The knob and icon, created using the ::after pseudo-element of the input
         // Not Checked State Styling
