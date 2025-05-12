@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using API.Data.Repositories;
 using API.Entities;
-using API.Entities.Metadata;
+using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
@@ -77,6 +77,12 @@ public static class IncludesExtensions
         {
             queryable = queryable
                 .Include(c => c.ExternalReviews);
+        }
+
+        if (includes.HasFlag(ChapterIncludes.ExternalRatings))
+        {
+            queryable = queryable
+                .Include(c => c.ExternalRatings);
         }
 
         return queryable.AsSplitQuery();
@@ -314,5 +320,26 @@ public static class IncludesExtensions
         }
 
         return query.AsSplitQuery();
+    }
+
+    public static IQueryable<Person> Includes(this IQueryable<Person> queryable, PersonIncludes includeFlags)
+    {
+
+        if (includeFlags.HasFlag(PersonIncludes.Aliases))
+        {
+            queryable = queryable.Include(p => p.Aliases);
+        }
+
+        if (includeFlags.HasFlag(PersonIncludes.ChapterPeople))
+        {
+            queryable = queryable.Include(p => p.ChapterPeople);
+        }
+
+        if (includeFlags.HasFlag(PersonIncludes.SeriesPeople))
+        {
+            queryable = queryable.Include(p => p.SeriesMetadataPeople);
+        }
+
+        return queryable;
     }
 }

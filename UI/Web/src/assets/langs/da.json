@@ -16,12 +16,6 @@
         "filter-label": "{{common.filter}}",
         "special": "{{entity-title.special}}"
     },
-    "review-series-modal": {
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}"
     },

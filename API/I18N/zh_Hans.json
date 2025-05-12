@@ -207,5 +207,6 @@
     "dashboard-stream-only-delete-smart-filter": "只能从仪表板中删除智能筛选器流",
     "smart-filter-name-required": "需要智能筛选器名称",
     "smart-filter-system-name": "您不能使用系统提供的流名称",
-    "sidenav-stream-only-delete-smart-filter": "只能从侧边栏删除智能筛选器流"
+    "sidenav-stream-only-delete-smart-filter": "只能从侧边栏删除智能筛选器流",
+    "aliases-have-overlap": "一个或多个别名与其他人有重叠，无法更新"
 }

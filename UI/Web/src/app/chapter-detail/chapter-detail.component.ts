@@ -83,7 +83,7 @@ enum TabID {
 }
 
 @Component({
-    selector: 'app-chapter-detail',
+  selector: 'app-chapter-detail',
   imports: [
     AsyncPipe,
     CardActionablesComponent,
@@ -116,9 +116,9 @@ enum TabID {
     ReviewsComponent,
     ExternalRatingComponent
   ],
-    templateUrl: './chapter-detail.component.html',
-    styleUrl: './chapter-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './chapter-detail.component.html',
+  styleUrl: './chapter-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterDetailComponent implements OnInit {
 
@@ -279,7 +279,11 @@ export class ChapterDetailComponent implements OnInit {
 
       this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 ||
         (this.chapter.tags || []).length > 0 || this.chapter.webLinks.length > 0;
-      
+
+      if (!this.showDetailsTab && this.activeTabId === TabID.Details) {
+        this.activeTabId = TabID.Reviews;
+      }
+
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -335,10 +339,6 @@ export class ChapterDetailComponent implements OnInit {
     this.location.replaceState(newUrl)
   }
 
-  openPerson(field: FilterField, value: number) {
-    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
-  }
-
   downloadChapter() {
     if (this.downloadInProgress) return;
     this.downloadService.download('chapter', this.chapter!, (d) => {
@@ -356,11 +356,6 @@ export class ChapterDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  performAction(action: ActionItem<Chapter>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.chapter!);
-    }
-  }
 
   handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {

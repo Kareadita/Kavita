@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -56,7 +57,7 @@ public class SeriesServiceTests : AbstractDbTest
         var locService = new LocalizationService(ds, new MockHostingEnvironment(),
             Substitute.For<IMemoryCache>(), Substitute.For<IUnitOfWork>());
 
-        _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+        _seriesService = new SeriesService(UnitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
             Substitute.For<IScrobblingService>(), locService, Substitute.For<IReadingListService>());
     }
@@ -65,14 +66,14 @@ public class SeriesServiceTests : AbstractDbTest
 
     protected override async Task ResetDb()
     {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
-        _context.Genre.RemoveRange(_context.Genre.ToList());
-        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
-        _context.Person.RemoveRange(_context.Person.ToList());
-        _context.Library.RemoveRange(_context.Library.ToList());
+        Context.Series.RemoveRange(Context.Series.ToList());
+        Context.AppUserRating.RemoveRange(Context.AppUserRating.ToList());
+        Context.Genre.RemoveRange(Context.Genre.ToList());
+        Context.CollectionTag.RemoveRange(Context.CollectionTag.ToList());
+        Context.Person.RemoveRange(Context.Person.ToList());
+        Context.Library.RemoveRange(Context.Library.ToList());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
     }
 
     private static UpdateRelatedSeriesDto CreateRelationsDto(Series series)
@@ -105,7 +106,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -126,7 +127,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var expectedRanges = new[] {"Omake", "Something SP02"};
 
@@ -141,7 +142,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -162,7 +163,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build()
         );
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Chapters);
@@ -178,7 +179,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -196,7 +197,7 @@ public class SeriesServiceTests : AbstractDbTest
                 .Build())
             .Build());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Chapters);
@@ -212,7 +213,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
                 .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
@@ -229,7 +230,7 @@ public class SeriesServiceTests : AbstractDbTest
                 .Build())
             .Build());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Chapters);
@@ -248,7 +249,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -263,7 +264,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Volumes);
@@ -277,7 +278,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -294,7 +295,7 @@ public class SeriesServiceTests : AbstractDbTest
 
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Volumes);
@@ -314,7 +315,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -332,7 +333,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.Equal("Volume 1", detail.Volumes.ElementAt(0).Name);
@@ -349,7 +350,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -373,7 +374,7 @@ public class SeriesServiceTests : AbstractDbTest
                     .Build())
                 .Build())
             .Build());
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
@@ -400,7 +401,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Comic)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Comic)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -424,7 +425,7 @@ public class SeriesServiceTests : AbstractDbTest
                     .Build())
                 .Build())
             .Build());
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
@@ -450,7 +451,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.ComicVine)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.ComicVine)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -474,7 +475,7 @@ public class SeriesServiceTests : AbstractDbTest
                     .Build())
                 .Build())
             .Build());
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
@@ -500,7 +501,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -522,7 +523,7 @@ public class SeriesServiceTests : AbstractDbTest
                     .Build())
                 .Build())
             .Build());
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
@@ -548,7 +549,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.LightNovel)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.LightNovel)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -570,7 +571,7 @@ public class SeriesServiceTests : AbstractDbTest
                     .Build())
                 .Build())
             .Build());
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
@@ -602,8 +603,8 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
-        _context.Series.Add(s);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -617,7 +618,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
@@ -634,10 +635,10 @@ public class SeriesServiceTests : AbstractDbTest
 
         var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre> {g};
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Genre.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Genre.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -651,7 +652,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre".SentenceCase()));
@@ -663,7 +664,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
         var g = new PersonBuilder("Existing Person").Build();
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder()
@@ -673,10 +674,10 @@ public class SeriesServiceTests : AbstractDbTest
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
 
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Person.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Person.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -690,7 +691,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
@@ -713,10 +714,10 @@ public class SeriesServiceTests : AbstractDbTest
             new SeriesMetadataPeople() {Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher}
         };
 
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Person.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Person.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -731,7 +732,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.People.Select(g => g.Person.Name).All(personName => personName == "Existing Person"));
@@ -763,9 +764,9 @@ public class SeriesServiceTests : AbstractDbTest
             new SeriesMetadataPeople { Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher }
         };
 
-        _context.Series.Add(series);
-        _context.Person.Add(existingPerson);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(series);
+        Context.Person.Add(existingPerson);
+        await Context.SaveChangesAsync();
 
         // Act: Update series metadata, attempting to update the writer to "Existing Writer"
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
@@ -782,7 +783,7 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.True(success);
 
         // Reload the series from the database
-        var updatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
+        var updatedSeries = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
         Assert.NotNull(updatedSeries.Metadata);
 
         // Assert that the people list still contains the updated person with the new name
@@ -804,10 +805,10 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
         var g = new PersonBuilder("Existing Person").Build();
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Person.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Person.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -821,7 +822,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.False(series.Metadata.People.Any());
@@ -839,10 +840,10 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
         var g = new PersonBuilder("Existing Person").Build();
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Person.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Person.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -857,7 +858,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.People.Count != 0);
@@ -891,10 +892,10 @@ public class SeriesServiceTests : AbstractDbTest
         var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre> {g};
         s.Metadata.GenresLocked = true;
-        _context.Series.Add(s);
+        Context.Series.Add(s);
 
-        _context.Genre.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Genre.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -909,7 +910,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre".SentenceCase()));
@@ -924,8 +925,8 @@ public class SeriesServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
-        _context.Series.Add(s);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -939,7 +940,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Equal(0, series.Metadata.ReleaseYear);
@@ -958,8 +959,8 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
 
-        _context.Series.Add(s);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -972,7 +973,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
@@ -991,9 +992,9 @@ public class SeriesServiceTests : AbstractDbTest
         var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre> { g };
 
-        _context.Series.Add(s);
-        _context.Genre.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        Context.Genre.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -1006,7 +1007,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.DoesNotContain("Existing Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
@@ -1025,9 +1026,9 @@ public class SeriesServiceTests : AbstractDbTest
         var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre> { g };
 
-        _context.Series.Add(s);
-        _context.Genre.Add(g);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        Context.Genre.Add(g);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -1040,7 +1041,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Empty(series.Metadata.Genres);
@@ -1058,8 +1059,8 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test Lib", LibraryType.Book).Build();
 
-        _context.Series.Add(s);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -1072,7 +1073,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
@@ -1090,9 +1091,9 @@ public class SeriesServiceTests : AbstractDbTest
         var t = new TagBuilder("Existing Tag").Build();
         s.Metadata.Tags = new List<Tag> { t };
 
-        _context.Series.Add(s);
-        _context.Tag.Add(t);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        Context.Tag.Add(t);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -1105,7 +1106,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.DoesNotContain("Existing Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
@@ -1124,9 +1125,9 @@ public class SeriesServiceTests : AbstractDbTest
         var t = new TagBuilder("Existing Tag").Build();
         s.Metadata.Tags = new List<Tag> { t };
 
-        _context.Series.Add(s);
-        _context.Tag.Add(t);
-        await _context.SaveChangesAsync();
+        Context.Series.Add(s);
+        Context.Tag.Add(t);
+        await Context.SaveChangesAsync();
 
         var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto
         {
@@ -1139,7 +1140,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(success);
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
         Assert.Empty(series.Metadata.Tags);
@@ -1276,7 +1277,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task UpdateRelatedSeries_ShouldAddAllRelations()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1295,9 +1296,9 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
@@ -1312,7 +1313,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task UpdateRelatedSeries_ShouldAddPrequelWhenAddingSequel()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1330,10 +1331,10 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
-        var series2 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series2 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Sequels.Add(2);
@@ -1348,7 +1349,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task UpdateRelatedSeries_DeleteAllRelations()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1367,9 +1368,9 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
@@ -1392,7 +1393,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task UpdateRelatedSeries_DeleteTargetSeries_ShouldSucceed()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1410,9 +1411,9 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
@@ -1421,10 +1422,10 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
 
-        _context.Series.Remove(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
+        Context.Series.Remove(await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
         try
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
         catch (Exception)
         {
@@ -1432,14 +1433,14 @@ public class SeriesServiceTests : AbstractDbTest
         }
 
         // Remove relations
-        Assert.Empty((await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related)).Relations);
+        Assert.Empty((await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related)).Relations);
     }
 
     [Fact]
     public async Task UpdateRelatedSeries_DeleteSourceSeries_ShouldSucceed()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1457,9 +1458,9 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
@@ -1467,12 +1468,12 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotNull(series1);
         Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
 
-        var seriesToRemove = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var seriesToRemove = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(seriesToRemove);
-        _context.Series.Remove(seriesToRemove);
+        Context.Series.Remove(seriesToRemove);
         try
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
         catch (Exception)
         {
@@ -1480,14 +1481,14 @@ public class SeriesServiceTests : AbstractDbTest
         }
 
         // Remove relations
-        Assert.Empty((await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related)).Relations);
+        Assert.Empty((await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related)).Relations);
     }
 
     [Fact]
     public async Task UpdateRelatedSeries_ShouldNotAllowDuplicates()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1505,9 +1506,9 @@ public class SeriesServiceTests : AbstractDbTest
             }
         });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         var relation = new SeriesRelation
         {
             Series = series1,
@@ -1532,7 +1533,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task GetRelatedSeries_EditionPrequelSequel_ShouldNotHaveParent()
     {
         await ResetDb();
-        _context.Library.Add(new Library
+        Context.Library.Add(new Library
         {
             AppUsers = new List<AppUser>
             {
@@ -1552,8 +1553,8 @@ public class SeriesServiceTests : AbstractDbTest
                 new SeriesBuilder("Test Series Adaption").Build(),
             }
         });
-        await _context.SaveChangesAsync();
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        await Context.SaveChangesAsync();
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Editions.Add(2);
@@ -1579,30 +1580,30 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test Series Sequels").Build())
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
-        _context.Library.Add(lib);
+        Context.Library.Add(lib);
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib.Id);
-        _unitOfWork.LibraryRepository.Delete(library);
+        var library = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(lib.Id);
+        UnitOfWork.LibraryRepository.Delete(library);
 
         try
         {
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
         }
         catch (Exception)
         {
             Assert.False(true);
         }
 
-        Assert.Null(await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
+        Assert.Null(await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
     }
 
     [Fact]
@@ -1623,7 +1624,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test Series Sequels").Build())
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
-        _context.Library.Add(lib1);
+        Context.Library.Add(lib1);
 
         var lib2 = new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test Series 2").Build())
@@ -1631,29 +1632,29 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test Series Prequels 3").Build())// TODO: Is this a bug
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
-        _context.Library.Add(lib2);
+        Context.Library.Add(lib2);
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(4); // cross library link
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib1.Id, LibraryIncludes.Series);
-        _unitOfWork.LibraryRepository.Delete(library);
+        var library = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(lib1.Id, LibraryIncludes.Series);
+        UnitOfWork.LibraryRepository.Delete(library);
 
         try
         {
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
         }
         catch (Exception)
         {
             Assert.False(true);
         }
 
-        Assert.Null(await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
+        Assert.Null(await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
     }
 
     #endregion
@@ -1675,13 +1676,13 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
                 .WithLocale("en")
                 .Build())
             .Build());
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         Assert.Equal(expected, await _seriesService.FormatChapterName(1, libraryType, withHash));
     }
@@ -1846,18 +1847,18 @@ public class SeriesServiceTests : AbstractDbTest
             .WithSeries(new SeriesBuilder("Test Series Sequels").Build())
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
-        _context.Library.Add(lib1);
+        Context.Library.Add(lib1);
 
         var lib2 = new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test Series 2").Build())
             .WithSeries(new SeriesBuilder("Test Series Prequels 2").Build())
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .Build();
-        _context.Library.Add(lib2);
+        Context.Library.Add(lib2);
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,
+        var series1 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1,
             SeriesIncludes.Related | SeriesIncludes.ExternalRatings);
         // Add relations
         var addRelationDto = CreateRelationsDto(series1);
@@ -1903,12 +1904,12 @@ public class SeriesServiceTests : AbstractDbTest
             }
         };
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         // Ensure we can delete the series
         Assert.True(await _seriesService.DeleteMultipleSeries(new[] {1, 2}));
-        Assert.Null(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1));
-        Assert.Null(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
+        Assert.Null(await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1));
+        Assert.Null(await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
     }
 
     #endregion
@@ -1920,7 +1921,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -1933,7 +1934,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
         Assert.Equal(Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
@@ -1945,7 +1946,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
                 .WithPublicationStatus(PublicationStatus.Completed)
@@ -1958,7 +1959,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
         Assert.Equal(Parser.LooseLeafVolumeNumber, nextChapter.VolumeNumber);
@@ -1970,7 +1971,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -1982,7 +1983,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
         Assert.NotNull(nextChapter);
@@ -1996,7 +1997,7 @@ public class SeriesServiceTests : AbstractDbTest
         await ResetDb();
         var now = DateTime.Parse("2021-01-01", CultureInfo.InvariantCulture); // 10/31/2024 can trigger an edge case bug
 
-        _context.Library.Add(new LibraryBuilder("Test LIb")
+        Context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
                 .WithPublicationStatus(PublicationStatus.OnGoing)
@@ -2010,7 +2011,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var nextChapter = await _seriesService.GetEstimatedChapterCreationDate(1, 1);
         Assert.NotNull(nextChapter);

@@ -6,7 +6,7 @@ namespace API.DTOs.Statistics;
 /// <summary>
 /// Represents a single User's reading event
 /// </summary>
-public class ReadHistoryEvent
+public sealed record ReadHistoryEvent
 {
     public int UserId { get; set; }
     public required string? UserName { get; set; } = default!;

@@ -344,10 +344,6 @@ export class CardItemComponent implements OnInit {
     this.clicked.emit(this.title);
   }
 
-  preventClick(event: any) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
 
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {

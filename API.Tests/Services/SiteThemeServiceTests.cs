@@ -31,24 +31,24 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
 
     protected override async Task ResetDb()
     {
-        _context.SiteTheme.RemoveRange(_context.SiteTheme);
-        await _context.SaveChangesAsync();
+        Context.SiteTheme.RemoveRange(Context.SiteTheme);
+        await Context.SaveChangesAsync();
         // Recreate defaults
-        await Seed.SeedThemes(_context);
+        await Seed.SeedThemes(Context);
     }
 
     [Fact]
     public async Task UpdateDefault_ShouldThrowOnInvalidId()
     {
         await ResetDb();
-        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldThrowOnInvalidId] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
+        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldThrowOnInvalidId] All Themes: {(await UnitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, UnitOfWork, _messageHub, Substitute.For<IFileService>(),
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
-        _context.SiteTheme.Add(new SiteTheme()
+        Context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
             NormalizedName = "Custom".ToNormalized(),
@@ -56,7 +56,7 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
             FileName = "custom.css",
             IsDefault = false
         });
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         var ex = await Assert.ThrowsAsync<KavitaException>(() => siteThemeService.UpdateDefault(10));
         Assert.Equal("Theme file missing or invalid", ex.Message);
@@ -68,14 +68,14 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
     public async Task GetContent_ShouldReturnContent()
     {
         await ResetDb();
-        _testOutputHelper.WriteLine($"[GetContent_ShouldReturnContent] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
+        _testOutputHelper.WriteLine($"[GetContent_ShouldReturnContent] All Themes: {(await UnitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, UnitOfWork, _messageHub, Substitute.For<IFileService>(),
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
-        _context.SiteTheme.Add(new SiteTheme()
+        Context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
             NormalizedName = "Custom".ToNormalized(),
@@ -83,9 +83,9 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
             FileName = "custom.css",
             IsDefault = false
         });
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var content = await siteThemeService.GetContent((await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("Custom")).Id);
+        var content = await siteThemeService.GetContent((await UnitOfWork.SiteThemeRepository.GetThemeDtoByName("Custom")).Id);
         Assert.NotNull(content);
         Assert.NotEmpty(content);
         Assert.Equal("123", content);
@@ -95,14 +95,14 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
     public async Task UpdateDefault_ShouldHaveOneDefault()
     {
         await ResetDb();
-        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldHaveOneDefault] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
+        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldHaveOneDefault] All Themes: {(await UnitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, UnitOfWork, _messageHub, Substitute.For<IFileService>(),
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
-        _context.SiteTheme.Add(new SiteTheme()
+        Context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
             NormalizedName = "Custom".ToNormalized(),
@@ -110,16 +110,16 @@ public abstract class SiteThemeServiceTest : AbstractDbTest
             FileName = "custom.css",
             IsDefault = false
         });
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var customTheme = (await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("Custom"));
+        var customTheme = (await UnitOfWork.SiteThemeRepository.GetThemeDtoByName("Custom"));
 
         Assert.NotNull(customTheme);
         await siteThemeService.UpdateDefault(customTheme.Id);
 
 
 
-        Assert.Equal(customTheme.Id, (await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Id);
+        Assert.Equal(customTheme.Id, (await UnitOfWork.SiteThemeRepository.GetDefaultTheme()).Id);
     }
 
 }

@@ -59,15 +59,6 @@
     "spoiler": {
         "click-to-show": "Спойлер, нажмите, чтобы показать"
     },
-    "review-series-modal": {
-        "title": "Редактировать отзыв",
-        "review-label": "Обзор",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Отзыв должен содержать не меньше {{count}} символов",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Обзор на {{username}}",

@@ -9,7 +9,7 @@ public enum CharacterRole
 }
 
 
-public class SeriesCharacter
+public sealed record SeriesCharacter
 {
     public string Name { get; set; }
     public required string Description { get; set; }

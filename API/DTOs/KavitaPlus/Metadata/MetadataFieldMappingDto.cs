@@ -2,7 +2,7 @@
 
 namespace API.DTOs.KavitaPlus.Metadata;
 
-public class MetadataFieldMappingDto
+public sealed record MetadataFieldMappingDto
 {
     public int Id { get; set; }
     public MetadataFieldType SourceType { get; set; }

@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Reader;
 
-public class BookChapterItem
+public sealed record BookChapterItem
 {
     /// <summary>
     /// Name of the Chapter

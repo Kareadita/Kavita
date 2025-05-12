@@ -10,6 +10,7 @@ using API.DTOs.Collection;
 using API.DTOs.KavitaPlus.ExternalMetadata;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata.Matching;
+using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -17,8 +18,10 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -223,7 +226,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = altNames.Where(s => !string.IsNullOrEmpty(s)).ToList(),
             Year = series.Metadata.ReleaseYear,
             AniListId = potentialAnilistId ?? ScrobblingService.GetAniListId(series),
-            MalId = potentialMalId ?? ScrobblingService.GetMalId(series),
+            MalId = potentialMalId ?? ScrobblingService.GetMalId(series)
         };
 
         var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
@@ -614,12 +617,8 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateTags(series, settings, externalMetadata, processedTags) || madeModification;
         madeModification = UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)) || madeModification;
 
-        var staff = (externalMetadata.Staff ?? []).Select(s =>
-        {
-            s.Name = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}";
+        var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
-            return s;
-        }).ToList();
         madeModification = await UpdateWriters(series, settings, staff) || madeModification;
         madeModification = await UpdateArtists(series, settings, staff) || madeModification;
         madeModification = await UpdateCharacters(series, settings, externalMetadata.Characters) || madeModification;
@@ -630,6 +629,49 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
 
         return madeModification;
+    }
+
+    private async Task<List<SeriesStaffDto>> SetNameAndAddAliases(MetadataSettingsDto settings, IList<SeriesStaffDto>? staff)
+    {
+        if (staff == null || staff.Count == 0) return [];
+
+        var nameMappings = staff.Select(s => new
+        {
+            Staff = s,
+            PreferredName = settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}",
+            AlternativeName = !settings.FirstLastPeopleNaming ? $"{s.FirstName} {s.LastName}" : $"{s.LastName} {s.FirstName}"
+        }).ToList();
+
+        var preferredNames = nameMappings.Select(n => n.PreferredName.ToNormalized()).Distinct().ToList();
+        var alternativeNames = nameMappings.Select(n => n.AlternativeName.ToNormalized()).Distinct().ToList();
+
+        var existingPeople = await _unitOfWork.PersonRepository.GetPeopleByNames(preferredNames.Union(alternativeNames).ToList());
+        var existingPeopleDictionary = PersonHelper.ConstructNameAndAliasDictionary(existingPeople);
+
+        var modified = false;
+        foreach (var mapping in nameMappings)
+        {
+            mapping.Staff.Name = mapping.PreferredName;
+
+            if (existingPeopleDictionary.ContainsKey(mapping.PreferredName.ToNormalized()))
+            {
+                continue;
+            }
+
+
+            if (existingPeopleDictionary.TryGetValue(mapping.AlternativeName.ToNormalized(), out var person))
+            {
+                modified = true;
+                person.Aliases.Add(new PersonAliasBuilder(mapping.PreferredName).Build());
+            }
+        }
+
+        if (modified)
+        {
+            await _unitOfWork.CommitAsync();
+        }
+
+        return [.. staff];
     }
 
     private static void GenerateGenreAndTagLists(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings,
@@ -750,7 +792,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var characters = externalCharacters
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -831,7 +873,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var artists = upstreamArtists
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -887,7 +929,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var writers = upstreamWriters
             .Select(w => new PersonDto()
             {
-                Name = w.Name,
+                Name = w.Name.Trim(),
                 AniListId = ScrobblingService.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
@@ -1085,7 +1127,7 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.Writer, potentialMatch.Writers) || madeModification;
 
             madeModification = await UpdateChapterCoverImage(chapter, settings, potentialMatch.CoverImageUrl) || madeModification;
-            madeModification = UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
+            madeModification = await UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
 
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
@@ -1094,7 +1136,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return madeModification;
     }
 
-    private bool UpdateExternalChapterMetadata(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
+    private async Task<bool> UpdateExternalChapterMetadata(Chapter chapter, MetadataSettingsDto settings, ExternalChapterDto metadata)
     {
         if (!settings.Enabled) return false;
 
@@ -1106,7 +1148,12 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
 
         #region Review
-        _unitOfWork.ExternalSeriesMetadataRepository.Remove(chapter.ExternalReviews);
+
+        // Remove existing Reviews
+        var existingReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReview(chapter.Id);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(existingReviews);
+
+
         List<ExternalReview> externalReviews = [];
         externalReviews.AddRange(metadata.CriticReviews
             .Where(r => !string.IsNullOrWhiteSpace(r.Username) && !string.IsNullOrWhiteSpace(r.Body))
@@ -1139,7 +1186,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var averageCriticRating = metadata.CriticReviews.Average(r => r.Rating);
         var averageUserRating = metadata.UserReviews.Average(r => r.Rating);
 
-        _unitOfWork.ExternalSeriesMetadataRepository.Remove(chapter.ExternalRatings);
+        var existingRatings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapter.Id);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(existingRatings);
+
         chapter.ExternalRatings =
         [
             new ExternalRating
@@ -1304,7 +1353,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var people = staff!
             .Select(w => new PersonDto()
             {
-                Name = w,
+                Name = w.Trim(),
             })
             .Concat(chapter.People
                 .Where(p => p.Role == role)

@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, clique para ver"
     },
-    "review-series-modal": {
-        "title": "Editar Crítica",
-        "review-label": "Crítica",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "A resenha deve ter pelo menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Crítica de {{username}}",
@@ -762,8 +753,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Não existem capítulos neste volume. Impossível ler.",
         "cover-change": "Pode levar até um minuto para a imagem ser refrescada pelo browser. Até isso acontecer, a imagem antiga será mostrada nalgumas páginas.",
-        "user-reviews-local": "Críticas Locais",
-        "user-reviews-plus": "Críticas Externas",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

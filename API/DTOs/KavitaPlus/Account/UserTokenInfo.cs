@@ -5,7 +5,7 @@ namespace API.DTOs.KavitaPlus.Account;
 /// <summary>
 /// Represents information around a user's tokens and their status
 /// </summary>
-public class UserTokenInfo
+public sealed record UserTokenInfo
 {
     public int UserId { get; set; }
     public string Username { get; set; }

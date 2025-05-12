@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, klik om te tonen"
     },
-    "review-series-modal": {
-        "title": "Beoordeling bewerken",
-        "review-label": "Beoordeling",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Review moet minimum {{count}} characters hebben",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}s Recensie",

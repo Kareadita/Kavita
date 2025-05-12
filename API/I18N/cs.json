@@ -207,5 +207,6 @@
     "dashboard-stream-only-delete-smart-filter": "Z ovládacího panelu lze odstranit pouze streamy chytrých filtrů",
     "smart-filter-name-required": "Vyžaduje se název chytrého filtru",
     "smart-filter-system-name": "Nelze použít název streamu poskytovaného systémem",
-    "sidenav-stream-only-delete-smart-filter": "Z postranní navigace lze odstranit pouze streamy chytrých filtrů"
+    "sidenav-stream-only-delete-smart-filter": "Z postranní navigace lze odstranit pouze streamy chytrých filtrů",
+    "aliases-have-overlap": "Jeden nebo více aliasů se překrývají s jinými osobami, nelze je aktualizovat"
 }

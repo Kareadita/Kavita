@@ -4,7 +4,7 @@
     <div class="carousel-container mb-3">
       <div>
         @if (actionables.length > 0) {
-          <app-card-actionables [actions]="actionables" (actionHandler)="performAction($event)"></app-card-actionables>
+          <app-card-actionables [inputActions]="actionables" (actionHandler)="performAction($event)"></app-card-actionables>
         }
         <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
           @if (titleLink !== '') {

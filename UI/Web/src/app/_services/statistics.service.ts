@@ -1,20 +1,19 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Inject, inject, Injectable} from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { UserReadStatistics } from '../statistics/_models/user-read-statistics';
-import { PublicationStatusPipe } from '../_pipes/publication-status.pipe';
-import {asyncScheduler, finalize, map, tap} from 'rxjs';
-import { MangaFormatPipe } from '../_pipes/manga-format.pipe';
-import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
-import { TopUserRead } from '../statistics/_models/top-reads';
-import { ReadHistoryEvent } from '../statistics/_models/read-history-event';
-import { ServerStatistics } from '../statistics/_models/server-statistics';
-import { StatCount } from '../statistics/_models/stat-count';
-import { PublicationStatus } from '../_models/metadata/publication-status';
-import { MangaFormat } from '../_models/manga-format';
-import { TextResonse } from '../_types/text-response';
+import {environment} from 'src/environments/environment';
+import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
+import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
+import {asyncScheduler, map} from 'rxjs';
+import {MangaFormatPipe} from '../_pipes/manga-format.pipe';
+import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
+import {TopUserRead} from '../statistics/_models/top-reads';
+import {ReadHistoryEvent} from '../statistics/_models/read-history-event';
+import {ServerStatistics} from '../statistics/_models/server-statistics';
+import {StatCount} from '../statistics/_models/stat-count';
+import {PublicationStatus} from '../_models/metadata/publication-status';
+import {MangaFormat} from '../_models/manga-format';
+import {TextResonse} from '../_types/text-response';
 import {TranslocoService} from "@jsverse/transloco";
-import {KavitaPlusMetadataBreakdown} from "../statistics/_models/kavitaplus-metadata-breakdown";
 import {throttleTime} from "rxjs/operators";
 import {DEBOUNCE_TIME} from "../shared/_services/download.service";
 import {download} from "../shared/_models/download";
@@ -44,11 +43,14 @@ export class StatisticsService {
   constructor(private httpClient: HttpClient, @Inject(SAVER) private save: Saver) { }
 
   getUserStatistics(userId: number, libraryIds: Array<number> = []) {
-    // TODO: Convert to httpParams object
-    let url = 'stats/user/' + userId + '/read';
-    if (libraryIds.length > 0) url += '?libraryIds=' + libraryIds.join(',');
+    const url = `${this.baseUrl}stats/user/${userId}/read`;
 
-    return this.httpClient.get<UserReadStatistics>(this.baseUrl + url);
+    let params = new HttpParams();
+    if (libraryIds.length > 0) {
+      params = params.set('libraryIds', libraryIds.join(','));
+    }
+
+    return this.httpClient.get<UserReadStatistics>(url, { params });
   }
 
   getServerStatistics() {
@@ -59,7 +61,7 @@ export class StatisticsService {
     return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/count/year').pipe(
       map(spreads => spreads.map(spread => {
       return {name: spread.value + '', value: spread.count};
-      })));
+    })));
   }
 
   getTopYears() {

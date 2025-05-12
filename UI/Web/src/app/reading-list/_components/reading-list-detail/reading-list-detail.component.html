@@ -10,12 +10,10 @@
 
           <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
             <h4 class="title mb-2">
-            <span>{{readingList.title}}
-              @if (readingList.promoted) {
-                (<app-promoted-icon [promoted]="readingList.promoted"></app-promoted-icon>)
-              }
-
-              @if( isLoading) {
+            <span>
+              <app-promoted-icon [promoted]="readingList.promoted"></app-promoted-icon>
+              <span class="ms-2">{{readingList.title}}</span>
+              @if(isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                   <span class="visually-hidden">loading...</span>
                 </div>
@@ -87,7 +85,7 @@
 
                 <div class="col-auto ms-2 d-none d-md-block">
                   <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                    <app-card-actionables [entity]="readingList" [inputActions]="actions" [labelBy]="readingList.title" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                   </div>
                 </div>
 

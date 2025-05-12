@@ -4,7 +4,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Dashboard;
 
-public class DashboardStreamDto
+public sealed record DashboardStreamDto
 {
     public int Id { get; set; }
     public required string Name { get; set; }

@@ -3,7 +3,7 @@ using YamlDotNet.Serialization;
 
 namespace API.DTOs.CoverDb;
 
-public class CoverDbAuthor
+public sealed record CoverDbAuthor
 {
     [YamlMember(Alias = "name", ApplyNamingConventions = false)]
     public string Name { get; set; }

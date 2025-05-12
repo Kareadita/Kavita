@@ -4,7 +4,7 @@ using API.Entities.Enums;
 namespace API.DTOs.ReadingLists;
 #nullable enable
 
-public class ReadingListItemDto
+public sealed record ReadingListItemDto
 {
     public int Id { get; init; }
     public int Order { get; init; }

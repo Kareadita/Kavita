@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Dashboard;
 
-public class SmartFilterDto
+public sealed record SmartFilterDto
 {
     public int Id { get; set; }
     public required string Name { get; set; }

@@ -28,17 +28,17 @@ public class ScrobblingServiceTests : AbstractDbTest
         _logger = Substitute.For<ILogger<ScrobblingService>>();
         _emailService = Substitute.For<IEmailService>();
 
-        _service = new ScrobblingService(_unitOfWork, Substitute.For<IEventHub>(), _logger,  _licenseService, _localizationService, _emailService);
+        _service = new ScrobblingService(UnitOfWork, Substitute.For<IEventHub>(), _logger,  _licenseService, _localizationService, _emailService);
     }
 
     protected override async Task ResetDb()
     {
-        _context.ScrobbleEvent.RemoveRange(_context.ScrobbleEvent.ToList());
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.Library.RemoveRange(_context.Library.ToList());
-        _context.AppUser.RemoveRange(_context.AppUser.ToList());
+        Context.ScrobbleEvent.RemoveRange(Context.ScrobbleEvent.ToList());
+        Context.Series.RemoveRange(Context.Series.ToList());
+        Context.Library.RemoveRange(Context.Library.ToList());
+        Context.AppUser.RemoveRange(Context.AppUser.ToList());
 
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
     }
 
     private async Task SeedData()
@@ -54,7 +54,7 @@ public class ScrobblingServiceTests : AbstractDbTest
             .Build();
 
 
-        _context.Library.Add(library);
+        Context.Library.Add(library);
 
         var user = new AppUserBuilder("testuser", "testuser")
             //.WithPreferences(new UserPreferencesBuilder().WithAniListScrobblingEnabled(true).Build())
@@ -62,9 +62,9 @@ public class ScrobblingServiceTests : AbstractDbTest
 
         user.UserPreferences.AniListScrobblingEnabled = true;
 
-        _unitOfWork.UserRepository.Add(user);
+        UnitOfWork.UserRepository.Add(user);
 
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
     }
 
     #region ScrobbleWantToReadUpdate Tests
@@ -83,7 +83,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, true);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
         Assert.Single(events);
         Assert.Equal(ScrobbleEventType.AddWantToRead, events[0].ScrobbleEventType);
         Assert.Equal(userId, events[0].AppUserId);
@@ -103,7 +103,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, false);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
         Assert.Single(events);
         Assert.Equal(ScrobbleEventType.RemoveWantToRead, events[0].ScrobbleEventType);
         Assert.Equal(userId, events[0].AppUserId);
@@ -126,7 +126,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, true);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
         Assert.Single(events);
         Assert.All(events, e => Assert.Equal(ScrobbleEventType.AddWantToRead, e.ScrobbleEventType));
@@ -149,7 +149,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, false);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
         Assert.Single(events);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.RemoveWantToRead);
@@ -172,7 +172,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, false);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
         Assert.Single(events);
         Assert.All(events, e => Assert.Equal(ScrobbleEventType.RemoveWantToRead, e.ScrobbleEventType));
@@ -195,7 +195,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _service.ScrobbleWantToReadUpdate(userId, seriesId, true);
 
         // Assert
-        var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId);
 
         Assert.Single(events);
         Assert.Contains(events, e => e.ScrobbleEventType == ScrobbleEventType.AddWantToRead);

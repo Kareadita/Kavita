@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs.Recommendation;
 #nullable enable
 
-public class SeriesStaffDto
+public sealed record SeriesStaffDto
 {
     public required string Name { get; set; }
     public string? FirstName { get; set; }

@@ -23,7 +23,7 @@ import {DownloadEvent, DownloadService} from "../../shared/_services/download.se
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
-import {Action, ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
@@ -33,7 +33,6 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
-import {Device} from "../../_models/device/device";
 import {ActionService} from "../../_services/action.service";
 import {FormsModule} from "@angular/forms";
 
@@ -143,8 +142,6 @@ export class VolumeCardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.filterSendTo();
-
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
@@ -178,30 +175,6 @@ export class VolumeCardComponent implements OnInit {
     }
     this.selection.emit(this.selected);
     this.cdRef.detectChanges();
-  }
-
-
-  filterSendTo() {
-    if (!this.actions || this.actions.length === 0) return;
-    // TODO: See if we can handle send to for volumes
-    //this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.volume);
-  }
-
-  performAction(action: ActionItem<Volume>) {
-    if (action.action == Action.Download) {
-      this.downloadService.download('volume', this.volume);
-      return; // Don't propagate the download from a card
-    }
-
-    if (action.action == Action.SendTo) {
-      const device = (action._extra!.data as Device);
-      this.actionService.sendToDevice(this.volume.chapters.map(c => c.id), device);
-      return;
-    }
-
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.volume);
-    }
   }
 
   handleClick(event: any) {

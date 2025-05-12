@@ -11,6 +11,9 @@ public class ExternalRating
     public int AverageScore { get; set; }
     public int FavoriteCount { get; set; }
     public ScrobbleProvider Provider { get; set; }
+    /// <summary>
+    /// Where this rating comes from: Critic or User
+    /// </summary>
     public RatingAuthority Authority { get; set; } = RatingAuthority.User;
     public string? ProviderUrl { get; set; }
     public int SeriesId { get; set; }

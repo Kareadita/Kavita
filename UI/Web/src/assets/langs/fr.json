@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Divulgâcheur, cliquez afin d'afficher"
     },
-    "review-series-modal": {
-        "title": "Éditer la critique",
-        "review-label": "Critique",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "La critique doit comporter au moins {{count}} caractères",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Critique de {{username}}",
@@ -762,8 +753,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Il n'y a aucun chapitre dans ce volume. Il ne peut être lu.",
         "cover-change": "L'actualisation de l'image par votre navigateur peut prendre jusqu'à une minute. En attendant, l'ancienne image peut être affichée sur certaines pages.",
-        "user-reviews-local": "Commentaires locaux",
-        "user-reviews-plus": "Commentaires externes",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

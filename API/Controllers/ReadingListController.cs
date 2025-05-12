@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
+using API.DTOs.Person;
 using API.DTOs.ReadingLists;
 using API.Entities.Enums;
 using API.Extensions;

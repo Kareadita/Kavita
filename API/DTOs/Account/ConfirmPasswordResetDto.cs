@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Account;
 
-public class ConfirmPasswordResetDto
+public sealed record ConfirmPasswordResetDto
 {
     [Required]
     public string Email { get; set; } = default!;

@@ -22,7 +22,7 @@
 
           </h4>
           <div class="subtitle mt-2 mb-2">
-            @if (series.localizedName !== series.name) {
+            @if (series.localizedName !== series.name && series.localizedName) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
           </div>
@@ -96,7 +96,7 @@
 
               <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>
               </div>
 
@@ -130,7 +130,7 @@
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
                   @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
+                    <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata!.publicationStatus)"
                        href="javascript:void(0);"
                        [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
                       {{pubStatus}}

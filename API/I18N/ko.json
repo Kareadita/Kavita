@@ -203,5 +203,9 @@
     "person-name-unique": "개인 이름은 고유해야 합니다",
     "person-image-doesnt-exist": "CoversDB에 사람이 존재하지 않습니다",
     "kavitaplus-restricted": "Kavita+만 해당",
-    "email-taken": "이미 사용중인 이메일"
+    "email-taken": "이미 사용중인 이메일",
+    "dashboard-stream-only-delete-smart-filter": "대시보드에서 스마트 필터 스트림만 삭제할 수 있습니다",
+    "sidenav-stream-only-delete-smart-filter": "사이드 메뉴에서 스마트 필터 스트림만 삭제할 수 있습니다",
+    "smart-filter-name-required": "스마트 필터 이름이 필요합니다",
+    "smart-filter-system-name": "시스템 제공 스트림 이름은 사용할 수 없습니다"
 }

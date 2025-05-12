@@ -7,7 +7,7 @@ using NotImplementedException = System.NotImplementedException;
 namespace API.DTOs.KavitaPlus.Metadata;
 
 
-public class MetadataSettingsDto
+public sealed record MetadataSettingsDto
 {
     /// <summary>
     /// If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed

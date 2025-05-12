@@ -121,7 +121,7 @@
     "opds-disabled": "OPDS не включен на этом сервере",
     "stats-permission-denied": "Вы не имеете права просматривать статистику другого пользователя",
     "reading-list-restricted": "Список чтения не существует или у вас нет доступа",
-    "favicon-doesnt-exist": "Фавикон не существует",
+    "favicon-doesnt-exist": "Favicon не существует",
     "external-source-already-in-use": "Существует поток с этим внешним источником",
     "issue-num": "Вопрос {0}{1}",
     "generic-create-temp-archive": "Возникла проблема с созданием временного архива",
@@ -194,5 +194,13 @@
     "backup": "Резервное копирование",
     "process-processed-scrobbling-events": "Обработка обработанных событий скроблинга",
     "scan-libraries": "Сканирование библиотек",
-    "kavita+-data-refresh": "Обновление данных Kavita+"
+    "kavita+-data-refresh": "Обновление данных Kavita+",
+    "kavitaplus-restricted": "Это доступно только для Kavita+",
+    "person-doesnt-exist": "Персона не существует",
+    "generic-cover-volume-save": "Не удается сохранить обложку для раздела",
+    "generic-cover-person-save": "Не удается сохранить изображение обложки для Персоны",
+    "person-name-unique": "Имя персоны должно быть уникальным",
+    "person-image-doesnt-exist": "Персона не существует в CoversDB",
+    "email-taken": "Почта уже используется",
+    "person-name-required": "Имя персоны обязательно и не может быть пустым"
 }

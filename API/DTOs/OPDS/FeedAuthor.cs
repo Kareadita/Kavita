@@ -2,7 +2,7 @@
 
 namespace API.DTOs.OPDS;
 
-public class FeedAuthor
+public sealed record FeedAuthor
 {
     [XmlElement("name")]
     public string Name { get; set; }

@@ -207,5 +207,6 @@
     "smart-filter-system-name": "Ní féidir leat ainm srutha an chórais a sholáthair tú a úsáid",
     "sidenav-stream-only-delete-smart-filter": "Ní féidir ach sruthanna cliste scagaire a scriosadh as an SideNav",
     "dashboard-stream-only-delete-smart-filter": "Ní féidir ach sruthanna cliste scagaire a scriosadh ón deais",
-    "smart-filter-name-required": "Ainm Scagaire Cliste ag teastáil"
+    "smart-filter-name-required": "Ainm Scagaire Cliste ag teastáil",
+    "aliases-have-overlap": "Tá forluí idir ceann amháin nó níos mó de na leasainmneacha agus daoine eile, ní féidir iad a nuashonrú"
 }

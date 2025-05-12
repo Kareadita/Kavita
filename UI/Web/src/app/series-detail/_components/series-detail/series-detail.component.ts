@@ -61,11 +61,6 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {
-  ReviewModalCloseAction,
-  ReviewModalCloseEvent,
-  ReviewModalComponent
-} from '../../../_single-module/review-modal/review-modal.component';
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
@@ -73,8 +68,6 @@ import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/e
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
-import {ReviewCardComponent} from '../../../_single-module/review-card/review-card.component';
-import {CarouselReelComponent} from '../../../carousel/_components/carousel-reel/carousel-reel.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
@@ -1136,13 +1129,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPageSource.next(closeResult.updateExternal);
       }
     });
-  }
-
-
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.series);
-    }
   }
 
   downloadSeries() {

@@ -212,6 +212,7 @@
     "user-no-access-library-from-series": "User does not have access to the library this series belongs to",
     "series-restricted-age-restriction": "User is not allowed to view this series due to age restrictions",
     "kavitaplus-restricted": "This is restricted to Kavita+ only",
+    "aliases-have-overlap": "One or more of the aliases have overlap with other people, cannot update",
 
     "volume-num": "Volume {0}",
     "book-num": "Book {0}",

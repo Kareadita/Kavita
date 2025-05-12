@@ -6,7 +6,7 @@ namespace API.DTOs.Dashboard;
 /// <summary>
 /// A mesh of data for Recently added volume/chapters
 /// </summary>
-public class RecentlyAddedItemDto
+public sealed record RecentlyAddedItemDto
 {
     public string SeriesName { get; set; } = default!;
     public int SeriesId { get; set; }

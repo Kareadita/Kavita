@@ -75,15 +75,6 @@
     "spoiler": {
         "click-to-show": "ச்பாய்லர், காட்ட சொடுக்கு செய்க"
     },
-    "review-series-modal": {
-        "title": "மதிப்பாய்வைத் திருத்தவும்",
-        "review-label": "சீராய்வு",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "மதிப்பாய்வு குறைந்தபட்சம் {{count}} எழுத்துக்களாக இருக்க வேண்டும்",
-        "required": "{{validation.required-field}}"
-    },
     "theme-manager": {
         "set-default": "இயல்புநிலையை அமைக்கவும்",
         "default-theme": "இயல்புநிலை",
@@ -237,7 +228,6 @@
         "kavita+-requirement": "கவிதா+ அண்மைக் கால வெளியீடு - 2 பதிப்புகளுடன் மட்டுமே வேலை செய்ய வடிவமைக்கப்பட்டுள்ளது. அதற்கு வெளியே எதுவும் வேலை செய்யாததற்கு உட்பட்டது."
     },
     "series-detail": {
-        "user-reviews-plus": "வெளிப்புற மதிப்புரைகள்",
         "writers-title": "{{metadata-fields.writers-title}}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}}",
         "characters-title": "{{metadata-fields.Characters-title}}}",
@@ -251,7 +241,6 @@
         "tags-title": "{{metadata-fields.tags-title}}}",
         "ongoing": "{{வெளியீட்டு-நிலை-பைப்.ங்கோயிங்}}",
         "release-date-title": "வெளியீடு",
-        "user-reviews-local": "உள்ளக மதிப்புரைகள்",
         "page-settings-title": "பக்க அமைப்புகள்",
         "close": "{{common.close}}",
         "layout-mode-label": "{{பயனர்-முன்னுரிமைகள்.லேவுட்-மோட்-புக்-லேபிள்}}}",

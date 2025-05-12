@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.DTOs.KavitaPlus.Metadata;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Services.Plus;
 
-namespace API.DTOs.Recommendation;
+namespace API.DTOs.KavitaPlus.Metadata;
 #nullable enable
 
 /// <summary>
 /// This is AniListSeries
 /// </summary>
-public class ExternalSeriesDetailDto
+public sealed record ExternalSeriesDetailDto
 {
     public string Name { get; set; }
     public int? AniListId { get; set; }

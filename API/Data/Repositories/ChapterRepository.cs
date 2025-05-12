@@ -8,6 +8,7 @@ using API.DTOs.Reader;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
@@ -27,6 +28,7 @@ public enum ChapterIncludes
     Genres = 16,
     Tags = 32,
     ExternalReviews = 1 << 6,
+    ExternalRatings = 1 << 7
 }
 
 public interface IChapterRepository
@@ -51,8 +53,10 @@ public interface IChapterRepository
     IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
-    Task<IList<UserReviewDto>> GetExternalChapterReviews(int chapterId);
-    Task<IList<RatingDto>> GetExternalChapterRatings(int chapterId);
+    Task<IList<UserReviewDto>> GetExternalChapterReviewDtos(int chapterId);
+    Task<IList<ExternalReview>> GetExternalChapterReview(int chapterId);
+    Task<IList<RatingDto>> GetExternalChapterRatingDtos(int chapterId);
+    Task<IList<ExternalRating>> GetExternalChapterRatings(int chapterId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -332,7 +336,7 @@ public class ChapterRepository : IChapterRepository
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }
 
-    public async Task<IList<UserReviewDto>> GetExternalChapterReviews(int chapterId)
+    public async Task<IList<UserReviewDto>> GetExternalChapterReviewDtos(int chapterId)
     {
         return await _context.Chapter
             .Where(c => c.Id == chapterId)
@@ -342,12 +346,28 @@ public class ChapterRepository : IChapterRepository
             .ToListAsync();
     }
 
-    public async Task<IList<RatingDto>> GetExternalChapterRatings(int chapterId)
+    public async Task<IList<ExternalReview>> GetExternalChapterReview(int chapterId)
+    {
+        return await _context.Chapter
+            .Where(c => c.Id == chapterId)
+            .SelectMany(c => c.ExternalReviews)
+            .ToListAsync();
+    }
+
+    public async Task<IList<RatingDto>> GetExternalChapterRatingDtos(int chapterId)
     {
         return await _context.Chapter
             .Where(c => c.Id == chapterId)
             .SelectMany(c => c.ExternalRatings)
             .ProjectTo<RatingDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<ExternalRating>> GetExternalChapterRatings(int chapterId)
+    {
+        return await _context.Chapter
+            .Where(c => c.Id == chapterId)
+            .SelectMany(c => c.ExternalRatings)
             .ToListAsync();
     }
 }

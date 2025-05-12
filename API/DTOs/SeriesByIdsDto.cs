@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs;
 
-public class SeriesByIdsDto
+public sealed record SeriesByIdsDto
 {
     public int[] SeriesIds { get; init; } = default!;
 }

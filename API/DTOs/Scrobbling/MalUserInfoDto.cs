@@ -3,7 +3,7 @@
 /// <summary>
 /// Information about a User's MAL connection
 /// </summary>
-public class MalUserInfoDto
+public sealed record MalUserInfoDto
 {
     public required string Username { get; set; }
     /// <summary>

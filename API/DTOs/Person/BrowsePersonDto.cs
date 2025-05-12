@@ -1,4 +1,6 @@
-﻿namespace API.DTOs;
+﻿using API.DTOs.Person;
+
+namespace API.DTOs;
 
 /// <summary>
 /// Used to browse writers and click in to see their series
