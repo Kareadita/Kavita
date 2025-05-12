@@ -19,12 +19,52 @@ h2 {
   }
 }
 
+:host ::ng-deep {
+  .main-container {
+    .container-fluid {
+      > div {
+        padding-right: unset;
+        .section {
+          background: var(--side-nav-bg-color);
+          border-radius: 5px;
+          padding: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
 
 @media (max-width: theme.$grid-breakpoints-lg) {
+  :host ::ng-deep {
+    .main-container {
+      padding: 0 0 0 25px;
+      .container-fluid {
+        padding: unset;
+        > div {
+          padding-right: calc(var(--bs-gutter-x) * 0.5);
+        }
+      }
+    }
+  }
   ::ng-deep .content-wrapper:not(.closed) {
     .scale {
       width: 100% !important;
       overflow-x: auto;
+    }
+  }
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  :host ::ng-deep {
+    .main-container {
+      padding: 0 0 0 14px;
+      .container-fluid {
+        padding: unset;
+        > div {
+          padding-right: unset;
+        }
+      }
     }
   }
 }

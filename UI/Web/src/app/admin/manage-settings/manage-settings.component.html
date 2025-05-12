@@ -10,311 +10,314 @@
       <strong>{{t('notice')}}</strong> {{t('restart-required')}}
     </div>
 
-
-    <h4>{{t('networking-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('hostName'); as formControl) {
-          <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
-            <ng-template #view>
-              {{formControl.value | defaultValue}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="hostname-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
-                    <div>{{t('host-name-validation')}}</div>
-                  }
-                </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('baseUrl'); as formControl) {
-          <app-setting-item [title]="t('base-url-label')" [subtitle]="t('base-url-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <div class="input-group">
-                <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
+    <div class="section">
+      <h4>{{t('networking-settings-title')}}</h4>
+      <ng-container>
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('hostName'); as formControl) {
+            <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
+              <ng-template #view>
+                {{formControl.value | defaultValue}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
                        [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-                <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
-              </div>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="baseurl-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
-                    <div>{{t('base-url-validation')}}</div>
-                  }
-                </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('ipAddresses'); as formControl) {
-          <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
-            <ng-template #view>
-              {{formControl.value | defaultValue}}
-            </ng-template>
-            <ng-template #edit>
-              <div class="input-group">
-                <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-                <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
-              </div>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="ipaddresses-validations" class="invalid-feedback">
-                  @if (formControl.errors?.emptyOrPattern) {
-                    <div>{{t('ip-address-validation')}}</div>
-                  }
-                </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('port'); as formControl) {
-          <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
-                     formControlName="port" type="number" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57" appEnterBlur>
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-    </ng-container>
-
-    <div class="setting-section-break"></div>
-
-    <h4>{{t('system-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('totalBackups'); as formControl) {
-          <app-setting-item [title]="t('backup-label')" [subtitle]="t('backup-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="settings-backup" aria-describedby="total-backups-validations" class="form-control"
-                     formControlName="totalBackups" type="number" inputmode="numeric" step="1" min="1" max="30"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="total-backups-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('field-required')}}</div>
-                  }
-                  @if (formControl.errors?.max) {
-                    <div>{{t('max-backup-validation', {num: formControl.errors?.max?.max})}}</div>
-                  }
-                  @if (formControl.errors?.min) {
-                    <div>{{t('min-backup-validation')}}</div>
-                  }
-                </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('totalLogs'); as formControl) {
-          <app-setting-item [title]="t('log-label')" [subtitle]="t('log-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="settings-logs" aria-describedby="total-logs-validations" class="form-control"
-                     formControlName="totalLogs" type="number" inputmode="numeric" step="1" min="1" max="30"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="total-logs-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('field-required')}}</div>
-                  }
-                  @if (formControl.errors?.max) {
-                    <div>{{t('max-logs-validation', {num: formControl.errors?.max?.max})}}</div>
-                  }
-                  @if (formControl.errors?.min) {
-                    <div>{{t('min-log-validation')}}</div>
-                  }
-                </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('loggingLevel'); as formControl) {
-          <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
-            <ng-template #view>
-              {{formControl.value | logLevel}}
-            </ng-template>
-            <ng-template #edit>
-
-              <select id="logging-level" aria-describedby="logging-level-help" class="form-select"  formControlName="loggingLevel"
-                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                @for(level of logLevels; track level) {
-                  <option [value]="level">{{level | logLevel}}</option>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="hostname-validations" class="invalid-feedback">
+                    @if (formControl.errors?.pattern) {
+                      <div>{{t('host-name-validation')}}</div>
+                    }
+                  </div>
                 }
-              </select>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="logging-level-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
-                    <div>{{t('host-name-validation')}}</div>
-                  }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('baseUrl'); as formControl) {
+            <app-setting-item [title]="t('base-url-label')" [subtitle]="t('base-url-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <div class="input-group">
+                  <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
+                         [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+                  <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
                 </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('cacheSize'); as formControl) {
-          <app-setting-item [title]="t('cache-size-label')" [subtitle]="t('cache-size-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="setting-cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
-                     type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="cache-size-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('field-required')}}</div>
-                  }
-                  @if (formControl.errors?.min) {
-                    <div>{{t('min-cache-validation')}}</div>
-                  }
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="baseurl-validations" class="invalid-feedback">
+                    @if (formControl.errors?.pattern) {
+                      <div>{{t('base-url-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('ipAddresses'); as formControl) {
+            <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
+              <ng-template #view>
+                {{formControl.value | defaultValue}}
+              </ng-template>
+              <ng-template #edit>
+                <div class="input-group">
+                  <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
+                         [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+                  <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
                 </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('enableOpds'); as formControl) {
-          <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('enableFolderWatching'); as formControl) {
-          <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('allowStatCollection'); as formControl) {
-          <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="stat-collection" type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
-      </div>
-
-    </ng-container>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="ipaddresses-validations" class="invalid-feedback">
+                    @if (formControl.errors?.emptyOrPattern) {
+                      <div>{{t('ip-address-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('port'); as formControl) {
+            <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
+                       formControlName="port" type="number" step="1" min="1"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57" appEnterBlur>
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+      </ng-container>
+    </div>
 
     <div class="setting-section-break"></div>
 
-    <h4>{{t('customization-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('onDeckProgressDays'); as formControl) {
-          <app-setting-item [title]="t('on-deck-last-progress-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="setting-on-deck-progress-days" aria-describedby="on-deck-progress-days-validations" class="form-control" formControlName="onDeckProgressDays"
-                     type="number" inputmode="numeric" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="on-deck-last-progress-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('field-required')}}</div>
+    <div class="section">
+      <h4>{{t('system-settings-title')}}</h4>
+      <ng-container>
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('totalBackups'); as formControl) {
+            <app-setting-item [title]="t('backup-label')" [subtitle]="t('backup-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="settings-backup" aria-describedby="total-backups-validations" class="form-control"
+                       formControlName="totalBackups" type="number" inputmode="numeric" step="1" min="1" max="30"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="total-backups-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('field-required')}}</div>
+                    }
+                    @if (formControl.errors?.max) {
+                      <div>{{t('max-backup-validation', {num: formControl.errors?.max?.max})}}</div>
+                    }
+                    @if (formControl.errors?.min) {
+                      <div>{{t('min-backup-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('totalLogs'); as formControl) {
+            <app-setting-item [title]="t('log-label')" [subtitle]="t('log-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="settings-logs" aria-describedby="total-logs-validations" class="form-control"
+                       formControlName="totalLogs" type="number" inputmode="numeric" step="1" min="1" max="30"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="total-logs-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('field-required')}}</div>
+                    }
+                    @if (formControl.errors?.max) {
+                      <div>{{t('max-logs-validation', {num: formControl.errors?.max?.max})}}</div>
+                    }
+                    @if (formControl.errors?.min) {
+                      <div>{{t('min-log-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('loggingLevel'); as formControl) {
+            <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
+              <ng-template #view>
+                {{formControl.value | logLevel}}
+              </ng-template>
+              <ng-template #edit>
+  
+                <select id="logging-level" aria-describedby="logging-level-help" class="form-select"  formControlName="loggingLevel"
+                        [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                  @for(level of logLevels; track level) {
+                    <option [value]="level">{{level | logLevel}}</option>
                   }
-                  @if (formControl.errors?.min) {
-                    <div>{{t('min-days-validation')}}</div>
-                  }
+                </select>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="logging-level-validations" class="invalid-feedback">
+                    @if (formControl.errors?.pattern) {
+                      <div>{{t('host-name-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('cacheSize'); as formControl) {
+            <app-setting-item [title]="t('cache-size-label')" [subtitle]="t('cache-size-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="setting-cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
+                       type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="cache-size-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('field-required')}}</div>
+                    }
+                    @if (formControl.errors?.min) {
+                      <div>{{t('min-cache-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('enableOpds'); as formControl) {
+            <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
                 </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('onDeckUpdateDays'); as formControl) {
-          <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-chapter-add-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="on-deck-last-chapter-add" aria-describedby="on-deck-last-chapter-add-validations" class="form-control" formControlName="onDeckUpdateDays"
-                     type="number" inputmode="numeric" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="on-deck-last-chapter-add-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('field-required')}}</div>
-                  }
-                  @if (formControl.errors?.min) {
-                    <div>{{t('min-days-validation')}}</div>
-                  }
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('enableFolderWatching'); as formControl) {
+            <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
                 </div>
-              }
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-    </ng-container>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('allowStatCollection'); as formControl) {
+            <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="stat-collection" type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="setting-section-break"></div>
+
+    <div class="section">
+      <h4>{{t('customization-settings-title')}}</h4>
+      <ng-container>
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('onDeckProgressDays'); as formControl) {
+            <app-setting-item [title]="t('on-deck-last-progress-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="setting-on-deck-progress-days" aria-describedby="on-deck-progress-days-validations" class="form-control" formControlName="onDeckProgressDays"
+                       type="number" inputmode="numeric" step="1" min="1"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="on-deck-last-progress-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('field-required')}}</div>
+                    }
+                    @if (formControl.errors?.min) {
+                      <div>{{t('min-days-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+  
+        <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('onDeckUpdateDays'); as formControl) {
+            <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-chapter-add-tooltip')">
+              <ng-template #view>
+                {{formControl.value}}
+              </ng-template>
+              <ng-template #edit>
+                <input id="on-deck-last-chapter-add" aria-describedby="on-deck-last-chapter-add-validations" class="form-control" formControlName="onDeckUpdateDays"
+                       type="number" inputmode="numeric" step="1" min="1"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+  
+                @if(settingsForm.dirty || !settingsForm.untouched) {
+                  <div id="on-deck-last-chapter-add-validations" class="invalid-feedback">
+                    @if (formControl.errors?.required) {
+                      <div>{{t('field-required')}}</div>
+                    }
+                    @if (formControl.errors?.min) {
+                      <div>{{t('min-days-validation')}}</div>
+                    }
+                  </div>
+                }
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+      </ng-container>
+    </div>
   </form>
 
 </ng-container>

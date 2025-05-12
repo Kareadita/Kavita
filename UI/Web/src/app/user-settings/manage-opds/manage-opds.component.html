@@ -5,14 +5,17 @@
 
   <p>{{t('clients-opds-description')}}</p>
 
-
-  <app-api-key [hideData]="true" [title]="t('clients-api-key-label')" [tooltipText]="t('clients-api-key-tooltip')" [showRefresh]="true"></app-api-key>
-
+  <div class="section">
+    <app-api-key [hideData]="true" [title]="t('clients-api-key-label')" [tooltipText]="t('clients-api-key-tooltip')" [showRefresh]="true"></app-api-key>
+  </div>
 
   @if (opdsEnabled && opdsUrl) {
-    <div class="mt-4">
-      <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
-                 [transform]="makeUrl"></app-api-key>
+    <div class="setting-section-break"></div>
+    <div class="section">
+      <div>
+        <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
+                   [transform]="makeUrl"></app-api-key>
+      </div>
     </div>
   }
 
