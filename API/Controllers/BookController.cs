@@ -103,9 +103,16 @@ public class BookController : BaseApiController
         if (chapter == null) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
 
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.LenientBookReaderOptions);
-        var key = BookService.CoalesceKeyForAnyFile(book, file);
 
-        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Get("en", "file-missing"));
+        var key = BookService.CoalesceKeyForAnyFile(book, file);
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key))
+        {
+            // the first attempt looks for the image directly, assuming no nesting.
+            // this attempt appends the chapter id in the front in case there are multiple chapters.
+            key = BookService.CoalesceKeyForChapterFile(book, chapterId, file);
+            if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key))
+                return BadRequest(await _localizationService.Get("en", "file-missing"));
+        }
 
         var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
         var content = await bookFile.ReadContentAsBytesAsync();

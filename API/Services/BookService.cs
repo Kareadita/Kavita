@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -321,7 +322,7 @@ public class BookService : IBookService
         }
     }
 
-    private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
+    private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase, int page)
     {
         var images = doc.DocumentNode.SelectNodes("//img")
                      ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
@@ -345,7 +346,7 @@ public class BookService : IBookService
 
             if (string.IsNullOrEmpty(key)) continue;
 
-            var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
+            var imageFile = GetKeyForImage(book, image.Attributes[key].Value, page);
             image.Attributes.Remove(key);
 
             if (!imageFile.StartsWith("http"))
@@ -371,11 +372,11 @@ public class BookService : IBookService
     /// <param name="book"></param>
     /// <param name="imageFile"></param>
     /// <returns></returns>
-    private static string GetKeyForImage(EpubBookRef book, string imageFile)
+    private static string GetKeyForImage(EpubBookRef book, string imageFile, int page)
     {
         if (book.Content.Images.ContainsLocalFileRefWithKey(imageFile)) return imageFile;
 
-        var correctedKey = book.Content.Images.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(imageFile));
+        var correctedKey = GetCorrectedKey(book.Content.Images.Local, page, imageFile);
         if (correctedKey != null)
         {
             imageFile = correctedKey;
@@ -383,8 +384,7 @@ public class BookService : IBookService
         else if (imageFile.StartsWith(".."))
         {
             // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
-            correctedKey =
-                book.Content.Images.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
+            correctedKey = GetCorrectedKeyOEBPS(book.Content.Images.Local, page, imageFile);
             if (correctedKey != null)
             {
                 imageFile = correctedKey;
@@ -394,6 +394,68 @@ public class BookService : IBookService
 
         return imageFile;
     }
+
+    private static string? GetCorrectedKey(IReadOnlyCollection<EpubLocalByteContentFileRef> images, int page, string imageFile)
+    {
+        // format: page 0 could be in a root directory 0 or totally skipped, so it'd be an exact match
+        // try for an exact match, then try again with just the last segment
+        // the image key could be something like 2/images/some_image.jpg, there may also be a directory like
+        // 2/
+        var fullMatch =
+            images
+                .Select(x => x.Key)
+                .SingleOrDefault(k =>
+                {
+                    // try for full uri
+                    var chapterNumber = k.GetFirstSegmentSpan().ParseInt();
+                    if (chapterNumber != null)
+                    {
+                        return chapterNumber == page && k.GetLastSegmentSpan().SequenceEqual(imageFile);
+                    }
+
+                    return k == imageFile;
+                });
+
+        if (fullMatch != null) return fullMatch;
+
+
+        return images.Select(x => x.Key).SingleOrDefault(k => k.GetLastSegmentSpan().SequenceEqual(imageFile));
+    }
+
+
+    private string? GetCorrectedKey(ReadOnlyCollection<EpubLocalTextContentFileRef> cssLocal, int page, string imageFile)
+    {
+        // format: page 0 could be in a root directory 0 or totally skipped, so it'd be an exact match
+        // try for an exact match, then try again with just the last segment
+        var fullMatch =
+            cssLocal
+                .Select(x => x.Key)
+                .SingleOrDefault(k =>
+                {
+                    // try for full uri
+                    var chapterNumber = k.GetFirstSegmentSpan().ParseInt();
+                    if (chapterNumber != null)
+                    {
+                        return chapterNumber == page && k.GetLastSegmentSpan().SequenceEqual(imageFile);
+                    }
+
+                    return k == imageFile;
+                });
+
+        if (fullMatch != null) return fullMatch;
+
+
+        return cssLocal.Select(x => x.Key).SingleOrDefault(k => k.GetLastSegmentSpan().SequenceEqual(imageFile));
+    }
+
+    private static string? GetCorrectedKeyOEBPS(IReadOnlyCollection<EpubLocalByteContentFileRef> images, int page, string imageFile)
+    {
+        imageFile = imageFile.Replace("..", string.Empty);
+
+        return GetCorrectedKey(images, page, imageFile);
+    }
+
+
 
     private static string PrepareFinalHtml(HtmlDocument doc, HtmlNode body)
     {
@@ -423,7 +485,7 @@ public class BookService : IBookService
         }
     }
 
-    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body)
+    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, int page)
     {
         var inlineStyles = doc.DocumentNode.SelectNodes("//style");
         if (inlineStyles != null)
@@ -445,7 +507,7 @@ public class BookService : IBookService
                 // In this case, we will do a search for the key that ends with
                 if (!book.Content.Css.ContainsLocalFileRefWithKey(key))
                 {
-                    var correctedKey = book.Content.Css.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(key));
+                    var correctedKey = GetCorrectedKey(book.Content.Css.Local, page, key);
                     if (correctedKey == null)
                     {
                         _logger.LogError("Epub is Malformed, key: {Key} is not matching OPF file", key);
@@ -1019,11 +1081,11 @@ public class BookService : IBookService
     /// <returns></returns>
     private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
     {
-        await InlineStyles(doc, book, apiBase, body);
+        await InlineStyles(doc, book, apiBase, body, page);
 
         RewriteAnchors(page, doc, mappings);
 
-        ScopeImages(doc, book, apiBase);
+        ScopeImages(doc, book, apiBase, page);
 
         return PrepareFinalHtml(doc, body);
     }
@@ -1077,6 +1139,19 @@ public class BookService : IBookService
         // {
         //     key = correctedKey;
         // }
+
+        return key;
+    }
+
+    public static string CoalesceKeyForChapterFile(EpubBookRef book, int chapterId, string key)
+    {
+        if (book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return key;
+
+        var cleanedKey = CleanContentKeys(key);
+        if (book.Content.AllFiles.ContainsLocalFileRefWithKey(cleanedKey)) return cleanedKey;
+
+        var keyWithChapter = $"{chapterId}/{key}";
+        if (book.Content.AllFiles.ContainsLocalFileRefWithKey(keyWithChapter)) return keyWithChapter;
 
         return key;
     }
