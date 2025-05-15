@@ -2229,8 +2229,8 @@
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
 
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",

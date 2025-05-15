@@ -15,7 +15,7 @@
 
       <div class="d-grid gap-2">
         @for (action of currentItems; track action.title) {
-          @if (willRenderAction(action)) {
+          @if (willRenderAction(action, user!)) {
             <button class="btn btn-outline-primary text-start d-flex justify-content-between align-items-center w-100"
                     (click)="handleItemClick(action)">
               {{action.title}}

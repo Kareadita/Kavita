@@ -21,7 +21,7 @@
       [trackByIdentity]="trackByIdentity"
     >
       <ng-template #cardItem let-item let-position="idx" >
-        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]"
+        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]" [actionEntity]="item"
                        [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
                        [linkUrl]="'/lists/' + item.id"
                        [count]="item.itemCount"
