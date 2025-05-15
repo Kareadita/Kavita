@@ -1,19 +1,29 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+[Flags]
+public enum ReadingProfileIncludes
+{
+    None = 0,
+    Series = 1 << 1,
+    Library = 1 << 2
+}
 
 public interface IAppUserReadingProfileRepository
 {
     Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId);
     Task<AppUserReadingProfile?> GetProfileForSeries(int userId, int seriesId);
     Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId);
-    Task<AppUserReadingProfile?> GetProfile(int profileId);
+    Task<AppUserReadingProfile?> GetProfile(int profileId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
 
     void Add(AppUserReadingProfile readingProfile);
     void Update(AppUserReadingProfile readingProfile);
@@ -44,10 +54,11 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .FirstOrDefaultAsync();
     }
 
-    public async Task<AppUserReadingProfile?> GetProfile(int profileId)
+    public async Task<AppUserReadingProfile?> GetProfile(int profileId, ReadingProfileIncludes includes = ReadingProfileIncludes.None)
     {
         return await context.AppUserReadingProfile
             .Where(rp => rp.Id == profileId)
+            .Includes(includes)
             .FirstOrDefaultAsync();
     }
 

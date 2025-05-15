@@ -23,6 +23,8 @@ namespace API.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    NormalizedName = table.Column<string>(type: "TEXT", nullable: true),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     ReadingDirection = table.Column<int>(type: "INTEGER", nullable: false),
                     ScalingOption = table.Column<int>(type: "INTEGER", nullable: false),

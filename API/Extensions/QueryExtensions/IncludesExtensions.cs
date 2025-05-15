@@ -342,4 +342,20 @@ public static class IncludesExtensions
 
         return queryable;
     }
+
+    public static IQueryable<AppUserReadingProfile> Includes(this IQueryable<AppUserReadingProfile> queryable, ReadingProfileIncludes includeFlags)
+    {
+
+        if (includeFlags.HasFlag(ReadingProfileIncludes.Series))
+        {
+            queryable = queryable.Include(r => r.Series);
+        }
+
+        if (includeFlags.HasFlag(ReadingProfileIncludes.Library))
+        {
+            queryable = queryable.Include(r => r.Libraries);
+        }
+
+        return queryable;
+    }
 }

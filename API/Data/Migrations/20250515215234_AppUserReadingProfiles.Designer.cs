@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250514215429_AppUserReadingProfiles")]
+    [Migration("20250515215234_AppUserReadingProfiles")]
     partial class AppUserReadingProfiles
     {
         /// <inheritdoc />
@@ -671,6 +671,12 @@ namespace API.Data.Migrations
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");

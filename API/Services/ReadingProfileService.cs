@@ -1,9 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
+using API.Helpers.Builders;
+using Kavita.Common;
 
 namespace API.Services;
 
@@ -45,6 +50,16 @@ public interface IReadingProfileService
     /// <returns></returns>
     Task DeleteImplicitForSeries(int userId, int seriesId);
 
+    /// <summary>
+    /// Deletes a given profile for a user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <exception cref="KavitaException">The default profile for the user cannot be deleted</exception>
+    Task DeleteReadingProfile(int userId, int profileId);
+
 }
 
 public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileService
@@ -69,10 +84,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileServi
         var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id);
         if (existingProfile == null)
         {
-            existingProfile = new AppUserReadingProfile
-            {
-                UserId = userId,
-            };
+            existingProfile = new AppUserReadingProfileBuilder(userId).Build();
         }
 
         if (existingProfile.UserId != userId) return false;
@@ -86,19 +98,34 @@ public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileServi
     {
         var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id);
 
+        // TODO: Rewrite
+        var isNew = false;
         if (existingProfile == null || existingProfile.Series.All(s => s.Id != seriesId))
         {
-            existingProfile = new AppUserReadingProfile
-            {
-                Implicit = true,
-                UserId = userId,
-            };
+            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            if (series == null) throw new KeyNotFoundException();
+
+            existingProfile = new AppUserReadingProfileBuilder(userId)
+                .WithSeries(series)
+                .WithImplicit(true)
+                .Build();
+
+            isNew = true;
         }
 
         if (existingProfile.UserId != userId) return false;
 
         UpdateReaderProfileFields(existingProfile, dto);
-        unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
+
+        if (isNew)
+        {
+            unitOfWork.AppUserReadingProfileRepository.Add(existingProfile);
+        }
+        else
+        {
+            unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
+        }
+
         return await unitOfWork.CommitAsync();
     }
 
@@ -109,12 +136,33 @@ public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileServi
 
         if (!profile.Implicit) return;
 
+        profile.Series = profile.Series.Where(s => s.Id != seriesId).ToList();
+
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteReadingProfile(int userId, int profileId)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        if (profile == null) throw new KeyNotFoundException();
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user == null || profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        if (user.UserPreferences.DefaultReadingProfileId == profileId) throw new KavitaException("cant-delete-default-profile");
+
         unitOfWork.AppUserReadingProfileRepository.Remove(profile);
         await unitOfWork.CommitAsync();
     }
 
     private static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto)
     {
+        if (!string.IsNullOrEmpty(dto.Name) && existingProfile.NormalizedName != dto.Name.ToNormalized())
+        {
+            existingProfile.Name = dto.Name;
+            existingProfile.NormalizedName = dto.Name.ToNormalized();
+        }
+
         // Manga Reader
         existingProfile.ReadingDirection = dto.ReadingDirection;
         existingProfile.ScalingOption = dto.ScalingOption;

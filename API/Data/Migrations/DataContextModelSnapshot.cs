@@ -669,6 +669,12 @@ namespace API.Data.Migrations
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");
 

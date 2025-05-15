@@ -12,6 +12,8 @@ public sealed record UserReadingProfileDto
 
     public int UserId { get; init; }
 
+    public string Name { get; init; }
+
     /// <inheritdoc cref="AppUserReadingProfile.Implicit"/>
     public bool Implicit { get; set; } = false;
 
@@ -60,6 +62,9 @@ public sealed record UserReadingProfileDto
     /// <inheritdoc cref="API.Entities.AppUserReadingProfile.AllowAutomaticWebtoonReaderDetection"/>
     [Required]
     public bool AllowAutomaticWebtoonReaderDetection { get; set; }
+
+    /// <inheritdoc cref="AppUserReadingProfile.WidthOverride"/>
+    public int? WidthOverride { get; set; }
 
     #endregion
 
