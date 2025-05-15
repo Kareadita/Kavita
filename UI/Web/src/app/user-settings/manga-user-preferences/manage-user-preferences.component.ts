@@ -110,7 +110,12 @@ export class ManageUserPreferencesComponent implements OnInit {
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
 
-    return (this.locales || []).filter(l => l.fileName === this.settingsForm.get('locale')!.value)[0].renderName;
+    const locale = (this.locales || []).find(l => l.fileName === this.settingsForm.get('locale')!.value);
+    if (!locale) {
+      return 'English';
+    }
+
+    return locale.renderName;
   }
 
 
