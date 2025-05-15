@@ -81,6 +81,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
     public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
+    public DbSet<AppUserReadingProfile> AppUserReadingProfile { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

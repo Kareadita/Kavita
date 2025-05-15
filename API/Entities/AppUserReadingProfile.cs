@@ -1,21 +1,18 @@
-﻿using System.Collections.Generic;
-using API.Data;
+using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.Entities;
 
-public class AppUserPreferences
+public class AppUserReadingProfile
 {
     public int Id { get; set; }
 
-    #region ReadingProfiles
+    public int UserId { get; set; }
+    public AppUser User { get; set; }
 
-    public int DefaultReadingProfileId { get; set; }
-
-    public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
-
-    #endregion
+    public ICollection<Series> Series { get; set; }
+    public ICollection<Library> Libraries { get; set; }
 
     #region MangaReader
 
@@ -67,6 +64,10 @@ public class AppUserPreferences
     /// Manga Reader Option: Allow Automatic Webtoon detection
     /// </summary>
     public bool AllowAutomaticWebtoonReaderDetection { get; set; }
+    /// <summary>
+    /// Manga Reader Option: Optional fixed width override
+    /// </summary>
+    public int? WidthOverride { get; set; } = null;
 
     #endregion
 
@@ -136,56 +137,9 @@ public class AppUserPreferences
 
     #endregion
 
-    #region Global
-
     /// <summary>
-    /// UI Site Global Setting: The UI theme the user should use.
+    /// If the profile has been created in the background after a user modified a series settings
     /// </summary>
-    /// <remarks>Should default to Dark</remarks>
-    public required SiteTheme Theme { get; set; } = Seed.DefaultThemes[0];
-    /// <summary>
-    /// Global Site Option: If the UI should layout items as Cards or List items
-    /// </summary>
-    /// <remarks>Defaults to Cards</remarks>
-    public PageLayoutMode GlobalPageLayoutMode { get; set; } = PageLayoutMode.Cards;
-    /// <summary>
-    /// UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already
-    /// </summary>
-    /// <remarks>Defaults to false</remarks>
-    public bool BlurUnreadSummaries { get; set; } = false;
-    /// <summary>
-    /// UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB.
-    /// </summary>
-    public bool PromptForDownloadSize { get; set; } = true;
-    /// <summary>
-    /// UI Site Global Setting: Should Kavita disable CSS transitions
-    /// </summary>
-    public bool NoTransitions { get; set; } = false;
-    /// <summary>
-    /// UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned
-    /// </summary>
-    public bool CollapseSeriesRelationships { get; set; } = false;
-    /// <summary>
-    /// UI Site Global Setting: Should series reviews be shared with all users in the server
-    /// </summary>
-    public bool ShareReviews { get; set; } = false;
-    /// <summary>
-    /// UI Site Global Setting: The language locale that should be used for the user
-    /// </summary>
-    public string Locale { get; set; }
-    #endregion
-
-    #region KavitaPlus
-    /// <summary>
-    /// Should this account have Scrobbling enabled for AniList
-    /// </summary>
-    public bool AniListScrobblingEnabled { get; set; }
-    /// <summary>
-    /// Should this account have Want to Read Sync enabled
-    /// </summary>
-    public bool WantToReadSync { get; set; }
-    #endregion
-
-    public AppUser AppUser { get; set; } = null!;
-    public int AppUserId { get; set; }
+    /// <remarks>A profile can be made non-implicit by a user, but not implicit</remarks>
+    public bool Implicit { get; set; } = false;
 }
