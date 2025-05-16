@@ -15,6 +15,7 @@ using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
@@ -68,7 +69,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
-        CreateMap<Person, PersonDto>();
+        CreateMap<Person, PersonDto>()
+            .ForMember(dest => dest.Aliases, opt => opt.MapFrom(src => src.Aliases.Select(s => s.Alias)));
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();

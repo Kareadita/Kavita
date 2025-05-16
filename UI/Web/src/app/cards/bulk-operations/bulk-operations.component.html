@@ -23,7 +23,7 @@
                   <span class="visually-hidden">{{t('mark-as-read')}}</span>
               </button>
               }
-              <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
+              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" />
           </span>
 
             <span id="bulk-actions-header" class="visually-hidden">Bulk Actions</span>

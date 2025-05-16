@@ -521,7 +521,7 @@ export class EditSeriesModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, description: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
+      return {id: 0, name: title, aliases: [], description: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
     personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
 

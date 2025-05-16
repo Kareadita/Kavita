@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, klicke zum Anzeigen"
     },
-    "review-series-modal": {
-        "title": "Rezension bearbeiten",
-        "review-label": "Rezension",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Rezension muss mindestens {{count}} Zeichen lang sein",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}'s Rezension",
@@ -762,8 +753,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Zu diesem Band gibt es keine Kapitel. Kann nicht gelesen werden.",
         "cover-change": "Es kann bis zu einer Minute dauern, bis Ihr Browser das Bild aktualisiert hat. Bis dahin kann auf einigen Seiten noch das alte Bild angezeigt werden.",
-        "user-reviews-local": "Lokale Bewertungen",
-        "user-reviews-plus": "Externe Bewertungen",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

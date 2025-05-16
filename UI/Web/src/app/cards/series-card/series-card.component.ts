@@ -22,7 +22,6 @@ import {ActionService} from 'src/app/_services/action.service';
 import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series-modal.component';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {DecimalPipe} from "@angular/common";
-import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -30,7 +29,6 @@ import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
@@ -39,7 +37,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {User} from "../../_models/user";
 import {ScrollService} from "../../_services/scroll.service";
 import {ReaderService} from "../../_services/reader.service";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
@@ -147,8 +144,6 @@ export class SeriesCardComponent implements OnInit, OnChanges {
    */
   prevOffset: number = 0;
   selectionInProgress: boolean = false;
-  private user: User | undefined;
-
 
   @HostListener('touchmove', ['$event'])
   onTouchMove(event: TouchEvent) {
@@ -192,15 +187,15 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.series) {
-      this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-        this.user = user;
-      });
+      // this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      //   this.user = user;
+      // });
 
       this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
         return this.downloadService.mapToEntityType(events, this.series);
       }));
 
-      this.actions = [...this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series))];
+      this.actions = [...this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))];
       if (this.isOnDeck) {
         const othersIndex = this.actions.findIndex(obj => obj.title === 'others');
         const othersAction = deepClone(this.actions[othersIndex]) as ActionItem<Series>;
@@ -209,9 +204,11 @@ export class SeriesCardComponent implements OnInit, OnChanges {
             action: Action.RemoveFromOnDeck,
             title: 'remove-from-on-deck',
             description: '',
-            callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
+            callback: this.handleSeriesActionCallback.bind(this),
             class: 'danger',
             requiresAdmin: false,
+            requiredRoles: [],
+            shouldRender: (_, _2, _3) => true,
             children: [],
           });
           this.actions[othersIndex] = othersAction;

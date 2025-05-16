@@ -1836,6 +1836,28 @@ namespace API.Data.Migrations
                     b.ToTable("Person");
                 });
 
+            modelBuilder.Entity("API.Entities.Person.PersonAlias", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedAlias")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("PersonAlias");
+                });
+
             modelBuilder.Entity("API.Entities.Person.SeriesMetadataPeople", b =>
                 {
                     b.Property<int>("SeriesMetadataId")
@@ -3082,6 +3104,17 @@ namespace API.Data.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("API.Entities.Person.PersonAlias", b =>
+                {
+                    b.HasOne("API.Entities.Person.Person", "Person")
+                        .WithMany("Aliases")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("API.Entities.Person.SeriesMetadataPeople", b =>
                 {
                     b.HasOne("API.Entities.Person.Person", "Person")
@@ -3496,6 +3529,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Person.Person", b =>
                 {
+                    b.Navigation("Aliases");
+
                     b.Navigation("ChapterPeople");
 
                     b.Navigation("SeriesMetadataPeople");

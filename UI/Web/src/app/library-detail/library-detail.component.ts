@@ -297,8 +297,6 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-
-
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, undefined);

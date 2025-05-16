@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.7",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.10",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.6.7"
+    "version": "0.8.6.10"
   },
   "servers": [
     {
@@ -5469,6 +5469,55 @@
         }
       }
     },
+    "/api/Person/search": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Find a person by name or alias against a query string",
+        "parameters": [
+          {
+            "name": "queryString",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Person/roles": {
       "get": {
         "tags": [
@@ -5837,6 +5886,105 @@
                   "items": {
                     "$ref": "#/components/schemas/StandaloneChapterDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/merge": {
+      "post": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Merges Persons into one, this action is irreversible",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/valid-alias": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Ensure the alias is valid to be added. For example, the alias cannot be on another person or be the same as the current person name/alias.",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "alias",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -16660,6 +16808,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -20905,6 +21060,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonAlias"
+            },
+            "nullable": true
+          },
           "coverImage": {
             "type": "string",
             "nullable": true
@@ -20962,6 +21124,35 @@
         },
         "additionalProperties": false
       },
+      "PersonAlias": {
+        "required": [
+          "alias",
+          "normalizedAlias"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedAlias": {
+            "type": "string",
+            "nullable": true
+          },
+          "personId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          }
+        },
+        "additionalProperties": false
+      },
       "PersonDto": {
         "required": [
           "name"
@@ -20991,6 +21182,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -21014,6 +21212,26 @@
             "type": "string",
             "description": "https://hardcover.app/authors/{HardcoverId}",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonMergeDto": {
+        "required": [
+          "destId",
+          "srcId"
+        ],
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": "integer",
+            "description": "The id of the person being merged into",
+            "format": "int32"
+          },
+          "srcId": {
+            "type": "integer",
+            "description": "The id of the person being merged. This person will be removed, and become an alias of API.DTOs.PersonMergeDto.DestId",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -25070,6 +25288,13 @@
           "name": {
             "minLength": 1,
             "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           },
           "description": {
             "type": "string",

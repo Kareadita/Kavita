@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
@@ -74,6 +74,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         {
             return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId(), ids));
         }
+
         return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId()));
     }
 

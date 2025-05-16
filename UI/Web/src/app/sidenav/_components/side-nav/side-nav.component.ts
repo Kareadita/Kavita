@@ -155,24 +155,25 @@ export class SideNavComponent implements OnInit {
   }
 
   async handleAction(action: ActionItem<Library>, library: Library) {
+    const lib = library;
     switch (action.action) {
       case(Action.Scan):
-        await this.actionService.scanLibrary(library);
+        await this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(library);
+        await this.actionService.refreshLibraryMetadata(lib);
         break;
       case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(library, undefined, false);
+        await this.actionService.refreshLibraryMetadata(lib, undefined, false);
         break;
       case (Action.AnalyzeFiles):
-        await this.actionService.analyzeFiles(library);
+        await this.actionService.analyzeFiles(lib);
         break;
       case (Action.Delete):
-        await this.actionService.deleteLibrary(library);
+        await this.actionService.deleteLibrary(lib);
         break;
       case (Action.Edit):
-        this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
+        this.actionService.editLibrary(lib, () => window.scrollTo(0, 0));
         break;
       default:
         break;
@@ -191,6 +192,7 @@ export class SideNavComponent implements OnInit {
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
+      console.log('library: ', library)
       action.callback(action, library);
     }
   }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
-using API.DTOs;
+using API.DTOs.Person;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;

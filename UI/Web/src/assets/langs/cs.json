@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, kliknutím zobrazíte"
     },
-    "review-series-modal": {
-        "title": "Upravit recenzi",
-        "review-label": "Recenze",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Recenze musí mít alespoň {{count}} znaků",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}'s Recenze",
@@ -81,7 +72,8 @@
         "your-review": "Toto je vaše recenze",
         "external-review": "Externí recenze",
         "local-review": "Místní recenze",
-        "rating-percentage": "Hodnocení {{r}} %"
+        "rating-percentage": "Hodnocení {{r}} %",
+        "critic": "kritik"
     },
     "want-to-read": {
         "title": "Chci číst",
@@ -785,9 +777,7 @@
         "publication-status-tooltip": "Stav publikace",
         "release-date-title": "Vydání",
         "time-left-alt": "Zbývající čas",
-        "user-reviews-local": "Místní hodnocení",
         "publication-status-title": "Publikace",
-        "user-reviews-plus": "Externí hodnocení",
         "weblinks-title": "Odkazy",
         "more-alt": "Více",
         "pages-count": "{{num}} stran",
@@ -821,7 +811,8 @@
         "close": "{{common.close}}",
         "kavita-rating-title": "Vaše hodnocení",
         "entry-label": "Zobrazit podrobnosti",
-        "kavita-tooltip": "Vaše hodnocení + celkové"
+        "kavita-tooltip": "Vaše hodnocení + celkové",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "a {{počet}} více"
@@ -1460,7 +1451,8 @@
         "skip-alt": "Přeskočit na hlavní obsah",
         "server-settings": "Nastavení serveru",
         "settings": "Nastavení",
-        "announcements": "Oznámení"
+        "announcements": "Oznámení",
+        "person-aka-status": "Shoduje se s aliasem"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2009,7 +2001,10 @@
         "new-collection": "Nová sbírka",
         "match": "Shoda",
         "match-tooltip": "Přiřadit série s Kavitou+ manuálně",
-        "reorder": "Přeuspořádat"
+        "reorder": "Přeuspořádat",
+        "rename": "Přejmenovat",
+        "rename-tooltip": "Přejmenovat inteligentní filtr",
+        "merge": "Sloučit"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2045,7 +2040,9 @@
         "known-for-title": "Známý díky",
         "individual-role-title": "Jako {{role}}",
         "browse-person-title": "Všechny práce {{name}}",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "Žádné informace o této osobě",
+        "aka-title": "Známé také jako "
     },
     "draggable-ordered-list": {
         "reorder-label": "Přeuspořádat",
@@ -2064,7 +2061,7 @@
     },
     "match-series-modal": {
         "no-results": "Nelze najít shodu.Zkuste přidat url od podporovaného poskytovatele a zkuste to znovu.",
-        "query-tooltip": "Zadejte název série, url AniListu/MyAnimeListu. Url budou používat přímé vyhledávání.",
+        "query-tooltip": "Zadejte název série, AniList/MyAnimeList/ComicBookRoundup url. Url budou používat přímé vyhledávání.",
         "title": "Shoda {{seriesName}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
@@ -2131,7 +2128,8 @@
         "chapter-count": "{{common.chapter-count}}",
         "releasing": "Vychází",
         "details": "Zobrazit stránku",
-        "updating-metadata-status": "Aktualizace metadat"
+        "updating-metadata-status": "Aktualizace metadat",
+        "issue-count": "{{common.issue-count}}"
     },
     "pdf-reader": {
         "incognito-mode": "Anonymní režim",
@@ -2179,7 +2177,11 @@
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "close": "{{common.close}}",
         "anilist-id-label": "AniList ID",
-        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/"
+        "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
+        "aliases-tab": "Aliasy",
+        "aliases-label": "Upravit aliasy",
+        "alias-overlap": "Tento alias již odkazuje na jinou osobu nebo je jménem této osoby, zvažte jejich sloučení.",
+        "aliases-tooltip": "Pokud je série označena aliasem osoby, je tato osoba přiřazena, místo aby byla vytvořena nová osoba. Při odstranění aliasu je nutné sérii znovu prohledat, aby se změna zachytila."
     },
     "errors": {
         "delete-theme-in-use": "Motiv je aktuálně používán alespoň jedním uživatelem, nelze odstranit",
@@ -2458,7 +2460,8 @@
         "match-success": "Správně sladěné série",
         "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon.",
         "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami.",
-        "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění."
+        "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění.",
+        "series-added-want-to-read": "Série přidána ze seznamu Chci číst"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2620,7 +2623,18 @@
         "localized-name-tooltip": "Povolit zápis lokalizovaného názvu při odemknutí pole. Kavita se pokusí provést nejlepší odhad.",
         "enable-cover-image-label": "Obrázek na obálce",
         "overrides-description": "Povolit Kavitě zápis přes uzamčená pole.",
-        "overrides-label": "Přepisuje"
+        "overrides-label": "Přepisuje",
+        "enable-chapter-release-date-label": "Datum vydání",
+        "enable-chapter-publisher-label": "Vydavatel",
+        "enable-chapter-publisher-tooltip": "Umožnit napsání vydavatele kapitoly/vydání",
+        "enable-chapter-cover-label": "Obálka kapitoly",
+        "enable-chapter-cover-tooltip": "Umožnit nastavení obálky kapitoly/vydání",
+        "chapter-header": "Pole kapitoly",
+        "enable-chapter-release-date-tooltip": "Povolit datum vydání kapitoly/vydání, které má být napsáno",
+        "enable-chapter-title-label": "Titulek",
+        "enable-chapter-title-tooltip": "Umožnit napsání názvu kapitoly/vydání",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}"
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -2631,7 +2645,12 @@
         "covers": "Obálky",
         "genres": "{{metadata-fields.genres-title}}",
         "summary": "{{filter-field-pipe.summary}}",
-        "publication-status": "{{edit-series-modal.publication-status-title}}"
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "chapter-title": "Název (kapitola)",
+        "chapter-covers": "Obálky (kapitola)",
+        "chapter-release-date": "Datum vydání (kapitola)",
+        "chapter-summary": "Shrnutí (kapitola)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitola)"
     },
     "role-localized-pipe": {
         "download": "Stažené",
@@ -2649,5 +2668,27 @@
         "trace": "Sledovat",
         "warning": "Varování",
         "critical": "Kritické"
+    },
+    "review-modal": {
+        "title": "Upravit recenzi",
+        "min-length": "Recenze musí mít alespoň {{count}} znaků",
+        "required": "{{validation.required-field}}",
+        "delete": "{{common.delete}}",
+        "save": "{{common.save}}",
+        "review-label": "Recenze",
+        "close": "{{common.close}}"
+    },
+    "reviews": {
+        "user-reviews-local": "Místní recenze",
+        "user-reviews-plus": "Externí recenze"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Sloučit osoby",
+        "merge-warning": "Pokud budete pokračovat, vybraná osoba bude odstraněna. Jméno vybrané osoby bude přidáno jako alias a všechny její role budou převedeny.",
+        "alias-title": "Nové aliasy",
+        "known-for-title": "Známý pro"
     }
 }

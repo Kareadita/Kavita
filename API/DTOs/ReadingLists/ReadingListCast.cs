@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.Person;
 
 namespace API.DTOs.ReadingLists;
 

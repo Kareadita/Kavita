@@ -51,7 +51,7 @@
 
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.0.1" />
-      <PackageReference Include="MailKit" Version="4.11.0" />
+      <PackageReference Include="MailKit" Version="4.12.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -66,7 +66,7 @@
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
@@ -78,7 +78,7 @@
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
-    <PackageReference Include="NetVips" Version="3.0.0" />
+    <PackageReference Include="NetVips" Version="3.0.1" />
     <PackageReference Include="NetVips.Native" Version="8.16.1" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -87,20 +87,20 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.AspNetCore.SignalR" Version="0.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.SignalR.Core" Version="0.1.2" />
     <PackageReference Include="SharpCompress" Version="0.39.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.8.0.113526">
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.9.0.115408">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="22.0.13" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="22.0.14" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
-    <PackageReference Include="VersOne.Epub" Version="3.3.3" />
+    <PackageReference Include="VersOne.Epub" Version="3.3.4" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
@@ -111,17 +111,16 @@
 
 
   <ItemGroup>
-    <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="cache\**" />
-    <None Remove="cache-long\**" />
     <None Remove="backups\**" />
     <None Remove="logs\**" />
     <None Remove="temp\**" />
-    <None Remove="kavita.log" />
-    <None Remove="kavita.db" />
-    <None Remove="covers\**" />
+    <None Remove="config\kavita.log" />
+    <None Remove="config\kavita.db" />
+    <None Remove="config\covers\**" />
     <None Remove="wwwroot\**" />
+    <None Remove="cache\cache-long\**" />
     <None Remove="config\cache\**" />
     <None Remove="config\logs\**" />
     <None Remove="config\covers\**" />
@@ -139,6 +138,7 @@
     <Compile Remove="covers\**" />
     <Compile Remove="wwwroot\**" />
     <Compile Remove="config\cache\**" />
+    <Compile Remove="cache\cache-long\**" />
     <Compile Remove="config\logs\**" />
     <Compile Remove="config\covers\**" />
     <Compile Remove="config\bookmarks\**" />
@@ -188,7 +188,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="config\cache-long\" />
     <Folder Include="config\themes" />
     <Content Include="EmailTemplates\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -100,7 +100,9 @@ export class GroupedTypeaheadComponent implements OnInit {
 
 
   hasFocus: boolean = false;
-  typeaheadForm: FormGroup = new FormGroup({});
+  typeaheadForm: FormGroup = new FormGroup({
+    typeahead: new FormControl('', []),
+  });
   includeChapterAndFiles: boolean = false;
   prevSearchTerm: string = '';
   searchSettingsForm = new FormGroup(({'includeExtras': new FormControl(false)}));
@@ -121,14 +123,29 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.close();
   }
 
-  @HostListener('window:keydown', ['$event'])
+  @HostListener('document:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
-    if (!this.hasFocus) { return; }
+
+    const isCtrlOrMeta = event.ctrlKey || event.metaKey;
+
 
     switch(event.key) {
       case KEY_CODES.ESC_KEY:
+        if (!this.hasFocus) { return; }
         this.close();
         event.stopPropagation();
+        break;
+
+      case KEY_CODES.K:
+        if (isCtrlOrMeta) {
+          if (this.inputElem.nativeElement) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            this.inputElem.nativeElement.focus();
+            this.inputElem.nativeElement.click();
+          }
+        }
         break;
       default:
         break;
@@ -136,7 +153,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
+    this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
     this.cdRef.markForCheck();
 
     this.searchSettingsForm.get('includeExtras')!.valueChanges.pipe(

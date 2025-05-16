@@ -52,6 +52,7 @@ public interface IVersionUpdaterService
     Task PushUpdate(UpdateNotificationDto update);
     Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0);
     Task<int> GetNumberOfReleasesBehind(bool stableOnly = false);
+    void BustGithubCache();
 }
 
 
@@ -384,7 +385,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
         {
             var cachedData = await File.ReadAllTextAsync(_cacheLatestReleaseFilePath);
-            return System.Text.Json.JsonSerializer.Deserialize<UpdateNotificationDto>(cachedData);
+            return JsonSerializer.Deserialize<UpdateNotificationDto>(cachedData);
         }
 
         return null;
@@ -407,7 +408,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(update, JsonOptions);
+            var json = JsonSerializer.Serialize(update, JsonOptions);
             await File.WriteAllTextAsync(_cacheLatestReleaseFilePath, json);
         }
         catch (Exception ex)
@@ -444,6 +445,21 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return updates
             .Where(update => !update.IsPrerelease)
             .Count(u => u.IsReleaseNewer);
+    }
+
+    /// <summary>
+    /// Clears the Github cache
+    /// </summary>
+    public void BustGithubCache()
+    {
+        try
+        {
+            File.Delete(_cacheFilePath);
+            File.Delete(_cacheLatestReleaseFilePath);
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to clear Github cache");
+        }
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)

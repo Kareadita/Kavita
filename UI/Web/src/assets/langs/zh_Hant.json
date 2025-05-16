@@ -58,15 +58,6 @@
     "spoiler": {
         "click-to-show": "點擊查看據透"
     },
-    "review-series-modal": {
-        "title": "編輯評論",
-        "review-label": "評論",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "評論至少需有 {{count}} 個字元",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}的評論",
@@ -712,8 +703,6 @@
         "page-settings-title": "頁面設定",
         "layout-mode-option-list": "清單",
         "incognito": "無痕模式",
-        "user-reviews-local": "本地評論",
-        "user-reviews-plus": "外部評論",
         "release-date-title": "發行",
         "publication-status-title": "出版",
         "continue-from": "繼續 {{title}}",

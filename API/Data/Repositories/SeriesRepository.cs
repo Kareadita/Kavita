@@ -15,6 +15,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.ReadingLists;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
@@ -455,11 +456,18 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Persons = await _context.SeriesMetadata
+        // I can't work out how to map people in DB layer
+        var personIds = await _context.SeriesMetadata
             .SearchPeople(searchQuery, seriesIds)
-            .Take(maxRecords)
-            .OrderBy(t => t.NormalizedName)
+            .Select(p => p.Id)
             .Distinct()
+            .OrderBy(id => id)
+            .Take(maxRecords)
+            .ToListAsync();
+
+        result.Persons = await _context.Person
+            .Where(p => personIds.Contains(p.Id))
+            .OrderBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -475,8 +483,8 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Files = new List<MangaFileDto>();
-        result.Chapters = new List<ChapterDto>();
+        result.Files = [];
+        result.Chapters = (List<ChapterDto>) [];
 
 
         if (includeChapterAndFiles)

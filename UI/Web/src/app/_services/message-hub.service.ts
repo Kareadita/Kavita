@@ -109,7 +109,11 @@ export enum EVENTS {
   /**
    * A Progress event when a smart collection is synchronizing
    */
-  SmartCollectionSync = 'SmartCollectionSync'
+  SmartCollectionSync = 'SmartCollectionSync',
+  /**
+   * A Person merged has been merged into another
+   */
+  PersonMerged = 'PersonMerged',
 }
 
 export interface Message<T> {
@@ -336,6 +340,13 @@ export class MessageHubService {
         payload: resp.body
       });
     });
+
+    this.hubConnection.on(EVENTS.PersonMerged, resp => {
+      this.messagesSource.next({
+        event: EVENTS.PersonMerged,
+        payload: resp.body
+      });
+    })
   }
 
   stopHubConnection() {

@@ -128,15 +128,6 @@
     "spoiler": {
         "click-to-show": "Spoileri, napsauta näyttääksesi"
     },
-    "review-series-modal": {
-        "title": "Muokkaa arvostelua",
-        "review-label": "Arvostelu",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Arvostelussa on oltava vähintään {{count}} merkkiä",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "external-mod": "(external)",

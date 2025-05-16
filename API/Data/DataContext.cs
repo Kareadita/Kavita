@@ -49,6 +49,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
     public DbSet<ReadingListItem> ReadingListItem { get; set; } = null!;
     public DbSet<Person> Person { get; set; } = null!;
+    public DbSet<PersonAlias> PersonAlias { get; set; } = null!;
     public DbSet<Genre> Genre { get; set; } = null!;
     public DbSet<Tag> Tag { get; set; } = null!;
     public DbSet<SiteTheme> SiteTheme { get; set; } = null!;

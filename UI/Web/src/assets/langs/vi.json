@@ -39,15 +39,6 @@
         "processed": "Đã Xử Lý",
         "not-processed": "Chưa Xử Lý"
     },
-    "review-series-modal": {
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
-        "title": "Sửa Đánh Giá",
-        "review-label": "Đánh Giá",
-        "min-length": "Đánh giá phải dài ít nhất {{count}} ký tự"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "go-to-review": "Tới Phần Đánh giá",
@@ -562,8 +553,6 @@
         "read-options-alt": "Tùy Chọn Đọc",
         "edit-series-alt": "Chỉnh Sửa Thông Tin",
         "send-to": "Tệp được gửi qua email tới {{deviceName}}",
-        "user-reviews-local": "Đánh Giá Cục Bộ",
-        "user-reviews-plus": "Đánh Giá Bên Ngoài",
         "release-date-title": "Phát hành",
         "pages-count": "{{num}} Trang",
         "words-count": "{{num}} Từ",

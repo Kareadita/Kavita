@@ -83,12 +83,12 @@ export class ManageLibraryComponent implements OnInit {
   lastSelectedIndex: number | null = null;
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
+  handleKeypress(_: KeyboardEvent) {
     this.isShiftDown = true;
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
+  handleKeyUp(_: KeyboardEvent) {
     this.isShiftDown = false;
   }
 
@@ -106,7 +106,7 @@ export class ManageLibraryComponent implements OnInit {
   ngOnInit(): void {
     this.getLibraries();
 
-    // when a progress event comes in, show it on the UI next to library
+    // when a progress event comes in, show it on the UI next to the library
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef),
       filter(event => event.event === EVENTS.ScanSeries || event.event === EVENTS.NotificationProgress),
       distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) =>
@@ -270,7 +270,8 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  async handleBulkAction(action: ActionItem<Library>, library : Library | null) {
+  async handleBulkAction(action: ActionItem<Library>, _: Library) {
+    //Library is null for bulk actions
     this.bulkAction = action.action;
     this.cdRef.markForCheck();
 
@@ -284,7 +285,7 @@ export class ManageLibraryComponent implements OnInit {
         break;
       case (Action.CopySettings):
 
-        // Prompt the user for the library then wait for them to manually trigger applyBulkAction
+        // Prompt the user for the library, then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
         ref.componentInstance.libraries = this.libraries;
         ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number | null) => {
@@ -297,7 +298,6 @@ export class ManageLibraryComponent implements OnInit {
         break;
     }
   }
-
 
   async handleAction(action: ActionItem<Library>, library: Library) {
     switch (action.action) {
@@ -320,13 +320,6 @@ export class ManageLibraryComponent implements OnInit {
         break;
     }
   }
-
-  performAction(action: ActionItem<Library>, library: Library) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, library);
-    }
-  }
-
 
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.libraries);

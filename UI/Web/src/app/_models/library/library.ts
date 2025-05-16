@@ -6,6 +6,9 @@ export enum LibraryType {
     Book = 2,
     Images = 3,
     LightNovel = 4,
+    /**
+     * Comic (Legacy)
+     */
     ComicVine = 5
 }
 

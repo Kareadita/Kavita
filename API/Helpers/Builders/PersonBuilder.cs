@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using API.Entities;
-using API.Entities.Enums;
-using API.Entities.Metadata;
+using System.Linq;
 using API.Entities.Person;
 using API.Extensions;
 
@@ -33,6 +31,20 @@ public class PersonBuilder : IEntityBuilder<Person>
         _person.Id = id;
         return this;
     }
+
+    public PersonBuilder WithAlias(string alias)
+    {
+        if (_person.Aliases.Any(a => a.NormalizedAlias.Equals(alias.ToNormalized())))
+        {
+            return this;
+        }
+
+        _person.Aliases.Add(new PersonAliasBuilder(alias).Build());
+
+        return this;
+    }
+
+
 
     public PersonBuilder WithSeriesMetadata(SeriesMetadataPeople seriesMetadataPeople)
     {

@@ -56,15 +56,6 @@
     "spoiler": {
         "click-to-show": "Potentsiaalselt mittesoovitav eelinfo sisu kohta - kliki seda, et näidata"
     },
-    "review-series-modal": {
-        "title": "Muuda ülevaade",
-        "review-label": "Ülevaade",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Ülevaade peab olema vähemalt {{count}} märki pikk",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}} ülevaade",

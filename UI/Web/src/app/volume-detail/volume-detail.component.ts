@@ -80,6 +80,7 @@ import {UserReview} from "../_single-module/review-card/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {ChapterService} from "../_services/chapter.service";
+import {User} from "../_models/user";
 
 enum TabID {
 
@@ -187,6 +188,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -211,7 +213,7 @@ export class VolumeDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this));
+  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this), this.shouldRenderVolumeAction.bind(this));
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
   bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
@@ -570,16 +572,6 @@ export class VolumeDetailComponent implements OnInit {
     this.location.replaceState(newUrl)
   }
 
-  openPerson(field: FilterField, value: number) {
-    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
-  }
-
-  performAction(action: ActionItem<Volume>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.volume!);
-    }
-  }
-
   async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
@@ -607,6 +599,17 @@ export class VolumeDetailComponent implements OnInit {
         const device = (action._extra!.data as Device);
         this.actionService.sendToDevice([chapter.id], device);
         break;
+    }
+  }
+
+  shouldRenderVolumeAction(action: ActionItem<Volume>, entity: Volume, user: User) {
+    switch (action.action) {
+      case(Action.MarkAsRead):
+        return entity.pagesRead < entity.pages;
+      case(Action.MarkAsUnread):
+        return entity.pagesRead !== 0;
+      default:
+        return true;
     }
   }
 
@@ -687,6 +690,4 @@ export class VolumeDetailComponent implements OnInit {
       this.currentlyReadingChapter = undefined;
     }
   }
-
-  protected readonly encodeURIComponent = encodeURIComponent;
 }

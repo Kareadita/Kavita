@@ -55,6 +55,9 @@ public class Startup
     {
         _config = config;
         _env = env;
+
+        // Disable Hangfire Automatic Retry
+        GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
     }
 
     // This method gets called by the runtime. Use this method to add services to the container.
@@ -223,7 +226,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
         IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider, ICacheService cacheService,
-        IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService)
+        IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService, IVersionUpdaterService versionService)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
@@ -235,8 +238,9 @@ public class Startup
                     // Apply all migrations on startup
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
-
                     logger.LogInformation("Running Migrations");
+
+                    #region Migrations
 
                     // v0.7.9
                     await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
@@ -289,13 +293,23 @@ public class Startup
                     await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
                     await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
 
+                    #endregion
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
+                    var isVersionDifferent = installVersion.Value != BuildInfo.Version.ToString();
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
                     await unitOfWork.CommitAsync();
 
                     logger.LogInformation("Running Migrations - complete");
+
+                    if (isVersionDifferent)
+                    {
+                        // Clear the Github cache so update stuff shows correctly
+                        versionService.BustGithubCache();
+                    }
+
                 }).GetAwaiter()
                 .GetResult();
         }

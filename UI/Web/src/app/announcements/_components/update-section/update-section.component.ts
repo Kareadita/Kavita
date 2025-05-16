@@ -10,6 +10,4 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 export class UpdateSectionComponent {
   @Input({required: true}) items: Array<string> = [];
   @Input({required: true}) title: string = '';
-
-  // TODO: Implement a read-more-list so that we by default show a configurable number
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -48,15 +49,13 @@ public class Program
 
         var directoryService = new DirectoryService(null!, new FileSystem());
 
+
+        // Check if this is the first time running and if so, rename appsettings-init.json to appsettings.json
+        HandleFirstRunConfiguration();
+
+
         // Before anything, check if JWT has been generated properly or if user still has default
-        if (!Configuration.CheckIfJwtTokenSet() &&
-            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
-        {
-            Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
-            var rBytes = new byte[256];
-            RandomNumberGenerator.Create().GetBytes(rBytes);
-            Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
-        }
+        EnsureJwtTokenKey();
 
         try
         {
@@ -70,6 +69,7 @@ public class Program
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 var context = services.GetRequiredService<DataContext>();
+
                 var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                 var isDbCreated = await context.Database.CanConnectAsync();
                 if (isDbCreated && pendingMigrations.Any())
@@ -154,6 +154,26 @@ public class Program
         } finally
         {
             await Log.CloseAndFlushAsync();
+        }
+    }
+
+    private static void EnsureJwtTokenKey()
+    {
+        if (Configuration.CheckIfJwtTokenSet() || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development) return;
+
+        Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
+        var rBytes = new byte[256];
+        RandomNumberGenerator.Create().GetBytes(rBytes);
+        Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
+    }
+
+    private static void HandleFirstRunConfiguration()
+    {
+        var firstRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings-init.json");
+        if (File.Exists(firstRunConfigFilePath) &&
+            !File.Exists(Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json")))
+        {
+            File.Move(firstRunConfigFilePath, Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json"));
         }
     }
 

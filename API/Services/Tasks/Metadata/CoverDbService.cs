@@ -501,7 +501,7 @@ public class CoverDbService : ICoverDbService
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
-                            person.CoverImage = Path.GetFileName(existingPath);
+                            return;
                         }
                     }
                     else
@@ -572,14 +572,20 @@ public class CoverDbService : ICoverDbService
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
                         {
-                            _directoryService.DeleteFiles([existingPath]);
+
+                            // Don't delete series cover, unless it's an override, otherwise the first chapter cover will be null
+                            if (existingPath.Contains(ImageService.GetSeriesFormat(series.Id)))
+                            {
+                                _directoryService.DeleteFiles([existingPath]);
+                            }
+
                             _directoryService.CopyFile(tempFullPath, finalFullPath);
                             series.CoverImage = finalFileName;
                         }
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
-                            series.CoverImage = Path.GetFileName(existingPath);
+                            return;
                         }
                     }
                     catch (Exception ex)
@@ -651,6 +657,7 @@ public class CoverDbService : ICoverDbService
                         else
                         {
                             _directoryService.DeleteFiles([tempFullPath]);
+                            return;
                         }
 
                         chapter.CoverImage = finalFileName;

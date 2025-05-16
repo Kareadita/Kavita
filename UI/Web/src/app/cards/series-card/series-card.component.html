@@ -74,7 +74,7 @@
 
       @if (actions && actions.length > 0) {
         <span class="card-actions">
-            <app-card-actionables (actionHandler)="handleSeriesActionCallback($event, series)" [actions]="actions" [labelBy]="series.name"></app-card-actionables>
+            <app-card-actionables [entity]="series" [inputActions]="actions" [labelBy]="series.name"></app-card-actionables>
         </span>
       }
     </div>

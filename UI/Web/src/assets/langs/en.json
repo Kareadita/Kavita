@@ -1003,7 +1003,7 @@
         "save": "{{common.save}}",
         "no-results": "Unable to find a match. Try adding the url from a supported provider and retry.",
         "query-label": "Query",
-        "query-tooltip": "Enter series name, AniList/MyAnimeList url. Urls will use a direct lookup.",
+        "query-tooltip": "Enter series name, AniList/MyAnimeList/ComicBookRoundup url. Urls will use a direct lookup.",
         "dont-match-label": "Do not Match",
         "dont-match-tooltip": "Opt this series from matching and scrobbling",
         "search": "Search"
@@ -1103,12 +1103,14 @@
     },
 
     "person-detail": {
+        "aka-title": "Also known as ",
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
         "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
         "all-roles": "Roles",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "No information about this Person"
     },
 
     "library-settings-modal": {
@@ -1857,7 +1859,8 @@
         "logout": "Logout",
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Matches an alias"
     },
 
     "promoted-icon": {
@@ -2246,6 +2249,7 @@
         "title": "{{personName}} Details",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "aliases-tab": "Aliases",
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2263,7 +2267,20 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
-        "download-coversdb": "Download from CoversDB"
+        "download-coversdb": "Download from CoversDB",
+        "aliases-label": "Edit aliases",
+        "alias-overlap": "This alias already points towards another person or is the name of this person, consider merging them.",
+        "aliases-tooltip": "When a series is tagged with an alias of a person, the person is assigned rather than creating a new person. When deleting an alias, you'll have to rescan the series for the change to be picked up."
+    },
+
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Merge Person",
+        "merge-warning": "If you proceed, the selected person will be removed. The selected person's name will be added as an alias, and all their roles will be transferred.",
+        "alias-title": "New aliases",
+        "known-for-title": "Known for"
     },
 
     "day-breakdown": {
@@ -2781,7 +2798,8 @@
         "match-tooltip": "Match Series with Kavita+ manually",
         "reorder": "Reorder",
         "rename": "Rename",
-        "rename-tooltip": "Rename the Smart Filter"
+        "rename-tooltip": "Rename the Smart Filter",
+        "merge": "Merge"
     },
 
     "preferences": {

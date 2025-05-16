@@ -1,18 +1,18 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
   OnInit,
   Output
 } from '@angular/core';
-import {NgClass} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {Action, ActionItem} from "../../_services/action-factory.service";
+import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
 import {tap} from "rxjs";
 import {User} from "../../_models/user";
@@ -36,6 +36,7 @@ export class ActionableModalComponent implements OnInit {
   protected readonly destroyRef = inject(DestroyRef);
   protected readonly Breakpoint = Breakpoint;
 
+  @Input() entity: ActionableEntity = null;
   @Input() actions: ActionItem<any>[] = [];
   @Input() willRenderAction!: (action: ActionItem<any>) => boolean;
   @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
