@@ -1,0 +1,38 @@
+@use '../../../series-detail-common';
+
+
+
+.group-item {
+  background-color: transparent;
+
+  &:hover {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  &:active, &.active {
+    background-color: var(--card-bg-color);
+    border-radius: 5px;
+  }
+}
+
+.pill {
+  font-size: .8rem;
+  background-color: var(--card-bg-color);
+  border-radius: 0.375rem;
+  color: var(--badge-text-color);
+
+  &.active {
+    background-color : var(--primary-color);
+  }
+}
+
+.custom-position {
+  right: 15px;
+  top: -42px;
+}
+
+a:hover {
+  cursor: pointer;
+}

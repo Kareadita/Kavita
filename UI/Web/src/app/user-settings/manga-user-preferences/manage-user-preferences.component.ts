@@ -80,23 +80,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
 
-  protected readonly readingDirections = readingDirections;
-  protected readonly scalingOptions = scalingOptions;
-  protected readonly pageSplitOptions = pageSplitOptions;
-  protected readonly readerModes = readingModes;
-  protected readonly layoutModes = layoutModes;
-  protected readonly bookWritingStyles = bookWritingStyles;
-  protected readonly bookLayoutModes = bookLayoutModes;
-  protected readonly pdfSpreadModes = pdfSpreadModes;
-  protected readonly pdfThemes = pdfThemes;
-  protected readonly pdfScrollModes = pdfScrollModes;
-
-  bookColorThemesTranslated = bookColorThemes.map(o => {
-    const d = {...o};
-    d.name = translate('theme.' + d.translationKey);
-    return d;
-  });
-
 
   fontFamilies: Array<string> = [];
   locales: Array<KavitaLocale> = [];
@@ -136,37 +119,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       this.user = results.user;
       this.user.preferences = results.pref;
-
-      /*if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
-        this.user.preferences.bookReaderFontFamily = 'default';
-      }
-
-      this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));
-      this.settingsForm.addControl('scalingOption', new FormControl(this.user.preferences.scalingOption, []));
-      this.settingsForm.addControl('pageSplitOption', new FormControl(this.user.preferences.pageSplitOption, []));
-      this.settingsForm.addControl('autoCloseMenu', new FormControl(this.user.preferences.autoCloseMenu, []));
-      this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
-      this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
-      this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
-      this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
-      this.settingsForm.addControl('swipeToPaginate', new FormControl(this.user.preferences.swipeToPaginate, []));
-      this.settingsForm.addControl('backgroundColor', new FormControl(this.user.preferences.backgroundColor, []));
-      this.settingsForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.user.preferences.allowAutomaticWebtoonReaderDetection, []));
-
-      this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
-      this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
-      this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
-      this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
-      this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
-      this.settingsForm.addControl('bookReaderWritingStyle', new FormControl(this.user.preferences.bookReaderWritingStyle, []))
-      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-      this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-      this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
-      this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
-
-      this.settingsForm.addControl('pdfTheme', new FormControl(this.user?.preferences.pdfTheme || PdfTheme.Dark, []));
-      this.settingsForm.addControl('pdfScrollMode', new FormControl(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical, []));
-      this.settingsForm.addControl('pdfSpreadMode', new FormControl(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, []));*/
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
@@ -290,18 +242,8 @@ export class ManageUserPreferencesComponent implements OnInit {
       //pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
       //pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
       aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
-      wantToReadSync: modelSettings.wantToReadSync
+      wantToReadSync: modelSettings.wantToReadSync,
+      defaultReadingProfileId: this.user!.preferences.defaultReadingProfileId,
     };
-  }
-
-  handleBackgroundColorChange(color: string) {
-    this.settingsForm.markAsDirty();
-    this.settingsForm.markAsTouched();
-    if (this.user?.preferences) {
-      //this.user.preferences.backgroundColor = color;
-    }
-
-    this.settingsForm.get('backgroundColor')?.setValue(color);
-    this.cdRef.markForCheck();
   }
 }

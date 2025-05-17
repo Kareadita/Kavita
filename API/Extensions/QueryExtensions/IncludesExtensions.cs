@@ -220,7 +220,8 @@ public static class IncludesExtensions
         {
             query = query
                 .Include(u => u.UserPreferences)
-                .ThenInclude(p => p.Theme);
+                .ThenInclude(p => p.Theme)
+                .Include(u => u.UserPreferences.ReadingProfiles);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))

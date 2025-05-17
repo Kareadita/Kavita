@@ -41,6 +41,7 @@ export enum SettingsTabId {
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
+  ReadingProfiles = 'reading-profiles',
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
@@ -111,6 +112,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       children: [
         new SideNavItem(SettingsTabId.Account, []),
         new SideNavItem(SettingsTabId.Preferences),
+        new SideNavItem(SettingsTabId.ReadingProfiles),
         new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
         new SideNavItem(SettingsTabId.Clients),
         new SideNavItem(SettingsTabId.Theme),

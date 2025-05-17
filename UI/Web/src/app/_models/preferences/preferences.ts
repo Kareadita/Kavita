@@ -2,6 +2,8 @@ import {PageLayoutMode} from '../page-layout-mode';
 import {SiteTheme} from './site-theme';
 
 export interface Preferences {
+  defaultReadingProfileId: number;
+
   // Global
   theme: SiteTheme;
   globalPageLayoutMode: PageLayoutMode;

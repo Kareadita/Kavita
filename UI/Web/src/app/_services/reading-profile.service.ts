@@ -23,8 +23,24 @@ export class ReadingProfileService {
     return this.httpClient.post(this.baseUrl + "ReadingProfile", profile);
   }
 
+  createProfile(profile: ReadingProfile) {
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/create", profile);
+  }
+
   updateImplicit(profile: ReadingProfile, seriesId: number) {
     return this.httpClient.post(this.baseUrl + "ReadingProfile/series?seriesId="+seriesId, profile);
+  }
+
+  all() {
+    return this.httpClient.get<ReadingProfile[]>(this.baseUrl + "ReadingProfile/all");
+  }
+
+  delete(id: number) {
+    return this.httpClient.delete(this.baseUrl + "ReadingProfile?profileId="+id);
+  }
+
+  setDefault(id: number) {
+    return this.httpClient.post(this.baseUrl + "ReadingProfile/set-default?profileId=" + id, {});
   }
 
 }

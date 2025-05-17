@@ -7,6 +7,7 @@ using API.Helpers.Builders;
 using API.Services;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Services;
@@ -29,10 +30,50 @@ public class ReadingProfileServiceTest: AbstractDbTest
         user.Libraries.Add(library);
         await UnitOfWork.CommitAsync();
 
-        var rps = new ReadingProfileService(UnitOfWork);
+        var rps = new ReadingProfileService(UnitOfWork, Substitute.For<ILocalizationService>());
         user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.UserPreferences);
 
         return (rps, user, library, series);
+    }
+
+    [Fact]
+    public async Task ImplicitProfileFirst()
+    {
+        await ResetDb();
+        var (rps, user, library, series) = await Setup();
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithImplicit(true)
+            .WithSeries(series)
+            .WithName("Implicit Profile")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Non-implicit Profile")
+            .Build();
+
+        user.UserPreferences.ReadingProfiles.Add(profile);
+        user.UserPreferences.ReadingProfiles.Add(profile2);
+        await UnitOfWork.CommitAsync();
+
+        var seriesProfile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfile);
+        Assert.Equal("Implicit Profile", seriesProfile.Name);
+
+        var seriesProfileDto = await UnitOfWork.AppUserReadingProfileRepository.GetProfileDtoForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfileDto);
+        Assert.Equal("Implicit Profile", seriesProfileDto.Name);
+
+        await rps.DeleteImplicitForSeries(user.Id, series.Id);
+
+        seriesProfile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfile);
+        Assert.Equal("Non-implicit Profile", seriesProfile.Name);
+
+        seriesProfileDto = await UnitOfWork.AppUserReadingProfileRepository.GetProfileDtoForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfileDto);
+        Assert.Equal("Non-implicit Profile", seriesProfileDto.Name);
     }
 
     [Fact]

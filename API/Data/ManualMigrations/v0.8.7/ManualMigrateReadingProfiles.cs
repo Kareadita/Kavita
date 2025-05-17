@@ -1,13 +1,16 @@
 using System;
 using System.Threading.Tasks;
+using API.Entities;
 using API.Entities.History;
+using API.Extensions;
+using API.Helpers.Builders;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data.ManualMigrations.v0._8._7;
+namespace API.Data.ManualMigrations;
 
-public class ManualMigrateReadingProfiles
+public static class ManualMigrateReadingProfiles
 {
     public static async Task Migrate(DataContext context, ILogger<Program> logger)
     {
@@ -18,62 +21,55 @@ public class ManualMigrateReadingProfiles
 
         logger.LogCritical("Running ManualMigrateReadingProfiles migration - Please be patient, this may take some time. This is not an error");
 
-        await context.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO AppUserReadingProfiles (
-                AppUserId,
-                ReadingDirection,
-                ScalingOption,
-                PageSplitOption,
-                ReaderMode,
-                AutoCloseMenu,
-                ShowScreenHints,
-                EmulateBook,
-                LayoutMode,
-                BackgroundColor,
-                SwipeToPaginate,
-                AllowAutomaticWebtoonReaderDetection,
-                BookReaderMargin,
-                BookReaderLineSpacing,
-                BookReaderFontSize,
-                BookReaderFontFamily,
-                BookReaderTapToPaginate,
-                BookReaderReadingDirection,
-                BookReaderWritingStyle,
-                BookThemeName,
-                BookReaderLayoutMode,
-                BookReaderImmersiveMode,
-                PdfTheme,
-                PdfScrollMode,
-                PdfSpreadMode
-            )
-            SELECT
-                AppUserId,
-                ReadingDirection,
-                ScalingOption,
-                PageSplitOption,
-                ReaderMode,
-                AutoCloseMenu,
-                ShowScreenHints,
-                EmulateBook,
-                LayoutMode,
-                BackgroundColor,
-                SwipeToPaginate,
-                AllowAutomaticWebtoonReaderDetection,
-                BookReaderMargin,
-                BookReaderLineSpacing,
-                BookReaderFontSize,
-                BookReaderFontFamily,
-                BookReaderTapToPaginate,
-                BookReaderReadingDirection,
-                BookReaderWritingStyle,
-                BookThemeName,
-                BookReaderLayoutMode,
-                BookReaderImmersiveMode,
-                PdfTheme,
-                PdfScrollMode,
-                PdfSpreadMode
-            FROM AppUserPreferences
-        ");
+        var users = await context.AppUser
+            .Include(u => u.UserPreferences)
+            .Include(u => u.UserPreferences.ReadingProfiles)
+            .ToListAsync();
+
+        foreach (var user in users)
+        {
+            var readingProfile = new AppUserReadingProfile
+            {
+                Name = "Default",
+                NormalizedName = "Default".ToNormalized(),
+                BackgroundColor = user.UserPreferences.BackgroundColor,
+                EmulateBook = user.UserPreferences.EmulateBook,
+                User = user,
+                PdfTheme = user.UserPreferences.PdfTheme,
+                ReaderMode = user.UserPreferences.ReaderMode,
+                ReadingDirection = user.UserPreferences.ReadingDirection,
+                ScalingOption = user.UserPreferences.ScalingOption,
+                LayoutMode = user.UserPreferences.LayoutMode,
+                WidthOverride = null,
+                UserId = user.Id,
+                AutoCloseMenu = user.UserPreferences.AutoCloseMenu,
+                BookReaderMargin = user.UserPreferences.BookReaderMargin,
+                PageSplitOption = user.UserPreferences.PageSplitOption,
+                BookThemeName = user.UserPreferences.BookThemeName,
+                PdfSpreadMode = user.UserPreferences.PdfSpreadMode,
+                PdfScrollMode = user.UserPreferences.PdfScrollMode,
+                SwipeToPaginate = user.UserPreferences.SwipeToPaginate,
+                BookReaderFontFamily = user.UserPreferences.BookReaderFontFamily,
+                BookReaderFontSize = user.UserPreferences.BookReaderFontSize,
+                BookReaderImmersiveMode = user.UserPreferences.BookReaderImmersiveMode,
+                BookReaderLayoutMode = user.UserPreferences.BookReaderLayoutMode,
+                BookReaderLineSpacing = user.UserPreferences.BookReaderLineSpacing,
+                BookReaderReadingDirection = user.UserPreferences.BookReaderReadingDirection,
+                BookReaderWritingStyle = user.UserPreferences.BookReaderWritingStyle,
+                AllowAutomaticWebtoonReaderDetection = user.UserPreferences.AllowAutomaticWebtoonReaderDetection,
+                BookReaderTapToPaginate = user.UserPreferences.BookReaderTapToPaginate,
+                ShowScreenHints = user.UserPreferences.ShowScreenHints,
+            };
+            user.UserPreferences.ReadingProfiles.Add(readingProfile);
+        }
+
+        await context.SaveChangesAsync();
+        foreach (var user in users)
+        {
+            user.UserPreferences.DefaultReadingProfileId =
+                (await context.AppUserReadingProfile
+                    .FirstAsync(rp => rp.UserId == user.Id)).Id;
+        }
 
         context.ManualMigrationHistory.Add(new ManualMigrationHistory
         {
