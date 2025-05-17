@@ -19,9 +19,9 @@ public interface IReadingProfileService
     /// Series -> Library -> Default
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="series"></param>
+    /// <param name="seriesId"></param>
     /// <returns></returns>
-    Task<AppUserReadingProfile> GetReadingProfileForSeries(int userId, Series series);
+    Task<UserReadingProfileDto> GetReadingProfileForSeries(int userId, int seriesId);
 
     /// <summary>
     /// Updates, or adds a specific reading profile for a user
@@ -32,15 +32,13 @@ public interface IReadingProfileService
     Task<bool> UpdateReadingProfile(int userId, UserReadingProfileDto dto);
 
     /// <summary>
-    /// Updates, or adds a specific reading profile for a user for a specific series.
-    /// If the reading profile is not assigned to the given series (Library, Default fallback),
-    /// a new implicit reading profile is created
+    /// Updates the implicit reading profile for a series, creates one if none exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<bool> UpdateReadingProfileForSeries(int userId, int seriesId, UserReadingProfileDto dto);
+    Task<bool> UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto);
 
     /// <summary>
     /// Deletes the implicit reading profile for a given series, if it exists
@@ -62,21 +60,24 @@ public interface IReadingProfileService
 
 }
 
-public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileService
+public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService): IReadingProfileService
 {
 
-    public async Task<AppUserReadingProfile> GetReadingProfileForSeries(int userId, Series series)
+    public async Task<UserReadingProfileDto> GetReadingProfileForSeries(int userId, int seriesId)
     {
-        var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, series.Id);
+        var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileDtoForSeries(userId, seriesId);
         if (seriesProfile != null) return seriesProfile;
 
-        var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, series.Id);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
+
+        var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileDtoForLibrary(userId, series.LibraryId);
         if (libraryProfile != null) return libraryProfile;
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) throw new UnauthorizedAccessException();
 
-        return await unitOfWork.AppUserReadingProfileRepository.GetProfile(user.UserPreferences.DefaultReadingProfileId);
+        return await unitOfWork.AppUserReadingProfileRepository.GetProfileDto(user.UserPreferences.DefaultReadingProfileId);
     }
 
     public async Task<bool> UpdateReadingProfile(int userId, UserReadingProfileDto dto)
@@ -94,45 +95,32 @@ public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileServi
         return await unitOfWork.CommitAsync();
     }
 
-    public async Task<bool> UpdateReadingProfileForSeries(int userId, int seriesId, UserReadingProfileDto dto)
+    public async Task<bool> UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto)
     {
-        var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id);
+        var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, seriesId);
 
-        // TODO: Rewrite
-        var isNew = false;
-        if (existingProfile == null || existingProfile.Series.All(s => s.Id != seriesId))
+        // Series already had an implicit profile, update it
+        if (existingProfile is {Implicit: true})
         {
-            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-            if (series == null) throw new KeyNotFoundException();
-
-            existingProfile = new AppUserReadingProfileBuilder(userId)
-                .WithSeries(series)
-                .WithImplicit(true)
-                .Build();
-
-            isNew = true;
-        }
-
-        if (existingProfile.UserId != userId) return false;
-
-        UpdateReaderProfileFields(existingProfile, dto);
-
-        if (isNew)
-        {
-            unitOfWork.AppUserReadingProfileRepository.Add(existingProfile);
-        }
-        else
-        {
+            UpdateReaderProfileFields(existingProfile, dto);
             unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
+            return await unitOfWork.CommitAsync();
         }
 
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId) ?? throw new KeyNotFoundException();
+        existingProfile = new AppUserReadingProfileBuilder(userId)
+            .WithSeries(series)
+            .WithImplicit(true)
+            .Build();
+
+        unitOfWork.AppUserReadingProfileRepository.Add(existingProfile);
         return await unitOfWork.CommitAsync();
     }
 
     public async Task DeleteImplicitForSeries(int userId, int seriesId)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, seriesId);
-        if (profile == null) return;
+        if (profile == null) throw new KavitaException(await localizationService.Translate(userId, "profile-doesnt-exist"));
 
         if (!profile.Implicit) return;
 
@@ -144,7 +132,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork): IReadingProfileServi
     public async Task DeleteReadingProfile(int userId, int profileId)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KeyNotFoundException();
+        if (profile == null) throw new KavitaException(await localizationService.Translate(userId, "profile-doesnt-exist"));
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null || profile.UserId != userId) throw new UnauthorizedAccessException();

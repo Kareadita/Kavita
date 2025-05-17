@@ -283,6 +283,14 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(src => src.BookReaderLayoutMode));
 
+        CreateMap<AppUserReadingProfile, UserReadingProfileDto>()
+            .ForMember(dest => dest.BookReaderThemeName,
+                opt =>
+                    opt.MapFrom(src => src.BookThemeName))
+            .ForMember(dest => dest.BookReaderLayoutMode,
+                opt =>
+                    opt.MapFrom(src => src.BookReaderLayoutMode));
+
 
         CreateMap<AppUserBookmark, BookmarkDto>();
 

@@ -112,7 +112,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
             WidthOverride = 53,
         };
 
-        await rps.UpdateReadingProfileForSeries(user.Id, series.Id, dto);
+        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
 
         var profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
         Assert.NotNull(profile);
@@ -145,7 +145,8 @@ public class ReadingProfileServiceTest: AbstractDbTest
         lib.Series.Add(series2);
 
         var lib2 = new LibraryBuilder("Manga2").Build();
-        var series3 = new SeriesBuilder("A Tropical Fish Yearns for Snow").WithLibraryId(lib2.Id).Build();
+        var series3 = new SeriesBuilder("A Tropical Fish Yearns for Snow").Build();
+        lib2.Series.Add(series3);
 
         user.Libraries.Add(lib2);
         await UnitOfWork.CommitAsync();
@@ -153,15 +154,15 @@ public class ReadingProfileServiceTest: AbstractDbTest
         user.UserPreferences.DefaultReadingProfileId = profile3.Id;
         await UnitOfWork.CommitAsync();
 
-        var p = await rps.GetReadingProfileForSeries(user.Id, series);
+        var p = await rps.GetReadingProfileForSeries(user.Id, series.Id);
         Assert.NotNull(p);
         Assert.Equal("Series Specific", p.Name);
 
-        p = await rps.GetReadingProfileForSeries(user.Id, series2);
+        p = await rps.GetReadingProfileForSeries(user.Id, series2.Id);
         Assert.NotNull(p);
         Assert.Equal("Library Specific", p.Name);
 
-        p = await rps.GetReadingProfileForSeries(user.Id, series3);
+        p = await rps.GetReadingProfileForSeries(user.Id, series3.Id);
         Assert.NotNull(p);
         Assert.Equal("Global", p.Name);
     }
