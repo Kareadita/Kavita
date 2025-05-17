@@ -1,17 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
-  bookLayoutModes,
-  bookWritingStyles,
-  layoutModes,
-  pageSplitOptions,
-  pdfScrollModes,
-  pdfSpreadModes,
-  pdfThemes,
-  Preferences,
-  readingDirections,
-  readingModes,
-  scalingOptions
+  Preferences
 } from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -44,6 +34,13 @@ import {PdfThemePipe} from "../../_pipes/pdf-theme.pipe";
 import {PdfScrollModePipe} from "../../_pipes/pdf-scroll-mode.pipe";
 import {LicenseService} from "../../_services/license.service";
 import {ColorPickerDirective} from "ngx-color-picker";
+import {
+  bookLayoutModes, bookWritingStyles,
+  layoutModes, pageSplitOptions,
+  pdfScrollModes,
+  pdfSpreadModes,
+  pdfThemes, readingDirections, readingModes, scalingOptions
+} from "../../_models/preferences/reading-profiles";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -140,7 +137,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.user = results.user;
       this.user.preferences = results.pref;
 
-      if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
+      /*if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
         this.user.preferences.bookReaderFontFamily = 'default';
       }
 
@@ -169,7 +166,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       this.settingsForm.addControl('pdfTheme', new FormControl(this.user?.preferences.pdfTheme || PdfTheme.Dark, []));
       this.settingsForm.addControl('pdfScrollMode', new FormControl(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical, []));
-      this.settingsForm.addControl('pdfSpreadMode', new FormControl(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, []));
+      this.settingsForm.addControl('pdfSpreadMode', new FormControl(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, []));*/
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
@@ -217,7 +214,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   reset() {
     if (!this.user) return;
 
-    this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection, {onlySelf: true, emitEvent: false});
+    /*this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu, {onlySelf: true, emitEvent: false});
@@ -242,7 +239,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
     this.settingsForm.get('pdfTheme')?.setValue(this.user?.preferences.pdfTheme || PdfTheme.Dark, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('pdfScrollMode')?.setValue(this.user?.preferences.pdfScrollMode || PdfScrollMode.Vertical, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('pdfSpreadMode')?.setValue(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('pdfSpreadMode')?.setValue(this.user?.preferences.pdfSpreadMode || PdfSpreadMode.None, {onlySelf: true, emitEvent: false});*/
 
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode, {onlySelf: true, emitEvent: false});
@@ -260,7 +257,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   packSettings(): Preferences {
     const modelSettings = this.settingsForm.value;
     return  {
-      readingDirection: parseInt(modelSettings.readingDirection, 10),
+      /*readingDirection: parseInt(modelSettings.readingDirection, 10),
       scalingOption: parseInt(modelSettings.scalingOption, 10),
       pageSplitOption: parseInt(modelSettings.pageSplitOption, 10),
       autoCloseMenu: modelSettings.autoCloseMenu,
@@ -277,21 +274,21 @@ export class ManageUserPreferencesComponent implements OnInit {
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       bookReaderWritingStyle: parseInt(modelSettings.bookReaderWritingStyle, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
-      bookReaderThemeName: modelSettings.bookReaderThemeName,
+      bookReaderThemeName: modelSettings.bookReaderThemeName,*/
       theme: modelSettings.theme,
-      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
+      //bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
       blurUnreadSummaries: modelSettings.blurUnreadSummaries,
       promptForDownloadSize: modelSettings.promptForDownloadSize,
       noTransitions: modelSettings.noTransitions,
-      emulateBook: modelSettings.emulateBook,
-      swipeToPaginate: modelSettings.swipeToPaginate,
+      //emulateBook: modelSettings.emulateBook,
+      //swipeToPaginate: modelSettings.swipeToPaginate,
       collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
       shareReviews: modelSettings.shareReviews,
       locale: modelSettings.locale || 'en',
-      pdfTheme: parseInt(modelSettings.pdfTheme, 10),
-      pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
-      pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
+      //pdfTheme: parseInt(modelSettings.pdfTheme, 10),
+      //pdfScrollMode: parseInt(modelSettings.pdfScrollMode, 10),
+      //pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
       aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
       wantToReadSync: modelSettings.wantToReadSync
     };
@@ -301,7 +298,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.settingsForm.markAsDirty();
     this.settingsForm.markAsTouched();
     if (this.user?.preferences) {
-      this.user.preferences.backgroundColor = color;
+      //this.user.preferences.backgroundColor = color;
     }
 
     this.settingsForm.get('backgroundColor')?.setValue(color);

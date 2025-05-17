@@ -14,7 +14,7 @@ import {
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgxExtendedPdfViewerModule, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs';
+import {forkJoin, take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
 import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
@@ -34,6 +34,8 @@ import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
 import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 
 @Component({
   selector: 'app-pdf-reader',
@@ -54,6 +56,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
@@ -69,6 +72,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   chapterId!: number;
   chapter!: Chapter;
   user!: User;
+  readingProfile!: ReadingProfile;
 
   /**
    * Reading List id. Defaults to -1.
@@ -171,9 +175,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.cdRef.markForCheck();
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+    forkJoin([
+      this.accountService.currentUser$.pipe(take(1)),
+      this.readingProfileService.getForSeries(this.seriesId)
+    ]).subscribe(([user, profile]) => {
       if (user) {
         this.user = user;
+        this.readingProfile = profile;
         this.init();
       }
     });
@@ -237,9 +245,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   init() {
 
     this.pageLayoutMode = this.convertPdfLayoutMode(PdfLayoutMode.Multiple);
-    this.scrollMode = this.convertPdfScrollMode(this.user.preferences.pdfScrollMode || PdfScrollMode.Vertical);
-    this.spreadMode = this.convertPdfSpreadMode(this.user.preferences.pdfSpreadMode || PdfSpreadMode.None);
-    this.theme = this.convertPdfTheme(this.user.preferences.pdfTheme || PdfTheme.Dark);
+    this.scrollMode = this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical);
+    this.spreadMode = this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None);
+    this.theme = this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark);
     this.backgroundColor = this.themeMap[this.theme].background;
     this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
 

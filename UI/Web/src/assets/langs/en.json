@@ -1181,6 +1181,7 @@
         "line-spacing-label": "{{user-preferences.line-height-book-label}}",
         "margin-label": "{{user-preferences.margin-book-label}}",
         "reset-to-defaults": "Reset to Defaults",
+        "save-global": "Save to your reading profile",
         "reader-settings-title": "Reader Settings",
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "right-to-left": "Right to Left",

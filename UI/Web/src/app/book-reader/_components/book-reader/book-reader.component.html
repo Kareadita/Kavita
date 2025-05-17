@@ -60,6 +60,7 @@
                 <a ngbNavLink>{{t('settings-header')}}</a>
                 <ng-template ngbNavContent>
                   <app-reader-settings
+                    [seriesId]="seriesId"
                     (colorThemeUpdate)="updateColorTheme($event)"
                     (styleUpdate)="updateReaderStyles($event)"
                     (clickToPaginateChanged)="showPaginationOverlay($event)"

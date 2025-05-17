@@ -40,7 +40,6 @@ import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/ut
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
-import {layoutModes, pageSplitOptions} from 'src/app/_models/preferences/preferences';
 import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
@@ -70,6 +69,8 @@ import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
+import {layoutModes, pageSplitOptions, ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -150,6 +151,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly modalService = inject(NgbModal);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
   public readonly mangaReaderService = inject(MangaReaderService);
@@ -194,6 +196,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   totalSeriesPages = 0;
   totalSeriesPagesRead = 0;
   user!: User;
+  readingProfile: ReadingProfile | null = null;
   generalSettingsForm!: FormGroup;
 
   readingDirection = ReadingDirection.LeftToRight;
@@ -496,33 +499,53 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.continuousChaptersStack.push(this.chapterId);
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+    forkJoin([
+      this.accountService.currentUser$.pipe(take(1)),
+      this.readingProfileService.getForSeries(this.seriesId)])
+      .subscribe(([user, profile]) => {
       if (!user) {
         this.router.navigateByUrl('/login');
         return;
       }
 
+      this.readingProfile = profile;
+
       this.user = user;
       this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
-      this.readingDirection = this.user.preferences.readingDirection;
-      this.scalingOption = this.user.preferences.scalingOption;
-      this.pageSplitOption = this.user.preferences.pageSplitOption;
-      this.autoCloseMenu = this.user.preferences.autoCloseMenu;
-      this.readerMode = this.user.preferences.readerMode;
-      this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
-      this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
+      this.readingDirection = this.readingProfile.readingDirection;
+      this.scalingOption = this.readingProfile.scalingOption;
+      this.pageSplitOption = this.readingProfile.pageSplitOption;
+      this.autoCloseMenu = this.readingProfile.autoCloseMenu;
+      this.readerMode = this.readingProfile.readerMode;
+      this.layoutMode = this.readingProfile.layoutMode || LayoutMode.Single;
+      this.backgroundColor = this.readingProfile.backgroundColor || '#000000';
       this.readerService.setOverrideStyles(this.backgroundColor);
 
       this.generalSettingsForm = this.formBuilder.nonNullable.group({
         autoCloseMenu: new FormControl(this.autoCloseMenu),
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
-        widthSlider: new FormControl('none'),
+        widthSlider: new FormControl(this.readingProfile.widthOverride ?? 'none'),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
-        emulateBook: new FormControl(this.user.preferences.emulateBook),
-        swipeToPaginate: new FormControl(this.user.preferences.swipeToPaginate)
+        emulateBook: new FormControl(this.readingProfile.emulateBook),
+        swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
       });
+
+      // Update implicit reading profile while changing settings
+      this.generalSettingsForm.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+        tap(_ => {
+          this.readingProfileService.updateImplicit(this.packReadingProfile(), this.seriesId).subscribe({
+            error: err => {
+              console.error(err);
+            }
+          })
+        })
+      ).subscribe();
+
 
       this.readerModeSubject.next(this.readerMode);
       this.pagingDirectionSubject.next(this.pagingDirection);
@@ -562,7 +585,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.layoutMode = parseInt(val, 10);
 
         if (this.layoutMode === LayoutMode.Single) {
-          this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
+          this.generalSettingsForm.get('pageSplitOption')?.setValue(this.readingProfile!.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('widthSlider')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
@@ -604,9 +627,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toastr.info(translate('manga-reader.first-time-reading-manga'));
         }
       });
-    });
 
-    this.init();
+      this.init();
+    });
   }
 
   ngAfterViewInit() {
@@ -780,7 +803,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   switchToWebtoonReaderIfPagesLikelyWebtoon() {
     if (this.readerMode === ReaderMode.Webtoon) return;
-    if (!this.user.preferences.allowAutomaticWebtoonReaderDetection) return;
+    if (!this.readingProfile!.allowAutomaticWebtoonReaderDetection) return;
 
     if (this.mangaReaderService.shouldBeWebtoonMode()) {
       this.readerMode = ReaderMode.Webtoon;
@@ -1460,7 +1483,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingDirection = ReadingDirection.LeftToRight;
     }
 
-    if (this.menuOpen && this.user.preferences.showScreenHints) {
+    if (this.menuOpen && this.readingProfile!.showScreenHints) {
       this.showClickOverlay = true;
       this.showClickOverlaySubject.next(true);
       setTimeout(() => {
@@ -1731,34 +1754,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // menu only code
   savePref() {
-    const modelSettings = this.generalSettingsForm.getRawValue();
-    // Get latest preferences from user, overwrite with what we manage in this UI, then save
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (!user) return;
-      const data = {...user.preferences};
-      data.layoutMode = parseInt(modelSettings.layoutMode, 10);
-      data.readerMode = this.readerMode;
-      data.autoCloseMenu = this.autoCloseMenu;
-      data.readingDirection = this.readingDirection;
-      data.emulateBook = modelSettings.emulateBook;
-      data.swipeToPaginate = modelSettings.swipeToPaginate;
-      data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
-      data.locale = data.locale || 'en';
-
-      this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
-        this.toastr.success(translate('manga-reader.user-preferences-updated'));
-        if (this.user) {
-          this.user.preferences = updatedPrefs;
-          this.cdRef.markForCheck();
-        }
-      })
-    });
+    this.readingProfileService.updateProfile(this.packReadingProfile(), this.seriesId).subscribe(_ => {
+      this.toastr.success(translate('manga-reader.user-preferences-updated'));
+    })
   }
 
   translatePrefOptions(o: {text: string, value: any}) {
     const d = {...o};
     d.text = translate('preferences.' + o.text);
     return d;
+  }
+
+  private packReadingProfile(): ReadingProfile {
+    const modelSettings = this.generalSettingsForm.getRawValue();
+    const data = {...this.readingProfile!};
+    data.layoutMode = parseInt(modelSettings.layoutMode, 10);
+    data.readerMode = this.readerMode;
+    data.autoCloseMenu = this.autoCloseMenu;
+    data.readingDirection = this.readingDirection;
+    data.emulateBook = modelSettings.emulateBook;
+    data.swipeToPaginate = modelSettings.swipeToPaginate;
+    data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
+    // TODO: Check if this saves correctly!
+    data.widthOverride = modelSettings.widthSlider === 'none' ? null : modelSettings.widthOverride;
+    return data;
   }
 
 }
