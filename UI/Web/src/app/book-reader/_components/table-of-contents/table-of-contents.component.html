@@ -17,12 +17,12 @@
     } @else {
       @for (chapterGroup of chapters; track chapterGroup.title + chapterGroup.children.length) {
         <ul class="chapter-title">
-          <li class="{{chapterGroup.page === pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
+          <li class="{{isChapterSelected(chapterGroup) ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
             {{chapterGroup.title}}
           </li>
           @for(chapter of chapterGroup.children; track chapter.title + chapter.part) {
             <ul>
-              <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
+              <li class="{{isAnchorSelected(chapter) ? 'active' : ''}}">
                 <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
               </li>
             </ul>
