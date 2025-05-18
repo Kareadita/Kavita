@@ -207,7 +207,8 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
       this.user = user;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
+        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
@@ -223,6 +224,17 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         this.loadPage();
       }
     });
+  }
+
+  shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
+    switch (action.action) {
+      case Action.Promote:
+        return !entity.promoted;
+      case Action.UnPromote:
+        return entity.promoted;
+      default:
+        return true;
+    }
   }
 
   ngAfterContentChecked(): void {
