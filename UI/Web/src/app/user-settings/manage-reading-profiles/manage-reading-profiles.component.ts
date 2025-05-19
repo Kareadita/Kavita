@@ -8,7 +8,7 @@ import {
   ReadingProfile, scalingOptions
 } from "../../_models/preferences/reading-profiles";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {Location, NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
@@ -44,6 +44,7 @@ import {
 import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ReadingProfileLibrarySelectionComponent} from "./_components/library-selection/reading-profile-library-selection.component";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -82,7 +83,8 @@ enum TabId {
     NgbNavLinkBase,
     NgbNavContent,
     NgbNavOutlet,
-    LoadingComponent
+    LoadingComponent,
+    ReadingProfileLibrarySelectionComponent
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -149,6 +151,16 @@ export class ManageReadingProfilesComponent implements OnInit {
     })
   }
 
+  get widthOverwriteLabel() {
+    const rawVal = this.readingProfileForm?.get('widthOverride')!.value;
+    if (!rawVal) {
+      return translate('off');
+    }
+
+    const val = parseInt(rawVal);
+    return (val <= 0) ? '' : val + '%'
+  }
+
   setupForm() {
     if (this.selectedProfile == null) {
       return;
@@ -162,6 +174,9 @@ export class ManageReadingProfilesComponent implements OnInit {
     }
 
     this.readingProfileForm.addControl('name', new FormControl(this.selectedProfile.name, Validators.required));
+
+
+    // Image reader
     this.readingProfileForm.addControl('readingDirection', new FormControl(this.selectedProfile.readingDirection, []));
     this.readingProfileForm.addControl('scalingOption', new FormControl(this.selectedProfile.scalingOption, []));
     this.readingProfileForm.addControl('pageSplitOption', new FormControl(this.selectedProfile.pageSplitOption, []));
@@ -173,7 +188,9 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('swipeToPaginate', new FormControl(this.selectedProfile.swipeToPaginate, []));
     this.readingProfileForm.addControl('backgroundColor', new FormControl(this.selectedProfile.backgroundColor, []));
     this.readingProfileForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.selectedProfile.allowAutomaticWebtoonReaderDetection, []));
+    this.readingProfileForm.addControl('widthOverride', new FormControl(this.selectedProfile.widthOverride, [Validators.min(0), Validators.max(100)]));
 
+    // Epub reader
     this.readingProfileForm.addControl('bookReaderFontFamily', new FormControl(this.selectedProfile.bookReaderFontFamily, []));
     this.readingProfileForm.addControl('bookReaderFontSize', new FormControl(this.selectedProfile.bookReaderFontSize, []));
     this.readingProfileForm.addControl('bookReaderLineSpacing', new FormControl(this.selectedProfile.bookReaderLineSpacing, []));
@@ -185,10 +202,12 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('bookReaderThemeName', new FormControl(this.selectedProfile.bookReaderThemeName || bookColorThemes[0].name, []));
     this.readingProfileForm.addControl('bookReaderImmersiveMode', new FormControl(this.selectedProfile.bookReaderImmersiveMode, []));
 
+    // Pdf reader
     this.readingProfileForm.addControl('pdfTheme', new FormControl(this.selectedProfile.pdfTheme || PdfTheme.Dark, []));
     this.readingProfileForm.addControl('pdfScrollMode', new FormControl(this.selectedProfile.pdfScrollMode || PdfScrollMode.Vertical, []));
     this.readingProfileForm.addControl('pdfSpreadMode', new FormControl(this.selectedProfile.pdfSpreadMode || PdfSpreadMode.None, []));
 
+    // Auto save
     this.readingProfileForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),

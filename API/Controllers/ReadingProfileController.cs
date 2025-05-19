@@ -1,12 +1,14 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
 using API.Services;
+using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,7 +26,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReadingProfileDto>>> GetAllReadingProfiles()
     {
-        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(User.GetUserId(), true));
+        var profiles = await unitOfWork.AppUserReadingProfileRepository
+            .GetProfilesDtoForUser(User.GetUserId(), true,
+                ReadingProfileIncludes.Series | ReadingProfileIncludes.Library);
+
+        return Ok(profiles);
     }
 
     /// <summary>
@@ -48,6 +54,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// If set, will delete the implicit reading profile if it exists
     /// </param>
     /// <returns></returns>
+    /// <remarks>This does not update connected series, and libraries. Use
+    /// <see cref="DeleteProfileFromSeries"/>, <see cref="AddProfileToSeries"/>,
+    /// <see cref="DeleteProfileFromLibrary"/>, <see cref="AddProfileToLibrary"/>
+    /// </remarks>
     [HttpPost]
     public async Task<ActionResult> UpdateReadingProfile([FromBody] UserReadingProfileDto dto, [FromQuery] int? seriesCtx)
     {
@@ -113,6 +123,58 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<IActionResult> DeleteReadingProfile([FromQuery] int profileId)
     {
         await readingProfileService.DeleteReadingProfile(User.GetUserId(), profileId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Sets the reading profile for a given series, removes the old one
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    [HttpPost("series/{seriesId}")]
+    public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
+    {
+        await readingProfileService.AddProfileToSeries(User.GetUserId(), profileId, seriesId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Deletes the reading profile from a series for the current logged-in user
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    [HttpDelete("series/{seriesId}")]
+    public async Task<IActionResult> DeleteProfileFromSeries(int seriesId, [FromQuery] int profileId)
+    {
+        await readingProfileService.RemoveProfileFromSeries(User.GetUserId(), profileId, seriesId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Sets the reading profile for a given library, removes the old one
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    [HttpPost("library/{libraryId}")]
+    public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
+    {
+        await readingProfileService.AddProfileToLibrary(User.GetUserId(), profileId, libraryId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Remove the reading profile from a library for the current logged-in user
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    [HttpDelete("library/{libraryId}")]
+    public async Task<IActionResult> DeleteProfileFromLibrary(int libraryId, [FromQuery] int profileId)
+    {
+        await readingProfileService.RemoveProfileFromLibrary(User.GetUserId(), profileId, libraryId);
         return Ok();
     }
 

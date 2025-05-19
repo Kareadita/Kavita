@@ -29,6 +29,7 @@ public interface IReadingProfileService
     /// <param name="userId"></param>
     /// <param name="dto"></param>
     /// <returns></returns>
+    /// <remarks>Does not update connected series and libraries</remarks>
     Task<bool> UpdateReadingProfile(int userId, UserReadingProfileDto dto);
 
     /// <summary>
@@ -73,6 +74,12 @@ public interface IReadingProfileService
     /// <param name="profileId"></param>
     /// <returns></returns>
     Task SetDefaultReadingProfile(int userId, int profileId);
+
+    Task AddProfileToSeries(int userId, int profileId, int seriesId);
+    Task RemoveProfileFromSeries(int userId, int profileId, int seriesId);
+
+    Task AddProfileToLibrary(int userId, int profileId, int libraryId);
+    Task RemoveProfileFromLibrary(int userId, int profileId, int libraryId);
 
 }
 
@@ -164,7 +171,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         if (!profile.Implicit) return;
 
-        profile.Series = profile.Series.Where(s => s.Id != seriesId).ToList();
+        profile.Series = profile.Series.Where(s => s.SeriesId != seriesId).ToList();
 
         await unitOfWork.CommitAsync();
     }
@@ -194,6 +201,70 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         if (user == null) throw new UnauthorizedAccessException();
 
         user.UserPreferences.DefaultReadingProfileId = profile.Id;
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task AddProfileToSeries(int userId, int profileId, int seriesId)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        if (profile == null) throw new KavitaException("profile-not-found");
+
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfile(userId, seriesId);
+        if (seriesProfile == null)
+        {
+            seriesProfile = new SeriesReadingProfile
+            {
+                AppUserId = userId,
+                SeriesId = seriesId,
+            };
+        }
+
+        seriesProfile.ReadingProfile = profile;
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task RemoveProfileFromSeries(int userId, int profileId, int seriesId)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        if (profile == null) throw new KavitaException("profile-not-found");
+
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        profile.Series = profile.Series.Where(s => s.SeriesId != seriesId).ToList();
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task AddProfileToLibrary(int userId, int profileId, int libraryId)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        if (profile == null) throw new KavitaException("profile-not-found");
+
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetLibraryProfile(userId, libraryId);
+        if (libraryProfile == null)
+        {
+            libraryProfile = new LibraryReadingProfile
+            {
+                AppUserId = userId,
+                LibraryId = libraryId,
+            };
+        }
+
+        libraryProfile.ReadingProfile = profile;
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task RemoveProfileFromLibrary(int userId, int profileId, int libraryId)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        if (profile == null) throw new KavitaException("profile-not-found");
+
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        profile.Libraries = profile.Libraries.Where(s => s.LibraryId != libraryId).ToList();
         await unitOfWork.CommitAsync();
     }
 

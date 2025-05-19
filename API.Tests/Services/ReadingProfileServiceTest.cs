@@ -157,7 +157,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
 
         var profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
         Assert.NotNull(profile);
-        Assert.Contains(profile.Series, s => s.Id == series.Id);
+        Assert.Contains(profile.Series, s => s.SeriesId == series.Id);
         Assert.True(profile.Implicit);
     }
 
@@ -206,6 +206,55 @@ public class ReadingProfileServiceTest: AbstractDbTest
         p = await rps.GetReadingProfileForSeries(user.Id, series3.Id);
         Assert.NotNull(p);
         Assert.Equal("Global", p.Name);
+    }
+
+    [Fact]
+    public async Task ReplaceReadingProfile()
+    {
+        await ResetDb();
+        var (rps, user, lib, series) = await Setup();
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 1")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Profile 2")
+            .Build();
+
+        Context.AppUserReadingProfile.Add(profile1);
+        Context.AppUserReadingProfile.Add(profile2);
+        await UnitOfWork.CommitAsync();
+
+        var profile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(profile);
+        Assert.Equal("Profile 1", profile.Name);
+
+        await rps.AddProfileToSeries(user.Id, profile2.Id, series.Id);
+        profile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(profile);
+        Assert.Equal("Profile 2", profile.Name);
+    }
+
+    [Fact]
+    public async Task DeleteReadingProfile()
+    {
+        await ResetDb();
+        var (rps, user, lib, series) = await Setup();
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 1")
+            .Build();
+
+        Context.AppUserReadingProfile.Add(profile1);
+        await UnitOfWork.CommitAsync();
+
+        await rps.RemoveProfileFromSeries(user.Id, profile1.Id, series.Id);
+        var profile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.Null(profile);
+
     }
 
     protected override async Task ResetDb()

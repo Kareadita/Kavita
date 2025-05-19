@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities;
 using API.Entities.Enums;
@@ -125,6 +126,14 @@ public sealed record UserReadingProfileDto
     /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PdfSpreadMode"/>
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
+
+    #endregion
+
+    #region Relations
+
+    public IList<int> SeriesIds { get; set; } = [];
+
+    public IList<int> LibraryIds { get; set; } = [];
 
     #endregion
 

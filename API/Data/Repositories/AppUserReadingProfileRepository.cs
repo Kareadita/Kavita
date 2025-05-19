@@ -24,6 +24,7 @@ public enum ReadingProfileIncludes
 public interface IAppUserReadingProfileRepository
 {
     Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
+    Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<AppUserReadingProfile?> GetProfileForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<UserReadingProfileDto?> GetProfileDtoForSeries(int userId, int seriesId);
     Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
@@ -31,6 +32,8 @@ public interface IAppUserReadingProfileRepository
     Task<AppUserReadingProfile?> GetProfile(int profileId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<UserReadingProfileDto?> GetProfileDto(int profileId);
     Task<AppUserReadingProfile?> GetProfileByName(int userId, string name);
+    Task<SeriesReadingProfile?> GetSeriesProfile(int userId, int seriesId);
+    Task<LibraryReadingProfile?> GetLibraryProfile(int userId, int libraryId);
 
     void Add(AppUserReadingProfile readingProfile);
     void Update(AppUserReadingProfile readingProfile);
@@ -48,10 +51,20 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .ToListAsync();
     }
 
+    public async Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool nonImplicitOnly,
+        ReadingProfileIncludes includes = ReadingProfileIncludes.None)
+    {
+        return await context.AppUserReadingProfile
+            .Where(rp => rp.UserId == userId && !(nonImplicitOnly && rp.Implicit))
+            .Includes(includes)
+            .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
     public async Task<AppUserReadingProfile?> GetProfileForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None)
     {
         return await context.AppUserReadingProfile
-            .Where(rp => rp.UserId == userId && rp.Series.Any(s => s.Id == seriesId))
+            .Where(rp => rp.UserId == userId && rp.Series.Any(s => s.SeriesId == seriesId))
             .Includes(includes)
             .OrderByDescending(rp => rp.Implicit) // Get implicit profiles first
             .FirstOrDefaultAsync();
@@ -60,7 +73,7 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
     public async Task<UserReadingProfileDto?> GetProfileDtoForSeries(int userId, int seriesId)
     {
         return await context.AppUserReadingProfile
-            .Where(rp => rp.UserId == userId && rp.Series.Any(s => s.Id == seriesId))
+            .Where(rp => rp.UserId == userId && rp.Series.Any(s => s.SeriesId == seriesId))
             .OrderByDescending(rp => rp.Implicit) // Get implicit profiles first
             .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
@@ -69,7 +82,7 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
     public async Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, ReadingProfileIncludes includes = ReadingProfileIncludes.None)
     {
         return await context.AppUserReadingProfile
-            .Where(rp => rp.UserId == userId && rp.Libraries.Any(s => s.Id == libraryId))
+            .Where(rp => rp.UserId == userId && rp.Libraries.Any(s => s.LibraryId == libraryId))
             .Includes(includes)
             .FirstOrDefaultAsync();
     }
@@ -77,7 +90,7 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
     public async Task<UserReadingProfileDto?> GetProfileDtoForLibrary(int userId, int libraryId)
     {
         return await context.AppUserReadingProfile
-            .Where(rp => rp.UserId == userId && rp.Libraries.Any(s => s.Id == libraryId))
+            .Where(rp => rp.UserId == userId && rp.Libraries.Any(s => s.LibraryId == libraryId))
             .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
@@ -103,6 +116,20 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
 
         return await context.AppUserReadingProfile
             .Where(rp => rp.NormalizedName == normalizedName && rp.UserId == userId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<SeriesReadingProfile?> GetSeriesProfile(int userId, int seriesId)
+    {
+        return await context.SeriesReadingProfile
+            .Where(rp => rp.SeriesId == seriesId && rp.AppUserId == userId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<LibraryReadingProfile?> GetLibraryProfile(int userId, int libraryId)
+    {
+        return await context.LibraryReadingProfile
+            .Where(rp => rp.LibraryId == libraryId && rp.AppUserId == userId)
             .FirstOrDefaultAsync();
     }
 

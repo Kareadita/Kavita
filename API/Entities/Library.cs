@@ -65,7 +65,7 @@ public class Library : IEntityDate, IHasCoverImage
     public ICollection<Series> Series { get; set; } = null!;
     public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
     public ICollection<LibraryExcludePattern> LibraryExcludePatterns { get; set; } = new List<LibraryExcludePattern>();
-    public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
+    public ICollection<LibraryReadingProfile> ReadingProfiles { get; set; } = null!;
 
     public void UpdateLastModified()
     {

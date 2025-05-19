@@ -21,13 +21,21 @@ public class AppUserReadingProfileBuilder
 
     public AppUserReadingProfileBuilder WithSeries(Series series)
     {
-        _profile.Series.Add(series);
+        _profile.Series.Add(new SeriesReadingProfile
+        {
+            Series = series,
+            AppUserId = _profile.UserId,
+        });
         return this;
     }
 
     public AppUserReadingProfileBuilder WithLibrary(Library library)
     {
-        _profile.Libraries.Add(library);
+        _profile.Libraries.Add(new LibraryReadingProfile
+        {
+            Library = library,
+            AppUserId = _profile.UserId,
+        });
         return this;
     }
 

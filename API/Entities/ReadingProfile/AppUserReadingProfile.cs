@@ -14,8 +14,8 @@ public class AppUserReadingProfile
     public int UserId { get; set; }
     public AppUser User { get; set; }
 
-    public ICollection<Series> Series { get; set; }
-    public ICollection<Library> Libraries { get; set; }
+    public ICollection<SeriesReadingProfile> Series { get; set; }
+    public ICollection<LibraryReadingProfile> Libraries { get; set; }
 
     #region MangaReader
 

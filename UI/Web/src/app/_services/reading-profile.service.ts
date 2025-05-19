@@ -43,4 +43,20 @@ export class ReadingProfileService {
     return this.httpClient.post(this.baseUrl + "ReadingProfile/set-default?profileId=" + id, {});
   }
 
+  addToSeries(id: number, seriesId: number) {
+    return this.httpClient.post(this.baseUrl + `ReadingProfile/series/${seriesId}?profileId=${id}`, {});
+  }
+
+  removeFromSeries(id: number, seriesId: number) {
+    return this.httpClient.delete(this.baseUrl + `ReadingProfile/series/${seriesId}?profileId=${id}`, {});
+  }
+
+  addToLibrary(id: number, libraryId: number) {
+    return this.httpClient.post(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
+  }
+
+  removeFromLibrary(id: number, libraryId: number) {
+    return this.httpClient.delete(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
+  }
+
 }

@@ -71,47 +71,65 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AppUserReadingProfileLibrary",
+                name: "LibraryReadingProfile",
                 columns: table => new
                 {
-                    LibrariesId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ReadingProfilesId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReadingProfileId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppUserReadingProfileLibrary", x => new { x.LibrariesId, x.ReadingProfilesId });
+                    table.PrimaryKey("PK_LibraryReadingProfile", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AppUserReadingProfileLibrary_AppUserReadingProfile_ReadingProfilesId",
-                        column: x => x.ReadingProfilesId,
+                        name: "FK_LibraryReadingProfile_AppUserReadingProfile_ReadingProfileId",
+                        column: x => x.ReadingProfileId,
                         principalTable: "AppUserReadingProfile",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AppUserReadingProfileLibrary_Library_LibrariesId",
-                        column: x => x.LibrariesId,
+                        name: "FK_LibraryReadingProfile_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LibraryReadingProfile_Library_LibraryId",
+                        column: x => x.LibraryId,
                         principalTable: "Library",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AppUserReadingProfileSeries",
+                name: "SeriesReadingProfile",
                 columns: table => new
                 {
-                    ReadingProfilesId = table.Column<int>(type: "INTEGER", nullable: false),
-                    SeriesId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReadingProfileId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppUserReadingProfileSeries", x => new { x.ReadingProfilesId, x.SeriesId });
+                    table.PrimaryKey("PK_SeriesReadingProfile", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AppUserReadingProfileSeries_AppUserReadingProfile_ReadingProfilesId",
-                        column: x => x.ReadingProfilesId,
+                        name: "FK_SeriesReadingProfile_AppUserReadingProfile_ReadingProfileId",
+                        column: x => x.ReadingProfileId,
                         principalTable: "AppUserReadingProfile",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AppUserReadingProfileSeries_Series_SeriesId",
+                        name: "FK_SeriesReadingProfile_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SeriesReadingProfile_Series_SeriesId",
                         column: x => x.SeriesId,
                         principalTable: "Series",
                         principalColumn: "Id",
@@ -129,13 +147,34 @@ namespace API.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppUserReadingProfileLibrary_ReadingProfilesId",
-                table: "AppUserReadingProfileLibrary",
-                column: "ReadingProfilesId");
+                name: "IX_LibraryReadingProfile_AppUserId",
+                table: "LibraryReadingProfile",
+                column: "AppUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppUserReadingProfileSeries_SeriesId",
-                table: "AppUserReadingProfileSeries",
+                name: "IX_LibraryReadingProfile_LibraryId_AppUserId",
+                table: "LibraryReadingProfile",
+                columns: new[] { "LibraryId", "AppUserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LibraryReadingProfile_ReadingProfileId",
+                table: "LibraryReadingProfile",
+                column: "ReadingProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeriesReadingProfile_AppUserId",
+                table: "SeriesReadingProfile",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeriesReadingProfile_ReadingProfileId",
+                table: "SeriesReadingProfile",
+                column: "ReadingProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeriesReadingProfile_SeriesId",
+                table: "SeriesReadingProfile",
                 column: "SeriesId");
         }
 
@@ -143,10 +182,10 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppUserReadingProfileLibrary");
+                name: "LibraryReadingProfile");
 
             migrationBuilder.DropTable(
-                name: "AppUserReadingProfileSeries");
+                name: "SeriesReadingProfile");
 
             migrationBuilder.DropTable(
                 name: "AppUserReadingProfile");
