@@ -888,6 +888,7 @@ public class ProcessSeries : IProcessSeries
             var file = new MangaFileBuilder(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
                 .WithExtension(fileInfo.Extension)
                 .WithBytes(fileInfo.Length)
+                .WithHash()
                 .Build();
             chapter.Files.Add(file);
         }
