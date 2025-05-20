@@ -4,6 +4,7 @@ using API.DTOs.Koreader;
 using API.DTOs.Progress;
 using API.Helpers;
 using API.Helpers.Builders;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -20,12 +21,14 @@ public class KoreaderService : IKoreaderService
 {
     private readonly IReaderService _readerService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILocalizationService _localizationService;
     private readonly ILogger<KoreaderService> _logger;
 
-    public KoreaderService(IReaderService readerService, IUnitOfWork unitOfWork, ILogger<KoreaderService> logger)
+    public KoreaderService(IReaderService readerService, IUnitOfWork unitOfWork, ILocalizationService localizationService, ILogger<KoreaderService> logger)
     {
         _readerService = readerService;
         _unitOfWork = unitOfWork;
+        _localizationService = localizationService;
         _logger = logger;
     }
 
@@ -43,10 +46,17 @@ public class KoreaderService : IKoreaderService
         var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         if (userProgressDto == null)
         {
-            // TODO: Handle this case
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId);
+            if (chapterDto == null) return;
+
+            var volumeDto = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId);
+            if (volumeDto == null) return;
+
             userProgressDto = new ProgressDto()
             {
                 ChapterId = file.ChapterId,
+                VolumeId = chapterDto.VolumeId,
+                SeriesId = volumeDto.SeriesId,
             };
         }
         // Update the bookScrollId if possible
@@ -68,15 +78,14 @@ public class KoreaderService : IKoreaderService
 
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
 
-        // TODO: How do we handle when file isn't found by hash?
-        if (file == null) return builder.Build();
+        if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
 
         return builder.WithProgress(koreaderProgress)
             .WithPercentage(progressDto?.PageNum, file.Pages)
-            .WithDeviceId(settingsDto.InstallId, userId) // TODO: Should we generate a hash for UserId + InstallId so that this DeviceId is unique to the user on the server?
+            .WithDeviceId(settingsDto.InstallId, userId)
             .Build();
     }
 }

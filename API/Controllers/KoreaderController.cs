@@ -78,11 +78,20 @@ public class KoreaderController : BaseApiController
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
     public async Task<ActionResult<KoreaderBookDto>> GetProgress(string apiKey, string ebookHash)
     {
-        var userId = await GetUserId(apiKey);
-        var response = await _koreaderService.GetProgress(ebookHash, userId);
-        _logger.LogDebug("Koreader response progress: {Progress}", response.Progress);
+        try
+        {
+            var userId = await GetUserId(apiKey);
+            var response = await _koreaderService.GetProgress(ebookHash, userId);
+            _logger.LogDebug("Koreader response progress: {Progress}", response.Progress);
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        return BadRequest();
     }
 
     private async Task<int> GetUserId(string apiKey)

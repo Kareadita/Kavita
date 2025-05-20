@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 // const IP = 'localhost';
-const IP = '10.10.30.215';
+const IP = 'localhost';
 
 export const environment = {
   production: false,
