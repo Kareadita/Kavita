@@ -68,10 +68,17 @@ public class KoreaderController : BaseApiController
     [HttpPut("{apiKey}/syncs/progress")]
     public async Task<ActionResult<KoreaderProgressUpdateDto>> UpdateProgress(string apiKey, KoreaderBookDto request)
     {
-        var userId = await GetUserId(apiKey);
-        await _koreaderService.SaveProgress(request, userId);
+        try
+        {
+            var userId = await GetUserId(apiKey);
+            await _koreaderService.SaveProgress(request, userId);
 
-        return Ok(new KoreaderProgressUpdateDto{ Document = request.Document, Timestamp = DateTime.UtcNow });
+            return Ok(new KoreaderProgressUpdateDto{ Document = request.Document, Timestamp = DateTime.UtcNow });
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
 
@@ -90,8 +97,6 @@ public class KoreaderController : BaseApiController
         {
             return BadRequest(ex.Message);
         }
-
-        return BadRequest();
     }
 
     private async Task<int> GetUserId(string apiKey)

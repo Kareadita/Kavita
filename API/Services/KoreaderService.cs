@@ -41,16 +41,16 @@ public class KoreaderService : IKoreaderService
     {
         _logger.LogDebug("Saving Koreader progress for {UserId}: {KoreaderProgress}", userId, koreaderBookDto.Progress);
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.Document);
-        if (file == null) return;
+        if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
         var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         if (userProgressDto == null)
         {
             var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId);
-            if (chapterDto == null) return;
+            if (chapterDto == null) throw new KavitaException(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
 
             var volumeDto = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId);
-            if (volumeDto == null) return;
+            if (volumeDto == null) throw new KavitaException(await _localizationService.Translate(userId, "volume-doesnt-exist"));
 
             userProgressDto = new ProgressDto()
             {
