@@ -129,6 +129,30 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
                     break;
+                case ServerSettingKey.OidcAuthority:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.Authority = row.Value;
+                    break;
+                case ServerSettingKey.OidcClientId:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.ClientId = row.Value;
+                    break;
+                case ServerSettingKey.OidcAutoLogin:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.AutoLogin = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.OidcProvisionAccounts:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.ProvisionAccounts = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.OidcRequireVerifiedEmail:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.RequireVerifiedEmail = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.OidcProvisionUserSettings:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.ProvisionUserSettings = bool.Parse(row.Value);
+                    break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:
                 case ServerSettingKey.EmailServiceUrl:

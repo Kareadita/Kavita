@@ -74,6 +74,18 @@ public class AccountController : BaseApiController
         _localizationService = localizationService;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        if (user == null) throw new UnauthorizedAccessException();
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+
+        return Ok(await ConstructUserDto(user));
+    }
+
     /// <summary>
     /// Update a user's password
     /// </summary>
@@ -245,6 +257,11 @@ public class AccountController : BaseApiController
             }
         }
 
+        return Ok(await ConstructUserDto(user));
+    }
+
+    private async Task<UserDto> ConstructUserDto(AppUser user)
+    {
         // Update LastActive on account
         user.UpdateLastActive();
 
@@ -265,12 +282,11 @@ public class AccountController : BaseApiController
         dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
             .Value;
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
-        if (pref == null) return Ok(dto);
+        if (pref == null) return dto;
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
-
-        return Ok(dto);
+        return dto;
     }
 
     /// <summary>

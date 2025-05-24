@@ -8,6 +8,8 @@ namespace API.Extensions;
 public static class ClaimsPrincipalExtensions
 {
     private const string NotAuthenticatedMessage = "User is not authenticated";
+    private static readonly string EmailVerifiedClaimType = "email_verified";
+
     /// <summary>
     /// Get's the authenticated user's username
     /// </summary>
@@ -25,5 +27,18 @@ public static class ClaimsPrincipalExtensions
     {
         var userClaim = user.FindFirst(ClaimTypes.NameIdentifier) ?? throw new KavitaException(NotAuthenticatedMessage);
         return int.Parse(userClaim.Value);
+    }
+
+    public static bool HasVerifiedEmail(this ClaimsPrincipal user)
+    {
+        var emailVerified = user.FindFirst(EmailVerifiedClaimType);
+        if (emailVerified == null) return false;
+
+        if (!bool.TryParse(emailVerified.Value, out bool emailVerifiedValue) || !emailVerifiedValue)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

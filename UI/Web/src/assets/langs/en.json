@@ -5,7 +5,42 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
-        "submit": "Sign in"
+        "submit": "Sign in",
+        "oidc": "Log in with OpenID Connect",
+        "oidc-tooltip": "This will connect you to an external site"
+    },
+
+    "oidc": {
+        "title": "OpenID Connect Callback",
+        "login": "Back to login screen",
+        "errors": {
+            "missing-external-id": "OpenID Connect provider did not return a valid identifier",
+            "missing-email": "OpenID Connect provider did not return a valid email",
+            "email-not-verified": "Your email must be verified to allow logging in via OpenID Connect",
+            "no-account": "No matching account found",
+            "disabled-account": "This account is disabled, please contact an administrator"
+        },
+        "settings": {
+            "save": "{{common.save}}",
+            "notice": "Notice",
+            "restart-required": "Changing OpenID Connect settings requires a restart",
+            "provider": "Provider",
+            "behaviour": "Behaviour",
+            "field-required": "{{name}} is required when {{other}} is set",
+
+            "authority": "Authority",
+            "authority-tooltip": "The URL to your OpenID Connect provider",
+            "clientId": "Client ID",
+            "clientId-tooltip": "The ClientID set in your OIDC provider, can be anything",
+            "provisionAccounts": "Provision accounts",
+            "provisionAccounts-tooltip": "Create a new account when someone logs in via OIDC, without already having an account",
+            "requireVerifiedEmail": "Require verified emails",
+            "requireVerifiedEmail-tooltip": "Requires emails to be verified when creation an account or matching with existing ones. A newly created account with a verified email, will be auto verified on Kavita's side",
+            "provisionUserSettings": "Provision user settings",
+            "provisionUserSettings-tooltip": "Synchronise Kavita user settings (roles, libraries, age rating) with those provided by the OIDC. See documentation for more information",
+            "autoLogin": "Auto login",
+            "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen"
+        }
     },
 
     "dashboard": {
@@ -1698,6 +1733,7 @@
         "import-section-title": "Import",
         "kavitaplus-section-title": "Kavita+",
         "admin-general": "General",
+        "admin-oidc": "OpenID Connect",
         "admin-users": "Users",
         "admin-libraries": "Libraries",
         "admin-media": "Media",

@@ -80,6 +80,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
+        services.AddScoped<IOidcService, OidcService>();
+
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 

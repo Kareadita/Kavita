@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -90,6 +90,10 @@ export class AccountService {
     });
   }
 
+  oidcEnabled() {
+    return this.httpClient.get<boolean>(this.baseUrl + "oidc/enabled");
+  }
+
   canInvokeAction(user: User, action: Action) {
     const isAdmin = this.hasAdminRole(user);
     const canDownload = this.hasDownloadRole(user);
@@ -167,6 +171,22 @@ export class AccountService {
     );
   }
 
+  loginByToken(token: string) {
+    const headers = new HttpHeaders({
+      "Authorization": `Bearer ${token}`
+    })
+    return this.httpClient.get<User>(this.baseUrl + 'account', {headers}).pipe(
+      tap((response: User) => {
+        const user = response;
+        if (user) {
+          user.oidcToken = token;
+          this.setCurrentUser(user);
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
   setCurrentUser(user?: User, refreshConnections = true) {
 
     const isSameUser = this.currentUser === user;
@@ -202,7 +222,10 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      this.startRefreshTokenTimer();
+      // oidc handles refreshing itself
+      if (!this.currentUser.oidcToken) {
+        this.startRefreshTokenTimer();
+      }
     }
   }
 

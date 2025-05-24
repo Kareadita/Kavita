@@ -197,4 +197,34 @@ public enum ServerSettingKey
     /// </summary>
     [Description("FirstInstallVersion")]
     FirstInstallVersion = 39,
+    /// <summary>
+    /// Optional OpenID Connect Authority URL
+    /// </summary>
+    [Description("OpenIDConnectAuthority")]
+    OidcAuthority = 40,
+    /// <summary>
+    /// Optional OpenID Connect ClientId, default to kavita
+    /// </summary>
+    [Description("OpenIDConnectClientId")]
+    OidcClientId = 41,
+    /// <summary>
+    /// Optional OpenID Connect ClientSecret, required if authority is set
+    /// </summary>
+    [Description("OpenIdConnectAutoLogin")]
+    OidcAutoLogin = 42,
+    /// <summary>
+    /// If true, auto creates a new account when someone logs in via OpenID Connect
+    /// </summary>
+    [Description("OpenIDConnectCreateAccounts")]
+    OidcProvisionAccounts = 43,
+    /// <summary>
+    /// Require emails to be verified by the OpenID Connect provider when creating accounts on login
+    /// </summary>
+    [Description("OpenIDConnectVerifiedEmail")]
+    OidcRequireVerifiedEmail = 44,
+    /// <summary>
+    /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provides roles on log in.
+    /// </summary>
+    [Description("OpenIDConnectSyncUserSettings")]
+    OidcProvisionUserSettings = 45,
 }

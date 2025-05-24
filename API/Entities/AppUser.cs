@@ -88,6 +88,11 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// <remarks>Kavita+ only</remarks>
     public DateTime ScrobbleEventGenerationRan { get; set; }
 
+    /// <summary>
+    /// The sub returned the by OIDC provider
+    /// </summary>
+    public string? ExternalId { get; set; }
+
 
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for

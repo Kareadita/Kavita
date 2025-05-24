@@ -1,0 +1,15 @@
+<ng-container *transloco="let t; read: 'oidc'">
+  <app-splash-container>
+    <ng-container title><h2>{{t('title')}}</h2></ng-container>
+    <ng-container body>
+
+      @if (error.length > 0) {
+        <div class="invalid-feedback mb-2">
+          {{t(error)}}
+        </div>
+      }
+
+      <button class="btn btn-outline-primary" (click)="goToLogin()">{{t('login')}}</button>
+    </ng-container>
+  </app-splash-container>
+</ng-container>

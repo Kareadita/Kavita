@@ -20,6 +20,7 @@ import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
+import {provideOAuthClient} from "angular-oauth2-oidc";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -146,6 +147,7 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
+        provideOAuthClient(),
         provideHttpClient(withInterceptorsFromDi())
     ]
 } as ApplicationConfig)

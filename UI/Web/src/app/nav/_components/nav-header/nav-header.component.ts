@@ -47,6 +47,7 @@ import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.comp
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
+import {OidcService} from "../../../_services/oidc.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -64,6 +65,7 @@ export class NavHeaderComponent implements OnInit {
   private readonly searchService = inject(SearchService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly accountService = inject(AccountService);
+  private readonly oidcService = inject(OidcService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
@@ -135,6 +137,7 @@ export class NavHeaderComponent implements OnInit {
     this.accountService.logout();
     this.navService.hideNavBar();
     this.navService.hideSideNav();
+    this.oidcService.logout();
     this.router.navigateByUrl('/login');
   }
 

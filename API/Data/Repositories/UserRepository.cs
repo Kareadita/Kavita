@@ -107,6 +107,7 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetDashboardStreamsByIds(IList<int> streamIds);
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
+    Task<AppUser?> GetByExternalId(string? externalId, AppUserIncludes includes = AppUserIncludes.None);
 }
 
 public class UserRepository : IUserRepository
@@ -554,6 +555,16 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUser
             .Where(u => u.Devices.Any(d => d.EmailAddress == deviceEmail))
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<AppUser?> GetByExternalId(string? externalId, AppUserIncludes includes = AppUserIncludes.None)
+    {
+        if (string.IsNullOrEmpty(externalId)) return null;
+
+        return await _context.AppUser
+            .Where(u => u.ExternalId == externalId)
+            .Includes(includes)
             .FirstOrDefaultAsync();
     }
 

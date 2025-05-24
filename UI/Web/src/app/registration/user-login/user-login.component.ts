@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { AccountService } from '../../_services/account.service';
@@ -10,6 +10,9 @@ import { NavService } from '../../_services/nav.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
 import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
+import {environment} from "../../../environments/environment";
+import {OidcService} from "../../_services/oidc.service";
+import {forkJoin} from "rxjs";
 
 
 @Component({
@@ -17,9 +20,11 @@ import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective]
+  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective, NgbTooltip]
 })
 export class UserLoginComponent implements OnInit {
+
+  baseUrl = environment.apiUrl;
 
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
@@ -35,10 +40,18 @@ export class UserLoginComponent implements OnInit {
    */
   isLoaded: boolean = false;
   isSubmitting = false;
+  oidcEnabled = false;
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService,
-    private readonly cdRef: ChangeDetectorRef, private route: ActivatedRoute) {
+  constructor(
+    private accountService: AccountService,
+    private router: Router,
+    private memberService: MemberService,
+    private toastr: ToastrService,
+    private navService: NavService,
+    private readonly cdRef: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    protected oidcService: OidcService,
+  ) {
       this.navService.hideNavBar();
       this.navService.hideSideNav();
     }
@@ -71,6 +84,18 @@ export class UserLoginComponent implements OnInit {
       if (val != null && val.length > 0) {
         this.login(val);
       }
+
+      const skipAutoLogin = params.get('skipAutoLogin') === 'true';
+      this.oidcService.settings$.subscribe(cfg => {
+        if (!cfg) return;
+
+        this.oidcEnabled = cfg.authority !== "";
+        this.cdRef.markForCheck();
+
+        if (cfg.autoLogin && !skipAutoLogin) {
+          this.oidcService.oidcLogin()
+        }
+      });
     });
   }
 
@@ -83,18 +108,8 @@ export class UserLoginComponent implements OnInit {
     this.cdRef.markForCheck();
     this.accountService.login(model).subscribe(() => {
       this.loginForm.reset();
-      this.navService.showNavBar();
-      this.navService.showSideNav();
+      this.doLogin()
 
-      // Check if user came here from another url, else send to library route
-      const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      if (pageResume && pageResume !== '/login') {
-        localStorage.setItem('kavita--auth-intersection-url', '');
-        this.router.navigateByUrl(pageResume);
-      } else {
-        localStorage.setItem('kavita--auth-intersection-url', '');
-        this.router.navigateByUrl('/home');
-      }
       this.isSubmitting = false;
       this.cdRef.markForCheck();
     }, err => {
@@ -102,5 +117,20 @@ export class UserLoginComponent implements OnInit {
       this.isSubmitting = false;
       this.cdRef.markForCheck();
     });
+  }
+
+  private doLogin() {
+    this.navService.showNavBar();
+    this.navService.showSideNav();
+
+    // Check if user came here from another url, else send to library route
+    const pageResume = localStorage.getItem('kavita--auth-intersection-url');
+    if (pageResume && pageResume !== '/login') {
+      localStorage.setItem('kavita--auth-intersection-url', '');
+      this.router.navigateByUrl(pageResume);
+    } else {
+      localStorage.setItem('kavita--auth-intersection-url', '');
+      this.router.navigateByUrl('/home');
+    }
   }
 }

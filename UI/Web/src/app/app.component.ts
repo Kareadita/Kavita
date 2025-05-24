@@ -25,6 +25,7 @@ import {TranslocoService} from "@jsverse/transloco";
 import {VersionService} from "./_services/version.service";
 import {LicenseService} from "./_services/license.service";
 import {LocalizationService} from "./_services/localization.service";
+import {OidcService} from "./_services/oidc.service";
 
 @Component({
     selector: 'app-root',
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly translocoService = inject(TranslocoService);
   private readonly versionService = inject(VersionService); // Needs to be injected to run background job
+  private readonly oidcService = inject(OidcService); // Needed to auto login
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
 

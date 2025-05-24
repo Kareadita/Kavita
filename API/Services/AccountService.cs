@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Account;
 using API.Entities;
 using API.Errors;
@@ -29,6 +30,9 @@ public interface IAccountService
     Task<bool> HasBookmarkPermission(AppUser? user);
     Task<bool> HasDownloadPermission(AppUser? user);
     Task<bool> CanChangeAgeRestriction(AppUser? user);
+
+    Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
+    Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
 }
 
 public class AccountService : IAccountService
@@ -142,5 +146,57 @@ public class AccountService : IAccountService
         if (roles.Contains(PolicyConstants.ReadOnlyRole)) return false;
 
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
+    }
+
+    public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole)
+    {
+        var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        List<Library> libraries;
+        if (hasAdminRole)
+        {
+            _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+                user.UserName);
+            libraries = allLibraries;
+        }
+        else
+        {
+            // Remove user from all libraries
+            foreach (var lib in allLibraries)
+            {
+                lib.AppUsers ??= new List<AppUser>();
+                lib.AppUsers.Remove(user);
+                user.RemoveSideNavFromLibrary(lib);
+            }
+
+            libraries = (await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(librariesIds, LibraryIncludes.AppUser)).ToList();
+        }
+
+        foreach (var lib in libraries)
+        {
+            lib.AppUsers ??= new List<AppUser>();
+            lib.AppUsers.Add(user);
+            user.CreateSideNavFromLibrary(lib);
+        }
+    }
+
+    public async Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles)
+    {
+        var existingRoles = await _userManager.GetRolesAsync(user);
+        var hasAdminRole = roles.Contains(PolicyConstants.AdminRole);
+        if (!hasAdminRole)
+        {
+            roles.Add(PolicyConstants.PlebRole);
+        }
+
+        if (existingRoles.Except(roles).Any() || roles.Except(existingRoles).Any())
+        {
+            var roleResult = await _userManager.RemoveFromRolesAsync(user, existingRoles);
+            if (!roleResult.Succeeded) return roleResult.Errors;
+
+            roleResult = await _userManager.AddToRolesAsync(user, roles);
+            if (!roleResult.Succeeded) return roleResult.Errors;
+        }
+
+        return [];
     }
 }

@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
 using API.Services.Tasks.Scanner;
+using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -172,7 +173,7 @@ public class SettingsService : ISettingsService
             updateTask = updateTask || UpdateSchedulingSettings(setting, updateSettingsDto);
 
             UpdateEmailSettings(setting, updateSettingsDto);
-
+            await UpdateOidcSettings(setting, updateSettingsDto);
 
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
@@ -346,6 +347,26 @@ public class SettingsService : ISettingsService
         return updateSettingsDto;
     }
 
+    private async Task<bool> IsValidAuthority(string authority)
+    {
+        if (string.IsNullOrEmpty(authority))
+        {
+            return false;
+        }
+
+        var url = authority + "/.well-known/openid-configuration";
+        try
+        {
+            var resp = await url.GetAsync();
+            return resp.StatusCode == 200;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "OpenIdConfiguration failed: {Reason}", e.Message);
+            return false;
+        }
+    }
+
     private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
     {
         _directoryService.ExistOrCreate(bookmarkDirectory);
@@ -377,6 +398,52 @@ public class SettingsService : ISettingsService
             return true;
         }
         return false;
+    }
+
+    private async Task UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.OidcAuthority &&
+            updateSettingsDto.OidcConfig.Authority + string.Empty != setting.Value)
+        {
+            if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
+            {
+                throw new KavitaException("oidc-invalid-authority");
+            }
+
+            setting.Value = updateSettingsDto.OidcConfig.Authority + string.Empty;
+            Configuration.OidcAuthority = setting.Value;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.OidcClientId &&
+            updateSettingsDto.OidcConfig.ClientId + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.ClientId + string.Empty;
+            Configuration.OidcClientId = setting.Value;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.OidcAutoLogin &&
+            updateSettingsDto.OidcConfig.AutoLogin + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.AutoLogin + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.OidcProvisionAccounts &&
+            updateSettingsDto.OidcConfig.ProvisionAccounts + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.ProvisionAccounts + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.OidcProvisionUserSettings &&
+            updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
