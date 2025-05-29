@@ -534,7 +534,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       // Update implicit reading profile while changing settings
-      /*this.generalSettingsForm.valueChanges.pipe(
+      this.generalSettingsForm.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef),
@@ -545,7 +545,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           })
         })
-      ).subscribe();*/
+      ).subscribe();
 
 
       this.readerModeSubject.next(this.readerMode);
@@ -771,7 +771,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     ).subscribe();
 
     // Set the default override to 0
-    widthOverrideControl.setValue(0);
+    //widthOverrideControl.setValue(0);
 
     //send the current width override value to the label
     this.widthOverrideLabel$ = this.readerSettings$?.pipe(
