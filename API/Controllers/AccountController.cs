@@ -153,6 +153,9 @@ public class AccountController : BaseApiController
             // Assign default streams
             AddDefaultStreamsToUser(user);
 
+            // Assign default reading profile
+            AddDefaultReadingProfileToUser(user);
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
             if (!await ConfirmEmailToken(token, user)) return BadRequest(await _localizationService.Get("en",  "validate-email", token));
@@ -669,6 +672,9 @@ public class AccountController : BaseApiController
             // Assign default streams
             AddDefaultStreamsToUser(user);
 
+            // Assign default reading profile
+            AddDefaultReadingProfileToUser(user);
+
             // Assign Roles
             var roles = dto.Roles;
             var hasAdminRole = dto.Roles.Contains(PolicyConstants.AdminRole);
@@ -777,6 +783,15 @@ public class AccountController : BaseApiController
         {
             user.SideNavStreams.Add(stream);
         }
+    }
+
+    private void AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .Build();
+        user.UserPreferences.ReadingProfiles.Add(profile);
+        user.UserPreferences.DefaultReadingProfile = profile;
     }
 
     /// <summary>

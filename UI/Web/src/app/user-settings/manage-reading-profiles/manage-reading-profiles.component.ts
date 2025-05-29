@@ -45,6 +45,7 @@ import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ReadingProfileLibrarySelectionComponent} from "./_components/library-selection/reading-profile-library-selection.component";
+import {ToastrService} from "ngx-toastr";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -114,6 +115,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     private accountService: AccountService,
     private bookService: BookService,
     private destroyRef: DestroyRef,
+    private toastr: ToastrService,
   ) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
@@ -222,6 +224,7 @@ export class ManageReadingProfilesComponent implements OnInit {
             },
             error: err => {
               console.log(err);
+              this.toastr.error(err.message);
             }
           })
         } else {
@@ -236,6 +239,7 @@ export class ManageReadingProfilesComponent implements OnInit {
             },
             error: err => {
               console.log(err);
+              this.toastr.error(err.message);
             }
           })
         }
@@ -246,8 +250,9 @@ export class ManageReadingProfilesComponent implements OnInit {
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
-    // Hack around readerMode being sent as a string otherwise
+    // Hack around readerMode being sent as a string otherwise ????
     data.readerMode = parseInt(data.readerMode as unknown as string);
+    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode as unknown as string);
     return data;
   }
 
