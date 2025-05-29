@@ -9,16 +9,16 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 
 @Component({
-  selector: 'app-bulk-add-to-reading-profile',
+  selector: 'app-bulk-set-reading-profile',
   imports: [
     ReactiveFormsModule,
     FilterPipe,
     TranslocoDirective
   ],
-  templateUrl: './bulk-add-to-reading-profile.component.html',
-  styleUrl: './bulk-add-to-reading-profile.component.scss'
+  templateUrl: './bulk-set-reading-profile.component.html',
+  styleUrl: './bulk-set-reading-profile.component.scss'
 })
-export class BulkAddToReadingProfileComponent implements OnInit, AfterViewInit {
+export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly toastr = inject(ToastrService);

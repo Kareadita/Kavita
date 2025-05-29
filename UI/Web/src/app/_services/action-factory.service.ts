@@ -125,7 +125,7 @@ export enum Action {
   /**
    * Add to a reading profile
    */
-  AddToReadingProfile = 30,
+  SetReadingProfile = 30,
 }
 
 /**
@@ -532,17 +532,7 @@ export class ActionFactoryService {
             requiresAdmin: false,
             requiredRoles: [],
             children: [],
-          },
-          {
-            action: Action.AddToReadingProfile,
-            title: 'add-to-reading-profile',
-            description: 'add-to-reading-profile-tooltip',
-            callback: this.dummyCallback,
-            shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
-            requiredRoles: [],
-            children: [],
-          },
+          }
         ],
       },
       {
@@ -606,6 +596,16 @@ export class ActionFactoryService {
             shouldRender: this.dummyShouldRender,
             requiresAdmin: true,
             requiredRoles: [Role.Admin],
+            children: [],
+          },
+          {
+            action: Action.SetReadingProfile,
+            title: 'set-reading-profile',
+            description: 'set-reading-profile-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
             children: [],
           },
           {

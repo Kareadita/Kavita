@@ -609,6 +609,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(chapterIds, device);
           break;
         }
+      case Action.SetReadingProfile:
+        this.actionService.SetReadingProfileForMultiple([this.series]);
+        break;
       default:
         break;
     }

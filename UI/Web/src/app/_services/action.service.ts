@@ -31,9 +31,7 @@ import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
-import {
-  BulkAddToReadingProfileComponent
-} from "../cards/_modals/bulk-add-to-reading-profile/bulk-add-to-reading-profile.component";
+import {BulkSetReadingProfileComponent} from "../cards/_modals/bulk-set-reading-profile/bulk-set-reading-profile.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -817,14 +815,14 @@ export class ActionService {
   }
 
   /**
-   * Adds series to a reading list
+   * Sets the reading profile for multiple series
    * @param series
    * @param callback
    */
-  addMultipleToReadingProfile(series: Array<Series>, callback?: BooleanActionCallback) {
+  SetReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
-    this.readingListModalRef = this.modalService.open(BulkAddToReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
     this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
     this.readingListModalRef.componentInstance.title = "hi"
 

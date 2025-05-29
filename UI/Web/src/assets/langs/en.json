@@ -1266,8 +1266,8 @@
         "create": "{{common.create}}"
     },
 
-    "bulk-add-to-reading-profile": {
-        "title": "Add to Reading profile",
+    "bulk-set-reading-profile": {
+        "title": "Set Reading profile",
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1979,7 +1979,7 @@
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
-        "user-preferences-updated": "User preferences updated",
+        "reading-profile-updated": "Reading profile updated",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "series-progress": "Series Progress: {{percentage}}"
     },
@@ -2714,7 +2714,7 @@
         "remove-from-want-to-read-tooltip": "Remove series from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
         "remove-from-on-deck-tooltip": "Remove series from showing from On Deck",
-        "add-to-reading-profile": "Add to Reading Profile",
+        "set-reading-profile": "Set Reading Profile",
 
         "others": "Others",
         "add-to-reading-list": "Add to Reading List",

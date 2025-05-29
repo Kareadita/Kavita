@@ -1756,7 +1756,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // menu only code
   savePref() {
     this.readingProfileService.updateProfile(this.packReadingProfile()).subscribe(_ => {
-      this.toastr.success(translate('manga-reader.user-preferences-updated'));
+      this.toastr.success(translate('manga-reader.reading-profile-updated'));
     })
   }
 

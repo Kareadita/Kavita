@@ -276,8 +276,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case Action.Download:
         this.downloadService.download('series', this.series);
         break;
-      case Action.AddToReadingProfile:
-        this.actionService.addMultipleToReadingProfile([this.series]);
+      case Action.SetReadingProfile:
+        this.actionService.SetReadingProfileForMultiple([this.series]);
         break;
       default:
         break;
