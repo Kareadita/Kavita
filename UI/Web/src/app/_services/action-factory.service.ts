@@ -122,6 +122,10 @@ export enum Action {
    * Merge two (or more?) entities
    */
   Merge = 29,
+  /**
+   * Add to a reading profile
+   */
+  AddToReadingProfile = 30,
 }
 
 /**
@@ -523,6 +527,16 @@ export class ActionFactoryService {
             action: Action.AddToCollection,
             title: 'add-to-collection',
             description: 'add-to-collection-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.AddToReadingProfile,
+            title: 'add-to-reading-profile',
+            description: 'add-to-reading-profile-tooltip',
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
             requiresAdmin: false,

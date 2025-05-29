@@ -31,6 +31,9 @@ import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
+import {
+  BulkAddToReadingProfileComponent
+} from "../cards/_modals/bulk-add-to-reading-profile/bulk-add-to-reading-profile.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -809,6 +812,32 @@ export class ActionService {
 
       if (callback) {
         callback(true);
+      }
+    });
+  }
+
+  /**
+   * Adds series to a reading list
+   * @param series
+   * @param callback
+   */
+  addMultipleToReadingProfile(series: Array<Series>, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkAddToReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
+    this.readingListModalRef.componentInstance.title = "hi"
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
       }
     });
   }

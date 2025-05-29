@@ -16,10 +16,7 @@ export class ReadingProfileService {
     return this.httpClient.get<ReadingProfile>(this.baseUrl + "ReadingProfile/"+seriesId);
   }
 
-  updateProfile(profile: ReadingProfile, seriesId?: number) {
-    if (seriesId) {
-      return this.httpClient.post(this.baseUrl + "ReadingProfile?seriesCtx="+seriesId, profile);
-    }
+  updateProfile(profile: ReadingProfile) {
     return this.httpClient.post(this.baseUrl + "ReadingProfile", profile);
   }
 
@@ -57,6 +54,10 @@ export class ReadingProfileService {
 
   removeFromLibrary(id: number, libraryId: number) {
     return this.httpClient.delete(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
+  }
+
+  batchAddToSeries(id: number, seriesIds: number[]) {
+    return this.httpClient.post(this.baseUrl + `ReadingProfile/batch?profileId=${id}`, seriesIds);
   }
 
 }

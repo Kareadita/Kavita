@@ -16,7 +16,7 @@ public interface IReadingProfileService
 {
     /// <summary>
     /// Returns the ReadingProfile that should be applied to the given series, walks up the tree.
-    /// Series -> Library -> Default
+    /// Series (implicit) -> Series (Assigned) -> Library -> Default
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
@@ -24,13 +24,13 @@ public interface IReadingProfileService
     Task<UserReadingProfileDto> GetReadingProfileForSeries(int userId, int seriesId);
 
     /// <summary>
-    /// Updates a given reading profile for a user
+    /// Updates a given reading profile for a user, and deletes all implicit profiles
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="dto"></param>
     /// <returns></returns>
     /// <remarks>Does not update connected series and libraries</remarks>
-    Task<bool> UpdateReadingProfile(int userId, UserReadingProfileDto dto);
+    Task UpdateReadingProfile(int userId, UserReadingProfileDto dto);
 
     /// <summary>
     /// Creates a new reading profile for a user. Name must be unique per user
@@ -47,15 +47,7 @@ public interface IReadingProfileService
     /// <param name="seriesId"></param>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<bool> UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto);
-
-    /// <summary>
-    /// Deletes the implicit reading profile for a given series, if it exists
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    Task DeleteImplicitForSeries(int userId, int seriesId);
+    Task UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto);
 
     /// <summary>
     /// Deletes a given profile for a user
@@ -76,6 +68,7 @@ public interface IReadingProfileService
     Task SetDefaultReadingProfile(int userId, int profileId);
 
     Task AddProfileToSeries(int userId, int profileId, int seriesId);
+    Task BatchAddProfileToSeries(int userId, int profileId, IList<int> seriesIds);
     Task RemoveProfileFromSeries(int userId, int profileId, int seriesId);
 
     Task AddProfileToLibrary(int userId, int profileId, int libraryId);
@@ -103,19 +96,25 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         return await unitOfWork.AppUserReadingProfileRepository.GetProfileDto(user.UserPreferences.DefaultReadingProfileId);
     }
 
-    public async Task<bool> UpdateReadingProfile(int userId, UserReadingProfileDto dto)
+    public async Task UpdateReadingProfile(int userId, UserReadingProfileDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null) throw new UnauthorizedAccessException();
 
-        var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id);
-        if (existingProfile == null) throw new KavitaException("profile-does-not-exist");
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id, ReadingProfileIncludes.Series);
+        if (profile == null) throw new KavitaException("profile-does-not-exist");
 
-        if (existingProfile.UserId != userId) throw new UnauthorizedAccessException();
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
 
-        UpdateReaderProfileFields(existingProfile, dto);
-        unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
-        return await unitOfWork.CommitAsync();
+        UpdateReaderProfileFields(profile, dto);
+        unitOfWork.AppUserReadingProfileRepository.Update(profile);
+
+        // Remove all implicit profiles for series using this profile
+        var allLinkedSeries = profile.Series.Select(sp => sp.SeriesId).ToList();
+        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, allLinkedSeries, true);
+        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+
+        await unitOfWork.CommitAsync();
     }
 
     public async Task<UserReadingProfileDto> CreateReadingProfile(int userId, UserReadingProfileDto dto)
@@ -135,7 +134,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         return await unitOfWork.AppUserReadingProfileRepository.GetProfileDto(newProfile.Id);
     }
 
-    public async Task<bool> UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto)
+    public async Task UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null) throw new UnauthorizedAccessException();
@@ -147,39 +146,29 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         {
             UpdateReaderProfileFields(existingProfile, dto, false);
             unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
-            return await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync();
+            return;
         }
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId) ?? throw new KeyNotFoundException();
-        existingProfile = new AppUserReadingProfileBuilder(userId)
+        var newProfile = new AppUserReadingProfileBuilder(userId)
             .WithSeries(series)
             .WithImplicit(true)
             .Build();
 
-        UpdateReaderProfileFields(existingProfile, dto, false);
-        existingProfile.Name = $"Implicit Profile for {seriesId}";
-        existingProfile.NormalizedName = existingProfile.Name.ToNormalized();
+        // Set name to something fitting for debugging if needed
+        UpdateReaderProfileFields(newProfile, dto, false);
+        newProfile.Name = $"Implicit Profile for {seriesId}";
+        newProfile.NormalizedName = newProfile.Name.ToNormalized();
 
-        user.UserPreferences.ReadingProfiles.Add(existingProfile);
-        return await unitOfWork.CommitAsync();
-    }
-
-    public async Task DeleteImplicitForSeries(int userId, int seriesId)
-    {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, seriesId, ReadingProfileIncludes.Series);
-        if (profile == null) return;
-
-        if (!profile.Implicit) return;
-
-        profile.Series = profile.Series.Where(s => s.SeriesId != seriesId).ToList();
-
+        user.UserPreferences.ReadingProfiles.Add(newProfile);
         await unitOfWork.CommitAsync();
     }
 
     public async Task DeleteReadingProfile(int userId, int profileId)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException(await localizationService.Translate(userId, "profile-doesnt-exist"));
+        if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null || profile.UserId != userId) throw new UnauthorizedAccessException();
@@ -212,16 +201,56 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         if (profile.UserId != userId) throw new UnauthorizedAccessException();
 
         var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfile(userId, seriesId);
-        if (seriesProfile == null)
+        if (seriesProfile != null)
         {
-            seriesProfile = new SeriesReadingProfile
+            seriesProfile.ReadingProfile = profile;
+            await unitOfWork.CommitAsync();
+            return;
+        }
+
+        seriesProfile = new SeriesReadingProfile
+        {
+            AppUserId = userId,
+            SeriesId = seriesId,
+            ReadingProfileId = profile.Id
+        };
+
+        unitOfWork.AppUserReadingProfileRepository.Add(seriesProfile);
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task BatchAddProfileToSeries(int userId, int profileId, IList<int> seriesIds)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId, ReadingProfileIncludes.Series);
+        if (profile == null) throw new KavitaException("profile-not-found");
+
+        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+
+        var seriesProfiles = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfilesForSeries(userId, seriesIds);
+        var newSeriesIds = seriesIds.Except(seriesProfiles.Select(p => p.SeriesId)).ToList();
+
+        // Update existing
+        foreach (var seriesProfile in seriesProfiles)
+        {
+            seriesProfile.ReadingProfile = profile;
+        }
+
+        // Create new ones
+        foreach (var seriesId in newSeriesIds)
+        {
+            var seriesProfile = new SeriesReadingProfile
             {
                 AppUserId = userId,
                 SeriesId = seriesId,
+                ReadingProfile = profile,
             };
+            unitOfWork.AppUserReadingProfileRepository.Add(seriesProfile);
         }
 
-        seriesProfile.ReadingProfile = profile;
+        // Remove all implicit profiles
+        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, seriesIds, true);
+        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+
         await unitOfWork.CommitAsync();
     }
 
@@ -288,6 +317,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.BackgroundColor = string.IsNullOrEmpty(dto.BackgroundColor) ? "#000000" : dto.BackgroundColor;
         existingProfile.SwipeToPaginate = dto.SwipeToPaginate;
         existingProfile.AllowAutomaticWebtoonReaderDetection = dto.AllowAutomaticWebtoonReaderDetection;
+        existingProfile.WidthOverride = dto.WidthOverride;
 
         // EpubReading
         existingProfile.BookReaderMargin = dto.BookReaderMargin;

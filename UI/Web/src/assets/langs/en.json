@@ -1266,6 +1266,16 @@
         "create": "{{common.create}}"
     },
 
+    "bulk-add-to-reading-profile": {
+        "title": "Add to Reading profile",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "No collections created yet",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}"
+    },
+
     "entity-title": {
         "special": "Special",
         "issue-num": "{{common.issue-hash-num}}",
@@ -2650,7 +2660,8 @@
         "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
         "match-success": "Series matched correctly",
         "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
-        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services."
+        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
+        "series-added-to-reading-profile": "Series added to Reading Profile {{name}}"
     },
 
     "read-time-pipe": {
@@ -2703,6 +2714,7 @@
         "remove-from-want-to-read-tooltip": "Remove series from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
         "remove-from-on-deck-tooltip": "Remove series from showing from On Deck",
+        "add-to-reading-profile": "Add to Reading Profile",
 
         "others": "Others",
         "add-to-reading-list": "Add to Reading List",

@@ -49,26 +49,15 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Updates the given reading profile, must belong to the current user
     /// </summary>
     /// <param name="dto"></param>
-    /// <param name="seriesCtx">
-    /// Optionally, from which series the update is called.
-    /// If set, will delete the implicit reading profile if it exists
-    /// </param>
     /// <returns></returns>
-    /// <remarks>This does not update connected series, and libraries. Use
-    /// <see cref="DeleteProfileFromSeries"/>, <see cref="AddProfileToSeries"/>,
-    /// <see cref="DeleteProfileFromLibrary"/>, <see cref="AddProfileToLibrary"/>
+    /// <remarks>
+    /// This does not update connected series, and libraries.
+    /// Deletes all implicit profiles for series linked to this profile
     /// </remarks>
     [HttpPost]
-    public async Task<ActionResult> UpdateReadingProfile([FromBody] UserReadingProfileDto dto, [FromQuery] int? seriesCtx)
+    public async Task<ActionResult> UpdateReadingProfile([FromBody] UserReadingProfileDto dto)
     {
-        if (seriesCtx.HasValue)
-        {
-            await readingProfileService.DeleteImplicitForSeries(User.GetUserId(), seriesCtx.Value);
-        }
-
-        var success = await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto);
-        if (!success) return BadRequest();
-
+        await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto);
         return Ok();
     }
 
@@ -92,9 +81,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("series")]
     public async Task<ActionResult> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
     {
-        var success = await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
-        if (!success) return BadRequest();
-
+        await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
         return Ok();
     }
 
@@ -175,6 +162,19 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<IActionResult> DeleteProfileFromLibrary(int libraryId, [FromQuery] int profileId)
     {
         await readingProfileService.RemoveProfileFromLibrary(User.GetUserId(), profileId, libraryId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Assigns the reading profile to all passes series, and deletes their implicit profiles
+    /// </summary>
+    /// <param name="profileId"></param>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
+    [HttpPost("batch")]
+    public async Task<IActionResult> BatchAddReadingProfile([FromQuery] int profileId, [FromBody] IList<int> seriesIds)
+    {
+        await readingProfileService.BatchAddProfileToSeries(User.GetUserId(), profileId, seriesIds);
         return Ok();
     }
 

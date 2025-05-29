@@ -385,7 +385,7 @@ export class ReaderSettingsComponent implements OnInit {
   }
 
   savePref() {
-    this.readingProfileService.updateProfile(this.packReadingProfile(), this.seriesId).subscribe()
+    this.readingProfileService.updateProfile(this.packReadingProfile()).subscribe()
   }
 
   private packReadingProfile(): ReadingProfile {

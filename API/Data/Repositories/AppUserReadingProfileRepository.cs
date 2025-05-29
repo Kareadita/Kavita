@@ -26,6 +26,7 @@ public interface IAppUserReadingProfileRepository
     Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<AppUserReadingProfile?> GetProfileForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
+    Task<IList<AppUserReadingProfile>> GetProfilesForSeries(int userId, IList<int> seriesIds, bool implicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<UserReadingProfileDto?> GetProfileDtoForSeries(int userId, int seriesId);
     Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<UserReadingProfileDto?> GetProfileDtoForLibrary(int userId, int libraryId);
@@ -33,11 +34,16 @@ public interface IAppUserReadingProfileRepository
     Task<UserReadingProfileDto?> GetProfileDto(int profileId);
     Task<AppUserReadingProfile?> GetProfileByName(int userId, string name);
     Task<SeriesReadingProfile?> GetSeriesProfile(int userId, int seriesId);
+    Task<IList<SeriesReadingProfile>> GetSeriesProfilesForSeries(int userId, IList<int> seriesIds);
     Task<LibraryReadingProfile?> GetLibraryProfile(int userId, int libraryId);
 
     void Add(AppUserReadingProfile readingProfile);
+    void Add(SeriesReadingProfile readingProfile);
     void Update(AppUserReadingProfile readingProfile);
+    void Update(SeriesReadingProfile readingProfile);
     void Remove(AppUserReadingProfile readingProfile);
+    void Remove(SeriesReadingProfile readingProfile);
+    void RemoveRange(IEnumerable<AppUserReadingProfile> readingProfiles);
 }
 
 public class AppUserReadingProfileRepository(DataContext context, IMapper mapper): IAppUserReadingProfileRepository
@@ -68,6 +74,17 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .Includes(includes)
             .OrderByDescending(rp => rp.Implicit) // Get implicit profiles first
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<IList<AppUserReadingProfile>> GetProfilesForSeries(int userId, IList<int> seriesIds, bool implicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None)
+    {
+        return await context.AppUserReadingProfile
+            .Where(rp
+                => rp.UserId == userId
+                   && rp.Series.Any(s => seriesIds.Contains(s.SeriesId))
+                   && (!implicitOnly || rp.Implicit))
+            .Includes(includes)
+            .ToListAsync();
     }
 
     public async Task<UserReadingProfileDto?> GetProfileDtoForSeries(int userId, int seriesId)
@@ -126,6 +143,13 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .FirstOrDefaultAsync();
     }
 
+    public async Task<IList<SeriesReadingProfile>> GetSeriesProfilesForSeries(int userId, IList<int> seriesIds)
+    {
+        return await context.SeriesReadingProfile
+            .Where(rp => seriesIds.Contains(rp.SeriesId) && rp.AppUserId == userId)
+            .ToListAsync();
+    }
+
     public async Task<LibraryReadingProfile?> GetLibraryProfile(int userId, int libraryId)
     {
         return await context.LibraryReadingProfile
@@ -138,13 +162,33 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
         context.AppUserReadingProfile.Add(readingProfile);
     }
 
+    public void Add(SeriesReadingProfile readingProfile)
+    {
+        context.SeriesReadingProfile.Add(readingProfile);
+    }
+
     public void Update(AppUserReadingProfile readingProfile)
     {
         context.AppUserReadingProfile.Update(readingProfile).State = EntityState.Modified;
     }
 
+    public void Update(SeriesReadingProfile readingProfile)
+    {
+        context.SeriesReadingProfile.Update(readingProfile).State = EntityState.Modified;
+    }
+
     public void Remove(AppUserReadingProfile readingProfile)
     {
         context.AppUserReadingProfile.Remove(readingProfile);
+    }
+
+    public void Remove(SeriesReadingProfile readingProfile)
+    {
+        context.SeriesReadingProfile.Remove(readingProfile);
+    }
+
+    public void RemoveRange(IEnumerable<AppUserReadingProfile> readingProfiles)
+    {
+        context.AppUserReadingProfile.RemoveRange(readingProfiles);
     }
 }

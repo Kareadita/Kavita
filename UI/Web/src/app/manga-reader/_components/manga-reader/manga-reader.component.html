@@ -142,7 +142,7 @@
     }
     </div>
 
-    @if (menuOpen) {
+    @if (menuOpen && readingProfile !== null) {
       <div class="fixed-bottom overlay"  [@slideFromBottom]="menuOpen">
         @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
           <div class="mb-3">

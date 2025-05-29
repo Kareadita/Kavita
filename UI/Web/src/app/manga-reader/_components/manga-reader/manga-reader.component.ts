@@ -501,14 +501,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     forkJoin([
       this.accountService.currentUser$.pipe(take(1)),
-      this.readingProfileService.getForSeries(this.seriesId)])
-      .subscribe(([user, profile]) => {
+      this.readingProfileService.getForSeries(this.seriesId)
+      ]).subscribe(([user, profile]) => {
       if (!user) {
         this.router.navigateByUrl('/login');
         return;
       }
 
       this.readingProfile = profile;
+      if (!this.readingProfile) return; // type hints
 
       this.user = user;
       this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
@@ -533,7 +534,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       // Update implicit reading profile while changing settings
-      this.generalSettingsForm.valueChanges.pipe(
+      /*this.generalSettingsForm.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef),
@@ -544,7 +545,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           })
         })
-      ).subscribe();
+      ).subscribe();*/
 
 
       this.readerModeSubject.next(this.readerMode);
@@ -1754,7 +1755,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // menu only code
   savePref() {
-    this.readingProfileService.updateProfile(this.packReadingProfile(), this.seriesId).subscribe(_ => {
+    this.readingProfileService.updateProfile(this.packReadingProfile()).subscribe(_ => {
       this.toastr.success(translate('manga-reader.user-preferences-updated'));
     })
   }
@@ -1775,8 +1776,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     data.emulateBook = modelSettings.emulateBook;
     data.swipeToPaginate = modelSettings.swipeToPaginate;
     data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
-    // TODO: Check if this saves correctly!
-    data.widthOverride = modelSettings.widthSlider === 'none' ? null : modelSettings.widthOverride;
+    data.widthOverride = modelSettings.widthSlider === 'none' ? null : modelSettings.widthSlider;
     return data;
   }
 

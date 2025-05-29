@@ -123,7 +123,6 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
-        console.log(this.user.preferences.defaultReadingProfileId);
       }
     });
 
@@ -247,6 +246,8 @@ export class ManageReadingProfilesComponent implements OnInit {
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
+    // Hack around readerMode being sent as a string otherwise
+    data.readerMode = parseInt(data.readerMode as unknown as string);
     return data;
   }
 

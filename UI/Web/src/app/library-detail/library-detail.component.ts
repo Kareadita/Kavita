@@ -149,6 +149,14 @@ export class LibraryDetailComponent implements OnInit {
           this.loadPage();
         });
         break;
+      case Action.AddToReadingProfile:
+        this.actionService.addMultipleToReadingProfile(selectedSeries, (success) => {
+          this.bulkLoader = false;
+          this.cdRef.markForCheck();
+          if (!success) return;
+          this.bulkSelectionService.deselectAll();
+          this.loadPage();
+        })
     }
   }
 

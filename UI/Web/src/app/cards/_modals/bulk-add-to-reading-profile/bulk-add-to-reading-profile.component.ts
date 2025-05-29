@@ -1,0 +1,81 @@
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {ToastrService} from "ngx-toastr";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ReadingList} from "../../../_models/reading-list";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
+
+@Component({
+  selector: 'app-bulk-add-to-reading-profile',
+  imports: [
+    ReactiveFormsModule,
+    FilterPipe,
+    TranslocoDirective
+  ],
+  templateUrl: './bulk-add-to-reading-profile.component.html',
+  styleUrl: './bulk-add-to-reading-profile.component.scss'
+})
+export class BulkAddToReadingProfileComponent implements OnInit, AfterViewInit {
+  private readonly modal = inject(NgbActiveModal);
+  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly MaxItems = 8;
+
+  @Input({required: true}) title!: string;
+  /**
+   * Series Ids to add to Collection Tag
+   */
+  @Input() seriesIds: Array<number> = [];
+  @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
+
+  profiles: Array<ReadingProfile> = [];
+  loading: boolean = false;
+  profileForm: FormGroup = new FormGroup({});
+
+  ngOnInit(): void {
+
+    this.profileForm.addControl('title', new FormControl(this.title, []));
+    this.profileForm.addControl('filterQuery', new FormControl('', []));
+
+    this.loading = true;
+    this.cdRef.markForCheck();
+    this.readingProfileService.all().subscribe(profiles => {
+      this.profiles = profiles;
+      this.loading = false;
+      this.cdRef.markForCheck();
+    });
+  }
+
+  ngAfterViewInit() {
+    // Shift focus to input
+    if (this.inputElem) {
+      this.inputElem.nativeElement.select();
+      this.cdRef.markForCheck();
+    }
+  }
+
+  close() {
+    this.modal.close();
+  }
+
+  addToProfile(profile: ReadingProfile) {
+    if (this.seriesIds.length === 0) return;
+
+    this.readingProfileService.batchAddToSeries(profile.id, this.seriesIds).subscribe(() => {
+      this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
+      this.modal.close();
+    });
+  }
+
+  filterList = (listItem: ReadingProfile) => {
+    return listItem.name.toLowerCase().indexOf((this.profileForm.value.filterQuery || '').toLowerCase()) >= 0;
+  }
+
+  clear() {
+    this.profileForm.get('filterQuery')?.setValue('');
+  }
+}
