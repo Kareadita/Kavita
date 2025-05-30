@@ -47,6 +47,7 @@ public interface IAppUserReadingProfileRepository
 
     void Add(AppUserReadingProfile readingProfile);
     void Add(SeriesReadingProfile readingProfile);
+    void Attach(AppUserReadingProfile readingProfile);
     void Update(AppUserReadingProfile readingProfile);
     void Update(SeriesReadingProfile readingProfile);
     void Remove(AppUserReadingProfile readingProfile);
@@ -181,6 +182,11 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
     public void Add(SeriesReadingProfile readingProfile)
     {
         context.SeriesReadingProfile.Add(readingProfile);
+    }
+
+    public void Attach(AppUserReadingProfile readingProfile)
+    {
+        context.AppUserReadingProfile.Attach(readingProfile);
     }
 
     public void Update(AppUserReadingProfile readingProfile)

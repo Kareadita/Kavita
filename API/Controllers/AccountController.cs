@@ -790,8 +790,13 @@ public class AccountController : BaseApiController
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithName("Default Profile")
             .Build();
+        _unitOfWork.AppUserReadingProfileRepository.Attach(profile);
+
         user.UserPreferences.ReadingProfiles.Add(profile);
-        user.UserPreferences.DefaultReadingProfile = profile;
+        // TODO: This doesn't save, but I've had to revert it having the full entity or everything would start failing
+        //      in tests because of foreign key constrains. This HAS to be resolved as the code does expect there to always be a
+        //      default profile
+        user.UserPreferences.DefaultReadingProfileId = profile.Id;
     }
 
     /// <summary>

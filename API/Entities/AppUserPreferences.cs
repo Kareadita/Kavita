@@ -12,7 +12,6 @@ public class AppUserPreferences
     #region ReadingProfiles
 
     public int DefaultReadingProfileId { get; set; }
-    public AppUserReadingProfile DefaultReadingProfile { get; set; }
 
     public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
 
