@@ -44,15 +44,12 @@ import {
 import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {ReadingProfileLibrarySelectionComponent} from "./_components/library-selection/reading-profile-library-selection.component";
 import {ToastrService} from "ngx-toastr";
 
 enum TabId {
   ImageReader = "image-reader",
   BookReader = "book-reader",
   PdfReader = "pdf-reader",
-  Series = "series",
-  Libraries = "libraries",
 }
 
 @Component({
@@ -85,7 +82,6 @@ enum TabId {
     NgbNavContent,
     NgbNavOutlet,
     LoadingComponent,
-    ReadingProfileLibrarySelectionComponent
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',

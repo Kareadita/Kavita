@@ -55,10 +55,10 @@
 
                 @if (selectedProfile.id !== 0) {
                   <div class="d-flex justify-content-between">
-                    <button class="me-2 btn btn-primary" [disabled]="selectedProfile.id === user.preferences.defaultReadingProfileId" (click)="setDefault(selectedProfile.id)">
+                    <button class="me-2 btn btn-primary" [disabled]="selectedProfile.id === user.preferences.defaultReadingProfileId" (click)="setDefault(selectedProfile!.id)">
                       <span>{{t('make-default')}}</span>
                     </button>
-                    <button class="btn btn-danger" (click)="delete(selectedProfile.id)">
+                    <button class="btn btn-danger" (click)="delete(selectedProfile!.id)" [disabled]="selectedProfile.id === user.preferences.defaultReadingProfileId">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -480,28 +480,6 @@
                       }
                     </ng-template>
                   </li>
-
-                  <li [ngbNavItem]="TabId.Series">
-                    <a ngbNavLink (click)="activeTabId = TabId.Series">{{t('reading-profile-series-settings-title')}}</a>
-                    <ng-template ngbNavContent>
-                      @defer (when activeTabId === TabId.Series; prefetch on idle) {
-                        @if (readingProfileForm !== null && selectedProfile !== null) {
-                        }
-                      }
-                    </ng-template>
-                  </li>
-
-                  <li [ngbNavItem]="TabId.Libraries">
-                    <a ngbNavLink (click)="activeTabId = TabId.Libraries">{{t('reading-profile-library-settings-title')}}</a>
-                    <ng-template ngbNavContent>
-                      @defer (when activeTabId === TabId.Libraries; prefetch on idle) {
-                        @if (readingProfileForm !== null && selectedProfile !== null) {
-                          <app-reading-profile-library-selection [readingProfileForm]="readingProfileForm" [selectedProfile]="selectedProfile"  />
-                        }
-                      }
-                    </ng-template>
-                  </li>
-
                 </ul>
               </div>
             </form>
@@ -518,7 +496,7 @@
 
     <ng-template #readingProfileOption let-profile>
 
-      <div class="p-2 group-item d-flex justify-content-between align-items-start {{selectedProfile && profile.id === selectedProfile.id ? 'active' : ''}}"
+      <div class="p-2 group-item d-flex justify-content-between align-items-start {{selectedProfile && profile.id === selectedProfile!.id ? 'active' : ''}}"
            (click)="selectProfile(profile)"
       >
         <div class="fw-bold">{{profile.name | sentenceCase}}</div>
