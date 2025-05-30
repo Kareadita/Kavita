@@ -4,8 +4,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using API.Services;
+using API.Tests.Helpers;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
@@ -129,6 +131,43 @@ public class ReadingProfileServiceTest: AbstractDbTest
         Assert.NotNull(profile);
         Assert.Contains(profile.Series, s => s.SeriesId == series.Id);
         Assert.True(profile.Implicit);
+    }
+
+    [Fact]
+    public async Task UpdateImplicitReadingProfile_DoesnotCreateNew()
+    {
+        await ResetDb();
+        var (rps, user, _, series) = await Setup();
+
+        var dto = new UserReadingProfileDto
+        {
+            ReaderMode = ReaderMode.Webtoon,
+            ScalingOption = ScalingOption.FitToHeight,
+            WidthOverride = 53,
+        };
+
+        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
+
+        var profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(profile);
+        Assert.Contains(profile.Series, s => s.SeriesId == series.Id);
+        Assert.True(profile.Implicit);
+
+        dto = new UserReadingProfileDto
+        {
+            ReaderMode = ReaderMode.LeftRight,
+        };
+
+        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
+        profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(profile);
+        Assert.Contains(profile.Series, s => s.SeriesId == series.Id);
+        Assert.True(profile.Implicit);
+        Assert.Equal(ReaderMode.LeftRight, profile.ReaderMode);
+
+        var implicitCount = await Context.AppUserReadingProfile
+            .Where(p => p.Implicit).CountAsync();
+        Assert.Equal(1, implicitCount);
     }
 
     [Fact]
@@ -355,6 +394,225 @@ public class ReadingProfileServiceTest: AbstractDbTest
             .Where(p => p.Implicit).CountAsync();
         Assert.Equal(0, implicitCount);
     }
+
+    [Fact]
+    public async Task AddDeletesImplicit()
+    {
+        await ResetDb();
+        var (rps, user, lib, series) = await Setup();
+
+        var implicitProfile = Mapper.Map<UserReadingProfileDto>(new AppUserReadingProfileBuilder(user.Id)
+            .Build());
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Profile 1")
+            .Build();
+        Context.AppUserReadingProfile.Add(profile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, implicitProfile);
+
+        var seriesProfile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfile);
+        Assert.True(seriesProfile.Implicit);
+
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+
+        seriesProfile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfile);
+        Assert.False(seriesProfile.Implicit);
+
+        var implicitCount = await Context.AppUserReadingProfile
+            .Where(p => p.Implicit).CountAsync();
+        Assert.Equal(0, implicitCount);
+    }
+
+    [Fact]
+    public async Task SetDefault()
+    {
+        await ResetDb();
+        var (rps, user, lib, series) = await Setup();
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Profile 1")
+            .Build();
+
+        Context.AppUserReadingProfile.Add(profile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.SetDefaultReadingProfile(user.Id, profile.Id);
+
+        var newSeries = new SeriesBuilder("New Series").Build();
+        lib.Series.Add(newSeries);
+        await UnitOfWork.CommitAsync();
+
+        var seriesProfile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        Assert.NotNull(seriesProfile);
+        Assert.Equal(profile.Id, seriesProfile.Id);
+    }
+
+    [Fact]
+    public async Task CreateReadingProfile()
+    {
+        await ResetDb();
+        var (rps, user, lib, series) = await Setup();
+
+        var dto = new UserReadingProfileDto
+        {
+            Name = "Profile 1",
+            ReaderMode = ReaderMode.LeftRight,
+            EmulateBook = false,
+        };
+
+        await rps.CreateReadingProfile(user.Id, dto);
+
+        var dto2 = new UserReadingProfileDto
+        {
+            Name = "Profile 2",
+            ReaderMode = ReaderMode.LeftRight,
+            EmulateBook = false,
+        };
+
+        await rps.CreateReadingProfile(user.Id, dto2);
+
+        var dto3 = new UserReadingProfileDto
+        {
+            Name = "Profile 1", // Not unique name
+            ReaderMode = ReaderMode.LeftRight,
+            EmulateBook = false,
+        };
+
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await rps.CreateReadingProfile(user.Id, dto3);
+        });
+
+        var allProfiles = Context.AppUserReadingProfile.ToList();
+        Assert.Equal(2, allProfiles.Count);
+    }
+
+    [Fact]
+    public async Task ClearSeriesProfile_RemovesImplicitAndUnlinksExplicit()
+    {
+        await ResetDb();
+        var (rps, user, _, series) = await Setup();
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithImplicit(true)
+            .WithName("Implicit Profile")
+            .Build();
+
+        var explicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithImplicit(false)
+            .WithName("Explicit Profile")
+            .Build();
+
+        Context.AppUserReadingProfile.Add(implicitProfile);
+        Context.AppUserReadingProfile.Add(explicitProfile);
+        await UnitOfWork.CommitAsync();
+
+        var allBefore = await UnitOfWork.AppUserReadingProfileRepository.GetAllProfilesForSeries(user.Id, series.Id, ReadingProfileIncludes.Series);
+        Assert.Equal(2, allBefore.Count);
+
+        await rps.ClearSeriesProfile(user.Id, series.Id);
+
+        var remainingProfiles = await Context.AppUserReadingProfile.Includes(ReadingProfileIncludes.Series).ToListAsync();
+        Assert.Single(remainingProfiles);
+        Assert.Equal("Explicit Profile", remainingProfiles[0].Name);
+        Assert.Empty(remainingProfiles[0].Series);
+
+        var profilesForSeries = await UnitOfWork.AppUserReadingProfileRepository.GetAllProfilesForSeries(user.Id, series.Id, ReadingProfileIncludes.Series);
+        Assert.Empty(profilesForSeries);
+    }
+
+    [Fact]
+    public async Task AddProfileToLibrary_AddsAndOverridesExisting()
+    {
+        await ResetDb();
+        var (rps, user, lib, _) = await Setup();
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Library Profile")
+            .Build();
+        Context.AppUserReadingProfile.Add(profile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.AddProfileToLibrary(user.Id, profile.Id, lib.Id);
+        await UnitOfWork.CommitAsync();
+
+        var linkedProfile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(user.Id, lib.Id, ReadingProfileIncludes.Library);
+        Assert.NotNull(linkedProfile);
+        Assert.Equal(profile.Id, linkedProfile.Id);
+
+        var newProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("New Profile")
+            .Build();
+        Context.AppUserReadingProfile.Add(newProfile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.AddProfileToLibrary(user.Id, newProfile.Id, lib.Id);
+        await UnitOfWork.CommitAsync();
+
+        linkedProfile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(user.Id, lib.Id, ReadingProfileIncludes.Library);
+        Assert.NotNull(linkedProfile);
+        Assert.Equal(newProfile.Id, linkedProfile.Id);
+    }
+
+    [Fact]
+    public async Task ClearLibraryProfile_RemovesImplicitOrUnlinksExplicit()
+    {
+        await ResetDb();
+        var (rps, user, lib, _) = await Setup();
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithImplicit(true)
+            .WithLibrary(lib)
+            .Build();
+        Context.AppUserReadingProfile.Add(implicitProfile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.ClearLibraryProfile(user.Id, lib.Id);
+        var profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(user.Id, lib.Id, ReadingProfileIncludes.Library);
+        Assert.Null(profile);
+
+        var explicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .Build();
+        Context.AppUserReadingProfile.Add(explicitProfile);
+        await UnitOfWork.CommitAsync();
+
+        await rps.ClearLibraryProfile(user.Id, lib.Id);
+        profile = await UnitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(user.Id, lib.Id, ReadingProfileIncludes.Library);
+        Assert.Null(profile);
+
+        var stillExists = await Context.AppUserReadingProfile.FindAsync(explicitProfile.Id);
+        Assert.NotNull(stillExists);
+    }
+
+    /// <summary>
+    /// As response to #3793, I'm not sure if we want to keep this. It's not the most nice. But I think the idea of this test
+    /// is worth having.
+    /// </summary>
+    [Fact]
+    public void UpdateFields_UpdatesAll()
+    {
+        var profile = new AppUserReadingProfile();
+        var dto = new UserReadingProfileDto();
+
+        RandfHelper.SetRandomValues(profile);
+        RandfHelper.SetRandomValues(dto);
+
+        ReadingProfileService.UpdateReaderProfileFields(profile, dto);
+
+        var newDto = Mapper.Map<UserReadingProfileDto>(profile);
+
+        Assert.True(RandfHelper.AreSimpleFieldsEqual(dto, newDto,
+            ["<Id>k__BackingField", "<UserId>k__BackingField", "<Implicit>k__BackingField"]));
+    }
+
+
 
     protected override async Task ResetDb()
     {

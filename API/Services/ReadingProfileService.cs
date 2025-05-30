@@ -286,16 +286,21 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         if (profile.UserId != userId) throw new UnauthorizedAccessException();
 
         var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetLibraryProfile(userId, libraryId);
-        if (libraryProfile == null)
+        if (libraryProfile != null)
         {
-            libraryProfile = new LibraryReadingProfile
-            {
-                AppUserId = userId,
-                LibraryId = libraryId,
-            };
+            libraryProfile.ReadingProfile = profile;
+            await unitOfWork.CommitAsync();
+            return;
         }
 
-        libraryProfile.ReadingProfile = profile;
+        libraryProfile = new LibraryReadingProfile
+        {
+            AppUserId = userId,
+            LibraryId = libraryId,
+            ReadingProfile = profile,
+        };
+
+        unitOfWork.AppUserReadingProfileRepository.Add(libraryProfile);
         await unitOfWork.CommitAsync();
     }
 
@@ -317,7 +322,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    private static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto, bool updateName = true)
+    public static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto, bool updateName = true)
     {
         if (updateName && !string.IsNullOrEmpty(dto.Name) && existingProfile.NormalizedName != dto.Name.ToNormalized())
         {
