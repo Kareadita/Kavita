@@ -246,9 +246,20 @@ export class ManageReadingProfilesComponent implements OnInit {
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
-    // Hack around readerMode being sent as a string otherwise ????
+    data.readingDirection = parseInt(data.readingDirection as unknown as string);
+    data.scalingOption = parseInt(data.scalingOption as unknown as string);
+    data.pageSplitOption = parseInt(data.pageSplitOption as unknown as string);
     data.readerMode = parseInt(data.readerMode as unknown as string);
+    data.layoutMode = parseInt(data.layoutMode as unknown as string);
+
+    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection as unknown as string);
+    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle as unknown as string);
     data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode as unknown as string);
+
+    data.pdfTheme = parseInt(data.pdfTheme as unknown as string);
+    data.pdfScrollMode = parseInt(data.pdfScrollMode as unknown as string);
+    data.pdfSpreadMode = parseInt(data.pdfSpreadMode as unknown as string);
+
     return data;
   }
 
