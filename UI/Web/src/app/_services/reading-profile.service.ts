@@ -44,20 +44,20 @@ export class ReadingProfileService {
     return this.httpClient.post(this.baseUrl + `ReadingProfile/series/${seriesId}?profileId=${id}`, {});
   }
 
-  removeFromSeries(id: number, seriesId: number) {
-    return this.httpClient.delete(this.baseUrl + `ReadingProfile/series/${seriesId}?profileId=${id}`, {});
+  clearSeriesProfiles(seriesId: number) {
+    return this.httpClient.delete(this.baseUrl + `ReadingProfile/series/${seriesId}`, {});
   }
 
   addToLibrary(id: number, libraryId: number) {
     return this.httpClient.post(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
   }
 
-  removeFromLibrary(id: number, libraryId: number) {
-    return this.httpClient.delete(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
+  clearLibraryProfiles(libraryId: number) {
+    return this.httpClient.delete(this.baseUrl + `ReadingProfile/library/${libraryId}`, {});
   }
 
-  batchAddToSeries(id: number, seriesIds: number[]) {
-    return this.httpClient.post(this.baseUrl + `ReadingProfile/batch?profileId=${id}`, seriesIds);
+  bulkAddToSeries(id: number, seriesIds: number[]) {
+    return this.httpClient.post(this.baseUrl + `ReadingProfile/bulk?profileId=${id}`, seriesIds);
   }
 
 }

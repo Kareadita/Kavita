@@ -150,7 +150,7 @@ export class LibraryDetailComponent implements OnInit {
         });
         break;
       case Action.SetReadingProfile:
-        this.actionService.SetReadingProfileForMultiple(selectedSeries, (success) => {
+        this.actionService.setReadingProfileForMultiple(selectedSeries, (success) => {
           this.bulkLoader = false;
           this.cdRef.markForCheck();
           if (!success) return;

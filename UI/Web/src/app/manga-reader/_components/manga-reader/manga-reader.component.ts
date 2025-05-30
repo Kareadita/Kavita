@@ -533,21 +533,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
       });
 
-      // Update implicit reading profile while changing settings
-      this.generalSettingsForm.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-        tap(_ => {
-          this.readingProfileService.updateImplicit(this.packReadingProfile(), this.seriesId).subscribe({
-            error: err => {
-              console.error(err);
-            }
-          })
-        })
-      ).subscribe();
-
-
       this.readerModeSubject.next(this.readerMode);
       this.pagingDirectionSubject.next(this.pagingDirection);
 
@@ -630,6 +615,26 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       this.init();
+
+      // TODO: Fix this, it's going off way too often
+      // Update implicit reading profile while changing settings
+      this.generalSettingsForm.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+        map(_ => this.packReadingProfile()),
+        distinctUntilChanged(),
+        tap(newProfile => {
+          this.readingProfileService.updateImplicit(newProfile, this.seriesId).subscribe({
+            next: () => {
+              this.readingProfile = newProfile;
+            },
+            error: err => {
+              console.error(err);
+            }
+          })
+        })
+      ).subscribe();
     });
   }
 

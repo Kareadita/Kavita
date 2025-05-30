@@ -127,15 +127,14 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
-    /// Deletes the reading profile from a series for the current logged-in user
+    /// Clears the reading profile for the given series for the currently logged-in user
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="profileId"></param>
     /// <returns></returns>
     [HttpDelete("series/{seriesId}")]
-    public async Task<IActionResult> DeleteProfileFromSeries(int seriesId, [FromQuery] int profileId)
+    public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
-        await readingProfileService.RemoveProfileFromSeries(User.GetUserId(), profileId, seriesId);
+        await readingProfileService.ClearSeriesProfile(User.GetUserId(), seriesId);
         return Ok();
     }
 
@@ -153,15 +152,15 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
-    /// Remove the reading profile from a library for the current logged-in user
+    /// Clears the reading profile for the given library for the currently logged-in user
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="profileId"></param>
     /// <returns></returns>
     [HttpDelete("library/{libraryId}")]
-    public async Task<IActionResult> DeleteProfileFromLibrary(int libraryId, [FromQuery] int profileId)
+    public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
-        await readingProfileService.RemoveProfileFromLibrary(User.GetUserId(), profileId, libraryId);
+        await readingProfileService.ClearLibraryProfile(User.GetUserId(), libraryId);
         return Ok();
     }
 
@@ -171,10 +170,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="profileId"></param>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    [HttpPost("batch")]
-    public async Task<IActionResult> BatchAddReadingProfile([FromQuery] int profileId, [FromBody] IList<int> seriesIds)
+    [HttpPost("bulk")]
+    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] IList<int> seriesIds)
     {
-        await readingProfileService.BatchAddProfileToSeries(User.GetUserId(), profileId, seriesIds);
+        await readingProfileService.BulkAddProfileToSeries(User.GetUserId(), profileId, seriesIds);
         return Ok();
     }
 

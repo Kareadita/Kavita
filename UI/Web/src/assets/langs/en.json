@@ -2714,7 +2714,11 @@
         "remove-from-want-to-read-tooltip": "Remove series from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
         "remove-from-on-deck-tooltip": "Remove series from showing from On Deck",
+
+        "reading-profiles": "Reading Profiles",
         "set-reading-profile": "Set Reading Profile",
+        "clear-reading-profile": "Clear Reading Profile",
+        "cleared-profile": "Cleared Reading Profile",
 
         "others": "Others",
         "add-to-reading-list": "Add to Reading List",

@@ -24,7 +24,7 @@ import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {DecimalPipe} from "@angular/common";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {Device} from "../../_models/device/device";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -41,6 +41,7 @@ import {ScrollService} from "../../_services/scroll.service";
 import {ReaderService} from "../../_services/reader.service";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {ReadingProfileService} from "../../_services/reading-profile.service";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -92,6 +93,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   private readonly downloadService = inject(DownloadService);
   private readonly scrollService = inject(ScrollService);
   private readonly readerService = inject(ReaderService);
+  private readonly readingProfilesService = inject(ReadingProfileService);
+  private readonly translocoService = inject(TranslocoService);
 
   @Input({required: true}) series!: Series;
   @Input() libraryId = 0;
@@ -277,7 +280,12 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         this.downloadService.download('series', this.series);
         break;
       case Action.SetReadingProfile:
-        this.actionService.SetReadingProfileForMultiple([this.series]);
+        this.actionService.setReadingProfileForMultiple([series]);
+        break;
+      case Action.ClearReadingProfile:
+        this.readingProfilesService.clearSeriesProfiles(series.id).subscribe(() => {
+          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+        });
         break;
       default:
         break;

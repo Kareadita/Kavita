@@ -27,9 +27,10 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
 
   @Input({required: true}) title!: string;
   /**
-   * Series Ids to add to Collection Tag
+   * Series Ids to add to Reading Profile
    */
   @Input() seriesIds: Array<number> = [];
+  @Input() libraryId: number | undefined;
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
   profiles: Array<ReadingProfile> = [];
@@ -63,12 +64,28 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
   }
 
   addToProfile(profile: ReadingProfile) {
-    if (this.seriesIds.length === 0) return;
+    if (this.seriesIds.length == 1) {
+      this.readingProfileService.addToSeries(profile.id, this.seriesIds[0]).subscribe(() => {
+        this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
+        this.modal.close();
+      });
+      return;
+    }
 
-    this.readingProfileService.batchAddToSeries(profile.id, this.seriesIds).subscribe(() => {
-      this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
-      this.modal.close();
-    });
+    if (this.seriesIds.length > 1) {
+      this.readingProfileService.bulkAddToSeries(profile.id, this.seriesIds).subscribe(() => {
+        this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
+        this.modal.close();
+      });
+      return;
+    }
+
+    if (this.libraryId) {
+      this.readingProfileService.addToLibrary(profile.id, this.libraryId).subscribe(() => {
+        this.toastr.success(translate('toasts.library-added-to-reading-profile', {name: profile.name}));
+        this.modal.close();
+      });
+    }
   }
 
   filterList = (listItem: ReadingProfile) => {

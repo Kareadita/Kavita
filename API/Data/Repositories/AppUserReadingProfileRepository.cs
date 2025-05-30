@@ -26,6 +26,14 @@ public interface IAppUserReadingProfileRepository
     Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool nonImplicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<AppUserReadingProfile?> GetProfileForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
+    /// <summary>
+    /// Returns both implicit and "real" reading profiles
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<IList<AppUserReadingProfile>> GetAllProfilesForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<IList<AppUserReadingProfile>> GetProfilesForSeries(int userId, IList<int> seriesIds, bool implicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
     Task<UserReadingProfileDto?> GetProfileDtoForSeries(int userId, int seriesId);
     Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, ReadingProfileIncludes includes = ReadingProfileIncludes.None);
@@ -74,6 +82,14 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .Includes(includes)
             .OrderByDescending(rp => rp.Implicit) // Get implicit profiles first
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<IList<AppUserReadingProfile>> GetAllProfilesForSeries(int userId, int seriesId, ReadingProfileIncludes includes = ReadingProfileIncludes.None)
+    {
+        return await context.AppUserReadingProfile
+            .Where(rp => rp.UserId == userId && rp.Series.Any(s => s.SeriesId == seriesId))
+            .Includes(includes)
+            .ToListAsync();
     }
 
     public async Task<IList<AppUserReadingProfile>> GetProfilesForSeries(int userId, IList<int> seriesIds, bool implicitOnly, ReadingProfileIncludes includes = ReadingProfileIncludes.None)

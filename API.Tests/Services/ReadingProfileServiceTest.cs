@@ -221,7 +221,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
         Context.AppUserReadingProfile.Add(profile1);
         await UnitOfWork.CommitAsync();
 
-        await rps.RemoveProfileFromSeries(user.Id, profile1.Id, series.Id);
+        await rps.ClearSeriesProfile(user.Id, series.Id);
         var profile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
         Assert.Null(profile);
 
@@ -254,7 +254,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
         await UnitOfWork.CommitAsync();
 
         var someSeriesIds = lib.Series.Take(lib.Series.Count / 2).Select(s => s.Id).ToList();
-        await rps.BatchAddProfileToSeries(user.Id, profile.Id, someSeriesIds);
+        await rps.BulkAddProfileToSeries(user.Id, profile.Id, someSeriesIds);
 
         foreach (var id in someSeriesIds)
         {
@@ -264,7 +264,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
         }
 
         var allIds = lib.Series.Select(s => s.Id).ToList();
-        await rps.BatchAddProfileToSeries(user.Id, profile2.Id, allIds);
+        await rps.BulkAddProfileToSeries(user.Id, profile2.Id, allIds);
 
         foreach (var id in allIds)
         {
@@ -342,7 +342,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
             Assert.True(seriesProfile.Implicit);
         }
 
-        await rps.BatchAddProfileToSeries(user.Id, profile.Id, ids);
+        await rps.BulkAddProfileToSeries(user.Id, profile.Id, ids);
 
         foreach (var id in ids)
         {

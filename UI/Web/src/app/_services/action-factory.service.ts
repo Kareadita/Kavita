@@ -126,6 +126,10 @@ export enum Action {
    * Add to a reading profile
    */
   SetReadingProfile = 30,
+  /**
+   * Remove the reading profile from the entity
+   */
+  ClearReadingProfile = 31,
 }
 
 /**
@@ -348,6 +352,37 @@ export class ActionFactoryService {
       },
       {
         action: Action.Submenu,
+        title: 'reading-profiles',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiresAdmin: false,
+        requiredRoles: [],
+        children: [
+          {
+            action: Action.SetReadingProfile,
+            title: 'set-reading-profile',
+            description: 'set-reading-profile-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.ClearReadingProfile,
+            title: 'clear-reading-profile',
+            description: 'clear-reading-profile-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
+            children: [],
+          },
+        ],
+      },
+      {
+        action: Action.Submenu,
         title: 'others',
         description: '',
         callback: this.dummyCallback,
@@ -561,6 +596,37 @@ export class ActionFactoryService {
       },
       {
         action: Action.Submenu,
+        title: 'reading-profiles',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiresAdmin: false,
+        requiredRoles: [],
+        children: [
+          {
+            action: Action.SetReadingProfile,
+            title: 'set-reading-profile',
+            description: 'set-reading-profile-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.ClearReadingProfile,
+            title: 'clear-reading-profile',
+            description: 'clear-reading-profile-tooltip',
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiresAdmin: false,
+            requiredRoles: [],
+            children: [],
+          },
+        ],
+      },
+      {
+        action: Action.Submenu,
         title: 'others',
         description: '',
         callback: this.dummyCallback,
@@ -596,16 +662,6 @@ export class ActionFactoryService {
             shouldRender: this.dummyShouldRender,
             requiresAdmin: true,
             requiredRoles: [Role.Admin],
-            children: [],
-          },
-          {
-            action: Action.SetReadingProfile,
-            title: 'set-reading-profile',
-            description: 'set-reading-profile-tooltip',
-            callback: this.dummyCallback,
-            shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
-            requiredRoles: [],
             children: [],
           },
           {

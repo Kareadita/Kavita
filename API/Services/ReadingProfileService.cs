@@ -68,11 +68,11 @@ public interface IReadingProfileService
     Task SetDefaultReadingProfile(int userId, int profileId);
 
     Task AddProfileToSeries(int userId, int profileId, int seriesId);
-    Task BatchAddProfileToSeries(int userId, int profileId, IList<int> seriesIds);
-    Task RemoveProfileFromSeries(int userId, int profileId, int seriesId);
+    Task BulkAddProfileToSeries(int userId, int profileId, IList<int> seriesIds);
+    Task ClearSeriesProfile(int userId, int seriesId);
 
     Task AddProfileToLibrary(int userId, int profileId, int libraryId);
-    Task RemoveProfileFromLibrary(int userId, int profileId, int libraryId);
+    Task ClearLibraryProfile(int userId, int libraryId);
 
 }
 
@@ -200,6 +200,10 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         if (profile.UserId != userId) throw new UnauthorizedAccessException();
 
+        // Remove all implicit profiles
+        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, [seriesId], true);
+        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+
         var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfile(userId, seriesId);
         if (seriesProfile != null)
         {
@@ -219,7 +223,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task BatchAddProfileToSeries(int userId, int profileId, IList<int> seriesIds)
+    public async Task BulkAddProfileToSeries(int userId, int profileId, IList<int> seriesIds)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId, ReadingProfileIncludes.Series);
         if (profile == null) throw new KavitaException("profile-not-found");
@@ -254,14 +258,23 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task RemoveProfileFromSeries(int userId, int profileId, int seriesId)
+    public async Task ClearSeriesProfile(int userId, int seriesId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException("profile-not-found");
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetAllProfilesForSeries(userId, seriesId, ReadingProfileIncludes.Series);
+        if (!profiles.Any()) return;
 
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+        foreach (var profile in profiles)
+        {
+            if (profile.Implicit)
+            {
+                unitOfWork.AppUserReadingProfileRepository.Remove(profile);
+            }
+            else
+            {
+                profile.Series = profile.Series.Where(s => !(s.SeriesId == seriesId && s.AppUserId == userId)).ToList();
+            }
+        }
 
-        profile.Series = profile.Series.Where(s => s.SeriesId != seriesId).ToList();
         await unitOfWork.CommitAsync();
     }
 
@@ -286,14 +299,21 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task RemoveProfileFromLibrary(int userId, int profileId, int libraryId)
+    public async Task ClearLibraryProfile(int userId, int libraryId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException("profile-not-found");
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, libraryId, ReadingProfileIncludes.Library);
+        if (profile == null) return;
 
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+        if (profile.Implicit)
+        {
+            unitOfWork.AppUserReadingProfileRepository.Remove(profile);
+            await unitOfWork.CommitAsync();
+            return;
+        }
 
-        profile.Libraries = profile.Libraries.Where(s => s.LibraryId != libraryId).ToList();
+        profile.Libraries = profile.Libraries
+            .Where(s => !(s.LibraryId == libraryId && s.AppUserId == userId))
+            .ToList();
         await unitOfWork.CommitAsync();
     }
 

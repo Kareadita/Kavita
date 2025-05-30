@@ -819,12 +819,38 @@ export class ActionService {
    * @param series
    * @param callback
    */
-  SetReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
+  setReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
     this.readingListModalRef = this.modalService.open(BulkSetReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
     this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
-    this.readingListModalRef.componentInstance.title = "hi"
+    this.readingListModalRef.componentInstance.title = ""
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
+      }
+    });
+  }
+
+  /**
+   * Sets the reading profile for multiple series
+   * @param library
+   * @param callback
+   */
+  setReadingProfileForLibrary(library: Library, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.libraryId = library.id;
+    this.readingListModalRef.componentInstance.title = ""
 
     this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
       this.readingListModalRef = null;
