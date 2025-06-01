@@ -1468,7 +1468,7 @@
         "edit-label": "Tryb edycji",
         "date-range-title": "Zakres dat",
         "reorder-alt": "Zmiana kolejności pozycji",
-        "dnd-warning": "Funkcja przeciągnij i upuść jest niedostępna na urządzeniach mobilnych lub gdy lista czytelnicza zawiera ponad 100 pozycji",
+        "dnd-warning": "Funkcja przeciągnij i upuść jest niedostępna na urządzeniach mobilnych lub gdy lista czytelnicza zawiera ponad 100 pozycji.",
         "details-tab": "{{series-detail.details-tab}}"
     },
     "events-widget": {
@@ -2260,7 +2260,8 @@
         "webtoon-override": "Przełączanie do trybu Webtoon z powodu obrazów odpowiadających webtoonowi.",
         "bulk-delete-libraries": "Jesteś pewien że chcesz usunąć {{count}} bibliotek?",
         "match-success": "Seria dopasowana prawidłowo",
-        "scrobble-gen-init": "Ustawiono w kolejce zadanie generowania zdarzeń scrobble na podstawie wcześniejszej historii czytania i ocen, synchronizując je z połączonymi usługami."
+        "scrobble-gen-init": "Ustawiono w kolejce zadanie generowania zdarzeń scrobble na podstawie wcześniejszej historii czytania i ocen, synchronizując je z połączonymi usługami.",
+        "confirm-delete-multiple-volumes": "Czy na pewno chcesz usunąć {{count}} tomów? Nie spowoduje to modyfikacji plików na dysku."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 godzina",

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.Entities.Enums;
 
 namespace API.DTOs;
 
-public class SeriesMetadataDto
+public sealed record SeriesMetadataDto
 {
     public int Id { get; set; }
     public string Summary { get; set; } = string.Empty;

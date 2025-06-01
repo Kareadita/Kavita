@@ -5,7 +5,7 @@ namespace API.DTOs.Reader;
 /// <summary>
 /// This is used for bulk updating a set of volume and or chapters in one go
 /// </summary>
-public class MarkVolumesReadDto
+public sealed record MarkVolumesReadDto
 {
     public int SeriesId { get; set; }
     /// <summary>

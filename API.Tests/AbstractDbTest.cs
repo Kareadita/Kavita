@@ -20,10 +20,11 @@ namespace API.Tests;
 
 public abstract class AbstractDbTest : AbstractFsTest , IDisposable
 {
-    protected readonly DbConnection _connection;
-    protected readonly DataContext _context;
-    protected readonly IUnitOfWork _unitOfWork;
-    protected readonly IMapper _mapper;
+    protected readonly DataContext Context;
+    protected readonly IUnitOfWork UnitOfWork;
+    protected readonly IMapper Mapper;
+    private readonly DbConnection _connection;
+    private bool _disposed;
 
     protected AbstractDbTest()
     {
@@ -34,17 +35,17 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
 
         _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
 
-        _context = new DataContext(contextOptions);
+        Context = new DataContext(contextOptions);
 
-        _context.Database.EnsureCreated(); // Ensure DB schema is created
+        Context.Database.EnsureCreated(); // Ensure DB schema is created
 
         Task.Run(SeedDb).GetAwaiter().GetResult();
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        _mapper = config.CreateMapper();
+        Mapper = config.CreateMapper();
 
         GlobalConfiguration.Configuration.UseInMemoryStorage();
-        _unitOfWork = new UnitOfWork(_context, _mapper, null);
+        UnitOfWork = new UnitOfWork(Context, Mapper, null);
     }
 
     private static DbConnection CreateInMemoryDatabase()
@@ -59,34 +60,34 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
     {
         try
         {
-            await _context.Database.EnsureCreatedAsync();
+            await Context.Database.EnsureCreatedAsync();
             var filesystem = CreateFileSystem();
 
-            await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
+            await Seed.SeedSettings(Context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
 
-            var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
+            var setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
             setting.Value = CacheDirectory;
 
-            setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
+            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
             setting.Value = BackupDirectory;
 
-            setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
+            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
             setting.Value = BookmarkDirectory;
 
-            setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
+            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
             setting.Value = "10";
 
-            _context.ServerSetting.Update(setting);
+            Context.ServerSetting.Update(setting);
 
 
-            _context.Library.Add(new LibraryBuilder("Manga")
+            Context.Library.Add(new LibraryBuilder("Manga")
                 .WithAllowMetadataMatching(true)
                 .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
                 .Build());
 
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
 
-            await Seed.SeedMetadataSettings(_context);
+            await Seed.SeedMetadataSettings(Context);
 
             return true;
         }
@@ -101,8 +102,21 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
 
     public void Dispose()
     {
-        _context.Dispose();
-        _connection.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+
+        if (disposing)
+        {
+            Context?.Dispose();
+            _connection?.Dispose();
+        }
+
+        _disposed = true;
     }
 
     /// <summary>
@@ -114,9 +128,9 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
     {
         var role = new AppRole { Id = userId, Name = roleName, NormalizedName = roleName.ToUpper() };
 
-        await _context.Roles.AddAsync(role);
-        await _context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
+        await Context.Roles.AddAsync(role);
+        await Context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
 
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
     }
 }

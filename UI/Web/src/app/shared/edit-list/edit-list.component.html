@@ -1,6 +1,7 @@
 <form [formGroup]="form" *transloco="let t">
   <div formArrayName="items">
-    @for(item of ItemsArray.controls; let i = $index; track i) {
+    <!-- We are tracking items, as the index will not always point towards the same item. -->
+    @for(item of ItemsArray.controls; let i = $index; track item; let last = $last) {
       <div class="row g-0 mb-3">
         <div class="col-lg-10 col-md-12 pe-2">
           <div class="mb-3">
@@ -11,21 +12,30 @@
               [formControlName]="i"
               id="item--{{i}}"
             >
+            @if (item.dirty && item.touched && errorMessage) {
+              @if (item.status === "INVALID") {
+                <div id="item--{{i}}-error" class="invalid-feedback" style="display: inline-block">
+                  {{errorMessage}}
+                </div>
+              }
+            }
           </div>
         </div>
-        <div class="col-lg-2">
-          <button class="btn btn-secondary me-1" (click)="add()">
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('common.add')}}</span>
-          </button>
+      <div class="col-lg-2">
           <button
-            class="btn btn-secondary"
+            class="btn btn-danger me-2"
             (click)="remove(i)"
             [disabled]="ItemsArray.length === 1"
           >
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('common.remove')}}</span>
           </button>
+          @if (last){
+            <button class="btn btn-secondary " (click)="add()">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('common.add')}}</span>
+            </button>
+          }
         </div>
       </div>
     }

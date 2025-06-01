@@ -14,6 +14,8 @@ public class MetadataSettings
     /// </summary>
     public bool Enabled { get; set; }
 
+    #region Series Metadata
+
     /// <summary>
     /// Allow the Summary to be written
     /// </summary>
@@ -42,6 +44,30 @@ public class MetadataSettings
     /// Allow setting the cover image
     /// </summary>
     public bool EnableCoverImage { get; set; }
+    #endregion
+
+    #region Chapter Metadata
+    /// <summary>
+    /// Allow Summary to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterSummary { get; set; }
+    /// <summary>
+    /// Allow Release Date to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterReleaseDate { get; set; }
+    /// <summary>
+    /// Allow Title to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterTitle { get; set; }
+    /// <summary>
+    /// Allow Publisher to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterPublisher { get; set; }
+    /// <summary>
+    /// Allow setting the cover image for the Chapter/Issue
+    /// </summary>
+    public bool EnableChapterCoverImage { get; set; }
+    #endregion
 
     // Need to handle the Genre/tags stuff
     public bool EnableGenres { get; set; } = true;

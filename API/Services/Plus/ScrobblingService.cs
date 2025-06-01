@@ -38,6 +38,9 @@ public enum ScrobbleProvider
     Kavita = 0,
     AniList = 1,
     Mal = 2,
+    [Obsolete]
+    GoogleBooks = 3,
+    Cbr = 4
 }
 
 public interface IScrobblingService

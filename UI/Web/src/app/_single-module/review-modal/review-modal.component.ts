@@ -6,30 +6,35 @@ import {UserReview} from "../review-card/user-review";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
+import {ChapterService} from "../../_services/chapter.service";
+import {of} from "rxjs";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../_services/theme.service";
+import {ReviewService} from "../../_services/review.service";
 
-export enum ReviewSeriesModalCloseAction {
+export enum ReviewModalCloseAction {
   Create,
   Edit,
   Delete,
   Close
 }
-export interface ReviewSeriesModalCloseEvent {
+export interface ReviewModalCloseEvent {
   success: boolean,
   review: UserReview;
-  action: ReviewSeriesModalCloseAction
+  action: ReviewModalCloseAction
 }
 
 @Component({
   selector: 'app-review-series-modal',
-  imports: [ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './review-series-modal.component.html',
-  styleUrls: ['./review-series-modal.component.scss'],
+  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule],
+  templateUrl: './review-modal.component.html',
+  styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReviewSeriesModalComponent implements OnInit {
+export class ReviewModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
-  private readonly seriesService = inject(SeriesService);
+  private readonly reviewService = inject(ReviewService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
@@ -46,23 +51,27 @@ export class ReviewSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close({success: false, review: this.review, action: ReviewSeriesModalCloseAction.Close});
+    this.modal.close({success: false, review: this.review, action: ReviewModalCloseAction.Close});
   }
 
   async delete() {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
-    this.seriesService.deleteReview(this.review.seriesId).subscribe(() => {
+
+    this.reviewService.deleteReview(this.review.seriesId, this.review.chapterId).subscribe(() => {
       this.toastr.success(translate('toasts.review-deleted'));
-      this.modal.close({success: true, review: this.review, action: ReviewSeriesModalCloseAction.Delete});
+      this.modal.close({success: true, review: this.review, action: ReviewModalCloseAction.Delete});
     });
+
   }
   save() {
     const model = this.reviewGroup.value;
     if (model.reviewBody.length < this.minLength) {
       return;
     }
-    this.seriesService.updateReview(this.review.seriesId, model.reviewBody).subscribe(review => {
-      this.modal.close({success: true, review: review, action: ReviewSeriesModalCloseAction.Edit});
+
+    this.reviewService.updateReview(this.review.seriesId, model.reviewBody, this.review.chapterId).subscribe(review => {
+      this.modal.close({success: true, review: review, action: ReviewModalCloseAction.Edit});
     });
+
   }
 }

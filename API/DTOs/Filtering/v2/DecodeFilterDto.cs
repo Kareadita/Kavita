@@ -3,7 +3,7 @@
 /// <summary>
 /// For requesting an encoded filter to be decoded
 /// </summary>
-public class DecodeFilterDto
+public sealed record DecodeFilterDto
 {
     public string EncodedFilter { get; set; }
 }

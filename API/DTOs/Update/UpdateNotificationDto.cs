@@ -6,7 +6,7 @@ namespace API.DTOs.Update;
 /// <summary>
 /// Update Notification denoting a new release available for user to update to
 /// </summary>
-public class UpdateNotificationDto
+public sealed record UpdateNotificationDto
 {
     /// <summary>
     /// Current installed Version

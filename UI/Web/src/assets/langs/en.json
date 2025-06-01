@@ -67,8 +67,12 @@
     "spoiler": {
         "click-to-show": "Spoiler, click to show"
     },
+    "reviews": {
+        "user-reviews-local": "Local Reviews",
+        "user-reviews-plus": "External Reviews"
+    },
 
-    "review-series-modal": {
+    "review-modal": {
         "title": "Edit Review",
         "review-label": "Review",
         "close": "{{common.close}}",
@@ -89,7 +93,8 @@
         "your-review": "This is your review",
         "external-review": "External Review",
         "local-review": "Local Review",
-        "rating-percentage": "Rating {{r}}%"
+        "rating-percentage": "Rating {{r}}%",
+        "critic": "critic"
     },
 
     "want-to-read": {
@@ -806,6 +811,17 @@
         "enable-cover-image-tooltip": "Allow Kavita to write the cover image for the Series",
         "enable-start-date-label": "Start Date",
         "enable-start-date-tooltip": "Allow Start Date of Series to be written to the Series",
+
+        "enable-chapter-title-label": "Title",
+        "enable-chapter-title-tooltip": "Allow Title of Chapter/Issue to be written",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "Release Date",
+        "enable-chapter-release-date-tooltip": "Allow Release Date of Chapter/Issue to be written",
+        "enable-chapter-publisher-label": "Publisher",
+        "enable-chapter-publisher-tooltip": "Allow Publisher of Chapter/Issue to be written",
+        "enable-chapter-cover-label": "Chapter Cover",
+        "enable-chapter-cover-tooltip": "Allow Cover of Chapter/Issue to be set",
         "enable-genres-label": "Genres",
         "enable-genres-tooltip": "Allow Series Genres to be written.",
         "enable-tags-label": "Tags",
@@ -827,7 +843,8 @@
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
         "person-roles-label": "Roles",
         "overrides-label": "Overrides",
-        "overrides-description": "Allow Kavita to write over locked fields."
+        "overrides-description": "Allow Kavita to write over locked fields.",
+        "chapter-header": "Chapter Fields"
     },
 
     "book-line-overlay": {
@@ -946,9 +963,6 @@
         "no-chapters": "There are no chapters to this volume. Cannot read.",
         "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.",
 
-        "user-reviews-local": "Local Reviews",
-        "user-reviews-plus": "External Reviews",
-
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",
@@ -989,7 +1003,7 @@
         "save": "{{common.save}}",
         "no-results": "Unable to find a match. Try adding the url from a supported provider and retry.",
         "query-label": "Query",
-        "query-tooltip": "Enter series name, AniList/MyAnimeList url. Urls will use a direct lookup.",
+        "query-tooltip": "Enter series name, AniList/MyAnimeList/ComicBookRoundup url. Urls will use a direct lookup.",
         "dont-match-label": "Do not Match",
         "dont-match-tooltip": "Opt this series from matching and scrobbling",
         "search": "Search"
@@ -998,6 +1012,7 @@
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
         "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}",
         "releasing": "Releasing",
         "details": "View page",
         "updating-metadata-status": "Updating Metadata"
@@ -1035,7 +1050,8 @@
         "entry-label": "See Details",
         "kavita-tooltip": "Your Rating + Overall",
         "kavita-rating-title": "Your Rating",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
 
     "badge-expander": {
@@ -1087,12 +1103,14 @@
     },
 
     "person-detail": {
+        "aka-title": "Also known as ",
         "known-for-title": "Known For",
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
         "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
         "all-roles": "Roles",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "No information about this Person"
     },
 
     "library-settings-modal": {
@@ -1841,7 +1859,8 @@
         "logout": "Logout",
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Matches an alias"
     },
 
     "promoted-icon": {
@@ -2230,6 +2249,7 @@
         "title": "{{personName}} Details",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
+        "aliases-tab": "Aliases",
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2247,7 +2267,20 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
-        "download-coversdb": "Download from CoversDB"
+        "download-coversdb": "Download from CoversDB",
+        "aliases-label": "Edit aliases",
+        "alias-overlap": "This alias already points towards another person or is the name of this person, consider merging them.",
+        "aliases-tooltip": "When a series is tagged with an alias of a person, the person is assigned rather than creating a new person. When deleting an alias, you'll have to rescan the series for the change to be picked up."
+    },
+
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Merge Person",
+        "merge-warning": "If you proceed, the selected person will be removed. The selected person's name will be added as an alias, and all their roles will be transferred.",
+        "alias-title": "New aliases",
+        "known-for-title": "Known for"
     },
 
     "day-breakdown": {
@@ -2590,6 +2623,7 @@
         "entity-unread": "{{name}} is now unread",
         "mark-read": "Marked as Read",
         "mark-unread": "Marked as Unread",
+        "series-added-want-to-read": "Series added from Want to Read list",
         "series-removed-want-to-read": "Series removed from Want to Read list",
         "series-deleted": "Series deleted",
         "delete-review": "Are you sure you want to delete your review?",
@@ -2686,7 +2720,12 @@
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "localized-name": "{{edit-series-modal.localized-name-label}}"
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "chapter-release-date": "Release Date (Chapter)",
+        "chapter-summary": "Summary (Chapter)",
+        "chapter-covers": "Covers (Chapter)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
+        "chapter-title": "Title (Chapter)"
     },
 
 
@@ -2757,7 +2796,10 @@
         "copy-settings": "Copy Settings From",
         "match": "Match",
         "match-tooltip": "Match Series with Kavita+ manually",
-        "reorder": "Reorder"
+        "reorder": "Reorder",
+        "rename": "Rename",
+        "rename-tooltip": "Rename the Smart Filter",
+        "merge": "Merge"
     },
 
     "preferences": {
@@ -2869,6 +2911,7 @@
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
+        "issue-count": "{{num}} Issues",
         "no-data": "No Data",
 
         "book-num": "Book",

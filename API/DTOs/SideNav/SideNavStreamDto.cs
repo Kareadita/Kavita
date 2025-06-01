@@ -4,7 +4,7 @@ using API.Entities.Enums;
 namespace API.DTOs.SideNav;
 #nullable enable
 
-public class SideNavStreamDto
+public sealed record SideNavStreamDto
 {
     public int Id { get; set; }
     public required string Name { get; set; }

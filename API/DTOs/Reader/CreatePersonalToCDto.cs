@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs.Reader;
 #nullable enable
 
-public class CreatePersonalToCDto
+public sealed record CreatePersonalToCDto
 {
     public required int ChapterId { get; set; }
     public required int VolumeId { get; set; }

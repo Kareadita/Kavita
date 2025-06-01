@@ -96,6 +96,19 @@
               </ng-template>
             </li>
 
+            <li [ngbNavItem]="TabID.Aliases">
+              <a ngbNavLink>{{t(TabID.Aliases)}}</a>
+              <ng-template ngbNavContent>
+                <h5>{{t('aliases-label')}}</h5>
+                <div class="text-muted mb-2">{{t('aliases-tooltip')}}</div>
+                <app-edit-list [items]="person.aliases"
+                               [asyncValidators]="[aliasValidator()]"
+                               (updateItems)="person.aliases = $event"
+                               [errorMessage]="t('alias-overlap')"
+                               [label]="t('aliases-label')"/>
+              </ng-template>
+            </li>
+
 
             <li [ngbNavItem]="TabID.CoverImage">
               <a ngbNavLink>{{t(TabID.CoverImage)}}</a>

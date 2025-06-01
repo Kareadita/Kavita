@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Email;
 
-public class EmailHistoryDto
+public sealed record EmailHistoryDto
 {
     public long Id { get; set; }
     public bool Sent { get; set; }

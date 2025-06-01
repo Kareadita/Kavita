@@ -9,7 +9,7 @@ import {FilterService} from "../_services/filter.service";
 import {Router} from "@angular/router";
 import {Series} from "../_models/series";
 import {JumpbarService} from "../_services/jumpbar.service";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
 import {ActionService} from "../_services/action.service";
 import {ManageSmartFiltersComponent} from "../sidenav/_components/manage-smart-filters/manage-smart-filters.component";
 import {DecimalPipe} from "@angular/common";
@@ -29,7 +29,7 @@ export class AllFiltersComponent implements OnInit {
   private readonly actionFactory = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
 
-  filterActions = this.actionFactory.getSmartFilterActions(this.handleAction.bind(this));
+
   jumpbarKeys: Array<JumpKey> = [];
   filters: SmartFilter[] = [];
   isLoading = true;
@@ -45,23 +45,5 @@ export class AllFiltersComponent implements OnInit {
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
-  }
-
-  async deleteFilter(filter: SmartFilter) {
-    await this.actionService.deleteFilter(filter.id, success => {
-      this.filters = this.filters.filter(f => f.id != filter.id);
-      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.filters, (s: Series) => s.name);
-      this.cdRef.markForCheck();
-    });
-  }
-
-  async handleAction(action: ActionItem<SmartFilter>, filter: SmartFilter) {
-    switch (action.action) {
-      case(Action.Delete):
-        await this.deleteFilter(filter);
-        break;
-      default:
-        break;
-    }
   }
 }

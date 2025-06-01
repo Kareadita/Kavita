@@ -3,7 +3,7 @@
 /// <summary>
 /// Used for running some task against a Series.
 /// </summary>
-public class RefreshSeriesDto
+public sealed record RefreshSeriesDto
 {
     /// <summary>
     /// Library Id series belongs to

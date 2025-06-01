@@ -273,11 +273,6 @@ export class ReadingListDetailComponent implements OnInit {
     });
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.readingList);
-    }
-  }
 
   readChapter(item: ReadingListItem) {
     if (!this.readingList) return;
@@ -386,12 +381,6 @@ export class ReadingListDetailComponent implements OnInit {
       this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
       {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
   }
-
-  updateAccessibilityMode() {
-    this.accessibilityMode = !this.accessibilityMode;
-    this.cdRef.markForCheck();
-  }
-
 
   toggleReorder() {
     this.formGroup.get('edit')?.setValue(!this.formGroup.get('edit')!.value);

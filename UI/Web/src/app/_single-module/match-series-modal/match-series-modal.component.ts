@@ -91,7 +91,7 @@ export class MatchSeriesModalComponent implements OnInit {
     data.tags = data.tags || [];
     data.genres = data.genres || [];
 
-    this.seriesService.updateMatch(this.series.id, data).subscribe(_ => {
+    this.seriesService.updateMatch(this.series.id, item.series).subscribe(_ => {
       this.save();
     });
   }

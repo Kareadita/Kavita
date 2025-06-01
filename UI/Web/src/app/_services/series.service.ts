@@ -203,26 +203,8 @@ export class SeriesService {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
   }
 
-
-
-  deleteReview(seriesId: number) {
-    return this.httpClient.delete(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
-  updateReview(seriesId: number, body: string) {
-    return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
-      seriesId, body
-    });
-  }
-
-  getReviews(seriesId: number) {
-    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
-  }
-
   getRatings(seriesId: number) {
     return this.httpClient.get<Array<Rating>>(this.baseUrl + 'rating?seriesId=' + seriesId);
-  }
-  getOverallRating(seriesId: number) {
-    return this.httpClient.get<Rating>(this.baseUrl + 'rating/overall?seriesId=' + seriesId);
   }
 
   removeFromOnDeck(seriesId: number) {
@@ -242,7 +224,7 @@ export class SeriesService {
   }
 
   updateMatch(seriesId: number, series: ExternalSeriesDetail) {
-    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId}${series.malId ? '&malId=' + series.malId : ''}`, {}, TextResonse);
+    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId || 0}&malId=${series.malId || 0}&cbrId=${series.cbrId || 0}`, {}, TextResonse);
   }
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {

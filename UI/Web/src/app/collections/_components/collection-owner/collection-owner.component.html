@@ -6,8 +6,8 @@
         {{t('collection-via-label')}}
         <app-image [imageUrl]="collection.source | providerImage"
                    width="16px" height="16px"
-                   [ngbTooltip]="collection.source | providerName"
-                   [attr.aria-label]="collection.source | providerName"></app-image>
+                   [ngbTooltip]="collection.source | scrobbleProviderName"
+                   [attr.aria-label]="collection.source | scrobbleProviderName"></app-image>
       }
     </div>
   }

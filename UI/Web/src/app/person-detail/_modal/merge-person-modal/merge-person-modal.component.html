@@ -1,0 +1,65 @@
+<ng-container *transloco="let t; prefix:'merge-person-modal'">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h4 class="modal-title">
+        {{t('title', {personName: this.person.name})}}</h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+  </div>
+
+  <div class="modal-body scrollable-modal d-flex flex-column" style="min-height: 300px;" >
+    <div class="row">
+      <div class="col-lg-12 col-md-12 pe-2">
+        <div class="mb-3">
+
+          <app-setting-item [title]="t('src')" [subtitle]="t('merge-warning')" [toggleOnViewClick]="false" [showEdit]="false">
+            <ng-template #view>
+              <app-typeahead [settings]="typeAheadSettings" (selectedData)="updatePerson($event)" [unFocus]="typeAheadUnfocus">
+                <ng-template #badgeItem let-item let-position="idx">
+                  {{item.name}}
+                </ng-template>
+                <ng-template #optionItem let-item let-position="idx">
+                  {{item.name}}
+                </ng-template>
+              </app-typeahead>
+            </ng-template>
+          </app-setting-item>
+        </div>
+      </div>
+    </div>
+
+    @if (mergee) {
+      <div class="row">
+        <div class="col-lg-12 col-md-12 pe-2">
+          <div class="mb-3">
+
+            <h5>{{t('alias-title')}}</h5>
+
+            <app-badge-expander [items]="allNewAliases()">
+              <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                {{item}}
+              </ng-template>
+            </app-badge-expander>
+
+            @if (knownFor$ | async; as knownFor) {
+              <h5 class="mt-2">{{t('known-for-title')}}</h5>
+
+              <app-badge-expander [items]="knownFor">
+                <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                  {{item.name}}
+                </ng-template>
+              </app-badge-expander>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="mergee === null" >{{t('save')}}</button>
+  </div>
+
+</ng-container>

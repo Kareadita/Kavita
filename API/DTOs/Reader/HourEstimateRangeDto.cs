@@ -3,7 +3,7 @@
 /// <summary>
 /// A range of time to read a selection (series, chapter, etc)
 /// </summary>
-public record HourEstimateRangeDto
+public sealed record HourEstimateRangeDto
 {
     /// <summary>
     /// Min hours to read the selection

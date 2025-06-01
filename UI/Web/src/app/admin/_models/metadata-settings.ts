@@ -25,6 +25,14 @@ export interface MetadataSettings {
   enableStartDate: boolean;
   enableCoverImage: boolean;
   enableLocalizedName: boolean;
+
+  enableChapterSummary: boolean;
+  enableChapterReleaseDate: boolean;
+  enableChapterTitle: boolean;
+  enableChapterPublisher: boolean;
+  enableChapterCoverImage: boolean;
+
+
   enableGenres: boolean;
   enableTags: boolean;
   firstLastPeopleNaming: boolean;

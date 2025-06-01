@@ -24,7 +24,8 @@
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Mentés…",
-        "update": "Frissítés"
+        "update": "Frissítés",
+        "account-detail-title": "Fiók Részletei"
     },
     "user-scrobble-history": {
         "title": "Feldolgozás történet",
@@ -78,7 +79,9 @@
     },
     "want-to-read": {
         "title": "Olvasandó",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "no-items": "Eddig nincsenek elemek. Próbáljon hozzáadni egy sorozatot!",
+        "no-items-filtered": "Egy elem sem felel meg a szűrési feltételeknek."
     },
     "user-preferences": {
         "account-tab": "{{tabs.account-tab}}",
@@ -90,7 +93,14 @@
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
         "background-color-label": "Háttérszín",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "locale-tooltip": "Kavita által használt nyelv",
+        "blur-unread-summaries-label": "El nem olvasott összefoglalók elhomályosítása",
+        "disable-animations-label": "Animációk kikapcsolása",
+        "disable-animations-tooltip": "Oldalon lévő animációk kikapcsolása. Hasznos az e-ink olvasóknak.",
+        "prompt-on-download-label": "Letöltés esetében kérdezzen",
+        "prompt-on-download-tooltip": "Kérdezzen, amikor a letöltés mérete túlhaladja a {{size}}MB-ot",
+        "collapse-series-relationships-label": "Sorozat Kapcsolatok Összezárása"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}"

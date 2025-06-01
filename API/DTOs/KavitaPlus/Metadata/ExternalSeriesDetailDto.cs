@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.DTOs.KavitaPlus.Metadata;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Services.Plus;
 
-namespace API.DTOs.Recommendation;
+namespace API.DTOs.KavitaPlus.Metadata;
 #nullable enable
 
 /// <summary>
 /// This is AniListSeries
 /// </summary>
-public class ExternalSeriesDetailDto
+public sealed record ExternalSeriesDetailDto
 {
     public string Name { get; set; }
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
+    public int? CbrId { get; set; }
     public IList<string> Synonyms { get; set; } = [];
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }
@@ -32,6 +33,14 @@ public class ExternalSeriesDetailDto
     public int Volumes { get; set; }
     public IList<SeriesRelationship>? Relations { get; set; } = [];
     public IList<SeriesCharacter>? Characters { get; set; } = [];
+
+    #region Comic Only
+    public string? Publisher { get; set; }
+    /// <summary>
+    /// Only from CBR for <see cref="ScrobbleProvider.Cbr"/>. Full metadata about issues
+    /// </summary>
+    public IList<ExternalChapterDto>? ChapterDtos { get; set; }
+    #endregion
 
 
 }

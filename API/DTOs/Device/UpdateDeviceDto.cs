@@ -3,7 +3,7 @@ using API.Entities.Enums.Device;
 
 namespace API.DTOs.Device;
 
-public class UpdateDeviceDto
+public sealed record UpdateDeviceDto
 {
     [Required]
     public int Id { get; set; }

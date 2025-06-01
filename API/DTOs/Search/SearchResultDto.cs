@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Search;
 
-public class SearchResultDto
+public sealed record SearchResultDto
 {
     public int SeriesId { get; init; }
     public string Name { get; init; } = default!;

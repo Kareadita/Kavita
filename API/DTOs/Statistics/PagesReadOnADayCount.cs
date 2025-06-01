@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Statistics;
 
-public class PagesReadOnADayCount<T> : ICount<T>
+public sealed record PagesReadOnADayCount<T> : ICount<T>
 {
     /// <summary>
     /// The day of the readings

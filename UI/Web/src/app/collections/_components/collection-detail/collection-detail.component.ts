@@ -56,20 +56,21 @@ import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {
   SmartCollectionDrawerComponent
 } from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 
 @Component({
-    selector: 'app-collection-detail',
-    templateUrl: './collection-detail.component.html',
-    styleUrls: ['./collection-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-collection-detail',
+  templateUrl: './collection-detail.component.html',
+  styleUrls: ['./collection-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
     BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe]
+    DatePipe, DefaultDatePipe, ProviderImagePipe, AsyncPipe, ScrobbleProviderNamePipe, PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -304,12 +305,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.collectionTag);
-    }
-  }
-
   openEditCollectionTagModal(collectionTag: UserCollection) {
     const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
     modalRef.componentInstance.tag = this.collectionTag;
@@ -320,7 +315,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openSyncDetailDrawer() {
-
     const ref = this.offcanvasService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
     ref.componentInstance.collection = this.collectionTag;
     ref.componentInstance.series = this.series;

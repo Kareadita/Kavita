@@ -2,7 +2,7 @@
 
 namespace API.DTOs.OPDS;
 
-public class SearchLink
+public sealed record SearchLink
 {
     [XmlAttribute("type")]
     public string Type { get; set; } = default!;

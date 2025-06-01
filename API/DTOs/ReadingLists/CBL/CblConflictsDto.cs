@@ -3,7 +3,7 @@
 namespace API.DTOs.ReadingLists.CBL;
 
 
-public class CblConflictQuestion
+public sealed record CblConflictQuestion
 {
     public string SeriesName { get; set; }
     public IList<int> LibrariesIds { get; set; }

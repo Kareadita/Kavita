@@ -27,8 +27,9 @@ export interface MetadataTagDto {
 
 export interface ExternalSeriesDetail {
   name: string;
-  aniListId?: number;
-  malId?: number;
+  aniListId?: number | null;
+  malId?: number | null;
+  cbrId?: number | null;
   synonyms: Array<string>;
   plusMediaFormat: PlusMediaFormat;
   siteUrl?: string;

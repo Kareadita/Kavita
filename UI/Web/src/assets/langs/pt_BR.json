@@ -2260,7 +2260,8 @@
         "bulk-delete-libraries": "Tem certeza de que deseja excluir {{count}} bibliotecas?",
         "match-success": "Série correspondida corretamente",
         "webtoon-override": "Mudando para o modo Webtoon devido a imagens que representam um Webtoon.",
-        "scrobble-gen-init": "Enfileirou uma tarefa para gerar eventos scrobble a partir do histórico de leitura e avaliações anteriores, sincronizando-os com serviços conectados."
+        "scrobble-gen-init": "Enfileirou uma tarefa para gerar eventos scrobble a partir do histórico de leitura e avaliações anteriores, sincronizando-os com serviços conectados.",
+        "confirm-delete-multiple-volumes": "Tem certeza de que deseja excluir {{count}} volumes? Isso não modificará os arquivos no disco."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2333,7 +2334,9 @@
         "copy-settings": "Copiar Configurações De",
         "match": "Corresponder",
         "match-tooltip": "Corresponder Séries com Kavita+ manualmente",
-        "reorder": "Reordenar"
+        "reorder": "Reordenar",
+        "rename-tooltip": "Renomear o Filtro Inteligente",
+        "rename": "Renomear"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {ServerService} from 'src/app/_services/server.service';
@@ -62,7 +62,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
       this.settingsForm.addControl('taskCleanup', new FormControl(this.serverSettings.taskCleanup, [Validators.required]));
-      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
+      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [this.emptyOrPattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
@@ -76,6 +76,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
       this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
+
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
@@ -186,4 +187,19 @@ export class ManageSettingsComponent implements OnInit {
       console.error('error: ', err);
     });
   }
+
+  emptyOrPattern(pattern: RegExp): ValidatorFn {
+    return (control) => {
+      if (!control.value || control.value.length === 0) {
+        return null;
+      }
+
+      if (pattern.test(control.value)) {
+        return null;
+      }
+
+      return { 'emptyOrPattern': { 'requiredPattern': pattern.toString(), 'actualValue': control.value } };
+    }
+  }
+
 }

@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {environment} from "../../environments/environment";
-import { HttpClient } from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {Chapter} from "../_models/chapter";
 import {TextResonse} from "../_types/text-response";
+import {ChapterDetailPlus} from "../_models/chapter-detail-plus";
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,10 @@ export class ChapterService {
 
   updateChapter(chapter: Chapter) {
     return this.httpClient.post(this.baseUrl + 'chapter/update', chapter, TextResonse);
+  }
+
+  chapterDetailPlus(seriesId: number, chapterId: number) {
+    return this.httpClient.get<ChapterDetailPlus>(this.baseUrl + `chapter/chapter-detail-plus?chapterId=${chapterId}&seriesId=${seriesId}`);
   }
 
 }

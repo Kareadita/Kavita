@@ -22,7 +22,7 @@
 
           </h4>
           <div class="subtitle mt-2 mb-2">
-            @if (series.localizedName !== series.name) {
+            @if (series.localizedName !== series.name && series.localizedName) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
           </div>
@@ -36,7 +36,6 @@
                                    [mangaFormat]="series.format">
           </app-metadata-detail-row>
 
-          <!-- Rating goes here (after I implement support for rating individual issues -->
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="series.id"
                                  [ratings]="ratings"
@@ -97,7 +96,7 @@
 
               <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>
               </div>
 
@@ -131,7 +130,7 @@
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
                   @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
+                    <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata!.publicationStatus)"
                        href="javascript:void(0);"
                        [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
                       {{pubStatus}}
@@ -315,25 +314,8 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-                <div class="mb-3">
-                  <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
-                                     iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                                     [clickableTitle]="true" (sectionClick)="openReviewModal()">
-                    <ng-template #carouselItem let-item let-position="idx">
-                      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-                    </ng-template>
-                  </app-carousel-reel>
-                </div>
-
-                <div class="mb-3">
-                  <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
-                    <ng-template #carouselItem let-item let-position="idx">
-                      <app-review-card [review]="item"></app-review-card>
-                    </ng-template>
-                  </app-carousel-reel>
-                </div>
+                <app-reviews [userReviews]="reviews" [plusReviews]="plusReviews" [series]="series" />
               }
-
             </ng-template>
           </li>
 

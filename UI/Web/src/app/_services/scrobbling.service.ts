@@ -12,9 +12,10 @@ import {UtilityService} from "../shared/_services/utility.service";
 
 export enum ScrobbleProvider {
   Kavita = 0,
-  AniList= 1,
+  AniList = 1,
   Mal = 2,
-  GoogleBooks = 3
+  GoogleBooks = 3,
+  Cbr = 4
 }
 
 @Injectable({

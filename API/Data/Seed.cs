@@ -312,6 +312,11 @@ public static class Seed
                 EnableLocalizedName = false,
                 FirstLastPeopleNaming = true,
                 EnableCoverImage = true,
+                EnableChapterTitle = false,
+                EnableChapterSummary = true,
+                EnableChapterPublisher = true,
+                EnableChapterCoverImage = false,
+                EnableChapterReleaseDate = true,
                 PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]
             };
             await context.MetadataSettings.AddAsync(existing);

@@ -1,14 +1,12 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from "@angular/common/http";
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Person, PersonRole} from "../_models/metadata/person";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {PaginatedResult} from "../_models/pagination";
 import {Series} from "../_models/series";
 import {map} from "rxjs/operators";
 import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/person/browse-person";
-import {Chapter} from "../_models/chapter";
 import {StandaloneChapter} from "../_models/standalone-chapter";
 import {TextResonse} from "../_types/text-response";
 
@@ -27,6 +25,10 @@ export class PersonService {
 
   get(name: string) {
     return this.httpClient.get<Person | null>(this.baseUrl + `person?name=${name}`);
+  }
+
+  searchPerson(name: string) {
+    return this.httpClient.get<Array<Person>>(this.baseUrl + `person/search?queryString=${encodeURIComponent(name)}`);
   }
 
   getRolesForPerson(personId: number) {
@@ -55,4 +57,15 @@ export class PersonService {
   downloadCover(personId: number) {
     return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
   }
+
+  isValidAlias(personId: number, alias: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + `person/valid-alias?personId=${personId}&alias=${alias}`, TextResonse).pipe(
+      map(valid => valid + '' === 'true')
+    );
+  }
+
+  mergePerson(destId: number, srcId: number) {
+    return this.httpClient.post<Person>(this.baseUrl + 'person/merge', {destId, srcId});
+  }
+
 }

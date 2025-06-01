@@ -4,11 +4,13 @@ using System.Xml.Serialization;
 
 namespace API.DTOs.OPDS;
 
+// TODO: OPDS Dtos are internal state, shouldn't be in DTO directory
+
 /// <summary>
 ///
 /// </summary>
 [XmlRoot("feed", Namespace = "http://www.w3.org/2005/Atom")]
-public class Feed
+public sealed record Feed
 {
     [XmlElement("updated")]
     public string Updated { get; init; } = DateTime.UtcNow.ToString("s");

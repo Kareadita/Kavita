@@ -27,6 +27,9 @@
             {{review.username}}
           }
           {{(isMyReview ? '' : review.username | defaultValue:'')}}
+          @if (review.authority === RatingAuthority.Critic) {
+            ({{t('critic')}})
+          }
         </div>
         @if (review.isExternal){
           <span class="review-score">{{t('rating-percentage', {r: review.score})}}</span>

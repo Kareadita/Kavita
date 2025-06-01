@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Kavita (v0.8.6.1)",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.1",
+    "title": "Kavita",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.9",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "3.1.0"
+    "version": "0.8.6.9"
   },
   "servers": [
     {
@@ -1252,6 +1252,47 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Chapter/chapter-detail-plus": {
+      "get": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Returns Ratings and Reviews for an individual Chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDetailPlusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDetailPlusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDetailPlusDto"
+                }
+              }
+            }
           }
         }
       }
@@ -5428,6 +5469,55 @@
         }
       }
     },
+    "/api/Person/search": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Find a person by name or alias against a query string",
+        "parameters": [
+          {
+            "name": "queryString",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Person/roles": {
       "get": {
         "tags": [
@@ -5803,6 +5893,105 @@
         }
       }
     },
+    "/api/Person/merge": {
+      "post": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Merges Persons into one, this action is irreversible",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonMergeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Person/valid-alias": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Ensure the alias is valid to be added. For example, the alias cannot be on another person or be the same as the current person name/alias.",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "alias",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Plugin/authenticate": {
       "post": {
         "tags": [
@@ -5896,15 +6085,124 @@
         }
       }
     },
-    "/api/Rating/overall": {
+    "/api/Rating/series": {
+      "post": {
+        "tags": [
+          "Rating"
+        ],
+        "summary": "Update the users' rating of the given series",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Rating/chapter": {
+      "post": {
+        "tags": [
+          "Rating"
+        ],
+        "summary": "Update the users' rating of the given chapter",
+        "requestBody": {
+          "description": "chapterId must be set",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRatingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Rating/overall-series": {
       "get": {
         "tags": [
           "Rating"
         ],
+        "summary": "Overall rating from all Kavita users for a given Series",
         "parameters": [
           {
             "name": "seriesId",
             "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Rating/overall-chapter": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "summary": "Overall rating from all Kavita users for a given Chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -8724,12 +9022,12 @@
         }
       }
     },
-    "/api/Review": {
+    "/api/Review/series": {
       "post": {
         "tags": [
           "Review"
         ],
-        "summary": "Updates the review for a given series",
+        "summary": "Updates the user's review for a given series",
         "requestBody": {
           "description": "",
           "content": {
@@ -8781,6 +9079,77 @@
         "parameters": [
           {
             "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Review/chapter": {
+      "post": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Update the user's review for a given chapter",
+        "requestBody": {
+          "description": "chapterId must be set",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Deletes the user's review for the given chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -8983,7 +9352,9 @@
               "enum": [
                 0,
                 1,
-                2
+                2,
+                3,
+                4
               ],
               "type": "integer",
               "description": "Misleading name but is the source of data (like a review coming from AniList)",
@@ -9922,39 +10293,6 @@
           }
         },
         "deprecated": true
-      }
-    },
-    "/api/Series/update-rating": {
-      "post": {
-        "tags": [
-          "Series"
-        ],
-        "summary": "Update the user rating for the given series",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSeriesRatingDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSeriesRatingDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSeriesRatingDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
       }
     },
     "/api/Series/update": {
@@ -11186,7 +11524,6 @@
           {
             "name": "aniListId",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -11198,6 +11535,14 @@
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          },
+          {
+            "name": "cbrId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -15070,6 +15415,13 @@
             },
             "nullable": true
           },
+          "chapterRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserChapterRating"
+            },
+            "nullable": true
+          },
           "userPreferences": {
             "$ref": "#/components/schemas/AppUserPreferences"
           },
@@ -15281,6 +15633,52 @@
         "additionalProperties": false,
         "description": "Represents a saved page in a Chapter entity for a given user."
       },
+      "AppUserChapterRating": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "description": "A number between 0-5.0 that represents how good a series is.",
+            "format": "float"
+          },
+          "hasBeenRated": {
+            "type": "boolean",
+            "description": "If the rating has been explicitly set. Otherwise, the 0.0 rating should be ignored as it's not rated"
+          },
+          "review": {
+            "type": "string",
+            "description": "A short summary the user can write when giving their review.",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "An optional tagline for the review",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          }
+        },
+        "additionalProperties": false
+      },
       "AppUserCollection": {
         "required": [
           "ageRating",
@@ -15380,7 +15778,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
@@ -15488,7 +15888,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
@@ -16406,6 +16808,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -16696,6 +17105,11 @@
             "type": "string",
             "nullable": true
           },
+          "averageExternalRating": {
+            "type": "number",
+            "description": "(Kavita+) Average rating from Kavita+ metadata",
+            "format": "float"
+          },
           "ageRatingLocked": {
             "type": "boolean"
           },
@@ -16782,6 +17196,13 @@
             },
             "nullable": true
           },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserChapterRating"
+            },
+            "nullable": true
+          },
           "userProgress": {
             "type": "array",
             "items": {
@@ -16795,6 +17216,47 @@
           "volumeId": {
             "type": "integer",
             "format": "int32"
+          },
+          "externalReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalReview"
+            },
+            "nullable": true
+          },
+          "externalRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalRating"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChapterDetailPlusDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "hasBeenRated": {
+            "type": "boolean"
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserReviewDto"
+            },
+            "nullable": true
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RatingDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -16808,18 +17270,15 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
-            "description": "Smallest number of the Range.",
             "nullable": true,
             "deprecated": true
           },
           "minNumber": {
             "type": "number",
-            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
             "format": "float"
           },
           "maxNumber": {
@@ -16828,21 +17287,17 @@
           },
           "sortOrder": {
             "type": "number",
-            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "pages": {
             "type": "integer",
-            "description": "Total number of pages in all MangaFiles",
             "format": "int32"
           },
           "isSpecial": {
-            "type": "boolean",
-            "description": "If this Chapter contains files that could only be identified as Series or has Special Identifier from filename"
+            "type": "boolean"
           },
           "title": {
             "type": "string",
-            "description": "Used for books/specials to display custom title. For non-specials/books, will be set to API.DTOs.ChapterDto.Range",
             "nullable": true
           },
           "files": {
@@ -16869,17 +17324,14 @@
             "format": "date-time"
           },
           "coverImageLocked": {
-            "type": "boolean",
-            "description": "If the Cover Image is locked for this entity"
+            "type": "boolean"
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume Id this Chapter belongs to",
             "format": "int32"
           },
           "createdUtc": {
             "type": "string",
-            "description": "When chapter was created",
             "format": "date-time"
           },
           "lastModifiedUtc": {
@@ -16888,22 +17340,18 @@
           },
           "created": {
             "type": "string",
-            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "releaseDate": {
             "type": "string",
-            "description": "When the chapter was released.",
             "format": "date-time"
           },
           "titleName": {
             "type": "string",
-            "description": "Title of the Chapter/Issue",
             "nullable": true
           },
           "summary": {
             "type": "string",
-            "description": "Summary of the Chapter",
             "nullable": true
           },
           "ageRating": {
@@ -16926,12 +17374,11 @@
               -1
             ],
             "type": "integer",
-            "description": "Age Rating for the issue/chapter",
+            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total words in a Chapter (books only)",
             "format": "int64"
           },
           "volumeTitle": {
@@ -16953,12 +17400,10 @@
           },
           "webLinks": {
             "type": "string",
-            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
             "nullable": true
           },
           "isbn": {
             "type": "string",
-            "description": "ISBN-13 (usually) of the Chapter",
             "nullable": true
           },
           "writers": {
@@ -17080,17 +17525,14 @@
           },
           "language": {
             "type": "string",
-            "description": "Language for the Chapter/Issue",
             "nullable": true
           },
           "count": {
             "type": "integer",
-            "description": "Number in the TotalCount of issues",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues for the series",
             "format": "int32"
           },
           "languageLocked": {
@@ -17100,12 +17542,10 @@
             "type": "boolean"
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "publicationStatusLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+            "type": "boolean"
           },
           "genresLocked": {
             "type": "boolean"
@@ -17496,6 +17936,15 @@
           },
           "person": {
             "$ref": "#/components/schemas/Person"
+          },
+          "kavitaPlusConnection": {
+            "type": "boolean",
+            "description": "The source of this connection. If not Kavita, this implies Metadata Download linked this and it can be removed between matches"
+          },
+          "orderWeight": {
+            "type": "integer",
+            "description": "A weight that allows lower numbers to sort first",
+            "format": "int32"
           },
           "role": {
             "enum": [
@@ -18220,6 +18669,80 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "ExternalChapterDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "issueNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "criticRating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "userRating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publisher": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "issueUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "criticReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserReviewDto"
+            },
+            "nullable": true
+          },
+          "userReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserReviewDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Information about an individual issue/chapter/book from Kavita+"
+      },
       "ExternalRating": {
         "type": "object",
         "properties": {
@@ -18239,10 +18762,21 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "authority": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Where this rating comes from: Critic or User",
             "format": "int32"
           },
           "providerUrl": {
@@ -18252,6 +18786,12 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "description": "This can be null when for a series-rating",
+            "format": "int32",
+            "nullable": true
           },
           "externalSeriesMetadatas": {
             "type": "array",
@@ -18305,7 +18845,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
@@ -18361,10 +18903,20 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "authority": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
             "format": "int32"
           },
           "siteUrl": {
@@ -18394,6 +18946,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "externalSeriesMetadatas": {
             "type": "array",
             "items": {
@@ -18420,6 +18977,11 @@
           "malId": {
             "type": "integer",
             "format": "int64",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "synonyms": {
@@ -18478,7 +19040,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
@@ -18518,6 +19082,18 @@
             "items": {
               "$ref": "#/components/schemas/SeriesCharacter"
             },
+            "nullable": true
+          },
+          "publisher": {
+            "type": "string",
+            "nullable": true
+          },
+          "chapterDtos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalChapterDto"
+            },
+            "description": "Only from CBR for API.Services.Plus.ScrobbleProvider.Cbr. Full metadata about issues",
             "nullable": true
           }
         },
@@ -18562,7 +19138,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
@@ -18620,6 +19198,10 @@
             "format": "int32"
           },
           "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cbrId": {
             "type": "integer",
             "format": "int32"
           },
@@ -20265,6 +20847,26 @@
             "type": "boolean",
             "description": "Allow setting the cover image"
           },
+          "enableChapterSummary": {
+            "type": "boolean",
+            "description": "Allow Summary to be set within Chapter/Issue"
+          },
+          "enableChapterReleaseDate": {
+            "type": "boolean",
+            "description": "Allow Release Date to be set within Chapter/Issue"
+          },
+          "enableChapterTitle": {
+            "type": "boolean",
+            "description": "Allow Title to be set within Chapter/Issue"
+          },
+          "enableChapterPublisher": {
+            "type": "boolean",
+            "description": "Allow Publisher to be set within Chapter/Issue"
+          },
+          "enableChapterCoverImage": {
+            "type": "boolean",
+            "description": "Allow setting the cover image for the Chapter/Issue"
+          },
           "enableGenres": {
             "type": "boolean"
           },
@@ -20323,7 +20925,12 @@
                 6,
                 7,
                 8,
-                9
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
               ],
               "type": "integer",
               "description": "Represents which field that can be written to as an override when already locked",
@@ -20453,6 +21060,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonAlias"
+            },
+            "nullable": true
+          },
           "coverImage": {
             "type": "string",
             "nullable": true
@@ -20510,6 +21124,35 @@
         },
         "additionalProperties": false
       },
+      "PersonAlias": {
+        "required": [
+          "alias",
+          "normalizedAlias"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedAlias": {
+            "type": "string",
+            "nullable": true
+          },
+          "personId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          }
+        },
+        "additionalProperties": false
+      },
       "PersonDto": {
         "required": [
           "name"
@@ -20539,6 +21182,13 @@
             "type": "string",
             "nullable": true
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -20562,6 +21212,26 @@
             "type": "string",
             "description": "https://hardcover.app/authors/{HardcoverId}",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonMergeDto": {
+        "required": [
+          "destId",
+          "srcId"
+        ],
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": "integer",
+            "description": "The id of the person being merged into",
+            "format": "int32"
+          },
+          "srcId": {
+            "type": "integer",
+            "description": "The id of the person being merged. This person will be removed, and become an alias of API.DTOs.PersonMergeDto.DestId",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -20705,10 +21375,20 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
+            "format": "int32"
+          },
+          "authority": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
             "format": "int32"
           },
           "providerUrl": {
@@ -22208,7 +22888,6 @@
           },
           "lastChapterAdded": {
             "type": "string",
-            "description": "DateTime representing last time a chapter was added to the Series",
             "format": "date-time"
           },
           "userRating": {
@@ -22236,9 +22915,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "nameLocked": {
-            "type": "boolean"
-          },
           "sortNameLocked": {
             "type": "boolean"
           },
@@ -22247,7 +22923,6 @@
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total number of words for the series. Only applies to epubs.",
             "format": "int64"
           },
           "libraryId": {
@@ -22272,26 +22947,21 @@
           },
           "folderPath": {
             "type": "string",
-            "description": "The highest level folder for this Series",
             "nullable": true
           },
           "lowestFolderPath": {
             "type": "string",
-            "description": "Lowest path (that is under library root) that contains all files for the series.",
             "nullable": true
           },
           "lastFolderScanned": {
             "type": "string",
-            "description": "The last time the folder for this series was scanned",
             "format": "date-time"
           },
           "dontMatch": {
-            "type": "boolean",
-            "description": "Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling."
+            "type": "boolean"
           },
           "isBlacklisted": {
-            "type": "boolean",
-            "description": "If the series was unable to match, it will be blacklisted until a manual metadata match overrides it"
+            "type": "boolean"
           },
           "coverImage": {
             "type": "string",
@@ -22884,7 +23554,9 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
@@ -23538,18 +24210,15 @@
           },
           "range": {
             "type": "string",
-            "description": "Range of chapters. Chapter 2-4 -> \"2-4\". Chapter 2 -> \"2\". If special, will be special name.",
             "nullable": true
           },
           "number": {
             "type": "string",
-            "description": "Smallest number of the Range.",
             "nullable": true,
             "deprecated": true
           },
           "minNumber": {
             "type": "number",
-            "description": "This may be 0 under the circumstance that the Issue is \"Alpha\" or other non-standard numbers.",
             "format": "float"
           },
           "maxNumber": {
@@ -23558,21 +24227,17 @@
           },
           "sortOrder": {
             "type": "number",
-            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "pages": {
             "type": "integer",
-            "description": "Total number of pages in all MangaFiles",
             "format": "int32"
           },
           "isSpecial": {
-            "type": "boolean",
-            "description": "If this Chapter contains files that could only be identified as Series or has Special Identifier from filename"
+            "type": "boolean"
           },
           "title": {
             "type": "string",
-            "description": "Used for books/specials to display custom title. For non-specials/books, will be set to API.DTOs.ChapterDto.Range",
             "nullable": true
           },
           "files": {
@@ -23599,17 +24264,14 @@
             "format": "date-time"
           },
           "coverImageLocked": {
-            "type": "boolean",
-            "description": "If the Cover Image is locked for this entity"
+            "type": "boolean"
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume Id this Chapter belongs to",
             "format": "int32"
           },
           "createdUtc": {
             "type": "string",
-            "description": "When chapter was created",
             "format": "date-time"
           },
           "lastModifiedUtc": {
@@ -23618,22 +24280,18 @@
           },
           "created": {
             "type": "string",
-            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "releaseDate": {
             "type": "string",
-            "description": "When the chapter was released.",
             "format": "date-time"
           },
           "titleName": {
             "type": "string",
-            "description": "Title of the Chapter/Issue",
             "nullable": true
           },
           "summary": {
             "type": "string",
-            "description": "Summary of the Chapter",
             "nullable": true
           },
           "ageRating": {
@@ -23656,12 +24314,11 @@
               -1
             ],
             "type": "integer",
-            "description": "Age Rating for the issue/chapter",
+            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total words in a Chapter (books only)",
             "format": "int64"
           },
           "minHoursToRead": {
@@ -23678,12 +24335,10 @@
           },
           "webLinks": {
             "type": "string",
-            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
             "nullable": true
           },
           "isbn": {
             "type": "string",
-            "description": "ISBN-13 (usually) of the Chapter",
             "nullable": true
           },
           "writers": {
@@ -23805,17 +24460,14 @@
           },
           "language": {
             "type": "string",
-            "description": "Language for the Chapter/Issue",
             "nullable": true
           },
           "count": {
             "type": "integer",
-            "description": "Number in the TotalCount of issues",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues for the series",
             "format": "int32"
           },
           "languageLocked": {
@@ -23825,12 +24477,10 @@
             "type": "boolean"
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "publicationStatusLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+            "type": "boolean"
           },
           "genresLocked": {
             "type": "boolean"
@@ -24639,6 +25289,13 @@
             "minLength": 1,
             "type": "string"
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -24660,6 +25317,25 @@
           "asin": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateRatingDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userRating": {
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false
@@ -25000,20 +25676,6 @@
         },
         "additionalProperties": false
       },
-      "UpdateSeriesRatingDto": {
-        "type": "object",
-        "properties": {
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userRating": {
-            "type": "number",
-            "format": "float"
-          }
-        },
-        "additionalProperties": false
-      },
       "UpdateStreamPositionDto": {
         "type": "object",
         "properties": {
@@ -25052,6 +25714,7 @@
             "items": {
               "type": "string"
             },
+            "description": "List of Roles to assign to user. If admin not present, Pleb will be applied.\nIf admin present, all libraries will be granted access and will ignore those from DTO.",
             "nullable": true
           },
           "libraries": {
@@ -25068,7 +25731,6 @@
           },
           "email": {
             "type": "string",
-            "description": "Email of the user",
             "nullable": true
           }
         },
@@ -25080,6 +25742,11 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "body": {
             "type": "string",
@@ -25214,7 +25881,6 @@
           "locale",
           "noTransitions",
           "pageSplitOption",
-          "pdfLayoutMode",
           "pdfScrollMode",
           "pdfSpreadMode",
           "pdfTheme",
@@ -25235,7 +25901,6 @@
               1
             ],
             "type": "integer",
-            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
             "format": "int32"
           },
           "scalingOption": {
@@ -25246,7 +25911,6 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How should the image be scaled to screen",
             "format": "int32"
           },
           "pageSplitOption": {
@@ -25257,7 +25921,6 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: Which side of a split image should we show first",
             "format": "int32"
           },
           "readerMode": {
@@ -25267,7 +25930,6 @@
               2
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\n<example>\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\nby clicking top/bottom sides of reader.\n</example>",
             "format": "int32"
           },
           "layoutMode": {
@@ -25277,57 +25939,45 @@
               3
             ],
             "type": "integer",
-            "description": "Manga Reader Option: How many pages to display in the reader at once",
             "format": "int32"
           },
           "emulateBook": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+            "type": "boolean"
           },
           "backgroundColor": {
             "minLength": 1,
-            "type": "string",
-            "description": "Manga Reader Option: Background color of the reader"
+            "type": "string"
           },
           "swipeToPaginate": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Should swiping trigger pagination"
+            "type": "boolean"
           },
           "autoCloseMenu": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
+            "type": "boolean"
           },
           "showScreenHints": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
+            "type": "boolean"
           },
           "allowAutomaticWebtoonReaderDetection": {
-            "type": "boolean",
-            "description": "Manga Reader Option: Allow Automatic Webtoon detection"
+            "type": "boolean"
           },
           "bookReaderMargin": {
             "type": "integer",
-            "description": "Book Reader Option: Override extra Margin",
             "format": "int32"
           },
           "bookReaderLineSpacing": {
             "type": "integer",
-            "description": "Book Reader Option: Override line-height",
             "format": "int32"
           },
           "bookReaderFontSize": {
             "type": "integer",
-            "description": "Book Reader Option: Override font size",
             "format": "int32"
           },
           "bookReaderFontFamily": {
             "minLength": 1,
-            "type": "string",
-            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override"
+            "type": "string"
           },
           "bookReaderTapToPaginate": {
-            "type": "boolean",
-            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+            "type": "boolean"
           },
           "bookReaderReadingDirection": {
             "enum": [
@@ -25335,7 +25985,6 @@
               1
             ],
             "type": "integer",
-            "description": "Book Reader Option: What direction should the next/prev page buttons go",
             "format": "int32"
           },
           "bookReaderWritingStyle": {
@@ -25344,7 +25993,7 @@
               1
             ],
             "type": "integer",
-            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
+            "description": "Represents the writing styles for the book-reader",
             "format": "int32"
           },
           "theme": {
@@ -25364,8 +26013,7 @@
             "format": "int32"
           },
           "bookReaderImmersiveMode": {
-            "type": "boolean",
-            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+            "type": "boolean"
           },
           "globalPageLayoutMode": {
             "enum": [
@@ -25373,33 +26021,26 @@
               1
             ],
             "type": "integer",
-            "description": "Global Site Option: If the UI should layout items as Cards or List items",
             "format": "int32"
           },
           "blurUnreadSummaries": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already"
+            "type": "boolean"
           },
           "promptForDownloadSize": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB."
+            "type": "boolean"
           },
           "noTransitions": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+            "type": "boolean"
           },
           "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
+            "type": "boolean"
           },
           "shareReviews": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+            "type": "boolean"
           },
           "locale": {
             "minLength": 1,
-            "type": "string",
-            "description": "UI Site Global Setting: The language locale that should be used for the user"
+            "type": "string"
           },
           "pdfTheme": {
             "enum": [
@@ -25407,7 +26048,6 @@
               1
             ],
             "type": "integer",
-            "description": "PDF Reader: Theme of the Reader",
             "format": "int32"
           },
           "pdfScrollMode": {
@@ -25417,16 +26057,7 @@
               3
             ],
             "type": "integer",
-            "description": "PDF Reader: Scroll mode of the reader",
-            "format": "int32"
-          },
-          "pdfLayoutMode": {
-            "enum": [
-              0,
-              2
-            ],
-            "type": "integer",
-            "description": "PDF Reader: Layout Mode of the reader",
+            "description": "Enum values match PdfViewer's enums",
             "format": "int32"
           },
           "pdfSpreadMode": {
@@ -25436,16 +26067,13 @@
               2
             ],
             "type": "integer",
-            "description": "PDF Reader: Spread Mode of the reader",
             "format": "int32"
           },
           "aniListScrobblingEnabled": {
-            "type": "boolean",
-            "description": "Kavita+: Should this account have Scrobbling enabled for AniList"
+            "type": "boolean"
           },
           "wantToReadSync": {
-            "type": "boolean",
-            "description": "Kavita+: Should this account have Want to Read Sync enabled"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -25513,6 +26141,11 @@
             "description": "The series this is for",
             "format": "int32"
           },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "libraryId": {
             "type": "integer",
             "description": "The library this series belongs in",
@@ -25553,10 +26186,21 @@
             "enum": [
               0,
               1,
-              2
+              2,
+              3,
+              4
             ],
             "type": "integer",
             "description": "If this review is External, which Provider did it come from",
+            "format": "int32"
+          },
+          "authority": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Source of the Rating",
             "format": "int32"
           }
         },

@@ -3,9 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter, HostListener,
+  EventEmitter,
+  HostListener,
   inject,
-  Input, OnInit,
+  Input,
+  OnInit,
   Output
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
@@ -14,7 +16,7 @@ import {DownloadEvent, DownloadService} from "../../shared/_services/download.se
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_services/action-factory.service";
 import {Chapter} from "../../_models/chapter";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
@@ -28,13 +30,10 @@ import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {Router, RouterLink} from "@angular/router";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {filter, map} from "rxjs/operators";
 import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 import {ReaderService} from "../../_services/reader.service";
 import {LibraryType} from "../../_models/library/library";
-import {Device} from "../../_models/device/device";
-import {ActionService} from "../../_services/action.service";
 import {MangaFormat} from "../../_models/manga-format";
 
 @Component({
@@ -60,14 +59,15 @@ export class ChapterCardComponent implements OnInit {
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly downloadService = inject(DownloadService);
-  private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly router = inject(Router);
   private readonly readerService = inject(ReaderService);
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) libraryId: number = 0;
   @Input({required: true}) seriesId: number = 0;
@@ -143,8 +143,6 @@ export class ChapterCardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.filterSendTo();
-
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
@@ -172,30 +170,6 @@ export class ChapterCardComponent implements OnInit {
     this.cdRef.detectChanges();
   }
 
-
-  filterSendTo() {
-    if (!this.actions || this.actions.length === 0) return;
-
-    this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.chapter);
-  }
-
-  performAction(action: ActionItem<any>) {
-    if (action.action == Action.Download) {
-      this.downloadService.download('chapter', this.chapter);
-      return; // Don't propagate the download from a card
-    }
-
-    if (action.action == Action.SendTo) {
-      const device = (action._extra!.data as Device);
-      this.actionService.sendToDevice([this.chapter.id], device);
-      return;
-    }
-
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.chapter);
-    }
-  }
-
   handleClick(event: any) {
     if (this.bulkSelectionService.hasSelections()) {
       this.handleSelection(event);
@@ -209,8 +183,4 @@ export class ChapterCardComponent implements OnInit {
     event.stopPropagation();
     this.readerService.readChapter(this.libraryId, this.seriesId, this.chapter, false);
   }
-
-
-  protected readonly LibraryType = LibraryType;
-  protected readonly MangaFormat = MangaFormat;
 }

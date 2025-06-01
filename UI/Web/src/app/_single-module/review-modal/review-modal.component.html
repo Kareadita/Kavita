@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'review-series-modal'">
+<ng-container *transloco="let t; read:'review-modal'">
   <div>
       <div class="modal-header">
           <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
@@ -8,6 +8,11 @@
       </div>
       <div class="modal-body">
           <form [formGroup]="reviewGroup">
+
+            <!--Not in sync with one at the top of the detail page, bad UX for now -->
+            <!--<ngx-stars [initialStars]="review.rating" (ratingOutput)="updateRating($event)" [size]="2"
+                       [maxStars]="5" [color]="starColor"></ngx-stars>-->
+
               <div class="row g-0 mt-2">
                   <label for="review" class="form-label">{{t('review-label')}}</label>
                   <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" [minlength]="minLength"

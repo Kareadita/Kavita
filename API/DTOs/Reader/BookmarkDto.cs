@@ -3,7 +3,7 @@
 namespace API.DTOs.Reader;
 #nullable enable
 
-public class BookmarkDto
+public sealed record BookmarkDto
 {
     public int Id { get; set; }
     [Required]

@@ -2,7 +2,7 @@
 
 namespace API.DTOs.ReadingLists;
 
-public class UpdateReadingListByMultipleSeriesDto
+public sealed record UpdateReadingListByMultipleSeriesDto
 {
     public int ReadingListId { get; init; }
     public IReadOnlyList<int> SeriesIds { get; init; } = default!;

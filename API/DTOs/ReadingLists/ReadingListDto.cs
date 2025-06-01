@@ -5,7 +5,7 @@ using API.Entities.Interfaces;
 namespace API.DTOs.ReadingLists;
 #nullable enable
 
-public class ReadingListDto : IHasCoverImage
+public sealed record ReadingListDto : IHasCoverImage
 {
     public int Id { get; init; }
     public string Title { get; set; } = default!;
@@ -20,8 +20,8 @@ public class ReadingListDto : IHasCoverImage
     /// </summary>
     public string? CoverImage { get; set; } = string.Empty;
 
-    public string PrimaryColor { get; set; } = string.Empty;
-    public string SecondaryColor { get; set; } = string.Empty;
+    public string? PrimaryColor { get; set; } = string.Empty;
+    public string? SecondaryColor { get; set; } = string.Empty;
 
     /// <summary>
     /// Number of Items in the Reading List

@@ -4,7 +4,7 @@ using API.DTOs.Reader;
 
 namespace API.DTOs.Downloads;
 
-public class DownloadBookmarkDto
+public sealed record DownloadBookmarkDto
 {
     [Required]
     public IEnumerable<BookmarkDto> Bookmarks { get; set; } = default!;

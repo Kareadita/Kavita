@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.Entities.Enums;
 
 namespace API.DTOs;
 
-public class UpdateChapterDto
+public sealed record UpdateChapterDto
 {
     public int Id { get; init; }
     public string Summary { get; set; } = string.Empty;

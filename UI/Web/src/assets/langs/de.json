@@ -2333,7 +2333,9 @@
         "copy-settings": "Einstellungen kopieren von",
         "match": "Treffer",
         "match-tooltip": "Spielserie mit Kavita+ manuell abgleichen",
-        "reorder": "Nachbestellung"
+        "reorder": "Nachbestellung",
+        "rename": "Umbenennen",
+        "rename-tooltip": "Smart Filter umbenennen"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",

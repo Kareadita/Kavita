@@ -7,7 +7,7 @@ using NotImplementedException = System.NotImplementedException;
 namespace API.DTOs.KavitaPlus.Metadata;
 
 
-public class MetadataSettingsDto
+public sealed record MetadataSettingsDto
 {
     /// <summary>
     /// If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed
@@ -42,6 +42,29 @@ public class MetadataSettingsDto
     /// Allow setting the cover image
     /// </summary>
     public bool EnableCoverImage { get; set; }
+
+    #region Chapter Metadata
+    /// <summary>
+    /// Allow Summary to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterSummary { get; set; }
+    /// <summary>
+    /// Allow Release Date to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterReleaseDate { get; set; }
+    /// <summary>
+    /// Allow Title to be set within Chapter/Issue
+    /// </summary>
+        public bool EnableChapterTitle { get; set; }
+    /// <summary>
+    /// Allow Publisher to be set within Chapter/Issue
+    /// </summary>
+    public bool EnableChapterPublisher { get; set; }
+    /// <summary>
+    /// Allow setting the cover image for the Chapter/Issue
+    /// </summary>
+    public bool EnableChapterCoverImage { get; set; }
+    #endregion
 
     // Need to handle the Genre/tags stuff
     public bool EnableGenres { get; set; } = true;

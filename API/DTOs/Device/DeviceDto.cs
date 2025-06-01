@@ -6,7 +6,7 @@ namespace API.DTOs.Device;
 /// <summary>
 /// A Device is an entity that can receive data from Kavita (kindle)
 /// </summary>
-public class DeviceDto
+public sealed record DeviceDto
 {
     /// <summary>
     /// The device Id

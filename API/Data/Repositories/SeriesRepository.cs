@@ -13,7 +13,9 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.ReadingLists;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
@@ -57,6 +59,8 @@ public enum SeriesIncludes
     ExternalRatings = 128,
     ExternalRecommendations = 256,
     ExternalMetadata = 512,
+
+    ExternalData = ExternalMetadata | ExternalReviews | ExternalRatings | ExternalRecommendations,
 }
 
 /// <summary>
@@ -452,11 +456,18 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Persons = await _context.SeriesMetadata
+        // I can't work out how to map people in DB layer
+        var personIds = await _context.SeriesMetadata
             .SearchPeople(searchQuery, seriesIds)
-            .Take(maxRecords)
-            .OrderBy(t => t.NormalizedName)
+            .Select(p => p.Id)
             .Distinct()
+            .OrderBy(id => id)
+            .Take(maxRecords)
+            .ToListAsync();
+
+        result.Persons = await _context.Person
+            .Where(p => personIds.Contains(p.Id))
+            .OrderBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -472,8 +483,8 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Files = new List<MangaFileDto>();
-        result.Chapters = new List<ChapterDto>();
+        result.Files = [];
+        result.Chapters = (List<ChapterDto>) [];
 
 
         if (includeChapterAndFiles)
@@ -563,7 +574,13 @@ public class SeriesRepository : ISeriesRepository
 
         if (!fullSeries) return await query.ToListAsync();
 
-        return await query.Include(s => s.Volumes)
+        return await query
+            .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.ExternalRatings)
+            .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.ExternalReviews)
             .Include(s => s.Relations)
             .Include(s => s.Metadata)
 
@@ -718,6 +735,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
+            .Include(s => s.ExternalSeriesMetadata)
             .Select(series => new PlusSeriesRequestDto()
             {
                 MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -727,6 +745,7 @@ public class SeriesRepository : ISeriesRepository
                     ScrobblingService.AniListWeblinkWebsite),
                 MalId = ScrobblingService.ExtractId<long?>(series.Metadata.WebLinks,
                     ScrobblingService.MalWeblinkWebsite),
+                CbrId = series.ExternalSeriesMetadata.CbrId,
                 GoogleBooksId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
                     ScrobblingService.GoogleBooksWeblinkWebsite),
                 MangaDexId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,

@@ -3,7 +3,7 @@
 /// <summary>
 /// DTO for requesting a folder to be scanned
 /// </summary>
-public class ScanFolderDto
+public sealed record ScanFolderDto
 {
     /// <summary>
     /// Api key for a user with Admin permissions

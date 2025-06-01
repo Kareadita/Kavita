@@ -8,8 +8,7 @@
 
         <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-home" [title]="t('home')" link="/home/">
           <ng-container actions>
-            <app-card-actionables [actions]="homeActions" labelBy="home" iconClass="fa-ellipsis-v"
-                                  (actionHandler)="performHomeAction($event)" />
+            <app-card-actionables [inputActions]="homeActions" labelBy="home" iconClass="fa-ellipsis-v" (actionHandler)="performHomeAction($event)" />
           </ng-container>
         </app-side-nav-item>
 
@@ -44,8 +43,7 @@
                                    [imageUrl]="getLibraryImage(navStream.library!)" [title]="navStream.library!.name"
                                    [comparisonMethod]="'startsWith'">
                   <ng-container actions>
-                    <app-card-actionables [actions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"
-                                          (actionHandler)="performAction($event, navStream.library!)"></app-card-actionables>
+                    <app-card-actionables [entity]="navStream.library" [inputActions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                   </ng-container>
                 </app-side-nav-item>
               }

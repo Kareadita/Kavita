@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Reader;
 
-public class BulkRemoveBookmarkForSeriesDto
+public sealed record BulkRemoveBookmarkForSeriesDto
 {
     public ICollection<int> SeriesIds { get; init; } = default!;
 }

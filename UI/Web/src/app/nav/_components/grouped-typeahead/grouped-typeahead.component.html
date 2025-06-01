@@ -15,6 +15,10 @@
           } @else {
             <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="resetField()"></button>
           }
+        } @else {
+          <div class="input-hint">
+            Ctrl+K
+          </div>
         }
       </div>
     </div>

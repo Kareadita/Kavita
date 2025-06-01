@@ -52,6 +52,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IStreamService, StreamService>();
+        services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<IPersonService, PersonService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
@@ -84,6 +86,7 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
+            options.UseInMemory(EasyCacheProfiles.Publisher);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
             options.UseInMemory(EasyCacheProfiles.LocaleOptions);

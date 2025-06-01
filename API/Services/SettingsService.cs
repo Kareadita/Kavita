@@ -65,6 +65,12 @@ public class SettingsService : ISettingsService
         existingMetadataSetting.FirstLastPeopleNaming = dto.FirstLastPeopleNaming;
         existingMetadataSetting.EnableCoverImage = dto.EnableCoverImage;
 
+        existingMetadataSetting.EnableChapterPublisher = dto.EnableChapterPublisher;
+        existingMetadataSetting.EnableChapterSummary = dto.EnableChapterSummary;
+        existingMetadataSetting.EnableChapterTitle = dto.EnableChapterTitle;
+        existingMetadataSetting.EnableChapterReleaseDate = dto.EnableChapterReleaseDate;
+        existingMetadataSetting.EnableChapterCoverImage = dto.EnableChapterCoverImage;
+
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
         existingMetadataSetting.Blacklist = (dto.Blacklist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];

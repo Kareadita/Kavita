@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Person;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
@@ -24,9 +27,10 @@ public class PersonController : BaseApiController
     private readonly ICoverDbService _coverDbService;
     private readonly IImageService _imageService;
     private readonly IEventHub _eventHub;
+    private readonly IPersonService _personService;
 
     public PersonController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper,
-        ICoverDbService coverDbService, IImageService imageService, IEventHub eventHub)
+        ICoverDbService coverDbService, IImageService imageService, IEventHub eventHub, IPersonService personService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
@@ -34,6 +38,7 @@ public class PersonController : BaseApiController
         _coverDbService = coverDbService;
         _imageService = imageService;
         _eventHub = eventHub;
+        _personService = personService;
     }
 
 
@@ -41,6 +46,17 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<PersonDto>> GetPersonByName(string name)
     {
         return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Find a person by name or alias against a query string
+    /// </summary>
+    /// <param name="queryString"></param>
+    /// <returns></returns>
+    [HttpGet("search")]
+    public async Task<ActionResult<List<PersonDto>>> SearchPeople([FromQuery] string queryString)
+    {
+        return Ok(await _unitOfWork.PersonRepository.SearchPeople(queryString));
     }
 
     /// <summary>
@@ -53,6 +69,7 @@ public class PersonController : BaseApiController
     {
         return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, User.GetUserId()));
     }
+
 
     /// <summary>
     /// Returns a list of authors and artists for browsing
@@ -78,7 +95,7 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
         // This needs to get all people and update them equally
-        var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id);
+        var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases);
         if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
         if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-required"));
@@ -89,6 +106,10 @@ public class PersonController : BaseApiController
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
         }
+
+        var success = await _personService.UpdatePersonAliasesAsync(person, dto.Aliases);
+        if (!success) return BadRequest(await _localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
+
 
         person.Name = dto.Name?.Trim();
         person.Description = dto.Description ?? string.Empty;
@@ -171,6 +192,42 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {
         return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, User.GetUserId(), role));
+    }
+
+    /// <summary>
+    /// Merges Persons into one, this action is irreversible
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("merge")]
+    public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
+    {
+        var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);
+        if (dst == null) return BadRequest();
+
+        var src = await _unitOfWork.PersonRepository.GetPersonById(dto.SrcId, PersonIncludes.All);
+        if (src == null) return BadRequest();
+
+        await _personService.MergePeopleAsync(src, dst);
+        await _eventHub.SendMessageAsync(MessageFactory.PersonMerged, MessageFactory.PersonMergedMessage(dst, src));
+
+        return Ok(_mapper.Map<PersonDto>(dst));
+    }
+
+    /// <summary>
+    /// Ensure the alias is valid to be added. For example, the alias cannot be on another person or be the same as the current person name/alias.
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <param name="alias"></param>
+    /// <returns></returns>
+    [HttpGet("valid-alias")]
+    public async Task<ActionResult<bool>> IsValidAlias(int personId, string alias)
+    {
+        var person = await _unitOfWork.PersonRepository.GetPersonById(personId, PersonIncludes.Aliases);
+        if (person == null) return NotFound();
+
+        var existingAlias = await _unitOfWork.PersonRepository.AnyAliasExist(alias);
+        return Ok(!existingAlias && person.NormalizedName != alias.ToNormalized());
     }
 
 

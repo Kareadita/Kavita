@@ -108,14 +108,17 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
 
     public async Task<bool> NeedsDataRefresh(int seriesId)
     {
+        // TODO: Add unit test
         var row = await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .FirstOrDefaultAsync();
+
         return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId)
     {
+        // TODO: Add unit test
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)
             .Include(m => m.ExternalRatings)
@@ -144,7 +147,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        IEnumerable<UserReviewDto> reviews = new List<UserReviewDto>();
+        IEnumerable<UserReviewDto> reviews = [];
         if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Any())
         {
             reviews = seriesDetailDto.ExternalReviews
@@ -157,8 +160,8 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
                 .OrderByDescending(r => r.Score);
         }
 
-        IEnumerable<RatingDto> ratings = new List<RatingDto>();
-        if (seriesDetailDto.ExternalRatings != null && seriesDetailDto.ExternalRatings.Any())
+        IEnumerable<RatingDto> ratings = [];
+        if (seriesDetailDto.ExternalRatings != null && seriesDetailDto.ExternalRatings.Count != 0)
         {
             ratings = seriesDetailDto.ExternalRatings
                 .Select(r => _mapper.Map<RatingDto>(r));

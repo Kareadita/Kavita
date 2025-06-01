@@ -118,7 +118,14 @@
                                width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage"></app-image>
                   </div>
                   <div class="ms-1">
-                    <div>{{item.name}}</div>
+                    <div>
+                      {{item.name}}
+                    </div>
+                    @if (item.aliases.length > 0) {
+                      <span class="small-text">
+                        {{t('person-aka-status')}}
+                      </span>
+                    }
                   </div>
                 </div>
               </ng-template>
@@ -206,7 +213,7 @@
               </div>
             }
           }
-        
+
 
       </div>
     </nav>

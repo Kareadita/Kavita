@@ -15,6 +15,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
+using API.DTOs.Person;
 using API.DTOs.Progress;
 using API.DTOs.Search;
 using API.Entities;

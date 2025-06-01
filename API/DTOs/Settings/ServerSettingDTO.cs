@@ -6,7 +6,7 @@ using API.Services;
 namespace API.DTOs.Settings;
 #nullable enable
 
-public class ServerSettingDto
+public sealed record ServerSettingDto
 {
 
     public string CacheDirectory { get; set; } = default!;

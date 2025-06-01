@@ -28,13 +28,13 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Set up Hangfire to use in-memory storage for testing
         GlobalConfiguration.Configuration.UseInMemoryStorage();
-        _scannerHelper = new ScannerHelper(_unitOfWork, testOutputHelper);
+        _scannerHelper = new ScannerHelper(UnitOfWork, testOutputHelper);
     }
 
     protected override async Task ResetDb()
     {
-        _context.Library.RemoveRange(_context.Library);
-        await _context.SaveChangesAsync();
+        Context.Library.RemoveRange(Context.Library);
+        await Context.SaveChangesAsync();
     }
 
 
@@ -44,18 +44,18 @@ public class ScannerServiceTests : AbstractDbTest
         {
             await SetLastScannedInThePast(series, duration, false);
         }
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
     }
 
     protected async Task SetLastScannedInThePast(Series series, TimeSpan? duration = null, bool save = true)
     {
         duration ??= TimeSpan.FromMinutes(2);
         series.LastFolderScanned = DateTime.Now.Subtract(duration.Value);
-        _context.Series.Update(series);
+        Context.Series.Update(series);
 
         if (save)
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
     }
 
@@ -66,7 +66,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
@@ -79,7 +79,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -94,7 +94,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -110,7 +110,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -125,7 +125,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -141,7 +141,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -157,7 +157,7 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase);
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -188,7 +188,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -213,7 +213,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -244,7 +244,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -268,7 +268,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -288,7 +288,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -326,7 +326,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -350,7 +350,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -369,7 +369,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -399,7 +399,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -436,7 +436,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -464,7 +464,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -484,13 +484,13 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
         library.LibraryExcludePatterns = [new LibraryExcludePattern() {Pattern = "**/Extra/*"}];
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -508,13 +508,13 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
         library.LibraryExcludePatterns = [new LibraryExcludePattern() {Pattern = "**\\Extra\\*"}];
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
@@ -541,13 +541,13 @@ public class ScannerServiceTests : AbstractDbTest
             new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 2")}
         ];
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(2, postLib.Series.Count);
@@ -563,7 +563,7 @@ public class ScannerServiceTests : AbstractDbTest
         // Rescan to ensure nothing changes yet again
         await scanner.ScanLibrary(library.Id, true);
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.Equal(2, postLib.Series.Count);
         s = postLib.Series.First(s => s.Name == "Plush");
         Assert.Equal(3, s.Volumes.Count);
@@ -594,13 +594,13 @@ public class ScannerServiceTests : AbstractDbTest
             new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 2")}
         ];
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Equal(2, postLib.Series.Count);
@@ -619,7 +619,7 @@ public class ScannerServiceTests : AbstractDbTest
         // Rescan to ensure nothing changes yet again
         await scanner.ScanLibrary(library.Id, false);
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.Equal(2, postLib.Series.Count);
         s = postLib.Series.First(s => s.Name == "Plush");
         Assert.Equal(3, s.Volumes.Count);
@@ -647,14 +647,14 @@ public class ScannerServiceTests : AbstractDbTest
             new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
         ];
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         var scanner = _scannerHelper.CreateServices();
 
         // First Scan: Everything should be added
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Contains(postLib.Series, s => s.Name == "Accel");
@@ -662,19 +662,19 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Second Scan: Remove Root 2, expect Accel to be removed
         library.Folders = [new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") }];
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         // Emulate time passage by updating lastFolderScan to be a min in the past
         foreach (var s in postLib.Series)
         {
             s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-            _context.Series.Update(s);
+            Context.Series.Update(s);
         }
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         await scanner.ScanLibrary(library.Id);
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.DoesNotContain(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
@@ -685,19 +685,19 @@ public class ScannerServiceTests : AbstractDbTest
             new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 1") },
             new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
         ];
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         // Emulate time passage by updating lastFolderScan to be a min in the past
         foreach (var s in postLib.Series)
         {
             s.LastFolderScanned = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-            _context.Series.Update(s);
+            Context.Series.Update(s);
         }
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         await scanner.ScanLibrary(library.Id);
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Accel should be back
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
@@ -707,7 +707,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Fourth Scan: Run again to check stability (should not remove Accel)
         await scanner.ScanLibrary(library.Id);
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.Contains(postLib.Series, s => s.Name == "Accel");
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
@@ -732,14 +732,14 @@ public class ScannerServiceTests : AbstractDbTest
             new FolderPath() { Path = Path.Combine(testDirectoryPath, "Root 2") }
         ];
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         var scanner = _scannerHelper.CreateServices();
 
         // First Scan: Everything should be added
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.NotNull(postLib);
         Assert.Contains(postLib.Series, s => s.Name == "Accel");
@@ -747,14 +747,14 @@ public class ScannerServiceTests : AbstractDbTest
 
         // Second Scan: Delete the Series
         library.Series = [];
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Empty(postLib.Series);
 
         await scanner.ScanLibrary(library.Id);
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         Assert.Contains(postLib.Series, s => s.Name == "Accel"); // Ensure Accel is gone
         Assert.Contains(postLib.Series, s => s.Name == "Plush");
@@ -768,13 +768,13 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
         var testDirectoryPath = library.Folders.First().Path;
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
 
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
 
@@ -800,9 +800,9 @@ public class ScannerServiceTests : AbstractDbTest
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
 
         await scanner.ScanLibrary(library.Id);
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(4, postLib.Series.Count);
 
@@ -827,13 +827,13 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
         var testDirectoryPath = library.Folders.First().Path;
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
 
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Equal(2, postLib.Series.Count);
 
@@ -841,9 +841,9 @@ public class ScannerServiceTests : AbstractDbTest
         Directory.Delete(executionerCopyDir, true);
 
         await scanner.ScanLibrary(library.Id);
-        await _unitOfWork.CommitAsync();
+        await UnitOfWork.CommitAsync();
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
         Assert.Single(postLib.Series, s => s.Name == "Spice and Wolf");
@@ -859,13 +859,13 @@ public class ScannerServiceTests : AbstractDbTest
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
         var testDirectoryPath = library.Folders.First().Path;
 
-        _unitOfWork.LibraryRepository.Update(library);
-        await _unitOfWork.CommitAsync();
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
 
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
 
@@ -882,7 +882,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         await scanner.ScanLibrary(library.Id);
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
 
@@ -899,7 +899,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         await scanner.ScanLibrary(library.Id);
 
-        postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
         Assert.Single(postLib.Series);
 
@@ -923,7 +923,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
-        var postLib = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
         Assert.NotNull(postLib);
 
         // Get the loose leaf volume and confirm each chapter aligns with expectation of Sort Order

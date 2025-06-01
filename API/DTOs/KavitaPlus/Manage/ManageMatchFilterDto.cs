@@ -12,7 +12,7 @@ public enum MatchStateOption
     DontMatch = 4
 }
 
-public class ManageMatchFilterDto
+public sealed record ManageMatchFilterDto
 {
     public MatchStateOption MatchStateOption { get; set; } = MatchStateOption.All;
     public string SearchTerm { get; set; } = string.Empty;

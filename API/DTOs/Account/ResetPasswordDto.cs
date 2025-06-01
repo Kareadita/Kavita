@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Account;
 
-public class ResetPasswordDto
+public sealed record ResetPasswordDto
 {
     /// <summary>
     /// The Username of the User

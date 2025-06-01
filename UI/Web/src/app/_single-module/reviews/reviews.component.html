@@ -1,0 +1,17 @@
+<div class="mb-3" *transloco="let t;prefix:'reviews'">
+  <app-carousel-reel [items]="userReviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
+                     iconClasses="fa-solid fa-{{this.getUserReviews().length > 0 ? 'pen' : 'plus'}}"
+                     [clickableTitle]=true (sectionClick)="openReviewModal()">
+    <ng-template #carouselItem let-item let-position="idx">
+      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
+    </ng-template>
+  </app-carousel-reel>
+</div>
+
+<div class="mb-3" *transloco="let t;prefix:'reviews'">
+  <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
+    <ng-template #carouselItem let-item let-position="idx">
+      <app-review-card [review]="item"></app-review-card>
+    </ng-template>
+  </app-carousel-reel>
+</div>

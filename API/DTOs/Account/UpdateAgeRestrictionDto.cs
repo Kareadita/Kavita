@@ -3,7 +3,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Account;
 
-public class UpdateAgeRestrictionDto
+public sealed record UpdateAgeRestrictionDto
 {
     [Required]
     public AgeRating AgeRating { get; set; }

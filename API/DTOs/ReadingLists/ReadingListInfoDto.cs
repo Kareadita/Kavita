@@ -3,7 +3,7 @@ using API.Entities.Interfaces;
 
 namespace API.DTOs.ReadingLists;
 
-public class ReadingListInfoDto : IHasReadTimeEstimate
+public sealed record ReadingListInfoDto : IHasReadTimeEstimate
 {
     /// <summary>
     /// Total Pages across all Reading List Items

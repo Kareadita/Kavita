@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Account;
 
-public class ConfirmEmailDto
+public sealed record ConfirmEmailDto
 {
     [Required]
     public string Email { get; set; } = default!;

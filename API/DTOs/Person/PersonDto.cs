@@ -1,6 +1,6 @@
-using System.Runtime.Serialization;
+using System.Collections.Generic;
 
-namespace API.DTOs;
+namespace API.DTOs.Person;
 #nullable enable
 
 public class PersonDto
@@ -13,6 +13,7 @@ public class PersonDto
     public string? SecondaryColor { get; set; }
 
     public string? CoverImage { get; set; }
+    public List<string> Aliases { get; set; } = [];
 
     public string? Description { get; set; }
     /// <summary>

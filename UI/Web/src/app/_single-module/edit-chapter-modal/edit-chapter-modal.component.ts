@@ -483,7 +483,7 @@ export class EditChapterModalComponent implements OnInit {
     };
 
     personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
+      return {id: 0, name: title, aliases: [], role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
     });
 
     personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');

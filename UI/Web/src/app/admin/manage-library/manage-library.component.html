@@ -1,7 +1,8 @@
 <ng-container *transloco="let t; read: 'manage-library'">
   <div class="position-relative">
     <div class="position-absolute custom-position-2">
-      <app-card-actionables [actions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')" [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null)">
+      <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')"
+                            [disabled]="bulkMode">
       </app-card-actionables>
     </div>
 
@@ -72,11 +73,22 @@
           <td>
             <!-- On Mobile we want to use ... for each row -->
             @if (useActionables$ | async) {
-              <app-card-actionables [actions]="actions" (actionHandler)="performAction($event, library)"></app-card-actionables>
+              <app-card-actionables [entity]="library" [inputActions]="actions"></app-card-actionables>
             } @else {
-              <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')"><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
-              <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i></button>
-              <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" [ngbTooltip]="t('edit-library')" [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})"></i></button>
+              <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')"
+                      [attr.aria-label]="t('scan-library')">
+                <i class="fa fa-sync-alt" aria-hidden="true"></i>
+              </button>
+
+              <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)">
+                <i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')"
+                   [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i>
+              </button>
+
+              <button class="btn btn-primary btn-sm" (click)="editLibrary(library)">
+                <i class="fa fa-pen" placement="top" [ngbTooltip]="t('edit-library')"
+                   [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})"></i>
+              </button>
             }
           </td>
         </tr>

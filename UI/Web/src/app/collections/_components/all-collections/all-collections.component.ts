@@ -43,6 +43,7 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
   templateUrl: './all-collections.component.html',
   styleUrls: ['./all-collections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe,
     TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent]
 })

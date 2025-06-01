@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs;
 #nullable enable
 
-public class UpdateSeriesDto
+public sealed record UpdateSeriesDto
 {
     public int Id { get; init; }
     public string? LocalizedName { get; init; }

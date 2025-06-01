@@ -7,6 +7,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Person;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -29,13 +30,11 @@ public interface ISeriesService
 {
     Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId);
     Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
-    Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
     Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
-
     Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle,
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
@@ -363,8 +362,7 @@ public class SeriesService : ISeriesService
         var existingPeople = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedNames);
 
         // Use a dictionary for quick lookups
-        var existingPeopleDictionary = existingPeople.DistinctBy(p => p.NormalizedName)
-            .ToDictionary(p => p.NormalizedName, p => p);
+        var existingPeopleDictionary = PersonHelper.ConstructNameAndAliasDictionary(existingPeople);
 
         // List to track people that will be added to the metadata
         var peopleToAdd = new List<Person>();
@@ -447,63 +445,12 @@ public class SeriesService : ISeriesService
     }
 
 
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="user">User with Ratings includes</param>
-    /// <param name="updateSeriesRatingDto"></param>
-    /// <returns></returns>
-    public async Task<bool> UpdateRating(AppUser? user, UpdateSeriesRatingDto updateSeriesRatingDto)
-    {
-        if (user == null)
-        {
-            _logger.LogError("Cannot update rating of null user");
-            return false;
-        }
-
-        var userRating =
-            await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
-            new AppUserRating();
-        try
-        {
-            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0f, 5f);
-            userRating.HasBeenRated = true;
-            userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-            if (userRating.Id == 0)
-            {
-                user.Ratings ??= new List<AppUserRating>();
-                user.Ratings.Add(userRating);
-            }
-
-            _unitOfWork.UserRepository.Update(user);
-
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
-            {
-                BackgroundJob.Enqueue(() =>
-                    _scrobblingService.ScrobbleRatingUpdate(user.Id, updateSeriesRatingDto.SeriesId,
-                        userRating.Rating));
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an exception saving rating");
-        }
-
-        await _unitOfWork.RollbackAsync();
-        user.Ratings?.Remove(userRating);
-
-        return false;
-    }
-
     public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds)
     {
         try
         {
             var chapterMappings =
-                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(seriesIds.ToArray());
+                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync([.. seriesIds]);
 
             var allChapterIds = new List<int>();
             foreach (var mapping in chapterMappings)
@@ -511,9 +458,8 @@ public class SeriesService : ISeriesService
                 allChapterIds.AddRange(mapping.Value);
             }
 
-            // NOTE: This isn't getting all the people and whatnot currently
+            // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
-
             _unitOfWork.SeriesRepository.Remove(series);
 
             var libraryIds = series.Select(s => s.LibraryId);
@@ -534,7 +480,8 @@ public class SeriesService : ISeriesService
 
             await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
             await _unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
-            _taskScheduler.CleanupChapters(allChapterIds.ToArray());
+            _taskScheduler.CleanupChapters([.. allChapterIds]);
+
             return true;
         }
         catch (Exception ex)

@@ -49,6 +49,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
     public DbSet<ReadingListItem> ReadingListItem { get; set; } = null!;
     public DbSet<Person> Person { get; set; } = null!;
+    public DbSet<PersonAlias> PersonAlias { get; set; } = null!;
     public DbSet<Genre> Genre { get; set; } = null!;
     public DbSet<Tag> Tag { get; set; } = null!;
     public DbSet<SiteTheme> SiteTheme { get; set; } = null!;
@@ -71,6 +72,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
     public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
     public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
+    [Obsolete]
     public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
     public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
     public DbSet<ChapterPeople> ChapterPeople { get; set; } = null!;
@@ -78,6 +80,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<EmailHistory> EmailHistory { get; set; } = null!;
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
+    public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

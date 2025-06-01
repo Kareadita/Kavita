@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {MetadataSettingField} from "../admin/_models/metadata-setting-field";
 import {translate} from "@jsverse/transloco";
 
@@ -10,9 +10,19 @@ export class MetadataSettingFiledPipe implements PipeTransform {
 
   transform(value: MetadataSettingField): string {
     switch (value) {
+      case MetadataSettingField.ChapterTitle:
+        return translate('metadata-setting-field-pipe.chapter-title');
+      case MetadataSettingField.ChapterSummary:
+        return translate('metadata-setting-field-pipe.chapter-summary');
+      case MetadataSettingField.ChapterReleaseDate:
+        return translate('metadata-setting-field-pipe.chapter-release-date');
+      case MetadataSettingField.ChapterPublisher:
+        return translate('metadata-setting-field-pipe.chapter-publisher');
+      case MetadataSettingField.ChapterCovers:
+        return translate('metadata-setting-field-pipe.chapter-covers');
       case MetadataSettingField.AgeRating:
         return translate('metadata-setting-field-pipe.age-rating');
-        case MetadataSettingField.People:
+      case MetadataSettingField.People:
         return translate('metadata-setting-field-pipe.people');
       case MetadataSettingField.Covers:
         return translate('metadata-setting-field-pipe.covers');

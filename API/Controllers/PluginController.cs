@@ -30,7 +30,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     public async Task<ActionResult<UserDto>> Authenticate([Required] string apiKey, [Required] string pluginName)
     {
         // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
-        // Should log into access table so we can tell the user
+        // Should log into the access table so we can tell the user
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         var userAgent = HttpContext.Request.Headers.UserAgent;
         var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
