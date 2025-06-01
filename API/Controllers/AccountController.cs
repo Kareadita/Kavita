@@ -154,7 +154,7 @@ public class AccountController : BaseApiController
             AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            AddDefaultReadingProfileToUser(user);
+            await AddDefaultReadingProfileToUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -673,7 +673,7 @@ public class AccountController : BaseApiController
             AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            AddDefaultReadingProfileToUser(user);
+            await AddDefaultReadingProfileToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -785,17 +785,15 @@ public class AccountController : BaseApiController
         }
     }
 
-    private void AddDefaultReadingProfileToUser(AppUser user)
+    private async Task AddDefaultReadingProfileToUser(AppUser user)
     {
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithName("Default Profile")
             .Build();
-        _unitOfWork.AppUserReadingProfileRepository.Attach(profile);
+        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await _unitOfWork.CommitAsync();
 
         user.UserPreferences.ReadingProfiles.Add(profile);
-        // TODO: This doesn't save, but I've had to revert it having the full entity or everything would start failing
-        //      in tests because of foreign key constrains. This HAS to be resolved as the code does expect there to always be a
-        //      default profile
         user.UserPreferences.DefaultReadingProfileId = profile.Id;
     }
 

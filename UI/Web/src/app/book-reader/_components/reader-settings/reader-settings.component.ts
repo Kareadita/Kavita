@@ -10,7 +10,7 @@ import {
   Output
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { take } from 'rxjs';
+import {skip, take} from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
@@ -210,7 +210,7 @@ export class ReaderSettingsComponent implements OnInit {
 
       this.setupSettings();
 
-      this.setTheme(this.readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme);
+      this.setTheme(this.readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme, false);
       this.cdRef.markForCheck();
 
       // Emit first time so book reader gets the setting
@@ -288,6 +288,7 @@ export class ReaderSettingsComponent implements OnInit {
     this.settingsForm.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
+      skip(1), // Skip the initial creation of the form, we do not want an implicit profile of this snapshot
       takeUntilDestroyed(this.destroyRef),
       tap(_ => this.updateImplicit())
     ).subscribe();
@@ -346,12 +347,15 @@ export class ReaderSettingsComponent implements OnInit {
     };
   }
 
-  setTheme(themeName: string) {
+  setTheme(themeName: string, update: boolean = true) {
     const theme = this.themes.find(t => t.name === themeName);
     this.activeTheme = theme;
     this.cdRef.markForCheck();
     this.colorThemeUpdate.emit(theme);
-    this.updateImplicit();
+
+    if (update) {
+      this.updateImplicit();
+    }
   }
 
   toggleReadingDirection() {

@@ -128,6 +128,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var newProfile = new AppUserReadingProfileBuilder(user.Id).Build();
         UpdateReaderProfileFields(newProfile, dto);
         unitOfWork.AppUserReadingProfileRepository.Add(newProfile);
+        user.UserPreferences.ReadingProfiles.Add(newProfile);
 
         await unitOfWork.CommitAsync();
 

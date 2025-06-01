@@ -25,6 +25,7 @@ import {
   merge,
   Observable,
   ReplaySubject,
+  skip,
   Subject,
   take,
   tap
@@ -616,11 +617,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.init();
 
-      // TODO: Fix this, it's going off way too often
       // Update implicit reading profile while changing settings
       this.generalSettingsForm.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        skip(1), // Skip the initial creation of the form, we do not want an implicit profile of this snapshot
         takeUntilDestroyed(this.destroyRef),
         map(_ => this.packReadingProfile()),
         distinctUntilChanged(),
@@ -821,7 +822,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   disableDoubleRendererIfScreenTooSmall() {
     if (window.innerWidth > window.innerHeight) {
-      this.generalSettingsForm.get('layoutMode')?.enable();
+      if (this.generalSettingsForm.get('layoutMode')?.disabled) {
+        this.generalSettingsForm.get('layoutMode')?.enable();
+      }
       this.cdRef.markForCheck();
       return;
     }
