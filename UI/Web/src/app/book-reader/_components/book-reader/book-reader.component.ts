@@ -748,7 +748,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     } else if (event.key === KEY_CODES.G) {
-      this.goToSection();
+      this.goToPage();
     } else if (event.key === KEY_CODES.F) {
       this.toggleFullscreen()
     }
@@ -905,27 +905,31 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  promptForSection() {
-    const question = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages - 1});
+  promptForPage() {
+    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
     const goToPageNum = window.prompt(question, '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }
 
-  goToSection(pageNum?: number) {
+  goToPage(pageNum?: number) {
     let page = pageNum;
     if (pageNum === null || pageNum === undefined) {
-      const goToPageNum = this.promptForSection();
+      const goToPageNum = this.promptForPage();
       if (goToPageNum === null) { return; }
       page = parseInt(goToPageNum.trim(), 10);
     }
 
     if (page === undefined || this.pageNum === page) { return; }
 
-    if (page > this.maxPages-1) {
-      page = this.maxPages-1;
+    if (page > this.maxPages) {
+      page = this.maxPages;
     } else if (page < 0) {
       page = 0;
+    }
+
+    if (!(page === 0 || page === this.maxPages - 1)) {
+      page -= 1;
     }
 
     this.pageNum = page;

@@ -882,7 +882,7 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous",
-        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?"
     },
 
     "personal-table-of-contents": {
