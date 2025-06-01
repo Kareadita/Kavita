@@ -130,22 +130,23 @@ public class LicenseService(
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
+        var result = false;
         try
         {
             var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
-            var result = await IsLicenseValid(serverSetting.Value);
-            await provider.FlushAsync();
-            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
-            return result;
+            result = await IsLicenseValid(serverSetting.Value);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an issue connecting to Kavita+");
+        }
+        finally
+        {
             await provider.FlushAsync();
-            await provider.SetAsync(CacheKey, false, _licenseCacheTimeout);
+            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
         }
 
-        return false;
+        return result;
     }
 
     /// <summary>

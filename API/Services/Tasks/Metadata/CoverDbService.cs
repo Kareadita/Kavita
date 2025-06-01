@@ -586,7 +586,12 @@ public class CoverDbService : ICoverDbService
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
                         {
-                            _directoryService.DeleteFiles([existingPath]);
+                            // Don't delete the Series cover unless it is an override, otherwise the first chapter will be null
+                            if (existingPath.Contains(ImageService.GetSeriesFormat(series.Id)))
+                            {
+                                _directoryService.DeleteFiles([existingPath]);
+                            }
+
                             _directoryService.CopyFile(tempFullPath, finalFullPath);
                             series.CoverImage = finalFileName;
                         }

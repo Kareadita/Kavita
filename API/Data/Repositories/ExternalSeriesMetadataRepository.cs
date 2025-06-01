@@ -108,14 +108,17 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
 
     public async Task<bool> NeedsDataRefresh(int seriesId)
     {
+        // TODO: Add unit test
         var row = await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .FirstOrDefaultAsync();
+
         return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId)
     {
+        // TODO: Add unit test
         var seriesDetailDto = await _context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)
             .Include(m => m.ExternalRatings)
@@ -144,7 +147,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        IEnumerable<UserReviewDto> reviews = new List<UserReviewDto>();
+        IEnumerable<UserReviewDto> reviews = [];
         if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Any())
         {
             reviews = seriesDetailDto.ExternalReviews
