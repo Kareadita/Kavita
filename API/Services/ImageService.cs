@@ -10,11 +10,9 @@ using API.Entities.Interfaces;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
-using Color = System.Drawing.Color;
 using Image = NetVips.Image;
 
 namespace API.Services;
@@ -750,7 +748,7 @@ public class ImageService : IImageService
     }
 
 
-    public static Color HexToRgb(string? hex)
+    public static (int R, int G, int B) HexToRgb(string? hex)
     {
         if (string.IsNullOrEmpty(hex)) throw new ArgumentException("Hex cannot be null");
 
@@ -774,7 +772,7 @@ public class ImageService : IImageService
         var g = Convert.ToInt32(hex.Substring(2, 2), 16);
         var b = Convert.ToInt32(hex.Substring(4, 2), 16);
 
-        return Color.FromArgb(r, g, b);
+        return (r, g, b);
     }
 
 
