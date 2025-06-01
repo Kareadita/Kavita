@@ -63,6 +63,7 @@ import {
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 
 enum TabID {
@@ -133,6 +134,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
+  private readonly confirmService = inject(ConfirmService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
@@ -730,7 +732,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('window:keydown', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
+  async handleKeyPress(event: KeyboardEvent) {
     const activeElement = document.activeElement as HTMLElement;
     const isInputFocused = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
     if (isInputFocused) return;
@@ -748,7 +750,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     } else if (event.key === KEY_CODES.G) {
-      this.goToPage();
+      await this.goToPage();
     } else if (event.key === KEY_CODES.F) {
       this.toggleFullscreen()
     }
@@ -905,35 +907,67 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  promptForPage() {
-    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
-    const goToPageNum = window.prompt(question, '');
+  async promptForPage() {
+    const promptConfig = {...this.confirmService.defaultPrompt};
+    promptConfig.header = translate('book-reader.go-to-page');
+    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
+
+    const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
+
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }
 
-  goToPage(pageNum?: number) {
+  async promptForSection() {
+    const [_, totalVirtualPages, _2] = this.getVirtualPage();
+    const promptConfig = {...this.confirmService.defaultPrompt};
+    promptConfig.header = translate('book-reader.go-to-section');
+    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: totalVirtualPages});
+
+    const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
+    if (goToPageNum === null || goToPageNum.trim().length === 0 || !/^[0-9]+$/.test(goToPageNum)) { return null; }
+
+    return Math.min(Math.max(parseInt(goToPageNum, 10), 0), totalVirtualPages - 1) + '';
+  }
+
+  async goToPage(pageNum?: number) {
     let page = pageNum;
     if (pageNum === null || pageNum === undefined) {
-      const goToPageNum = this.promptForPage();
+      const goToPageNum = await this.promptForPage();
       if (goToPageNum === null) { return; }
+
       page = parseInt(goToPageNum.trim(), 10);
     }
 
     if (page === undefined || this.pageNum === page) { return; }
 
-    if (page > this.maxPages) {
-      page = this.maxPages;
+    if (page > this.maxPages - 1) {
+      page = this.maxPages - 1;
     } else if (page < 0) {
       page = 0;
     }
 
-    if (!(page === 0 || page === this.maxPages - 1)) {
-      page -= 1;
-    }
-
     this.pageNum = page;
     this.loadPage();
+  }
+
+  async loadSection(sectionNum?: number) {
+    let section = sectionNum;
+    if (sectionNum === null || sectionNum === undefined) {
+      const goToPageNum = await this.promptForSection();
+      if (goToPageNum === null) { return; }
+      section = parseInt(goToPageNum.trim(), 10);
+    }
+
+    if (section === undefined || this.pageNum === section) { return; }
+
+    if (section > this.maxPages - 1) {
+      section = this.maxPages - 1;
+    } else if (section < 0) {
+      section = 0;
+    }
+
+    // HACK
   }
 
 

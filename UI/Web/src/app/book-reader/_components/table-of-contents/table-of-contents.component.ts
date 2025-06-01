@@ -31,9 +31,8 @@ export class TableOfContentsComponent implements OnChanges {
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
+    //console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
     this.cdRef.markForCheck();
-
   }
 
   cleanIdSelector(id: string) {

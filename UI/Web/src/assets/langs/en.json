@@ -858,10 +858,12 @@
 
     "book-reader": {
         "title": "Book Settings",
-        "page-label": "Page",
+        "section-label": "Section",
+        "section-tooltip": "A virtual page when using Column mode",
 
-        "pagination-header": "Section",
+        "pagination-header": "Page",
         "go-to-page": "Go to page",
+        "go-to-first-page": "Go to first page",
         "go-to-last-page": "Go to last page",
         "prev-page": "Prev Page",
         "next-page": "Next Page",
@@ -869,6 +871,10 @@
         "next-chapter": "Next Chapter/Volume",
         "skip-header": "Skip to main content",
         "virtual-pages": "virtual pages",
+        "next-section": "Next section",
+        "prev-section": "Prev section",
+        "go-to-section": "Go to section",
+        "go-to-last-section": "Go to last section",
 
         "settings-header": "Settings",
         "table-of-contents-header": "Table of Contents",
@@ -882,7 +888,8 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous",
-        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?"
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?",
+        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
     },
 
     "personal-table-of-contents": {
@@ -2579,7 +2586,8 @@
         "confirm": "Confirm",
         "info": "Info",
         "cancel": "{{common.cancel}}",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "Question"
     },
 
     "toasts": {
