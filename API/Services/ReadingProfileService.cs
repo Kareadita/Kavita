@@ -345,7 +345,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.AllowAutomaticWebtoonReaderDetection = dto.AllowAutomaticWebtoonReaderDetection;
         existingProfile.WidthOverride = dto.WidthOverride;
 
-        // EpubReading
+        // Book Reader
         existingProfile.BookReaderMargin = dto.BookReaderMargin;
         existingProfile.BookReaderLineSpacing = dto.BookReaderLineSpacing;
         existingProfile.BookReaderFontSize = dto.BookReaderFontSize;
@@ -357,7 +357,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.BookReaderLayoutMode = dto.BookReaderLayoutMode;
         existingProfile.BookReaderImmersiveMode = dto.BookReaderImmersiveMode;
 
-        // Pdf Reading
+        // PDF Reading
         existingProfile.PdfTheme = dto.PdfTheme;
         existingProfile.PdfScrollMode = dto.PdfScrollMode;
         existingProfile.PdfSpreadMode = dto.PdfSpreadMode;
