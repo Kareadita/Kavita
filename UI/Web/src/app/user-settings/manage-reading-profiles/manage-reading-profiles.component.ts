@@ -1,11 +1,18 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
-  bookLayoutModes, bookWritingStyles, layoutModes,
-  pageSplitOptions, pdfScrollModes,
-  pdfSpreadModes, pdfThemes,
-  readingDirections, readingModes,
-  ReadingProfile, scalingOptions
+  bookLayoutModes,
+  bookWritingStyles,
+  layoutModes,
+  pageSplitOptions,
+  pdfScrollModes,
+  pdfSpreadModes,
+  pdfThemes,
+  readingDirections,
+  readingModes,
+  ReadingProfile,
+  ReadingProfileKind,
+  scalingOptions
 } from "../../_models/preferences/reading-profiles";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
@@ -34,13 +41,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {ColorPickerDirective} from "ngx-color-picker";
-import {
-  NgbNav,
-  NgbNavItem,
-  NgbNavLinkBase,
-  NgbNavContent,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
@@ -139,13 +140,6 @@ export class ManageReadingProfilesComponent implements OnInit {
       this.readingProfiles = this.readingProfiles.filter(o => o.id !== id);
       this.cdRef.markForCheck();
     });
-  }
-
-  setDefault(id: number) {
-    this.readingProfileService.setDefault(id).subscribe(() => {
-      this.user.preferences.defaultReadingProfileId = id;
-      this.cdRef.markForCheck();
-    })
   }
 
   get widthOverwriteLabel() {
@@ -286,7 +280,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   }
 
   addNew() {
-    const defaultProfile = this.readingProfiles.find(f => f.id === this.user.preferences.defaultReadingProfileId);
+    const defaultProfile = this.readingProfiles.find(f => f.kind === ReadingProfileKind.Default);
     this.selectedProfile = {...defaultProfile!};
     this.selectedProfile.id = 0;
     this.selectedProfile.name = "New Profile #" + (this.readingProfiles.length + 1);
@@ -306,4 +300,5 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly pdfScrollModes = pdfScrollModes;
 
   protected readonly TabId = TabId;
+  protected readonly ReadingProfileKind = ReadingProfileKind;
 }

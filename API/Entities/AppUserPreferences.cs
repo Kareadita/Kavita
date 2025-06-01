@@ -9,14 +9,6 @@ public class AppUserPreferences
 {
     public int Id { get; set; }
 
-    #region ReadingProfiles
-
-    public int DefaultReadingProfileId { get; set; }
-
-    public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
-
-    #endregion
-
     #region MangaReader
 
     /// <summary>

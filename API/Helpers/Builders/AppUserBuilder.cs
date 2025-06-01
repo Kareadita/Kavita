@@ -22,7 +22,6 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             UserPreferences = new AppUserPreferences
             {
                 Theme = theme ?? Seed.DefaultThemes.First(),
-                ReadingProfiles = [],
             },
             ReadingLists = new List<ReadingList>(),
             Bookmarks = new List<AppUserBookmark>(),
@@ -33,6 +32,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Id = 0,
             DashboardStreams = new List<AppUserDashboardStream>(),
             SideNavStreams = new List<AppUserSideNavStream>(),
+            ReadingProfiles = [],
         };
     }
 

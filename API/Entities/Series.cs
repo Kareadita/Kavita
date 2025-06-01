@@ -135,7 +135,6 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public List<Volume> Volumes { get; set; } = null!;
     public Library Library { get; set; } = null!;
     public int LibraryId { get; set; }
-    public ICollection<SeriesReadingProfile> ReadingProfiles { get; set; } = null!;
 
 
     public void UpdateLastFolderScanned()

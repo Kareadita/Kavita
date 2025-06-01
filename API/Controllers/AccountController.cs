@@ -612,7 +612,7 @@ public class AccountController : BaseApiController
     }
 
     /// <summary>
-    /// Requests the Invite Url for the UserId. Will return error if user is already validated.
+    /// Requests the Invite Url for the AppUserId. Will return error if user is already validated.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
@@ -789,12 +789,10 @@ public class AccountController : BaseApiController
     {
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
             .Build();
         _unitOfWork.AppUserReadingProfileRepository.Add(profile);
         await _unitOfWork.CommitAsync();
-
-        user.UserPreferences.ReadingProfiles.Add(profile);
-        user.UserPreferences.DefaultReadingProfileId = profile.Id;
     }
 
     /// <summary>

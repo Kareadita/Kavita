@@ -6,8 +6,10 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
+using AutoMapper;
 using Kavita.Common;
 
 namespace API.Services;
@@ -16,12 +18,12 @@ public interface IReadingProfileService
 {
     /// <summary>
     /// Returns the ReadingProfile that should be applied to the given series, walks up the tree.
-    /// Series (implicit) -> Series (Assigned) -> Library -> Default
+    /// Series (Implicit) -> Series (User) -> Library (User) -> Default
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    Task<UserReadingProfileDto> GetReadingProfileForSeries(int userId, int seriesId);
+    Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId);
 
     /// <summary>
     /// Updates a given reading profile for a user, and deletes all implicit profiles
@@ -60,59 +62,87 @@ public interface IReadingProfileService
     Task DeleteReadingProfile(int userId, int profileId);
 
     /// <summary>
-    /// Sets the given profile as global default
+    /// Assigns the reading profile to the series, and remove the implicit RP from the series if it exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
+    /// <param name="seriesId"></param>
     /// <returns></returns>
-    Task SetDefaultReadingProfile(int userId, int profileId);
-
     Task AddProfileToSeries(int userId, int profileId, int seriesId);
+    /// <summary>
+    /// Assigns the reading profile to many series, and remove the implicit RP from the series if it exists
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="profileId"></param>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
     Task BulkAddProfileToSeries(int userId, int profileId, IList<int> seriesIds);
+    /// <summary>
+    /// Remove all reading profiles from the series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     Task ClearSeriesProfile(int userId, int seriesId);
 
+    /// <summary>
+    /// Assign the reading profile to the library
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="profileId"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     Task AddProfileToLibrary(int userId, int profileId, int libraryId);
+    /// <summary>
+    /// Remove the reading profile from the library, if it exists
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     Task ClearLibraryProfile(int userId, int libraryId);
 
 }
 
-public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService): IReadingProfileService
+public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
 {
 
-    public async Task<UserReadingProfileDto> GetReadingProfileForSeries(int userId, int seriesId)
+    public async Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId)
     {
-        var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileDtoForSeries(userId, seriesId);
+        return mapper.Map<UserReadingProfileDto>(await GetReadingProfileForSeries(userId, seriesId));
+    }
+
+    public async Task<AppUserReadingProfile> GetReadingProfileForSeries(int userId, int seriesId)
+    {
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+
+        var implicitSeriesProfile = profiles
+            .FirstOrDefault(p => p.SeriesIds.Contains(seriesId) && p.Kind == ReadingProfileKind.Implicit);
+        if (implicitSeriesProfile != null) return implicitSeriesProfile;
+
+        var seriesProfile = profiles
+            .FirstOrDefault(p => p.SeriesIds.Contains(seriesId) && p.Kind != ReadingProfileKind.Implicit);
         if (seriesProfile != null) return seriesProfile;
+
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
 
-        var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileDtoForLibrary(userId, series.LibraryId);
+        var libraryProfile = profiles
+            .FirstOrDefault(p => p.LibraryIds.Contains(series.LibraryId) && p.Kind != ReadingProfileKind.Implicit);
         if (libraryProfile != null) return libraryProfile;
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
-        if (user == null) throw new UnauthorizedAccessException();
-
-        return await unitOfWork.AppUserReadingProfileRepository.GetProfileDto(user.UserPreferences.DefaultReadingProfileId);
+        return profiles.First(p => p.Kind == ReadingProfileKind.Default);
     }
 
     public async Task UpdateReadingProfile(int userId, UserReadingProfileDto dto)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
-        if (user == null) throw new UnauthorizedAccessException();
-
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(dto.Id, ReadingProfileIncludes.Series);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id);
         if (profile == null) throw new KavitaException("profile-does-not-exist");
-
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
 
         UpdateReaderProfileFields(profile, dto);
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
-        // Remove all implicit profiles for series using this profile
-        var allLinkedSeries = profile.Series.Select(sp => sp.SeriesId).ToList();
-        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, allLinkedSeries, true);
-        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+        await DeleteImplicateReadingProfilesForSeries(userId, profile.SeriesIds);
 
         await unitOfWork.CommitAsync();
     }
@@ -128,11 +158,11 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var newProfile = new AppUserReadingProfileBuilder(user.Id).Build();
         UpdateReaderProfileFields(newProfile, dto);
         unitOfWork.AppUserReadingProfileRepository.Add(newProfile);
-        user.UserPreferences.ReadingProfiles.Add(newProfile);
+        user.ReadingProfiles.Add(newProfile);
 
         await unitOfWork.CommitAsync();
 
-        return await unitOfWork.AppUserReadingProfileRepository.GetProfileDto(newProfile.Id);
+        return mapper.Map<UserReadingProfileDto>(newProfile);
     }
 
     public async Task UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto)
@@ -140,10 +170,11 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null) throw new UnauthorizedAccessException();
 
-        var existingProfile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, seriesId);
+        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var existingProfile = profiles.FirstOrDefault(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId));
 
         // Series already had an implicit profile, update it
-        if (existingProfile is {Implicit: true})
+        if (existingProfile is {Kind: ReadingProfileKind.Implicit})
         {
             UpdateReaderProfileFields(existingProfile, dto, false);
             unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
@@ -154,7 +185,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId) ?? throw new KeyNotFoundException();
         var newProfile = new AppUserReadingProfileBuilder(userId)
             .WithSeries(series)
-            .WithImplicit(true)
+            .WithKind(ReadingProfileKind.Implicit)
             .Build();
 
         // Set name to something fitting for debugging if needed
@@ -162,165 +193,111 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         newProfile.Name = $"Implicit Profile for {seriesId}";
         newProfile.NormalizedName = newProfile.Name.ToNormalized();
 
-        user.UserPreferences.ReadingProfiles.Add(newProfile);
+        user.ReadingProfiles.Add(newProfile);
         await unitOfWork.CommitAsync();
     }
 
     public async Task DeleteReadingProfile(int userId, int profileId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
-        if (user == null || profile.UserId != userId) throw new UnauthorizedAccessException();
-
-        if (user.UserPreferences.DefaultReadingProfileId == profileId) throw new KavitaException("cant-delete-default-profile");
+        if (profile.Kind == ReadingProfileKind.Default) throw new KavitaException("cant-delete-default-profile");
 
         unitOfWork.AppUserReadingProfileRepository.Remove(profile);
         await unitOfWork.CommitAsync();
     }
 
-    public async Task SetDefaultReadingProfile(int userId, int profileId)
-    {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException("profile-not-found");
-
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
-        if (user == null) throw new UnauthorizedAccessException();
-
-        user.UserPreferences.DefaultReadingProfileId = profile.Id;
-        await unitOfWork.CommitAsync();
-    }
-
     public async Task AddProfileToSeries(int userId, int profileId, int seriesId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException("profile-not-found");
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], []);
 
-        // Remove all implicit profiles
-        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, [seriesId], true);
-        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+        profile.SeriesIds.Add(seriesId);
+        unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
-        var seriesProfile = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfile(userId, seriesId);
-        if (seriesProfile != null)
-        {
-            seriesProfile.ReadingProfile = profile;
-            await unitOfWork.CommitAsync();
-            return;
-        }
-
-        seriesProfile = new SeriesReadingProfile
-        {
-            AppUserId = userId,
-            SeriesId = seriesId,
-            ReadingProfileId = profile.Id
-        };
-
-        unitOfWork.AppUserReadingProfileRepository.Add(seriesProfile);
         await unitOfWork.CommitAsync();
     }
 
     public async Task BulkAddProfileToSeries(int userId, int profileId, IList<int> seriesIds)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId, ReadingProfileIncludes.Series);
-        if (profile == null) throw new KavitaException("profile-not-found");
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, seriesIds, []);
 
-        var seriesProfiles = await unitOfWork.AppUserReadingProfileRepository.GetSeriesProfilesForSeries(userId, seriesIds);
-        var newSeriesIds = seriesIds.Except(seriesProfiles.Select(p => p.SeriesId)).ToList();
-
-        // Update existing
-        foreach (var seriesProfile in seriesProfiles)
-        {
-            seriesProfile.ReadingProfile = profile;
-        }
-
-        // Create new ones
-        foreach (var seriesId in newSeriesIds)
-        {
-            var seriesProfile = new SeriesReadingProfile
-            {
-                AppUserId = userId,
-                SeriesId = seriesId,
-                ReadingProfile = profile,
-            };
-            unitOfWork.AppUserReadingProfileRepository.Add(seriesProfile);
-        }
-
-        // Remove all implicit profiles
-        var implicitProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForSeries(userId, seriesIds, true);
-        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+        profile.SeriesIds.AddRange(seriesIds.Except(profile.SeriesIds));
+        unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
         await unitOfWork.CommitAsync();
     }
 
     public async Task ClearSeriesProfile(int userId, int seriesId)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetAllProfilesForSeries(userId, seriesId, ReadingProfileIncludes.Series);
-        if (!profiles.Any()) return;
-
-        foreach (var profile in profiles)
-        {
-            if (profile.Implicit)
-            {
-                unitOfWork.AppUserReadingProfileRepository.Remove(profile);
-            }
-            else
-            {
-                profile.Series = profile.Series.Where(s => !(s.SeriesId == seriesId && s.AppUserId == userId)).ToList();
-            }
-        }
-
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], []);
         await unitOfWork.CommitAsync();
     }
 
     public async Task AddProfileToLibrary(int userId, int profileId, int libraryId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfile(profileId);
-        if (profile == null) throw new KavitaException("profile-not-found");
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        if (profile.UserId != userId) throw new UnauthorizedAccessException();
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [], [libraryId]);
 
-        var libraryProfile = await unitOfWork.AppUserReadingProfileRepository.GetLibraryProfile(userId, libraryId);
-        if (libraryProfile != null)
-        {
-            libraryProfile.ReadingProfile = profile;
-            await unitOfWork.CommitAsync();
-            return;
-        }
-
-        libraryProfile = new LibraryReadingProfile
-        {
-            AppUserId = userId,
-            LibraryId = libraryId,
-            ReadingProfile = profile,
-        };
-
-        unitOfWork.AppUserReadingProfileRepository.Add(libraryProfile);
+        profile.LibraryIds.Add(libraryId);
+        unitOfWork.AppUserReadingProfileRepository.Update(profile);
         await unitOfWork.CommitAsync();
     }
 
     public async Task ClearLibraryProfile(int userId, int libraryId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, libraryId, ReadingProfileIncludes.Library);
-        if (profile == null) return;
-
-        if (profile.Implicit)
+        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var libraryProfile = profiles.FirstOrDefault(p => p.LibraryIds.Contains(libraryId));
+        if (libraryProfile != null)
         {
-            unitOfWork.AppUserReadingProfileRepository.Remove(profile);
-            await unitOfWork.CommitAsync();
-            return;
+            libraryProfile.LibraryIds.Remove(libraryId);
+            unitOfWork.AppUserReadingProfileRepository.Update(libraryProfile);
         }
 
-        profile.Libraries = profile.Libraries
-            .Where(s => !(s.LibraryId == libraryId && s.AppUserId == userId))
+
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync();
+        }
+    }
+
+    private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds)
+    {
+        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var implicitProfiles = profiles
+            .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
+            .Where(rp => rp.Kind == ReadingProfileKind.Implicit)
             .ToList();
-        await unitOfWork.CommitAsync();
+        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+
+        var nonImplicitProfiles = profiles
+            .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any() || rp.LibraryIds.Intersect(libraryIds).Any())
+            .Where(rp => rp.Kind != ReadingProfileKind.Implicit);
+
+        foreach (var profile in nonImplicitProfiles)
+        {
+            profile.SeriesIds.RemoveAll(seriesIds.Contains);
+            profile.LibraryIds.RemoveAll(libraryIds.Contains);
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
+    }
+
+    private async Task DeleteImplicateReadingProfilesForSeries(int userId, IList<int> seriesIds)
+    {
+        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var implicitProfiles = profiles
+            .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
+            .Where(rp => rp.Kind == ReadingProfileKind.Implicit)
+            .ToList();
+        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
     }
 
     public static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto, bool updateName = true)

@@ -45,7 +45,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
             throw new KavitaUnauthenticatedUserException();
         }
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
+        logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({AppUserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
 
         return new UserDto
         {

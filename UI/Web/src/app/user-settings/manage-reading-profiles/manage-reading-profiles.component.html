@@ -55,10 +55,7 @@
 
                 @if (selectedProfile.id !== 0) {
                   <div class="d-flex justify-content-between">
-                    <button class="me-2 btn btn-primary" [disabled]="selectedProfile.id === user.preferences.defaultReadingProfileId" (click)="setDefault(selectedProfile!.id)">
-                      <span>{{t('make-default')}}</span>
-                    </button>
-                    <button class="btn btn-danger" (click)="delete(selectedProfile!.id)" [disabled]="selectedProfile.id === user.preferences.defaultReadingProfileId">
+                    <button class="btn btn-danger" (click)="delete(selectedProfile!.id)" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -501,7 +498,7 @@
       >
         <div class="fw-bold">{{profile.name | sentenceCase}}</div>
 
-        @if (profile.id === user.preferences.defaultReadingProfileId) {
+        @if (profile.kind === ReadingProfileKind.Default) {
           <span class="pill p-1 ms-1">{{t('default-profile')}}</span>
         }
 

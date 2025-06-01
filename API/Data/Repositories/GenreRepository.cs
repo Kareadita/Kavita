@@ -111,7 +111,7 @@ public class GenreRepository : IGenreRepository
 
     /// <summary>
     /// Returns a set of Genre tags for a set of library Ids.
-    /// UserId will restrict returned Genres based on user's age restriction and library access.
+    /// AppUserId will restrict returned Genres based on user's age restriction and library access.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryIds"></param>

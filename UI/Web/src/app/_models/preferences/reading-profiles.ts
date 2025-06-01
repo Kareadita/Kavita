@@ -13,11 +13,18 @@ import {PdfSpreadMode} from "./pdf-spread-mode";
 import {Series} from "../series";
 import {Library} from "../library/library";
 
+export enum ReadingProfileKind {
+  Default = 0,
+  User = 1,
+  Implicit = 2,
+}
+
 export interface ReadingProfile {
 
   id: number;
   name: string;
   normalizedName: string;
+  kind: ReadingProfileKind;
 
   // Manga Reader
   readingDirection: ReadingDirection;

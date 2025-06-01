@@ -220,8 +220,7 @@ public static class IncludesExtensions
         {
             query = query
                 .Include(u => u.UserPreferences)
-                .ThenInclude(p => p.Theme)
-                .Include(u => u.UserPreferences.ReadingProfiles);
+                .ThenInclude(p => p.Theme);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
@@ -339,22 +338,6 @@ public static class IncludesExtensions
         if (includeFlags.HasFlag(PersonIncludes.SeriesPeople))
         {
             queryable = queryable.Include(p => p.SeriesMetadataPeople);
-        }
-
-        return queryable;
-    }
-
-    public static IQueryable<AppUserReadingProfile> Includes(this IQueryable<AppUserReadingProfile> queryable, ReadingProfileIncludes includeFlags)
-    {
-
-        if (includeFlags.HasFlag(ReadingProfileIncludes.Series))
-        {
-            queryable = queryable.Include(r => r.Series);
-        }
-
-        if (includeFlags.HasFlag(ReadingProfileIncludes.Library))
-        {
-            queryable = queryable.Include(r => r.Libraries);
         }
 
         return queryable;

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.History;
 using API.Extensions;
 using API.Helpers.Builders;
@@ -23,7 +24,7 @@ public static class ManualMigrateReadingProfiles
 
         var users = await context.AppUser
             .Include(u => u.UserPreferences)
-            .Include(u => u.UserPreferences.ReadingProfiles)
+            .Include(u => u.ReadingProfiles)
             .ToListAsync();
 
         foreach (var user in users)
@@ -32,16 +33,19 @@ public static class ManualMigrateReadingProfiles
             {
                 Name = "Default",
                 NormalizedName = "Default".ToNormalized(),
+                Kind = ReadingProfileKind.Default,
+                LibraryIds = [],
+                SeriesIds = [],
                 BackgroundColor = user.UserPreferences.BackgroundColor,
                 EmulateBook = user.UserPreferences.EmulateBook,
-                User = user,
+                AppUser = user,
                 PdfTheme = user.UserPreferences.PdfTheme,
                 ReaderMode = user.UserPreferences.ReaderMode,
                 ReadingDirection = user.UserPreferences.ReadingDirection,
                 ScalingOption = user.UserPreferences.ScalingOption,
                 LayoutMode = user.UserPreferences.LayoutMode,
                 WidthOverride = null,
-                UserId = user.Id,
+                AppUserId = user.Id,
                 AutoCloseMenu = user.UserPreferences.AutoCloseMenu,
                 BookReaderMargin = user.UserPreferences.BookReaderMargin,
                 PageSplitOption = user.UserPreferences.PageSplitOption,
@@ -60,16 +64,10 @@ public static class ManualMigrateReadingProfiles
                 BookReaderTapToPaginate = user.UserPreferences.BookReaderTapToPaginate,
                 ShowScreenHints = user.UserPreferences.ShowScreenHints,
             };
-            user.UserPreferences.ReadingProfiles.Add(readingProfile);
+            user.ReadingProfiles.Add(readingProfile);
         }
 
         await context.SaveChangesAsync();
-        foreach (var user in users)
-        {
-            user.UserPreferences.DefaultReadingProfileId =
-                (await context.AppUserReadingProfile
-                    .FirstAsync(rp => rp.UserId == user.Id)).Id;
-        }
 
         context.ManualMigrationHistory.Add(new ManualMigrationHistory
         {

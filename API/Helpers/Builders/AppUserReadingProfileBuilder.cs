@@ -1,4 +1,5 @@
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 
 namespace API.Helpers.Builders;
@@ -9,39 +10,36 @@ public class AppUserReadingProfileBuilder
 
     public AppUserReadingProfile Build() => _profile;
 
+    /// <summary>
+    /// The profile's kind will be <see cref="ReadingProfileKind.User"/> unless overwritten with <see cref="WithKind"/>
+    /// </summary>
+    /// <param name="userId"></param>
     public AppUserReadingProfileBuilder(int userId)
     {
         _profile = new AppUserReadingProfile
         {
-            UserId = userId,
-            Series = [],
-            Libraries = [],
+            AppUserId = userId,
+            Kind = ReadingProfileKind.User,
+            SeriesIds = [],
+            LibraryIds = []
         };
     }
 
     public AppUserReadingProfileBuilder WithSeries(Series series)
     {
-        _profile.Series.Add(new SeriesReadingProfile
-        {
-            Series = series,
-            AppUserId = _profile.UserId,
-        });
+        _profile.SeriesIds.Add(series.Id);
         return this;
     }
 
     public AppUserReadingProfileBuilder WithLibrary(Library library)
     {
-        _profile.Libraries.Add(new LibraryReadingProfile
-        {
-            Library = library,
-            AppUserId = _profile.UserId,
-        });
+        _profile.LibraryIds.Add(library.Id);
         return this;
     }
 
-    public AppUserReadingProfileBuilder WithImplicit(bool b)
+    public AppUserReadingProfileBuilder WithKind(ReadingProfileKind kind)
     {
-        _profile.Implicit = b;
+        _profile.Kind = kind;
         return this;
     }
 

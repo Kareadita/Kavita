@@ -26,10 +26,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReadingProfileDto>>> GetAllReadingProfiles()
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository
-            .GetProfilesDtoForUser(User.GetUserId(), true,
-                ReadingProfileIncludes.Series | ReadingProfileIncludes.Library);
-
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(User.GetUserId());
         return Ok(profiles);
     }
 
@@ -42,7 +39,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("{seriesId}")]
     public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int seriesId)
     {
-        return Ok(await readingProfileService.GetReadingProfileForSeries(User.GetUserId(), seriesId));
+        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(User.GetUserId(), seriesId));
     }
 
     /// <summary>
@@ -82,20 +79,6 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<ActionResult> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
     {
         await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
-        return Ok();
-    }
-
-    /// <summary>
-    /// Sets the given profile as the global default
-    /// </summary>
-    /// <param name="profileId"></param>
-    /// <returns></returns>
-    /// <exception cref="KavitaException"></exception>
-    /// <exception cref="UnauthorizedAccessException"></exception>
-    [HttpPost("set-default")]
-    public async Task<IActionResult> SetDefault([FromQuery] int profileId)
-    {
-        await readingProfileService.SetDefaultReadingProfile(User.GetUserId(), profileId);
         return Ok();
     }
 

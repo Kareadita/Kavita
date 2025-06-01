@@ -11,11 +11,12 @@ public class AppUserReadingProfile
     public string Name { get; set; }
     public string NormalizedName { get; set; }
 
-    public int UserId { get; set; }
-    public AppUser User { get; set; }
+    public int AppUserId { get; set; }
+    public AppUser AppUser { get; set; }
 
-    public ICollection<SeriesReadingProfile> Series { get; set; }
-    public ICollection<LibraryReadingProfile> Libraries { get; set; }
+    public ReadingProfileKind Kind { get; set; }
+    public List<int> LibraryIds { get; set; }
+    public List<int> SeriesIds { get; set; }
 
     #region MangaReader
 
@@ -139,10 +140,4 @@ public class AppUserReadingProfile
 
 
     #endregion
-
-    /// <summary>
-    /// If the profile has been created in the background after a user modified a series settings
-    /// </summary>
-    /// <remarks>A profile can be made non-implicit by a user, but not implicit</remarks>
-    public bool Implicit { get; set; } = false;
 }

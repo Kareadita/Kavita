@@ -9,8 +9,6 @@ namespace API.DTOs;
 
 public sealed record UserPreferencesDto
 {
-    /// <inheritdoc cref="AppUserPreferences.DefaultReadingProfileId"/>
-    public int DefaultReadingProfileId { get; init; }
 
     /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.

@@ -10,13 +10,10 @@ public sealed record UserReadingProfileDto
 {
 
     public int Id { get; set; }
-
     public int UserId { get; init; }
 
     public string Name { get; init; }
-
-    /// <inheritdoc cref="AppUserReadingProfile.Implicit"/>
-    public bool Implicit { get; set; } = false;
+    public ReadingProfileKind Kind { get; init; }
 
     #region MangaReader
 
@@ -126,14 +123,6 @@ public sealed record UserReadingProfileDto
     /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PdfSpreadMode"/>
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
-
-    #endregion
-
-    #region Relations
-
-    public IList<int> SeriesIds { get; set; } = [];
-
-    public IList<int> LibraryIds { get; set; } = [];
 
     #endregion
 

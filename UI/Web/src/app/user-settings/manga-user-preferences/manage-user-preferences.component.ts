@@ -243,7 +243,6 @@ export class ManageUserPreferencesComponent implements OnInit {
       //pdfSpreadMode: parseInt(modelSettings.pdfSpreadMode, 10),
       aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
       wantToReadSync: modelSettings.wantToReadSync,
-      defaultReadingProfileId: this.user!.preferences.defaultReadingProfileId,
     };
   }
 }

@@ -280,16 +280,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserReadingProfile, UserReadingProfileDto>()
             .ForMember(dest => dest.BookReaderThemeName,
                 opt =>
-                    opt.MapFrom(src => src.BookThemeName))
-            .ForMember(dest => dest.BookReaderLayoutMode,
-                opt =>
-                    opt.MapFrom(src => src.BookReaderLayoutMode))
-            .ForMember(dest => dest.SeriesIds,
-                opt =>
-                    opt.MapFrom(src => src.Series.Select(s => s.SeriesId).ToList()))
-            .ForMember(dest => dest.LibraryIds,
-                opt =>
-                    opt.MapFrom(src => src.Libraries.Select(s => s.LibraryId).ToList()));
+                    opt.MapFrom(src => src.BookThemeName));
 
 
         CreateMap<AppUserBookmark, BookmarkDto>();

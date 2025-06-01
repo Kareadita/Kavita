@@ -455,9 +455,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("CollapseSeriesRelationships")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DefaultReadingProfileId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("EmulateBook")
                         .HasColumnType("INTEGER");
 
@@ -623,7 +620,7 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<int?>("AppUserPreferencesId")
+                    b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("AutoCloseMenu")
@@ -671,11 +668,14 @@ namespace API.Data.Migrations
                     b.Property<bool>("EmulateBook")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("Implicit")
+                    b.Property<int>("Kind")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("LibraryIds")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -704,13 +704,13 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
+                    b.PrimitiveCollection<string>("SeriesIds")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("SwipeToPaginate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("WidthOverride")
@@ -718,11 +718,9 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserPreferencesId");
+                    b.HasIndex("AppUserId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AppUserReadingProfile");
+                    b.ToTable("AppUserReadingProfiles");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
@@ -1375,33 +1373,6 @@ namespace API.Data.Migrations
                     b.HasIndex("LibraryId");
 
                     b.ToTable("LibraryFileTypeGroup");
-                });
-
-            modelBuilder.Entity("API.Entities.LibraryReadingProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("LibraryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ReadingProfileId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("ReadingProfileId");
-
-                    b.HasIndex("LibraryId", "AppUserId")
-                        .IsUnique();
-
-                    b.ToTable("LibraryReadingProfile");
                 });
 
             modelBuilder.Entity("API.Entities.MangaFile", b =>
@@ -2391,32 +2362,6 @@ namespace API.Data.Migrations
                     b.ToTable("Series");
                 });
 
-            modelBuilder.Entity("API.Entities.SeriesReadingProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ReadingProfileId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("ReadingProfileId");
-
-                    b.HasIndex("SeriesId");
-
-                    b.ToTable("SeriesReadingProfile");
-                });
-
             modelBuilder.Entity("API.Entities.ServerSetting", b =>
                 {
                     b.Property<int>("Key")
@@ -3009,17 +2954,13 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.AppUserReadingProfile", b =>
                 {
-                    b.HasOne("API.Entities.AppUserPreferences", null)
+                    b.HasOne("API.Entities.AppUser", "AppUser")
                         .WithMany("ReadingProfiles")
-                        .HasForeignKey("AppUserPreferencesId");
-
-                    b.HasOne("API.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
@@ -3179,33 +3120,6 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Library");
-                });
-
-            modelBuilder.Entity("API.Entities.LibraryReadingProfile", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Library", "Library")
-                        .WithMany("ReadingProfiles")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.AppUserReadingProfile", "ReadingProfile")
-                        .WithMany("Libraries")
-                        .HasForeignKey("ReadingProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("Library");
-
-                    b.Navigation("ReadingProfile");
                 });
 
             modelBuilder.Entity("API.Entities.MangaFile", b =>
@@ -3465,33 +3379,6 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
-            modelBuilder.Entity("API.Entities.SeriesReadingProfile", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.AppUserReadingProfile", "ReadingProfile")
-                        .WithMany("Series")
-                        .HasForeignKey("ReadingProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Series", "Series")
-                        .WithMany("ReadingProfiles")
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("ReadingProfile");
-
-                    b.Navigation("Series");
-                });
-
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -3714,6 +3601,8 @@ namespace API.Data.Migrations
 
                     b.Navigation("ReadingLists");
 
+                    b.Navigation("ReadingProfiles");
+
                     b.Navigation("ScrobbleHolds");
 
                     b.Navigation("SideNavStreams");
@@ -3727,18 +3616,6 @@ namespace API.Data.Migrations
                     b.Navigation("UserRoles");
 
                     b.Navigation("WantToRead");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserPreferences", b =>
-                {
-                    b.Navigation("ReadingProfiles");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserReadingProfile", b =>
-                {
-                    b.Navigation("Libraries");
-
-                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.Chapter", b =>
@@ -3763,8 +3640,6 @@ namespace API.Data.Migrations
                     b.Navigation("LibraryExcludePatterns");
 
                     b.Navigation("LibraryFileTypes");
-
-                    b.Navigation("ReadingProfiles");
 
                     b.Navigation("Series");
                 });
@@ -3802,8 +3677,6 @@ namespace API.Data.Migrations
                     b.Navigation("Progress");
 
                     b.Navigation("Ratings");
-
-                    b.Navigation("ReadingProfiles");
 
                     b.Navigation("RelationOf");
 

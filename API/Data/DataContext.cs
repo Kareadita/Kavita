@@ -81,9 +81,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
     public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
-    public DbSet<AppUserReadingProfile> AppUserReadingProfile { get; set; } = null!;
-    public DbSet<SeriesReadingProfile> SeriesReadingProfile { get; set; } = null!;
-    public DbSet<LibraryReadingProfile> LibraryReadingProfile { get; set; } = null!;
+    public DbSet<AppUserReadingProfile> AppUserReadingProfiles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -272,6 +270,19 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserReadingProfile>()
             .Property(b => b.AllowAutomaticWebtoonReaderDetection)
             .HasDefaultValue(true);
+
+        builder.Entity<AppUserReadingProfile>()
+            .Property(rp => rp.LibraryIds)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasColumnType("TEXT");
+        builder.Entity<AppUserReadingProfile>()
+            .Property(rp => rp.SeriesIds)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasColumnType("TEXT");
     }
 
     #nullable enable
