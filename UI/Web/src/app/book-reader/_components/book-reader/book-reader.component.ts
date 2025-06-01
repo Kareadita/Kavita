@@ -918,18 +918,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return goToPageNum;
   }
 
-  async promptForSection() {
-    const [_, totalVirtualPages, _2] = this.getVirtualPage();
-    const promptConfig = {...this.confirmService.defaultPrompt};
-    promptConfig.header = translate('book-reader.go-to-section');
-    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: totalVirtualPages});
-
-    const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
-    if (goToPageNum === null || goToPageNum.trim().length === 0 || !/^[0-9]+$/.test(goToPageNum)) { return null; }
-
-    return Math.min(Math.max(parseInt(goToPageNum, 10), 0), totalVirtualPages - 1) + '';
-  }
-
   async goToPage(pageNum?: number) {
     let page = pageNum;
     if (pageNum === null || pageNum === undefined) {
@@ -949,25 +937,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pageNum = page;
     this.loadPage();
-  }
-
-  async loadSection(sectionNum?: number) {
-    let section = sectionNum;
-    if (sectionNum === null || sectionNum === undefined) {
-      const goToPageNum = await this.promptForSection();
-      if (goToPageNum === null) { return; }
-      section = parseInt(goToPageNum.trim(), 10);
-    }
-
-    if (section === undefined || this.pageNum === section) { return; }
-
-    if (section > this.maxPages - 1) {
-      section = this.maxPages - 1;
-    } else if (section < 0) {
-      section = 0;
-    }
-
-    // HACK
   }
 
 
