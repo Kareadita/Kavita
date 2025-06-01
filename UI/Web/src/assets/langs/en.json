@@ -106,7 +106,7 @@
 
     "user-preferences": {
         "title": "User Dashboard",
-        "pref-description": "These are global settings that are bound to your account.",
+        "pref-description": "These are global settings that are bound to your account. Reader settings are located in Reading Profiles.",
 
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
