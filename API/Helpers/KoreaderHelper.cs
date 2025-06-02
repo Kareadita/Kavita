@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers;
 
@@ -15,13 +16,14 @@ public static class KoreaderHelper
     /// <summary>
     /// Hashes the document according to a custom Koreader hashing algorithm.
     /// Look at the util.partialMD5 method in the attached link.
+    /// Note: Only applies to epub files
     /// </summary>
     /// <remarks>The hashing algorithm is relatively quick as it only hashes ~10,000 bytes for the biggest of files.</remarks>
     /// <see href="https://github.com/koreader/koreader/blob/master/frontend/util.lua#L1040"/>
     /// <param name="filePath">The path to the file to hash</param>
     public static string HashContents(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath) || !Parser.IsEpub(filePath))
         {
             return null;
         }
@@ -48,9 +50,9 @@ public static class KoreaderHelper
         }
 
         file.Close();
-        md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+        md5.TransformFinalBlock([], 0, 0);
 
-        return md5.Hash == null ? null : BitConverter.ToString(md5.Hash).Replace("-", string.Empty).ToUpper();
+        return md5.Hash == null ? null : Convert.ToHexString(md5.Hash).ToUpper();
     }
 
     /// <summary>
@@ -63,7 +65,7 @@ public static class KoreaderHelper
         var fileNameBytes = Encoding.ASCII.GetBytes(fileName);
         var bytes = MD5.HashData(fileNameBytes);
 
-        return BitConverter.ToString(bytes).Replace("-", string.Empty);
+        return Convert.ToHexString(bytes);
     }
 
     public static void UpdateProgressDto(ProgressDto progress, string koreaderPosition)

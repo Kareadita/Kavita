@@ -880,6 +880,8 @@ public class ProcessSeries : IProcessSeries
             existingFile.FileName = Parser.Parser.RemoveExtensionIfSupported(existingFile.FilePath);
             existingFile.FilePath = Parser.Parser.NormalizePath(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
+            existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
+
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }
         else
