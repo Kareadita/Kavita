@@ -861,7 +861,6 @@
         "page-label": "Page",
 
         "pagination-header": "Section",
-        "go-to-page": "Go to page",
         "go-to-first-page": "Go to first page",
         "go-to-last-page": "Go to last page",
         "prev-page": "Prev Page",
@@ -883,7 +882,12 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous",
-        "go-to-page-prompt": "There are {{totalPages}} sections. What section do you want to go to?"
+
+        "go-to-page": "Go to page",
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?",
+
+        "go-to-section": "Go to section",
+        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
     },
 
     "personal-table-of-contents": {

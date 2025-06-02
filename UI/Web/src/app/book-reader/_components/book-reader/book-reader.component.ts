@@ -909,8 +909,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
-    promptConfig.header = translate('book-reader.go-to-page');
-    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
+    // Pages are called sections in the UI, manga reader uses the go-to-page string so we use a different one here
+    promptConfig.header = translate('book-reader.go-to-section');
+    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages - 1});
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 
