@@ -310,7 +310,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
-    /// <param name="libraryId"></param>
+    /// <param name="libraryId">This is not in use</param>
     /// <returns></returns>
     [HttpPost("all-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
@@ -321,8 +321,6 @@ public class SeriesController : BaseApiController
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto, context);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
-
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
