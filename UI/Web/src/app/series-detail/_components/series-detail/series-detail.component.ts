@@ -551,7 +551,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.location.replaceState(newUrl)
   }
 
-  handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+  async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     this.cdRef.markForCheck();
     switch(action.action) {
       case(Action.MarkAsRead):
@@ -565,16 +565,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
       case(Action.Scan):
-        this.actionService.scanSeries(series);
+        await this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshSeriesMetadata(series, undefined, true, false);
+        await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
         break;
       case(Action.GenerateColorScape):
-        this.actionService.refreshSeriesMetadata(series, undefined, false, true);
+        await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
         break;
       case(Action.Delete):
-        this.deleteSeries(series);
+        await this.deleteSeries(series);
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series);
@@ -645,6 +645,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(volume.chapters.map(c => c.id), device);
           break;
         }
+      case (Action.Download):
+        this.downloadService.download('volume', volume);
+        break;
       default:
         break;
     }
@@ -678,6 +681,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.chapters = this.chapters.filter(c => c.id != chapter.id);
           this.cdRef.markForCheck();
         });
+        break;
+      case (Action.Download):
+        this.downloadService.download('chapter', chapter);
         break;
       default:
         break;
