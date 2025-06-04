@@ -230,15 +230,15 @@
 
                           @if (readingProfileForm.get("widthOverride"); as widthOverride) {
                             <div class="row g-0 mt-4 mb-4">
-                              <app-setting-item [title]="t('width-overwrite')">
+                              <app-setting-item [title]="t('width-override-label')">
                                 <ng-template #view>
                                   <label for="width-override-slider" class="form-label">
-                                    {{ widthOverwriteLabel }}
+                                    {{ widthOverrideLabel }}
                                   </label>
                                 </ng-template>
                                 <ng-template #edit>
                                   <div class="d-flex justify-content-between align-items-center">
-                                    <span>{{ widthOverwriteLabel }}</span>
+                                    <span>{{ widthOverrideLabel }}</span>
                                     <button class="btn btn-secondary" (click)="widthOverride.setValue(null)">
                                       {{t('reset')}}
                                     </button>
