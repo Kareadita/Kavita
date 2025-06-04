@@ -14,7 +14,7 @@ import {
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgxExtendedPdfViewerModule, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, take} from 'rxjs';
+import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
 import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
@@ -36,6 +36,7 @@ import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-pdf-reader',
@@ -166,6 +167,16 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+      this.setupReaderSettings();
+      this.cdRef.markForCheck();
+    });
+
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -175,13 +186,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.cdRef.markForCheck();
 
-    forkJoin([
-      this.accountService.currentUser$.pipe(take(1)),
-      this.readingProfileService.getForSeries(this.seriesId)
-    ]).subscribe(([user, profile]) => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
-        this.readingProfile = profile;
         this.init();
       }
     });
@@ -242,12 +249,14 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  init() {
-
+  setupReaderSettings() {
     this.pageLayoutMode = this.convertPdfLayoutMode(PdfLayoutMode.Multiple);
     this.scrollMode = this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical);
     this.spreadMode = this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None);
     this.theme = this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark);
+  }
+
+  init() {
     this.backgroundColor = this.themeMap[this.theme].background;
     this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
 

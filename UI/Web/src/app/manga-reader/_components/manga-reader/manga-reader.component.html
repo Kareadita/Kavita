@@ -53,96 +53,94 @@
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
-    @if (readingProfile !== null) {
-        @if (readerMode !== ReaderMode.Webtoon) {
-          <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
-            <app-canvas-renderer
-              [readerSettings$]="readerSettings$"
-              [image$]="currentImage$"
-              [bookmark$]="showBookmarkEffect$"
-              [showClickOverlay$]="showClickOverlay$">
-            </app-canvas-renderer>
-          </div>
+      @if (readerMode !== ReaderMode.Webtoon) {
+        <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
+          <app-canvas-renderer
+            [readerSettings$]="readerSettings$"
+            [image$]="currentImage$"
+            [bookmark$]="showBookmarkEffect$"
+            [showClickOverlay$]="showClickOverlay$">
+          </app-canvas-renderer>
+        </div>
 
-          <!-- Pagination controls and screen hints-->
-          <div class="pagination-area">
-            <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
-                 [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
-              @if (showClickOverlay) {
-                <div>
-                  <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
-                     [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
-                </div>
-              }
-            </div>
-            <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
-                 [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
+        <!-- Pagination controls and screen hints-->
+        <div class="pagination-area">
+          <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
+            @if (showClickOverlay) {
+              <div>
+                <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                   [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
+              </div>
+            }
+          </div>
+          <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
+               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px',
                                 'max-height': MaxHeight}">
-              @if (showClickOverlay) {
-                <div>
-                  <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
-                     [title]="t('next-page-tooltip')" aria-hidden="true"></i>
-                </div>
-              }
-            </div>
+            @if (showClickOverlay) {
+              <div>
+                <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                   [title]="t('next-page-tooltip')" aria-hidden="true"></i>
+              </div>
+            }
           </div>
+        </div>
 
-          <div appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
-            <app-single-renderer [image$]="currentImage$"
-                                 [readerSettings$]="readerSettings$"
-                                 [bookmark$]="showBookmarkEffect$"
-                                 [pageNum$]="pageNum$"
-                                 [showClickOverlay$]="showClickOverlay$">
-            </app-single-renderer>
+        <div appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
+          <app-single-renderer [image$]="currentImage$"
+                               [readerSettings$]="readerSettings$"
+                               [bookmark$]="showBookmarkEffect$"
+                               [pageNum$]="pageNum$"
+                               [showClickOverlay$]="showClickOverlay$">
+          </app-single-renderer>
 
-            <app-double-renderer [image$]="currentImage$"
-                                 [readerSettings$]="readerSettings$"
-                                 [bookmark$]="showBookmarkEffect$"
-                                 [showClickOverlay$]="showClickOverlay$"
-                                 [pageNum$]="pageNum$"
-                                 [getPage]="getPageFn">
-            </app-double-renderer>
+          <app-double-renderer [image$]="currentImage$"
+                               [readerSettings$]="readerSettings$"
+                               [bookmark$]="showBookmarkEffect$"
+                               [showClickOverlay$]="showClickOverlay$"
+                               [pageNum$]="pageNum$"
+                               [getPage]="getPageFn">
+          </app-double-renderer>
 
-            <app-double-reverse-renderer [image$]="currentImage$"
-                                         [readerSettings$]="readerSettings$"
-                                         [bookmark$]="showBookmarkEffect$"
-                                         [showClickOverlay$]="showClickOverlay$"
-                                         [pageNum$]="pageNum$"
-                                         [getPage]="getPageFn">
-            </app-double-reverse-renderer>
+          <app-double-reverse-renderer [image$]="currentImage$"
+                                       [readerSettings$]="readerSettings$"
+                                       [bookmark$]="showBookmarkEffect$"
+                                       [showClickOverlay$]="showClickOverlay$"
+                                       [pageNum$]="pageNum$"
+                                       [getPage]="getPageFn">
+          </app-double-reverse-renderer>
 
-            <app-double-no-cover-renderer [image$]="currentImage$"
-                                          [readerSettings$]="readerSettings$"
-                                          [bookmark$]="showBookmarkEffect$"
-                                          [showClickOverlay$]="showClickOverlay$"
-                                          [pageNum$]="pageNum$"
-                                          [getPage]="getPageFn">
-            </app-double-no-cover-renderer>
+          <app-double-no-cover-renderer [image$]="currentImage$"
+                                        [readerSettings$]="readerSettings$"
+                                        [bookmark$]="showBookmarkEffect$"
+                                        [showClickOverlay$]="showClickOverlay$"
+                                        [pageNum$]="pageNum$"
+                                        [getPage]="getPageFn">
+          </app-double-no-cover-renderer>
+        </div>
+      } @else {
+        @if (!isLoading && !inSetup) {
+          <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
+            <app-infinite-scroller [pageNum]="pageNum"
+                                   [bufferPages]="5"
+                                   [goToPage]="goToPageEvent"
+                                   (pageNumberChange)="handleWebtoonPageChange($event)"
+                                   [totalPages]="maxPages"
+                                   [urlProvider]="getPageUrl"
+                                   (loadNextChapter)="loadNextChapter()"
+                                   (loadPrevChapter)="loadPrevChapter()"
+                                   [bookmarkPage]="showBookmarkEffectEvent"
+                                   [fullscreenToggled]="fullscreenEvent"
+                                   [readerSettings$]="readerSettings$">
+            </app-infinite-scroller>
           </div>
-        } @else {
-          @if (!isLoading && !inSetup) {
-            <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
-              <app-infinite-scroller [pageNum]="pageNum"
-                                     [bufferPages]="5"
-                                     [goToPage]="goToPageEvent"
-                                     (pageNumberChange)="handleWebtoonPageChange($event)"
-                                     [totalPages]="maxPages"
-                                     [urlProvider]="getPageUrl"
-                                     (loadNextChapter)="loadNextChapter()"
-                                     (loadPrevChapter)="loadPrevChapter()"
-                                     [bookmarkPage]="showBookmarkEffectEvent"
-                                     [fullscreenToggled]="fullscreenEvent"
-                                     [readerSettings$]="readerSettings$">
-              </app-infinite-scroller>
-            </div>
-          }
         }
-    }
+      }
     </div>
 
-    @if (menuOpen && readingProfile !== null) {
+    @if (menuOpen) {
       <div class="fixed-bottom overlay"  [@slideFromBottom]="menuOpen">
         @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
           <div class="mb-3">

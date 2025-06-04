@@ -197,7 +197,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   totalSeriesPages = 0;
   totalSeriesPagesRead = 0;
   user!: User;
-  readingProfile: ReadingProfile | null = null;
+  readingProfile!: ReadingProfile;
   generalSettingsForm!: FormGroup;
 
   readingDirection = ReadingDirection.LeftToRight;
@@ -484,6 +484,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+      this.setupReaderSettings();
+      this.cdRef.markForCheck();
+    });
+
+
     this.getPageFn = this.getPage.bind(this);
 
     this.libraryId = parseInt(libraryId, 10);
@@ -500,113 +511,108 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.continuousChaptersStack.push(this.chapterId);
 
-    forkJoin([
-      this.accountService.currentUser$.pipe(take(1)),
-      this.readingProfileService.getForSeries(this.seriesId)
-      ]).subscribe(([user, profile]) => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (!user) {
         this.router.navigateByUrl('/login');
         return;
       }
 
-      this.readingProfile = profile;
-      if (!this.readingProfile) return; // type hints
 
       this.user = user;
       this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
-      this.readingDirection = this.readingProfile.readingDirection;
-      this.scalingOption = this.readingProfile.scalingOption;
-      this.pageSplitOption = this.readingProfile.pageSplitOption;
-      this.autoCloseMenu = this.readingProfile.autoCloseMenu;
-      this.readerMode = this.readingProfile.readerMode;
-      this.layoutMode = this.readingProfile.layoutMode || LayoutMode.Single;
-      this.backgroundColor = this.readingProfile.backgroundColor || '#000000';
-      this.readerService.setOverrideStyles(this.backgroundColor);
+      // this.readingDirection = this.readingProfile.readingDirection;
+      // this.scalingOption = this.readingProfile.scalingOption;
+      // this.pageSplitOption = this.readingProfile.pageSplitOption;
+      // this.autoCloseMenu = this.readingProfile.autoCloseMenu;
+      // this.readerMode = this.readingProfile.readerMode;
+      // this.layoutMode = this.readingProfile.layoutMode || LayoutMode.Single;
+      // this.backgroundColor = this.readingProfile.backgroundColor || '#000000';
+      // this.readerService.setOverrideStyles(this.backgroundColor);
+      //
+      // this.generalSettingsForm = this.formBuilder.nonNullable.group({
+      //   autoCloseMenu: new FormControl(this.autoCloseMenu),
+      //   pageSplitOption: new FormControl(this.pageSplitOption),
+      //   fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
+      //   widthSlider: new FormControl(this.readingProfile.widthOverride ?? 'none'),
+      //   layoutMode: new FormControl(this.layoutMode),
+      //   darkness: new FormControl(100),
+      //   emulateBook: new FormControl(this.readingProfile.emulateBook),
+      //   swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
+      // });
+      //
+      // this.readerModeSubject.next(this.readerMode);
+      // this.pagingDirectionSubject.next(this.pagingDirection);
 
-      this.generalSettingsForm = this.formBuilder.nonNullable.group({
-        autoCloseMenu: new FormControl(this.autoCloseMenu),
-        pageSplitOption: new FormControl(this.pageSplitOption),
-        fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
-        widthSlider: new FormControl(this.readingProfile.widthOverride ?? 'none'),
-        layoutMode: new FormControl(this.layoutMode),
-        darkness: new FormControl(100),
-        emulateBook: new FormControl(this.readingProfile.emulateBook),
-        swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
-      });
-
-      this.readerModeSubject.next(this.readerMode);
-      this.pagingDirectionSubject.next(this.pagingDirection);
-
-      // We need a mergeMap when page changes
-      this.readerSettings$ = merge(this.generalSettingsForm.valueChanges, this.pagingDirection$, this.readerMode$).pipe(
-        map(_ => this.createReaderSettingsUpdate()),
-        takeUntilDestroyed(this.destroyRef),
-      );
-
-      this.updateForm();
-
-      this.pagingDirection$.pipe(
-        distinctUntilChanged(),
-        tap(dir => {
-          this.pagingDirection = dir;
-          this.cdRef.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {});
-
-      this.readerMode$.pipe(
-        distinctUntilChanged(),
-        tap(mode => {
-          this.readerMode = mode;
-          this.disableDoubleRendererIfScreenTooSmall();
-          this.cdRef.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {});
-
-      this.setupWidthOverrideTriggers();
-
-      this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-
-        const changeOccurred = parseInt(val, 10) !== this.layoutMode;
-        this.layoutMode = parseInt(val, 10);
-
-        if (this.layoutMode === LayoutMode.Single) {
-          this.generalSettingsForm.get('pageSplitOption')?.setValue(this.readingProfile!.pageSplitOption);
-          this.generalSettingsForm.get('pageSplitOption')?.enable();
-          this.generalSettingsForm.get('widthSlider')?.enable();
-          this.generalSettingsForm.get('fittingOption')?.enable();
-          this.generalSettingsForm.get('emulateBook')?.enable();
-        } else {
-          this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
-          this.generalSettingsForm.get('pageSplitOption')?.disable();
-          this.generalSettingsForm.get('widthSlider')?.disable();
-          this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
-          this.generalSettingsForm.get('fittingOption')?.disable();
-          this.generalSettingsForm.get('emulateBook')?.enable();
-        }
-        this.cdRef.markForCheck();
-
-        // Re-render the current page when we switch layouts
-        if (changeOccurred) {
-          this.setPageNum(this.adjustPagesForDoubleRenderer(this.pageNum));
-          this.loadPage();
-        }
-      });
-
-      this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-        this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-        this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
-
-        const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
-        // If we need to split on a menu change, then we need to re-render.
-        if (needsSplitting) {
-          // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
-          this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
-          this.canvasRenderer.reset();
-          this.loadPage();
-        }
-      });
+      // // We need a mergeMap when page changes
+      // this.readerSettings$ = merge(this.generalSettingsForm.valueChanges, this.pagingDirection$, this.readerMode$).pipe(
+      //   map(_ => this.createReaderSettingsUpdate()),
+      //   takeUntilDestroyed(this.destroyRef),
+      // );
+      //
+      // this.updateForm();
+      //
+      // this.pagingDirection$.pipe(
+      //   distinctUntilChanged(),
+      //   tap(dir => {
+      //     this.pagingDirection = dir;
+      //     this.cdRef.markForCheck();
+      //   }),
+      //   takeUntilDestroyed(this.destroyRef)
+      // ).subscribe(() => {});
+      //
+      // this.readerMode$.pipe(
+      //   distinctUntilChanged(),
+      //   tap(mode => {
+      //     this.readerMode = mode;
+      //     this.disableDoubleRendererIfScreenTooSmall();
+      //     this.cdRef.markForCheck();
+      //   }),
+      //   takeUntilDestroyed(this.destroyRef)
+      // ).subscribe(() => {});
+      //
+      // this.setupWidthOverrideTriggers();
+      //
+      // this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      //
+      //   const changeOccurred = parseInt(val, 10) !== this.layoutMode;
+      //   this.layoutMode = parseInt(val, 10);
+      //
+      //   if (this.layoutMode === LayoutMode.Single) {
+      //     this.generalSettingsForm.get('pageSplitOption')?.setValue(this.readingProfile!.pageSplitOption);
+      //     this.generalSettingsForm.get('pageSplitOption')?.enable();
+      //     this.generalSettingsForm.get('widthSlider')?.enable();
+      //     this.generalSettingsForm.get('fittingOption')?.enable();
+      //     this.generalSettingsForm.get('emulateBook')?.enable();
+      //   } else {
+      //     this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
+      //     this.generalSettingsForm.get('pageSplitOption')?.disable();
+      //     this.generalSettingsForm.get('widthSlider')?.disable();
+      //     this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
+      //     this.generalSettingsForm.get('fittingOption')?.disable();
+      //     this.generalSettingsForm.get('emulateBook')?.enable();
+      //   }
+      //   this.cdRef.markForCheck();
+      //
+      //   // Re-render the current page when we switch layouts
+      //   if (changeOccurred) {
+      //     this.setPageNum(this.adjustPagesForDoubleRenderer(this.pageNum));
+      //     this.loadPage();
+      //   }
+      // });
+      //
+      // this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      //   this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
+      //   this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
+      //
+      //   const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      //   // If we need to split on a menu change, then we need to re-render.
+      //   if (needsSplitting) {
+      //     // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
+      //     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
+      //     this.canvasRenderer.reset();
+      //     this.loadPage();
+      //   }
+      // });
 
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
         if (!progress) {
@@ -722,6 +728,104 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.H) {
       this.openShortcutModal();
     }
+  }
+
+  setupReaderSettings() {
+    this.readingDirection = this.readingProfile.readingDirection;
+    this.scalingOption = this.readingProfile.scalingOption;
+    this.pageSplitOption = this.readingProfile.pageSplitOption;
+    this.autoCloseMenu = this.readingProfile.autoCloseMenu;
+    this.readerMode = this.readingProfile.readerMode;
+    this.layoutMode = this.readingProfile.layoutMode || LayoutMode.Single;
+    this.backgroundColor = this.readingProfile.backgroundColor || '#000000';
+    this.readerService.setOverrideStyles(this.backgroundColor);
+
+    this.generalSettingsForm = this.formBuilder.nonNullable.group({
+      autoCloseMenu: new FormControl(this.autoCloseMenu),
+      pageSplitOption: new FormControl(this.pageSplitOption),
+      fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
+      widthSlider: new FormControl(this.readingProfile.widthOverride ?? 'none'),
+      layoutMode: new FormControl(this.layoutMode),
+      darkness: new FormControl(100),
+      emulateBook: new FormControl(this.readingProfile.emulateBook),
+      swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
+    });
+
+    this.readerModeSubject.next(this.readerMode);
+    this.pagingDirectionSubject.next(this.pagingDirection);
+
+    // We need a mergeMap when page changes
+    this.readerSettings$ = merge(this.generalSettingsForm.valueChanges, this.pagingDirection$, this.readerMode$).pipe(
+      map(_ => this.createReaderSettingsUpdate()),
+      takeUntilDestroyed(this.destroyRef),
+    );
+
+    this.updateForm();
+
+    this.pagingDirection$.pipe(
+      distinctUntilChanged(),
+      tap(dir => {
+        this.pagingDirection = dir;
+        this.cdRef.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {});
+
+    this.readerMode$.pipe(
+      distinctUntilChanged(),
+      tap(mode => {
+        this.readerMode = mode;
+        this.disableDoubleRendererIfScreenTooSmall();
+        this.cdRef.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {});
+
+    this.setupWidthOverrideTriggers();
+
+    this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+
+      const changeOccurred = parseInt(val, 10) !== this.layoutMode;
+      this.layoutMode = parseInt(val, 10);
+
+      if (this.layoutMode === LayoutMode.Single) {
+        this.generalSettingsForm.get('pageSplitOption')?.setValue(this.readingProfile!.pageSplitOption);
+        this.generalSettingsForm.get('pageSplitOption')?.enable();
+        this.generalSettingsForm.get('widthSlider')?.enable();
+        this.generalSettingsForm.get('fittingOption')?.enable();
+        this.generalSettingsForm.get('emulateBook')?.enable();
+      } else {
+        this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
+        this.generalSettingsForm.get('pageSplitOption')?.disable();
+        this.generalSettingsForm.get('widthSlider')?.disable();
+        this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
+        this.generalSettingsForm.get('fittingOption')?.disable();
+        this.generalSettingsForm.get('emulateBook')?.enable();
+      }
+      this.cdRef.markForCheck();
+
+      // Re-render the current page when we switch layouts
+      if (changeOccurred) {
+        this.setPageNum(this.adjustPagesForDoubleRenderer(this.pageNum));
+        this.loadPage();
+      }
+    });
+
+    this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
+      this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
+
+      const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      // If we need to split on a menu change, then we need to re-render.
+      if (needsSplitting) {
+        // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
+        this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
+        this.canvasRenderer.reset();
+        this.loadPage();
+      }
+    });
+
+    this.cdRef.markForCheck();
   }
 
   /**

@@ -61,6 +61,7 @@
                 <ng-template ngbNavContent>
                   <app-reader-settings
                     [seriesId]="seriesId"
+                    [readingProfile]="readingProfile"
                     (colorThemeUpdate)="updateColorTheme($event)"
                     (styleUpdate)="updateReaderStyles($event)"
                     (clickToPaginateChanged)="showPaginationOverlay($event)"

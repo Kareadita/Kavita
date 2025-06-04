@@ -63,6 +63,7 @@ import {
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 
 
 enum TabID {
@@ -147,6 +148,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   chapterId!: number;
   chapter!: Chapter;
   user!: User;
+  readingProfile!: ReadingProfile;
 
   /**
    * Reading List id. Defaults to -1.
@@ -608,6 +610,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+      //this.setupReaderSettings(); // TODO: Implement this Amelia
+      this.cdRef.markForCheck();
+    });
+
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
@@ -668,7 +680,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chapters = results.chapters;
         this.pageNum = results.progress.pageNum;
         this.cdRef.markForCheck();
-        if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
+
+        if (results.progress.bookScrollId) {
+          this.lastSeenScrollPartPath = results.progress.bookScrollId;
+        }
 
         this.continuousChaptersStack.push(this.chapterId);
 

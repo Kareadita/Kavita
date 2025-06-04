@@ -1,31 +1,41 @@
-import { DOCUMENT, NgFor, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe } from '@angular/common';
+import {DOCUMENT, NgClass, NgFor, NgIf, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
-  Inject, Input,
+  Inject,
+  Input,
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {skip, take} from 'rxjs';
-import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { BookTheme } from 'src/app/_models/preferences/book-theme';
-import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
-import { WritingStyle } from 'src/app/_models/preferences/writing-style';
-import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { FontFamily, BookService } from '../../_services/book.service';
-import { BookBlackTheme } from '../../_models/book-black-theme';
-import { BookDarkTheme } from '../../_models/book-dark-theme';
-import { BookWhiteTheme } from '../../_models/book-white-theme';
-import { BookPaperTheme } from '../../_models/book-paper-theme';
+import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
+import {BookTheme} from 'src/app/_models/preferences/book-theme';
+import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
+import {WritingStyle} from 'src/app/_models/preferences/writing-style';
+import {ThemeProvider} from 'src/app/_models/preferences/site-theme';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {BookService, FontFamily} from '../../_services/book.service';
+import {BookBlackTheme} from '../../_models/book-black-theme';
+import {BookDarkTheme} from '../../_models/book-dark-theme';
+import {BookWhiteTheme} from '../../_models/book-white-theme';
+import {BookPaperTheme} from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
@@ -92,10 +102,13 @@ const mobileBreakpointMarginOverride = 700;
     templateUrl: './reader-settings.component.html',
     styleUrls: ['./reader-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
+      NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle,
+      TitleCasePipe, TranslocoDirective]
 })
 export class ReaderSettingsComponent implements OnInit {
   @Input({required:true}) seriesId!: number;
+  @Input({required:true}) readingProfile!: ReadingProfile;
   /**
    * Outputs when clickToPaginate is changed
    */
@@ -128,8 +141,6 @@ export class ReaderSettingsComponent implements OnInit {
    * Outputs when immersive mode is changed
    */
   @Output() immersiveMode: EventEmitter<boolean> = new EventEmitter();
-
-  readingProfile: ReadingProfile | null = null;
 
   user!: User;
   /**
@@ -172,8 +183,6 @@ export class ReaderSettingsComponent implements OnInit {
     return WritingStyle;
   }
 
-
-
   constructor(private bookService: BookService, private accountService: AccountService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
     private readonly cdRef: ChangeDetectorRef, private readingProfileService: ReadingProfileService) {}
@@ -184,44 +193,40 @@ export class ReaderSettingsComponent implements OnInit {
     this.fontOptions = this.fontFamilies.map(f => f.title);
     this.cdRef.markForCheck();
 
-    this.readingProfileService.getForSeries(this.seriesId).subscribe(profile => {
-      this.readingProfile = profile;
+    if (this.readingProfile.bookReaderFontFamily === undefined) {
+      this.readingProfile.bookReaderFontFamily = 'default';
+    }
+    if (this.readingProfile.bookReaderFontSize === undefined || this.readingProfile.bookReaderFontSize < 50) {
+      this.readingProfile.bookReaderFontSize = 100;
+    }
+    if (this.readingProfile.bookReaderLineSpacing === undefined || this.readingProfile.bookReaderLineSpacing < 100) {
+      this.readingProfile.bookReaderLineSpacing = 100;
+    }
+    if (this.readingProfile.bookReaderMargin === undefined) {
+      this.readingProfile.bookReaderMargin = 0;
+    }
+    if (this.readingProfile.bookReaderReadingDirection === undefined) {
+      this.readingProfile.bookReaderReadingDirection = ReadingDirection.LeftToRight;
+    }
+    if (this.readingProfile.bookReaderWritingStyle === undefined) {
+      this.readingProfile.bookReaderWritingStyle = WritingStyle.Horizontal;
+    }
+    this.readingDirectionModel = this.readingProfile.bookReaderReadingDirection;
+    this.writingStyleModel = this.readingProfile.bookReaderWritingStyle;
 
-      if (this.readingProfile.bookReaderFontFamily === undefined) {
-        this.readingProfile.bookReaderFontFamily = 'default';
-      }
-      if (this.readingProfile.bookReaderFontSize === undefined || this.readingProfile.bookReaderFontSize < 50) {
-        this.readingProfile.bookReaderFontSize = 100;
-      }
-      if (this.readingProfile.bookReaderLineSpacing === undefined || this.readingProfile.bookReaderLineSpacing < 100) {
-        this.readingProfile.bookReaderLineSpacing = 100;
-      }
-      if (this.readingProfile.bookReaderMargin === undefined) {
-        this.readingProfile.bookReaderMargin = 0;
-      }
-      if (this.readingProfile.bookReaderReadingDirection === undefined) {
-        this.readingProfile.bookReaderReadingDirection = ReadingDirection.LeftToRight;
-      }
-      if (this.readingProfile.bookReaderWritingStyle === undefined) {
-        this.readingProfile.bookReaderWritingStyle = WritingStyle.Horizontal;
-      }
-      this.readingDirectionModel = this.readingProfile.bookReaderReadingDirection;
-      this.writingStyleModel = this.readingProfile.bookReaderWritingStyle;
+    this.setupSettings();
 
-      this.setupSettings();
+    this.setTheme(this.readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme, false);
+    this.cdRef.markForCheck();
 
-      this.setTheme(this.readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme, false);
-      this.cdRef.markForCheck();
+    // Emit first time so book reader gets the setting
+    this.readingDirection.emit(this.readingDirectionModel);
+    this.bookReaderWritingStyle.emit(this.writingStyleModel);
+    this.clickToPaginateChanged.emit(this.readingProfile.bookReaderTapToPaginate);
+    this.layoutModeUpdate.emit(this.readingProfile.bookReaderLayoutMode);
+    this.immersiveMode.emit(this.readingProfile.bookReaderImmersiveMode);
 
-      // Emit first time so book reader gets the setting
-      this.readingDirection.emit(this.readingDirectionModel);
-      this.bookReaderWritingStyle.emit(this.writingStyleModel);
-      this.clickToPaginateChanged.emit(this.readingProfile.bookReaderTapToPaginate);
-      this.layoutModeUpdate.emit(this.readingProfile.bookReaderLayoutMode);
-      this.immersiveMode.emit(this.readingProfile.bookReaderImmersiveMode);
-
-      this.resetSettings();
-    })
+    this.resetSettings();
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
