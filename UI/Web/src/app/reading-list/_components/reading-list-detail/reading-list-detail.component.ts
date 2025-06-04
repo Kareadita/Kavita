@@ -58,6 +58,7 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {IHasCast} from "../../../_models/common/i-has-cast";
+import {User} from "../../../_models/user";
 
 enum TabID {
   Storyline = 'storyline-tab',
@@ -251,7 +252,8 @@ export class ReadingListDetailComponent implements OnInit {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
 
-          this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
+          this.actions = this.actionFactoryService
+            .getReadingListActions(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this))
             .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
           this.isOwnedReadingList = this.actions.filter(a => a.action === Action.Edit).length > 0;
           this.cdRef.markForCheck();
@@ -304,6 +306,17 @@ export class ReadingListDetailComponent implements OnInit {
           }
         });
         break;
+    }
+  }
+
+  shouldRenderReadingListAction(action: ActionItem<ReadingList>, entity: ReadingList, user: User) {
+    switch (action.action) {
+      case Action.Promote:
+        return !entity.promoted;
+      case Action.UnPromote:
+          return entity.promoted;
+      default:
+        return true;
     }
   }
 

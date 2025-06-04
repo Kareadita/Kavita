@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, clique para mostrar"
     },
-    "review-series-modal": {
-        "title": "Editar Análise",
-        "review-label": "Análise",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "A análise deve ter pelo menos {{count}} caracteres",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}'s Análise",
@@ -81,7 +72,8 @@
         "your-review": "Esta é sua análise",
         "external-review": "Análise Externa",
         "local-review": "Análise Local",
-        "rating-percentage": "Avaliação {{r}}%"
+        "rating-percentage": "Avaliação {{r}}%",
+        "critic": "crítico"
     },
     "want-to-read": {
         "title": "Quero Ler",
@@ -762,8 +754,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Não há capítulos neste volume. Não posso ler.",
         "cover-change": "Pode levar até um minuto para o seu navegador atualizar a imagem. Até lá, a imagem antiga pode ser exibida em algumas páginas.",
-        "user-reviews-local": "Análises Locais",
-        "user-reviews-plus": "Análises Externas",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",
@@ -825,7 +815,8 @@
         "entry-label": "Ver Detalhes",
         "kavita-tooltip": "Sua Avaliação + Geral",
         "kavita-rating-title": "Sua Avaliação",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "e {{count}} mais"
@@ -1522,7 +1513,8 @@
         "logout": "Sair",
         "all-filters": "Filtros Inteligentes",
         "nav-link-header": "Opções de Navegação",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Resultados como pseudônimos"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2261,7 +2253,8 @@
         "match-success": "Série correspondida corretamente",
         "webtoon-override": "Mudando para o modo Webtoon devido a imagens que representam um Webtoon.",
         "scrobble-gen-init": "Enfileirou uma tarefa para gerar eventos scrobble a partir do histórico de leitura e avaliações anteriores, sincronizando-os com serviços conectados.",
-        "confirm-delete-multiple-volumes": "Tem certeza de que deseja excluir {{count}} volumes? Isso não modificará os arquivos no disco."
+        "confirm-delete-multiple-volumes": "Tem certeza de que deseja excluir {{count}} volumes? Isso não modificará os arquivos no disco.",
+        "series-added-want-to-read": "Série adicionada da lista Quero Ler"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2336,7 +2329,8 @@
         "match-tooltip": "Corresponder Séries com Kavita+ manualmente",
         "reorder": "Reordenar",
         "rename-tooltip": "Renomear o Filtro Inteligente",
-        "rename": "Renomear"
+        "rename": "Renomear",
+        "merge": "Mesclar"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2485,7 +2479,11 @@
         "cover-image-description-extra": "Alternativamente, você pode baixar uma capa do CoversDB, se disponível.",
         "download-coversdb": "Baixar do CoversDB",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
-        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}"
+        "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
+        "alias-overlap": "Esse pseudônimo já aponta para outra pessoa ou é o nome dessa pessoa, considere mesclá -la.",
+        "aliases-label": "Editar pseudônimos",
+        "aliases-tab": "Pseudônimos",
+        "aliases-tooltip": "Quando uma série é etiquetada com um pseudônimo de uma pessoa, a pessoa é atribuída em vez de ser criada uma nova pessoa. Ao eliminar um pseudônimo, terá de voltar a analisar a série para que a alteração seja detectada."
     },
     "browse-authors": {
         "author-count": "{{num}} Pessoas",
@@ -2498,7 +2496,9 @@
         "individual-role-title": "Como um {{role}}",
         "known-for-title": "Conhecido Por",
         "all-roles": "Papéis",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "Nenhuma informação sobre esta Pessoa",
+        "aka-title": "Também conhecido como · "
     },
     "manage-user-tokens": {
         "anilist-header": "AniList",
@@ -2561,7 +2561,7 @@
         "save": "{{common.save}}",
         "no-results": "Não foi possível encontrar uma correspondência. Tente adicionar o URL de um provedor compatível e tente novamente.",
         "query-label": "Consulta",
-        "query-tooltip": "Digite o nome da série, URL AniList/MyAnimeList. As URLs usarão uma pesquisa direta.",
+        "query-tooltip": "Digite o nome da série, urls de Anilist/Myanimelist/ComicbookRoundup URL. As URLs serão usadas como pesquisa direta.",
         "dont-match-label": "Não Fazer Correspondência",
         "dont-match-tooltip": "Opte por esta série de correspondência e scrobbling",
         "search": "Pesquisar"
@@ -2571,7 +2571,8 @@
         "chapter-count": "{{common.chapter-count}}",
         "releasing": "Lançando",
         "details": "Exibir página",
-        "updating-metadata-status": "Atualizando Metadados"
+        "updating-metadata-status": "Atualizando Metadados",
+        "issue-count": "{{common.issue-count}}"
     },
     "email-history": {
         "description": "Aqui você encontra todos os e-mails enviados por Kavita e para qual usuário.",
@@ -2622,7 +2623,18 @@
         "enable-cover-image-tooltip": "Permitir que Kavita escreva a imagem da capa das Séries",
         "localized-name-tooltip": "Permitir que o nome localizado seja escrito quando o campo for desbloqueado. Kavita tentará dar o melhor palpite.",
         "overrides-description": "Permita que Kavita escreva os campos trancados.",
-        "overrides-label": "Substituir"
+        "overrides-label": "Substituir",
+        "enable-chapter-title-label": "Título",
+        "enable-chapter-publisher-label": "Editora",
+        "enable-chapter-publisher-tooltip": "Permitir que a Editora do Capítulo/Número seja salvo",
+        "enable-chapter-cover-label": "Capa do Capítulo",
+        "enable-chapter-cover-tooltip": "Permitir que a Capa do Capítulo/Número seja definida",
+        "chapter-header": "Campos de Capítulo",
+        "enable-chapter-title-tooltip": "Permitir que o Título do Capítulo/Número seja salvo",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "Data de Lançamento",
+        "enable-chapter-release-date-tooltip": "Permitir que a Data de Lançamento do Capítulo/Número seja salvo"
     },
     "metadata-setting-field-pipe": {
         "publication-status": "{{edit-series-modal.publication-status-title}}",
@@ -2633,7 +2645,12 @@
         "localized-name": "{{edit-series-modal.localized-name-label}}",
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "people": "{{tabs.people-tab}}",
-        "summary": "{{filter-field-pipe.summary}}"
+        "summary": "{{filter-field-pipe.summary}}",
+        "chapter-summary": "Resumo (Capítulo)",
+        "chapter-covers": "Capas (Capítulo)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Capítulo)",
+        "chapter-title": "Título (Capítulo)",
+        "chapter-release-date": "Data de Lançamento (Capítulo)"
     },
     "role-localized-pipe": {
         "admin": "Admin",
@@ -2651,5 +2668,27 @@
         "trace": "Rastro",
         "warning": "Aviso",
         "critical": "Crítico"
+    },
+    "reviews": {
+        "user-reviews-local": "Análises Locais",
+        "user-reviews-plus": "Análises Externas"
+    },
+    "review-modal": {
+        "title": "Editar Análise",
+        "review-label": "Análise",
+        "close": "{{common.close}}",
+        "delete": "{{common.delete}}",
+        "min-length": "A análise deve ter pelo menos {{count}} caracteres",
+        "required": "{{validation.required-field}}",
+        "save": "{{common.save}}"
+    },
+    "merge-person-modal": {
+        "save": "{{common.save}}",
+        "src": "Mesclar Pessoa",
+        "alias-title": "Novos pseudônimos",
+        "close": "{{common.close}}",
+        "title": "{{personName}}",
+        "merge-warning": "se prosseguir, a pessoa selecionada será removida. O nome da pessoa selecionada será adicionado como um pseudônimo e todas as suas funções serão transferidas.",
+        "known-for-title": "Conhecido por"
     }
 }

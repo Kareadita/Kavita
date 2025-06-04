@@ -3,7 +3,7 @@
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "title": "Logga in till ditt konto",
+        "title": "Logga in på ditt konto",
         "forgot-password": "Glömt lösenord?",
         "submit": "Logga in"
     },
@@ -43,15 +43,6 @@
         "token-expired": "Din AniList-token är Utgången! Scrobbling kommer inte processeras förrän du har förnyat det under Konto.",
         "generate-scrobble-events": "Backfill Events"
     },
-    "review-series-modal": {
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
-        "title": "Redigera recension",
-        "review-label": "Recension",
-        "min-length": "Recension måste vara minst {{count}} tecken"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "external-mod": "(extern)",
@@ -86,7 +77,7 @@
         "locale-label": "Språk",
         "locale-tooltip": "Språket Kavita ska nyttja",
         "blur-unread-summaries-label": "Censurera olästa sammanfattningar",
-        "blur-unread-summaries-tooltip": "Cencurera sammanfattningar på volymer eller kapitel som inte har någon läsprogress (för att undvika spoilers)",
+        "blur-unread-summaries-tooltip": "Cencurera handlingen på volymer eller kapitel som inte har någon läsprogress (för att undvika spoilers)",
         "disable-animations-tooltip": "Inaktivera animationer på sidan. Användbart på e-ink-läsare.",
         "reading-mode-label": "Läsläge",
         "layout-mode-label": "Layoutläge",
@@ -269,7 +260,7 @@
         "age-restriction-label": "Åldersbegränsning"
     },
     "scrobbling-providers": {
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "Nya användare bör klicka på \"{{scrobbling-providers.generate}}\" nedan för att tillåta Kavita+ att prata med {{service}}. Efter att du gett programmet åtkomst, kopiera och klistra in token i rutan nedanför. Du kan generera nytt token när som helst.",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
@@ -504,7 +495,7 @@
         "incognito-mode-label": "Inkognitoläge",
         "next": "Nästa",
         "next-chapter": "Nästa Kapitel/Volym",
-        "close-reader": "Stäng läsare",
+        "close-reader": "Stäng Läsare",
         "go-to-page": "Gå till sida",
         "go-to-last-page": "Gå till sista sidan",
         "prev-chapter": "Förra Kapitel/Volym",
@@ -601,8 +592,6 @@
         "cover-change": "Det kan ta upp till en minut för att din webbläsare ska uppdatera bilden. Under tiden kan den gamla bilden visas på vissa sidor.",
         "layout-mode-option-list": "Lista",
         "read-incognito": "Läs inkognito",
-        "user-reviews-plus": "Externa recensioner",
-        "user-reviews-local": "Lokala recensioner",
         "continue-incognito": "Fortsätt inkognito",
         "incognito": "Inkognito",
         "continue-from": "Fortsätt {{title}}",
@@ -636,7 +625,7 @@
         "editors-title": "Redaktörer",
         "colorists-title": "Färgläggare",
         "letterers-title": "Bokstavsättare",
-        "inkers-title": "Inker"
+        "inkers-title": "Inkers"
     },
     "external-rating": {
         "close": "{{common.close}}",
@@ -944,7 +933,7 @@
         "bookmark-dir-tooltip": "Plats där bokmärken kommer att lagras. Bokmärken är källfiler och kan vara stora. Välj en plats med tillräckligt med lagring. Katalogen hanteras; andra filer inom katalogen kommer att raderas. Om du använder Docker, montera en extra volym och använd den.",
         "encode-as-description-part-2": "Kan jag använda WebP?",
         "media-issue-title": "Medieproblem",
-        "scrobble-issue-title": "Scrobble-problem",
+        "scrobble-issue-title": "Scrobble Nummer",
         "cover-image-size-label": "Omslagsbildsstorlek"
     },
     "manage-scrobble-errors": {
@@ -1110,7 +1099,7 @@
         "filter-label": "{{common.filter}}",
         "promote-tooltip": "Marknadsför betyder att taggen kan ses over hela servern, inte bara för admin-användare. Alla serier som har denna tagg kommer fortfarande att ha användarbegränsningar placerade på sig.",
         "title": "Redigera {{collectionName}} Samling",
-        "summary-label": "Summering",
+        "summary-label": "Handling",
         "missing-series-title": "Saknade Serier:",
         "name-validation": "Namn måste vara unikt",
         "name-label": "Namn",
@@ -1295,7 +1284,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "summary-label": "Summering",
+        "summary-label": "Handling",
         "promote-label": "Tipsa",
         "promote-tooltip": "Tipsa betyder att samlingen kan ses över hela servern, inte bara av dig. Alla serier inom denna samling kommer fortfarande att ha användarbegränsningar som gäller för dem.",
         "starting-title": "Startar",
@@ -1494,7 +1483,7 @@
         "highest-count-tooltip": "Högsta Antal funnet i alla ComicInfo i serien",
         "name-label": "Namn",
         "sort-name-label": "Sortera Namn",
-        "summary-label": "Summering",
+        "summary-label": "Handling",
         "total-words-title": "Totalt antal Ord",
         "size-title": "Storlek",
         "specials-volume": "Specials",
@@ -1667,7 +1656,7 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "Du kan inte ordna om objekt via drag & släpp medan ett filter används. Använd {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Massläge",
         "no-data-external-source": "Alla Externa Källor har lagts till i Sido Nav eller så har inga skapats än.",
@@ -1752,7 +1741,7 @@
         "imprint": "Förlag",
         "average-rating": "Genomsnittligt betyg",
         "series-name": "Serie Namn",
-        "summary": "Summering",
+        "summary": "Handling",
         "read-date": "Läsdatum",
         "want-to-read": "Vill Läsa",
         "publication-status": "Publikationsstatus"
@@ -1823,13 +1812,15 @@
         "remove-from-on-deck-tooltip": "Radera serier från att visas på Hyllan",
         "add-to-collection-tooltip": "Lägg till serier i en samling",
         "delete-tooltip": "Det finns inget sätt att ångra detta beslut",
-        "back-to": "Tillbaka till {{action}}"
+        "back-to": "Tillbaka till {{action}}",
+        "rename": "Byt namn",
+        "rename-tooltip": "Byt namn på Smart Filter"
     },
     "dashboard": {
         "recently-added-title": "Nyligen tillagda serier",
         "more-in-genre-title": "Mer inom {{genre}}",
         "server-settings-link": "Serverinställningar",
-        "no-libraries": "Det är inga bibliotek skapade än. Skapa några i",
+        "no-libraries": "Det finns inga bibliotek skapade än. Skapa några i",
         "not-granted": "Du har inte fått rättigheter till något bibliotek.",
         "on-deck-title": "På hyllan",
         "recently-updated-title": "Nyligen uppdaterade serier"
@@ -1866,7 +1857,7 @@
     },
     "manage-metadata-settings": {
         "enabled-tooltip": "Tillåt Kavita att ladda ner metadata och skriva till sin databas.",
-        "summary-label": "Summering",
+        "summary-label": "Handling",
         "enable-people-label": "Personer",
         "enable-start-date-tooltip": "Tillåt Seriens startdatum att bli skriven till serien",
         "enable-genres-label": "Genres",
@@ -1887,7 +1878,7 @@
         "enable-genres-tooltip": "Tillåt serie-genrer att skrivas.",
         "description": "Kavita+ har möjlighet att ladda ner och skriva viss begränsad metadata till databasen. Denna sida gör det möjligt för dig att växla vad som ingår.",
         "enable-people-tooltip": "Tillåt personer (karaktärer, författare, osv.) att <b>läggas till</b>. Alla personer inkluderar bilder.",
-        "summary-tooltip": "TIllåt Summering att skrivas när fältet är upplåst.",
+        "summary-tooltip": "Tillåt Handling att skrivas när fältet är upplåst.",
         "derive-publication-status-tooltip": "Tillåt publiceringsstatus att härledas från totala kapitel-/volymantal.",
         "derive-publication-status-label": "Publiceringsstatus",
         "enable-relations-label": "Förhållanden",
@@ -1903,7 +1894,18 @@
         "enable-tags-label": "Taggar",
         "age-rating-mapping-title": "Åldersgruppsbedömning",
         "add-age-rating-mapping-label": "Lägg till Åldersgruppsbedömning",
-        "field-mapping-title": "Fältmappning"
+        "field-mapping-title": "Fältmappning",
+        "enable-chapter-title-label": "Titel",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-title-tooltip": "Tillåt Titeln för Kapitel/Nummer att skrivas",
+        "enable-chapter-cover-tooltip": "Tillåt Omslag för Kapitel/Nummer att ställas in",
+        "enable-chapter-cover-label": "Kapitelomslag",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "Släppdatum",
+        "enable-chapter-release-date-tooltip": "Tillåt Släppdatum för Kapitel/Nummer att skrivas",
+        "enable-chapter-publisher-tooltip": "Tillåt Utgivare för Kapitel/Nummer att skrivas",
+        "enable-chapter-publisher-label": "Utgivare",
+        "chapter-header": "Kapitelfält"
     },
     "match-series-result-item": {
         "releasing": "Släpper",
@@ -2129,7 +2131,7 @@
         "show": "Visa",
         "hide": "Göm",
         "regen-warning": "Att regenerera din API-nyckel kommer att ogiltigförklara alla befintliga klienter.",
-        "no-key": "FEL – NYCKEL INTE ANGETTS",
+        "no-key": "ERROR – NYCKEL HAR EJ ANGETTS",
         "confirm-reset": "Detta kommer att ogiltigförklara alla OPDS-konfigurationer du har ställt in. Är du säker på att du vill fortsätta?",
         "key-reset": "Återställ API-nyckel",
         "copy": "Kopiera"
@@ -2168,7 +2170,7 @@
         "sunday": "Söndag"
     },
     "device-platform-pipe": {
-        "custom": "Anpassa"
+        "custom": "Anpassad"
     },
     "cbl-import-result-pipe": {
         "success": "Lyckats",
@@ -2648,6 +2650,11 @@
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "localized-name": "{{edit-series-modal.localized-name-label}}"
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "chapter-summary": "Handling (Kapitel)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitel)",
+        "chapter-title": "Titel (Kapitel)",
+        "chapter-release-date": "Släppdatum (Kapitel)",
+        "chapter-covers": "Omslag (Kapitel)"
     }
 }

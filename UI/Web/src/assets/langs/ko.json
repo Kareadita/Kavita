@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "스포일러, 표시하려면 클릭"
     },
-    "review-series-modal": {
-        "title": "리뷰 수정",
-        "review-label": "평가",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "리뷰는 적어도 {{count}}자여야 합니다",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}님의 리뷰",
@@ -81,7 +72,8 @@
         "your-review": "당신의 리뷰",
         "external-review": "외부 리뷰",
         "local-review": "로컬 리뷰",
-        "rating-percentage": "평점 {{r}}%"
+        "rating-percentage": "평점 {{r}}%",
+        "critic": "평점"
     },
     "want-to-read": {
         "title": "읽고 싶어요",
@@ -517,9 +509,9 @@
     },
     "library-type-pipe": {
         "book": "책",
-        "comic": "만화(Comic)",
+        "comic": "만화 (Legacy)",
         "manga": "만화(Manga)",
-        "comicVine": "Comic Vine",
+        "comicVine": "코믹(Comic)",
         "image": "이미지",
         "lightNovel": "라이트 노벨"
     },
@@ -762,8 +754,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "이 볼륨에는 챕터가 없습니다. 읽을 수 없습니다.",
         "cover-change": "브라우저에서 이미지를 새로 고치는 데 최대 1분이 걸릴 수 있습니다. 그때까지는 일부 페이지에 이전 이미지가 표시될 수 있습니다.",
-        "user-reviews-local": "로컬 리뷰",
-        "user-reviews-plus": "외부 리뷰",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",
@@ -789,7 +779,7 @@
         "more-alt": "더 보기",
         "time-left-alt": "남은 시간",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "출판",
         "publication-status-tooltip": "출판현황",
         "on": "{{reader-settings.on}}",
@@ -825,7 +815,8 @@
         "entry-label": "세부정보 보기",
         "kavita-tooltip": "귀하의 평가 + 전체",
         "kavita-rating-title": "귀하의 평가",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "와 {{count}} 더"
@@ -861,7 +852,8 @@
         "more": "더 보기",
         "customize": "{{settings.customize}}",
         "browse-authors": "작가 찾아보기",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "cancel-edit": "재정렬 닫기"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -878,7 +870,7 @@
         "type-label": "유형",
         "type-tooltip": "라이브러리 유형에 따라 파일 이름이 구문 분석되는 방식과 UI에 장(만화)과 이슈(만화)가 표시되는지 여부가 결정됩니다. 라이브러리 유형 간의 차이점에 대한 자세한 내용은 Wiki를 확인하세요.",
         "kavitaplus-eligible-label": "Kavita+ 적격",
-        "kavitaplus-eligible-tooltip": "Kavita+가 정보를 가져오거나 스크로블링을 지원합니까",
+        "kavitaplus-eligible-tooltip": "Kavita+ 메타데이터 기능 또는 자동 추천 지원",
         "folder-description": "라이브러리에 폴더 추가",
         "browse": "미디어 폴더 찾아보기",
         "help-us-part-1": "팔로우하여 저희를 도와주세요 ",
@@ -1086,7 +1078,7 @@
         "reset": "{{common.reset}}",
         "test": "테스트",
         "host-name-label": "호스트 이름",
-        "host-name-tooltip": "도메인 이름(역방향 프록시의). 이메일 기능에 필요합니다. 역방향 프록시가 없으면 임의의 URL을 사용하십시오.",
+        "host-name-tooltip": "이메일 기능에 필요한 역방향 프록시의 도메인 이름입니다. 역방향 프록시를 사용하지 않는 경우, http://externalip:port/ 형식 등 어떠한 URL도 사용할 수 있습니다",
         "host-name-validation": "호스트 이름은 http(s)로 시작하고 /로 끝나지 않아야 합니다",
         "sender-address-label": "송신자 주소",
         "sender-address-tooltip": "이는 수신자가 이메일을 받을 때 볼 수 있는 이메일 주소입니다. 일반적으로 계정과 연결된 이메일 주소입니다.",
@@ -1596,7 +1588,7 @@
         "dry-run-step": "모의 실행",
         "final-import-step": "마지막 단계",
         "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용",
-        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>보고</a>.",
+        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>리포지토리</a>.",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -2015,7 +2007,8 @@
         "sidenav": "사이드 내비게이션",
         "external-sources": "외부 소스",
         "smart-filters": "스마트 필터",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "description": "순서 바꾸기, 표시 여부 전환, 스마트 필터 및 외부 소스를 홈페이지 또는 사이드 탐색 메뉴에 바인딩하여 Kavita의 다양한 기능을 사용자 지정할 수 있습니다."
     },
     "customize-dashboard-streams": {
         "no-data": "대시보드에 모든 스마트 필터가 추가되었거나 아직 생성되지 않았습니다.",
@@ -2258,7 +2251,8 @@
         "bulk-delete-libraries": "{{count}}개의 라이브러리를 삭제하시겠습니까?",
         "webtoon-override": "웹툰을 나타내는 이미지가 있어 웹툰 모드로 전환합니다.",
         "match-success": "시리즈가 올바르게 일치함",
-        "confirm-delete-multiple-volumes": "{{count}}개의 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다."
+        "confirm-delete-multiple-volumes": "{{count}}개의 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
+        "scrobble-gen-init": "과거 열람 이력 및 평가를 추적하는 이벤트를 생성하여 연결된 서비스와 동기화하는 기능을 작업 예정 목록에 추가하였습니다."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2330,7 +2324,10 @@
         "title": "작업",
         "copy-settings": "설정 복사하기",
         "match": "일치",
-        "match-tooltip": "Kavita+에서 시리즈를 수동으로 일치시키기"
+        "match-tooltip": "Kavita+에서 시리즈를 수동으로 일치시키기",
+        "reorder": "정렬 변경",
+        "rename": "이름 변경",
+        "rename-tooltip": "스마트 필터 이름 변경"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2587,7 +2584,18 @@
         "enable-genres-tooltip": "시리즈 장르를 작성할 수 있도록 허용합니다.",
         "whitelist-label": "화이트리스트 태그",
         "age-rating-mapping-title": "연령 등급 매핑",
-        "genre": "장르"
+        "genre": "장르",
+        "enable-chapter-title-label": "제목",
+        "chapter-header": "챕터 필드",
+        "enable-chapter-title-tooltip": "Chapter/Issue 제목 작성 허용",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "발매일",
+        "enable-chapter-release-date-tooltip": "Chapter/Issue 발매일 작성 허용",
+        "enable-chapter-publisher-label": "출판사",
+        "enable-chapter-publisher-tooltip": "Chapter/Issue 출판사 작성 허용",
+        "enable-chapter-cover-label": "챕터 표지",
+        "enable-chapter-cover-tooltip": "Chapter/Issue 커버 설정 허용"
     },
     "match-series-modal": {
         "search": "검색",
@@ -2606,7 +2614,8 @@
         "details": "페이지 보기",
         "updating-metadata-status": "메타데이터 업데이트",
         "releasing": "출시",
-        "chapter-count": "{{common.chapter-count}}"
+        "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}"
     },
     "email-history": {
         "sent-header": "성공",
@@ -2627,7 +2636,12 @@
         "people": "{{tabs.people-tab}}",
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
-        "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
+        "chapter-covers": "커버 (Chapter)",
+        "chapter-title": "제목 (챕터)",
+        "chapter-release-date": "발매일 (Chapter)",
+        "chapter-summary": "요약 (Chapter)"
     },
     "role-localized-pipe": {
         "admin": "관리자",
@@ -2645,5 +2659,18 @@
         "trace": "추적",
         "warning": "경고",
         "critical": "치명적"
+    },
+    "reviews": {
+        "user-reviews-local": "로컬 리뷰",
+        "user-reviews-plus": "외부 리뷰"
+    },
+    "review-modal": {
+        "title": "리뷰 편집",
+        "review-label": "리뷰",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "리뷰는 최소 {{count}}자 이상이어야 합니다",
+        "required": "{{validation.required-field}}"
     }
 }

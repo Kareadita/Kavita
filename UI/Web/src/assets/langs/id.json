@@ -54,15 +54,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, klik untuk tampilkan"
     },
-    "review-series-modal": {
-        "title": "Ubah Ulasan",
-        "review-label": "Ulasan",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Ulasan harus setidaknya terdiri dari {{count}} karakter",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}"
     },

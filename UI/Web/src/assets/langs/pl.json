@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, kliknij by wyświetlić"
     },
-    "review-series-modal": {
-        "title": "Edytuj recenzję",
-        "review-label": "Recenzja",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Recenzja musi zawierać co najmniej {{count}} znaków",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "Recenzja {{username}}",
@@ -762,8 +753,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "W tym tomie nie ma rozdziałów. Nie można odczytać.",
         "cover-change": "Odświeżenie obrazu w przeglądarce może potrwać do minuty. Do tego czasu na niektórych stronach może być wyświetlany stary obraz.",
-        "user-reviews-local": "Lokalne recenzje",
-        "user-reviews-plus": "Zewnętrzne recenzje",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

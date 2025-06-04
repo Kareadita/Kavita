@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "剧透，点击显示"
     },
-    "review-series-modal": {
-        "title": "编辑评论",
-        "review-label": "评论",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "评论必须至少有 {{count}} 个字符",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}的评论",
@@ -81,7 +72,8 @@
         "your-review": "我的评论",
         "external-review": "外部评论",
         "local-review": "本地评论",
-        "rating-percentage": "评分 {{r}}%"
+        "rating-percentage": "评分 {{r}}%",
+        "critic": "评论家"
     },
     "want-to-read": {
         "title": "想读",
@@ -106,7 +98,7 @@
         "locale-label": "本地语言",
         "locale-tooltip": "Kavita 当前语言",
         "blur-unread-summaries-label": "模糊未读摘要",
-        "blur-unread-summaries-tooltip": "模糊没有阅读进度的卷或章节的摘要文本（避免剧透）",
+        "blur-unread-summaries-tooltip": "模糊没有阅读进度的卷或章节的内容简介文本（避免剧透）",
         "prompt-on-download-label": "下载时提示",
         "prompt-on-download-tooltip": "当下载大小超过 {{size}}MB 时提示",
         "disable-animations-label": "关闭动画",
@@ -762,8 +754,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "本卷没有章节，无法读取。",
         "cover-change": "刷新图片需要一点时间。在此期间，可能某些页面仍显示旧图片。",
-        "user-reviews-local": "本地评论",
-        "user-reviews-plus": "外部评论",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",
@@ -825,7 +815,8 @@
         "entry-label": "查看详情",
         "kavita-tooltip": "您的评分 + 总体",
         "kavita-rating-title": "您的评分",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "和{{count}}个更多"
@@ -1522,7 +1513,8 @@
         "logout": "注销",
         "all-filters": "智能筛选",
         "nav-link-header": "导航选项",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "匹配别名"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2261,7 +2253,8 @@
         "match-success": "系列匹配正确",
         "webtoon-override": "由于图片代表网络漫画，因此切换到网络漫画模式。",
         "scrobble-gen-init": "将一项任务加入队列，该任务将根据过去的阅读历史和评分生成 scrobble 事件，并将其与已连接的服务同步。",
-        "confirm-delete-multiple-volumes": "您确定要删除这 {{count}} 个卷吗？这不会修改磁盘上的文件。"
+        "confirm-delete-multiple-volumes": "您确定要删除这 {{count}} 个卷吗？这不会修改磁盘上的文件。",
+        "series-added-want-to-read": "从“想读”列表中添加的系列"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2336,7 +2329,8 @@
         "match-tooltip": "使用 Kavita+ 手动匹配系列",
         "reorder": "重新排序",
         "rename-tooltip": "重命名智能筛选",
-        "rename": "重命名"
+        "rename": "重命名",
+        "merge": "合并"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2485,7 +2479,11 @@
         "cover-image-description-extra": "或者，您可以从 CoversDB 下载封面（如果有）。",
         "download-coversdb": "从 CoversDB 下载",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
-        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}"
+        "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
+        "aliases-tooltip": "当某个系列被标记为某个人的别名时，系统会分配该人，而不是创建新的人。删除别名后，您必须重新扫描该系列才能生效。",
+        "aliases-tab": "别名",
+        "aliases-label": "编辑别名",
+        "alias-overlap": "此别名已经指向另一个人或为该人的名字，请考虑合并它们。"
     },
     "person-detail": {
         "all-roles": "角色",
@@ -2493,7 +2491,9 @@
         "individual-role-title": "作为 {{role}}",
         "browse-person-title": "{{name}} 的全部作品",
         "browse-person-by-role-title": "{{name}} 作为 {{role}} 的所有作品",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "没有关于此人的信息",
+        "aka-title": "又名 "
     },
     "browse-authors": {
         "author-count": "{{num}} 人",
@@ -2507,7 +2507,7 @@
         "description": "选择一个匹配项来重新连接 Kavita+ 元数据并重新生成 scrobble 事件。 不匹配可用于限制 Kavita 匹配元数据和乱序。",
         "no-results": "无法找到匹配项。尝试添加来自受支持的提供商的 URL，然后重试。",
         "query-label": "询问",
-        "query-tooltip": "输入系列名称、AniList/MyAnimeList url。 URL 将使用直接查找。",
+        "query-tooltip": "输入系列名称、AniList/MyAnimeList/ComicBookRoundup 网址。网址将使用直接查找。",
         "dont-match-label": "不匹配",
         "dont-match-tooltip": "从匹配和 scrobbling 中选择该系列",
         "search": "搜索"
@@ -2571,7 +2571,8 @@
         "chapter-count": "{{common.chapter-count}}",
         "releasing": "释放",
         "details": "查看页面",
-        "updating-metadata-status": "更新元数据"
+        "updating-metadata-status": "更新元数据",
+        "issue-count": "{{common.issue-count}}"
     },
     "email-history": {
         "description": "在这里您可以找到从 Kavita 发送的所有电子邮件以及发送给哪个用户。",
@@ -2622,7 +2623,18 @@
         "enable-cover-image-label": "封面图片",
         "enable-cover-image-tooltip": "允许 Kavita 为该系列撰写封面图片",
         "overrides-label": "覆盖",
-        "overrides-description": "允许 Kavita 覆盖锁定的字段。"
+        "overrides-description": "允许 Kavita 覆盖锁定的字段。",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "发布日期",
+        "enable-chapter-release-date-tooltip": "允许写入章节/期刊的发布日期",
+        "enable-chapter-cover-label": "章节封面",
+        "enable-chapter-cover-tooltip": "允许设置章节/期刊的封面",
+        "chapter-header": "章节字段",
+        "enable-chapter-publisher-label": "出版社",
+        "enable-chapter-title-label": "标题",
+        "enable-chapter-title-tooltip": "允许写入章节/期刊的标题",
+        "enable-chapter-publisher-tooltip": "允许写入章节/期刊的出版社"
     },
     "metadata-setting-field-pipe": {
         "covers": "封面",
@@ -2633,7 +2645,12 @@
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
-        "publication-status": "{{edit-series-modal.publication-status-title}}"
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "chapter-summary": "内容简介（章节）",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (章节)",
+        "chapter-title": "标题（章节）",
+        "chapter-covers": "封面（章节）",
+        "chapter-release-date": "发布日期（章节）"
     },
     "role-localized-pipe": {
         "download": "下载",
@@ -2651,5 +2668,27 @@
         "trace": "追踪",
         "warning": "警告",
         "critical": "严重"
+    },
+    "reviews": {
+        "user-reviews-plus": "外部评审",
+        "user-reviews-local": "本地评论"
+    },
+    "review-modal": {
+        "review-label": "评论",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "评论必须至少包含 {{count}} 个字符",
+        "required": "{{validation.required-field}}",
+        "title": "编辑评论",
+        "close": "{{common.close}}"
+    },
+    "merge-person-modal": {
+        "close": "{{common.close}}",
+        "src": "合并人员",
+        "title": "{{personName}}",
+        "known-for-title": "代表作品",
+        "merge-warning": "如果继续，所选人员将被移除。所选人员的姓名将被添加为别名，并且其所有角色都将被转移。",
+        "alias-title": "新别名",
+        "save": "{{common.save}}"
     }
 }

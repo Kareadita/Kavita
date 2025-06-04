@@ -62,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spojler, kliknite na zobrazenie"
     },
-    "review-series-modal": {
-        "title": "Upraviť recenziu",
-        "review-label": "Recenzia",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
-        "min-length": "Recenzia musí obsahovať aspoň {{count}} znakov"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "external-mod": "(externé)",
@@ -784,8 +775,6 @@
         "more-alt": "Viac",
         "publication-status-title": "Publikácia",
         "publication-status-tooltip": "Stav publikácie",
-        "user-reviews-local": "Miestne recenzie",
-        "user-reviews-plus": "Externé recenzie",
         "pages-count": "{{num}} Strán",
         "words-count": "{{num}} Slov",
         "weblinks-title": "Odkazy",

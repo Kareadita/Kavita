@@ -70,6 +70,7 @@ import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -150,9 +151,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly modalService = inject(NgbModal);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
-  public readonly readerService = inject(ReaderService);
-  public readonly utilityService = inject(UtilityService);
-  public readonly mangaReaderService = inject(MangaReaderService);
+  private readonly confirmService = inject(ConfirmService);
+  protected readonly readerService = inject(ReaderService);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly mangaReaderService = inject(MangaReaderService);
+
 
   protected readonly KeyDirection = KeyDirection;
   protected readonly ReaderMode = ReaderMode;
@@ -647,7 +650,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('window:keyup', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
+  async handleKeyPress(event: KeyboardEvent) {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
@@ -682,7 +685,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.SPACE) {
       this.toggleMenu();
     } else if (event.key === KEY_CODES.G) {
-      const goToPageNum = this.promptForPage();
+      const goToPageNum = await this.promptForPage();
       if (goToPageNum === null) { return; }
       this.goToPage(parseInt(goToPageNum.trim(), 10));
     } else if (event.key === KEY_CODES.B) {
@@ -1593,9 +1596,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // This is menu only code
-  promptForPage() {
-    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages});
-    const goToPageNum = window.prompt(question, '');
+  async promptForPage() {
+    // const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages});
+    // const goToPageNum = window.prompt(question, '');
+
+    const promptConfig = {...this.confirmService.defaultPrompt};
+    promptConfig.header = translate('book-reader.go-to-page');
+    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages});
+
+    const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
+
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }

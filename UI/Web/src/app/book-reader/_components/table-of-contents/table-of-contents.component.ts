@@ -31,9 +31,8 @@ export class TableOfContentsComponent implements OnChanges {
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
+    //console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
     this.cdRef.markForCheck();
-
   }
 
   cleanIdSelector(id: string) {
@@ -47,4 +46,30 @@ export class TableOfContentsComponent implements OnChanges {
   loadChapterPage(pageNum: number, part: string) {
     this.loadChapter.emit({pageNum, part});
   }
+
+  isChapterSelected(chapterGroup: BookChapterItem) {
+    if (chapterGroup.page === this.pageNum) {
+      return true;
+    }
+
+    const idx = this.chapters.indexOf(chapterGroup);
+    if (idx < 0) {
+      return false; // should never happen
+    }
+
+    const nextIdx = idx + 1;
+    // Last chapter
+    if (nextIdx >= this.chapters.length) {
+      return chapterGroup.page < this.pageNum;
+    }
+
+    // Passed chapter, and next chapter has not been reached
+    const next = this.chapters[nextIdx];
+    return chapterGroup.page < this.pageNum && next.page > this.pageNum;
+  }
+
+  isAnchorSelected(chapter: BookChapterItem) {
+    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor
+  }
+
 }

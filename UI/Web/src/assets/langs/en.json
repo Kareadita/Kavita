@@ -861,7 +861,7 @@
         "page-label": "Page",
 
         "pagination-header": "Section",
-        "go-to-page": "Go to page",
+        "go-to-first-page": "Go to first page",
         "go-to-last-page": "Go to last page",
         "prev-page": "Prev Page",
         "next-page": "Next Page",
@@ -882,7 +882,12 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous",
-        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?"
+
+        "go-to-page": "Go to page",
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?",
+
+        "go-to-section": "Go to section",
+        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
     },
 
     "personal-table-of-contents": {
@@ -2229,8 +2234,8 @@
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
 
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -2579,7 +2584,8 @@
         "confirm": "Confirm",
         "info": "Info",
         "cancel": "{{common.cancel}}",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "Question"
     },
 
     "toasts": {

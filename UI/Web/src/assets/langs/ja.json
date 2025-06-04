@@ -61,15 +61,6 @@
     "spoiler": {
         "click-to-show": "クリックするとネタバレが表示されます"
     },
-    "review-series-modal": {
-        "title": "レビューを編集する",
-        "review-label": "レビュー",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "レビューは最低 {{count}}文字以上である必要があります｡",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}さんのレビュー",
@@ -726,8 +717,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "この巻にはチャプターが存在しません。読むことはできません。",
         "cover-change": "ブラウザが画像をリフレッシュするまで最大1分かかる場合があります。その間、一部のページでは古い画像が表示される可能性があります。",
-        "user-reviews-local": "ローカルレビュー",
-        "user-reviews-plus": "外部レビュー",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "characters-title": "{{metadata-fields.characters-title}}",

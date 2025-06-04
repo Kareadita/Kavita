@@ -24,6 +24,7 @@ import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
+import {User} from "../../../_models/user";
 
 @Component({
     selector: 'app-reading-lists',
@@ -37,7 +38,7 @@ export class ReadingListsComponent implements OnInit {
 
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly actionService = inject(ActionService);
-  
+
 
   lists: ReadingList[] = [];
   loadingLists = false;
@@ -69,10 +70,8 @@ export class ReadingListsComponent implements OnInit {
   }
 
   getActions(readingList: ReadingList) {
-    const d = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
-      .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
-
-    return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
+    return this.actionFactoryService
+      .getReadingListActions(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this))
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
   }
 
@@ -170,6 +169,17 @@ export class ReadingListsComponent implements OnInit {
           this.bulkSelectionService.deselectAll();
         });
         break;
+    }
+  }
+
+  shouldRenderReadingListAction(action: ActionItem<ReadingList>, entity: ReadingList, user: User) {
+    switch (action.action) {
+      case Action.Promote:
+        return !entity.promoted;
+      case Action.UnPromote:
+        return entity.promoted;
+      default:
+        return true;
     }
   }
 }

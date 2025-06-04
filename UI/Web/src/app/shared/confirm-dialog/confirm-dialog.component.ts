@@ -1,15 +1,15 @@
 import {Component, inject, OnInit} from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ConfirmButton } from './_models/confirm-button';
-import { ConfirmConfig } from './_models/confirm-config';
-import {CommonModule} from "@angular/common";
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {ConfirmButton} from './_models/confirm-button';
+import {ConfirmConfig} from './_models/confirm-config';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-confirm-dialog',
-    imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe],
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss']
 })
@@ -18,6 +18,9 @@ export class ConfirmDialogComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
 
   config!: ConfirmConfig;
+  formGroup = new FormGroup({
+    'prompt': new FormControl('', []),
+  })
 
   ngOnInit(): void {
     if (this.config) {
@@ -37,6 +40,10 @@ export class ConfirmDialogComponent implements OnInit {
   }
 
   clickButton(button: ConfirmButton) {
+    if (this.config._type === 'prompt') {
+      this.modal.close(button.type === 'primary' ? this.formGroup.get('prompt')?.value : '');
+      return;
+    }
     this.modal.close(button.type === 'primary');
   }
 
