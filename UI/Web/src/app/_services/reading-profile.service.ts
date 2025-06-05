@@ -17,15 +17,23 @@ export class ReadingProfileService {
   }
 
   updateProfile(profile: ReadingProfile) {
-    return this.httpClient.post(this.baseUrl + "ReadingProfile", profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile", profile);
+  }
+
+  updateParentProfile(seriesId: number, profile: ReadingProfile) {
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + `ReadingProfile/update-parent?seriesId=${seriesId}`, profile);
   }
 
   createProfile(profile: ReadingProfile) {
     return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/create", profile);
   }
 
+  promoteProfile(profileId: number) {
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/promote?profileId=" + profileId, {});
+  }
+
   updateImplicit(profile: ReadingProfile, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + "ReadingProfile/series?seriesId="+seriesId, profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/series?seriesId="+seriesId, profile);
   }
 
   all() {

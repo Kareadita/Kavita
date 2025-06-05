@@ -1132,7 +1132,11 @@
         "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "Reset to Defaults",
-        "save-global": "Save to your reading profile",
+        "update-parent": "Update parent profile",
+        "create-new": "Promote profile",
+        "create-new-tooltip": "Create a new manageable profile from your current implicit one",
+        "reading-profile-updated": "Reading profile updated",
+        "reading-profile-promoted": "Reading profile promoted",
         "reader-settings-title": "Reader Settings",
         "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "Right to Left",
@@ -1948,7 +1952,9 @@
 
     "manga-reader": {
         "back": "Back",
-        "save-globally": "Save Globally",
+        "update-parent": "Update parent profile",
+        "create-new": "Promote profile",
+        "create-new-tooltip": "Create a new manageable profile from your current implicit one",
         "incognito-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-title": "Incognito Mode:",
         "shortcuts-menu-alt": "Keyboard Shortcuts Modal",
@@ -1985,6 +1991,7 @@
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
         "reading-profile-updated": "Reading profile updated",
+        "reading-profile-promoted": "Reading profile promoted",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "series-progress": "Series Progress: {{percentage}}"
     },
@@ -2813,8 +2820,10 @@
         "profiles-title": "Your reading profiles",
         "default-profile": "Default",
         "add": "{{common.add}}",
+        "add-tooltip": "Your new profile will be saved after making a change to it",
         "make-default": "Set as default",
         "no-selected": "No profile selected",
+        "confirm": "Are you sure you want to delete the reading profile {{name}}?",
         "selection-tip": "Select a profile from the list, or create a new one at the top right",
 
         "image-reader-settings-title": "Image Reader",

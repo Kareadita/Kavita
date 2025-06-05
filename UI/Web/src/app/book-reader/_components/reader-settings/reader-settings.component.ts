@@ -36,10 +36,11 @@ import {
   NgbAccordionItem,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
-import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
+import {ToastrService} from "ngx-toastr";
 
 /**
  * Used for book reader. Do not use for other components
@@ -185,7 +186,8 @@ export class ReaderSettingsComponent implements OnInit {
 
   constructor(private bookService: BookService, private accountService: AccountService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
-    private readonly cdRef: ChangeDetectorRef, private readingProfileService: ReadingProfileService) {}
+    private readonly cdRef: ChangeDetectorRef, private readingProfileService: ReadingProfileService,
+              private toastr: ToastrService) {}
 
   ngOnInit(): void {
 
@@ -226,14 +228,13 @@ export class ReaderSettingsComponent implements OnInit {
     this.layoutModeUpdate.emit(this.readingProfile.bookReaderLayoutMode);
     this.immersiveMode.emit(this.readingProfile.bookReaderImmersiveMode);
 
-    this.resetSettings();
-
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
-      } else {
-        this.resetSettings();
       }
+
+      // User needs to be loaded before we call this
+      this.resetSettings();
     });
   }
 
@@ -393,8 +394,29 @@ export class ReaderSettingsComponent implements OnInit {
     this.fullscreen.emit();
   }
 
-  savePref() {
-    this.readingProfileService.updateProfile(this.packReadingProfile()).subscribe()
+  // menu only code
+  updateParentPref() {
+    if (this.readingProfile.kind !== ReadingProfileKind.Implicit) {
+      return;
+    }
+
+    this.readingProfileService.updateParentProfile(this.seriesId, this.packReadingProfile()).subscribe(newProfile => {
+      this.readingProfile = newProfile;
+      this.toastr.success(translate('manga-reader.reading-profile-updated'));
+      this.cdRef.markForCheck();
+    });
+  }
+
+  createNewProfileFromImplicit() {
+    if (this.readingProfile.kind !== ReadingProfileKind.Implicit) {
+      return;
+    }
+
+    this.readingProfileService.promoteProfile(this.readingProfile.id).subscribe(newProfile => {
+      this.readingProfile = newProfile;
+      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
+      this.cdRef.markForCheck();
+    });
   }
 
   private packReadingProfile(): ReadingProfile {
@@ -417,4 +439,5 @@ export class ReaderSettingsComponent implements OnInit {
     return data;
   }
 
+  protected readonly ReadingProfileKind = ReadingProfileKind;
 }

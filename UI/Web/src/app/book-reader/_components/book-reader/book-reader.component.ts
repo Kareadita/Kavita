@@ -618,7 +618,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigateByUrl('/home');
         return;
       }
-      //this.setupReaderSettings(); // TODO: Implement this Amelia
+      //this.setupReaderSettings(); // TODO: Implement this Amelia, it works without am I missing something?
       this.cdRef.markForCheck();
     });
 

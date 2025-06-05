@@ -43,22 +43,6 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
-    /// Updates the given reading profile, must belong to the current user
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// This does not update connected series, and libraries.
-    /// Deletes all implicit profiles for series linked to this profile
-    /// </remarks>
-    [HttpPost]
-    public async Task<ActionResult> UpdateReadingProfile([FromBody] UserReadingProfileDto dto)
-    {
-        await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto);
-        return Ok();
-    }
-
-    /// <summary>
     /// Creates a new reading profile for the current user
     /// </summary>
     /// <param name="dto"></param>
@@ -70,16 +54,56 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
+    /// Promotes the implicit profile to a user profile. Removes the series from other profiles
+    /// </summary>
+    /// <param name="profileId"></param>
+    /// <returns></returns>
+    [HttpPost("promote")]
+    public async Task<ActionResult<UserReadingProfileDto>> PromoteImplicitReadingProfile([FromQuery] int profileId)
+    {
+        return Ok(await readingProfileService.PromoteImplicitProfile(User.GetUserId(), profileId));
+    }
+
+    /// <summary>
     /// Update the implicit reading profile for a series, creates one if none exists
     /// </summary>
     /// <param name="dto"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("series")]
-    public async Task<ActionResult> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
     {
-        await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
-        return Ok();
+        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
+        return Ok(updatedProfile);
+    }
+
+    /// <summary>
+    /// Updates the non-implicit reading profile for the given series, and removes implicit profiles
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpPost("update-parent")]
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
+    {
+        var newParentProfile = await readingProfileService.UpdateParent(User.GetUserId(), seriesId, dto);
+        return Ok(newParentProfile);
+    }
+
+    /// <summary>
+    /// Updates the given reading profile, must belong to the current user
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// This does not update connected series, and libraries.
+    /// Deletes all implicit profiles for series linked to this profile
+    /// </remarks>
+    [HttpPost]
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile([FromBody] UserReadingProfileDto dto)
+    {
+        var newProfile = await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto);
+        return Ok(newProfile);
     }
 
     /// <summary>

@@ -25,7 +25,6 @@ import {
   merge,
   Observable,
   ReplaySubject,
-  skip,
   Subject,
   take,
   tap
@@ -33,7 +32,7 @@ import {
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -70,7 +69,12 @@ import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {shareReplay} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
-import {layoutModes, pageSplitOptions, ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {
+  layoutModes,
+  pageSplitOptions,
+  ReadingProfile,
+  ReadingProfileKind
+} from "../../../_models/preferences/reading-profiles";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 
@@ -125,10 +129,10 @@ enum KeyDirection {
             ])
         ])
     ],
-    imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
-        DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
-        NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
-        FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective]
+  imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
+    DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
+    NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
+    FullscreenIconPipe, TranslocoDirective, PercentPipe, NgClass, AsyncPipe, DblClickDirective, NgbTooltip]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -537,14 +541,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        skip(1), // Skip the initial creation of the form, we do not want an implicit profile of this snapshot
         takeUntilDestroyed(this.destroyRef),
         map(_ => this.packReadingProfile()),
         distinctUntilChanged(),
         tap(newProfile => {
           this.readingProfileService.updateImplicit(newProfile, this.seriesId).subscribe({
-            next: () => {
-              this.readingProfile = newProfile;
+            next: updatedProfile => {
+              this.readingProfile = updatedProfile;
             },
             error: err => {
               console.error(err);
@@ -1783,10 +1786,28 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // menu only code
-  savePref() {
-    this.readingProfileService.updateProfile(this.packReadingProfile()).subscribe(_ => {
+  updateParentPref() {
+    if (this.readingProfile.kind !== ReadingProfileKind.Implicit) {
+      return;
+    }
+
+    this.readingProfileService.updateParentProfile(this.seriesId, this.packReadingProfile()).subscribe(newProfile => {
+      this.readingProfile = newProfile;
       this.toastr.success(translate('manga-reader.reading-profile-updated'));
-    })
+      this.cdRef.markForCheck();
+    });
+  }
+
+  createNewProfileFromImplicit() {
+    if (this.readingProfile.kind !== ReadingProfileKind.Implicit) {
+      return;
+    }
+
+    this.readingProfileService.promoteProfile(this.readingProfile.id).subscribe(newProfile => {
+      this.readingProfile = newProfile;
+      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
+      this.cdRef.markForCheck();
+    });
   }
 
   translatePrefOptions(o: {text: string, value: any}) {
@@ -1811,4 +1832,5 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return data;
   }
 
+  protected readonly ReadingProfileKind = ReadingProfileKind;
 }

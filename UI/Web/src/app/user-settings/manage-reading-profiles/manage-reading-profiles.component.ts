@@ -14,7 +14,7 @@ import {
   ReadingProfileKind,
   scalingOptions
 } from "../../_models/preferences/reading-profiles";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
@@ -41,11 +41,12 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {ColorPickerDirective} from "ngx-color-picker";
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
+import {ConfirmService} from "../../shared/confirm.service";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -83,6 +84,7 @@ enum TabId {
     NgbNavContent,
     NgbNavOutlet,
     LoadingComponent,
+    NgbTooltip,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -113,6 +115,8 @@ export class ManageReadingProfilesComponent implements OnInit {
     private bookService: BookService,
     private destroyRef: DestroyRef,
     private toastr: ToastrService,
+    private confirmService: ConfirmService,
+    private transLoco: TranslocoService,
   ) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
@@ -129,15 +133,24 @@ export class ManageReadingProfilesComponent implements OnInit {
       this.readingProfiles = profiles;
       this.loading = false;
       this.setupForm();
+
+      const defaultProfile = this.readingProfiles.find(rp => rp.kind === ReadingProfileKind.Default);
+      this.selectProfile(defaultProfile);
+
       this.cdRef.markForCheck();
     });
 
   }
 
-  delete(id: number) {
-    this.readingProfileService.delete(id).subscribe(() => {
+  async delete(readingProfile: ReadingProfile) {
+    if (!await this.confirmService.confirm(this.transLoco.translate("manage-reading-profiles.confirm", {name: readingProfile.name}))) {
+      return;
+    }
+
+
+    this.readingProfileService.delete(readingProfile.id).subscribe(() => {
       this.selectProfile(undefined);
-      this.readingProfiles = this.readingProfiles.filter(o => o.id !== id);
+      this.readingProfiles = this.readingProfiles.filter(o => o.id !== readingProfile.id);
       this.cdRef.markForCheck();
     });
   }
@@ -204,37 +217,39 @@ export class ManageReadingProfilesComponent implements OnInit {
       distinctUntilChanged(),
       filter(_ => this.readingProfileForm!.valid),
       takeUntilDestroyed(this.destroyRef),
-      tap(_ => {
-        if (this.selectedProfile!.id == 0) {
-          this.readingProfileService.createProfile(this.packData()).subscribe({
-            next: createdProfile => {
-              this.selectedProfile = createdProfile;
-              this.readingProfiles.push(createdProfile);
-              this.cdRef.markForCheck();
-            },
-            error: err => {
-              console.log(err);
-              this.toastr.error(err.message);
-            }
-          })
-        } else {
-          const profile = this.packData();
-          this.readingProfileService.updateProfile(profile).subscribe({
-            next: _ => {
-              this.readingProfiles = this.readingProfiles.map(p => {
-                if (p.id !== profile.id) return p;
-                return profile;
-              });
-              this.cdRef.markForCheck();
-            },
-            error: err => {
-              console.log(err);
-              this.toastr.error(err.message);
-            }
-          })
-        }
-      }),
+      tap(_ => this.autoSave()),
     ).subscribe();
+  }
+
+  private autoSave() {
+    if (this.selectedProfile!.id == 0) {
+      this.readingProfileService.createProfile(this.packData()).subscribe({
+        next: createdProfile => {
+          this.selectedProfile = createdProfile;
+          this.readingProfiles.push(createdProfile);
+          this.cdRef.markForCheck();
+        },
+        error: err => {
+          console.log(err);
+          this.toastr.error(err.message);
+        }
+      })
+    } else {
+      const profile = this.packData();
+      this.readingProfileService.updateProfile(profile).subscribe({
+        next: _ => {
+          this.readingProfiles = this.readingProfiles.map(p => {
+            if (p.id !== profile.id) return p;
+            return profile;
+          });
+          this.cdRef.markForCheck();
+        },
+        error: err => {
+          console.log(err);
+          this.toastr.error(err.message);
+        }
+      })
+    }
   }
 
   private packData(): ReadingProfile {
