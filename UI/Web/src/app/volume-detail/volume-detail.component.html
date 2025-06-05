@@ -170,7 +170,7 @@
                                       [libraryId]="libraryId"
                                       [libraryType]="libraryType"
                                       [actions]="chapterActions"
-                                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume.chapters.length, $event)"
+                                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume!.chapters.length, $event)"
                                       [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"
                     ></app-chapter-card>
                   }
