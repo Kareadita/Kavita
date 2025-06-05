@@ -2835,6 +2835,7 @@
         "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
         "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
         "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "Override width of images in the reader",
         "reset": "{{common.reset}}",
 
         "book-reader-settings-title": "Book Reader",

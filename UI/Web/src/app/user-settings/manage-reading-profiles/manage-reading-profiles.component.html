@@ -230,7 +230,7 @@
 
                           @if (readingProfileForm.get("widthOverride"); as widthOverride) {
                             <div class="row g-0 mt-4 mb-4">
-                              <app-setting-item [title]="t('width-override-label')">
+                              <app-setting-item [title]="t('width-override-label')" [subtitle]="t('width-override-tooltip')">
                                 <ng-template #view>
                                   <label for="width-override-slider" class="form-label">
                                     {{ widthOverrideLabel }}
