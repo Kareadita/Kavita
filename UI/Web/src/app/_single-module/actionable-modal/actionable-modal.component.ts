@@ -38,7 +38,7 @@ export class ActionableModalComponent implements OnInit {
 
   @Input() entity: ActionableEntity = null;
   @Input() actions: ActionItem<any>[] = [];
-  @Input() willRenderAction!: (action: ActionItem<any>) => boolean;
+  @Input() willRenderAction!: (action: ActionItem<any>, user: User) => boolean;
   @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
   @Output() actionPerformed = new EventEmitter<ActionItem<any>>();
 

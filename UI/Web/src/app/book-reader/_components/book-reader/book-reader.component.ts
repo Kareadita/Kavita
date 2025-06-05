@@ -64,6 +64,7 @@ import {
 } from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 
 enum TabID {
@@ -134,6 +135,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
+  private readonly confirmService = inject(ConfirmService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
@@ -745,7 +747,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('window:keydown', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
+  async handleKeyPress(event: KeyboardEvent) {
     const activeElement = document.activeElement as HTMLElement;
     const isInputFocused = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
     if (isInputFocused) return;
@@ -763,7 +765,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     } else if (event.key === KEY_CODES.G) {
-      this.goToPage();
+      await this.goToPage();
     } else if (event.key === KEY_CODES.F) {
       this.toggleFullscreen()
     }
@@ -920,31 +922,33 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  promptForPage() {
-    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
-    const goToPageNum = window.prompt(question, '');
+  async promptForPage() {
+    const promptConfig = {...this.confirmService.defaultPrompt};
+    // Pages are called sections in the UI, manga reader uses the go-to-page string so we use a different one here
+    promptConfig.header = translate('book-reader.go-to-section');
+    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages - 1});
+
+    const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
+
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }
 
-  goToPage(pageNum?: number) {
+  async goToPage(pageNum?: number) {
     let page = pageNum;
     if (pageNum === null || pageNum === undefined) {
-      const goToPageNum = this.promptForPage();
+      const goToPageNum = await this.promptForPage();
       if (goToPageNum === null) { return; }
+
       page = parseInt(goToPageNum.trim(), 10);
     }
 
     if (page === undefined || this.pageNum === page) { return; }
 
-    if (page > this.maxPages) {
-      page = this.maxPages;
+    if (page > this.maxPages - 1) {
+      page = this.maxPages - 1;
     } else if (page < 0) {
       page = 0;
-    }
-
-    if (!(page === 0 || page === this.maxPages - 1)) {
-      page -= 1;
     }
 
     this.pageNum = page;

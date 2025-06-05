@@ -107,6 +107,8 @@ public class UsersController : BaseApiController
         existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
+        existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
+        existingPreferences.AllowAutomaticWebtoonReaderDetection = preferencesDto.AllowAutomaticWebtoonReaderDetection;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
 

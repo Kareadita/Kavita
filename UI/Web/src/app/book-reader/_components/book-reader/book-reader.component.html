@@ -20,25 +20,26 @@
         </div>
         <div subheader>
           <div class="pagination-cont">
-            <ng-container *ngIf="layoutMode !== BookPageLayoutMode.Default">
+            <!-- Column mode needs virtual pages -->
+            @if (layoutMode !== BookPageLayoutMode.Default) {
+              @let vp = getVirtualPage();
               <div class="virt-pagination-cont">
                 <div class="g-0 text-center">
                   {{t('page-label')}}
                 </div>
-                <div class="d-flex align-items-center justify-content-between text-center row g-0" *ngIf="getVirtualPage() as vp" >
-                  <button class="btn btn-small btn-icon col-1" (click)="prevPage()" [title]="t('prev-page')">
+                <div class="d-flex align-items-center justify-content-between text-center row g-0">
+                  <button class="btn btn-small btn-icon col-1" (click)="prevPage()" [title]="t('prev-page')" [disabled]="vp[0] === 1">
                     <i class="fa-solid fa-caret-left" aria-hidden="true"></i>
                   </button>
                   <div class="col-1">{{vp[0]}}</div>
                   <div class="col-8">
-                    <ngb-progressbar [title]="t('virtual-pages')" type="primary" height="5px" (click)="loadPage()" [value]="vp[0]" [max]="vp[1]"></ngb-progressbar>
+                     <ngb-progressbar  type="primary" height="5px" [value]="vp[0]" [max]="vp[1]"></ngb-progressbar>
                   </div>
-                  <div class="col-1 btn-icon" (click)="loadPage()" [title]="t('go-to-last-page')">{{vp[1]}}</div>
+                  <div class="col-1 btn-icon">{{vp[1]}}</div>
                   <button class="btn btn-small btn-icon col-1" (click)="nextPage()" [title]="t('next-page')"><i class="fa-solid fa-caret-right" aria-hidden="true"></i></button>
                 </div>
               </div>
-            </ng-container>
-
+            }
             <div class="g-0 text-center">
               {{t('pagination-header')}}
             </div>

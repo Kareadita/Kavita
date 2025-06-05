@@ -15,13 +15,14 @@ import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, AsyncPipe]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
