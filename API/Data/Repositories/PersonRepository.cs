@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Person;
 using API.Entities.Enums;
 using API.Entities.Person;
@@ -45,7 +46,7 @@ public interface IPersonRepository
     Task<string?> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
-    Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams);
+    Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, List<PersonRole> roles, UserParams userParams);
     Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases);
     /// <summary>
@@ -194,9 +195,8 @@ public class PersonRepository : IPersonRepository
         return chapterRoles.Union(seriesRoles).Distinct();
     }
 
-    public async Task<PagedList<BrowsePersonDto>> GetAllWritersAndSeriesCount(int userId, UserParams userParams)
+    public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, List<PersonRole> roles, UserParams userParams)
     {
-        List<PersonRole> roles = [PersonRole.Writer, PersonRole.CoverArtist];
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var query = _context.Person

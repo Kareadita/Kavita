@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Person;
 using API.Entities.Enums;
 using API.Extensions;
@@ -80,8 +81,10 @@ public class PersonController : BaseApiController
     public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetAuthorsForBrowse([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        var list = await _unitOfWork.PersonRepository.GetAllWritersAndSeriesCount(User.GetUserId(), userParams);
+
+        var list = await _unitOfWork.PersonRepository.GetBrowsePersonDtos(User.GetUserId(), [PersonRole.CoverArtist, PersonRole.Writer], userParams);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
         return Ok(list);
     }
 
