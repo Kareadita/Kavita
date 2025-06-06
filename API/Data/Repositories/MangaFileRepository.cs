@@ -40,6 +40,6 @@ public class MangaFileRepository : IMangaFileRepository
 
         return await _context.MangaFile
             .FirstOrDefaultAsync(f => f.KoreaderHash != null &&
-                                      EF.Functions.Like(f.KoreaderHash, hash));
+                                    f.KoreaderHash.Equals(hash.ToUpper()));
     }
 }

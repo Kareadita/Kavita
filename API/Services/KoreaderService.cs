@@ -74,7 +74,6 @@ public class KoreaderService : IKoreaderService
     public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId)
     {
         var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var builder = new KoreaderBookDtoBuilder(bookHash);
 
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
 
@@ -83,7 +82,7 @@ public class KoreaderService : IKoreaderService
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
 
-        return builder.WithProgress(koreaderProgress)
+        return new KoreaderBookDtoBuilder(bookHash).WithProgress(koreaderProgress)
             .WithPercentage(progressDto?.PageNum, file.Pages)
             .WithDeviceId(settingsDto.InstallId, userId)
             .Build();

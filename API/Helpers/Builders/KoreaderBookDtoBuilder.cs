@@ -38,8 +38,7 @@ public class KoreaderBookDtoBuilder : IEntityBuilder<KoreaderBookDto>
 
     public KoreaderBookDtoBuilder WithDeviceId(string installId, int userId)
     {
-        using var sha256 = SHA256.Create();
-        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(installId + userId));
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(installId + userId));
         _dto.Device_id = hash.ToString();
         return this;
     }

@@ -81,7 +81,12 @@ public class KoreaderController : BaseApiController
         }
     }
 
-
+    /// <summary>
+    /// Gets book progress from Kavita, if not found will return a 400
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="ebookHash"></param>
+    /// <returns></returns>
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
     public async Task<ActionResult<KoreaderBookDto>> GetProgress(string apiKey, string ebookHash)
     {
