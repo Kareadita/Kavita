@@ -1106,7 +1106,9 @@
     "browse-authors": {
         "title": "Browse Authors & Writers",
         "author-count": "{{num}} People",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
 
     "person-detail": {
