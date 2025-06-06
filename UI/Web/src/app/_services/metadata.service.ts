@@ -1,7 +1,7 @@
 import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {tap} from 'rxjs/operators';
-import {of} from 'rxjs';
+import {map, of} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {Genre} from '../_models/metadata/genre';
 import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
@@ -11,7 +11,7 @@ import {Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
-import {SortField} from "../_models/metadata/series-filter";
+import {mangaFormatFilters, SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
@@ -20,14 +20,25 @@ import {LibraryType} from "../_models/library/library";
 import {IHasCast} from "../_models/common/i-has-cast";
 import {TextResonse} from "../_types/text-response";
 import {QueryContext} from "../_models/metadata/v2/query-context";
+import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
+import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
+import {TranslocoService} from "@jsverse/transloco";
+import {LibraryService} from './library.service';
+import {CollectionTagService} from "./collection-tag.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetadataService {
 
+  private readonly translocoService = inject(TranslocoService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly collectionTagService = inject(CollectionTagService);
+
   baseUrl = environment.apiUrl;
   private validLanguages: Array<Language> = [];
+  private ageRatingPipe = new AgeRatingPipe();
+  private mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor(private httpClient: HttpClient) { }
 
@@ -182,5 +193,67 @@ export class MetadataService {
         entity.translators = persons;
         break;
     }
+  }
+
+  /**
+   * Used to get the underlying Options (for Metadata Filter Dropdowns)
+   * @param filterField
+   */
+  getOptionsForFilterField(filterField: FilterField) {
+    switch (filterField) {
+      case FilterField.PublicationStatus:
+        return this.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
+          return {value: pub.value, label: pub.title}
+        })));
+      case FilterField.AgeRating:
+        return this.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
+          return {value: rating.value, label: this.ageRatingPipe.transform(rating.value)}
+        })));
+      case FilterField.Genres:
+        return this.getAllGenres().pipe(map(genres => genres.map(genre => {
+          return {value: genre.id, label: genre.title}
+        })));
+      case FilterField.Languages:
+        return this.getAllLanguages().pipe(map(statuses => statuses.map(status => {
+          return {value: status.isoCode, label: status.title + ` (${status.isoCode})`}
+        })));
+      case FilterField.Formats:
+        return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
+          return {value: status.value, label: this.mangaFormatPipe.transform(status.value)}
+        })));
+      case FilterField.Libraries:
+        return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
+          return {value: lib.id, label: lib.name}
+        })));
+      case FilterField.Tags:
+        return this.getAllTags().pipe(map(statuses => statuses.map(status => {
+          return {value: status.id, label: status.title}
+        })));
+      case FilterField.CollectionTags:
+        return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
+          return {value: status.id, label: status.title}
+        })));
+      case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
+      case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
+      case FilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
+      case FilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
+      case FilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
+      case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
+      case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
+      case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
+      case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
+      case FilterField.Team: return this.getPersonOptions(PersonRole.Team);
+      case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
+      case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
+      case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
+    }
+
+    return of([]);
+  }
+
+  private getPersonOptions(role: PersonRole) {
+    return this.getAllPeopleByRole(role).pipe(map(people => people.map(person => {
+      return {value: person.id, label: person.name}
+    })));
   }
 }

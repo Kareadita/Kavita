@@ -2590,6 +2590,31 @@
         "prompt": "Question"
     },
 
+    "browse-title-pipe": {
+        "publication-status": "{{value}} works",
+        "age-rating": "Rated {{value}}",
+        "user-rating": "Rated {{value}} stars",
+        "tag": "Has Tag {{value}}",
+        "translator": "Translated by {{value}}",
+        "character": "Has character {{value}}",
+        "publisher": "Published by {{value}}",
+        "editor": "Edited by {{value}}",
+        "artist": "Drawn by {{value}}",
+        "letterer": "Lettered by {{value}}",
+        "colorist": "Colored by {{value}}",
+        "inker": "Inked by {{value}}",
+        "penciller": "Pencilled by {{value}}",
+        "writer": "Written by {{value}}",
+        "genre": "Has Genre {{value}}",
+        "library": "Within {{value}} library",
+        "format": "Format of {{value}}",
+        "release-year": "Released in {{value}}",
+        "imprint": "Imprint of {{value}}",
+        "team": "Team {{value}}",
+        "location": "In {{value}} location"
+    },
+
+
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",

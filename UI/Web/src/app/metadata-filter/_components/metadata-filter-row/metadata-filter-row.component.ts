@@ -11,10 +11,8 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
-import {PersonRole} from 'src/app/_models/metadata/person';
 import {LibraryService} from 'src/app/_services/library.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
@@ -277,62 +275,8 @@ export class MetadataFilterRowComponent implements OnInit {
 
   getDropdownObservable(): Observable<Select2Option[]> {
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-      switch (filterField) {
-        case FilterField.PublicationStatus:
-          return this.metadataService.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
-            return {value: pub.value, label: pub.title}
-          })));
-        case FilterField.AgeRating:
-          return this.metadataService.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
-            return {value: rating.value, label: this.ageRatingPipe.transform(rating.value)}
-          })));
-        case FilterField.Genres:
-          return this.metadataService.getAllGenres().pipe(map(genres => genres.map(genre => {
-            return {value: genre.id, label: genre.title}
-          })));
-        case FilterField.Languages:
-          return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
-            return {value: status.isoCode, label: status.title + ` (${status.isoCode})`}
-          })));
-        case FilterField.Formats:
-          return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
-            return {value: status.value, label: this.mangaFormatPipe.transform(status.value)}
-          })));
-        case FilterField.Libraries:
-          return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
-            return {value: lib.id, label: lib.name}
-          })));
-        case FilterField.Tags:
-          return this.metadataService.getAllTags().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, label: status.title}
-          })));
-        case FilterField.CollectionTags:
-          return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, label: status.title}
-          })));
-        case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
-        case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
-        case FilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
-        case FilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
-        case FilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
-        case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
-        case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
-        case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
-        case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
-        case FilterField.Team: return this.getPersonOptions(PersonRole.Team);
-        case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
-        case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
-        case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
-      }
-      return of([]);
+      return this.metadataService.getOptionsForFilterField(filterField);
   }
-
-  getPersonOptions(role: PersonRole) {
-    return this.metadataService.getAllPeopleByRole(role).pipe(map(people => people.map(person => {
-      return {value: person.id, label: person.name}
-    })));
-  }
-
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;

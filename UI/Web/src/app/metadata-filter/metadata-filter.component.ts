@@ -61,6 +61,11 @@ export class MetadataFilterComponent implements OnInit {
   protected readonly translocoService = inject(TranslocoService);
   private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
 
+  protected readonly allSortFields = allSortFields.map(f => {
+    return {title: this.sortFieldPipe.transform(f), value: f};
+  }).sort((a, b) => a.title.localeCompare(b.title));
+  protected readonly allFilterFields = allFields;
+
   /**
    * This toggles the opening/collapsing of the metadata filter code
    */
@@ -88,10 +93,7 @@ export class MetadataFilterComponent implements OnInit {
   fullyLoaded: boolean = false;
   filterV2: SeriesFilterV2 | undefined;
 
-  protected readonly allSortFields = allSortFields.map(f => {
-    return {title: this.sortFieldPipe.transform(f), value: f};
-  }).sort((a, b) => a.title.localeCompare(b.title));
-  protected readonly allFilterFields = allFields;
+
 
 
   ngOnInit(): void {
@@ -112,38 +114,6 @@ export class MetadataFilterComponent implements OnInit {
 
     this.loadFromPresetsAndSetup();
   }
-
-  // loadSavedFilter(event: Select2UpdateEvent<any>) {
-  //   // Load the filter from the backend and update the screen
-  //   if (event.value === undefined || typeof(event.value) === 'string') return;
-  //   const smartFilter = event.value as SmartFilter;
-  //   this.filterV2 = this.filterUtilitiesService.decodeSeriesFilter(smartFilter.filter);
-  //   this.cdRef.markForCheck();
-  //   console.log('update event: ', event);
-  // }
-  //
-  // createFilterValue(event: Select2AutoCreateEvent<any>) {
-  //   // Create a new name and filter
-  //   if (!this.filterV2) return;
-  //   this.filterV2.name = event.value;
-  //   this.filterService.saveFilter(this.filterV2).subscribe(() => {
-  //
-  //     const item = {
-  //       value: {
-  //         filter: this.filterUtilitiesService.encodeSeriesFilter(this.filterV2!),
-  //         name: event.value,
-  //       } as SmartFilter,
-  //       label: event.value
-  //     };
-  //     this.smartFilters.push(item);
-  //     this.sortGroup.get('name')?.setValue(item);
-  //     this.cdRef.markForCheck();
-  //     this.toastr.success(translate('toasts.smart-filter-updated'));
-  //     this.apply();
-  //   });
-  //
-  //   console.log('create event: ', event);
-  // }
 
 
   close() {

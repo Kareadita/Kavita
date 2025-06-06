@@ -33,6 +33,10 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {BrowseTitlePipe} from "../../../_pipes/browse-title.pipe";
+import {MetadataService} from "../../../_services/metadata.service";
+import {Observable} from "rxjs";
 
 
 @Component({
@@ -57,6 +61,7 @@ export class AllSeriesComponent implements OnInit {
   private readonly jumpbarService = inject(JumpbarService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly metadataService = inject(MetadataService);
 
   title: string = translate('side-nav.all-series');
   series: Series[] = [];
@@ -68,7 +73,7 @@ export class AllSeriesComponent implements OnInit {
   filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
-
+  browseTitlePipe = new BrowseTitlePipe();
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -126,8 +131,30 @@ export class AllSeriesComponent implements OnInit {
 
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;
+
       this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
       this.titleService.setTitle('Kavita - ' + this.title);
+
+      // To provide a richer experience, when we are browsing just a Genre/Tag/etc, we regenerate the title (if not explicitly passed) to "Browse {GenreName}"
+      if (this.shouldRewriteTitle()) {
+        const field = this.filter.statements[0].field;
+
+        // This api returns value as string and number, it will complain without the casting
+        (this.metadataService.getOptionsForFilterField(field) as Observable<any>).subscribe((opts: any[]) => {
+          const matchingOpts = opts.filter(m => `${m.value}` === `${this.filter!.statements[0].value}`);
+          if (matchingOpts.length === 0) return;
+
+          const value = matchingOpts[0].label;
+          const newTitle = this.browseTitlePipe.transform(field, value);
+          if (newTitle !== '') {
+            this.title = newTitle;
+            this.titleService.setTitle('Kavita - ' + this.title);
+            this.cdRef.markForCheck();
+          }
+        });
+
+      }
+
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       this.filterSettings.presetsV2 =  this.filter;
@@ -141,6 +168,10 @@ export class AllSeriesComponent implements OnInit {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
     });
+  }
+
+  shouldRewriteTitle() {
+    return this.title === translate('side-nav.all-series') && this.filter && this.filter.statements.length === 1 && this.filter.statements[0].comparison === FilterComparison.Equal
   }
 
   updateFilter(data: FilterEvent) {
