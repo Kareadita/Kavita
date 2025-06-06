@@ -773,6 +773,8 @@
         "library-name-header": "Library",
         "valid-until-header": "Next Refresh",
         "actions-header": "Actions",
+        "library-type": "Library Type",
+        "matched-state-label": "Match State",
         "matched-status-label": "Matched",
         "unmatched-status-label": "Not Matched",
         "blacklist-status-label": "Needs Manual Match",

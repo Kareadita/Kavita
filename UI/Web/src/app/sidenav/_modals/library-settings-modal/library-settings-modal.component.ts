@@ -20,7 +20,13 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
+import {
+  allKavitaPlusEligibleTypes,
+  allKavitaPlusMetadataApplicableTypes,
+  allLibraryTypes,
+  Library,
+  LibraryType
+} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -125,13 +131,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return libType === LibraryType.Manga || libType === LibraryType.LightNovel;
+    return allKavitaPlusEligibleTypes.includes(libType);
   }
 
   get IsMetadataDownloadEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return libType === LibraryType.Manga || libType === LibraryType.LightNovel
-      || libType === LibraryType.ComicVine || libType === LibraryType.Comic;
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
   }
 
   ngOnInit(): void {

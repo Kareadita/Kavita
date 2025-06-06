@@ -190,6 +190,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       } else {
         return this.manageService.getAllKavitaPlusSeries({
           matchStateOption: MatchStateOption.Error,
+          libraryType: -1,
           searchTerm: ''
         }).pipe(
           takeUntilDestroyed(this.destroyRef),
