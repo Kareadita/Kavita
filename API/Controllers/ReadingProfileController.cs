@@ -35,11 +35,12 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Series -> Library -> Default
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="skipImplicit"></param>
     /// <returns></returns>
-    [HttpGet("{seriesId}")]
-    public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int seriesId)
+    [HttpGet("{seriesId:int}")]
+    public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int seriesId, [FromQuery] bool skipImplicit)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(User.GetUserId(), seriesId));
+        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(User.GetUserId(), seriesId, skipImplicit));
     }
 
     /// <summary>
@@ -126,7 +127,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="seriesId"></param>
     /// <param name="profileId"></param>
     /// <returns></returns>
-    [HttpPost("series/{seriesId}")]
+    [HttpPost("series/{seriesId:int}")]
     public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
     {
         await readingProfileService.AddProfileToSeries(User.GetUserId(), profileId, seriesId);
@@ -138,7 +139,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpDelete("series/{seriesId}")]
+    [HttpDelete("series/{seriesId:int}")]
     public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
         await readingProfileService.ClearSeriesProfile(User.GetUserId(), seriesId);
@@ -151,7 +152,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="libraryId"></param>
     /// <param name="profileId"></param>
     /// <returns></returns>
-    [HttpPost("library/{libraryId}")]
+    [HttpPost("library/{libraryId:int}")]
     public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
     {
         await readingProfileService.AddProfileToLibrary(User.GetUserId(), profileId, libraryId);
@@ -164,7 +165,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="libraryId"></param>
     /// <param name="profileId"></param>
     /// <returns></returns>
-    [HttpDelete("library/{libraryId}")]
+    [HttpDelete("library/{libraryId:int}")]
     public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
         await readingProfileService.ClearLibraryProfile(User.GetUserId(), libraryId);

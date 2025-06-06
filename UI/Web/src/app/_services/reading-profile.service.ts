@@ -12,8 +12,8 @@ export class ReadingProfileService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getForSeries(seriesId: number) {
-    return this.httpClient.get<ReadingProfile>(this.baseUrl + "ReadingProfile/"+seriesId);
+  getForSeries(seriesId: number, skipImplicit: boolean = false) {
+    return this.httpClient.get<ReadingProfile>(this.baseUrl + `ReadingProfile/${seriesId}?skipImplicit=${skipImplicit}`);
   }
 
   updateProfile(profile: ReadingProfile) {

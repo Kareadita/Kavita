@@ -22,8 +22,9 @@ public interface IReadingProfileService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="skipImplicit"></param>
     /// <returns></returns>
-    Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId);
+    Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId, bool skipImplicit = false);
 
     /// <summary>
     /// Creates a new reading profile for a user. Name must be unique per user
@@ -60,7 +61,7 @@ public interface IReadingProfileService
     Task<UserReadingProfileDto> UpdateParent(int userId, int seriesId, UserReadingProfileDto dto);
 
     /// <summary>
-    /// Updates a given reading profile for a user, and deletes all implicit profiles
+    /// Updates a given reading profile for a user
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="dto"></param>
@@ -123,9 +124,9 @@ public interface IReadingProfileService
 public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
 {
 
-    public async Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId)
+    public async Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int seriesId, bool skipImplicit = false)
     {
-        return mapper.Map<UserReadingProfileDto>(await GetReadingProfileForSeries(userId, seriesId));
+        return mapper.Map<UserReadingProfileDto>(await GetReadingProfileForSeries(userId, seriesId, skipImplicit));
     }
 
     public async Task<AppUserReadingProfile> GetReadingProfileForSeries(int userId, int seriesId, bool skipImplicit = false)
@@ -175,7 +176,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         UpdateReaderProfileFields(profile, dto);
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
-        await DeleteImplicateReadingProfilesForSeries(userId, profile.SeriesIds);
+        // await DeleteImplicateReadingProfilesForSeries(userId, profile.SeriesIds);
 
         await unitOfWork.CommitAsync();
         return mapper.Map<UserReadingProfileDto>(profile);

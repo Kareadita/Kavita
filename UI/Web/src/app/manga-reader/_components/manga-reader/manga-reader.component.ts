@@ -205,6 +205,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   totalSeriesPagesRead = 0;
   user!: User;
   readingProfile!: ReadingProfile;
+  /**
+   * The reading profile itself, unless readingProfile is implicit
+   */
+  parentReadingProfile: ReadingProfile | null = null;
   generalSettingsForm!: FormGroup;
 
   readingDirection = ReadingDirection.LeftToRight;
@@ -491,17 +495,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.readingProfile = data['readingProfile'];
-      if (this.readingProfile == null) {
-        this.router.navigateByUrl('/home');
-        return;
-      }
-      this.setupReaderSettings();
-      this.cdRef.markForCheck();
-    });
-
-
     this.getPageFn = this.getPage.bind(this);
 
     this.libraryId = parseInt(libraryId, 10);
@@ -509,6 +502,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
     this.bookmarkMode = this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true';
+
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+      // Requires seriesId to be set
+      this.setupReaderSettings();
+      this.cdRef.markForCheck();
+    });
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -644,6 +648,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setupReaderSettings() {
+
+    if (this.readingProfile.kind === ReadingProfileKind.Implicit) {
+      this.readingProfileService.getForSeries(this.seriesId, true).subscribe(parent => {
+        this.parentReadingProfile = parent;
+        this.cdRef.markForCheck();
+      })
+    } else {
+      this.parentReadingProfile = this.readingProfile;
+    }
+
     this.readingDirection = this.readingProfile.readingDirection;
     this.scalingOption = this.readingProfile.scalingOption;
     this.pageSplitOption = this.readingProfile.pageSplitOption;
@@ -1805,6 +1819,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.readingProfileService.promoteProfile(this.readingProfile.id).subscribe(newProfile => {
       this.readingProfile = newProfile;
+      this.parentReadingProfile = newProfile; // Profile is no longer implicit
       this.toastr.success(translate("manga-reader.reading-profile-promoted"));
       this.cdRef.markForCheck();
     });

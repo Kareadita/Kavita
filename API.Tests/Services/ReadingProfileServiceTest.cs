@@ -67,13 +67,8 @@ public class ReadingProfileServiceTest: AbstractDbTest
         Assert.NotNull(seriesProfile);
         Assert.Equal("Implicit Profile", seriesProfile.Name);
 
-        await rps.UpdateReadingProfile(user.Id, new UserReadingProfileDto
-        {
-            Id = profile2.Id,
-            WidthOverride = 23,
-        });
-
-        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        // Find parent
+        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id, true);
         Assert.NotNull(seriesProfile);
         Assert.Equal("Non-implicit Profile", seriesProfile.Name);
     }
@@ -260,7 +255,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
     }
 
     [Fact]
-    public async Task BatchAddReadingProfiles()
+    public async Task BulkAddReadingProfiles()
     {
         await ResetDb();
         var (rps, user, lib, series) = await Setup();
@@ -309,43 +304,7 @@ public class ReadingProfileServiceTest: AbstractDbTest
     }
 
     [Fact]
-    public async Task UpdateDeletesImplicit()
-    {
-        await ResetDb();
-        var (rps, user, lib, series) = await Setup();
-
-        var implicitProfile = Mapper.Map<UserReadingProfileDto>(new AppUserReadingProfileBuilder(user.Id)
-            .Build());
-
-        var profile = new AppUserReadingProfileBuilder(user.Id)
-            .WithName("Profile 1")
-            .Build();
-        Context.AppUserReadingProfiles.Add(profile);
-        await UnitOfWork.CommitAsync();
-
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
-        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, implicitProfile);
-
-
-        var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
-        Assert.NotNull(seriesProfile);
-        Assert.Equal(ReadingProfileKind.Implicit, seriesProfile.Kind);
-
-        var profileDto = Mapper.Map<UserReadingProfileDto>(profile);
-        await rps.UpdateReadingProfile(user.Id, profileDto);
-
-        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
-        Assert.NotNull(seriesProfile);
-        Assert.Equal(ReadingProfileKind.User, seriesProfile.Kind);
-
-        var implicitCount = await Context.AppUserReadingProfiles
-            .Where(p => p.Kind == ReadingProfileKind.Implicit)
-            .CountAsync();
-        Assert.Equal(0, implicitCount);
-    }
-
-    [Fact]
-    public async Task BatchUpdateDeletesImplicit()
+    public async Task BulkAssignDeletesImplicit()
     {
         await ResetDb();
         var (rps, user, lib, series) = await Setup();
@@ -574,18 +533,22 @@ public class ReadingProfileServiceTest: AbstractDbTest
     [Fact]
     public void UpdateFields_UpdatesAll()
     {
-        var profile = new AppUserReadingProfile();
-        var dto = new UserReadingProfileDto();
+        // Repeat to ensure booleans are flipped and actually tested
+        for (int i = 0; i < 10; i++)
+        {
+            var profile = new AppUserReadingProfile();
+            var dto = new UserReadingProfileDto();
 
-        RandfHelper.SetRandomValues(profile);
-        RandfHelper.SetRandomValues(dto);
+            RandfHelper.SetRandomValues(profile);
+            RandfHelper.SetRandomValues(dto);
 
-        ReadingProfileService.UpdateReaderProfileFields(profile, dto);
+            ReadingProfileService.UpdateReaderProfileFields(profile, dto);
 
-        var newDto = Mapper.Map<UserReadingProfileDto>(profile);
+            var newDto = Mapper.Map<UserReadingProfileDto>(profile);
 
-        Assert.True(RandfHelper.AreSimpleFieldsEqual(dto, newDto,
-            ["<Id>k__BackingField", "<AppUserId>k__BackingField", "<Implicit>k__BackingField"]));
+            Assert.True(RandfHelper.AreSimpleFieldsEqual(dto, newDto,
+                ["<Id>k__BackingField", "<UserId>k__BackingField"]));
+        }
     }
 
 

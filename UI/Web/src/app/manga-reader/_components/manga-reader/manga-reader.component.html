@@ -310,8 +310,17 @@
 
 
                 <div class="col-md-6 col-sm-12">
-                  <button class="btn btn-primary" [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit" (click)="updateParentPref()">{{t('update-parent')}}</button>
-                  <button class="btn btn-primary ms-2" [ngbTooltip]="t('create-new-tooltip')" [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit" (click)="createNewProfileFromImplicit()">{{t('create-new')}}</button>
+                  <button class="btn btn-primary"
+                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
+                          (click)="updateParentPref()">
+                    {{ t('update-parent', {name: parentReadingProfile?.name || t('loading')}) }}
+                  </button>
+                  <button class="btn btn-primary ms-2"
+                          [ngbTooltip]="t('create-new-tooltip')"
+                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit"
+                          (click)="createNewProfileFromImplicit()">
+                    {{ t('create-new') }}
+                  </button>
                 </div>
               </div>
             </form>

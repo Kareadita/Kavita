@@ -166,6 +166,11 @@ export class ReaderSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
 
   /**
+   * The reading profile itself, unless readingProfile is implicit
+   */
+  parentReadingProfile: ReadingProfile | null = null;
+
+  /**
    * System provided themes
    */
   themes: Array<BookTheme> = bookColorThemes;
@@ -190,6 +195,14 @@ export class ReaderSettingsComponent implements OnInit {
               private toastr: ToastrService) {}
 
   ngOnInit(): void {
+    if (this.readingProfile.kind === ReadingProfileKind.Implicit) {
+      this.readingProfileService.getForSeries(this.seriesId, true).subscribe(parent => {
+        this.parentReadingProfile = parent;
+        this.cdRef.markForCheck();
+      })
+    } else {
+      this.parentReadingProfile = this.readingProfile;
+    }
 
     this.fontFamilies = this.bookService.getFontFamilies();
     this.fontOptions = this.fontFamilies.map(f => f.title);
@@ -325,6 +338,10 @@ export class ReaderSettingsComponent implements OnInit {
 
   updateImplicit() {
     this.readingProfileService.updateImplicit(this.packReadingProfile(), this.seriesId).subscribe({
+      next: newProfile => {
+        this.readingProfile = newProfile;
+        this.cdRef.markForCheck();
+      },
       error: err => {
         console.error(err);
       }
@@ -414,6 +431,7 @@ export class ReaderSettingsComponent implements OnInit {
 
     this.readingProfileService.promoteProfile(this.readingProfile.id).subscribe(newProfile => {
       this.readingProfile = newProfile;
+      this.parentReadingProfile = newProfile; // profile is no longer implicit
       this.toastr.success(translate("manga-reader.reading-profile-promoted"));
       this.cdRef.markForCheck();
     });
