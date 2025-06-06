@@ -15,12 +15,7 @@ import {DecimalPipe} from "@angular/common";
 import {Series} from "../_models/series";
 import {Pagination} from "../_models/pagination";
 import {JumpKey} from "../_models/jumpbar/jump-key";
-import {ActivatedRoute, Router} from "@angular/router";
-import {Title} from "@angular/platform-browser";
-import {ActionFactoryService} from "../_services/action-factory.service";
-import {ActionService} from "../_services/action.service";
-import {MessageHubService} from "../_services/message-hub.service";
-import {UtilityService} from "../shared/_services/utility.service";
+import {Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
 import {BrowsePerson} from "../_models/person/browse-person";
 import {JumpbarService} from "../_services/jumpbar.service";
@@ -48,13 +43,7 @@ export class BrowseAuthorsComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly titleService = inject(Title);
-  private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
-  private readonly hubService = inject(MessageHubService);
-  private readonly utilityService = inject(UtilityService);
   private readonly personService = inject(PersonService);
   private readonly jumpbarService = inject(JumpbarService);
   protected readonly imageService = inject(ImageService);

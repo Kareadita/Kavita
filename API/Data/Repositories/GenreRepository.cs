@@ -6,6 +6,7 @@ using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -27,6 +28,7 @@ public interface IGenreRepository
     Task<GenreTagDto> GetRandomGenre();
     Task<GenreTagDto> GetGenreById(int id);
     Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames);
+    Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams);
 }
 
 public class GenreRepository : IGenreRepository
@@ -164,5 +166,29 @@ public class GenreRepository : IGenreRepository
 
         // Return the original non-normalized genres for the missing ones
         return missingGenres.Select(normalizedName => normalizedToOriginalMap[normalizedName]).ToList();
+    }
+
+    public async Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        var query = _context.Genre
+            .RestrictAgainstAgeRestriction(ageRating)
+            .Select(g => new BrowseGenreDto
+            {
+                Id = g.Id,
+                Title = g.Title,
+                SeriesCount = g.SeriesMetadatas
+                    .Select(sm => sm.Id)
+                    .Distinct()
+                    .Count(),
+                IssueCount = g.Chapters
+                    .Select(ch => ch.Id)
+                    .Distinct()
+                    .Count()
+            })
+            .OrderBy(g => g.Title);
+
+        return await PagedList<BrowseGenreDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 }

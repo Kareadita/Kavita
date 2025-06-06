@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
-import { AuthGuard } from './_guards/auth.guard';
-import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { AdminGuard } from './_guards/admin.guard';
+import {NgModule} from '@angular/core';
+import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
+import {AuthGuard} from './_guards/auth.guard';
+import {LibraryAccessGuard} from './_guards/library-access.guard';
 
 const routes: Routes = [
   {
@@ -53,6 +52,10 @@ const routes: Routes = [
       {
         path: 'browse/authors',
         loadChildren: () => import('./_routes/browse-authors-routing.module').then(m => m.routes)
+      },
+      {
+        path: 'browse/genres',
+        loadChildren: () => import('./_routes/browse-genres-routing.module').then(m => m.routes)
       },
       {
         path: 'library',

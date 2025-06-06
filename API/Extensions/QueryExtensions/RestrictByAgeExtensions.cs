@@ -3,6 +3,7 @@ using System.Linq;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Entities.Person;
 
 namespace API.Extensions.QueryExtensions;
@@ -21,6 +22,19 @@ public static class RestrictByAgeExtensions
         if (!restriction.IncludeUnknowns)
         {
             return q.Where(s => s.Metadata.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
+    }
+
+    public static IQueryable<SeriesMetadata> RestrictAgainstAgeRestriction(this IQueryable<SeriesMetadata> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+        var q = queryable.Where(s => s.AgeRating <= restriction.AgeRating);
+
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(s => s.AgeRating != AgeRating.Unknown);
         }
 
         return q;

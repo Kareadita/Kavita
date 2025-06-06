@@ -12,7 +12,7 @@ public class BrowsePersonDto : PersonDto
     /// </summary>
     public int SeriesCount { get; set; }
     /// <summary>
-    /// Number or Issues this Person is the Writer for
+    /// Number of Issues this Person is the Writer for
     /// </summary>
     public int IssueCount { get; set; }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Person;
@@ -44,6 +45,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             .ToList();
 
         return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
+    }
+
+    /// <summary>
+    /// Returns a list of Genres with counts for counts when Genre is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("genres-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseGenreDto>>> GetBrowseGenres(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.GenreRepository.GetBrowseableGenre(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {tap} from 'rxjs/operators';
 import {map, of} from 'rxjs';
@@ -25,6 +25,9 @@ import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
 import {TranslocoService} from "@jsverse/transloco";
 import {LibraryService} from './library.service';
 import {CollectionTagService} from "./collection-tag.service";
+import {PaginatedResult} from "../_models/pagination";
+import {UtilityService} from "../shared/_services/utility.service";
+import {BrowseGenre} from "../_models/metadata/browse-genre";
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +37,7 @@ export class MetadataService {
   private readonly translocoService = inject(TranslocoService);
   private readonly libraryService = inject(LibraryService);
   private readonly collectionTagService = inject(CollectionTagService);
+  private readonly utilityService = inject(UtilityService);
 
   baseUrl = environment.apiUrl;
   private validLanguages: Array<Language> = [];
@@ -83,6 +87,17 @@ export class MetadataService {
     }
 
     return this.httpClient.get<Array<Genre>>(this.baseUrl + method);
+  }
+
+  getGenreWithCounts(pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<BrowseGenre[]>>(this.baseUrl + 'metadata/genres-with-counts', {}, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowseGenre[]>;
+      })
+    );
   }
 
   getAllLanguages(libraries?: Array<number>) {
