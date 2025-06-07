@@ -1,6 +1,4 @@
-﻿using API.Entities;
-
-namespace API.DTOs.Metadata;
+﻿namespace API.DTOs.Metadata.Browse;
 
 public sealed record BrowseTagDto : TagDto
 {
@@ -9,7 +7,7 @@ public sealed record BrowseTagDto : TagDto
     /// </summary>
     public int SeriesCount { get; set; }
     /// <summary>
-    /// Number of Issues this Entity is on
+    /// Number of Chapters this Entity is on
     /// </summary>
-    public int IssueCount { get; set; }
+    public int ChapterCount { get; set; }
 }

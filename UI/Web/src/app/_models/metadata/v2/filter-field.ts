@@ -66,7 +66,6 @@ export const allPeople = [
 
 export const personRoleForFilterField = (role: PersonRole) => {
   switch (role) {
-    case PersonRole.Artist: return FilterField.CoverArtist;
     case PersonRole.Character: return FilterField.Characters;
     case PersonRole.Colorist: return FilterField.Colorist;
     case PersonRole.CoverArtist: return FilterField.CoverArtist;

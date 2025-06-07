@@ -11,7 +11,7 @@ import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.se
 import {BrowseGenre} from "../../_models/metadata/browse/browse-genre";
 import {Pagination} from "../../_models/pagination";
 import {JumpKey} from "../../_models/jumpbar/jump-key";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {BrowseTag} from "../../_models/metadata/browse/browse-tag";

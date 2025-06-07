@@ -1,6 +1,6 @@
-import {inject, Pipe, PipeTransform} from '@angular/core';
-import { PersonRole } from '../_models/metadata/person';
-import {translate, TranslocoService} from "@jsverse/transloco";
+import {Pipe, PipeTransform} from '@angular/core';
+import {PersonRole} from '../_models/metadata/person';
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'personRole',
@@ -10,8 +10,6 @@ export class PersonRolePipe implements PipeTransform {
 
   transform(value: PersonRole): string {
     switch (value) {
-      case PersonRole.Artist:
-        return translate('person-role-pipe.artist');
       case PersonRole.Character:
         return translate('person-role-pipe.character');
       case PersonRole.Colorist:

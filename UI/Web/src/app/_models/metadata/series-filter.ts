@@ -7,10 +7,6 @@ export interface FilterItem<T> {
     selected: boolean;
 }
 
-export interface SortOptions {
-  sortField: SortField;
-  isAscending: boolean;
-}
 
 export enum SortField {
   SortName = 1,

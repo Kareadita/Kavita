@@ -28,6 +28,7 @@ import {allFields} from "../_models/metadata/v2/filter-field";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {animate, style, transition, trigger} from "@angular/animations";
+import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -46,9 +47,9 @@ import {animate, style, transition, trigger} from "@angular/animations";
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet, DrawerComponent,
-        ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
-        MetadataBuilderComponent, NgClass]
+  imports: [NgTemplateOutlet, DrawerComponent,
+    ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
+    MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -185,9 +186,10 @@ export class MetadataFilterComponent implements OnInit {
   }
 
 
-  updateSortOrder() {
+  updateSortOrder(isAscending: boolean) {
     if (this.filterSettings.sortDisabled) return;
-    this.isAscendingSort = !this.isAscendingSort;
+    this.isAscendingSort = isAscending;
+
     if (this.filterV2?.sortOptions === null) {
       this.filterV2.sortOptions = {
         isAscending: this.isAscendingSort,

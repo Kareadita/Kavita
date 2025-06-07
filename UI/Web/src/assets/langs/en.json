@@ -1104,11 +1104,16 @@
     },
 
     "browse-authors": {
-        "title": "Browse Authors & Writers",
+        "title": "Browse People",
         "author-count": "{{num}} People",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "issue-count": "{{common.issue-count}}",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "roles-label": "Roles",
+        "sort-label": "Sort",
+        "name-label": "Name",
+        "issue-count-label": "Issue Count",
+        "series-count-label": "Series Count"
     },
 
     "browse-genres": {
@@ -1883,7 +1888,9 @@
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
         "close": "{{common.close}}",
-        "person-aka-status": "Matches an alias"
+        "person-aka-status": "Matches an alias",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags"
     },
 
     "promoted-icon": {

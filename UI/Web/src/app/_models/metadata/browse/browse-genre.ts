@@ -2,5 +2,5 @@ import {Genre} from "../genre";
 
 export interface BrowseGenre extends Genre {
   seriesCount: number;
-  issueCount: number;
+  chapterCount: number;
 }

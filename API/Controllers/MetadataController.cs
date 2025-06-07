@@ -9,6 +9,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
 using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;

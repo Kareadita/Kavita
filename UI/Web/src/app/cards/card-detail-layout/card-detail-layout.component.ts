@@ -88,7 +88,10 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @Input() filterSettings!: FilterSettings;
   @Input() refresh!: EventEmitter<void>;
 
-
+  /**
+   * Will force the jumpbar to be disabled - in cases where you're not using a traditional filter config
+   */
+  @Input() customSort: boolean = false;
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
@@ -106,6 +109,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   updateApplied: number = 0;
   bufferAmount: number = 1;
+
 
 
 
@@ -171,11 +175,10 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
+    if (this.customSort) return true;
     if (this.filteringDisabled) return false;
-    const hasCustomSort = this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending;
-    //const hasNonDefaultSortField = this.filterSettings?.presetsV2?.sortOptions?.sortField != SortField.SortName;
-
-    return hasCustomSort;
+    
+    return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending;
   }
 
   performAction(action: ActionItem<any>) {

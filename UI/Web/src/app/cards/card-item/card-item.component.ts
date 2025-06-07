@@ -46,7 +46,7 @@ import {NextExpectedChapter} from "../../_models/series-detail/next-expected-cha
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;

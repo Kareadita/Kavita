@@ -178,8 +178,6 @@ export class MetadataService {
     switch (role) {
       case PersonRole.Other:
         break;
-      case PersonRole.Artist:
-        break;
       case PersonRole.CoverArtist:
         entity.coverArtists = persons;
         break;

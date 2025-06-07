@@ -6,7 +6,7 @@ import {
 } from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {JumpbarService} from "../../_services/jumpbar.service";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {Pagination} from "../../_models/pagination";
 import {JumpKey} from "../../_models/jumpbar/jump-key";
 import {MetadataService} from "../../_services/metadata.service";

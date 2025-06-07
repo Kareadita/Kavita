@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -182,7 +183,7 @@ public class GenreRepository : IGenreRepository
                     .Select(sm => sm.Id)
                     .Distinct()
                     .Count(),
-                IssueCount = g.Chapters
+                ChapterCount = g.Chapters
                     .Select(ch => ch.Id)
                     .Distinct()
                     .Count()

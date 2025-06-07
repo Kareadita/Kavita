@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Filtering.v2;
+using API.DTOs.Metadata.Browse;
+using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Person;
 using API.Entities.Enums;
 using API.Entities.Person;
@@ -46,7 +48,7 @@ public interface IPersonRepository
     Task<string?> GetCoverImageAsync(int personId);
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
-    Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, List<PersonRole> roles, UserParams userParams);
+    Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter, UserParams userParams);
     Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases);
     /// <summary>
@@ -195,13 +197,15 @@ public class PersonRepository : IPersonRepository
         return chapterRoles.Union(seriesRoles).Distinct();
     }
 
-    public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, List<PersonRole> roles, UserParams userParams)
+    public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter, UserParams userParams)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var query = _context.Person
-            .Where(p => p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) || p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role)))
+            .Where(p => p.SeriesMetadataPeople.Any(smp => filter.Roles.Contains(smp.Role)) || p.ChapterPeople.Any(cmp => filter.Roles.Contains(cmp.Role)))
+            .WhereIf(!string.IsNullOrEmpty(filter.Query), p => EF.Functions.Like(p.Name, $"%{filter.Query}%"))
             .RestrictAgainstAgeRestriction(ageRating)
+            .SortBy(filter.SortOptions)
             .Select(p => new BrowsePersonDto
             {
                 Id = p.Id,
@@ -209,17 +213,17 @@ public class PersonRepository : IPersonRepository
                 Description = p.Description,
                 CoverImage = p.CoverImage,
                 SeriesCount = p.SeriesMetadataPeople
-                    .Where(smp => roles.Contains(smp.Role))
+                    .Where(smp => filter.Roles.Contains(smp.Role))
                     .Select(smp => smp.SeriesMetadata.SeriesId)
                     .Distinct()
                     .Count(),
-                IssueCount = p.ChapterPeople
-                    .Where(cp => roles.Contains(cp.Role))
+                ChapterCount = p.ChapterPeople
+                    .Where(cp => filter.Roles.Contains(cp.Role))
                     .Select(cp => cp.Chapter.Id)
                     .Distinct()
                     .Count()
             })
-            .OrderBy(p => p.Name);
+            ;
 
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }

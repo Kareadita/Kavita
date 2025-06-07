@@ -1,13 +1,13 @@
 import {inject, Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Params, Router} from '@angular/router';
-import {SortField, SortOptions} from 'src/app/_models/metadata/series-filter';
+import {SortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
-import { HttpClient } from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";

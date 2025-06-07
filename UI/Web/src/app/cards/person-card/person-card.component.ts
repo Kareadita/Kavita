@@ -19,7 +19,7 @@ import {ScrollService} from "../../_services/scroll.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NgTemplateOutlet} from "@angular/common";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {Person} from "../../_models/metadata/person";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
