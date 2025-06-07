@@ -129,11 +129,17 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     {
         var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, skipImplicit);
 
+        // If there is an implicit, send back
+        var implicitProfile =
+            profiles.FirstOrDefault(p => p.SeriesIds.Contains(seriesId) && p.Kind == ReadingProfileKind.Implicit);
+        if (implicitProfile != null) return  implicitProfile;
+
+        // Next check for a bound Series profile
         var seriesProfile = profiles
             .FirstOrDefault(p => p.SeriesIds.Contains(seriesId) && p.Kind != ReadingProfileKind.Implicit);
         if (seriesProfile != null) return seriesProfile;
 
-
+        // Check for a library bound profile
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
 
@@ -141,6 +147,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             .FirstOrDefault(p => p.LibraryIds.Contains(series.LibraryId) && p.Kind != ReadingProfileKind.Implicit);
         if (libraryProfile != null) return libraryProfile;
 
+        // Fallback to the default profile
         return profiles.First(p => p.Kind == ReadingProfileKind.Default);
     }
 
@@ -201,7 +208,6 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     /// <returns></returns>
     public async Task<UserReadingProfileDto> PromoteImplicitProfile(int userId, int profileId)
     {
-
         // Get all the user's profiles including the implicit
         var allUserProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, false);
         var profileToPromote = allUserProfiles.First(r => r.Id == profileId);
@@ -221,33 +227,26 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         profileToPromote.Kind = ReadingProfileKind.User;
         profileToPromote.Name = await localizationService.Translate(userId, "generated-reading-profile-name", series.Name);
+        profileToPromote.Name = EnsureUniqueProfileName(allUserProfiles, profileToPromote.Name);
         profileToPromote.NormalizedName = profileToPromote.Name.ToNormalized();
         unitOfWork.AppUserReadingProfileRepository.Update(profileToPromote);
 
         await unitOfWork.CommitAsync();
 
         return mapper.Map<UserReadingProfileDto>(profileToPromote);
+    }
 
+    private static string EnsureUniqueProfileName(IList<AppUserReadingProfile> allUserProfiles, string name)
+    {
+        var counter = 1;
+        var newName = name;
+        while (allUserProfiles.Any(p => p.Name == newName))
+        {
+            newName = $"{name} ({counter})";
+            counter++;
+        }
 
-        // var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
-        // if (profile == null) throw new KavitaException("profile-does-not-exist");
-        //
-        // if (profile.Kind != ReadingProfileKind.Implicit) throw new KavitaException("cannot-promote-non-implicit-profile");
-        //
-        // // Implicit profiles are only bound to one profile
-        // var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(profile.SeriesIds[0]);
-        // if (series == null) throw new KavitaException("series-doesnt-exist"); // Shouldn't happen
-        //
-        // await RemoveSeriesFromUserProfiles(userId, [series.Id]);
-        //
-        // profile.Kind = ReadingProfileKind.User;
-        // profile.Name = await localizationService.Translate(userId, "generated-reading-profile-name", series.Name);
-        // profile.NormalizedName = profile.Name.ToNormalized();
-        //
-        // unitOfWork.AppUserReadingProfileRepository.Update(profile);
-        // await unitOfWork.CommitAsync();
-        //
-        // return mapper.Map<UserReadingProfileDto>(profile);
+        return newName;
     }
 
     public async Task<UserReadingProfileDto> UpdateImplicitReadingProfile(int userId, int seriesId, UserReadingProfileDto dto)
