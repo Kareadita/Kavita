@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
@@ -17,51 +17,51 @@ export class ReadingProfileService {
   }
 
   updateProfile(profile: ReadingProfile) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile", profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + 'reading-profile', profile);
   }
 
   updateParentProfile(seriesId: number, profile: ReadingProfile) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + `ReadingProfile/update-parent?seriesId=${seriesId}`, profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + `reading-profile/update-parent?seriesId=${seriesId}`, profile);
   }
 
   createProfile(profile: ReadingProfile) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/create", profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + 'reading-profile/create', profile);
   }
 
   promoteProfile(profileId: number) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/promote?profileId=" + profileId, {});
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "reading-profile/promote?profileId=" + profileId, {});
   }
 
   updateImplicit(profile: ReadingProfile, seriesId: number) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + "ReadingProfile/series?seriesId="+seriesId, profile);
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + "reading-profile/series?seriesId="+seriesId, profile);
   }
 
   all() {
-    return this.httpClient.get<ReadingProfile[]>(this.baseUrl + "ReadingProfile/all");
+    return this.httpClient.get<ReadingProfile[]>(this.baseUrl + 'reading-profile/all');
   }
 
   delete(id: number) {
-    return this.httpClient.delete(this.baseUrl + "ReadingProfile?profileId="+id);
+    return this.httpClient.delete(this.baseUrl + `reading-profile?profileId=${id}`);
   }
 
   addToSeries(id: number, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + `ReadingProfile/series/${seriesId}?profileId=${id}`, {});
+    return this.httpClient.post(this.baseUrl + `reading-profile/series/${seriesId}?profileId=${id}`, {});
   }
 
   clearSeriesProfiles(seriesId: number) {
-    return this.httpClient.delete(this.baseUrl + `ReadingProfile/series/${seriesId}`, {});
+    return this.httpClient.delete(this.baseUrl + `reading-profile/series/${seriesId}`, {});
   }
 
   addToLibrary(id: number, libraryId: number) {
-    return this.httpClient.post(this.baseUrl + `ReadingProfile/library/${libraryId}?profileId=${id}`, {});
+    return this.httpClient.post(this.baseUrl + `reading-profile/library/${libraryId}?profileId=${id}`, {});
   }
 
   clearLibraryProfiles(libraryId: number) {
-    return this.httpClient.delete(this.baseUrl + `ReadingProfile/library/${libraryId}`, {});
+    return this.httpClient.delete(this.baseUrl + `reading-profile/library/${libraryId}`, {});
   }
 
   bulkAddToSeries(id: number, seriesIds: number[]) {
-    return this.httpClient.post(this.baseUrl + `ReadingProfile/bulk?profileId=${id}`, seriesIds);
+    return this.httpClient.post(this.baseUrl + `reading-profile/bulk?profileId=${id}`, seriesIds);
   }
 
 }

@@ -158,7 +158,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   get widthOverrideLabel() {
     const rawVal = this.readingProfileForm?.get('widthOverride')!.value;
     if (!rawVal) {
-      return translate('off');
+      return translate('reader-settings.off');
     }
 
     const val = parseInt(rawVal);

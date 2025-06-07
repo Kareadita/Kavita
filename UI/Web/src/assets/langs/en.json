@@ -1978,7 +1978,7 @@
         "height": "Height",
         "width": "Width",
         "width-override-label": "Width Override",
-        "off": "Off",
+        "off": "{{reader-settings.off}}",
         "original": "Original",
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe Enabled",
@@ -2886,8 +2886,8 @@
         "pdf-theme-tooltip": "Color theme of the reader",
 
         "reading-profile-series-settings-title": "Series",
-
-        "reading-profile-library-settings-title": "Library"
+        "reading-profile-library-settings-title": "Library",
+        "delete": "{{common.delete}}"
     },
 
 

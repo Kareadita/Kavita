@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+[Route("api/reading-profile")]
 public class ReadingProfileController(ILogger<ReadingProfileController> logger, IUnitOfWork unitOfWork,
     IReadingProfileService readingProfileService): BaseApiController
 {
@@ -26,8 +27,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReadingProfileDto>>> GetAllReadingProfiles()
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(User.GetUserId());
-        return Ok(profiles);
+        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(User.GetUserId(), true));
     }
 
     /// <summary>
@@ -95,16 +95,14 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Updates the given reading profile, must belong to the current user
     /// </summary>
     /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <returns>The updated reading profile</returns>
     /// <remarks>
-    /// This does not update connected series, and libraries.
-    /// Deletes all implicit profiles for series linked to this profile
+    /// This does not update connected series and libraries.
     /// </remarks>
     [HttpPost]
-    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile([FromBody] UserReadingProfileDto dto)
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile(UserReadingProfileDto dto)
     {
-        var newProfile = await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto);
-        return Ok(newProfile);
+        return Ok(await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto));
     }
 
     /// <summary>

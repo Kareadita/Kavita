@@ -29,20 +29,20 @@ public interface IAppUserReadingProfileRepository
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId);
+    Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool skipImplicit = false);
     /// <summary>
-    /// Returns all non-implicit reading profiles for the user
+    /// Returns all reading profiles for the user
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId);
+    Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool skipImplicit = false);
     /// <summary>
-    /// Find a profile by name, belonging to a specific user
+    /// Is there a user reading profile with this name (normalized)
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    Task<AppUserReadingProfile?> GetProfileByName(int userId, string name);
+    Task<bool> IsProfileNameInUse(int userId, string name);
 
     void Add(AppUserReadingProfile readingProfile);
     void Update(AppUserReadingProfile readingProfile);
@@ -59,29 +59,35 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId)
+    public async Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool skipImplicit = false)
     {
         return await context.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId)
+            .WhereIf(skipImplicit, rp => rp.Kind != ReadingProfileKind.Implicit)
             .ToListAsync();
     }
 
-    public async Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId)
+    /// <summary>
+    /// Returns all Reading Profiles for the User
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool skipImplicit = false)
     {
         return await context.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId)
-            .Where(rp => rp.Kind !=ReadingProfileKind.Implicit)
+            .WhereIf(skipImplicit, rp => rp.Kind != ReadingProfileKind.Implicit)
             .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
-    public async Task<AppUserReadingProfile?> GetProfileByName(int userId, string name)
+    public async Task<bool> IsProfileNameInUse(int userId, string name)
     {
         var normalizedName = name.ToNormalized();
 
         return await context.AppUserReadingProfiles
             .Where(rp => rp.NormalizedName == normalizedName && rp.AppUserId == userId)
-            .FirstOrDefaultAsync();
+            .AnyAsync();
     }
 
     public void Add(AppUserReadingProfile readingProfile)

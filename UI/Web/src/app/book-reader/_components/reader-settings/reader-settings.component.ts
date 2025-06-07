@@ -432,8 +432,9 @@ export class ReaderSettingsComponent implements OnInit {
     this.readingProfileService.promoteProfile(this.readingProfile.id).subscribe(newProfile => {
       this.readingProfile = newProfile;
       this.parentReadingProfile = newProfile; // profile is no longer implicit
-      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
       this.cdRef.markForCheck();
+
+      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
     });
   }
 
