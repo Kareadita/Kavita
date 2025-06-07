@@ -1118,6 +1118,13 @@
         "series-count": "{{common.series-count}}"
     },
 
+    "browse-tags": {
+        "title": "Browse Tags",
+        "genre-count": "{{num}} Tags",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+
     "person-detail": {
         "aka-title": "Also known as ",
         "known-for-title": "Known For",

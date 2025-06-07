@@ -9,20 +9,20 @@ import {
 } from '@angular/core';
 import {
   SideNavCompanionBarComponent
-} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
-import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
+} from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-detail-layout.component";
 import {DecimalPipe} from "@angular/common";
-import {Series} from "../_models/series";
-import {Pagination} from "../_models/pagination";
-import {JumpKey} from "../_models/jumpbar/jump-key";
+import {Series} from "../../_models/series";
+import {Pagination} from "../../_models/pagination";
+import {JumpKey} from "../../_models/jumpbar/jump-key";
 import {Router} from "@angular/router";
-import {PersonService} from "../_services/person.service";
-import {BrowsePerson} from "../_models/person/browse-person";
-import {JumpbarService} from "../_services/jumpbar.service";
-import {PersonCardComponent} from "../cards/person-card/person-card.component";
-import {ImageService} from "../_services/image.service";
+import {PersonService} from "../../_services/person.service";
+import {BrowsePerson} from "../../_models/person/browse-person";
+import {JumpbarService} from "../../_services/jumpbar.service";
+import {PersonCardComponent} from "../../cards/person-card/person-card.component";
+import {ImageService} from "../../_services/image.service";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {CompactNumberPipe} from "../_pipes/compact-number.pipe";
+import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 
 
 @Component({

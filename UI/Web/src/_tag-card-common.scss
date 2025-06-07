@@ -1,4 +1,4 @@
-.genre-card {
+.tag-card {
   background-color: var(--bs-card-color, #2c2c2c);
   padding: 1rem;
   border-radius: 12px;
@@ -7,12 +7,12 @@
   cursor: pointer;
 }
 
-.genre-card:hover {
+.tag-card:hover {
   background-color: #3a3a3a;
   transform: translateY(-3px);
 }
 
-.genre-name {
+.tag-name {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -22,7 +22,7 @@
   text-overflow: ellipsis;
 }
 
-.genre-meta {
+.tag-meta {
   font-size: 0.85rem;
   display: flex;
   justify-content: space-between;

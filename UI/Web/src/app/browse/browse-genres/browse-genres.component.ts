@@ -1,35 +1,29 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  OnInit
-} from '@angular/core';
-import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, OnInit} from '@angular/core';
+import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-detail-layout.component";
 import {DecimalPipe} from "@angular/common";
 import {
   SideNavCompanionBarComponent
-} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+} from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {JumpbarService} from "../_services/jumpbar.service";
-import {BrowsePerson} from "../_models/person/browse-person";
-import {Pagination} from "../_models/pagination";
-import {JumpKey} from "../_models/jumpbar/jump-key";
-import {MetadataService} from "../_services/metadata.service";
-import {BrowseGenre} from "../_models/metadata/browse-genre";
-import {FilterField} from "../_models/metadata/v2/filter-field";
-import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
-import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {JumpbarService} from "../../_services/jumpbar.service";
+import {BrowsePerson} from "../../_models/person/browse-person";
+import {Pagination} from "../../_models/pagination";
+import {JumpKey} from "../../_models/jumpbar/jump-key";
+import {MetadataService} from "../../_services/metadata.service";
+import {BrowseGenre} from "../../_models/metadata/browse/browse-genre";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
+import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 
 @Component({
-  selector: 'app-all-genres',
+  selector: 'app-browse-genres',
   imports: [
     CardDetailLayoutComponent,
     DecimalPipe,
     SideNavCompanionBarComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    CompactNumberPipe
   ],
   templateUrl: './browse-genres.component.html',
   styleUrl: './browse-genres.component.scss',
@@ -39,7 +33,6 @@ export class BrowseGenresComponent implements OnInit {
 
   protected readonly FilterField = FilterField;
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   private readonly jumpbarService = inject(JumpbarService);

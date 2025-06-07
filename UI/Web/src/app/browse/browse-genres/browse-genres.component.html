@@ -19,11 +19,11 @@
     >
       <ng-template #cardItem let-item let-position="idx">
 
-        <div class="genre-card" (click)="openFilter(FilterField.Genres, item.id)">
-          <div class="genre-name">{{ item.title }}</div>
-          <div class="genre-meta">
-            <span>{{ item.seriesCount }} Series</span>
-            <span>{{ item.issueCount }} Issues</span>
+        <div class="tag-card" (click)="openFilter(FilterField.Genres, item.id)">
+          <div class="tag-name">{{ item.title }}</div>
+          <div class="tag-meta">
+            <span>{{t('series-count', {num: item.seriesCount | compactNumber})}}</span>
+            <span>{{t('issue-count', {num: item.issueCount | compactNumber})}}</span>
           </div>
         </div>
 

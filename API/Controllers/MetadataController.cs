@@ -113,6 +113,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     }
 
     /// <summary>
+    /// Returns a list of Tags with counts for counts when Tag is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("tags-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseTagDto>>> GetBrowseTags(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.TagRepository.GetBrowseableTag(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
+    }
+
+    /// <summary>
     /// Fetches all age ratings from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>

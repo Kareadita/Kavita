@@ -1,4 +1,4 @@
-import {Genre} from "./genre";
+import {Genre} from "../genre";
 
 export interface BrowseGenre extends Genre {
   seriesCount: number;

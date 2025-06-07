@@ -27,7 +27,8 @@ import {LibraryService} from './library.service';
 import {CollectionTagService} from "./collection-tag.service";
 import {PaginatedResult} from "../_models/pagination";
 import {UtilityService} from "../shared/_services/utility.service";
-import {BrowseGenre} from "../_models/metadata/browse-genre";
+import {BrowseGenre} from "../_models/metadata/browse/browse-genre";
+import {BrowseTag} from "../_models/metadata/browse/browse-tag";
 
 @Injectable({
   providedIn: 'root'
@@ -96,6 +97,17 @@ export class MetadataService {
     return this.httpClient.post<PaginatedResult<BrowseGenre[]>>(this.baseUrl + 'metadata/genres-with-counts', {}, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowseGenre[]>;
+      })
+    );
+  }
+
+  getTagWithCounts(pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<BrowseTag[]>>(this.baseUrl + 'metadata/tags-with-counts', {}, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowseTag[]>;
       })
     );
   }
