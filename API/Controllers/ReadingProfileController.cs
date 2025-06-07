@@ -68,6 +68,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <summary>
     /// Update the implicit reading profile for a series, creates one if none exists
     /// </summary>
+    /// <remarks>Any modification to the reader settings during reading will create an implicit profile. Use "update-parent" to save to the bound series profile.</remarks>
     /// <param name="dto"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>

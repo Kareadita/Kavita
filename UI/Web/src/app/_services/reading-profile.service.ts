@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
@@ -8,12 +8,11 @@ import {ReadingProfile} from "../_models/preferences/reading-profiles";
 })
 export class ReadingProfileService {
 
+  private readonly httpClient = inject(HttpClient);
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) { }
-
   getForSeries(seriesId: number, skipImplicit: boolean = false) {
-    return this.httpClient.get<ReadingProfile>(this.baseUrl + `ReadingProfile/${seriesId}?skipImplicit=${skipImplicit}`);
+    return this.httpClient.get<ReadingProfile>(this.baseUrl + `reading-profile/${seriesId}?skipImplicit=${skipImplicit}`);
   }
 
   updateProfile(profile: ReadingProfile) {

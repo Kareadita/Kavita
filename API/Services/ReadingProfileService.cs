@@ -156,6 +156,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         UpdateReaderProfileFields(parentProfile, dto, false);
         unitOfWork.AppUserReadingProfileRepository.Update(parentProfile);
 
+        // Remove the implicit profile when we UpdateParent (from reader) as it is implied that we are already bound with a non-implicit profile
         await DeleteImplicateReadingProfilesForSeries(userId, [seriesId]);
 
         await unitOfWork.CommitAsync();
