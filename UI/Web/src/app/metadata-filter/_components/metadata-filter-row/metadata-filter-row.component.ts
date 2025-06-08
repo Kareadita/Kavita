@@ -13,8 +13,6 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {BehaviorSubject, distinctUntilChanged, filter, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe} from "@angular/common";
@@ -142,8 +140,6 @@ export class MetadataFilterRowComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly dateParser = inject(NgbDateParserFormatter);
   private readonly metadataService = inject(MetadataService);
-  private readonly libraryService = inject(LibraryService);
-  private readonly collectionTagService = inject(CollectionTagService);
   private readonly translocoService = inject(TranslocoService);
 
 
@@ -151,9 +147,9 @@ export class MetadataFilterRowComponent implements OnInit {
   /**
    * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
    */
-  @Input() preset!: FilterStatement;
+  @Input() preset!: FilterStatement<number>;
   @Input() availableFields: Array<FilterField> = allFields;
-  @Output() filterStatement = new EventEmitter<FilterStatement>();
+  @Output() filterStatement = new EventEmitter<FilterStatement<number>>();
 
 
   formGroup: FormGroup = new FormGroup({

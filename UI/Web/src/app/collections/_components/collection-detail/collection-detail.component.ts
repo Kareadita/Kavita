@@ -50,7 +50,7 @@ import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloc
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -62,6 +62,7 @@ import {
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 
 @Component({
   selector: 'app-collection-detail',
@@ -109,13 +110,13 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<UserCollection>[] = [];
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: FilterSettings<FilterField> = new FilterSettings();
   summary: string = '';
   user!: User;
 
   actionInProgress: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -189,9 +190,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       const tagId = parseInt(routeId, 10);
 
       this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
+        this.filter = filter as FilterV2<FilterField>;
 
-        if (this.filter.statements.filter(stmt => stmt.field === FilterField.CollectionTags).length === 0) {
+        if (this.filter.statements.filter((stmt: FilterStatement<FilterField>) => stmt.field === FilterField.CollectionTags).length === 0) {
           this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
         }
         this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();

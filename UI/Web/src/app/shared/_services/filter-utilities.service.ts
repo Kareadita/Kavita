@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Params, Router} from '@angular/router';
 import {SortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
-import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
@@ -11,8 +11,9 @@ import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";
-import {of, switchMap} from "rxjs";
+import {Observable, of, switchMap} from "rxjs";
 import {Location} from "@angular/common";
+import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 
 
 @Injectable({
@@ -27,12 +28,12 @@ export class FilterUtilitiesService {
 
   private apiUrl = environment.apiUrl;
 
-  encodeFilter(filter: SeriesFilterV2 | undefined) {
+  encodeFilter(filter: FilterV2<number> | undefined) {
     return this.http.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);
   }
 
   decodeFilter(encodedFilter: string) {
-    return this.http.post<SeriesFilterV2>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
+    return this.http.post<FilterV2<number>>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
       if (filter == null) {
         filter = this.metadataService.createDefaultFilterDto();
         filter.statements.push(this.createSeriesV2DefaultStatement());
@@ -42,13 +43,13 @@ export class FilterUtilitiesService {
     }))
   }
 
-  updateUrlFromFilter(filter: SeriesFilterV2 | undefined) {
+  updateUrlFromFilter(filter: FilterV2<number> | undefined) {
     return this.encodeFilter(filter).pipe(tap(encodedFilter => {
       window.history.replaceState(window.location.href, '', window.location.href.split('?')[0]+ '?' + encodedFilter);
     }));
   }
 
-  filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot) {
+  filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): Observable<FilterV2<number>> {
     const filter = this.metadataService.createDefaultFilterDto();
     filter.statements.push(this.createSeriesV2DefaultStatement());
     if (!window.location.href.includes('?')) return of(filter);
@@ -72,7 +73,7 @@ export class FilterUtilitiesService {
     }));
   }
 
-  applyFilterWithParams(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
+  applyFilterWithParams(page: Array<any>, filter: FilterV2<any>, extraParams: Params) {
     return this.encodeFilter(filter).pipe(switchMap(encodedFilter => {
       let url = page.join('/') + '?' + encodedFilter;
       url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
@@ -81,7 +82,7 @@ export class FilterUtilitiesService {
     }));
   }
 
-  createSeriesV2Filter(): SeriesFilterV2 {
+  createSeriesV2Filter(): FilterV2<FilterField> {
       return {
           combination: FilterCombination.And,
           statements: [],
@@ -93,11 +94,31 @@ export class FilterUtilitiesService {
       };
   }
 
-  createSeriesV2DefaultStatement(): FilterStatement {
+  createSeriesV2DefaultStatement(): FilterStatement<FilterField> {
       return {
           comparison: FilterComparison.Equal,
           value: '',
           field: FilterField.SeriesName
       }
+  }
+
+  createPersonV2Filter(): FilterV2<PersonFilterField> {
+    return {
+      combination: FilterCombination.And,
+      statements: [],
+      limitTo: 0,
+      sortOptions: {
+        isAscending: true,
+        sortField: SortField.SortName
+      },
+    };
+  }
+
+  createPersonV2DefaultStatement(): FilterStatement<PersonFilterField> {
+    return {
+      comparison: FilterComparison.Equal,
+      value: '',
+      field: PersonFilterField.Name
+    }
   }
 }

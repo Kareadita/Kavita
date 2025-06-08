@@ -13,7 +13,7 @@ import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {mangaFormatFilters, SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 import {SeriesDetailPlus} from "../_models/series-detail/series-detail-plus";
 import {LibraryType} from "../_models/library/library";
@@ -148,9 +148,9 @@ export class MetadataService {
     return this.httpClient.get<Array<Person>>(this.baseUrl + 'metadata/people-by-role?role=' + role);
   }
 
-  createDefaultFilterDto(): SeriesFilterV2 {
+  createDefaultFilterDto(): FilterV2<FilterField> {
     return {
-      statements: [] as FilterStatement[],
+      statements: [] as FilterStatement<FilterField>[],
       combination: FilterCombination.And,
       limitTo: 0,
       sortOptions: {
@@ -168,7 +168,7 @@ export class MetadataService {
     };
   }
 
-  updateFilter(arr: Array<FilterStatement>, index: number, filterStmt: FilterStatement) {
+  updateFilter(arr: Array<FilterStatement<number>>, index: number, filterStmt: FilterStatement<number>) {
     arr[index].comparison = filterStmt.comparison;
     arr[index].field = filterStmt.field;
     arr[index].value = filterStmt.value ? filterStmt.value + '' : '';

@@ -23,7 +23,7 @@ import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {allPeople, FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -98,7 +98,7 @@ export class PersonDetailComponent implements OnInit {
   roles$: Observable<PersonRole[]> | null = null;
   roles: PersonRole[] | null = null;
   works$: Observable<Series[]> | null = null;
-  filter: SeriesFilterV2 | null = null;
+  filter: FilterV2<FilterField> | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
   anilistUrl: string = '';
@@ -181,7 +181,7 @@ export class PersonDetailComponent implements OnInit {
   }
 
   createFilter(roles: PersonRole[]) {
-    const filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
+    const filter = this.filterUtilityService.createSeriesV2Filter();
     filter.combination = FilterCombination.Or;
     filter.limitTo = 20;
 

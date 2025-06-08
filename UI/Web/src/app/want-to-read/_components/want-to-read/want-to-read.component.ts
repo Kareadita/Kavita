@@ -1,43 +1,46 @@
-import { DOCUMENT, NgStyle, NgIf, DecimalPipe } from '@angular/common';
+import {DecimalPipe, DOCUMENT, NgStyle} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
-  HostListener,
   inject,
   Inject,
   OnInit,
   ViewChild
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { Router, ActivatedRoute } from '@angular/router';
-import { take, debounceTime } from 'rxjs';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {debounceTime, take} from 'rxjs';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
 
 @Component({
@@ -56,11 +59,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: FilterSettings<FilterField> = new FilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];

@@ -90,6 +90,17 @@ public class PersonController : BaseApiController
         return Ok(list);
     }
 
+    // [HttpPost("all-v2")]
+    // public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetAuthorsForBrowse(FilterV2Dto filter, [FromQuery] UserParams? userParams)
+    // {
+    //     userParams ??= UserParams.Default;
+    //
+    //     // var list = await _unitOfWork.PersonRepository.GetBrowsePersonDtos(User.GetUserId(), filter, userParams);
+    //     // Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+    //
+    //     return Ok([]);
+    // }
+
     /// <summary>
     /// Updates the Person
     /// </summary>

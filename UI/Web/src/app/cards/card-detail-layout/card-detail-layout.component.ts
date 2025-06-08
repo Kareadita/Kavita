@@ -35,14 +35,27 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {filter, map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
+import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 
 
 const ANIMATION_TIME_MS = 0;
 
+/**
+ * Provides a virtualized card layout, jump bar, and metadata filter bar.
+ *
+ * How to use:
+ * - For filtering:
+ *    - pass a filterSettings which will bootstrap the filtering bar
+ *    - pass a jumpbar method binding to calc the count for the entity
+ * - For card layout
+ *    - Pass an identity function for trackby
+ *    - Pass a pagination object for the total count
+ *    - Pass the items
+ *    -
+ */
 @Component({
   selector: 'app-card-detail-layout',
   imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent,
@@ -85,8 +98,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * A trackBy to help with rendering. This is required as without it there are issues when scrolling
    */
   @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
-  @Input() filterSettings!: FilterSettings;
+  @Input() filterSettings!: FilterSettings<number>;
   @Input() refresh!: EventEmitter<void>;
+  /**
+   * Pass the filter object optionally. If not passed, will create a SeriesFilter by default
+   */
+  filter: FilterV2<number> | undefined = undefined;
 
   /**
    * Will force the jumpbar to be disabled - in cases where you're not using a traditional filter config
@@ -104,7 +121,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
-  filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
@@ -128,6 +144,10 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     if (this.trackByIdentity === undefined) {
       this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
+    // This shouldn't be needed as filter is a temp variable to check if a custom sort is present
+    // if (!this.filter) {
+    //   this.filter = this.filterUtilityService.createSeriesV2Filter();
+    // }
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
@@ -177,7 +197,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   hasCustomSort() {
     if (this.customSort) return true;
     if (this.filteringDisabled) return false;
-    
+
     return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending;
   }
 

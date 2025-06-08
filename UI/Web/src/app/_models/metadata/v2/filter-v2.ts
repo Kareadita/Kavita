@@ -2,9 +2,9 @@ import {FilterStatement} from "./filter-statement";
 import {FilterCombination} from "./filter-combination";
 import {SortOptions} from "./sort-options";
 
-export interface SeriesFilterV2 {
+export interface FilterV2<T> {
     name?: string;
-    statements: Array<FilterStatement>;
+    statements: Array<FilterStatement<T>>;
     combination: FilterCombination;
     sortOptions?: SortOptions;
     limitTo: number;

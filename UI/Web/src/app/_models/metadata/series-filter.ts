@@ -1,5 +1,5 @@
 import {MangaFormat} from "../manga-format";
-import {SeriesFilterV2} from "./v2/series-filter-v2";
+import {FilterV2} from "./v2/filter-v2";
 
 export interface FilterItem<T> {
     title: string;
@@ -51,7 +51,7 @@ export const mangaFormatFilters = [
 ];
 
 export interface FilterEvent {
-  filterV2: SeriesFilterV2;
+  filterV2: FilterV2<number>;
   isFirst: boolean;
 }
 

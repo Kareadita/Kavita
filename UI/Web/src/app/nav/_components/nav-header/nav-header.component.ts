@@ -159,7 +159,7 @@ export class NavHeaderComponent implements OnInit {
       });
   }
 
-  goTo(statement: FilterStatement) {
+  goTo(statement: FilterStatement<number>) {
     let params: any = {};
     const filter = this.filterUtilityService.createSeriesV2Filter();
     filter.statements = [statement];

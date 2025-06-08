@@ -1,6 +1,6 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; read:'browse-authors'" >
-    <app-side-nav-companion-bar [hasFilter]="false">
+    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <h2 title>
         <span>{{t('title')}}</span>
       </h2>
@@ -55,6 +55,8 @@
       [filteringDisabled]="true"
       [customSort]="filterGroup.get('sortField')!.value !== PersonSortField.Name"
       [refresh]="refresh"
+      [filterSettings]="filterSettings"
+      [filterOpen]="filterOpen"
     >
       <ng-template #cardItem let-item let-position="idx">
         <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">

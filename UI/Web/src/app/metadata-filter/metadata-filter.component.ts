@@ -17,14 +17,14 @@ import {Library} from '../_models/library/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
 import {FilterSettings} from './filter-settings';
-import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
+import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
-import {allFields} from "../_models/metadata/v2/filter-field";
+import {allFields, FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {animate, style, transition, trigger} from "@angular/animations";
@@ -52,6 +52,7 @@ import {SortButtonComponent} from "../_single-module/sort-button/sort-button.com
     MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
 export class MetadataFilterComponent implements OnInit {
+  protected readonly allFilterFields = allFields;
 
   private readonly destroyRef = inject(DestroyRef);
   public readonly utilityService = inject(UtilityService);
@@ -65,7 +66,7 @@ export class MetadataFilterComponent implements OnInit {
   protected readonly allSortFields = allSortFields.map(f => {
     return {title: this.sortFieldPipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
-  protected readonly allFilterFields = allFields;
+
 
   /**
    * This toggles the opening/collapsing of the metadata filter code
@@ -75,7 +76,7 @@ export class MetadataFilterComponent implements OnInit {
    * Should filtering be shown on the page
    */
   @Input() filteringDisabled: boolean = false;
-  @Input({required: true}) filterSettings!: FilterSettings;
+  @Input({required: true}) filterSettings!: FilterSettings<FilterField>;
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
 
@@ -92,7 +93,7 @@ export class MetadataFilterComponent implements OnInit {
   updateApplied: number = 0;
 
   fullyLoaded: boolean = false;
-  filterV2: SeriesFilterV2 | undefined;
+  filterV2: FilterV2<FilterField> | undefined;
 
 
 
@@ -148,7 +149,7 @@ export class MetadataFilterComponent implements OnInit {
     return clonedObj;
   }
 
-  handleFilters(filter: SeriesFilterV2) {
+  handleFilters(filter: FilterV2<FilterField>) {
     this.filterV2 = filter;
   }
 

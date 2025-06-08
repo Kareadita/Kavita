@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
+import {FilterV2} from 'src/app/_models/metadata/v2/filter-v2';
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -38,13 +38,13 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 })
 export class MetadataBuilderComponent implements OnInit {
 
-  @Input({required: true}) filter!: SeriesFilterV2;
+  @Input({required: true}) filter!: FilterV2<number>;
   /**
    * The number of statements that can be. 0 means unlimited. -1 means none.
    */
   @Input() statementLimit = 0;
   @Input() availableFilterFields = allFields;
-  @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
+  @Output() update: EventEmitter<FilterV2<number>> = new EventEmitter<FilterV2<number>>();
   @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -79,7 +79,7 @@ export class MetadataBuilderComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateFilter(index: number, filterStmt: FilterStatement) {
+  updateFilter(index: number, filterStmt: FilterStatement<number>) {
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }

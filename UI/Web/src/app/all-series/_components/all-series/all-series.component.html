@@ -13,10 +13,10 @@
       <app-card-detail-layout
                               [isLoading]="loadingSeries"
                               [items]="series"
-                              [trackByIdentity]="trackByIdentity"
-                              [filterSettings]="filterSettings"
                               [filterOpen]="filterOpen"
                               [jumpBarKeys]="jumpbarKeys"
+                              [trackByIdentity]="trackByIdentity"
+                              [filterSettings]="filterSettings"
                               (applyFilter)="updateFilter($event)"
       >
         <ng-template #cardItem let-item let-position="idx">

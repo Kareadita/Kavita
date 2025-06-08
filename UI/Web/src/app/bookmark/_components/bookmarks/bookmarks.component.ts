@@ -24,9 +24,10 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
 @Component({
   selector: 'app-bookmarks',
@@ -63,11 +64,11 @@ export class BookmarksComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
 
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: FilterSettings<FilterField> = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();

@@ -15,7 +15,7 @@ import {DecimalPipe} from "@angular/common";
 import {Series} from "../../_models/series";
 import {Pagination} from "../../_models/pagination";
 import {JumpKey} from "../../_models/jumpbar/jump-key";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../../_services/person.service";
 import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {JumpbarService} from "../../_services/jumpbar.service";
@@ -32,6 +32,10 @@ import {debounceTime, tap} from "rxjs/operators";
 import {SortButtonComponent} from "../../_single-module/sort-button/sort-button.component";
 import {PersonSortField} from "../../_models/metadata/v2/person-sort-field";
 import {PersonSortOptions} from "../../_models/metadata/v2/sort-options";
+import {FilterSettings} from "../../metadata-filter/filter-settings";
+import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
+import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
+import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 
 
 @Component({
@@ -59,6 +63,8 @@ export class BrowseAuthorsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly personService = inject(PersonService);
   private readonly jumpbarService = inject(JumpbarService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly imageService = inject(ImageService);
 
 
@@ -77,11 +83,29 @@ export class BrowseAuthorsComponent implements OnInit {
     query: new FormControl('', []),
   });
   isAscending:  boolean = true;
+  filterSettings: FilterSettings<PersonFilterField> = new FilterSettings<PersonFilterField>();
+  filterActive: boolean = false;
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filter: FilterV2<PersonFilterField> | undefined = undefined;
+  filterActiveCheck!: FilterV2<PersonFilterField>;
 
 
   ngOnInit() {
     this.isLoading = true;
     this.cdRef.markForCheck();
+
+
+    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
+      this.filter = filter;
+
+      this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createPersonV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
+
+      this.cdRef.markForCheck();
+    });
+
+
 
     this.filterGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),

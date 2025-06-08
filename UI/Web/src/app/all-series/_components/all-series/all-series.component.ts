@@ -32,11 +32,12 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BrowseTitlePipe} from "../../../_pipes/browse-title.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Observable} from "rxjs";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
 
 @Component({
@@ -67,10 +68,10 @@ export class AllSeriesComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: FilterSettings<FilterField> = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   browseTitlePipe = new BrowseTitlePipe();
@@ -132,12 +133,12 @@ export class AllSeriesComponent implements OnInit {
     this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
       this.filter = filter;
 
-      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
+      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter!.name || this.title;
       this.titleService.setTitle('Kavita - ' + this.title);
 
       // To provide a richer experience, when we are browsing just a Genre/Tag/etc, we regenerate the title (if not explicitly passed) to "Browse {GenreName}"
       if (this.shouldRewriteTitle()) {
-        const field = this.filter.statements[0].field;
+        const field = this.filter!.statements[0].field;
 
         // This api returns value as string and number, it will complain without the casting
         (this.metadataService.getOptionsForFilterField(field) as Observable<any>).subscribe((opts: any[]) => {

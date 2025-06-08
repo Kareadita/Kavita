@@ -1090,8 +1090,6 @@ public class SeriesRepository : ISeriesRepository
             return query.Where(s => false);
         }
 
-
-
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
         query = ApplyLibraryFilter(filter, query);
 
