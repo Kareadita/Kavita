@@ -297,6 +297,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   addNew() {
     const defaultProfile = this.readingProfiles.find(f => f.kind === ReadingProfileKind.Default);
     this.selectedProfile = {...defaultProfile!};
+    this.selectedProfile.kind = ReadingProfileKind.User;
     this.selectedProfile.id = 0;
     this.selectedProfile.name = "New Profile #" + (this.readingProfiles.length + 1);
     this.setupForm();
@@ -313,7 +314,6 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly readerModes = readingModes;
   protected readonly bookWritingStyles = bookWritingStyles;
   protected readonly pdfScrollModes = pdfScrollModes;
-
   protected readonly TabId = TabId;
   protected readonly ReadingProfileKind = ReadingProfileKind;
 }
