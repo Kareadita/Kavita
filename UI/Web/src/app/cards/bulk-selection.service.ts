@@ -144,7 +144,7 @@ export class BulkSelectionService {
    */
   getActions(callback: (action: ActionItem<any>, data: any) => void) {
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection,
-      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
+      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile];
 
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
       return this.applyFilterToList(this.actionFactory.getSeriesActions(callback), allowedActions);

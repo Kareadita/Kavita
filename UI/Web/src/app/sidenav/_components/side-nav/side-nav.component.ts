@@ -16,7 +16,7 @@ import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
@@ -25,6 +25,7 @@ import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
 import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
 import {ToastrService} from "ngx-toastr";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 @Component({
   selector: 'app-side-nav',
@@ -53,7 +54,9 @@ export class SideNavComponent implements OnInit {
   protected readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly toastr = inject(ToastrService)
+  private readonly toastr = inject(ToastrService);
+  private readonly readingProfilesService = inject(ReadingProfileService);
+  private readonly translocoService = inject(TranslocoService);
 
 
   cachedData: SideNavStream[] | null = null;
@@ -174,6 +177,14 @@ export class SideNavComponent implements OnInit {
         break;
       case (Action.Edit):
         this.actionService.editLibrary(lib, () => window.scrollTo(0, 0));
+        break;
+      case (Action.SetReadingProfile):
+        this.actionService.setReadingProfileForLibrary(lib);
+        break;
+      case (Action.ClearReadingProfile):
+        this.readingProfilesService.clearLibraryProfiles(lib.id).subscribe(() => {
+          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+        });
         break;
       default:
         break;

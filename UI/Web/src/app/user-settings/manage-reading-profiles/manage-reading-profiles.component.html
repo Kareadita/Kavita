@@ -1,0 +1,509 @@
+<ng-container *transloco="let t;prefix:'manage-reading-profiles'">
+
+  <app-loading [loading]="loading"></app-loading>
+
+  @if (!loading) {
+    <div class="position-relative">
+      <button class="btn btn-outline-primary position-absolute custom-position" [ngbTooltip]="t('add-tooltip')" (click)="addNew()" [title]="t('add')">
+        <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
+      </button>
+    </div>
+
+    <p class="ps-2">{{t('description')}}</p>
+    <p class="ps-2 text-muted">{{t('extra-tip')}}</p>
+
+
+    <div class="row g-0 ">
+
+      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
+        <div class="pe-2">
+
+          @if (readingProfiles.length < virtualScrollerBreakPoint) {
+            @for (readingProfile of readingProfiles; track readingProfile.id) {
+              <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}"></ng-container>
+            }
+          } @else {
+            <virtual-scroller #scroll [items]="readingProfiles">
+              @for (readingProfile of scroll.viewPortItems; track readingProfile.id) {
+                <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}"></ng-container>
+              }
+            </virtual-scroller>
+          }
+        </div>
+      </div>
+
+      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
+        <div class="card p-3">
+          @if (selectedProfile === null) {
+            <p class="ps-2">{{t('no-selected')}}</p>
+            <p class="ps-2 text-muted">{{t('selection-tip')}}</p>
+          }
+
+          @if (readingProfileForm !== null && selectedProfile !== null) {
+
+            <form [formGroup]="readingProfileForm">
+
+              <div class="mb-2 d-flex justify-content-between align-items-center">
+                <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default">
+                  <ng-template #view>
+                    {{readingProfileForm.get('name')!.value}}
+                  </ng-template>
+                  <ng-template #edit>
+                    <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
+                  </ng-template>
+                </app-setting-item>
+
+                @if (selectedProfile.id !== 0) {
+                  <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" (click)="delete(selectedProfile!)" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
+                      <i class="fa fa-trash" aria-hidden="true"></i>
+                      <span class="visually-hidden">{{t('delete')}}</span>
+                    </button>
+                  </div>
+                }
+
+              </div>
+
+              <div class="carousel-tabs-container mb-2">
+                <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs">
+
+                  <li [ngbNavItem]="TabId.ImageReader">
+                    <a ngbNavLink (click)="activeTabId = TabId.ImageReader">{{t('image-reader-settings-title')}}</a>
+                    <ng-template ngbNavContent>
+                      @defer (when activeTabId === TabId.ImageReader; prefetch on idle) {
+                        <div>
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('readingDirection')!.value | readingDirection}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="readingDirection">
+                                  @for (opt of readingDirections; track opt) {
+                                    <option [value]="opt.value">{{opt.value | readingDirection}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('scaling-option-label')" [subtitle]="t('scaling-option-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('scalingOption')!.value | scalingOption}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="scalingOption">
+                                  @for (opt of scalingOptions; track opt) {
+                                    <option [value]="opt.value">{{opt.value | scalingOption}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('page-splitting-label')" [subtitle]="t('page-splitting-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('pageSplitOption')!.value | pageSplitOption}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="pageSplitOption">
+                                  @for (opt of pageSplitOptions; track opt) {
+                                    <option [value]="opt.value">{{opt.value | pageSplitOption}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('reading-mode-label')" [subtitle]="t('reading-mode-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('readerMode')!.value | readerMode}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="readerMode">
+                                  @for (opt of readerModes; track opt) {
+                                    <option [value]="opt.value">{{opt.value | readerMode}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('layout-mode-label')" [subtitle]="t('layout-mode-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('layoutMode')!.value | layoutMode}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="layoutMode">
+                                  @for (opt of layoutModes; track opt) {
+                                    <option [value]="opt.value">{{opt.value | layoutMode}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
+                              <ng-template #view>
+                                <div class="color-box-container">
+                                  <div class="color-box" [ngStyle]="{'background-color': selectedProfile!.backgroundColor}"></div>
+                                  <span class="hex-code">{{ selectedProfile!.backgroundColor.toUpperCase() }}</span>
+                                </div>
+                              </ng-template>
+                              <ng-template #edit>
+                                <input [value]="selectedProfile!.backgroundColor" class="form-control"
+                                       (colorPickerChange)="handleBackgroundColorChange($event)"
+                                       [style.background]="selectedProfile!.backgroundColor" [cpAlphaChannel]="'disabled'"
+                                       [(colorPicker)]="selectedProfile!.backgroundColor" />
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
+                              <ng-template #switch>
+                                <div class="form-check form-switch float-end">
+                                  <input type="checkbox" role="switch"
+                                         formControlName="autoCloseMenu" class="form-check-input"
+                                         aria-labelledby="auto-close-label">
+                                </div>
+                              </ng-template>
+                            </app-setting-switch>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
+                              <ng-template #switch>
+                                <div class="form-check form-switch float-end">
+                                  <input type="checkbox" role="switch"
+                                         formControlName="showScreenHints" class="form-check-input"
+                                         aria-labelledby="auto-close-label">
+                                </div>
+                              </ng-template>
+                            </app-setting-switch>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
+                              <ng-template #switch>
+                                <div class="form-check form-switch float-end">
+                                  <input type="checkbox" role="switch" id="emulate-comic-book"
+                                         formControlName="emulateBook" class="form-check-input"
+                                         aria-labelledby="auto-close-label">
+                                </div>
+                              </ng-template>
+                            </app-setting-switch>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
+                              <ng-template #switch>
+                                <div class="form-check form-switch float-end">
+                                  <input type="checkbox" role="switch" id="swipe-to-paginate"
+                                         formControlName="swipeToPaginate" class="form-check-input"
+                                         aria-labelledby="auto-close-label">
+                                </div>
+                              </ng-template>
+                            </app-setting-switch>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
+                              <ng-template #switch>
+                                <div class="form-check form-switch float-end">
+                                  <input type="checkbox" role="switch" id="allow-auto-webtoon-reader"
+                                         formControlName="allowAutomaticWebtoonReaderDetection" class="form-check-input"
+                                         aria-labelledby="auto-close-label">
+                                </div>
+                              </ng-template>
+                            </app-setting-switch>
+                          </div>
+
+                          @if (readingProfileForm.get("widthOverride"); as widthOverride) {
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('width-override-label')" [subtitle]="t('width-override-tooltip')">
+                                <ng-template #view>
+                                  <label for="width-override-slider" class="form-label">
+                                    {{ widthOverrideLabel | sentenceCase }}
+                                  </label>
+                                </ng-template>
+                                <ng-template #edit>
+                                  <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ widthOverrideLabel | sentenceCase }}</span>
+                                    <button class="btn btn-secondary" (click)="widthOverride.setValue(null)">
+                                      {{t('reset')}}
+                                    </button>
+                                  </div>
+                                  <input id="width-override-slider" type="range" min="0" max="100" class="form-range" formControlName="widthOverride">
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+                          }
+
+                        </div>
+                      }
+                    </ng-template>
+                  </li>
+
+                  <li [ngbNavItem]="TabId.BookReader">
+                    <a ngbNavLink (click)="activeTabId = TabId.BookReader">{{t('book-reader-settings-title')}}</a>
+                    <ng-template ngbNavContent>
+                      @defer (when activeTabId === TabId.BookReader; prefetch on idle) {
+                        @if (selectedProfile !== null && readingProfileForm !== null) {
+                          <div>
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
+                                <ng-template #switch>
+                                  <div class="form-check form-switch float-end">
+                                    <input type="checkbox" role="switch" id="tap-to-paginate"
+                                           formControlName="bookReaderTapToPaginate" class="form-check-input"
+                                           aria-labelledby="auto-close-label">
+                                  </div>
+                                </ng-template>
+                              </app-setting-switch>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
+                                <ng-template #switch>
+                                  <div class="form-check form-switch float-end">
+                                    <input type="checkbox" role="switch"
+                                           formControlName="bookReaderImmersiveMode" class="form-check-input"
+                                           aria-labelledby="auto-close-label">
+                                  </div>
+                                </ng-template>
+                              </app-setting-switch>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
+                                <ng-template #view>
+                                  {{readingProfileForm.get('bookReaderReadingDirection')!.value | readingDirection}}
+                                </ng-template>
+                                <ng-template #edit>
+                                  <select class="form-select" aria-describedby="book-reader-heading"
+                                          formControlName="bookReaderReadingDirection">
+                                    @for (opt of readingDirections; track opt) {
+                                      <option [value]="opt.value">{{opt.value | readingDirection}}</option>
+                                    }
+                                  </select>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('font-family-label')" [subtitle]="t('font-family-tooltip')">
+                                <ng-template #view>
+                                  {{readingProfileForm.get('bookReaderFontFamily')!.value | titlecase}}
+                                </ng-template>
+                                <ng-template #edit>
+                                  <select class="form-select" aria-describedby="book-reader-heading"
+                                          formControlName="bookReaderFontFamily">
+                                    @for (opt of fontFamilies; track opt) {
+                                      <option [value]="opt">{{opt | titlecase}}</option>
+                                    }
+                                  </select>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('writing-style-label')" [subtitle]="t('writing-style-tooltip')">
+                                <ng-template #view>
+                                  {{readingProfileForm.get('bookReaderWritingStyle')!.value | writingStyle}}
+                                </ng-template>
+                                <ng-template #edit>
+                                  <select class="form-select" aria-describedby="book-reader-heading"
+                                          formControlName="bookReaderWritingStyle">
+                                    @for (opt of bookWritingStyles; track opt) {
+                                      <option [value]="opt.value">{{opt.value | writingStyle}}</option>
+                                    }
+                                  </select>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('layout-mode-book-label')" [subtitle]="t('layout-mode-book-tooltip')">
+                                <ng-template #view>
+                                  {{readingProfileForm.get('bookReaderLayoutMode')!.value | bookPageLayoutMode}}
+                                </ng-template>
+                                <ng-template #edit>
+                                  <select class="form-select" aria-describedby="book-reader-heading"
+                                          formControlName="bookReaderLayoutMode">
+                                    @for (opt of bookLayoutModes; track opt) {
+                                      <option [value]="opt.value">{{opt.value | bookPageLayoutMode}}</option>
+                                    }
+                                  </select>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('color-theme-book-label')" [subtitle]="t('color-theme-book-tooltip')">
+                                <ng-template #view>
+                                  {{readingProfileForm.get('bookReaderThemeName')!.value}}
+                                </ng-template>
+                                <ng-template #edit>
+                                  <select class="form-select" aria-describedby="book-reader-heading"
+                                          formControlName="bookReaderThemeName">
+                                    @for (opt of bookColorThemesTranslated; track opt) {
+                                      <option [value]="opt.name">{{opt.name | titlecase}}</option>
+                                    }
+                                  </select>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('font-size-book-label')" [subtitle]="t('font-size-book-tooltip')">
+                                <ng-template #view>
+                                  <span class="range-text">{{readingProfileForm.get('bookReaderFontSize')?.value + '%'}}</span>
+                                </ng-template>
+                                <ng-template #edit>
+                                  <div class="row g-0">
+                                    <div class="col-10">
+                                      <input type="range" class="form-range" id="fontsize" min="50" max="300" step="10"
+                                             formControlName="bookReaderFontSize">
+
+                                    </div>
+                                    <span class="ps-2 col-2 align-middle">{{readingProfileForm.get('bookReaderFontSize')?.value + '%'}}</span>
+                                  </div>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('line-height-book-label')" [subtitle]="t('line-height-book-tooltip')">
+                                <ng-template #view>
+                                  <span class="range-text">{{readingProfileForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
+                                </ng-template>
+                                <ng-template #edit>
+                                  <div class="row g-0">
+                                    <div class="col-10">
+                                      <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
+                                             formControlName="bookReaderLineSpacing">
+                                    </div>
+                                    <span class="ps-2 col-2 align-middle">{{readingProfileForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
+                                  </div>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-item [title]="t('margin-book-label')" [subtitle]="t('margin-book-tooltip')">
+                                <ng-template #view>
+                                  <span class="range-text">{{readingProfileForm.get('bookReaderMargin')?.value + '%'}}</span>
+                                </ng-template>
+                                <ng-template #edit>
+                                  <div class="row g-0">
+                                    <div class="col-10">
+                                      <input type="range" class="form-range" id="margin" min="0" max="30" step="5"
+                                             formControlName="bookReaderMargin">
+                                    </div>
+                                    <span class="ps-2 col-2 align-middle">{{readingProfileForm!.get('bookReaderMargin')?.value + '%'}}</span>
+                                  </div>
+                                </ng-template>
+                              </app-setting-item>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </ng-template>
+                  </li>
+
+                  <li [ngbNavItem]="TabId.PdfReader">
+                    <a ngbNavLink (click)="activeTabId = TabId.PdfReader">{{t('pdf-reader-settings-title')}}</a>
+                    <ng-template ngbNavContent>
+                      @defer (when activeTabId === TabId.PdfReader; prefetch on idle) {
+                        <div>
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm!.get('pdfSpreadMode')!.value | pdfSpreadMode}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="pdf-reader-heading"
+                                        formControlName="pdfSpreadMode">
+                                  @for (opt of pdfSpreadModes; track opt) {
+                                    <option [value]="opt.value">{{opt.value | pdfSpreadMode}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('pdf-theme-label')" [subtitle]="t('pdf-theme-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm!.get('pdfTheme')!.value | pdfTheme}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="pdf-reader-heading"
+                                        formControlName="pdfTheme">
+                                  @for (opt of pdfThemes; track opt) {
+                                    <option [value]="opt.value">{{opt.value | pdfTheme}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('pdf-scroll-mode-label')" [subtitle]="t('pdf-scroll-mode-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm!.get('pdfScrollMode')!.value | pdfScrollMode}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="pdf-reader-heading"
+                                        formControlName="pdfScrollMode">
+                                  @for (opt of pdfScrollModes; track opt) {
+                                    <option [value]="opt.value">{{opt.value | pdfScrollMode}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+                        </div>
+                      }
+                    </ng-template>
+                  </li>
+                </ul>
+              </div>
+            </form>
+
+            <div [ngbNavOutlet]="nav"></div>
+          }
+        </div>
+      </div>
+
+
+
+    </div>
+
+
+    <ng-template #readingProfileOption let-profile>
+
+      <div class="p-2 group-item d-flex justify-content-between align-items-start {{selectedProfile && profile.id === selectedProfile!.id ? 'active' : ''}}"
+           (click)="selectProfile(profile)">
+
+        <div class="fw-bold">{{profile.name | sentenceCase}}</div>
+
+        @if (profile.kind === ReadingProfileKind.Default) {
+          <span class="pill p-1 ms-1">{{t('default-profile')}}</span>
+        }
+      </div>
+    </ng-template>
+  }
+
+</ng-container>

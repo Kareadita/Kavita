@@ -9,12 +9,12 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
-import {pageLayoutModes} from "../../_models/preferences/preferences";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
 import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
 
 @Component({
   selector: 'app-manage-media-settings',

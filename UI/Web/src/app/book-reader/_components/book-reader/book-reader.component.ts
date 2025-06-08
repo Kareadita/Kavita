@@ -21,7 +21,6 @@ import {ToastrService} from 'ngx-toastr';
 import {forkJoin, fromEvent, merge, of} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
-import {AccountService} from 'src/app/_services/account.service';
 import {NavService} from 'src/app/_services/nav.service';
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'src/app/_services/reader.service';
 import {SeriesService} from 'src/app/_services/series.service';
@@ -40,7 +39,6 @@ import {LibraryType} from 'src/app/_models/library/library';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {PageStyle, ReaderSettingsComponent} from '../reader-settings/reader-settings.component';
-import {User} from 'src/app/_models/user';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
@@ -63,6 +61,7 @@ import {
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
 
 
@@ -121,7 +120,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly accountService = inject(AccountService);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
   private readonly renderer = inject(Renderer2);
@@ -148,7 +146,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
-  user!: User;
+  readingProfile!: ReadingProfile;
 
   /**
    * Reading List id. Defaults to -1.
@@ -610,7 +608,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
@@ -623,19 +620,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cdRef.markForCheck();
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      this.cdRef.markForCheck();
 
-    this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-      if (!hasProgress) {
-        this.toggleDrawer();
-        this.toastr.info(translate('toasts.book-settings-info'));
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
       }
-    });
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.init();
-      }
+      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
+        if (!hasProgress) {
+          this.toggleDrawer();
+          this.toastr.info(translate('toasts.book-settings-info'));
+        }
+      });
+
+      this.init();
     });
   }
 
@@ -670,7 +671,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chapters = results.chapters;
         this.pageNum = results.progress.pageNum;
         this.cdRef.markForCheck();
-        if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
+
+        if (results.progress.bookScrollId) {
+          this.lastSeenScrollPartPath = results.progress.bookScrollId;
+        }
 
         this.continuousChaptersStack.push(this.chapterId);
 
@@ -770,6 +774,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   closeReader() {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
   }
+
 
   sortElements(a: Element, b: Element) {
     const aTop = a.getBoundingClientRect().top;
@@ -1049,7 +1054,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
-    this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
+    this.updateLayoutMode(this.layoutMode);
     this.addEmptyPageIfRequired();
 
     // Find all the part ids and their top offset

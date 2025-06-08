@@ -53,7 +53,6 @@
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
-
       @if (readerMode !== ReaderMode.Webtoon) {
         <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-canvas-renderer
@@ -311,7 +310,17 @@
 
 
                 <div class="col-md-6 col-sm-12">
-                  <button class="btn btn-primary" (click)="savePref()">{{t('save-globally')}}</button>
+                  <button class="btn btn-primary"
+                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
+                          (click)="updateParentPref()">
+                    {{ t('update-parent', {name: parentReadingProfile?.name || t('loading')}) }}
+                  </button>
+                  <button class="btn btn-primary ms-sm-2"
+                          [ngbTooltip]="t('create-new-tooltip')"
+                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit"
+                          (click)="createNewProfileFromImplicit()">
+                    {{ t('create-new') }}
+                  </button>
                 </div>
               </div>
             </form>

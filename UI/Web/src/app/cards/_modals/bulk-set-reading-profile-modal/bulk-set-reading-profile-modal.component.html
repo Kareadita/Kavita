@@ -1,0 +1,56 @@
+<ng-container *transloco="let t; prefix: 'bulk-set-reading-profile-modal'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <form [formGroup]="profileForm">
+    <div class="modal-body">
+      @if (profiles.length >= MaxItems) {
+        <div class="mb-3">
+          <label for="filter" class="form-label">{{t('filter-label')}}</label>
+          <div class="input-group">
+            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">Clear</button>
+          </div>
+        </div>
+      }
+
+      <ul class="list-group">
+        @for(profile of profiles | filter: filterList; let i = $index; track profile.name) {
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="addToProfile(profile)">
+            <div class="p-2 group-item d-flex justify-content-between align-items-center">
+
+              <div class="fw-bold">{{profile.name | sentenceCase}}</div>
+
+              @if (currentProfile && currentProfile.name === profile.name) {
+                <span class="pill p-1 ms-1">{{t('bound')}}</span>
+              }
+            </div>
+          </li>
+        }
+
+        @if (profiles.length === 0 && !isLoading) {
+          <li class="list-group-item">{{t('no-data')}}</li>
+        }
+
+        @if (isLoading) {
+          <li class="list-group-item">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    </div>
+  </form>
+
+
+
+
+
+</ng-container>

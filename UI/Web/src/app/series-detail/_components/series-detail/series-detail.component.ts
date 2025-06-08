@@ -110,6 +110,7 @@ import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
 import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 
 enum TabID {
@@ -175,6 +176,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
@@ -609,6 +611,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(chapterIds, device);
           break;
         }
+      case Action.SetReadingProfile:
+        this.actionService.setReadingProfileForMultiple([this.series]);
+        break;
+      case Action.ClearReadingProfile:
+        this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
+          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+        });
+        break;
       default:
         break;
     }

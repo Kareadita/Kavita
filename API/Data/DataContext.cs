@@ -81,6 +81,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<MetadataSettings> MetadataSettings { get; set; } = null!;
     public DbSet<MetadataFieldMapping> MetadataFieldMapping { get; set; } = null!;
     public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
+    public DbSet<AppUserReadingProfile> AppUserReadingProfiles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -256,6 +257,32 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<MetadataSettings>()
             .Property(b => b.EnableCoverImage)
             .HasDefaultValue(true);
+
+        builder.Entity<AppUserReadingProfile>()
+            .Property(b => b.BookThemeName)
+            .HasDefaultValue("Dark");
+        builder.Entity<AppUserReadingProfile>()
+            .Property(b => b.BackgroundColor)
+            .HasDefaultValue("#000000");
+        builder.Entity<AppUserReadingProfile>()
+            .Property(b => b.BookReaderWritingStyle)
+            .HasDefaultValue(WritingStyle.Horizontal);
+        builder.Entity<AppUserReadingProfile>()
+            .Property(b => b.AllowAutomaticWebtoonReaderDetection)
+            .HasDefaultValue(true);
+
+        builder.Entity<AppUserReadingProfile>()
+            .Property(rp => rp.LibraryIds)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasColumnType("TEXT");
+        builder.Entity<AppUserReadingProfile>()
+            .Property(rp => rp.SeriesIds)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasColumnType("TEXT");
     }
 
     #nullable enable

@@ -217,6 +217,15 @@
             </div>
           }
         }
+
+        @defer (when fragment === SettingsTabId.ReadingProfiles; prefetch on idle) {
+          @if (fragment === SettingsTabId.ReadingProfiles) {
+            <div class="scale col-md-12">
+              <app-manage-reading-profiles></app-manage-reading-profiles>
+            </div>
+          }
+        }
+
       }
     </div>
   </ng-container>
