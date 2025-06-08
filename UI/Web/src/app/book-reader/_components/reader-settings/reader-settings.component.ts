@@ -202,32 +202,15 @@ export class ReaderSettingsComponent implements OnInit {
       })
     } else {
       this.parentReadingProfile = this.readingProfile;
+      this.cdRef.markForCheck();
     }
 
     this.fontFamilies = this.bookService.getFontFamilies();
     this.fontOptions = this.fontFamilies.map(f => f.title);
-    this.cdRef.markForCheck();
 
-    if (this.readingProfile.bookReaderFontFamily === undefined) {
-      this.readingProfile.bookReaderFontFamily = 'default';
-    }
-    if (this.readingProfile.bookReaderFontSize === undefined || this.readingProfile.bookReaderFontSize < 50) {
-      this.readingProfile.bookReaderFontSize = 100;
-    }
-    if (this.readingProfile.bookReaderLineSpacing === undefined || this.readingProfile.bookReaderLineSpacing < 100) {
-      this.readingProfile.bookReaderLineSpacing = 100;
-    }
-    if (this.readingProfile.bookReaderMargin === undefined) {
-      this.readingProfile.bookReaderMargin = 0;
-    }
-    if (this.readingProfile.bookReaderReadingDirection === undefined) {
-      this.readingProfile.bookReaderReadingDirection = ReadingDirection.LeftToRight;
-    }
-    if (this.readingProfile.bookReaderWritingStyle === undefined) {
-      this.readingProfile.bookReaderWritingStyle = WritingStyle.Horizontal;
-    }
-    this.readingDirectionModel = this.readingProfile.bookReaderReadingDirection;
-    this.writingStyleModel = this.readingProfile.bookReaderWritingStyle;
+
+
+    this.cdRef.markForCheck();
 
     this.setupSettings();
 
@@ -253,6 +236,27 @@ export class ReaderSettingsComponent implements OnInit {
 
   setupSettings() {
     if (!this.readingProfile) return;
+
+    if (this.readingProfile.bookReaderFontFamily === undefined) {
+      this.readingProfile.bookReaderFontFamily = 'default';
+    }
+    if (this.readingProfile.bookReaderFontSize === undefined || this.readingProfile.bookReaderFontSize < 50) {
+      this.readingProfile.bookReaderFontSize = 100;
+    }
+    if (this.readingProfile.bookReaderLineSpacing === undefined || this.readingProfile.bookReaderLineSpacing < 100) {
+      this.readingProfile.bookReaderLineSpacing = 100;
+    }
+    if (this.readingProfile.bookReaderMargin === undefined) {
+      this.readingProfile.bookReaderMargin = 0;
+    }
+    if (this.readingProfile.bookReaderReadingDirection === undefined) {
+      this.readingProfile.bookReaderReadingDirection = ReadingDirection.LeftToRight;
+    }
+    if (this.readingProfile.bookReaderWritingStyle === undefined) {
+      this.readingProfile.bookReaderWritingStyle = WritingStyle.Horizontal;
+    }
+    this.readingDirectionModel = this.readingProfile.bookReaderReadingDirection;
+    this.writingStyleModel = this.readingProfile.bookReaderWritingStyle;
 
     this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.readingProfile.bookReaderFontFamily, []));
     this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fontName => {
@@ -290,7 +294,7 @@ export class ReaderSettingsComponent implements OnInit {
       this.styleUpdate.emit(this.pageStyles);
     });
 
-    this.settingsForm.addControl('layoutMode', new FormControl(this.readingProfile.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+    this.settingsForm.addControl('layoutMode', new FormControl(this.readingProfile.bookReaderLayoutMode, []));
     this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((layoutMode: BookPageLayoutMode) => {
       this.layoutModeUpdate.emit(layoutMode);
     });

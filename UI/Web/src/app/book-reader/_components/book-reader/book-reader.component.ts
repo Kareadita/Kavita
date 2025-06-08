@@ -21,7 +21,6 @@ import {ToastrService} from 'ngx-toastr';
 import {forkJoin, fromEvent, merge, of} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
-import {AccountService} from 'src/app/_services/account.service';
 import {NavService} from 'src/app/_services/nav.service';
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'src/app/_services/reader.service';
 import {SeriesService} from 'src/app/_services/series.service';
@@ -40,7 +39,6 @@ import {LibraryType} from 'src/app/_models/library/library';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {PageStyle, ReaderSettingsComponent} from '../reader-settings/reader-settings.component';
-import {User} from 'src/app/_models/user';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
@@ -122,7 +120,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly accountService = inject(AccountService);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
   private readonly renderer = inject(Renderer2);
@@ -149,7 +146,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
-  user!: User;
   readingProfile!: ReadingProfile;
 
   /**
@@ -640,16 +636,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (user) {
-          this.user = user;
-          this.init();
-        }
-      });
+      this.init();
     });
-
-
-
   }
 
   init() {
@@ -786,6 +774,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   closeReader() {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
   }
+
 
   sortElements(a: Element, b: Element) {
     const aTop = a.getBoundingClientRect().top;
@@ -1065,7 +1054,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
-    this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
+    this.updateLayoutMode(this.layoutMode);
     this.addEmptyPageIfRequired();
 
     // Find all the part ids and their top offset
