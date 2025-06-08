@@ -552,6 +552,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.readingProfileService.updateImplicit(newProfile, this.seriesId).subscribe({
             next: updatedProfile => {
               this.readingProfile = updatedProfile;
+              this.cdRef.markForCheck();
             },
             error: err => {
               console.error(err);
