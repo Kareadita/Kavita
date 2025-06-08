@@ -2676,7 +2676,8 @@
         "match-success": "Series matched correctly",
         "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
         "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
-        "series-added-to-reading-profile": "Series added to Reading Profile {{name}}"
+        "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
+        "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}"
     },
 
     "read-time-pipe": {
@@ -2732,7 +2733,9 @@
 
         "reading-profiles": "Reading Profiles",
         "set-reading-profile": "Set Reading Profile",
+        "set-reading-profile-tooltip": "Bind a Reading Profile to this Library",
         "clear-reading-profile": "Clear Reading Profile",
+        "clear-reading-profile-tooltip": "Clear Reading Profile for this Library",
         "cleared-profile": "Cleared Reading Profile",
 
         "others": "Others",

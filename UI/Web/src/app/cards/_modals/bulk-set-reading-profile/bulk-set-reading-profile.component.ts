@@ -3,7 +3,6 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ReadingList} from "../../../_models/reading-list";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
@@ -66,7 +65,7 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
   addToProfile(profile: ReadingProfile) {
     if (this.seriesIds.length == 1) {
       this.readingProfileService.addToSeries(profile.id, this.seriesIds[0]).subscribe(() => {
-        this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
+        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {name: profile.name}));
         this.modal.close();
       });
       return;
@@ -74,7 +73,7 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
 
     if (this.seriesIds.length > 1) {
       this.readingProfileService.bulkAddToSeries(profile.id, this.seriesIds).subscribe(() => {
-        this.toastr.success(translate('toasts.series-added-to-reading-profile', {name: profile.name}));
+        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {name: profile.name}));
         this.modal.close();
       });
       return;
@@ -82,7 +81,7 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
 
     if (this.libraryId) {
       this.readingProfileService.addToLibrary(profile.id, this.libraryId).subscribe(() => {
-        this.toastr.success(translate('toasts.library-added-to-reading-profile', {name: profile.name}));
+        this.toastr.success(translate('toasts.library-bound-to-reading-profile', {name: profile.name}));
         this.modal.close();
       });
     }

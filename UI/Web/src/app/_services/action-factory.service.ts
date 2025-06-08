@@ -1117,7 +1117,10 @@ export class ActionFactoryService {
 
     if (action.children === null || action.children?.length === 0) return;
 
-    action.children?.forEach((childAction) => {
+    // Ensure action children are a copy of the parent (since parent does a shallow mapping)
+    action.children = action.children.map(d => { return {...d}; });
+
+    action.children.forEach((childAction) => {
       this.applyCallback(childAction, callback, shouldRenderFunc);
     });
   }
@@ -1125,10 +1128,13 @@ export class ActionFactoryService {
   public applyCallbackToList(list: Array<ActionItem<any>>,
                              callback: ActionCallback<any>,
                              shouldRenderFunc: ActionShouldRenderFunc<any> = this.dummyShouldRender): Array<ActionItem<any>> {
+    // Create a clone of the list to ensure we aren't affecting the default state
     const actions = list.map((a) => {
       return { ...a };
     });
+
     actions.forEach((action) => this.applyCallback(action, callback, shouldRenderFunc));
+
     return actions;
   }
 
