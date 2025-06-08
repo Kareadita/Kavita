@@ -168,13 +168,13 @@
           </div>
         </div>
 
-        <div class="d-flex gap-2 mt-2 flex-wrap mb-2">
-          <button class="btn btn-primary"
+        <div class="row g-0 mt-2">
+          <button class="btn btn-primary col-12 mb-2"
                   [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
                   (click)="updateParentPref()">
             {{ t('update-parent', {name: parentReadingProfile?.name || t('loading')}) }}
           </button>
-          <button class="btn btn-primary"
+          <button class="btn btn-primary col-12 mb-2"
                   [ngbTooltip]="t('create-new-tooltip')"
                   [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit"
                   (click)="createNewProfileFromImplicit()">

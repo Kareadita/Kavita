@@ -612,17 +612,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.readingProfile = data['readingProfile'];
-      if (this.readingProfile == null) {
-        this.router.navigateByUrl('/home');
-        return;
-      }
-      //this.setupReaderSettings(); // TODO: Implement this Amelia, it works without am I missing something?
-      this.cdRef.markForCheck();
-    });
-
-
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
@@ -635,20 +624,32 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cdRef.markForCheck();
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.readingProfile = data['readingProfile'];
+      this.cdRef.markForCheck();
 
-    this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-      if (!hasProgress) {
-        this.toggleDrawer();
-        this.toastr.info(translate('toasts.book-settings-info'));
+      if (this.readingProfile == null) {
+        this.router.navigateByUrl('/home');
+        return;
       }
+
+      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
+        if (!hasProgress) {
+          this.toggleDrawer();
+          this.toastr.info(translate('toasts.book-settings-info'));
+        }
+      });
+
+      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+        if (user) {
+          this.user = user;
+          this.init();
+        }
+      });
     });
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.init();
-      }
-    });
+
+
   }
 
   init() {
