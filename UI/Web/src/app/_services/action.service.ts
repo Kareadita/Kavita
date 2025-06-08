@@ -31,7 +31,9 @@ import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
-import {BulkSetReadingProfileComponent} from "../cards/_modals/bulk-set-reading-profile/bulk-set-reading-profile.component";
+import {
+  BulkSetReadingProfileModalComponent
+} from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -822,7 +824,7 @@ export class ActionService {
   setReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
-    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
     this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
     this.readingListModalRef.componentInstance.title = ""
 
@@ -848,7 +850,7 @@ export class ActionService {
   setReadingProfileForLibrary(library: Library, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
-    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
     this.readingListModalRef.componentInstance.libraryId = library.id;
     this.readingListModalRef.componentInstance.title = ""
 

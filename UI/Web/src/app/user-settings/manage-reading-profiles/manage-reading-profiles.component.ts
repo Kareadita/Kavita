@@ -129,7 +129,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       }
     });
 
-    this.readingProfileService.all().subscribe(profiles => {
+    this.readingProfileService.getAllProfiles().subscribe(profiles => {
       this.readingProfiles = profiles;
       this.loading = false;
       this.setupForm();

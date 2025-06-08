@@ -8,22 +8,25 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 
 @Component({
-  selector: 'app-bulk-set-reading-profile',
+  selector: 'app-bulk-set-reading-profile-modal',
   imports: [
     ReactiveFormsModule,
     FilterPipe,
     TranslocoDirective
   ],
-  templateUrl: './bulk-set-reading-profile.component.html',
-  styleUrl: './bulk-set-reading-profile.component.scss'
+  templateUrl: './bulk-set-reading-profile-modal.component.html',
+  styleUrl: './bulk-set-reading-profile-modal.component.scss'
 })
-export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
+export class BulkSetReadingProfileModalComponent implements OnInit, AfterViewInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly MaxItems = 8;
 
+  /**
+   * Modal Header - since this code is used for multiple flows
+   */
   @Input({required: true}) title!: string;
   /**
    * Series Ids to add to Reading Profile
@@ -33,19 +36,20 @@ export class BulkSetReadingProfileComponent implements OnInit, AfterViewInit {
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
   profiles: Array<ReadingProfile> = [];
-  loading: boolean = false;
-  profileForm: FormGroup = new FormGroup({});
+  isLoading: boolean = false;
+  profileForm: FormGroup = new FormGroup({
+    filterQuery: new FormControl('', []), // Used for inline filtering when too many RPs
+  });
 
   ngOnInit(): void {
 
     this.profileForm.addControl('title', new FormControl(this.title, []));
-    this.profileForm.addControl('filterQuery', new FormControl('', []));
 
-    this.loading = true;
+    this.isLoading = true;
     this.cdRef.markForCheck();
-    this.readingProfileService.all().subscribe(profiles => {
+    this.readingProfileService.getAllProfiles().subscribe(profiles => {
       this.profiles = profiles;
-      this.loading = false;
+      this.isLoading = false;
       this.cdRef.markForCheck();
     });
   }

@@ -35,7 +35,7 @@ export class ReadingProfileService {
     return this.httpClient.post<ReadingProfile>(this.baseUrl + "reading-profile/series?seriesId="+seriesId, profile);
   }
 
-  all() {
+  getAllProfiles() {
     return this.httpClient.get<ReadingProfile[]>(this.baseUrl + 'reading-profile/all');
   }
 

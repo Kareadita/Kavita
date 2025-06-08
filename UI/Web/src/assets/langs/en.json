@@ -1276,7 +1276,7 @@
         "create": "{{common.create}}"
     },
 
-    "bulk-set-reading-profile": {
+    "bulk-set-reading-profile-modal": {
         "title": "Set Reading profile",
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",

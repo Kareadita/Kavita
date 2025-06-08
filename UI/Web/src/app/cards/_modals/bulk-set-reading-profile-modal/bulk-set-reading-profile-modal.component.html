@@ -1,10 +1,10 @@
-<ng-container *transloco="let t; prefix: 'bulk-set-reading-profile'">
+<ng-container *transloco="let t; prefix: 'bulk-set-reading-profile-modal'">
 
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
-  <form style="width: 100%" [formGroup]="profileForm">
+  <form [formGroup]="profileForm">
     <div class="modal-body">
       @if (profiles.length >= MaxItems) {
         <div class="mb-3">
@@ -18,16 +18,16 @@
 
       <ul class="list-group">
         @for(profile of profiles | filter: filterList; let i = $index; track profile.name) {
-          <li class="list-group-item clickable" tabindex="0" role="option"  (click)="addToProfile(profile)">
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="addToProfile(profile)">
             {{profile.name}}
           </li>
         }
 
-        @if (profiles.length === 0 && !loading) {
+        @if (profiles.length === 0 && !isLoading) {
           <li class="list-group-item">{{t('no-data')}}</li>
         }
 
-        @if (loading) {
+        @if (isLoading) {
           <li class="list-group-item">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">{{t('loading')}}</span>
@@ -36,7 +36,13 @@
         }
       </ul>
     </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    </div>
   </form>
+
+
 
 
 
