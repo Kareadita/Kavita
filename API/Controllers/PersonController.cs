@@ -117,6 +117,7 @@ public class PersonController : BaseApiController
 
 
         person.Name = dto.Name?.Trim();
+        person.NormalizedName = person.Name.ToNormalized();
         person.Description = dto.Description ?? string.Empty;
         person.CoverImageLocked = dto.CoverImageLocked;
 
