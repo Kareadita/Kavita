@@ -13,6 +13,7 @@ using AutoMapper;
 using Kavita.Common;
 
 namespace API.Services;
+#nullable enable
 
 public interface IReadingProfileService
 {
@@ -73,7 +74,7 @@ public interface IReadingProfileService
     Task DeleteReadingProfile(int userId, int profileId);
 
     /// <summary>
-    /// Assigns the reading profile to the series, and remove the implicit RP from the series if it exists
+    /// Binds the reading profile to the series, and remove the implicit RP from the series if it exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
@@ -81,7 +82,7 @@ public interface IReadingProfileService
     /// <returns></returns>
     Task AddProfileToSeries(int userId, int profileId, int seriesId);
     /// <summary>
-    /// Assigns the reading profile to many series, and remove the implicit RP from the series if it exists
+    /// Binds the reading profile to many series, and remove the implicit RP from the series if it exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
@@ -89,7 +90,7 @@ public interface IReadingProfileService
     /// <returns></returns>
     Task BulkAddProfileToSeries(int userId, int profileId, IList<int> seriesIds);
     /// <summary>
-    /// Remove all reading profiles from the series
+    /// Remove all reading profiles bound to the series
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
@@ -97,7 +98,7 @@ public interface IReadingProfileService
     Task ClearSeriesProfile(int userId, int seriesId);
 
     /// <summary>
-    /// Assign the reading profile to the library
+    /// Bind the reading profile to the library
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
@@ -105,13 +106,19 @@ public interface IReadingProfileService
     /// <returns></returns>
     Task AddProfileToLibrary(int userId, int profileId, int libraryId);
     /// <summary>
-    /// Remove the reading profile from the library, if it exists
+    /// Remove the reading profile bound to the library, if it exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
     Task ClearLibraryProfile(int userId, int libraryId);
-
+    /// <summary>
+    /// Returns the bound Reading Profile to a Library
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId);
 }
 
 public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
@@ -354,6 +361,12 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         {
             await unitOfWork.CommitAsync();
         }
+    }
+
+    public async Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId)
+    {
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, true);
+        return mapper.Map<UserReadingProfileDto>(profiles.FirstOrDefault(p => p.LibraryIds.Contains(libraryId)));
     }
 
     private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds)

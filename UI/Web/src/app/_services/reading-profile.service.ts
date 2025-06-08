@@ -15,6 +15,10 @@ export class ReadingProfileService {
     return this.httpClient.get<ReadingProfile>(this.baseUrl + `reading-profile/${seriesId}?skipImplicit=${skipImplicit}`);
   }
 
+  getForLibrary(libraryId: number) {
+    return this.httpClient.get<ReadingProfile | null>(this.baseUrl + `reading-profile/library?libraryId=${libraryId}`);
+  }
+
   updateProfile(profile: ReadingProfile) {
     return this.httpClient.post<ReadingProfile>(this.baseUrl + 'reading-profile', profile);
   }

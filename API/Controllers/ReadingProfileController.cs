@@ -44,6 +44,17 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
+    /// Returns the (potential) Reading Profile bound to the library
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    [HttpGet("library")]
+    public async Task<ActionResult<UserReadingProfileDto?>> GetProfileForLibrary(int libraryId)
+    {
+        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(User.GetUserId(), libraryId));
+    }
+
+    /// <summary>
     /// Creates a new reading profile for the current user
     /// </summary>
     /// <param name="dto"></param>

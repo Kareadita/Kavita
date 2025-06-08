@@ -1283,7 +1283,8 @@
         "clear": "{{common.clear}}",
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "bound":  "Bound"
     },
 
     "entity-title": {

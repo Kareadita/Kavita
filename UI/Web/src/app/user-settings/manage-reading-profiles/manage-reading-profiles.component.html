@@ -495,14 +495,13 @@
     <ng-template #readingProfileOption let-profile>
 
       <div class="p-2 group-item d-flex justify-content-between align-items-start {{selectedProfile && profile.id === selectedProfile!.id ? 'active' : ''}}"
-           (click)="selectProfile(profile)"
-      >
+           (click)="selectProfile(profile)">
+
         <div class="fw-bold">{{profile.name | sentenceCase}}</div>
 
         @if (profile.kind === ReadingProfileKind.Default) {
           <span class="pill p-1 ms-1">{{t('default-profile')}}</span>
         }
-
       </div>
     </ng-template>
   }
