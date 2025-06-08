@@ -1163,6 +1163,9 @@
         "layout-mode-option-2col": "2 Column",
         "color-theme-title": "Color Theme",
 
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x",
+
         "theme-dark": "Dark",
         "theme-black": "Black",
         "theme-white": "White",

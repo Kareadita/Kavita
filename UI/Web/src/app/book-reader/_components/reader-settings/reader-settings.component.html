@@ -33,9 +33,9 @@
                   <div class="row g-0 controls">
                     <label for="linespacing" class="form-label col-6">{{t('line-spacing-label')}}</label>
                     <span class="col-6 float-end" style="display: inline-flex;">
-                            1x
-                            <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
-                            2.5x
+                      {{t('line-spacing-min-label')}}
+                      <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
+                      {{t('line-spacing-max-label')}}
                         </span>
                   </div>
 
