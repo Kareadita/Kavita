@@ -47,6 +47,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
+import {WikiLink} from "../../_models/wiki";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -237,10 +238,10 @@ export class ManageReadingProfilesComponent implements OnInit {
     } else {
       const profile = this.packData();
       this.readingProfileService.updateProfile(profile).subscribe({
-        next: _ => {
+        next: newProfile => {
           this.readingProfiles = this.readingProfiles.map(p => {
             if (p.id !== profile.id) return p;
-            return profile;
+            return newProfile;
           });
           this.cdRef.markForCheck();
         },
@@ -316,4 +317,5 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly pdfScrollModes = pdfScrollModes;
   protected readonly TabId = TabId;
   protected readonly ReadingProfileKind = ReadingProfileKind;
+  protected readonly WikiLink = WikiLink;
 }
