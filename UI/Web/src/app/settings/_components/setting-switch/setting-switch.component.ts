@@ -51,7 +51,7 @@ export class SettingSwitchComponent implements AfterContentInit {
       const inputElement = element.querySelector('input');
 
       // If no id, generate a random id and assign it to the input
-      inputElement.id = crypto.randomUUID();
+      inputElement.id = this.generateId();
 
       if (inputElement && inputElement.id) {
         this.labelId = inputElement.id;
@@ -60,6 +60,15 @@ export class SettingSwitchComponent implements AfterContentInit {
         console.warn('No input with ID found in app-setting-switch. For accessibility, please ensure the input has an ID.');
       }
     });
+  }
+
+  private generateId(): string {
+    if (crypto && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+
+    // Fallback for browsers without crypto.randomUUID (which has happened multiple times in my user base)
+    return 'id-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
   }
 
 }
