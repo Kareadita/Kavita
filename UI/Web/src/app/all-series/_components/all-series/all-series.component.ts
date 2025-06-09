@@ -11,13 +11,12 @@ import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -38,6 +37,7 @@ import {BrowseTitlePipe} from "../../../_pipes/browse-title.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Observable} from "rxjs";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 
 
 @Component({
@@ -68,8 +68,8 @@ export class AllSeriesComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField> | undefined = undefined;
-  filterSettings: FilterSettings<FilterField> = new FilterSettings();
+  filter: FilterV2<FilterField, SortField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;

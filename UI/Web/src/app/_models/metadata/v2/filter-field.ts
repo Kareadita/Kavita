@@ -48,7 +48,7 @@ const enumArray = Object.keys(FilterField)
 
 enumArray.sort((a, b) => a.value.localeCompare(b.value));
 
-export const allFields = enumArray
+export const allSeriesFilterFields = enumArray
     .map(key => parseInt(key.key, 10))as FilterField[];
 
 export const allPeople = [

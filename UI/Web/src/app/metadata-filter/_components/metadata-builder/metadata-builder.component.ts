@@ -18,7 +18,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {allFields} from "../../../_models/metadata/v2/filter-field";
+import {allSeriesFilterFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -43,7 +43,7 @@ export class MetadataBuilderComponent implements OnInit {
    * The number of statements that can be. 0 means unlimited. -1 means none.
    */
   @Input() statementLimit = 0;
-  @Input() availableFilterFields = allFields;
+  @Input() availableFilterFields = allSeriesFilterFields;
   @Output() update: EventEmitter<FilterV2<number>> = new EventEmitter<FilterV2<number>>();
   @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 

@@ -25,5 +25,4 @@ export class FilterService {
   renameSmartFilter(filter: SmartFilter) {
     return this.httpClient.post(this.baseUrl + `filter/rename?filterId=${filter.id}&name=${filter.name.trim()}`, {});
   }
-
 }

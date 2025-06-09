@@ -25,7 +25,6 @@ import {EVENTS, MessageHubService} from '../_services/message-hub.service';
 import {SeriesService} from '../_services/series.service';
 import {NavService} from '../_services/nav.service';
 import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
-import {FilterSettings} from '../metadata-filter/filter-settings';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -43,6 +42,7 @@ import {FilterField} from "../_models/metadata/v2/filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
+import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 
 @Component({
     selector: 'app-library-detail',
@@ -76,7 +76,7 @@ export class LibraryDetailComponent implements OnInit {
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
   actions: ActionItem<Library>[] = [];
   filter: FilterV2<FilterField> | undefined = undefined;
-  filterSettings: FilterSettings<FilterField> = new FilterSettings();
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
   filterActiveCheck!: FilterV2<FilterField>;

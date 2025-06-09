@@ -19,7 +19,6 @@ import {ToastrService} from 'ngx-toastr';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -63,6 +62,7 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 
 @Component({
   selector: 'app-collection-detail',
@@ -111,7 +111,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<UserCollection>[] = [];
   filter: FilterV2<FilterField> | undefined = undefined;
-  filterSettings: FilterSettings<FilterField> = new FilterSettings();
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   summary: string = '';
   user!: User;
 

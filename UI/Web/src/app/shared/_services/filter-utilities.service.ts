@@ -12,7 +12,6 @@ import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";
 import {Observable, of, switchMap} from "rxjs";
-import {Location} from "@angular/common";
 import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 
 
@@ -21,12 +20,11 @@ import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 })
 export class FilterUtilitiesService {
 
-  private readonly location = inject(Location);
   private readonly router = inject(Router);
   private readonly metadataService = inject(MetadataService);
   private readonly http = inject(HttpClient);
 
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl;
 
   encodeFilter(filter: FilterV2<number> | undefined) {
     return this.http.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);

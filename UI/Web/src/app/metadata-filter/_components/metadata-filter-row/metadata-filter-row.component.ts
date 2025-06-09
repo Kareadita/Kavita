@@ -14,7 +14,7 @@ import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {BehaviorSubject, distinctUntilChanged, filter, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
-import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
+import {allSeriesFilterFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe} from "@angular/common";
 import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
@@ -148,7 +148,7 @@ export class MetadataFilterRowComponent implements OnInit {
    * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
    */
   @Input() preset!: FilterStatement<number>;
-  @Input() availableFields: Array<FilterField> = allFields;
+  @Input() availableFields: Array<FilterField> = allSeriesFilterFields;
   @Output() filterStatement = new EventEmitter<FilterStatement<number>>();
 
 

@@ -32,10 +32,10 @@ import {debounceTime, tap} from "rxjs/operators";
 import {SortButtonComponent} from "../../_single-module/sort-button/sort-button.component";
 import {PersonSortField} from "../../_models/metadata/v2/person-sort-field";
 import {PersonSortOptions} from "../../_models/metadata/v2/sort-options";
-import {FilterSettings} from "../../metadata-filter/filter-settings";
 import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
+import {PersonFilterSettings} from "../../metadata-filter/filter-settings";
 
 
 @Component({
@@ -83,7 +83,7 @@ export class BrowseAuthorsComponent implements OnInit {
     query: new FormControl('', []),
   });
   isAscending:  boolean = true;
-  filterSettings: FilterSettings<PersonFilterField> = new FilterSettings<PersonFilterField>();
+  filterSettings: PersonFilterSettings = new PersonFilterSettings();
   filterActive: boolean = false;
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filter: FilterV2<PersonFilterField> | undefined = undefined;

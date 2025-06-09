@@ -23,7 +23,7 @@ export enum SortField {
   Random = 9
 }
 
-export const allSortFields = Object.keys(SortField)
+export const allSeriesSortFields = Object.keys(SortField)
     .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
     .map(key => parseInt(key, 10)) as SortField[];
 

@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ContentChild,
   DestroyRef,
   EventEmitter,
   inject,
+  input,
   Input,
   OnInit,
   Output
@@ -14,9 +16,8 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
-import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
+import {allSeriesSortFields, FilterEvent, FilterItem} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
-import {FilterSettings} from './filter-settings';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
@@ -24,37 +25,42 @@ import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
-import {allFields, FilterField} from "../_models/metadata/v2/filter-field";
+import {allSeriesFilterFields, FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {animate, style, transition, trigger} from "@angular/animations";
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {FilterSettingsBase} from "./filter-settings";
+import {allPersonSortFields} from "../_models/metadata/v2/person-sort-field";
+import {allPersonFilterFields} from "../_models/metadata/v2/person-filter-field";
 
 @Component({
-    selector: 'app-metadata-filter',
-    templateUrl: './metadata-filter.component.html',
-    styleUrls: ['./metadata-filter.component.scss'],
-    animations: [
-        trigger('inOutAnimation', [
-            transition(':enter', [
-                style({ height: 0, opacity: 0 }),
-                animate('.5s ease-out', style({ height: 300, opacity: 1 }))
-            ]),
-            transition(':leave', [
-                style({ height: 300, opacity: 1 }),
-                animate('.5s ease-in', style({ height: 0, opacity: 0 }))
-            ])
-        ]),
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-metadata-filter',
+  templateUrl: './metadata-filter.component.html',
+  styleUrls: ['./metadata-filter.component.scss'],
+  animations: [
+      trigger('inOutAnimation', [
+          transition(':enter', [
+              style({ height: 0, opacity: 0 }),
+              animate('.5s ease-out', style({ height: 300, opacity: 1 }))
+          ]),
+          transition(':leave', [
+              style({ height: 300, opacity: 1 }),
+              animate('.5s ease-in', style({ height: 0, opacity: 0 }))
+          ])
+      ]),
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
     MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
-export class MetadataFilterComponent implements OnInit {
-  protected readonly allFilterFields = allFields;
+export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
+  protected readonly allFilterFields = allSeriesFilterFields;
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
@@ -63,7 +69,7 @@ export class MetadataFilterComponent implements OnInit {
   protected readonly translocoService = inject(TranslocoService);
   private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
 
-  protected readonly allSortFields = allSortFields.map(f => {
+  protected readonly allSortFields = allSeriesSortFields.map(f => {
     return {title: this.sortFieldPipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
@@ -76,7 +82,23 @@ export class MetadataFilterComponent implements OnInit {
    * Should filtering be shown on the page
    */
   @Input() filteringDisabled: boolean = false;
-  @Input({required: true}) filterSettings!: FilterSettings<FilterField>;
+  //@Input({required: true}) filterSettings!: FilterSettings<T>;
+
+  @Input({required: true}) filterSettings!: FilterSettingsBase<TFilter, TSort>;
+  /**
+   * Entity type derives the Sort and Filter fields
+   */
+  entityType = input<'series' | 'person'>('series');
+
+  sortFieldOptions = computed(() => {
+    if (this.entityType() === 'series') return allSeriesSortFields;
+    return allPersonSortFields;
+  });
+  filterFieldOptions = computed(() => {
+    if (this.entityType() === 'series') return allSeriesFilterFields;
+    return allPersonFilterFields;
+  });
+
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
 
@@ -100,7 +122,7 @@ export class MetadataFilterComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettings();
+      this.filterSettings = new FilterSettingsBase<TFilter, TSort>();
       this.cdRef.markForCheck();
     }
 
@@ -159,8 +181,10 @@ export class MetadataFilterComponent implements OnInit {
 
     this.filterV2 = this.deepClone(this.filterSettings.presetsV2);
 
+    const defaultSortField = this.sortFieldOptions()[0];
+
     this.sortGroup = new FormGroup({
-      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
+      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || defaultSortField, disabled: this.filterSettings.sortDisabled}, []),
       limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
       name: new FormControl(this.filterV2?.name || '', [])
     });
@@ -192,9 +216,11 @@ export class MetadataFilterComponent implements OnInit {
     this.isAscendingSort = isAscending;
 
     if (this.filterV2?.sortOptions === null) {
+      const defaultSortField = this.sortFieldOptions()[0];
+
       this.filterV2.sortOptions = {
         isAscending: this.isAscendingSort,
-        sortField: SortField.SortName
+        sortField: defaultSortField
       }
     }
 
@@ -235,6 +261,7 @@ export class MetadataFilterComponent implements OnInit {
   setToggle(event: any) {
     this.toggleService.set(!this.filteringCollapsed);
   }
+
 
   protected readonly Breakpoint = Breakpoint;
 }

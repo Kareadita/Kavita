@@ -22,7 +22,6 @@ import {
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -39,6 +38,7 @@ import {filter, map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
+import {FilterSettingsBase, SeriesFilterSettings} from "../../metadata-filter/filter-settings";
 
 
 const ANIMATION_TIME_MS = 0;
@@ -49,7 +49,7 @@ const ANIMATION_TIME_MS = 0;
  * How to use:
  * - For filtering:
  *    - pass a filterSettings which will bootstrap the filtering bar
- *    - pass a jumpbar method binding to calc the count for the entity
+ *    - pass a jumpbar method binding to calc the count for the entity (not implemented yet)
  * - For card layout
  *    - Pass an identity function for trackby
  *    - Pass a pagination object for the total count
@@ -84,7 +84,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    */
   @Input() parentScroll!: Element | Window;
 
-  // Filter Code
+  // We need to pass filterOpen from the grandfather to the metadata filter due to the filter button being in a separate component
   @Input() filterOpen!: EventEmitter<boolean>;
   /**
    * Should filtering be shown on the page
@@ -98,7 +98,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * A trackBy to help with rendering. This is required as without it there are issues when scrolling
    */
   @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
-  @Input() filterSettings!: FilterSettings<number>;
+  @Input() filterSettings!: FilterSettingsBase;
   @Input() refresh!: EventEmitter<void>;
   /**
    * Pass the filter object optionally. If not passed, will create a SeriesFilter by default
@@ -150,7 +150,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     // }
 
     if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettings();
+      this.filterSettings = new SeriesFilterSettings();
       this.cdRef.markForCheck();
     }
 

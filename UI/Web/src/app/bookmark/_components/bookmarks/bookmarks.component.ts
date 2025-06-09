@@ -3,7 +3,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
@@ -28,6 +27,7 @@ import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 
 @Component({
   selector: 'app-bookmarks',
@@ -65,7 +65,7 @@ export class BookmarksComponent implements OnInit {
 
   pagination: Pagination = new Pagination();
   filter: FilterV2<FilterField> | undefined = undefined;
-  filterSettings: FilterSettings<FilterField> = new FilterSettings();
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
   filterActiveCheck!: FilterV2<FilterField>;

@@ -16,7 +16,6 @@ import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime, take} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -41,6 +40,7 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 
 
 @Component({
@@ -60,7 +60,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
   filter: FilterV2<FilterField> | undefined = undefined;
-  filterSettings: FilterSettings<FilterField> = new FilterSettings();
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
   filterActiveCheck!: FilterV2<FilterField>;
