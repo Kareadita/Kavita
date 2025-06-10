@@ -246,7 +246,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     // Automatically updates when the breakpoint changes, or when reader settings changes
     this.widthOverride = computed(() => {
-      //console.log("updating widthOverride")
       const breakpoint = this.utilityService.activeUserBreakpoint();
       const value = this.readerSettings().widthSlider;
 
@@ -258,12 +257,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     //perform jump so the page stays in view (NOT WORKING)
     effect(() => {
-      //console.log("width changing!")
+      const width = this.widthOverride(); // needs to be at the top for effect to work
       this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
       if(!this.currentPageElem)
         return;
 
-      const width = this.widthOverride();
       let images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
       images.forEach((img) => {
         this.renderer.setStyle(img, "width", width);
