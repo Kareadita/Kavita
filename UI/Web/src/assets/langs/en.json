@@ -2820,7 +2820,13 @@
         "pdf-odd": "Odd",
         "pdf-even": "Even",
         "pdf-light": "Light",
-        "pdf-dark": "Dark"
+        "pdf-dark": "Dark",
+        "breakpoints": {
+            "never": "Never",
+            "mobile": "Mobile",
+            "tablet": "Tablet",
+            "desktop": "Desktop"
+        }
     },
 
     "manage-reading-profiles": {
@@ -2861,6 +2867,8 @@
         "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
         "width-override-label": "{{manga-reader.width-override-label}}",
         "width-override-tooltip": "Override width of images in the reader",
+        "disable-width-override-label": "Disable width override",
+        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is smaller than the configured breakpoint",
         "reset": "{{common.reset}}",
 
         "book-reader-settings-title": "Book Reader",

@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnIni
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
-  bookWritingStyles,
+  bookWritingStyles, breakPoints,
   layoutModes,
   pageSplitOptions,
   pdfScrollModes,
@@ -48,6 +48,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
 import {WikiLink} from "../../_models/wiki";
+import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -86,6 +87,7 @@ enum TabId {
     NgbNavOutlet,
     LoadingComponent,
     NgbTooltip,
+    BreakpointPipe,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -194,6 +196,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('backgroundColor', new FormControl(this.selectedProfile.backgroundColor, []));
     this.readingProfileForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.selectedProfile.allowAutomaticWebtoonReaderDetection, []));
     this.readingProfileForm.addControl('widthOverride', new FormControl(this.selectedProfile.widthOverride, [Validators.min(0), Validators.max(100)]));
+    this.readingProfileForm.addControl('disableWidthOverride', new FormControl(this.selectedProfile.disableWidthOverride, []))
 
     // Epub reader
     this.readingProfileForm.addControl('bookReaderFontFamily', new FormControl(this.selectedProfile.bookReaderFontFamily, []));
@@ -261,6 +264,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     data.pageSplitOption = parseInt(data.pageSplitOption as unknown as string);
     data.readerMode = parseInt(data.readerMode as unknown as string);
     data.layoutMode = parseInt(data.layoutMode as unknown as string);
+    data.disableWidthOverride = parseInt(data.disableWidthOverride as unknown as string);
 
     data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection as unknown as string);
     data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle as unknown as string);
@@ -318,4 +322,5 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly TabId = TabId;
   protected readonly ReadingProfileKind = ReadingProfileKind;
   protected readonly WikiLink = WikiLink;
+  protected readonly breakPoints = breakPoints;
 }

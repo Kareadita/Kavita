@@ -33,8 +33,9 @@
 
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages | async; let index = $index; track item.src) {
-      <img src="{{item.src}}" style="display: block;" [ngStyle]="{'width': widthOverride$ | async}"
+      <img src="{{item.src}}" style="display: block;"
            [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
+           [style.width]="widthOverride()"
            class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
            rel="nofollow"
            alt="image"
