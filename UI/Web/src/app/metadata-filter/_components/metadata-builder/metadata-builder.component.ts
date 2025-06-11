@@ -5,6 +5,7 @@ import {
   DestroyRef,
   EventEmitter,
   inject,
+  input,
   Input,
   OnInit,
   Output
@@ -18,10 +19,10 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {allSeriesFilterFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ValidFilterEntity} from "../../filter-settings";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -36,14 +37,14 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataBuilderComponent implements OnInit {
+export class MetadataBuilderComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
   @Input({required: true}) filter!: FilterV2<number>;
   /**
    * The number of statements that can be. 0 means unlimited. -1 means none.
    */
   @Input() statementLimit = 0;
-  @Input() availableFilterFields = allSeriesFilterFields;
+  entityType = input.required<ValidFilterEntity>();
   @Output() update: EventEmitter<FilterV2<number>> = new EventEmitter<FilterV2<number>>();
   @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
@@ -52,7 +53,6 @@ export class MetadataBuilderComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
   protected readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly  destroyRef = inject(DestroyRef);
-  protected readonly Breakpoint = Breakpoint;
 
   formGroup: FormGroup = new FormGroup({});
 
@@ -83,5 +83,7 @@ export class MetadataBuilderComponent implements OnInit {
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 
 }

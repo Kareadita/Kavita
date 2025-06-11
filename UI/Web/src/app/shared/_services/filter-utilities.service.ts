@@ -1,18 +1,20 @@
 import {inject, Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Params, Router} from '@angular/router';
-import {SortField} from 'src/app/_models/metadata/series-filter';
+import {allSeriesSortFields, SortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {allSeriesFilterFields, FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";
 import {Observable, of, switchMap} from "rxjs";
-import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
+import {allPersonFilterFields, PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
+import {allPersonSortFields} from "../../_models/metadata/v2/person-sort-field";
+import {ValidFilterEntity} from "../../metadata-filter/filter-settings";
 
 
 @Injectable({
@@ -117,6 +119,37 @@ export class FilterUtilitiesService {
       comparison: FilterComparison.Equal,
       value: '',
       field: PersonFilterField.Name
+    }
+  }
+
+  getSortFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return allSeriesSortFields as unknown as T[];
+      case 'person':
+        return allPersonSortFields as unknown as T[];
+      default:
+        return [] as T[];
+    }
+  }
+
+  getFilterFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return allSeriesFilterFields as unknown as T[];
+      case 'person':
+        return allPersonFilterFields as unknown as T[];
+      default:
+        return [] as T[];
+    }
+  }
+
+  getDefaultFilterField<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return FilterField.SeriesName as unknown as T;
+      case 'person':
+        return PersonFilterField.Role as unknown as T;
     }
   }
 }

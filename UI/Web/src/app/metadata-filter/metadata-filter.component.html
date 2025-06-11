@@ -26,8 +26,8 @@
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
           <app-metadata-builder [filter]="filterV2"
-                                [availableFilterFields]="allFilterFields"
-                                [statementLimit]="filterSettings.statementLimit"
+                                [entityType]="filterSettings().type"
+                                [statementLimit]="filterSettings().statementLimit"
                                 (update)="handleFilters($event)">
           </app-metadata-builder>
         </div>
@@ -41,7 +41,7 @@
             </div>
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <app-sort-button [disabled]="filterSettings.sortDisabled" (update)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
+              <app-sort-button [disabled]="filterSettings().sortDisabled" (update)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
                 @for(field of allSortFields; track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
@@ -76,7 +76,7 @@
       <button class="btn btn-primary col-6" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
     </div>
     <div class="col-md-2 col-sm-6 mt-4 pt-2">
-      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled || !this.sortGroup.get('name')?.value">
+      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
         {{t('save')}}
       </button>

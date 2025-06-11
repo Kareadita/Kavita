@@ -2,28 +2,34 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
+  Injector,
+  input,
   Input,
   OnInit,
   Output,
+  Signal,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
-import {allSeriesFilterFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
+import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe} from "@angular/common";
 import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Select2, Select2Option} from "ng-select2-component";
 import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
+import {ValidFilterEntity} from "../../filter-settings";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 
 enum PredicateType {
   Text = 1,
@@ -131,31 +137,25 @@ const BooleanComparisons = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent implements OnInit {
-
-  protected readonly FilterComparison = FilterComparison;
-  protected readonly PredicateType = PredicateType;
+export class MetadataFilterRowComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dateParser = inject(NgbDateParserFormatter);
   private readonly metadataService = inject(MetadataService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly filterUtilitiesService = inject(FilterUtilitiesService);
+  private readonly injector = inject(Injector);
 
-
-  @Input() index: number = 0; // This is only for debugging
   /**
    * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
    */
-  @Input() preset!: FilterStatement<number>;
-  @Input() availableFields: Array<FilterField> = allSeriesFilterFields;
-  @Output() filterStatement = new EventEmitter<FilterStatement<number>>();
+  @Input() preset!: FilterStatement<TFilter>;
+  entityType = input.required<ValidFilterEntity>();
+  @Output() filterStatement = new EventEmitter<FilterStatement<TFilter>>();
 
 
-  formGroup: FormGroup = new FormGroup({
-    'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
-    'filterValue': new FormControl<string | number>('', []),
-  });
+  formGroup!: FormGroup;
   validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   dropdownOptions$ = of<Select2Option[]>([]);
@@ -164,25 +164,57 @@ export class MetadataFilterRowComponent implements OnInit {
   private readonly mangaFormatPipe = new MangaFormatPipe(this.translocoService);
   private readonly ageRatingPipe = new AgeRatingPipe();
 
-  get IsEmptySelected() {
-    return parseInt(this.formGroup.get('comparison')?.value + '', 10) !== FilterComparison.IsEmpty;
-  }
 
+  private comparisonSignal!: Signal<FilterComparison>;
+  private inputSignal!: Signal<TFilter>;
 
-  get UiLabel(): FilterRowUi | null {
-    const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
-    if (!unitLabels.has(field)) return null;
-    return unitLabels.get(field) as FilterRowUi;
-  }
+  isEmptySelected: Signal<boolean> = computed(() => false);
+  uiLabel: Signal<FilterRowUi | null> = computed(() => null);
+  isMultiSelectDropdownAllowed: Signal<boolean> = computed(() => false);
 
-  get MultipleDropdownAllowed() {
-    const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains || comp === FilterComparison.MustContains;
-  }
-
+  sortFieldOptions = computed(() => []);
+  filterFieldOptions = computed(() => []);
 
   ngOnInit() {
-    this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
+
+    this.formGroup = new FormGroup({
+      'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
+      'filterValue': new FormControl<string | number>('', []),
+      'input': new FormControl<TFilter>(this.filterUtilitiesService.getDefaultFilterField<TFilter>(this.entityType()), [])
+    });
+
+    this.comparisonSignal = toSignal<FilterComparison>(
+      this.formGroup.get('comparison')!.valueChanges.pipe(
+        startWith(this.formGroup.get('comparison')!.value),
+        map(d => parseInt(d + '', 10) as FilterComparison)
+      )
+      , {requireSync: true, injector: this.injector});
+    this.inputSignal = toSignal<TFilter>(
+      this.formGroup.get('input')!.valueChanges.pipe(
+        startWith(this.formGroup.get('input')!.value),
+        map(d => parseInt(d + '', 10) as TFilter)
+      )
+      , {requireSync: true, injector: this.injector});
+
+    this.isEmptySelected = computed(() => this.comparisonSignal() !== FilterComparison.IsEmpty);
+    this.uiLabel = computed(() => {
+      if (!unitLabels.has(this.inputSignal())) return null;
+      return unitLabels.get(this.inputSignal()) as FilterRowUi;
+    });
+
+    this.isMultiSelectDropdownAllowed = computed(() => {
+      return this.comparisonSignal() === FilterComparison.Contains || this.comparisonSignal() === FilterComparison.NotContains || this.comparisonSignal() === FilterComparison.MustContains;
+    });
+
+    this.sortFieldOptions = computed(() => {
+      return this.filterUtilitiesService.getSortFields(this.entityType());
+    });
+    this.filterFieldOptions = computed(() => {
+      return this.filterUtilitiesService.getFilterFields(this.entityType());
+    });
+
+
+    //this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
@@ -215,7 +247,7 @@ export class MetadataFilterRowComponent implements OnInit {
   propagateFilterUpdate() {
     const stmt = {
       comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
-      field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
+      field: parseInt(this.formGroup.get('input')?.value, 10) as TFilter,
       value: this.formGroup.get('filterValue')?.value!
     };
 
@@ -252,7 +284,7 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }
     else if (DropdownFields.includes(this.preset.field)) {
-      if (this.MultipleDropdownAllowed || val.includes(',')) {
+      if (this.isMultiSelectDropdownAllowed() || val.includes(',')) {
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
         if (this.preset.field === FilterField.Languages) {
@@ -383,4 +415,7 @@ export class MetadataFilterRowComponent implements OnInit {
   updateIfDateFilled() {
     this.propagateFilterUpdate();
   }
+
+  protected readonly FilterComparison = FilterComparison;
+  protected readonly PredicateType = PredicateType;
 }

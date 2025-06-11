@@ -5,6 +5,7 @@ import {
   computed,
   ContentChild,
   DestroyRef,
+  effect,
   EventEmitter,
   inject,
   input,
@@ -25,15 +26,14 @@ import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
-import {allSeriesFilterFields, FilterField} from "../_models/metadata/v2/filter-field";
+import {FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {animate, style, transition, trigger} from "@angular/animations";
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
-import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterSettingsBase} from "./filter-settings";
-import {allPersonSortFields} from "../_models/metadata/v2/person-sort-field";
-import {allPersonFilterFields} from "../_models/metadata/v2/person-filter-field";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+
 
 @Component({
   selector: 'app-metadata-filter',
@@ -57,16 +57,16 @@ import {allPersonFilterFields} from "../_models/metadata/v2/person-filter-field"
     MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
-  protected readonly allFilterFields = allSeriesFilterFields;
+
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   private readonly filterService = inject(FilterService);
   protected readonly toggleService = inject(ToggleService);
   protected readonly translocoService = inject(TranslocoService);
+  protected readonly filterUtilitiesService = inject(FilterUtilitiesService);
   private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
 
   protected readonly allSortFields = allSeriesSortFields.map(f => {
@@ -78,26 +78,8 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
    * This toggles the opening/collapsing of the metadata filter code
    */
   @Input() filterOpen: EventEmitter<boolean> = new EventEmitter();
-  /**
-   * Should filtering be shown on the page
-   */
-  @Input() filteringDisabled: boolean = false;
-  //@Input({required: true}) filterSettings!: FilterSettings<T>;
 
-  @Input({required: true}) filterSettings!: FilterSettingsBase<TFilter, TSort>;
-  /**
-   * Entity type derives the Sort and Filter fields
-   */
-  entityType = input<'series' | 'person'>('series');
-
-  sortFieldOptions = computed(() => {
-    if (this.entityType() === 'series') return allSeriesSortFields;
-    return allPersonSortFields;
-  });
-  filterFieldOptions = computed(() => {
-    if (this.entityType() === 'series') return allSeriesFilterFields;
-    return allPersonFilterFields;
-  });
+  filterSettings = input.required<FilterSettingsBase<TFilter, TSort>>();
 
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
@@ -116,16 +98,22 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   fullyLoaded: boolean = false;
   filterV2: FilterV2<FilterField> | undefined;
+  sortFieldOptions = computed(() => {
+    return this.filterUtilitiesService.getSortFields(this.filterSettings().type);
+  });
+  filterFieldOptions = computed(() => {
+    return this.filterUtilitiesService.getFilterFields(this.filterSettings().type);
+  });
 
 
+  constructor() {
+    effect(() => {
+      console.log('setting type: ', this.filterSettings().type);
+    })
+  }
 
 
   ngOnInit(): void {
-    if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettingsBase<TFilter, TSort>();
-      this.cdRef.markForCheck();
-    }
-
     if (this.filterOpen) {
       this.filterOpen.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(openState => {
         this.filteringCollapsed = !openState;
@@ -179,17 +167,17 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   loadFromPresetsAndSetup() {
     this.fullyLoaded = false;
 
-    this.filterV2 = this.deepClone(this.filterSettings.presetsV2);
+    this.filterV2 = this.deepClone(this.filterSettings().presetsV2);
 
     const defaultSortField = this.sortFieldOptions()[0];
 
     this.sortGroup = new FormGroup({
-      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || defaultSortField, disabled: this.filterSettings.sortDisabled}, []),
+      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || defaultSortField, disabled: this.filterSettings().sortDisabled}, []),
       limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
       name: new FormControl(this.filterV2?.name || '', [])
     });
-    if (this.filterSettings?.presetsV2?.sortOptions) {
-      this.isAscendingSort = this.filterSettings?.presetsV2?.sortOptions!.isAscending;
+    if (this.filterSettings()?.presetsV2?.sortOptions) {
+      this.isAscendingSort = this.filterSettings()?.presetsV2?.sortOptions!.isAscending || true;
     }
 
 
@@ -212,7 +200,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
 
   updateSortOrder(isAscending: boolean) {
-    if (this.filterSettings.sortDisabled) return;
+    if (this.filterSettings().sortDisabled) return;
     this.isAscendingSort = isAscending;
 
     if (this.filterV2?.sortOptions === null) {
@@ -256,10 +244,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   toggleSelected() {
     this.toggleService.toggle();
     this.cdRef.markForCheck();
-  }
-
-  setToggle(event: any) {
-    this.toggleService.set(!this.filteringCollapsed);
   }
 
 
