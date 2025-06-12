@@ -1283,8 +1283,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Calls the correct prev- or nextPage method based on the direction, readingDirection, and readerMode
+   *
+   * readingDirection is ignored when readerMode is Webtoon or UpDown
+   *
+   * KeyDirection.Right: right or bottom click
+   * KeyDirection.Left:  left or top click
+   * @param event
+   * @param direction
+   */
   handlePageChange(event: any, direction: KeyDirection) {
-    if (this.readerMode === ReaderMode.Webtoon) {
+    // Webtoons and UpDown reading mode should not take ReadingDirection into account
+    if (this.readerMode === ReaderMode.Webtoon || this.readerMode === ReaderMode.UpDown) {
       if (direction === KeyDirection.Right) {
         this.nextPage(event);
       } else {
@@ -1292,6 +1303,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return;
     }
+
     if (direction === KeyDirection.Right) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage(event) : this.prevPage(event);
     } else if (direction === KeyDirection.Left) {
