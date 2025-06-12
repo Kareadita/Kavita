@@ -1,11 +1,15 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs.Scrobbling;
+using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Scrobble;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -15,11 +19,15 @@ namespace API.Tests.Services;
 
 public class ScrobblingServiceTests : AbstractDbTest
 {
+    private const int ChapterPages = 100;
+
     private readonly ScrobblingService _service;
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
     private readonly ILogger<ScrobblingService> _logger;
     private readonly IEmailService _emailService;
+    private readonly IKavitaPlusApiService _kavitaPlusApiService;
+    private readonly IReaderService _readerService;
 
     public ScrobblingServiceTests()
     {
@@ -27,8 +35,17 @@ public class ScrobblingServiceTests : AbstractDbTest
         _localizationService = Substitute.For<ILocalizationService>();
         _logger = Substitute.For<ILogger<ScrobblingService>>();
         _emailService = Substitute.For<IEmailService>();
+        _kavitaPlusApiService = Substitute.For<IKavitaPlusApiService>();
 
-        _service = new ScrobblingService(UnitOfWork, Substitute.For<IEventHub>(), _logger,  _licenseService, _localizationService, _emailService);
+        _service = new ScrobblingService(UnitOfWork, Substitute.For<IEventHub>(), _logger,  _licenseService,
+            _localizationService, _emailService, _kavitaPlusApiService);
+
+        _readerService = new ReaderService(UnitOfWork,
+            Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(),
+            Substitute.For<IImageService>(),
+            Substitute.For<IDirectoryService>(),
+            Substitute.For<IScrobblingService>()); // Do not use the actual one
     }
 
     protected override async Task ResetDb()
@@ -46,6 +63,18 @@ public class ScrobblingServiceTests : AbstractDbTest
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Archive)
             .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("Volume 1")
+                .WithChapters([
+                    new ChapterBuilder("1")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("2")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
             .Build();
 
         var library = new LibraryBuilder("Test Library", LibraryType.Manga)
@@ -66,6 +95,176 @@ public class ScrobblingServiceTests : AbstractDbTest
 
         await UnitOfWork.CommitAsync();
     }
+
+    private async Task<ScrobbleEvent> CreateScrobbleEvent(int? seriesId = null)
+    {
+        var evt = new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ChapterRead,
+            Format = PlusMediaFormat.Manga,
+            SeriesId = seriesId ?? 0,
+            LibraryId = 0,
+            AppUserId = 0,
+        };
+
+        if (seriesId != null)
+        {
+            var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId.Value);
+            if (series != null) evt.Series = series;
+        }
+
+        return evt;
+    }
+
+
+    #region K+ API Request Tests
+
+    [Fact]
+    public async Task PostScrobbleUpdate_AuthErrors()
+    {
+        _kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+            .ReturnsForAnyArgs(new ScrobbleResponseDto()
+            {
+                ErrorMessage = "Unauthorized"
+            });
+
+        var evt = await CreateScrobbleEvent();
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await _service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+        });
+        Assert.True(evt.IsErrored);
+        Assert.Equal("Kavita+ subscription no longer active", evt.ErrorDetails);
+    }
+
+    [Fact]
+    public async Task PostScrobbleUpdate_UnknownSeriesLoggedAsError()
+    {
+        _kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+            .ReturnsForAnyArgs(new ScrobbleResponseDto()
+            {
+                ErrorMessage = "Unknown Series"
+            });
+
+        await SeedData();
+        var evt = await CreateScrobbleEvent(1);
+
+        await _service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+        await UnitOfWork.CommitAsync();
+        Assert.True(evt.IsErrored);
+
+        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
+        Assert.True(series.IsBlacklisted);
+
+        var errors = await UnitOfWork.ScrobbleRepository.GetAllScrobbleErrorsForSeries(1);
+        Assert.Single(errors);
+        Assert.Equal("Series cannot be matched for Scrobbling", errors.First().Comment);
+        Assert.Equal(series.Id, errors.First().SeriesId);
+    }
+
+    [Fact]
+    public async Task PostScrobbleUpdate_InvalidAccessToken()
+    {
+        _kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+            .ReturnsForAnyArgs(new ScrobbleResponseDto()
+            {
+                ErrorMessage = "Access token is invalid"
+            });
+
+        var evt = await CreateScrobbleEvent();
+
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+        {
+            await _service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+        });
+
+        Assert.True(evt.IsErrored);
+        Assert.Equal("Access Token needs to be rotated to continue scrobbling", evt.ErrorDetails);
+    }
+
+    #endregion
+
+    #region Scrobble Reading Update Tests
+
+    [Fact]
+    public async Task ScrobbleReadingUpdate_IgnoreNoLicense()
+    {
+        await ResetDb();
+        await SeedData();
+
+        _licenseService.HasActiveLicense().Returns(false);
+
+        await _service.ScrobbleReadingUpdate(1, 1);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public async Task ScrobbleReadingUpdate_UpdateExistingNotIsProcessed()
+    {
+        await ResetDb();
+        await SeedData();
+
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        var chapter1 = await UnitOfWork.ChapterRepository.GetChapterAsync(1);
+        var chapter2 = await UnitOfWork.ChapterRepository.GetChapterAsync(2);
+        var chapter3 = await UnitOfWork.ChapterRepository.GetChapterAsync(3);
+        Assert.NotNull(chapter1);
+        Assert.NotNull(chapter2);
+        Assert.NotNull(chapter3);
+
+        _licenseService.HasActiveLicense().Returns(true);
+
+        await _service.ScrobbleReadingUpdate(1, 1);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+
+        var readEvent = events.First();
+        Assert.False(readEvent.IsProcessed);
+
+        await _readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await UnitOfWork.CommitAsync();
+
+        // Scrobble update
+        await _service.ScrobbleReadingUpdate(1, 1);
+        events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+
+        readEvent = events.First();
+        Assert.False(readEvent.IsProcessed);
+        Assert.Equal(1, readEvent.ChapterNumber);
+
+        // Mark as processed
+        readEvent.IsProcessed = true;
+        await UnitOfWork.CommitAsync();
+
+        await _readerService.MarkChaptersAsRead(user, 1, [chapter2]);
+        await UnitOfWork.CommitAsync();
+
+        // Scrobble update
+        await _service.ScrobbleReadingUpdate(1, 1);
+        events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Equal(2, events.Count);
+        Assert.Single(events.Where(e => e.IsProcessed).ToList());
+        Assert.Single(events.Where(e => !e.IsProcessed).ToList());
+
+        // Should update the existing non processed event
+        await _readerService.MarkChaptersAsRead(user, 1, [chapter3]);
+        await UnitOfWork.CommitAsync();
+
+        // Scrobble update
+        await _service.ScrobbleReadingUpdate(1, 1);
+        events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Equal(2, events.Count);
+        Assert.Single(events.Where(e => e.IsProcessed).ToList());
+        Assert.Single(events.Where(e => !e.IsProcessed).ToList());
+    }
+
+    #endregion
+
 
     #region ScrobbleWantToReadUpdate Tests
 

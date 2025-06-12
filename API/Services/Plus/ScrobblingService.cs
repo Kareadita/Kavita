@@ -71,6 +71,7 @@ public class ScrobblingService : IScrobblingService
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
     private readonly IEmailService _emailService;
+    private readonly IKavitaPlusApiService _kavitaPlusApiService;
 
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
@@ -107,7 +108,8 @@ public class ScrobblingService : IScrobblingService
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
-        ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService)
+        ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
+        IKavitaPlusApiService kavitaPlusApiService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -115,6 +117,7 @@ public class ScrobblingService : IScrobblingService
         _licenseService = licenseService;
         _localizationService = localizationService;
         _emailService = emailService;
+        _kavitaPlusApiService = kavitaPlusApiService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -222,11 +225,7 @@ public class ScrobblingService : IScrobblingService
 
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
-                .WithKavitaPlusHeaders(license.Value, token)
-                .GetStringAsync();
-
-            return bool.Parse(response);
+            return await _kavitaPlusApiService.HasTokenExpired(license.Value, token, provider);
         }
         catch (HttpRequestException e)
         {
@@ -374,8 +373,9 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
+        // Check if there is an existing not yet processed event, if so update it
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
-            ScrobbleEventType.ChapterRead);
+            ScrobbleEventType.ChapterRead, true);
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
@@ -386,8 +386,10 @@ public class ScrobblingService : IScrobblingService
                 (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
             existingEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
+
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync();
+
             _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
                 existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
             return;
@@ -488,11 +490,7 @@ public class ScrobblingService : IScrobblingService
         if (string.IsNullOrWhiteSpace(aniListToken)) return 0;
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
-                .WithKavitaPlusHeaders(license, aniListToken)
-                .GetStringAsync();
-
-            return int.Parse(response);
+            return await _kavitaPlusApiService.GetRateLimit(license, aniListToken);
         }
         catch (Exception e)
         {
@@ -502,81 +500,77 @@ public class ScrobblingService : IScrobblingService
         return 0;
     }
 
-    private async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
+    public async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
     {
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/update")
-                .WithKavitaPlusHeaders(license)
-                .PostJsonAsync(data)
-                .ReceiveJson<ScrobbleResponseDto>();
+            var response = await _kavitaPlusApiService.PostScrobbleUpdate(data, license);
 
-            if (!response.Successful)
+            if (response.Successful || response.ErrorMessage == null) return response.RateLeft;
+
+            // Might want to log this under ScrobbleError
+            if (response.ErrorMessage.Contains("Too Many Requests"))
             {
-                // Might want to log this under ScrobbleError
-                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
+                _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
+                await Task.Delay(TimeSpan.FromMinutes(10));
+                return await PostScrobbleUpdate(data, license, evt);
+            }
+            if (response.ErrorMessage.Contains("Unauthorized"))
+            {
+                _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
+                await _licenseService.HasActiveLicense(true);
+                evt.IsErrored = true;
+                evt.ErrorDetails = "Kavita+ subscription no longer active";
+                throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
+            }
+            if (response.ErrorMessage.Contains("Access token is invalid"))
+            {
+                evt.IsErrored = true;
+                evt.ErrorDetails = AccessTokenErrorMessage;
+                throw new KavitaException("Access token is invalid");
+            }
+            if (response.ErrorMessage.Contains("Unknown Series"))
+            {
+                // Log the Series name and Id in ScrobbleErrors
+                _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
+                if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
-                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
-                    await Task.Delay(TimeSpan.FromMinutes(10));
-                    return await PostScrobbleUpdate(data, license, evt);
-                }
-                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unauthorized"))
-                {
-                    _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
-                    await _licenseService.HasActiveLicense(true);
-                    evt.IsErrored = true;
-                    evt.ErrorDetails = "Kavita+ subscription no longer active";
-                    throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
-                }
-                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Access token is invalid"))
-                {
-                    evt.IsErrored = true;
-                    evt.ErrorDetails = AccessTokenErrorMessage;
-                    throw new KavitaException("Access token is invalid");
-                }
-                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
-                {
-                    // Log the Series name and Id in ScrobbleErrors
-                    _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
-                    if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
+                    // Create a new ExternalMetadata entry to indicate that this is not matchable
+                    var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
+                    if (series == null) return 0;
+
+                    series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
+                    series.IsBlacklisted = true;
+                    _unitOfWork.SeriesRepository.Update(series);
+
+                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                     {
-                        // Create a new ExternalMetadata entry to indicate that this is not matchable
-                        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
-                        if (series == null) return 0;
+                        Comment = UnknownSeriesErrorMessage,
+                        Details = data.SeriesName,
+                        LibraryId = evt.LibraryId,
+                        SeriesId = evt.SeriesId
+                    });
 
-                        series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
-                        series.IsBlacklisted = true;
-                        _unitOfWork.SeriesRepository.Update(series);
-
-                        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
-                        {
-                            Comment = UnknownSeriesErrorMessage,
-                            Details = data.SeriesName,
-                            LibraryId = evt.LibraryId,
-                            SeriesId = evt.SeriesId
-                        });
-
-                    }
-
-                    evt.IsErrored = true;
-                    evt.ErrorDetails = UnknownSeriesErrorMessage;
-                } else if (response.ErrorMessage != null && response.ErrorMessage.StartsWith("Review"))
-                {
-                    // Log the Series name and Id in ScrobbleErrors
-                    _logger.LogInformation("Kavita+ was unable to save the review");
-                    if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
-                    {
-                        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
-                        {
-                            Comment = response.ErrorMessage,
-                            Details = data.SeriesName,
-                            LibraryId = evt.LibraryId,
-                            SeriesId = evt.SeriesId
-                        });
-                    }
-                    evt.IsErrored = true;
-                    evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
                 }
+
+                evt.IsErrored = true;
+                evt.ErrorDetails = UnknownSeriesErrorMessage;
+            } else if (response.ErrorMessage.StartsWith("Review"))
+            {
+                // Log the Series name and Id in ScrobbleErrors
+                _logger.LogInformation("Kavita+ was unable to save the review");
+                if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
+                {
+                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                    {
+                        Comment = response.ErrorMessage,
+                        Details = data.SeriesName,
+                        LibraryId = evt.LibraryId,
+                        SeriesId = evt.SeriesId
+                    });
+                }
+                evt.IsErrored = true;
+                evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
             }
 
             return response.RateLeft;
@@ -595,7 +589,7 @@ public class ScrobblingService : IScrobblingService
             }
 
             _logger.LogError(ex, "Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
-            if (ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
+            if (ex.StatusCode == 500 || ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
             {
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
