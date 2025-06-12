@@ -175,23 +175,24 @@ export class UtilityService {
      const style = getComputedStyle(this.document.body)
      const mobileBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--mobile-breakpoint'), Breakpoint.Mobile);
      const tabletBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--tablet-breakpoint'), Breakpoint.Tablet);
-     const desktopBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--desktop-breakpoint'), Breakpoint.Desktop);
+     //const desktopBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--desktop-breakpoint'), Breakpoint.Desktop);
 
      if (window.innerWidth <= mobileBreakPoint) {
        return UserBreakpoint.Mobile;
-     } else if (window.innerWidth >= mobileBreakPoint && window.innerWidth <= tabletBreakPoint) {
+     } else if (window.innerWidth <= tabletBreakPoint) {
        return UserBreakpoint.Tablet;
      }
 
+     // Fallback to desktop
      return UserBreakpoint.Desktop;
   }
 
   private parseOrDefault<T>(s: string, def: T): T {
-     try {
-       return parseInt(s, 10) as T;
-     } catch (e) {
+     const ret = parseInt(s, 10);
+     if (isNaN(ret)) {
        return def;
      }
+     return ret as T;
   }
 
   isInViewport(element: Element, additionalTopOffset: number = 0) {

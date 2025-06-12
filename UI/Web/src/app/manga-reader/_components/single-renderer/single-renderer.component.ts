@@ -75,7 +75,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       takeUntilDestroyed(this.destroyRef)
     );
 
-    this.readerSettings = toSignal(this.readerSettings$, {injector: this.injector}) as Signal<ReaderSetting>;
+    this.readerSettings = toSignal(this.readerSettings$, {injector: this.injector, requireSync: true});
     this.widthOverride = computed(() => {
       const breakpoint = this.utilityService.activeUserBreakpoint();
       const value = this.readerSettings().widthSlider;
