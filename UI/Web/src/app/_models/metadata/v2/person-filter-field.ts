@@ -1,7 +1,8 @@
 export enum PersonFilterField {
-  None = -1,
   Role = 1,
-  Name = 2
+  Name = 2,
+  SeriesCount = 3,
+  ChapterCount = 4,
 }
 
 

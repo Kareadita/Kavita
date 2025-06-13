@@ -7,7 +7,7 @@ import {Genre} from '../_models/metadata/genre';
 import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
 import {Language} from '../_models/metadata/language';
 import {PublicationStatusDto} from '../_models/metadata/publication-status-dto';
-import {Person, PersonRole} from '../_models/metadata/person';
+import {allPeopleRoles, Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
@@ -29,6 +29,10 @@ import {PaginatedResult} from "../_models/pagination";
 import {UtilityService} from "../shared/_services/utility.service";
 import {BrowseGenre} from "../_models/metadata/browse/browse-genre";
 import {BrowseTag} from "../_models/metadata/browse/browse-tag";
+import {ValidFilterEntity} from "../metadata-filter/filter-settings";
+import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
+import {PersonRolePipe} from "../_pipes/person-role.pipe";
+import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +48,7 @@ export class MetadataService {
   private validLanguages: Array<Language> = [];
   private ageRatingPipe = new AgeRatingPipe();
   private mangaFormatPipe = new MangaFormatPipe(this.translocoService);
+  private personRolePipe = new PersonRolePipe();
 
   constructor(private httpClient: HttpClient) { }
 
@@ -148,19 +153,28 @@ export class MetadataService {
     return this.httpClient.get<Array<Person>>(this.baseUrl + 'metadata/people-by-role?role=' + role);
   }
 
-  createDefaultFilterDto(): FilterV2<FilterField> {
+  createDefaultFilterDto<TFilter extends number, TSort extends number>(entityType: ValidFilterEntity): FilterV2<TFilter, TSort> {
     return {
-      statements: [] as FilterStatement<FilterField>[],
+      statements: [] as FilterStatement<TFilter>[],
       combination: FilterCombination.And,
       limitTo: 0,
       sortOptions: {
         isAscending: true,
-        sortField: SortField.SortName
+        sortField: (entityType === 'series' ? SortField.SortName : PersonSortField.Name) as TSort
       }
     };
   }
 
-  createDefaultFilterStatement(field: FilterField = FilterField.SeriesName, comparison = FilterComparison.Equal, value = '') {
+  createDefaultFilterStatement(entityType: ValidFilterEntity) {
+    switch (entityType) {
+      case 'series':
+        return this.createFilterStatement(FilterField.SeriesName);
+      case 'person':
+        return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist}, ${PersonRole.Writer}`);
+    }
+  }
+
+  createFilterStatement<T extends number>(field: T, comparison = FilterComparison.Equal, value = '') {
     return {
       comparison: comparison,
       field: field,
@@ -223,9 +237,28 @@ export class MetadataService {
   /**
    * Used to get the underlying Options (for Metadata Filter Dropdowns)
    * @param filterField
+   * @param entityType
    */
-  getOptionsForFilterField(filterField: FilterField) {
-    switch (filterField) {
+  getOptionsForFilterField<T extends number>(filterField: T, entityType: ValidFilterEntity) {
+
+    switch (entityType) {
+      case 'series':
+        return this.getSeriesOptionsForFilterField(filterField as FilterField);
+      case 'person':
+        return this.getPersonOptionsForFilterField(filterField as PersonFilterField);
+    }
+  }
+
+  private getPersonOptionsForFilterField(field: PersonFilterField) {
+    switch (field) {
+      case PersonFilterField.Role:
+        return of(allPeopleRoles.map(r => {return {value: r, label: this.personRolePipe.transform(r)}}));
+    }
+    return of([])
+  }
+
+  private getSeriesOptionsForFilterField(field: FilterField) {
+    switch (field) {
       case FilterField.PublicationStatus:
         return this.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
           return {value: pub.value, label: pub.title}

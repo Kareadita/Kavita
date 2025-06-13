@@ -9,7 +9,9 @@ import {UtilityService} from "../shared/_services/utility.service";
 import {BrowsePerson} from "../_models/metadata/browse/browse-person";
 import {StandaloneChapter} from "../_models/standalone-chapter";
 import {TextResonse} from "../_types/text-response";
-import {BrowsePersonFilter} from "../_models/metadata/v2/browse-person-filter";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
+import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
+import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +46,7 @@ export class PersonService {
     return this.httpClient.get<Array<StandaloneChapter>>(this.baseUrl + `person/chapters-by-role?personId=${personId}&role=${role}`);
   }
 
-  getAuthorsToBrowse(filter: BrowsePersonFilter, pageNum?: number, itemsPerPage?: number) {
+  getAuthorsToBrowse(filter: FilterV2<PersonFilterField, PersonSortField>, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
@@ -54,6 +56,17 @@ export class PersonService {
       })
     );
   }
+
+  // getAuthorsToBrowse(filter: BrowsePersonFilter, pageNum?: number, itemsPerPage?: number) {
+  //   let params = new HttpParams();
+  //   params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+  //
+  //   return this.httpClient.post<PaginatedResult<BrowsePerson[]>>(this.baseUrl + `person/all`, filter, {observe: 'response', params}).pipe(
+  //     map((response: any) => {
+  //       return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowsePerson[]>;
+  //     })
+  //   );
+  // }
 
   downloadCover(personId: number) {
     return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);

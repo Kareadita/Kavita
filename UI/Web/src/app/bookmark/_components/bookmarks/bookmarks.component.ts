@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  OnInit
+} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
@@ -10,7 +18,7 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -28,6 +36,9 @@ import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {MetadataService} from "../../../_services/metadata.service";
 
 @Component({
   selector: 'app-bookmarks',
@@ -52,6 +63,8 @@ export class BookmarksComponent implements OnInit {
   private readonly titleService = inject(Title);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly imageService = inject(ImageService);
+  public readonly metadataService = inject(MetadataService);
+  public readonly destroyRef = inject(DestroyRef);
 
   protected readonly WikiLink = WikiLink;
 
@@ -74,8 +87,14 @@ export class BookmarksComponent implements OnInit {
   refresh: EventEmitter<void> = new EventEmitter();
 
   constructor() {
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
+
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+        }
 
         this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
         this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
@@ -84,6 +103,7 @@ export class BookmarksComponent implements OnInit {
 
         this.cdRef.markForCheck();
       });
+
 
       this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }

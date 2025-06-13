@@ -22,7 +22,7 @@ import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
@@ -41,6 +41,9 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {MetadataService} from "../../../_services/metadata.service";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 
 @Component({
@@ -55,6 +58,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
 
   isLoading: boolean = true;
   series: Array<Series> = [];
@@ -108,12 +112,22 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
+
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+        const defaultStmt = {field: FilterField.WantToRead, value: 'true', comparison: FilterComparison.Equal} as FilterStatement<FilterField>;
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(defaultStmt);
+        }
+
 
         this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+        this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
+
 
         this.cdRef.markForCheck();
       });

@@ -11,22 +11,21 @@ import {
   input,
   Input,
   OnInit,
-  Output
+  Output,
+  Signal
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
-import {allSeriesSortFields, FilterEvent, FilterItem} from '../_models/metadata/series-filter';
+import {FilterEvent, FilterItem} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
-import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, JsonPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
-import {SortFieldPipe} from "../_pipes/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
-import {FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
 import {animate, style, transition, trigger} from "@angular/animations";
@@ -54,7 +53,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
-    MetadataBuilderComponent, NgClass, SortButtonComponent]
+    MetadataBuilderComponent, NgClass, SortButtonComponent, JsonPipe]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
@@ -67,12 +66,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   protected readonly toggleService = inject(ToggleService);
   protected readonly translocoService = inject(TranslocoService);
   protected readonly filterUtilitiesService = inject(FilterUtilitiesService);
-  private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
-
-  protected readonly allSortFields = allSeriesSortFields.map(f => {
-    return {title: this.sortFieldPipe.transform(f), value: f};
-  }).sort((a, b) => a.title.localeCompare(b.title));
-
 
   /**
    * This toggles the opening/collapsing of the metadata filter code
@@ -97,20 +90,20 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   updateApplied: number = 0;
 
   fullyLoaded: boolean = false;
-  filterV2: FilterV2<FilterField> | undefined;
-  sortFieldOptions = computed(() => {
-    return this.filterUtilitiesService.getSortFields(this.filterSettings().type);
-  });
-  filterFieldOptions = computed(() => {
-    return this.filterUtilitiesService.getFilterFields(this.filterSettings().type);
-  });
-
+  filterV2: FilterV2<TFilter, TSort> | undefined;
+  sortFieldOptions: Signal<{title: string, value: number}[]> = computed(() => []);
+  filterFieldOptions: Signal<{title: string, value: number}[]> = computed(() => []);
 
   constructor() {
     effect(() => {
-      console.log('setting type: ', this.filterSettings().type);
+      const settings = this.filterSettings();
+      if (settings?.presetsV2) {
+        this.filterV2 = this.deepClone(settings.presetsV2);
+        this.cdRef.markForCheck();
+      }
     })
   }
+
 
 
   ngOnInit(): void {
@@ -121,6 +114,15 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
         this.cdRef.markForCheck();
       });
     }
+
+
+    this.filterFieldOptions = computed(() => {
+      return this.filterUtilitiesService.getFilterFields(this.filterSettings().type);
+    });
+
+    this.sortFieldOptions = computed(() => {
+      return this.filterUtilitiesService.getSortFields(this.filterSettings().type);
+    });
 
 
 
@@ -159,7 +161,8 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     return clonedObj;
   }
 
-  handleFilters(filter: FilterV2<FilterField>) {
+  handleFilters(filter: FilterV2<TFilter, TSort>) {
+    console.log('handleFilters', filter);
     this.filterV2 = filter;
   }
 
@@ -167,31 +170,37 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   loadFromPresetsAndSetup() {
     this.fullyLoaded = false;
 
-    this.filterV2 = this.deepClone(this.filterSettings().presetsV2);
+    const currentFilterSettings = this.filterSettings();
+    console.log('BUG HERE filterSettings: ', currentFilterSettings);
+    this.filterV2 = this.deepClone(currentFilterSettings.presetsV2);
 
-    const defaultSortField = this.sortFieldOptions()[0];
+    console.log('preset: ', currentFilterSettings.presetsV2);
+
+    const defaultSortField = this.sortFieldOptions()[0].value;
 
     this.sortGroup = new FormGroup({
       sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || defaultSortField, disabled: this.filterSettings().sortDisabled}, []),
       limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
       name: new FormControl(this.filterV2?.name || '', [])
     });
+
     if (this.filterSettings()?.presetsV2?.sortOptions) {
       this.isAscendingSort = this.filterSettings()?.presetsV2?.sortOptions!.isAscending || true;
     }
 
+    this.cdRef.markForCheck();
 
     this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-    if (this.filterV2?.sortOptions === null) {
-      this.filterV2.sortOptions = {
-        isAscending: this.isAscendingSort,
-        sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
-      };
-    }
-    this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
-    this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
-    this.filterV2!.name = this.sortGroup.get('name')?.value || '';
-    this.cdRef.markForCheck();
+      if (this.filterV2?.sortOptions === null) {
+        this.filterV2.sortOptions = {
+          isAscending: this.isAscendingSort,
+          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort
+        };
+      }
+      this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort;
+      this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
+      this.filterV2!.name = this.sortGroup.get('name')?.value || '';
+      this.cdRef.markForCheck();
     });
 
     this.fullyLoaded = true;
@@ -204,7 +213,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     this.isAscendingSort = isAscending;
 
     if (this.filterV2?.sortOptions === null) {
-      const defaultSortField = this.sortFieldOptions()[0];
+      const defaultSortField = this.sortFieldOptions()[0].value as TSort;
 
       this.filterV2.sortOptions = {
         isAscending: this.isAscendingSort,

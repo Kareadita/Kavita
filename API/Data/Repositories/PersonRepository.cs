@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.DTOs;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse;
@@ -11,7 +12,9 @@ using API.Entities.Enums;
 using API.Entities.Person;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
+using API.Helpers.Converters;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -201,31 +204,76 @@ public class PersonRepository : IPersonRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var query = _context.Person
-            .Where(p => p.SeriesMetadataPeople.Any(smp => filter.Roles.Contains(smp.Role)) || p.ChapterPeople.Any(cmp => filter.Roles.Contains(cmp.Role)))
-            .WhereIf(!string.IsNullOrEmpty(filter.Query), p => EF.Functions.Like(p.Name, $"%{filter.Query}%"))
-            .RestrictAgainstAgeRestriction(ageRating)
-            .SortBy(filter.SortOptions)
-            .Select(p => new BrowsePersonDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CoverImage = p.CoverImage,
-                SeriesCount = p.SeriesMetadataPeople
-                    .Where(smp => filter.Roles.Contains(smp.Role))
-                    .Select(smp => smp.SeriesMetadata.SeriesId)
-                    .Distinct()
-                    .Count(),
-                ChapterCount = p.ChapterPeople
-                    .Where(cp => filter.Roles.Contains(cp.Role))
-                    .Select(cp => cp.Chapter.Id)
-                    .Distinct()
-                    .Count()
-            })
-            ;
+        var query = CreateFilteredPersonQueryable(userId, filter, ageRating);
 
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    private IQueryable<BrowsePersonDto> CreateFilteredPersonQueryable(int userId, BrowsePersonFilterDto filter, AgeRestriction ageRating)
+    {
+        var query = _context.Person.AsNoTracking();
+
+        // Apply filtering based on statements
+        query = BuildPersonFilterQuery(userId, filter, query);
+
+        // Apply age restriction
+        query = query.RestrictAgainstAgeRestriction(ageRating);
+
+        // Apply sorting and limiting
+        var sortedQuery = query.SortBy(filter.SortOptions);
+
+        var limitedQuery = ApplyPersonLimit(sortedQuery, filter.LimitTo);
+
+        // Project to DTO
+        var projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            CoverImage = p.CoverImage,
+            SeriesCount = p.SeriesMetadataPeople
+                .Select(smp => smp.SeriesMetadata.SeriesId)
+                .Distinct()
+                .Count(),
+            ChapterCount = p.ChapterPeople
+                .Select(cp => cp.Chapter.Id)
+                .Distinct()
+                .Count()
+        });
+
+        return projectedQuery;
+    }
+
+    private static IQueryable<Person> BuildPersonFilterQuery(int userId, BrowsePersonFilterDto filterDto, IQueryable<Person> query)
+    {
+        if (filterDto.Statements == null || filterDto.Statements.Count == 0) return query;
+
+        var queries = filterDto.Statements
+            .Select(statement => BuildPersonFilterGroup(userId, statement, query))
+            .ToList();
+
+        return filterDto.Combination == FilterCombination.And
+            ? queries.Aggregate((q1, q2) => q1.Intersect(q2))
+            : queries.Aggregate((q1, q2) => q1.Union(q2));
+    }
+
+    private static IQueryable<Person> BuildPersonFilterGroup(int userId, PersonFilterStatementDto statement, IQueryable<Person> query)
+    {
+        var value = PersonFilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
+
+        return statement.Field switch
+        {
+            PersonFilterField.Name => query.HasPersonName(true, statement.Comparison, (string)value),
+            PersonFilterField.Role => query.HasPersonRole(true, statement.Comparison, (IList<PersonRole>)value),
+            PersonFilterField.SeriesCount => query.HasPersonSeriesCount(true, statement.Comparison, (int)value),
+            PersonFilterField.ChapterCount => query.HasPersonChapterCount(true, statement.Comparison, (int)value),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private static IQueryable<Person> ApplyPersonLimit(IQueryable<Person> query, int limit)
+    {
+        return limit <= 0 ? query : query.Take(limit);
     }
 
     public async Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None)

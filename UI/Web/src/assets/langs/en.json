@@ -2085,7 +2085,10 @@
         "release-year": "Release Year",
         "read-progress": "Last Read",
         "average-rating": "Average Rating",
-        "random": "Random"
+        "random": "Random",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
     },
 
     "edit-series-modal": {
@@ -2606,6 +2609,13 @@
         "imprint": "Imprint of {{value}}",
         "team": "Team {{value}}",
         "location": "In {{value}} location"
+    },
+
+    "generic-filter-field-pipe": {
+        "person-role": "Role",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
     },
 
 

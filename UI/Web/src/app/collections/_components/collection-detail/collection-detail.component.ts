@@ -26,7 +26,7 @@ import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
@@ -48,7 +48,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
@@ -63,6 +62,8 @@ import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.p
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {MetadataService} from "../../../_services/metadata.service";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 @Component({
   selector: 'app-collection-detail',
@@ -96,6 +97,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
+  private readonly metadataService = inject(MetadataService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly Breakpoint = Breakpoint;
@@ -189,18 +191,26 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter as FilterV2<FilterField>;
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+  
+        const defaultStmt =  {field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(defaultStmt);
+        }
 
         if (this.filter.statements.filter((stmt: FilterStatement<FilterField>) => stmt.field === FilterField.CollectionTags).length === 0) {
-          this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+          this.filter!.statements.push(defaultStmt);
         }
+
         this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
-        this.cdRef.markForCheck();
 
         this.updateTag(tagId);
+        this.cdRef.markForCheck();
       });
   }
 

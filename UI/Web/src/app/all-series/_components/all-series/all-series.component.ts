@@ -38,6 +38,8 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Observable} from "rxjs";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {Select2Option} from "ng-select2-component";
 
 
 @Component({
@@ -130,8 +132,14 @@ export class AllSeriesComponent implements OnInit {
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-      this.filter = filter;
+
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('series');
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      }
 
       this.title = this.route.snapshot.queryParamMap.get('title') || this.filter!.name || this.title;
       this.titleService.setTitle('Kavita - ' + this.title);
@@ -140,8 +148,13 @@ export class AllSeriesComponent implements OnInit {
       if (this.shouldRewriteTitle()) {
         const field = this.filter!.statements[0].field;
 
+        console.log('field', field);
+
         // This api returns value as string and number, it will complain without the casting
-        (this.metadataService.getOptionsForFilterField(field) as Observable<any>).subscribe((opts: any[]) => {
+        (this.metadataService.getOptionsForFilterField<FilterField>(field, 'series') as Observable<Select2Option[]>).subscribe((opts: Select2Option[]) => {
+          console.log('opts:', opts);
+
+          // BUG: There is now a timing issue when navigating FROM a click. On refresh it works.
           const matchingOpts = opts.filter(m => `${m.value}` === `${this.filter!.statements[0].value}`);
           if (matchingOpts.length === 0) return;
 
@@ -158,7 +171,7 @@ export class AllSeriesComponent implements OnInit {
 
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
+      this.filterSettings.presetsV2 = this.filter;
 
       this.cdRef.markForCheck();
     });

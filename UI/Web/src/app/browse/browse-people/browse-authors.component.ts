@@ -23,19 +23,16 @@ import {PersonCardComponent} from "../../cards/person-card/person-card.component
 import {ImageService} from "../../_services/image.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
-import {allPeopleRoles, PersonRole} from "../../_models/metadata/person";
-import {Select2} from "ng-select2-component";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {PersonRolePipe} from "../../_pipes/person-role.pipe";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, tap} from "rxjs/operators";
-import {SortButtonComponent} from "../../_single-module/sort-button/sort-button.component";
+import {ReactiveFormsModule} from "@angular/forms";
 import {PersonSortField} from "../../_models/metadata/v2/person-sort-field";
-import {PersonSortOptions} from "../../_models/metadata/v2/sort-options";
 import {PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {PersonFilterSettings} from "../../metadata-filter/filter-settings";
+import {FilterEvent} from "../../_models/metadata/series-filter";
+import {PersonRole} from "../../_models/metadata/person";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -47,9 +44,8 @@ import {PersonFilterSettings} from "../../metadata-filter/filter-settings";
     DecimalPipe,
     PersonCardComponent,
     CompactNumberPipe,
-    Select2,
     ReactiveFormsModule,
-    SortButtonComponent,
+
   ],
   templateUrl: './browse-authors.component.html',
   styleUrl: './browse-authors.component.scss',
@@ -75,58 +71,51 @@ export class BrowseAuthorsComponent implements OnInit {
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys: Array<JumpKey> = [];
   trackByIdentity = (index: number, item: BrowsePerson) => `${item.id}`;
-  personRolePipe = new PersonRolePipe();
-  allRoles = allPeopleRoles.map(r => {return {value: r, label: this.personRolePipe.transform(r)}});
-  filterGroup = new FormGroup({
-    roles: new FormControl([PersonRole.CoverArtist, PersonRole.Writer], []),
-    sortField: new FormControl(PersonSortField.Name, []),
-    query: new FormControl('', []),
-  });
-  isAscending:  boolean = true;
   filterSettings: PersonFilterSettings = new PersonFilterSettings();
   filterActive: boolean = false;
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  filter: FilterV2<PersonFilterField> | undefined = undefined;
+  filter: FilterV2<PersonFilterField, PersonSortField> | undefined = undefined;
   filterActiveCheck!: FilterV2<PersonFilterField>;
 
 
-  ngOnInit() {
+  constructor() {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<PersonFilterField, PersonSortField>;
 
-    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-      this.filter = filter;
+      // if (this.filter == null) {
+      //   this.filter
+      // }
+
+      console.log('filter from url:', this.filter);
 
       this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
-      this.filterActiveCheck!.statements.push(this.filterUtilityService.createPersonV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
+      this.filterActiveCheck!.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
+      this.filterSettings.presetsV2 = this.filter;
 
       this.cdRef.markForCheck();
+      this.loadData();
     });
-
-
-
-    this.filterGroup.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      debounceTime(200),
-      tap(_ => this.loadData())
-    ).subscribe()
-
-    this.loadData();
   }
 
-  onSortUpdate(isAscending: boolean) {
-    this.isAscending = isAscending;
-    this.loadData();
+
+  ngOnInit() {
+
   }
+
 
   loadData() {
-    const roles = this.filterGroup.get('roles')?.value ?? [];
-    const sortOptions = {sortField: parseInt(this.filterGroup.get('sortField')!.value + '', 10), isAscending: this.isAscending} as PersonSortOptions;
-    const query = this.filterGroup.get('query')?.value ?? '';
+    console.log('loading data with filter', this.filter!);
 
-    this.personService.getAuthorsToBrowse({roles, sortOptions, query}).subscribe(d => {
+    if (!this.filter) {
+      this.filter = this.filterUtilityService.createPersonV2Filter();
+      this.filter.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
+      this.cdRef.markForCheck();
+    }
+
+    this.personService.getAuthorsToBrowse(this.filter!).subscribe(d => {
       this.authors = [...d.result];
       this.pagination = d.pagination;
       this.jumpKeys = this.jumpbarService.getJumpKeys(this.authors, d => d.name);
@@ -137,5 +126,19 @@ export class BrowseAuthorsComponent implements OnInit {
 
   goToPerson(person: BrowsePerson) {
     this.router.navigate(['person', person.name]);
+  }
+
+  updateFilter(data: FilterEvent) {
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
+
+    if (data.isFirst) {
+      this.loadData();
+      return;
+    }
+
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((_) => {
+      this.loadData();
+    });
   }
 }

@@ -3,8 +3,8 @@
         <div class="row g-0">
             <div class="col-md-3 me-2 col-10 mb-2">
                 <select class="form-select me-2" formControlName="input">
-                  @for (field of filterFieldOptions(); track field) {
-                    <option [value]="field">{{field | filterField}}</option>
+                  @for (field of filterFieldOptions(); track field.value) {
+                    <option [value]="field.value">{{field.title}}</option>
                   }
                 </select>
             </div>

@@ -39,13 +39,13 @@ import {ValidFilterEntity} from "../../filter-settings";
 })
 export class MetadataBuilderComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
-  @Input({required: true}) filter!: FilterV2<number>;
+  @Input({required: true}) filter!: FilterV2<TFilter, TSort>;
   /**
    * The number of statements that can be. 0 means unlimited. -1 means none.
    */
   @Input() statementLimit = 0;
   entityType = input.required<ValidFilterEntity>();
-  @Output() update: EventEmitter<FilterV2<number>> = new EventEmitter<FilterV2<number>>();
+  @Output() update: EventEmitter<FilterV2<TFilter, TSort>> = new EventEmitter<FilterV2<TFilter, TSort>>();
   @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -62,7 +62,11 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
   ];
 
   ngOnInit() {
+
+    console.log('metadata builder filter: ', this.filter);
+
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
+
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
       this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterCombination;
       this.update.emit(this.filter);
@@ -70,7 +74,8 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
   }
 
   addFilter() {
-    this.filter.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filter.statements];
+    const statement = this.metadataService.createFilterStatement<TFilter>(this.filterUtilityService.getDefaultFilterField(this.entityType()));
+    this.filter.statements = [statement, ...this.filter.statements];
     this.cdRef.markForCheck();
   }
 

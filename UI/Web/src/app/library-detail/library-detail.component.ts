@@ -17,7 +17,7 @@ import {SeriesAddedEvent} from '../_models/events/series-added-event';
 import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
-import {FilterEvent} from '../_models/metadata/series-filter';
+import {FilterEvent, SortField} from '../_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 import {ActionService} from '../_services/action.service';
 import {LibraryService} from '../_services/library.service';
@@ -43,6 +43,7 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
+import {MetadataService} from "../_services/metadata.service";
 
 @Component({
     selector: 'app-library-detail',
@@ -68,6 +69,7 @@ export class LibraryDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly metadataService = inject(MetadataService);
 
   libraryId!: number;
   libraryName = '';
@@ -184,16 +186,19 @@ export class LibraryDetailComponent implements OnInit {
 
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
-    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-      this.filter = filter as FilterV2<FilterField>;
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-        this.filter!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal};
+
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('series');
+        this.filter.statements.push(defaultStmt);
       }
 
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
 
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(defaultStmt);
       this.filterSettings.presetsV2 =  this.filter;
 
       this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100), tap(_ => this.loadPage())).subscribe();

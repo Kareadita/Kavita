@@ -1,18 +1,18 @@
 <ng-container *transloco="let t; read: 'card-detail-layout'">
   <app-loading [loading]="isLoading"></app-loading>
 
-  @if (header.length > 0) {
+  @if (header().length > 0) {
     <div class="row mt-2 g-0 pb-2">
       <div class="col me-auto">
         <h4>
-          @if (actions.length > 0) {
+          @if (actions().length > 0) {
             <span>
-              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions()" [labelBy]="header()"></app-card-actionables>&nbsp;
             </span>
           }
 
           <span>
-            {{header}}&nbsp;
+            {{header()}}&nbsp;
             @if (pagination) {
               <span class="badge bg-primary rounded-pill"
                     [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>

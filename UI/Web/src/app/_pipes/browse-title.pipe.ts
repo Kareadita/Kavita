@@ -2,10 +2,6 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {translate} from "@jsverse/transloco";
 
-
-// export type BrowseTitleFields = FilterField.Genres | FilterField.Tags | FilterField.Editor | FilterField.Inker |
-//   FilterField.
-
 /**
  * Responsible for taking a filter field and value (as a string) and translating into a "Browse X" heading for All Series page
  * Example: Genre & "Action" -> Browse Action

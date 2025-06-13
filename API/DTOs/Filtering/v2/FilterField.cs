@@ -56,5 +56,12 @@ public enum FilterField
     /// Last time User Read
     /// </summary>
     ReadLast = 32,
+}
 
+public enum PersonFilterField
+{
+    Role = 1,
+    Name = 2,
+    SeriesCount = 3,
+    ChapterCount = 4,
 }

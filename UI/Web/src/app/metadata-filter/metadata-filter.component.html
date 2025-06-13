@@ -43,15 +43,19 @@
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <app-sort-button [disabled]="filterSettings().sortDisabled" (update)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                @for(field of allSortFields; track field.value) {
+                @for(field of filterFieldOptions(); track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
                 }
               </select>
             </div>
-            <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
-              <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
-              <input id="filter-name" type="text" class="form-control" formControlName="name">
-            </div>
+
+            @if (filterSettings().supportsSmartFilter) {
+              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
+                <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
+                <input id="filter-name" type="text" class="form-control" formControlName="name">
+              </div>
+            }
+
 
             @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
               <ng-container [ngTemplateOutlet]="buttons"></ng-container>

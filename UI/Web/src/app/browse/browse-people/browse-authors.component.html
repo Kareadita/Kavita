@@ -8,44 +8,44 @@
 
     </app-side-nav-companion-bar>
 
-    <form [formGroup]="filterGroup">
-      <div class="row mb-3">
-        <div class="col-md-4 col-auto">
-          <div class="form-group">
-            <label for="role-selection">{{t('roles-label')}}</label>
-            <select2 [data]="allRoles"
-                     id="role-selection"
-                     formControlName="roles"
-                     [hideSelectedItems]="true"
-                     [multiple]="true"
-                     [infiniteScroll]="true"
-                     [resettable]="true"
-            style="min-width: 200px">
-            </select2>
-          </div>
-        </div>
+<!--    <form [formGroup]="filterGroup">-->
+<!--      <div class="row mb-3">-->
+<!--        <div class="col-md-4 col-auto">-->
+<!--          <div class="form-group">-->
+<!--            <label for="role-selection">{{t('roles-label')}}</label>-->
+<!--            <select2 [data]="allRoles"-->
+<!--                     id="role-selection"-->
+<!--                     formControlName="roles"-->
+<!--                     [hideSelectedItems]="true"-->
+<!--                     [multiple]="true"-->
+<!--                     [infiniteScroll]="true"-->
+<!--                     [resettable]="true"-->
+<!--            style="min-width: 200px">-->
+<!--            </select2>-->
+<!--          </div>-->
+<!--        </div>-->
 
-        <div class="col-auto ms-auto me-auto">
-          <div class="form-group">
-            <label for="query">Filter</label>
-            <input type="text" id="query" style="min-width: 100px" autocomplete="off" formControlName="query" class="form-control" />
-          </div>
-        </div>
+<!--        <div class="col-auto ms-auto me-auto">-->
+<!--          <div class="form-group">-->
+<!--            <label for="query">Filter</label>-->
+<!--            <input type="text" id="query" style="min-width: 100px" autocomplete="off" formControlName="query" class="form-control" />-->
+<!--          </div>-->
+<!--        </div>-->
 
-        <div class="col-auto ms-auto">
-          <div class="form-group">
-            <label for="sort">{{t('sort-label')}}</label>
-            <app-sort-button (update)="onSortUpdate($event)"></app-sort-button>
-            <select class="form-select" style="min-width: 100px" formControlName="sortField">
-              <option [value]="PersonSortField.Name">{{t('name-label')}}</option>
-              <option [value]="PersonSortField.SeriesCount">{{t('series-count-label')}}</option>
-              <option [value]="PersonSortField.ChapterCount">{{t('issue-count-label')}}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </form>
-
+<!--        <div class="col-auto ms-auto">-->
+<!--          <div class="form-group">-->
+<!--            <label for="sort">{{t('sort-label')}}</label>-->
+<!--            <app-sort-button (update)="onSortUpdate($event)"></app-sort-button>-->
+<!--            <select class="form-select" style="min-width: 100px" formControlName="sortField">-->
+<!--              <option [value]="PersonSortField.Name">{{t('name-label')}}</option>-->
+<!--              <option [value]="PersonSortField.SeriesCount">{{t('series-count-label')}}</option>-->
+<!--              <option [value]="PersonSortField.ChapterCount">{{t('issue-count-label')}}</option>-->
+<!--            </select>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </form>-->
+<!--    [customSort]="filterGroup.get('sortField')!.value !== PersonSortField.Name"-->
     <app-card-detail-layout
       [isLoading]="isLoading"
       [items]="authors"
@@ -53,10 +53,11 @@
       [trackByIdentity]="trackByIdentity"
       [jumpBarKeys]="jumpKeys"
       [filteringDisabled]="true"
-      [customSort]="filterGroup.get('sortField')!.value !== PersonSortField.Name"
+
       [refresh]="refresh"
       [filterSettings]="filterSettings"
       [filterOpen]="filterOpen"
+      (applyFilter)="updateFilter($event)"
     >
       <ng-template #cardItem let-item let-position="idx">
         <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">

@@ -10,10 +10,12 @@ import {
   HostListener,
   inject,
   Inject,
+  input,
   Input,
   OnChanges,
   OnInit,
   Output,
+  Signal,
   SimpleChange,
   SimpleChanges,
   TemplateRef,
@@ -38,7 +40,7 @@ import {filter, map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
-import {FilterSettingsBase, SeriesFilterSettings} from "../../metadata-filter/filter-settings";
+import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filter-settings";
 
 
 const ANIMATION_TIME_MS = 0;
@@ -73,9 +75,9 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly Breakpoint = Breakpoint;
 
-  @Input() header: string = '';
+
+  header: Signal<string> = input('');
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
@@ -93,17 +95,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   /**
    * Any actions to exist on the header for the parent collection (library, collection)
    */
-  @Input() actions: ActionItem<any>[] = [];
+  actions: Signal<ActionItem<any>[]> = input([]);
   /**
    * A trackBy to help with rendering. This is required as without it there are issues when scrolling
    */
   @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
   @Input() filterSettings!: FilterSettingsBase;
+  entityType = input<ValidFilterEntity | 'other'>();
   @Input() refresh!: EventEmitter<void>;
-  /**
-   * Pass the filter object optionally. If not passed, will create a SeriesFilter by default
-   */
-  filter: FilterV2<number> | undefined = undefined;
+
 
   /**
    * Will force the jumpbar to be disabled - in cases where you're not using a traditional filter config
@@ -125,6 +125,11 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   updateApplied: number = 0;
   bufferAmount: number = 1;
+
+  /**
+   * Pass the filter object optionally. If not passed, will create a SeriesFilter by default
+   */
+  filter: FilterV2<number> | undefined = undefined;
 
 
 
@@ -150,7 +155,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     // }
 
     if (this.filterSettings === undefined) {
-      this.filterSettings = new SeriesFilterSettings();
+      this.filterSettings = this.filterUtilityService.getDefaultSettings(this.entityType());
+      console.log('[card detail layout] Filter Setting is not set, defaulting: ', this.filterSettings);
       this.cdRef.markForCheck();
     }
 
@@ -231,4 +237,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   tryToSaveJumpKey() {
     this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

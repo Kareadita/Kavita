@@ -18,6 +18,7 @@ export class FilterSettingsBase<TFilter extends number = number, TSort extends n
     statementLimit: number = 0;
     saveDisabled: boolean = false;
     type: ValidFilterEntity = 'series';
+    supportsSmartFilter: boolean = false;
 }
 
 /**
@@ -25,6 +26,7 @@ export class FilterSettingsBase<TFilter extends number = number, TSort extends n
  */
 export class SeriesFilterSettings extends FilterSettingsBase<FilterField, SortField> {
   type: ValidFilterEntity = 'series';
+  supportsSmartFilter = true;
 }
 
 /**

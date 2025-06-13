@@ -20,16 +20,23 @@ import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe} from "@angular/common";
-import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Select2, Select2Option} from "ng-select2-component";
 import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
-import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
 import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+
+interface FieldConfig {
+  type: PredicateType;
+  baseComparisons: FilterComparison[];
+  defaultValue: any;
+  allowsDateComparisons?: boolean;
+  allowsNumberComparisons?: boolean;
+  excludesMustContains?: boolean;
+  allowsIsEmpty?: boolean;
+}
 
 enum PredicateType {
   Text = 1,
@@ -56,42 +63,42 @@ const unitLabels: Map<FilterField, FilterRowUi> = new Map([
     [FilterField.ReadLast, new FilterRowUi('unit-read-last')],
 ]);
 
-const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [
-  FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
-  FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
-];
-const DropdownFields = [
-  FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
-  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-  FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-  FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
-  FilterField.Imprint, FilterField.Team, FilterField.Location
-];
-const BooleanFields = [FilterField.WantToRead];
-const DateFields = [FilterField.ReadingDate];
-
-const DropdownFieldsWithoutMustContains = [
-  FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
-];
-const DropdownFieldsThatIncludeNumberComparisons = [
-  FilterField.AgeRating
-];
-const NumberFieldsThatIncludeDateComparisons = [
-  FilterField.ReleaseYear
-];
-
-const FieldsThatShouldIncludeIsEmpty = [
-  FilterField.Summary, FilterField.UserRating, FilterField.Genres,
-  FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
-  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-  FilterField.Writers, FilterField.Imprint, FilterField.Team,
-  FilterField.Location,
-];
+// const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name];
+// const NumberFields = [
+//   FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
+//   FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
+// ];
+// const DropdownFields = [
+//   FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
+//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+//   FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+//   FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
+//   FilterField.Imprint, FilterField.Team, FilterField.Location, PersonFilterField.Role
+// ];
+// const BooleanFields = [FilterField.WantToRead];
+// const DateFields = [FilterField.ReadingDate];
+//
+// const DropdownFieldsWithoutMustContains = [
+//   FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
+// ];
+// const DropdownFieldsThatIncludeNumberComparisons = [
+//   FilterField.AgeRating
+// ];
+// const NumberFieldsThatIncludeDateComparisons = [
+//   FilterField.ReleaseYear
+// ];
+//
+// const FieldsThatShouldIncludeIsEmpty = [
+//   FilterField.Summary, FilterField.UserRating, FilterField.Genres,
+//   FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
+//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+//   FilterField.Writers, FilterField.Imprint, FilterField.Team,
+//   FilterField.Location,
+// ];
 
 const StringComparisons = [
   FilterComparison.Equal,
@@ -128,7 +135,6 @@ const BooleanComparisons = [
   imports: [
     ReactiveFormsModule,
     AsyncPipe,
-    FilterFieldPipe,
     FilterComparisonPipe,
     NgbTooltip,
     TranslocoDirective,
@@ -161,8 +167,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
   dropdownOptions$ = of<Select2Option[]>([]);
 
   loaded: boolean = false;
-  private readonly mangaFormatPipe = new MangaFormatPipe(this.translocoService);
-  private readonly ageRatingPipe = new AgeRatingPipe();
 
 
   private comparisonSignal!: Signal<FilterComparison>;
@@ -172,8 +176,8 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
   uiLabel: Signal<FilterRowUi | null> = computed(() => null);
   isMultiSelectDropdownAllowed: Signal<boolean> = computed(() => false);
 
-  sortFieldOptions = computed(() => []);
-  filterFieldOptions = computed(() => []);
+  sortFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
+  filterFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
 
   ngOnInit() {
 
@@ -213,9 +217,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return this.filterUtilitiesService.getFilterFields(this.entityType());
     });
 
-
-    //this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
-
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
 
@@ -226,12 +227,12 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       startWith(this.preset.value),
       distinctUntilChanged(),
       filter(() => {
-        const inputVal = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-        return DropdownFields.includes(inputVal);
+        return this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType()).includes(this.inputSignal());
       }),
       switchMap((_) => this.getDropdownObservable()),
       takeUntilDestroyed(this.destroyRef)
     );
+
 
 
     this.formGroup!.valueChanges.pipe(
@@ -251,7 +252,9 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       value: this.formGroup.get('filterValue')?.value!
     };
 
-    if (typeof stmt.value === 'object' && DateFields.includes(stmt.field)) {
+    const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
+    if (typeof stmt.value === 'object' && dateFields.includes(stmt.field)) {
       stmt.value = this.dateParser.format(stmt.value);
     }
 
@@ -265,7 +268,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     }
 
     if (stmt.comparison !== FilterComparison.IsEmpty) {
-      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !BooleanFields.includes(stmt.field))) return;
+      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !booleanFields.includes(stmt.field))) return;
     }
 
     this.filterStatement.emit(stmt);
@@ -276,14 +279,19 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
     this.formGroup.get('input')?.patchValue(this.preset.field);
 
-    if (StringFields.includes(this.preset.field)) {
+    const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
+    const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
+    const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
+
+    if (stringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (BooleanFields.includes(this.preset.field)) {
+    } else if (booleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (DateFields.includes(this.preset.field)) {
+    } else if (dateFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }
-    else if (DropdownFields.includes(this.preset.field)) {
+    else if (dropdownFields.includes(this.preset.field)) {
       if (this.isMultiSelectDropdownAllowed() || val.includes(',')) {
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
@@ -302,18 +310,29 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
   }
 
   getDropdownObservable(): Observable<Select2Option[]> {
-      const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-      return this.metadataService.getOptionsForFilterField(filterField);
+      const filterField = this.inputSignal();
+      return this.metadataService.getOptionsForFilterField<TFilter>(filterField, this.entityType());
   }
 
   handleFieldChange(val: string) {
-    const inputVal = parseInt(val, 10) as FilterField;
+    const inputVal = parseInt(val, 10) as TFilter;
+    console.log('input', inputVal);inputVal
 
+    const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
+    const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
+    const numberFields = this.filterUtilitiesService.getNumberFields<TFilter>(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields<TFilter>(this.entityType());
+    const dateFields = this.filterUtilitiesService.getDateFields<TFilter>(this.entityType());
+    const fieldsThatShouldIncludeIsEmpty = this.filterUtilitiesService.getFieldsThatShouldIncludeIsEmpty<TFilter>(this.entityType());
+    const numberFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getNumberFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
+    const dropdownFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
+    const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
+    const dropdownFieldsThatIncludeNumberComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeNumberComparisons<TFilter>(this.entityType());
 
-    if (StringFields.includes(inputVal)) {
+    if (stringFields.includes(inputVal)) {
       let comps = [...StringComparisons];
 
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -328,13 +347,13 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return;
     }
 
-    if (NumberFields.includes(inputVal)) {
+    if (numberFields.includes(inputVal)) {
       const comps = [...NumberComparisons];
 
-      if (NumberFieldsThatIncludeDateComparisons.includes(inputVal)) {
+      if (numberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         comps.push(...DateComparisons);
       }
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -350,9 +369,9 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return;
     }
 
-    if (DateFields.includes(inputVal)) {
+    if (dateFields.includes(inputVal)) {
       const comps = [...DateComparisons];
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -367,9 +386,9 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return;
     }
 
-    if (BooleanFields.includes(inputVal)) {
+    if (booleanFields.includes(inputVal)) {
       let comps = [...DateComparisons];
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -385,15 +404,15 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return;
     }
 
-    if (DropdownFields.includes(inputVal)) {
+    if (dropdownFields.includes(inputVal)) {
       let comps = [...DropdownComparisons];
-      if (DropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
+      if (dropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
         comps.push(...NumberComparisons);
       }
-      if (DropdownFieldsWithoutMustContains.includes(inputVal)) {
+      if (dropdownFieldsWithoutMustContains.includes(inputVal)) {
         comps = comps.filter(c => c !== FilterComparison.MustContains);
       }
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 

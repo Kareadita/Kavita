@@ -14,7 +14,15 @@ import {map, tap} from "rxjs/operators";
 import {Observable, of, switchMap} from "rxjs";
 import {allPersonFilterFields, PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 import {allPersonSortFields} from "../../_models/metadata/v2/person-sort-field";
-import {ValidFilterEntity} from "../../metadata-filter/filter-settings";
+import {
+  FilterSettingsBase,
+  PersonFilterSettings,
+  SeriesFilterSettings,
+  ValidFilterEntity
+} from "../../metadata-filter/filter-settings";
+import {SortFieldPipe} from "../../_pipes/sort-field.pipe";
+import {GenericFilterFieldPipe} from "../../_pipes/generic-filter-field.pipe";
+import {TranslocoService} from "@jsverse/transloco";
 
 
 @Injectable({
@@ -25,6 +33,10 @@ export class FilterUtilitiesService {
   private readonly router = inject(Router);
   private readonly metadataService = inject(MetadataService);
   private readonly http = inject(HttpClient);
+  private readonly translocoService = inject(TranslocoService);
+
+  private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
+  private readonly genericFilterFieldPipe = new GenericFilterFieldPipe();
 
   private readonly apiUrl = environment.apiUrl;
 
@@ -35,7 +47,7 @@ export class FilterUtilitiesService {
   decodeFilter(encodedFilter: string) {
     return this.http.post<FilterV2<number>>(this.apiUrl + 'filter/decode', {encodedFilter}).pipe(map(filter => {
       if (filter == null) {
-        filter = this.metadataService.createDefaultFilterDto();
+        filter = this.metadataService.createDefaultFilterDto('series');
         filter.statements.push(this.createSeriesV2DefaultStatement());
       }
 
@@ -49,9 +61,9 @@ export class FilterUtilitiesService {
     }));
   }
 
-  filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): Observable<FilterV2<number>> {
-    const filter = this.metadataService.createDefaultFilterDto();
-    filter.statements.push(this.createSeriesV2DefaultStatement());
+  filterPresetsFromUrl<TFilter extends number>(snapshot: ActivatedRouteSnapshot, entityType: ValidFilterEntity, defaultStatement: FilterStatement<TFilter> | null = null): Observable<FilterV2<number>> {
+    const filter = this.metadataService.createDefaultFilterDto(entityType);
+    filter.statements.push(defaultStatement ?? this.createSeriesV2DefaultStatement());
     if (!window.location.href.includes('?')) return of(filter);
 
     return this.decodeFilter(window.location.href.split('?')[1]);
@@ -66,7 +78,7 @@ export class FilterUtilitiesService {
    */
   applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
     const dto = this.createSeriesV2Filter();
-    dto.statements.push(this.metadataService.createDefaultFilterStatement(filter, comparison, value + ''));
+    dto.statements.push(this.metadataService.createFilterStatement(filter, comparison, value + ''));
 
     return this.encodeFilter(dto).pipe(switchMap(encodedFilter => {
       return this.router.navigateByUrl(page.join('/') + '?' + encodedFilter);
@@ -125,22 +137,30 @@ export class FilterUtilitiesService {
   getSortFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
       case 'series':
-        return allSeriesSortFields as unknown as T[];
+        return allSeriesSortFields.map(f => {
+          return {title: this.sortFieldPipe.transform(f, type), value: f};
+        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
       case 'person':
-        return allPersonSortFields as unknown as T[];
+        return allPersonSortFields.map(f => {
+          return {title: this.sortFieldPipe.transform(f, type), value: f};
+        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
       default:
-        return [] as T[];
+        return [] as {title: string, value: T}[];
     }
   }
 
-  getFilterFields<T extends number>(type: ValidFilterEntity) {
+  getFilterFields<T extends number>(type: ValidFilterEntity): {title: string, value: T}[] {
     switch (type) {
       case 'series':
-        return allSeriesFilterFields as unknown as T[];
+        return allSeriesFilterFields.map(f => {
+          return {title: this.genericFilterFieldPipe.transform(f, type), value: f};
+        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
       case 'person':
-        return allPersonFilterFields as unknown as T[];
+        return allPersonFilterFields.map(f => {
+          return {title: this.genericFilterFieldPipe.transform(f, type), value: f};
+        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
       default:
-        return [] as T[];
+        return [] as {title: string, value: T}[];
     }
   }
 
@@ -151,5 +171,162 @@ export class FilterUtilitiesService {
       case 'person':
         return PersonFilterField.Role as unknown as T;
     }
+  }
+
+  /**
+   * Returns the appropriate Dropdown Fields based on the entity type
+   * @param type
+   */
+  getDropdownFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
+          FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+          FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+          FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+          FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+          FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
+          FilterField.Imprint, FilterField.Team, FilterField.Location
+        ] as unknown as T[];
+      case 'person':
+        return [
+          PersonFilterField.Role
+        ] as unknown as T[];
+    }
+  }
+
+  getStringFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name
+        ] as unknown as T[];
+      case 'person':
+        return [
+          PersonFilterField.Name
+        ] as unknown as T[];
+    }
+  }
+
+  getNumberFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
+          FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
+        ] as unknown as T[];
+      case 'person':
+        return [
+          PersonFilterField.ChapterCount, PersonFilterField.SeriesCount
+        ] as unknown as T[];
+    }
+  }
+
+  getBooleanFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.WantToRead
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getDateFields<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.ReadingDate
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getNumberFieldsThatIncludeDateComparisons<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.ReleaseYear
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getDropdownFieldsThatIncludeDateComparisons<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.AgeRating
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getDropdownFieldsWithoutMustContains<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getDropdownFieldsThatIncludeNumberComparisons<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.AgeRating
+        ] as unknown as T[];
+      case 'person':
+        return [
+
+        ] as unknown as T[];
+    }
+  }
+
+  getFieldsThatShouldIncludeIsEmpty<T extends number>(type: ValidFilterEntity) {
+    switch (type) {
+      case 'series':
+        return [
+          FilterField.Summary, FilterField.UserRating, FilterField.Genres,
+          FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
+          FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+          FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+          FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+          FilterField.Writers, FilterField.Imprint, FilterField.Team,
+          FilterField.Location
+        ] as unknown as T[];
+      case 'person':
+        return [] as unknown as T[];
+    }
+  }
+
+  getDefaultSettings(entityType: ValidFilterEntity | "other" | undefined): FilterSettingsBase<any, any> {
+    if (entityType === 'other' || entityType === undefined) {
+      // It doesn't matter, return series type
+      return new SeriesFilterSettings();
+    }
+
+    if (entityType == 'series') return new SeriesFilterSettings();
+    if (entityType == 'person') return new PersonFilterSettings();
+
+    return new SeriesFilterSettings();
   }
 }
