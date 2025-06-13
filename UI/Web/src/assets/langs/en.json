@@ -1036,7 +1036,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
-        "browse-authors": "Browse Authors",
+        "browse-people": "Browse People",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -1049,7 +1049,7 @@
         "edit": "{{common.edit}}"
     },
 
-    "browse-authors": {
+    "browse-people": {
         "title": "Browse People",
         "author-count": "{{num}} People",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -2511,7 +2511,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-people": "{{side-nav.browse-people}}"
     },
 
     "filter-field-pipe": {

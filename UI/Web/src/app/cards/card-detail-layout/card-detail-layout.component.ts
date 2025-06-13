@@ -81,9 +81,8 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
 
   header: Signal<string> = input('');
   @Input() isLoading: boolean = false;
-  //@Input() items: any[] = [];
   @Input() pagination!: Pagination;
-  items = input.required<any[]>();
+  @Input() items: any[] = [];
 
 
   /**
@@ -159,7 +158,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     }
 
     if (this.pagination === undefined) {
-      const items = this.items();
+      const items = this.items;
       this.pagination = {currentPage: 1, itemsPerPage: items.length, totalItems: items.length, totalPages: 1};
       this.cdRef.markForCheck();
     }

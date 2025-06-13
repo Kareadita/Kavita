@@ -4,7 +4,6 @@ import {
 } from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-detail-layout.component";
 import {DecimalPipe} from "@angular/common";
-import {Series} from "../../_models/series";
 import {Pagination} from "../../_models/pagination";
 import {JumpKey} from "../../_models/jumpbar/jump-key";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -25,10 +24,12 @@ import {FilterEvent} from "../../_models/metadata/series-filter";
 import {PersonRole} from "../../_models/metadata/person";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {MetadataService} from "../../_services/metadata.service";
+import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 
 
 @Component({
-  selector: 'app-browse-authors',
+  selector: 'app-browse-people',
   imports: [
     SideNavCompanionBarComponent,
     TranslocoDirective,
@@ -39,11 +40,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     ReactiveFormsModule,
 
   ],
-  templateUrl: './browse-authors.component.html',
-  styleUrl: './browse-authors.component.scss',
+  templateUrl: './browse-people.component.html',
+  styleUrl: './browse-people.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BrowseAuthorsComponent {
+export class BrowsePeopleComponent {
   protected readonly PersonSortField = PersonSortField;
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -54,9 +55,8 @@ export class BrowseAuthorsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly imageService = inject(ImageService);
+  protected readonly metadataService = inject(MetadataService);
 
-
-  series: Series[] = [];
   isLoading = false;
   authors: Array<BrowsePerson> = [];
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
@@ -77,6 +77,11 @@ export class BrowseAuthorsComponent {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<PersonFilterField, PersonSortField>;
 
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('person');
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('person') as FilterStatement<PersonFilterField>);
+      }
+
       this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
       this.filterActiveCheck!.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
       this.filterSettings.presetsV2 = this.filter;
@@ -89,8 +94,8 @@ export class BrowseAuthorsComponent {
 
   loadData() {
     if (!this.filter) {
-      this.filter = this.filterUtilityService.createPersonV2Filter();
-      this.filter.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
+      this.filter = this.metadataService.createDefaultFilterDto('person');
+      this.filter.statements.push(this.metadataService.createDefaultFilterStatement('person') as FilterStatement<PersonFilterField>);
       this.cdRef.markForCheck();
     }
 

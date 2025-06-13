@@ -170,11 +170,11 @@ export class MetadataService {
       case 'series':
         return this.createFilterStatement(FilterField.SeriesName);
       case 'person':
-        return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist}, ${PersonRole.Writer}`);
+        return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist},${PersonRole.Writer}`);
     }
   }
 
-  createFilterStatement<T extends number>(field: T, comparison = FilterComparison.Equal, value = '') {
+  createFilterStatement<T extends number = number>(field: T, comparison = FilterComparison.Equal, value = '') {
     return {
       comparison: comparison,
       field: field,

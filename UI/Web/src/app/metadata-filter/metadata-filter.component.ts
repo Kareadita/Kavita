@@ -162,7 +162,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   }
 
   handleFilters(filter: FilterV2<TFilter, TSort>) {
-    console.log('handleFilters', filter);
     this.filterV2 = filter;
   }
 
@@ -171,10 +170,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     this.fullyLoaded = false;
 
     const currentFilterSettings = this.filterSettings();
-    console.log('BUG HERE filterSettings: ', currentFilterSettings);
     this.filterV2 = this.deepClone(currentFilterSettings.presetsV2);
-
-    console.log('preset: ', currentFilterSettings.presetsV2);
 
     const defaultSortField = this.sortFieldOptions()[0].value;
 

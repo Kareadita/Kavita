@@ -35,7 +35,7 @@
           <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
         }
 
-        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items()" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
+        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
             @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
               <div class="card col-auto mt-2 mb-2"
@@ -56,7 +56,7 @@
   </div>
 
   <ng-template #cardTemplate>
-    <virtual-scroller #scroll [items]="items()" [bufferAmount]="bufferAmount">
+    <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
 
         <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">

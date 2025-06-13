@@ -18,7 +18,6 @@ export class ToggleService {
     .pipe(filter(event => event instanceof NavigationStart))
     .subscribe((event) => {
       this.toggleState = false;
-      console.log('[toggleservice] collapsing toggle due to navigation event');
       this.toggleStateSource.next(this.toggleState);
     });
     this.toggleStateSource.next(false);
@@ -28,7 +27,6 @@ export class ToggleService {
     this.toggleState = !this.toggleState;
     this.toggleStateSource.pipe(take(1)).subscribe(state => {
       this.toggleState = !state;
-      console.log('[toggleservice] toggling setting filter open status: ', this.toggleState);
       this.toggleStateSource.next(this.toggleState);
     });
 
@@ -36,7 +34,6 @@ export class ToggleService {
 
   set(state: boolean) {
     this.toggleState = state;
-    console.log('[toggleservice] setting filter open status: ', this.toggleState);
     this.toggleStateSource.next(state);
   }
 }

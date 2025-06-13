@@ -63,8 +63,6 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
 
   ngOnInit() {
 
-    console.log('metadata builder filter: ', this.filter);
-
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
 
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
