@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject} from '@angular/core';
 import {
   SideNavCompanionBarComponent
 } from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
@@ -51,7 +43,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   styleUrl: './browse-authors.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BrowseAuthorsComponent implements OnInit {
+export class BrowseAuthorsComponent {
   protected readonly PersonSortField = PersonSortField;
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -85,12 +77,6 @@ export class BrowseAuthorsComponent implements OnInit {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<PersonFilterField, PersonSortField>;
 
-      // if (this.filter == null) {
-      //   this.filter
-      // }
-
-      console.log('filter from url:', this.filter);
-
       this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
       this.filterActiveCheck!.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
       this.filterSettings.presetsV2 = this.filter;
@@ -101,14 +87,7 @@ export class BrowseAuthorsComponent implements OnInit {
   }
 
 
-  ngOnInit() {
-
-  }
-
-
   loadData() {
-    console.log('loading data with filter', this.filter!);
-
     if (!this.filter) {
       this.filter = this.filterUtilityService.createPersonV2Filter();
       this.filter.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
@@ -128,7 +107,7 @@ export class BrowseAuthorsComponent implements OnInit {
     this.router.navigate(['person', person.name]);
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<PersonFilterField, PersonSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

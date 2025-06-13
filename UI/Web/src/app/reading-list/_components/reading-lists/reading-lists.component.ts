@@ -31,7 +31,8 @@ import {User} from "../../../_models/user";
     templateUrl: './reading-lists.component.html',
     styleUrls: ['./reading-lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, BulkOperationsComponent]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, CardItemComponent,
+    DecimalPipe, TranslocoDirective, BulkOperationsComponent]
 })
 export class ReadingListsComponent implements OnInit {
   protected readonly WikiLink = WikiLink;

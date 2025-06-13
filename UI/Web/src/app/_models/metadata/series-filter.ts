@@ -50,8 +50,8 @@ export const mangaFormatFilters = [
     }
 ];
 
-export interface FilterEvent {
-  filterV2: FilterV2<number>;
+export interface FilterEvent<TFilter extends number = number, TSort extends number = number> {
+  filterV2: FilterV2<TFilter, TSort>;
   isFirst: boolean;
 }
 

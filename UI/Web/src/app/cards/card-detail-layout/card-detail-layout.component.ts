@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ContentChild,
   DestroyRef,
   ElementRef,
@@ -15,16 +16,17 @@ import {
   OnChanges,
   OnInit,
   Output,
+  signal,
   Signal,
   SimpleChange,
   SimpleChanges,
   TemplateRef,
   TrackByFunction,
-  ViewChild
+  ViewChild,
+  WritableSignal
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Library} from 'src/app/_models/library/library';
@@ -64,11 +66,11 @@ const ANIMATION_TIME_MS = 0;
     TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
-export class CardDetailLayoutComponent implements OnInit, OnChanges {
+export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges {
 
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly jumpbarService = inject(JumpbarService);
@@ -79,8 +81,11 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   header: Signal<string> = input('');
   @Input() isLoading: boolean = false;
-  @Input() items: any[] = [];
+  //@Input() items: any[] = [];
   @Input() pagination!: Pagination;
+  items = input.required<any[]>();
+
+
   /**
    * Parent scroll for virtualize pagination
    */
@@ -100,7 +105,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * A trackBy to help with rendering. This is required as without it there are issues when scrolling
    */
   @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
-  @Input() filterSettings!: FilterSettingsBase;
+  @Input() filterSettings: FilterSettingsBase | undefined = undefined;
   entityType = input<ValidFilterEntity | 'other'>();
   @Input() refresh!: EventEmitter<void>;
 
@@ -108,7 +113,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   /**
    * Will force the jumpbar to be disabled - in cases where you're not using a traditional filter config
    */
-  @Input() customSort: boolean = false;
+  customSort = input(false);
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
@@ -126,12 +131,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   updateApplied: number = 0;
   bufferAmount: number = 1;
 
-  /**
-   * Pass the filter object optionally. If not passed, will create a SeriesFilter by default
-   */
-  filter: FilterV2<number> | undefined = undefined;
 
+  filterSignal: WritableSignal<FilterV2<number, number> | undefined> = signal(undefined);
+  hasCustomSort = computed(() => {
+    if (this.customSort()) return true;
+    if (this.filteringDisabled) return false;
 
+    const filter = this.filterSignal();
+    return filter?.sortOptions?.sortField != SortField.SortName || !filter?.sortOptions.isAscending;
+  });
 
 
   constructor(@Inject(DOCUMENT) private document: Document) {}
@@ -149,19 +157,10 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     if (this.trackByIdentity === undefined) {
       this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
-    // This shouldn't be needed as filter is a temp variable to check if a custom sort is present
-    // if (!this.filter) {
-    //   this.filter = this.filterUtilityService.createSeriesV2Filter();
-    // }
-
-    if (this.filterSettings === undefined) {
-      this.filterSettings = this.filterUtilityService.getDefaultSettings(this.entityType());
-      console.log('[card detail layout] Filter Setting is not set, defaulting: ', this.filterSettings);
-      this.cdRef.markForCheck();
-    }
 
     if (this.pagination === undefined) {
-      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
+      const items = this.items();
+      this.pagination = {currentPage: 1, itemsPerPage: items.length, totalItems: items.length, totalPages: 1};
       this.cdRef.markForCheck();
     }
 
@@ -200,23 +199,16 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     }
   }
 
-  hasCustomSort() {
-    if (this.customSort) return true;
-    if (this.filteringDisabled) return false;
-
-    return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending;
-  }
-
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, undefined);
     }
   }
 
-  applyMetadataFilter(event: FilterEvent) {
-    this.applyFilter.emit(event);
+  applyMetadataFilter(event: FilterEvent<number, number>) {
+    this.applyFilter.emit(event as FilterEvent<TFilter, TSort>);
     this.updateApplied++;
-    this.filter = event.filterV2;
+    this.filterSignal.set(event.filterV2);
     this.cdRef.markForCheck();
   }
 

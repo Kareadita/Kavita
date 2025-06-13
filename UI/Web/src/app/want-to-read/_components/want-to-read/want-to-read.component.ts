@@ -63,7 +63,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField> | undefined = undefined;
+  filter: FilterV2<FilterField, SortField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
@@ -182,7 +182,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

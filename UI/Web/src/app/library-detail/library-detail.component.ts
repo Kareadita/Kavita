@@ -316,7 +316,7 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

@@ -188,7 +188,7 @@ export class AllSeriesComponent implements OnInit {
     return this.title === translate('side-nav.all-series') && this.filter && this.filter.statements.length === 1 && this.filter.statements[0].comparison === FilterComparison.Equal
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

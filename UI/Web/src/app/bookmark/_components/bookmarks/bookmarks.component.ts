@@ -211,7 +211,7 @@ export class BookmarksComponent implements OnInit {
     this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id));
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

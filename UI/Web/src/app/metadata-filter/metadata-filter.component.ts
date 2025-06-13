@@ -23,7 +23,7 @@ import {ToggleService} from '../_services/toggle.service';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
-import {AsyncPipe, JsonPipe, NgClass, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {FilterService} from "../_services/filter.service";
@@ -53,7 +53,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
-    MetadataBuilderComponent, NgClass, SortButtonComponent, JsonPipe]
+    MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
@@ -74,7 +74,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   filterSettings = input.required<FilterSettingsBase<TFilter, TSort>>();
 
-  @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
+  @Output() applyFilter: EventEmitter<FilterEvent<TFilter, TSort>> = new EventEmitter();
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
 
 
@@ -231,7 +231,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   }
 
   apply() {
-    this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
+    this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!} as FilterEvent<TFilter, TSort>);
 
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();
