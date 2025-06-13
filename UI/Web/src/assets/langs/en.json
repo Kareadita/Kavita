@@ -2511,7 +2511,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-people": "{{side-nav.browse-people}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
 
     "filter-field-pipe": {
