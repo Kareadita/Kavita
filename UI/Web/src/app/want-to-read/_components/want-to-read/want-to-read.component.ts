@@ -124,7 +124,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
         }
 
 
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
         this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
 

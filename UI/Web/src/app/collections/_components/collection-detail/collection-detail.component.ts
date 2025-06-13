@@ -193,7 +193,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
         this.filter = data['filter'] as FilterV2<FilterField, SortField>;
-  
+
         const defaultStmt =  {field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
 
         if (this.filter == null) {
@@ -205,7 +205,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
           this.filter!.statements.push(defaultStmt);
         }
 
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
         this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
 

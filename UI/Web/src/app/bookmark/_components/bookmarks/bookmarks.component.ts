@@ -96,8 +96,8 @@ export class BookmarksComponent implements OnInit {
           this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
         }
 
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+        this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
         this.filterSettings.presetsV2 =  this.filter;
         this.filterSettings.statementLimit = 1;
 

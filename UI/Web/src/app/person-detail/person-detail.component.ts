@@ -44,6 +44,7 @@ import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
+import {MetadataService} from "../_services/metadata.service";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -87,6 +88,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly toastr = inject(ToastrService);
   private readonly messageHubService = inject(MessageHubService)
+  private readonly metadataService = inject(MetadataService)
 
   protected readonly FilterField = FilterField;
 
@@ -181,7 +183,7 @@ export class PersonDetailComponent implements OnInit {
   }
 
   createFilter(roles: PersonRole[]) {
-    const filter = this.filterUtilityService.createSeriesV2Filter();
+    const filter = this.metadataService.createDefaultFilterDto('series');
     filter.combination = FilterCombination.Or;
     filter.limitTo = 20;
 
@@ -217,7 +219,7 @@ export class PersonDetailComponent implements OnInit {
     params['page'] = 1;
     params['title'] = translate('person-detail.browse-person-by-role-title', {name: this.person!.name, role: personPipe.transform(role)});
 
-    const searchFilter = this.filterUtilityService.createSeriesV2Filter();
+    const searchFilter = this.metadataService.createDefaultFilterDto('series');
     searchFilter.limitTo = 0;
     searchFilter.combination = FilterCombination.Or;
 
