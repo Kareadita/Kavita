@@ -43,7 +43,7 @@
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <app-sort-button [disabled]="filterSettings().sortDisabled" (update)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                @for(field of filterFieldOptions(); track field.value) {
+                @for(field of sortFieldOptions(); track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
                 }
               </select>

@@ -132,6 +132,33 @@ export class AccountService {
     return roles.some(role => user.roles.includes(role));
   }
 
+  /**
+   * If User or Admin, will return false
+   * @param user
+   * @param restrictedRoles
+   */
+  hasAnyRestrictedRole(user: User, restrictedRoles: Array<Role> = []) {
+    if (!user || !user.roles) {
+      return true;
+    }
+
+    if (restrictedRoles.length === 0) {
+      return false;
+    }
+
+    // If the user is an admin, they have the role
+    if (this.hasAdminRole(user)) {
+      return false;
+    }
+
+
+    if (restrictedRoles.length > 0 && restrictedRoles.some(role => user.roles.includes(role))) {
+      return true;
+    }
+
+    return false;
+  }
+
   hasAdminRole(user: User) {
     return user && user.roles.includes(Role.Admin);
   }

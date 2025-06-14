@@ -16,9 +16,9 @@ export class SortFieldPipe implements PipeTransform {
   transform<T extends number>(value: T, entityType: ValidFilterEntity): string {
 
     switch (entityType) {
-      case "series":
+      case 'series':
         return this.seriesSortFields(value as SortField);
-      case "person":
+      case 'person':
         return this.personSortFields(value as PersonSortField);
 
     }

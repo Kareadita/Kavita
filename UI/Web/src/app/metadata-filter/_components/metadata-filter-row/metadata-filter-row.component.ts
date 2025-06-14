@@ -176,7 +176,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
   uiLabel: Signal<FilterRowUi | null> = computed(() => null);
   isMultiSelectDropdownAllowed: Signal<boolean> = computed(() => false);
 
-  sortFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
   filterFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
 
   ngOnInit() {
@@ -210,9 +209,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return this.comparisonSignal() === FilterComparison.Contains || this.comparisonSignal() === FilterComparison.NotContains || this.comparisonSignal() === FilterComparison.MustContains;
     });
 
-    this.sortFieldOptions = computed(() => {
-      return this.filterUtilitiesService.getSortFields(this.entityType());
-    });
     this.filterFieldOptions = computed(() => {
       return this.filterUtilitiesService.getFilterFields(this.entityType());
     });

@@ -120,7 +120,7 @@ public static class Seed
     new AppUserSideNavStream()
     {
         Name = "browse-authors",
-        StreamType = SideNavStreamType.BrowseAuthors,
+        StreamType = SideNavStreamType.BrowsePeople,
         Order = 6,
         IsProvided = true,
         Visible = true
