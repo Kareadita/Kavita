@@ -148,13 +148,9 @@ export class AllSeriesComponent implements OnInit {
       if (this.shouldRewriteTitle()) {
         const field = this.filter!.statements[0].field;
 
-        console.log('field', field);
-
         // This api returns value as string and number, it will complain without the casting
         (this.metadataService.getOptionsForFilterField<FilterField>(field, 'series') as Observable<Select2Option[]>).subscribe((opts: Select2Option[]) => {
-          console.log('opts:', opts);
 
-          // BUG: There is now a timing issue when navigating FROM a click. On refresh it works.
           const matchingOpts = opts.filter(m => `${m.value}` === `${this.filter!.statements[0].value}`);
           if (matchingOpts.length === 0) return;
 

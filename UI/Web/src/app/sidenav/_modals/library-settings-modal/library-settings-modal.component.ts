@@ -21,8 +21,8 @@ import {
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {
-  allKavitaPlusEligibleTypes,
   allKavitaPlusMetadataApplicableTypes,
+  allKavitaPlusScrobbleEligibleTypes,
   allLibraryTypes,
   Library,
   LibraryType
@@ -131,7 +131,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return allKavitaPlusEligibleTypes.includes(libType);
+    return allKavitaPlusScrobbleEligibleTypes.includes(libType);
   }
 
   get IsMetadataDownloadEligible() {

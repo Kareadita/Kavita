@@ -154,7 +154,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
+      this.trackByIdentity = (_: number, item: any) => `${this.header()}_${this.updateApplied}_${item?.id}`;
     }
 
     if (this.pagination === undefined) {

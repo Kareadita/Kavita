@@ -312,7 +312,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as TFilter;
-    console.log('input', inputVal);inputVal
 
     const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
     const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());

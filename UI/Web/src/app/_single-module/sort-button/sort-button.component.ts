@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
@@ -12,21 +12,10 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class SortButtonComponent {
 
-  // input is replacement for @Input
   disabled = input<boolean>(false);
-  isAscending = input<boolean>(true);
-
-  // signal is for internal state, whenever component needs to update the state internally. Not needed for disabled since component doesn't internally modify
-  private isAscendingSignal = signal(this.isAscending());
-
-  // Computed signals for template
-  protected currentAscending = computed(() => this.isAscendingSignal());
-  protected isDisabled = computed(() => this.disabled());
-
-  @Output() update = new EventEmitter<boolean>();
+  isAscending = model<boolean>(true);
 
   updateSortOrder() {
-    this.isAscendingSignal.set(!this.isAscendingSignal());
-    this.update.emit(this.isAscendingSignal());
+    this.isAscending.set(!this.isAscending());
   }
 }
