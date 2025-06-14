@@ -4,7 +4,7 @@ import {DecimalPipe} from "@angular/common";
 import {
   SideNavCompanionBarComponent
 } from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {JumpbarService} from "../../_services/jumpbar.service";
 import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {Pagination} from "../../_models/pagination";
@@ -15,6 +15,7 @@ import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {Title} from "@angular/platform-browser";
 
 @Component({
   selector: 'app-browse-genres',
@@ -36,7 +37,8 @@ export class BrowseGenresComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   private readonly jumpbarService = inject(JumpbarService);
-  protected readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly titleService = inject(Title);
 
   isLoading = false;
   genres: Array<BrowseGenre> = [];
@@ -48,6 +50,9 @@ export class BrowseGenresComponent implements OnInit {
   ngOnInit() {
     this.isLoading = true;
     this.cdRef.markForCheck();
+
+    this.titleService.setTitle('Kavita - ' + translate('browse-genres.title'));
+
     this.metadataService.getGenreWithCounts(undefined, undefined).subscribe(d => {
       this.genres = d.result;
       this.pagination = d.pagination;
@@ -60,6 +65,4 @@ export class BrowseGenresComponent implements OnInit {
   openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
-
-
 }
