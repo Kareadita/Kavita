@@ -22,7 +22,7 @@ public static class PersonFilterFieldValueConverter
 
     private static IList<PersonRole> ParsePersonRoles(string value)
     {
-        if (string.IsNullOrEmpty(value)) return new List<PersonRole>();
+        if (string.IsNullOrEmpty(value)) return [];
 
         return value.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(v => Enum.Parse<PersonRole>(v.Trim()))

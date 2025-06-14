@@ -1290,7 +1290,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.ReadingDate => query.HasReadingDate(true, statement.Comparison, (DateTime) value, userId),
             FilterField.ReadLast => query.HasReadLast(true, statement.Comparison, (int) value, userId),
             FilterField.AverageRating => query.HasAverageRating(true, statement.Comparison, (float) value),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }
 
