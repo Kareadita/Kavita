@@ -62,7 +62,6 @@ export class SettingSwitchComponent implements AfterContentInit {
     });
   }
 
-
   private generateId(): string {
     if (crypto && crypto.randomUUID) {
       return crypto.randomUUID();
