@@ -30,7 +30,7 @@ export enum KEY_CODES {
 }
 
 /**
- * @deprecated Use {@link UserBreakpoint} and {@link UtilityService.activeUserBreakpoint}
+ * Use {@link UserBreakpoint} and {@link UtilityService.activeUserBreakpoint} for breakpoint that should depend on user settings
  */
 export enum Breakpoint {
   Mobile = 768,
@@ -173,9 +173,9 @@ export class UtilityService {
 
   private getActiveUserBreakpoint(): UserBreakpoint {
      const style = getComputedStyle(this.document.body)
-     const mobileBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--mobile-breakpoint'), Breakpoint.Mobile);
-     const tabletBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--tablet-breakpoint'), Breakpoint.Tablet);
-     //const desktopBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--desktop-breakpoint'), Breakpoint.Desktop);
+     const mobileBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-mobile-breakpoint'), Breakpoint.Mobile);
+     const tabletBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-tablet-breakpoint'), Breakpoint.Tablet);
+     //const desktopBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-desktop-breakpoint'), Breakpoint.Desktop);
 
      if (window.innerWidth <= mobileBreakPoint) {
        return UserBreakpoint.Mobile;
