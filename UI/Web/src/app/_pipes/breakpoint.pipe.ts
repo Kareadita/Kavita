@@ -11,13 +11,13 @@ export class BreakpointPipe implements PipeTransform {
     const v = parseInt(value + '', 10) as UserBreakpoint;
     switch (v) {
       case UserBreakpoint.Never:
-        return translate('preferences.breakpoints.never');
+        return translate('breakpoint-pipe.never');
       case UserBreakpoint.Mobile:
-        return translate('preferences.breakpoints.mobile');
+        return translate('breakpoint-pipe.mobile');
       case UserBreakpoint.Tablet:
-        return translate('preferences.breakpoints.tablet');
+        return translate('breakpoint-pipe.tablet');
       case UserBreakpoint.Desktop:
-        return translate('preferences.breakpoints.desktop');
+        return translate('breakpoint-pipe.desktop');
     }
     throw new Error("unknown breakpoint value: " + value);
   }

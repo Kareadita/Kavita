@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
@@ -6,9 +7,13 @@ namespace API.Entities;
 
 public enum BreakPoint
 {
+    [Description("Never")]
     Never = 0,
+    [Description("Mobile")]
     Mobile = 1,
+    [Description("Tablet")]
     Tablet = 2,
+    [Description("Desktop")]
     Desktop = 3,
 }
 

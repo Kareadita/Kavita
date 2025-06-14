@@ -10,7 +10,7 @@
     </div>
 
     <p class="ps-2">{{t('description')}}</p>
-    <p class="ps-2 text-muted">{{t('extra-tip')}} <a target="_blank" [href]="WikiLink.ReadingProfiles">{{t('wiki-title')}}</a></p>
+    <p class="ps-2 text-muted">{{t('extra-tip')}} <a target="_blank" rel="noopener noreferrer" [href]="WikiLink.ReadingProfiles">{{t('wiki-title')}}</a></p>
 
 
     <div class="row g-0 ">
@@ -46,7 +46,7 @@
               <div class="mb-2 d-flex justify-content-between align-items-center">
                 <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default">
                   <ng-template #view>
-                    <span [class.cursor-click]="selectedProfile.kind !== ReadingProfileKind.Default">
+                    <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
                       {{readingProfileForm.get('name')!.value}}
                     </span>
                   </ng-template>

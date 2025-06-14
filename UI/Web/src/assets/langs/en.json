@@ -2820,13 +2820,13 @@
         "pdf-odd": "Odd",
         "pdf-even": "Even",
         "pdf-light": "Light",
-        "pdf-dark": "Dark",
-        "breakpoints": {
-            "never": "Never",
-            "mobile": "Mobile",
-            "tablet": "Tablet",
-            "desktop": "Desktop"
-        }
+        "pdf-dark": "Dark"
+    },
+    "breakpoint-pipe": {
+        "never": "Never",
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
     },
 
     "manage-reading-profiles": {
