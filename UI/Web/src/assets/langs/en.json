@@ -2882,10 +2882,17 @@
         "pdf-light": "Light",
         "pdf-dark": "Dark"
     },
+    "breakpoint-pipe": {
+        "never": "Never",
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+    },
 
     "manage-reading-profiles": {
         "description": "Not all your series may be read in the same way, set up distinct reading profiles per library or series to make getting back in your series as seamless as possible.",
-        "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign or update one of your own reading profiles to the series.",
+        "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
+        "wiki-title": "wiki",
         "profiles-title": "Your reading profiles",
         "default-profile": "Default",
         "add": "{{common.add}}",
@@ -2920,6 +2927,8 @@
         "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
         "width-override-label": "{{manga-reader.width-override-label}}",
         "width-override-tooltip": "Override width of images in the reader",
+        "disable-width-override-label": "Disable width override",
+        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is at least the configured breakpoint or smaller",
         "reset": "{{common.reset}}",
 
         "book-reader-settings-title": "Book Reader",

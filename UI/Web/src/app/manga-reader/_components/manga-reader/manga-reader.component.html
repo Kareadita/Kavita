@@ -93,7 +93,8 @@
                                [readerSettings$]="readerSettings$"
                                [bookmark$]="showBookmarkEffect$"
                                [pageNum$]="pageNum$"
-                               [showClickOverlay$]="showClickOverlay$">
+                               [showClickOverlay$]="showClickOverlay$"
+                               [readingProfile]="readingProfile">
           </app-single-renderer>
 
           <app-double-renderer [image$]="currentImage$"
@@ -133,7 +134,8 @@
                                    (loadPrevChapter)="loadPrevChapter()"
                                    [bookmarkPage]="showBookmarkEffectEvent"
                                    [fullscreenToggled]="fullscreenEvent"
-                                   [readerSettings$]="readerSettings$">
+                                   [readerSettings$]="readerSettings$"
+                                   [readingProfile]="readingProfile">
             </app-infinite-scroller>
           </div>
         }

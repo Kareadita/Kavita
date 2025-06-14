@@ -432,6 +432,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.SwipeToPaginate = dto.SwipeToPaginate;
         existingProfile.AllowAutomaticWebtoonReaderDetection = dto.AllowAutomaticWebtoonReaderDetection;
         existingProfile.WidthOverride = dto.WidthOverride;
+        existingProfile.DisableWidthOverride = dto.DisableWidthOverride;
 
         // Book Reader
         existingProfile.BookReaderMargin = dto.BookReaderMargin;

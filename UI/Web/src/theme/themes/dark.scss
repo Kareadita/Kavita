@@ -442,4 +442,10 @@
     /** Search **/
     --input-hint-border-color: #aeaeae;
     --input-hint-text-color: lightgrey;
+
+    /** Breakpoint **/
+    --setting-mobile-breakpoint: 768;
+    --setting-tablet-breakpoint: 1280;
+    --setting-desktop-breakpoint: 1440;
+
 }

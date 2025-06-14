@@ -64,6 +64,9 @@ public sealed record UserReadingProfileDto
     /// <inheritdoc cref="AppUserReadingProfile.WidthOverride"/>
     public int? WidthOverride { get; set; }
 
+    /// <inheritdoc cref="AppUserReadingProfile.DisableWidthOverride"/>
+    public BreakPoint DisableWidthOverride { get; set; } = BreakPoint.Never;
+
     #endregion
 
     #region EpubReader
