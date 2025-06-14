@@ -9,7 +9,7 @@
 
 .tag-card:hover {
   background-color: #3a3a3a;
-  transform: translateY(-3px);
+  //transform: translateY(-3px); // Cool effect but has a weird background issue. ROBBIE: Fix this
 }
 
 .tag-name {
