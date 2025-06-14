@@ -2868,7 +2868,7 @@
         "width-override-label": "{{manga-reader.width-override-label}}",
         "width-override-tooltip": "Override width of images in the reader",
         "disable-width-override-label": "Disable width override",
-        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is smaller than the configured breakpoint",
+        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is at least the configured breakpoint or smaller",
         "reset": "{{common.reset}}",
 
         "book-reader-settings-title": "Book Reader",
