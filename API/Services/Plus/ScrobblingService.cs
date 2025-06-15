@@ -146,7 +146,7 @@ public class ScrobbleSyncContext
     /// </summary>
     public List<AppUser> Users { get; set; } = [];
     /// <summary>
-    /// Amount fo already processed events
+    /// Amount of already processed events
     /// </summary>
     public int ProgressCounter { get; set; }
 
@@ -198,6 +198,9 @@ public class ScrobblingService : IScrobblingService
 
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
+    private const string InvalidKPlusLicenseErrorMessage = "Kavita+ subscription no longer active";
+    private const string ReviewFailedErrorMessage = "Review was unable to be saved due to upstream requirements";
+    private const string BadPayLoadErrorMessage = "Bad payload from Scrobble Provider";
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
@@ -409,7 +412,7 @@ public class ScrobblingService : IScrobblingService
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
-            ScrobbleEventType.ScoreUpdated);
+            ScrobbleEventType.ScoreUpdated, true);
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
@@ -510,7 +513,9 @@ public class ScrobblingService : IScrobblingService
         if (!await _licenseService.HasActiveLicense()) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
-        if (series == null || !series.Library.AllowScrobbling) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
+        if (!series.Library.AllowScrobbling) return;
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
@@ -523,10 +528,7 @@ public class ScrobblingService : IScrobblingService
             .Where(e => new[] { ScrobbleEventType.AddWantToRead, ScrobbleEventType.RemoveWantToRead }.Contains(e.ScrobbleEventType));
 
         // Remove all existing want-to-read events for this series/user
-        foreach (var existingEvent in existingEvents)
-        {
-            _unitOfWork.ScrobbleRepository.Remove(existingEvent);
-        }
+        _unitOfWork.ScrobbleRepository.Remove(existingEvents);
 
         // Create the new event
         var evt = new ScrobbleEvent()
@@ -642,9 +644,17 @@ public class ScrobblingService : IScrobblingService
 
     #endregion
 
+    /// <summary>
+    /// Returns false if, the series is on hold or Don't Match, or when the library has scrobbling disable or not eligible
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="series"></param>
+    /// <returns></returns>
     private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
         if (series.DontMatch) return true;
+
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
             _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
@@ -652,12 +662,17 @@ public class ScrobblingService : IScrobblingService
         }
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true}) return true;
-        if (!ExternalMetadataService.IsPlusEligible(library.Type)) return true;
+        if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type)) return true;
 
         return false;
     }
 
+    /// <summary>
+    /// Returns the rate limit from the K+ api
+    /// </summary>
+    /// <param name="license"></param>
+    /// <param name="aniListToken"></param>
+    /// <returns></returns>
     private async Task<int> GetRateLimit(string license, string aniListToken)
     {
         if (string.IsNullOrWhiteSpace(aniListToken)) return 0;
@@ -687,29 +702,35 @@ public class ScrobblingService : IScrobblingService
             .Select(l => l.Id)
             .ToImmutableHashSet();
 
-        var errors = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors())
+        var erroredSeries = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors())
             .Where(e => e.Comment is "Unknown Series" or UnknownSeriesErrorMessage or AccessTokenErrorMessage)
             .Select(e => e.SeriesId)
             .ToList();
 
         var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
         var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
         var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
         var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
-            .Where(e => !errors.Contains(e.SeriesId))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
 
-        await ClearErrors(errors);
+        // Clear any events that are already on error table
+        var erroredEvents = await _unitOfWork.ScrobbleRepository.GetAllEventsWithSeriesIds(erroredSeries);
+        if (erroredEvents.Count > 0)
+        {
+            _unitOfWork.ScrobbleRepository.Remove(erroredEvents);
+            await _unitOfWork.CommitAsync();
+        }
 
         return new ScrobbleSyncContext
         {
@@ -721,21 +742,6 @@ public class ScrobblingService : IScrobblingService
             RateLimits = [],
             License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value,
         };
-    }
-
-    /// <summary>
-    /// Remove all events for which its series has errored
-    /// </summary>
-    /// <param name="erroredSeries"></param>
-    private async Task ClearErrors(List<int> erroredSeries)
-    {
-        // Clear any events that are already on error table
-        var erroredEvents = await _unitOfWork.ScrobbleRepository.GetAllEventsWithSeriesIds(erroredSeries);
-        if (erroredEvents.Count > 0)
-        {
-            _unitOfWork.ScrobbleRepository.Remove(erroredEvents);
-            await _unitOfWork.CommitAsync();
-        }
     }
 
     /// <summary>
@@ -945,6 +951,12 @@ public class ScrobblingService : IScrobblingService
             });
     }
 
+    /// <summary>
+    /// Returns true if the user token is valid
+    /// </summary>
+    /// <param name="evt"></param>
+    /// <returns></returns>
+    /// <remarks>If the token is not, adds a scrobble error</remarks>
     private async Task<bool> ValidateUserToken(ScrobbleEvent evt)
     {
         if (!TokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
@@ -961,6 +973,12 @@ public class ScrobblingService : IScrobblingService
         return false;
     }
 
+    /// <summary>
+    /// Returns true if the series can be scrobbled
+    /// </summary>
+    /// <param name="evt"></param>
+    /// <returns></returns>
+    /// <remarks>If the series cannot be scrobbled, adds a scrobble error</remarks>
     private async Task<bool> ValidateSeriesCanBeScrobbled(ScrobbleEvent evt)
     {
         if (evt.Series is { IsBlacklisted: false, DontMatch: false })
@@ -977,14 +995,18 @@ public class ScrobblingService : IScrobblingService
             SeriesId = evt.SeriesId
         });
 
-        evt.IsErrored = true;
-        evt.ErrorDetails = UnknownSeriesErrorMessage;
+        evt.SetErrorMessage(UnknownSeriesErrorMessage);
         evt.ProcessDateUtc = DateTime.UtcNow;
         _unitOfWork.ScrobbleRepository.Update(evt);
         await _unitOfWork.CommitAsync();
         return false;
     }
 
+    /// <summary>
+    /// Removed Special parses numbers from chatter and volume numbers
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     private static ScrobbleDto NormalizeScrobbleData(ScrobbleDto data)
     {
         // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
@@ -998,6 +1020,12 @@ public class ScrobblingService : IScrobblingService
         return data;
     }
 
+    /// <summary>
+    /// Loops through all events, and post them to K+
+    /// </summary>
+    /// <param name="events"></param>
+    /// <param name="ctx"></param>
+    /// <param name="createEvent"></param>
     private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleDto>> createEvent)
     {
         foreach (var evt in events.Where(CanProcessScrobbleEvent))
@@ -1035,8 +1063,7 @@ public class ScrobblingService : IScrobblingService
                 if (ex.Message.Contains("Access token is invalid"))
                 {
                     _logger.LogCritical(ex, "Access Token for AppUserId: {AppUserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
-                    evt.IsErrored = true;
-                    evt.ErrorDetails = AccessTokenErrorMessage;
+                    evt.SetErrorMessage(AccessTokenErrorMessage);
                     _unitOfWork.ScrobbleRepository.Update(evt);
                 }
             }
@@ -1056,6 +1083,11 @@ public class ScrobblingService : IScrobblingService
         await SaveToDb(ctx.ProgressCounter, true);
     }
 
+    /// <summary>
+    /// Save changes every five updates
+    /// </summary>
+    /// <param name="progressCounter"></param>
+    /// <param name="force">Ignore update count check</param>
     private async Task SaveToDb(int progressCounter, bool force = false)
     {
         if ((force || progressCounter % 5 == 0) && _unitOfWork.HasChanges())
@@ -1065,61 +1097,80 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    /// <summary>
+    /// If no errors have been logged for the given series, creates a new Unknown series error, and blacklists the series
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="evt"></param>
+    private async Task MarkSeriesAsUnknown(ScrobbleDto data, ScrobbleEvent evt)
+    {
+        if (await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId)) return;
+
+        // Create a new ExternalMetadata entry to indicate that this is not matchable
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
+        if (series == null) return;
+
+        series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata {SeriesId = evt.SeriesId};
+        series.IsBlacklisted = true;
+        _unitOfWork.SeriesRepository.Update(series);
+
+        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+        {
+            Comment = UnknownSeriesErrorMessage,
+            Details = data.SeriesName,
+            LibraryId = evt.LibraryId,
+            SeriesId = evt.SeriesId
+        });
+    }
+
+    /// <summary>
+    /// Makes the K+ request, and handles any exceptions that occur
+    /// </summary>
+    /// <param name="data">Data to send to K+</param>
+    /// <param name="license">K+ license key</param>
+    /// <param name="evt">Related scrobble event</param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException">Exceptions may be rethrown as a KavitaException</exception>
+    /// <remarks>Some FlurlHttpException are also rethrown</remarks>
     public async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
     {
         try
         {
             var response = await _kavitaPlusApiService.PostScrobbleUpdate(data, license);
 
+            _logger.LogDebug("K+ API Scrobble response for series {SeriesName}: Successful {Successful}, ErrorMessage {ErrorMessage}, ExtraInformation: {ExtraInformation}, RateLeft: {RateLeft}",
+                data.SeriesName, response.Successful, response.ErrorMessage, response.ExtraInformation, response.RateLeft);
+
             if (response.Successful || response.ErrorMessage == null) return response.RateLeft;
 
             // Might want to log this under ScrobbleError
             if (response.ErrorMessage.Contains("Too Many Requests"))
             {
-                _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
+                _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
                 await Task.Delay(TimeSpan.FromMinutes(10));
                 return await PostScrobbleUpdate(data, license, evt);
             }
+
             if (response.ErrorMessage.Contains("Unauthorized"))
             {
                 _logger.LogCritical("Kavita+ responded with Unauthorized. Please check your subscription");
                 await _licenseService.HasActiveLicense(true);
-                evt.IsErrored = true;
-                evt.ErrorDetails = "Kavita+ subscription no longer active";
+                evt.SetErrorMessage(InvalidKPlusLicenseErrorMessage);
                 throw new KavitaException("Kavita+ responded with Unauthorized. Please check your subscription");
             }
+
             if (response.ErrorMessage.Contains("Access token is invalid"))
             {
-                evt.IsErrored = true;
-                evt.ErrorDetails = AccessTokenErrorMessage;
+                evt.SetErrorMessage(AccessTokenErrorMessage);
                 throw new KavitaException("Access token is invalid");
             }
+
             if (response.ErrorMessage.Contains("Unknown Series"))
             {
                 // Log the Series name and Id in ScrobbleErrors
                 _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
-                if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
-                {
-                    // Create a new ExternalMetadata entry to indicate that this is not matchable
-                    var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(evt.SeriesId, SeriesIncludes.ExternalMetadata);
-                    if (series == null) return 0;
-
-                    series.ExternalSeriesMetadata ??= new ExternalSeriesMetadata() {SeriesId = evt.SeriesId};
-                    series.IsBlacklisted = true;
-                    _unitOfWork.SeriesRepository.Update(series);
-
-                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
-                    {
-                        Comment = UnknownSeriesErrorMessage,
-                        Details = data.SeriesName,
-                        LibraryId = evt.LibraryId,
-                        SeriesId = evt.SeriesId
-                    });
-
-                }
-
-                evt.IsErrored = true;
-                evt.ErrorDetails = UnknownSeriesErrorMessage;
+                await MarkSeriesAsUnknown(data, evt);
+                evt.SetErrorMessage(UnknownSeriesErrorMessage);
             } else if (response.ErrorMessage.StartsWith("Review"))
             {
                 // Log the Series name and Id in ScrobbleErrors
@@ -1134,8 +1185,7 @@ public class ScrobblingService : IScrobblingService
                         SeriesId = evt.SeriesId
                     });
                 }
-                evt.IsErrored = true;
-                evt.ErrorDetails = "Review was unable to be saved due to upstream requirements";
+                evt.SetErrorMessage(ReviewFailedErrorMessage);
             }
 
             return response.RateLeft;
@@ -1148,7 +1198,7 @@ public class ScrobblingService : IScrobblingService
 
             if (errorMessage.Contains("Too Many Requests"))
             {
-                _logger.LogInformation("Hit Too many requests, sleeping to regain requests and retrying");
+                _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
                 await Task.Delay(TimeSpan.FromMinutes(10));
                 return await PostScrobbleUpdate(data, license, evt);
             }
@@ -1166,9 +1216,8 @@ public class ScrobblingService : IScrobblingService
                         SeriesId = evt.SeriesId
                     });
                 }
-                evt.IsErrored = true;
-                evt.ErrorDetails = "Bad payload from Scrobble Provider";
-                throw new KavitaException("Bad payload from Scrobble Provider");
+                evt.SetErrorMessage(BadPayLoadErrorMessage);
+                throw new KavitaException(BadPayLoadErrorMessage);
             }
             throw;
         }
