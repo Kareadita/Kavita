@@ -724,13 +724,13 @@ public class ScrobblingService : IScrobblingService
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
 
-        // Clear any events that are already on error table
+        /*// Clear any events that are already on error table
         var erroredEvents = await _unitOfWork.ScrobbleRepository.GetAllEventsWithSeriesIds(erroredSeries);
         if (erroredEvents.Count > 0)
         {
             _unitOfWork.ScrobbleRepository.Remove(erroredEvents);
             await _unitOfWork.CommitAsync();
-        }
+        }*/
 
         return new ScrobbleSyncContext
         {
