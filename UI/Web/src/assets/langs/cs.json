@@ -83,7 +83,7 @@
     },
     "user-preferences": {
         "title": "Uživatelský panel",
-        "pref-description": "Toto jsou globální nastavení, která jsou vázána na váš účet.",
+        "pref-description": "Jedná se o globální nastavení, která jsou vázána na váš účet. Nastavení čtečky se nachází v sekci Čtecí profily.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -107,70 +107,19 @@
         "collapse-series-relationships-tooltip": "Měla by Kavita ukázat seriály, které nemají žádné vztahy nebo jsou rodičem/prequelem",
         "share-series-reviews-label": "Sdílejte recenze Serií",
         "share-series-reviews-tooltip": "Má Kavita zahrnout vaše recenze na Series pro ostatní uživatele",
-        "image-reader-settings-title": "Čtečka obrázků",
-        "reading-direction-label": "Směr čtení",
-        "reading-direction-tooltip": "Kliknutím na směr přejdete na další stránku. Zprava doleva znamená, že kliknutím na levou stranu obrazovky přejdete na další stránku.",
-        "scaling-option-label": "Možnosti škálování",
-        "scaling-option-tooltip": "Jak změnit měřítko obrázku na obrazovku.",
-        "page-splitting-label": "Rozdělení stránky",
-        "page-splitting-tooltip": "Jak rozdělit obrázek v plné šířce (tj. oba obrázky jsou kombinovány)",
-        "reading-mode-label": "Režim čtení",
-        "reading-mode-tooltip": "Změna stránkování na vertikální, horizontální nebo nekonečné posunování",
-        "layout-mode-label": "Režim rozvržení",
-        "layout-mode-tooltip": "Vykreslení jednoho obrázku na obrazovku nebo dvou obrázků vedle sebe",
-        "background-color-label": "Barva pozadí",
-        "background-color-tooltip": "Barva pozadí čtečky obrázků",
-        "auto-close-menu-label": "Nabídka automatického zavření",
-        "auto-close-menu-tooltip": "Mělo by se menu automaticky zavřít",
-        "show-screen-hints-label": "Zobrazit tipy na obrazovce",
-        "show-screen-hints-tooltip": "Zobrazení překryvného okna pro lepší orientaci v oblasti a směru stránkování",
-        "emulate-comic-book-label": "Emulovat komiks",
-        "swipe-to-paginate-label": "Přejeďte prstem na stránkování",
-        "book-reader-settings-title": "Čtečka knih",
-        "tap-to-paginate-label": "Klepnutím můžete stránkovat",
-        "tap-to-paginate-tooltip": "Pokud strany obrazovky čtečky knih umožňují klepnutím na ni přejít na předchozí/další stránku",
-        "immersive-mode-label": "Imerzní režim",
-        "immersive-mode-tooltip": "Tím se nabídka skryje za kliknutí na dokument čtečky a otočením klepnutím zapněte stránkování",
-        "reading-direction-book-label": "Směr čtení",
-        "reading-direction-book-tooltip": "Směrem ke kliknutí se přesunete na další stránku. Zprava doleva znamená, že kliknutím na levou stranu obrazovky přejdete na další stránku.",
-        "font-family-label": "Rodina písem",
-        "font-family-tooltip": "Rodina písem k načtení. Výchozí načte výchozí písmo knihy",
-        "writing-style-label": "Styl psaní",
-        "writing-style-tooltip": "Změní směr textu. Vodorovně je zleva doprava, svisle shora dolů.",
-        "layout-mode-book-label": "Režim rozvržení",
-        "layout-mode-book-tooltip": "Jak by měl být obsah rozvržen. Scroll je takový, jak ho kniha balí. 1 nebo 2 sloupce se přizpůsobí výšce zařízení a vejdou se 1 nebo 2 sloupce textu na stránku",
-        "color-theme-book-label": "Barevný motiv",
-        "color-theme-book-tooltip": "Jaký barevný motiv použít na obsah a nabídku čtečky knih",
-        "font-size-book-label": "Velikost písma",
-        "line-height-book-label": "Řádkování",
-        "line-height-book-tooltip": "Kolik mezer mezi řádky knihy",
-        "margin-book-label": "Okraj",
-        "margin-book-tooltip": "Kolik mezer na každé straně obrazovky. To bude přepsáno na 0 na mobilních zařízeních bez ohledu na toto nastavení.",
         "clients-opds-alert": "OPDS není na tomto serveru povoleno. Toto nebude mít vliv na uživatele Tachiyomi.",
         "clients-opds-description": "Všichni klienti třetích stran budou používat klíč API nebo níže uvedenou adresu URL připojení. Jsou to jako hesla, udržujte je v soukromí.",
         "clients-api-key-tooltip": "Klíč API je jako heslo. Jeho resetováním dojde ke zneplatnění všech stávajících klientů.",
         "clients-opds-url-tooltip": "Viz seznam podporovaných klientů OPDS: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "swipe-to-paginate-tooltip": "Mělo by přejetí prstem po obrazovce způsobit spuštění další nebo předchozí stránky",
-        "emulate-comic-book-tooltip": "Používá stínový efekt, který napodobuje čtení z knihy",
-        "pdf-scroll-mode-tooltip": "Způsob procházení stránek. Vertikální/horizontální a stránkování klepnutím (bez posouvání)",
-        "pdf-spread-mode-label": "Režim rozložení",
-        "pdf-reader-settings-title": "PDF čtečka",
-        "pdf-scroll-mode-label": "Režim posunu",
-        "font-size-book-tooltip": "Procento měřítka, které se použije na písmo v knize",
-        "pdf-spread-mode-tooltip": "Jak by měly být stránky uspořádány. Jednoduché nebo dvojité (liché/sudé)",
-        "pdf-theme-label": "Motiv",
-        "pdf-theme-tooltip": "Barevný motiv čtečky",
         "clients-opds-url-label": "URL OPDS",
         "clients-api-key-label": "Klíč API",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobblování",
         "anilist-scrobbling-tooltip": "Povolit Kavitě Scrobble (jednosměrná synchronizace) průběhu čtení a hodnocení do AniListu",
         "want-to-read-sync-label": "Chci číst Synchronizace",
-        "want-to-read-sync-tooltip": "Povolit Kavitě přidávat položky do seznamu Chci číst na základě AniListu a sérií MAL v seznamu čekajících čtení",
-        "allow-auto-webtoon-reader-label": "Režim automatické čtečky webových komiksů",
-        "allow-auto-webtoon-reader-tooltip": "Pokud stránky vypadají jako webový komiks, přepněte se do režimu čtečky webových komiksů. Mohou se vyskytnout některé falešně pozitivní výsledky."
+        "want-to-read-sync-tooltip": "Povolit Kavitě přidávat položky do seznamu Chci číst na základě AniListu a sérií MAL v seznamu čekajících čtení"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -680,7 +629,10 @@
         "incognito-mode-label": "Režim inkognito",
         "next": "Další",
         "previous": "Předchozí",
-        "go-to-page-prompt": "Existuje {{totalPages}} stránek. Na kterou stránku chcete přejít?"
+        "go-to-page-prompt": "Existuje {{totalPages}} stránek. Na kterou stránku chcete přejít?",
+        "go-to-first-page": "Přejít na první stránku",
+        "go-to-section": "Přejít do sekce",
+        "go-to-section-prompt": "Je zde {{totalSections}} sekcí. Do které sekce chcete přejít?"
     },
     "personal-table-of-contents": {
         "no-data": "V záložkách zatím nic není",
@@ -728,7 +680,7 @@
     "series-detail": {
         "page-settings-title": "Nastavení stránky",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-option-card": "Karta",
         "layout-mode-option-list": "Seznam",
         "continue-from": "Pokračovat {{title}}",
@@ -839,7 +791,6 @@
         "customize": "{{settings.customize}}",
         "reading-lists": "Seznamy četby",
         "bookmarks": "Záložky",
-        "browse-authors": "Procházet autory",
         "donate": "Přispět",
         "more": "Více",
         "back": "Zpět",
@@ -849,7 +800,8 @@
         "collections": "Sbírky",
         "all-series": "Všechny série",
         "cancel-edit": "Zavřít úpravu",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "browse-people": "Procházet Osoby"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -905,14 +857,14 @@
         "allow-metadata-matching-tooltip": "Měla by Kavita stáhnout metadata pro série v rámci této knihovny. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+."
     },
     "reader-settings": {
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "right-to-left": "Zprava doleva",
         "writing-style-tooltip": "Změní směr textu. Vodorovný je zleva doprava, svislý je shora dolů.",
         "general-settings-title": "Obecná nastavení",
@@ -938,7 +890,15 @@
         "color-theme-title": "Barevné motivy",
         "theme-white": "Bílý",
         "theme-paper": "Papír",
-        "theme-black": "Černý"
+        "theme-black": "Černý",
+        "create-new-tooltip": "Vytvořte nový spravovatelný profil z vašeho aktuálního implicitního profilu",
+        "update-parent": "Uložit do {{name}}",
+        "loading": "načítání",
+        "create-new": "Nový profil z implicitního",
+        "reading-profile-updated": "Profil čtení aktualizován",
+        "reading-profile-promoted": "Profil čtení propagován",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -1337,7 +1297,8 @@
         "admin-manage-tokens": "Správa uživatelských tokenů",
         "scrobble-holds": "Podržení Scrobble",
         "account": "Účet",
-        "admin-metadata": "Správa metadat"
+        "admin-metadata": "Správa metadat",
+        "reading-profiles": "Profily čtení"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -1452,7 +1413,9 @@
         "server-settings": "Nastavení serveru",
         "settings": "Nastavení",
         "announcements": "Oznámení",
-        "person-aka-status": "Shoduje se s aliasem"
+        "person-aka-status": "Shoduje se s aliasem",
+        "browse-tags": "Procházet štítky",
+        "browse-genres": "Procházet žánry"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1524,8 +1487,8 @@
         "dry-run-description": "Toto je zkušební verze, která ukazuje, co se stane, pokud stisknete tlačítko Další a provedete import. Všechny chyby nebudou importovány."
     },
     "manga-reader": {
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "next-page-tooltip": "Další stránka",
         "first-time-reading-manga": "Klepnutím na obrázek kdykoli otevřete nabídku. Klepnutím na ukazatel průběhu můžete konfigurovat různá nastavení nebo přejít na stránku. Klepnutím na strany obrázku přejdete na další/předchozí stránku.",
         "back": "Zpět",
@@ -1536,7 +1499,6 @@
         "no-prev-chapter": "Žádná předchozí kapitola",
         "incognito-title": "Anonymní režim:",
         "left-to-right-alt": "Zleva doprava",
-        "save-globally": "Uložit globálně",
         "shortcuts-menu-alt": "Modální klávesové zkratky",
         "prev-page-tooltip": "Předchozí stránka",
         "prev-chapter-tooltip": "Předchozí kapitola/svazek",
@@ -1555,14 +1517,19 @@
         "incognito-alt": "Anonymní režim je zapnutý. Přepnutím jej vypnete.",
         "image-splitting-label": "Rozdělení obrazu",
         "width-override-label": "Přepsání šířky",
-        "off": "Vypnuto",
+        "off": "{{reader-settings.off}}",
         "enable-comic-book-label": "Napodobit komiks",
         "brightness-label": "Jas",
         "bookmark-page-tooltip": "Založit stránku",
         "unbookmark-page-tooltip": "Zrušení záložky stránky",
         "bookmarks-title": "Záložky",
         "layout-mode-switched": "Režim rozvržení přepnutý na jednoduchý z důvodu nedostatku místa pro vykreslení dvojitého rozvržení",
-        "user-preferences-updated": "Aktualizace uživatelských předvoleb"
+        "create-new": "{{reader-settings.create-new}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "Profil čtení aktualizován",
+        "reading-profile-promoted": "Profil čtení propagován"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1744,8 +1711,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -1898,7 +1865,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2004,7 +1971,13 @@
         "reorder": "Přeuspořádat",
         "rename": "Přejmenovat",
         "rename-tooltip": "Přejmenovat inteligentní filtr",
-        "merge": "Sloučit"
+        "merge": "Sloučit",
+        "reading-profiles": "Profily čtení",
+        "set-reading-profile": "Nastavit profil čtení",
+        "set-reading-profile-tooltip": "Připojit profil čtení k této knihovně",
+        "clear-reading-profile": "Vymazat profil čtení",
+        "clear-reading-profile-tooltip": "Vymazat profil čtení pro tuto knihovnu",
+        "cleared-profile": "Vyčištěný profil čtení"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2093,11 +2066,6 @@
         "epub": "Epub",
         "image": "Obrázek"
     },
-    "browse-authors": {
-        "title": "Procházet autory a spisovatele",
-        "author-count": "{{num}} lidí",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
-    },
     "carousel-reel": {
         "prev-items": "Předchozí položky",
         "next-items": "Další položky"
@@ -2121,7 +2089,9 @@
         "dont-match-status-label": "{{dont-match-label}}",
         "match-alt": "Spáruj {{seriesName}}",
         "actions-header": "Akce",
-        "library-name-header": "Knihovna"
+        "library-name-header": "Knihovna",
+        "library-type": "Typ knihovny",
+        "matched-state-label": "Stav shody"
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
@@ -2154,7 +2124,10 @@
         "last-modified": "Naposledy upraveno",
         "time-to-read": "Čas k přečtení",
         "read-progress": "Naposledy čteno",
-        "average-rating": "Průměrné hodnocení"
+        "average-rating": "Průměrné hodnocení",
+        "person-name": "Jméno",
+        "person-series-count": "Počet sérií",
+        "person-chapter-count": "Počet kapitol"
     },
     "edit-person-modal": {
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2461,7 +2434,9 @@
         "webtoon-override": "Přepnutí do režimu Webtoon kvůli obrázkům představujícím webtoon.",
         "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami.",
         "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění.",
-        "series-added-want-to-read": "Série přidána ze seznamu Chci číst"
+        "series-added-want-to-read": "Série přidána ze seznamu Chci číst",
+        "series-bound-to-reading-profile": "Série vázaná na čtenářský profil {{name}}",
+        "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2543,7 +2518,8 @@
         "submit": "Odeslat",
         "email": "E-mail",
         "chapter-count": "{{num}} Kapitol",
-        "no-data": "Žádná data"
+        "no-data": "Žádná data",
+        "issue-count": "{{num}} Vydání"
     },
     "entity-type": {
         "logs": "záznamy",
@@ -2582,7 +2558,8 @@
         "confirm": "Potvrdit",
         "info": "Informace",
         "cancel": "{{common.cancel}}",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "Otázka"
     },
     "manage-metadata-settings": {
         "enabled-tooltip": "Povolte systému Kavita stahovat metadata a zapisovat do jeho databáze.",
@@ -2690,5 +2667,146 @@
         "merge-warning": "Pokud budete pokračovat, vybraná osoba bude odstraněna. Jméno vybrané osoby bude přidáno jako alias a všechny její role budou převedeny.",
         "alias-title": "Nové aliasy",
         "known-for-title": "Známý pro"
+    },
+    "manage-reading-profiles": {
+        "extra-tip": "Přiřaďte profily čtení pomocí akčního menu v sériích a knihovnách nebo hromadně. Při změně nastavení v čtečce se vytvoří skrytý profil, který si pamatuje vaše volby pro danou sérii (ne pro soubory PDF). Tento profil se odstraní, když přiřadíte k sérii jeden ze svých vlastních profilů čtení. Více informací naleznete na stránce",
+        "reading-direction-tooltip": "Směr kliknutí pro přechod na další stránku. Zprava doleva znamená, že kliknete na levou stranu obrazovky, abyste přejeli na další stránku.",
+        "layout-mode-book-tooltip": "Jak by měl být obsah rozložen. Posouvání je stejné jako u knihy. 1 nebo 2 sloupce se přizpůsobí výšce zařízení a na každou stránku se vejde 1 nebo 2 sloupce textu",
+        "description": "Ne všechny vaše série lze číst stejným způsobem, proto nastavte pro každou knihovnu nebo sérii samostatné profily čtení, aby se vám co nejlépe dařilo navázat na předchozí díly série.",
+        "reading-direction-book-tooltip": "Směr kliknutí pro přechod na další stránku. Zprava doleva znamená, že kliknete na levou stranu obrazovky, abyste přejeli na další stránku.",
+        "font-family-tooltip": "Rodina písem, která se má načíst. Výchozí nastavení načte výchozí písmo knihy",
+        "pdf-theme-tooltip": "Barevné motivy čtečky",
+        "reading-profile-series-settings-title": "Série",
+        "reading-direction-book-label": "Směr čtení",
+        "margin-book-tooltip": "Jak velký odstup na každé straně obrazovky. Na mobilních zařízeních se tato hodnota bez ohledu na nastavení nastaví na 0.",
+        "allow-auto-webtoon-reader-tooltip": "Pokud stránky vypadají jako webtoon, přepněte do režimu Webtoon čtečky. Mohou se vyskytnout některé falešně pozitivní výsledky.",
+        "reset": "{{common.reset}}",
+        "tap-to-paginate-tooltip": "Měly by strany obrazovky čtečky knih umožňovat klepnutí pro přechod na předchozí/následující stránku",
+        "delete": "{{common.delete}}",
+        "profiles-title": "Vaše profily čtení",
+        "default-profile": "Výchozí",
+        "add": "{{common.add}}",
+        "add-tooltip": "Váš nový profil bude uložen po provedení změn",
+        "make-default": "Nastavit jako výchozí",
+        "no-selected": "Není vybrán žádný profil",
+        "confirm": "Opravdu chcete smazat profil čtení {{name}}?",
+        "selection-tip": "Vyberte profil ze seznamu nebo vytvořte nový v pravém horním rohu",
+        "image-reader-settings-title": "Čtečka obrázků",
+        "reading-direction-label": "Směr čtení",
+        "scaling-option-label": "Možnosti škálování",
+        "scaling-option-tooltip": "Jak přizpůsobit velikost obrázku vaší obrazovce.",
+        "page-splitting-label": "Rozdělení stránky",
+        "page-splitting-tooltip": "Jak rozdělit obrázek v plné šířce (tj. kombinace levého a pravého obrázku)",
+        "reading-mode-label": "Režim čtení",
+        "reading-mode-tooltip": "Změňte čtečku tak, aby stránkovala vertikálně, horizontálně nebo měla nekonečné posouvání",
+        "layout-mode-label": "Režim rozvržení",
+        "layout-mode-tooltip": "Zobrazit jeden obrázek na obrazovce nebo dva obrázky vedle sebe",
+        "background-color-label": "Barva pozadí",
+        "background-color-tooltip": "Barva pozadí čtečky obrázků",
+        "auto-close-menu-label": "Automatické zavření nabídky",
+        "auto-close-menu-tooltip": "Mělo by se menu automaticky zavřít",
+        "show-screen-hints-label": "Zobrazit nápovědu na obrazovce",
+        "show-screen-hints-tooltip": "Zobrazit překryvnou vrstvu, která pomůže pochopit oblast a směr stránkování",
+        "emulate-comic-book-label": "Napodobit komiks",
+        "emulate-comic-book-tooltip": "Použije stínový efekt, který napodobuje čtení z knihy",
+        "swipe-to-paginate-label": "Přejetím prstem přejděte na stránku",
+        "swipe-to-paginate-tooltip": "Má přejetí prstem po obrazovce vyvolat přechod na další nebo předchozí stránku",
+        "allow-auto-webtoon-reader-label": "Režim automatického čtení webtoonů",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "Přepsat šířku obrázků v čtečce",
+        "book-reader-settings-title": "Čtečka knih",
+        "tap-to-paginate-label": "Klepnutím na stránku posouvat",
+        "immersive-mode-label": "Imersivní režim",
+        "immersive-mode-tooltip": "Tím se skryje nabídka za kliknutím na dokument čtečky a zapne se listování klepnutím",
+        "font-family-label": "Rodina písem",
+        "writing-style-label": "Styl psaní",
+        "writing-style-tooltip": "Změní směr textu. Horizontální směr je zleva doprava, vertikální směr je shora dolů.",
+        "layout-mode-book-label": "Režim rozvržení",
+        "color-theme-book-label": "Barevné téma",
+        "color-theme-book-tooltip": "Jaké barevné schéma použít pro obsah čtečky knih a nabídku",
+        "font-size-book-label": "Velikost písma",
+        "font-size-book-tooltip": "Procento zmenšení, které se použije na písmo v knize",
+        "line-height-book-label": "Řádkování",
+        "line-height-book-tooltip": "Jak velký je odstup mezi řádky v knize",
+        "margin-book-label": "Odsazení",
+        "pdf-reader-settings-title": "Čtečka PDF",
+        "pdf-scroll-mode-label": "Režim posouvání",
+        "pdf-scroll-mode-tooltip": "Jak procházíte stránky. Vertikálně/horizontálně a klepnutím na stránku (bez posouvání)",
+        "pdf-spread-mode-label": "Režim rozložení",
+        "pdf-spread-mode-tooltip": "Jak by měly být stránky rozvrženy. Jednoduché nebo dvojité (liché/sudé)",
+        "pdf-theme-label": "Motiv",
+        "reading-profile-library-settings-title": "Knihovna",
+        "wiki-title": "wiki",
+        "disable-width-override-label": "Zakázat přepsání šířky",
+        "disable-width-override-tooltip": "Zabraňte tomu, aby se přepsání šířky projevilo, pokud je vaše obrazovka alespoň v konfigurovaném bodě zlomu nebo menší"
+    },
+    "bulk-set-reading-profile-modal": {
+        "title": "Nastavit profil čtení",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "Zatím nebyly vytvořeny žádné sbírky",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}",
+        "bound": "Vázaný"
+    },
+    "browse-people": {
+        "title": "Procházet Osoby",
+        "author-count": "{{num}} osob",
+        "issue-count": "{{common.issue-count}}",
+        "roles-label": "Role",
+        "sort-label": "Třídit",
+        "name-label": "Jméno",
+        "issue-count-label": "Počet vydání",
+        "series-count-label": "Počet sérií",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-genres": {
+        "title": "Procházet žánry",
+        "genre-count": "{{num}} žánrů",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-tags": {
+        "title": "Procházet štítky",
+        "genre-count": "{{num}} štítků",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} prací",
+        "age-rating": "Hodnoceno {{value}}",
+        "tag": "Má štítek {{value}}",
+        "translator": "Přeložil {{value}}",
+        "character": "Má postavu {{value}}",
+        "editor": "Úpravy provedl {{value}}",
+        "artist": "Nakreslil {{value}}",
+        "letterer": "Vepsal text {{value}}",
+        "inker": "Inkoustoval {{value}}",
+        "genre": "Má žánr {{value}}",
+        "library": "V rámci knihovny {{value}}",
+        "release-year": "Vydáno v roce {{value}}",
+        "imprint": "Otisk {{value}}",
+        "team": "Tým {{value}}",
+        "location": "V místě {{value}}",
+        "user-rating": "Hodnoceno {{value}} hvězdičkami",
+        "format": "Formát {{value}}",
+        "colorist": "Vybarvil {{value}}",
+        "publisher": "Vydáno {{value}}",
+        "writer": "Napsal {{value}}",
+        "penciller": "Nakreslil tužkou {{hodnota}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-name": "Jméno",
+        "person-series-count": "Počet sérií",
+        "person-role": "Role",
+        "person-chapter-count": "Počet kapitol"
+    },
+    "breakpoint-pipe": {
+        "never": "Nikdy",
+        "mobile": "Mobilní",
+        "tablet": "Tablet",
+        "desktop": "Stolní počítač"
     }
 }

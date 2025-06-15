@@ -93,7 +93,7 @@
         "page-layout-mode-tooltip": "Показывать элементы в виде карточек или списка на странице сведений о серии.",
         "locale-label": "Язык",
         "locale-tooltip": "Язык, который должна использовать Кавита",
-        "blur-unread-summaries-label": "Размытие непрочитанных сводок",
+        "blur-unread-summaries-label": "Размытие непрочитанного",
         "blur-unread-summaries-tooltip": "Размытие аннотаций в не прочитанных томах или главах (во избежание спойлеров)",
         "prompt-on-download-label": "Запрос на загрузку",
         "prompt-on-download-tooltip": "Запрашивать, когда размер загрузки превышает {{size}} МБ",
@@ -103,41 +103,6 @@
         "collapse-series-relationships-tooltip": "Должна ли Кавита показывать серии, которые не имеют отношения друг к другу, или это родителаякий серия/приквел",
         "share-series-reviews-label": "Поделится обзором серий",
         "share-series-reviews-tooltip": "Должна ли Kavita включать ваши отзывы о сериях для других пользователей",
-        "image-reader-settings-title": "Просмоторщик изображений",
-        "reading-direction-label": "Направление чтения",
-        "reading-direction-tooltip": "Направление нажатия для перехода на следующую страницу. С права на лево означает, что для перехода на следующую страницу нужно нажать в левой части экрана.",
-        "scaling-option-label": "Параметры масштабирования",
-        "scaling-option-tooltip": "Как масштабировать изображение для вашего экрана.",
-        "page-splitting-label": "Разделение страниц",
-        "page-splitting-tooltip": "Как разделить изображение во всю ширину (т.е. как левое, так и правое изображения объединяются)",
-        "reading-mode-label": "Режим чтения",
-        "layout-mode-label": "Режим макета",
-        "layout-mode-tooltip": "Вывод на экран одного изображения или двух рядом расположенных изображений",
-        "background-color-label": "Цвет фона",
-        "auto-close-menu-label": "Автоматическое закрытие меню",
-        "show-screen-hints-label": "Показывать экранные подсказки",
-        "emulate-comic-book-label": "Имитация комиксов",
-        "swipe-to-paginate-label": "Проведите пальцем по страницам",
-        "book-reader-settings-title": "Читалка",
-        "tap-to-paginate-label": "Нажмите для пагинации",
-        "tap-to-paginate-tooltip": "Должны ли боковые стороны экрана читалки позволять нажимать на них для перехода к предыдущей/следующей странице",
-        "immersive-mode-label": "Режим погружения",
-        "immersive-mode-tooltip": "Это позволит скрыть меню после щелчка по документу читателя и включить функцию перехода к страницам",
-        "reading-direction-book-label": "Направление чтения",
-        "reading-direction-book-tooltip": "Направление нажатия для перехода на следующую страницу. С лева на право означает, что для перехода на следующую страницу нужно щелкнуть в левой части экрана.",
-        "font-family-label": "Семейство шрифтов",
-        "font-family-tooltip": "Семейство шрифтов для загрузки. По умолчанию загрузит шрифт, используемый в книге по умолчанию",
-        "writing-style-label": "Стиль письма",
-        "writing-style-tooltip": "Изменяет направление текста. Горизонтальное направление - слева направо, вертикальное - сверху вниз.",
-        "layout-mode-book-label": "Режим макета",
-        "layout-mode-book-tooltip": "Как должен быть размещен контент. Scroll - так, как это принято в книгах. 1 или 2 колонки соответствуют высоте устройства и вмещают 1 или 2 колонки текста на страницу",
-        "color-theme-book-label": "Цветовая тема",
-        "color-theme-book-tooltip": "Какую цветовую тему применить к содержанию и меню программы чтения книг",
-        "font-size-book-label": "Размер шрифта",
-        "line-height-book-label": "Межстрочный интервал",
-        "line-height-book-tooltip": "Размер интервала между строками книги",
-        "margin-book-label": "Отступ",
-        "margin-book-tooltip": "Величина интервала с каждой стороны экрана. На мобильных устройствах этот параметр будет иметь значение 0 независимо от этой настройки.",
         "clients-opds-alert": "OPDS не включен на этом сервере. Это не повлияет на пользователей Tachiyomi.",
         "clients-opds-description": "Все сторонние клиенты будут использовать либо API-ключ, либо указанный ниже Url подключения. Например пароли, храните их в тайне.",
         "clients-api-key-tooltip": "Ключ API - это как пароль. Храните его в секрете, берегите его.",
@@ -185,7 +150,7 @@
     },
     "manage-devices": {
         "title": "Диспетчер устройств",
-        "description": "Этот раздел предназначен для настройки устройств, которые не могут подключаться к Kavita через веб-браузер, а вместо этого имеют адрес электронной почты, принимающий файлы.",
+        "description": "Раздел предназначен для настройки устройств, которые не могут подключаться к Kavita через веб-браузер, но используют адрес электронной почты, принимающий файлы.",
         "devices-title": "Устройства",
         "no-devices": "Пока нет ни одного настроенного устройства",
         "platform-label": "Платформа: ",
@@ -285,21 +250,25 @@
         "open-filtered-search": "Откройте отфильтрованный поиск для {{item}}."
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "Всего прочитанных страниц",
+        "total-pages-read-label": "Прочитанных страниц",
         "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "Всего слов прочитано",
+        "total-words-read-label": "Прочитанных слов",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "Время, проведенное за чтением",
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "Читать главы",
+        "chapters-read-label": "Прочитанных глав",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "Среднее чтение / неделя",
-        "last-active-label": "Последний активный",
-        "chapters": "{{value}} глав"
+        "avg-reading-per-week-label": "Среднее время чтения / в неделю",
+        "last-active-label": "Последняя активность",
+        "chapters": "{{value}} глав",
+        "pages-count": "{{num}} страниц",
+        "pages-read-by-year-title": "Прочтено страниц за год",
+        "words-read-by-year-title": "Прочтенных слов за год",
+        "words-count": "{{num}} слов"
     },
     "user-stats": {
         "library-read-progress-title": "Прогресс чтения в библиотеке",
-        "read-percentage": "% Читать"
+        "read-percentage": "% Прочитанного"
     },
     "top-readers": {
         "title": "Лучшие читатели",
@@ -510,7 +479,10 @@
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "writing-style-label": "{{user-preferences.writing-style-label}}",
         "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}"
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "left-to-right": "Слева направо",
+        "right-to-left": "Справа налево",
+        "writing-style-tooltip": "Изменяет направление текста. По горизонтали - слева направо, по вертикали - сверху вниз."
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -599,7 +571,11 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "field-required": "{{validation.field-required}}"
+        "field-required": "{{validation.field-required}}",
+        "allow-stats-label": "Отправка анонимной статистики",
+        "port-tooltip": "Порт сервера. Для вступления в силу требуется перезагрузка. Эту настройку нельзя изменить, если вы запускаете образ Docker как пользователь без прав root.",
+        "port-label": "Порт",
+        "allow-stats-tooltip-part-1": "Отправляйте анонимные данные об использовании Kavita. Сюда входит информация о некоторых используемых функциях, количестве файлов, версии операционной системы, версии установки Kavita, процессоре и памяти. Мы будем использовать эту информацию для определения приоритетов добавления новых функций, исправления ошибок и оптимизации производительности. Более подробная информация о собираемых данных отражена на https://wiki.kavitareader.com . Для вступления в силу требуется перезагрузка. "
     },
     "manage-tasks-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
@@ -697,7 +673,9 @@
     },
     "manga-reader": {
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "right-to-left-alt": "Справа налево",
+        "left-to-right-alt": "Слево направо"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -814,7 +792,9 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "title": "Активность чтения",
+        "no-data": "Отсутствует прогресс"
     },
     "series-preview-drawer": {
         "tags-label": "{{filter-field-pipe.tags}}",
@@ -882,12 +862,19 @@
         "writers": "{{metadata-fields.writers-title}}"
     },
     "actionable": {
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "download": "Скачать",
+        "add-to": "Добавить к",
+        "read": "Читать",
+        "new-collection": "Новая коллекция",
+        "rename": "Переименовать",
+        "refresh-covers-tooltip": "Востанавить все обложки"
     },
     "validation": {
         "required-field": "Это поле обязательно для заполнения",
         "valid-email": "Это должен быть действительный адрес электронной почты",
-        "password-validation": "Длина пароля должна составлять от 6 до 32 символов"
+        "password-validation": "Длина пароля должна составлять от 6 до 32 символов",
+        "year-validation": "Значение года должно быть настоящий, цифра должна быть больше 1000 и содержать 4 цифры"
     },
     "entity-type": {
         "volume": "том",
@@ -925,6 +912,42 @@
         "issue-hash-num": "Вопрос #",
         "issue-num": "Вопрос",
         "chapter-num": "Глава",
-        "volume-num": "Том"
+        "volume-num": "Том",
+        "book-num-shorthand": "Книга {{num}}",
+        "chapter-nums": "Главы",
+        "volume-nums": "Тома",
+        "book-nums": "Книги",
+        "issue-num-shorthand": "#{{num}}",
+        "volume-num-shorthand": "Том. {{num}}",
+        "chapter-num-shorthand": "Глава {{num}}",
+        "chapter-count": "{{num}} Главы",
+        "no-data": "Нет данных"
+    },
+    "preferences": {
+        "original": "Оригинал",
+        "list": "Список",
+        "pdf-multiple": "По умолчанию",
+        "left-to-right": "Слева направо",
+        "right-to-left": "Справа налево"
+    },
+    "toasts": {
+        "confirm-download-size-ios": "В iOS возникают проблемы с загрузкой файлов размером более 200 МБ, загрузка может завершиться некорректно.",
+        "confirm-library-type-change": "Смена типа библиотеки вызовет новое сканирование с другими правилами синтаксического анализа и может привести к повторному созданию серий, что может привести к потере прогресса и закладок. Перед началом разумно создать резервную копию. Вы уверены, что хотите продолжить?",
+        "chapter-deleted": "Удаление главы",
+        "collection-not-owned": "Вы не являетесь владельцем этой коллекции"
+    },
+    "tabs": {
+        "devices-tab": "Устройства",
+        "smart-filters-tab": "Умный фильтр",
+        "folder-tab": "Папка"
+    },
+    "metadata-setting-field-pipe": {
+        "chapter-release-date": "Дата Релиза (Главы)"
+    },
+    "read-time-pipe": {
+        "less-than-hour": "<1 Часа"
+    },
+    "day-breakdown": {
+        "no-data": "Отсутствует прогресс, отправляйтесь читать =)"
     }
 }

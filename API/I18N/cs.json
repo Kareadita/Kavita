@@ -208,5 +208,6 @@
     "smart-filter-name-required": "Vyžaduje se název chytrého filtru",
     "smart-filter-system-name": "Nelze použít název streamu poskytovaného systémem",
     "sidenav-stream-only-delete-smart-filter": "Z postranní navigace lze odstranit pouze streamy chytrých filtrů",
-    "aliases-have-overlap": "Jeden nebo více aliasů se překrývají s jinými osobami, nelze je aktualizovat"
+    "aliases-have-overlap": "Jeden nebo více aliasů se překrývají s jinými osobami, nelze je aktualizovat",
+    "generated-reading-profile-name": "Generováno z {0}"
 }
