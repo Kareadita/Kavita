@@ -1065,6 +1065,15 @@ public class ScrobblingService : IScrobblingService
                     _logger.LogCritical(ex, "Access Token for AppUserId: {AppUserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
                     evt.SetErrorMessage(AccessTokenErrorMessage);
                     _unitOfWork.ScrobbleRepository.Update(evt);
+
+                    // Ensure series with this error do not get re-processed next sync
+                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+                    {
+                        Comment = AccessTokenErrorMessage,
+                        Details = $"{evt.AppUser.UserName} has an invalid access token (K+ Error)",
+                        LibraryId = evt.LibraryId,
+                        SeriesId = evt.SeriesId,
+                    });
                 }
             }
             catch (Exception ex)

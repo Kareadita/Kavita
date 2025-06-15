@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -97,6 +98,18 @@ public class ScrobblingServiceTests : AbstractDbTest
                         .WithPages(ChapterPages)
                         .Build(),
                     new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 2")
+                .WithChapters([
+                    new ChapterBuilder("4")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("5")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("6")
                         .WithPages(ChapterPages)
                         .Build()])
                 .Build())
@@ -231,21 +244,28 @@ public class ScrobblingServiceTests : AbstractDbTest
         UnitOfWork.UserRepository.Update(user);
         await UnitOfWork.CommitAsync();
 
-        var chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(1);
+        var chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
+
+        var volume = await UnitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        Assert.NotNull(volume);
 
         await _service.ScrobbleReadingUpdate(1, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
-        // Give it some read progress
+        // Give it some (more) read progress
+        await _readerService.MarkChaptersAsRead(user, 1, volume.Chapters);
         await _readerService.MarkChaptersAsRead(user, 1, [chapter]);
         await UnitOfWork.CommitAsync();
 
         await _service.ProcessUpdatesSinceLastSync();
 
         await _kavitaPlusApiService.Received(1).PostScrobbleUpdate(
-            Arg.Is<ScrobbleDto>(data => data.ChapterNumber == (int)chapter.MaxNumber),
+            Arg.Is<ScrobbleDto>(data =>
+                data.ChapterNumber == (int)chapter.MaxNumber &&
+                data.VolumeNumber == (int)volume.MaxNumber
+                ),
             Arg.Any<string>());
     }
 
