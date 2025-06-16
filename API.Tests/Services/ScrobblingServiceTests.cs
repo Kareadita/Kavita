@@ -66,7 +66,7 @@ public class ScrobblingServiceTests : AbstractDbTest
             Substitute.For<IDirectoryService>(),
             Substitute.For<IScrobblingService>()); // Do not use the actual one
 
-        _readerService = new ReaderService(UnitOfWork,
+        _hookedUpReaderService = new ReaderService(UnitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(),
             Substitute.For<IImageService>(),
@@ -283,6 +283,36 @@ public class ScrobblingServiceTests : AbstractDbTest
 
         await _service.ScrobbleReadingUpdate(1, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public async Task ScrobbleReadingUpdate_RemoveWhenNoProgress()
+    {
+        await ResetDb();
+        await SeedData();
+
+        _licenseService.HasActiveLicense().Returns(true);
+
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        await _service.ScrobbleReadingUpdate(1, 1);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await _hookedUpReaderService.MarkSeriesAsUnread(user, 1);
+        await UnitOfWork.CommitAsync();
+
+        // Existing event is deleted
+        events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await _hookedUpReaderService.MarkSeriesAsUnread(user, 1);
+        await UnitOfWork.CommitAsync();
+
+        // No new events are added
+        events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
     }
 

@@ -453,19 +453,27 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
+        var volumeNumber = (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
+        var chapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
+
         // Check if there is an existing not yet processed event, if so update it
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead, true);
         if (existingEvt is {IsProcessed: false})
         {
+            if (volumeNumber == 0 && chapterNumber == 0)
+            {
+                _unitOfWork.ScrobbleRepository.Remove(existingEvt);
+                await _unitOfWork.CommitAsync();
+                _logger.LogDebug("Removed scrobble event for {Series} as there is no reading progress", series.Name);
+            }
+
             // We need to just update Volume/Chapter number
             var prevChapter = $"{existingEvt.ChapterNumber}";
             var prevVol = $"{existingEvt.VolumeNumber}";
 
-            existingEvt.VolumeNumber =
-                (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
-            existingEvt.ChapterNumber =
-                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
+            existingEvt.VolumeNumber = volumeNumber;
+            existingEvt.ChapterNumber = chapterNumber;
 
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync();
@@ -475,9 +483,15 @@ public class ScrobblingService : IScrobblingService
             return;
         }
 
+        if (volumeNumber == 0 && chapterNumber == 0)
+        {
+            // Do not create a new scrobble event if there is no progress
+            return;
+        }
+
         try
         {
-            var evt = new ScrobbleEvent()
+            var evt = new ScrobbleEvent
             {
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
@@ -485,10 +499,8 @@ public class ScrobblingService : IScrobblingService
                 AniListId = GetAniListId(series),
                 MalId = GetMalId(series),
                 AppUserId = userId,
-                VolumeNumber =
-                    (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
-                ChapterNumber =
-                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
+                VolumeNumber = volumeNumber,
+                ChapterNumber = chapterNumber,
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             };
 
