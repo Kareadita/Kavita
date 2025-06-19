@@ -5,6 +5,7 @@ namespace API.DTOs.Scrobbling;
 
 public sealed record ScrobbleEventDto
 {
+    public long Id { get; init; }
     public string SeriesName { get; set; }
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
