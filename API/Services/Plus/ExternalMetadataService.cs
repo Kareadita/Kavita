@@ -1199,32 +1199,39 @@ public class ExternalMetadataService : IExternalMetadataService
 
         #region Rating
 
-        var averageCriticRating = metadata.CriticReviews.Average(r => r.Rating);
-        var averageUserRating = metadata.UserReviews.Average(r => r.Rating);
+        // C# can't make the implicit conversation here
+        float? averageCriticRating = metadata.CriticReviews.Count > 0 ? metadata.CriticReviews.Average(r => r.Rating) : null;
+        float? averageUserRating = metadata.UserReviews.Count > 0 ? metadata.UserReviews.Average(r => r.Rating) : null;
 
         var existingRatings = await _unitOfWork.ChapterRepository.GetExternalChapterRatings(chapter.Id);
         _unitOfWork.ExternalSeriesMetadataRepository.Remove(existingRatings);
 
-        chapter.ExternalRatings =
-        [
-            new ExternalRating
+        chapter.ExternalRatings = [];
+
+        if (averageUserRating != null)
+        {
+            chapter.ExternalRatings.Add(new ExternalRating
             {
                 AverageScore = (int) averageUserRating,
                 Provider = ScrobbleProvider.Cbr,
                 Authority = RatingAuthority.User,
                 ProviderUrl = metadata.IssueUrl,
-            },
-            new ExternalRating
+
+            });
+            chapter.AverageExternalRating = averageUserRating.Value;
+        }
+
+        if (averageCriticRating != null)
+        {
+            chapter.ExternalRatings.Add(new ExternalRating
             {
                 AverageScore = (int) averageCriticRating,
                 Provider = ScrobbleProvider.Cbr,
                 Authority = RatingAuthority.Critic,
                 ProviderUrl = metadata.IssueUrl,
 
-            },
-        ];
-
-        chapter.AverageExternalRating = averageUserRating;
+            });
+        }
 
         madeModification = averageUserRating > 0f || averageCriticRating > 0f || madeModification;
 
