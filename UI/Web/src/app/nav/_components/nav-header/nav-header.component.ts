@@ -134,13 +134,6 @@ export class NavHeaderComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  logout() {
-    this.accountService.logout();
-    this.navService.hideNavBar();
-    this.navService.hideSideNav();
-    this.router.navigateByUrl('/login');
-  }
-
   moveFocus() {
     this.document.getElementById('content')?.focus();
   }
@@ -253,7 +246,6 @@ export class NavHeaderComponent implements OnInit {
 
   openLinkSelectionMenu() {
     const ref = this.modalService.open(NavLinkModalComponent, {fullscreen: 'sm'});
-    ref.componentInstance.logoutFn = this.logout.bind(this);
   }
 
 }

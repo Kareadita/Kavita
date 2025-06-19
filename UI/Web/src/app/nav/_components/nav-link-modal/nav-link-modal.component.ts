@@ -5,6 +5,7 @@ import {Router, RouterLink} from "@angular/router";
 import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {NavService} from "../../../_services/nav.service";
 
 @Component({
   selector: 'app-nav-link-modal',
@@ -25,15 +26,10 @@ export class NavLinkModalComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly modal = inject(NgbActiveModal);
   private readonly router = inject(Router);
-
-  @Input({required: true}) logoutFn!: () => void;
+  protected readonly navService = inject(NavService);
 
   close() {
     this.modal.close();
-  }
-
-  logout() {
-    this.logoutFn();
   }
 
   closeIfOnSettings() {

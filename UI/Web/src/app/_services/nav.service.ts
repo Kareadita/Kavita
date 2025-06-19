@@ -9,6 +9,24 @@ import {AccountService} from "./account.service";
 import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
+import {WikiLink} from "../_models/wiki";
+
+/**
+ * NavItem used to construct the dropdown or NavLinkModal on mobile
+ * Priority construction
+ * @param routerLink A link to a page on the web app, takes priority
+ * @param fragment Optional fragment for routerLink
+ * @param href A link to an external page, must set noopener noreferrer
+ * @param click Callback, lowest priority. Should only be used if routerLink and href or not set
+ */
+interface NavItem {
+  transLocoKey: string;
+  href?: string;
+  fragment?: string;
+  routerLink?: string;
+  click?: () => void;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +38,33 @@ export class NavService {
   private readonly destroyRef = inject(DestroyRef);
 
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
+
+  public navItems: NavItem[] = [
+    {
+      transLocoKey: 'all-filters',
+      routerLink: '/all-filters/',
+    },
+    {
+      transLocoKey: 'browse-genres',
+      routerLink: '/browse/genres',
+    },
+    {
+      transLocoKey: 'browse-tags',
+      routerLink: '/browse/tags',
+    },
+    {
+      transLocoKey: 'announcements',
+      routerLink: '/announcements/',
+    },
+    {
+      transLocoKey: 'help',
+      href: WikiLink.Guides,
+    },
+    {
+      transLocoKey: 'logout',
+      click: () => this.logout(),
+    }
+  ]
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   /**
@@ -125,6 +170,13 @@ export class NavService {
       this.renderer.setStyle(bodyElem, 'overflow', 'auto');
       this.navbarVisibleSource.next(false);
     }, 10);
+  }
+
+  logout() {
+    this.accountService.logout();
+    this.hideNavBar();
+    this.hideSideNav();
+    this.router.navigateByUrl('/login');
   }
 
   /**

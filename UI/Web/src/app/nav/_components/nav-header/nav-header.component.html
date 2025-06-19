@@ -205,12 +205,15 @@
                   <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
                 </button>
                 <div ngbDropdownMenu>
-                  <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
-                  <a ngbDropdownItem routerLink="/browse/genres">{{t('browse-genres')}}</a>
-                  <a ngbDropdownItem routerLink="/browse/tags">{{t('browse-tags')}}</a>
-                  <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
-                  <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
-                  <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>
+                  @for (navItem of navService.navItems; track $index) {
+                    @if (navItem.routerLink) {
+                      <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>
+                    } @else if (navItem.href) {
+                      <a ngbDropdownItem [href]="navItem.href" rel="noopener noreferrer" target="_blank">{{t(navItem.transLocoKey)}}</a>
+                    } @else if (navItem.click) {
+                      <a ngbDropdownItem (click)="navItem.click()">{{t(navItem.transLocoKey)}}</a>
+                    }
+                  }
                 </div>
               </div>
             }
