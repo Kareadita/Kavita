@@ -1068,6 +1068,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var status = DeterminePublicationStatus(series, chapters, externalMetadata);
 
             series.Metadata.PublicationStatus = status;
+            series.Metadata.PublicationStatusLocked = true;
             return true;
         }
         catch (Exception ex)
