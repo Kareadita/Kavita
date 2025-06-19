@@ -9,12 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Cronos" Version="0.10.0" />
+      <PackageReference Include="Cronos" Version="0.11.0" />
       <PackageReference Include="DotNet.Glob" Version="3.1.3" />
       <PackageReference Include="Flurl.Http" Version="4.0.2" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.9.0.115408">
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.11.0.117924">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
