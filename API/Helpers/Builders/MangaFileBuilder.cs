@@ -60,4 +60,17 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
         _mangaFile.Id = Math.Max(id, 0);
         return this;
     }
+
+    /// <summary>
+    /// Generate the Hash on the underlying file
+    /// </summary>
+    /// <remarks>Only applicable to Epubs</remarks>
+    public MangaFileBuilder WithHash()
+    {
+        if (_mangaFile.Format != MangaFormat.Epub) return this;
+
+        _mangaFile.KoreaderHash = KoreaderHelper.HashContents(_mangaFile.FilePath);
+
+        return this;
+    }
 }

@@ -20,7 +20,10 @@
     <form [formGroup]="formGroup">
       <div class="form-group pe-1">
         <label for="filter">{{t('filter-label')}}</label>
-        <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off"/>
+        <div class="input-group">
+          <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off" [placeholder]="t('filter-label')"/>
+          <button class="btn btn-primary" type="button" [disabled]="!selections.hasAnySelected()" (click)="bulkDelete()">{{t('delete-selected-label')}}</button>
+        </div>
       </div>
     </form>
   </div>
@@ -39,6 +42,20 @@
     [limit]="pageInfo.size"
     [sorts]="[{prop: 'createdUtc', dir: 'desc'}]"
   >
+
+    <ngx-datatable-column prop="select" [sortable]="false" [draggable]="false" [resizeable]="false" [width]="50">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        <div class="form-check">
+          <input id="select-all" type="checkbox" class="form-check-input"
+                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="selections.hasSomeSelected()">
+          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all-label')}}</label>
+        </div>
+      </ng-template>
+      <ng-template let-event="row" let-idx="index" ngx-datatable-cell-template>
+        <input id="select-event-{{idx}}" type="checkbox" class="form-check-input"
+               [ngModel]="selections.isSelected(event)" (change)="handleSelection(event, idx)">
+      </ng-template>
+    </ngx-datatable-column>
 
     <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
@@ -101,7 +118,7 @@
       </ng-template>
     </ngx-datatable-column>
 
-    <ngx-datatable-column prop="isPorcessed" [sortable]="true" [draggable]="false" [resizeable]="false">
+    <ngx-datatable-column prop="isProcessed" [sortable]="true" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('is-processed-header')}}
       </ng-template>

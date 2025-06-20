@@ -8,7 +8,7 @@
         <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
         <div class="input-group">
           <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
-          <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-errors')}}</button>
+          <button class="btn btn-primary" type="button" [disabled]="data.length === 0" (click)="clear()">{{t('clear-errors')}}</button>
         </div>
       </div>
     </div>

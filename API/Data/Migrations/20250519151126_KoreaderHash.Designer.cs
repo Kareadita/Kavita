@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250519151126_KoreaderHash")]
+    partial class KoreaderHash
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -607,123 +610,6 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesId");
 
                     b.ToTable("AppUserRating");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserReadingProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("AllowAutomaticWebtoonReaderDetection")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("AutoCloseMenu")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("BackgroundColor")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("#000000");
-
-                    b.Property<string>("BookReaderFontFamily")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("BookReaderFontSize")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("BookReaderImmersiveMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookReaderLayoutMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookReaderLineSpacing")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookReaderMargin")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookReaderReadingDirection")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("BookReaderTapToPaginate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BookReaderWritingStyle")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
-                    b.Property<string>("BookThemeName")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("Dark");
-
-                    b.Property<int>("DisableWidthOverride")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("EmulateBook")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Kind")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("LayoutMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("LibraryIds")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PageSplitOption")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PdfScrollMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PdfSpreadMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PdfTheme")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ReaderMode")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ReadingDirection")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ScalingOption")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SeriesIds")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("ShowScreenHints")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("SwipeToPaginate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("WidthOverride")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("AppUserReadingProfiles");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
@@ -2958,17 +2844,6 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
-            modelBuilder.Entity("API.Entities.AppUserReadingProfile", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ReadingProfiles")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
                 {
                     b.HasOne("API.Entities.AppRole", "Role")
@@ -3606,8 +3481,6 @@ namespace API.Data.Migrations
                     b.Navigation("Ratings");
 
                     b.Navigation("ReadingLists");
-
-                    b.Navigation("ReadingProfiles");
 
                     b.Navigation("ScrobbleHolds");
 

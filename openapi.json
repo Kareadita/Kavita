@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.14",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.15",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.6.14"
+    "version": "0.8.6.15"
   },
   "servers": [
     {
@@ -2987,6 +2987,139 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/users/auth": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress": {
+      "put": {
+        "tags": [
+          "Koreader"
+        ],
+        "summary": "Syncs book progress with Kavita. Will attempt to save the underlying reader position if possible.",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress/{ebookHash}": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "summary": "Gets book progress from Kavita, if not found will return a 400",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ebookHash",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              }
+            }
           }
         }
       }
@@ -21027,6 +21160,54 @@
         },
         "additionalProperties": false
       },
+      "KoreaderBookDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "description": "This is the Koreader hash of the book. It is used to identify the book.",
+            "nullable": true
+          },
+          "device_id": {
+            "type": "string",
+            "description": "A randomly generated id from the koreader device. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "device": {
+            "type": "string",
+            "description": "The Koreader device name. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Percent progress of the book. Only used to maintain the Koreader interface.",
+            "format": "float"
+          },
+          "progress": {
+            "type": "string",
+            "description": "An XPath string read by Koreader to determine the location within the epub.\nEssentially, it is Koreader's equivalent to ProgressDto.BookScrollId.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "This is the interface for receiving and sending updates to Koreader. The only fields\nthat are actually used are the Document and Progress fields."
+      },
+      "KoreaderProgressUpdateDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "description": "This is the Koreader hash of the book. It is used to identify the book.",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "UTC Timestamp to return to KOReader",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "LanguageDto": {
         "required": [
           "isoCode",
@@ -21520,6 +21701,11 @@
           "filePath": {
             "type": "string",
             "description": "Absolute path to the archive file",
+            "nullable": true
+          },
+          "koreaderHash": {
+            "type": "string",
+            "description": "A hash of the document using Koreader's unique hashing algorithm",
             "nullable": true
           },
           "pages": {
@@ -27660,6 +27846,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Koreader",
+      "description": "The endpoint to interface with Koreader's Progress Sync plugin."
     },
     {
       "name": "Manage",

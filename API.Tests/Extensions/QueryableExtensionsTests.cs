@@ -67,7 +67,7 @@ public class QueryableExtensionsTests
 
     [Theory]
     [InlineData(true, 2)]
-    [InlineData(false, 1)]
+    [InlineData(false, 2)]
     public void RestrictAgainstAgeRestriction_Genre_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
         var items = new List<Genre>()
@@ -94,7 +94,7 @@ public class QueryableExtensionsTests
 
     [Theory]
     [InlineData(true, 2)]
-    [InlineData(false, 1)]
+    [InlineData(false, 2)]
     public void RestrictAgainstAgeRestriction_Tag_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
         var items = new List<Tag>()
