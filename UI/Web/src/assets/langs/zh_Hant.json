@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "儲存…",
         "update": "更新",
-        "account-detail-title": "帳戶詳細資訊"
+        "account-detail-title": "帳戶詳細資訊",
+        "invalid-email-warning": "無效的電子郵件會使 Kavita 的某些功能無法運作"
     },
     "user-scrobble-history": {
         "title": "Scrobble歷史",
@@ -38,7 +39,7 @@
         "series-header": "系列",
         "data-header": "資料",
         "is-processed-header": "已處理",
-        "no-data": "沒有資料",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "第{{v}}卷 第{{n}}章",
         "volume-num": "{{num}} 卷",
         "chapter-num": "章節 {{num}}",
@@ -46,7 +47,10 @@
         "not-applicable": "不適用",
         "processed": "處理",
         "not-processed": "未處理",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "你的帳戶設定中已停用Scrobbling。",
+        "generate-scrobble-events": "回填事件",
+        "token-expired": "你的 AniList 權杖已過期！在你於帳戶頁面更新之前，追蹤事件將無法處理。"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "閱讀進度",
@@ -98,67 +102,18 @@
         "prompt-on-download-tooltip": "下載大小超過{{size}}MB時提示",
         "disable-animations-label": "禁用動畫",
         "disable-animations-tooltip": "關閉網站中的動畫，對於電子書閱讀器很有用。",
-        "collapse-series-relationships-label": "摺疊系列",
+        "collapse-series-relationships-label": "摺疊系列關係",
         "collapse-series-relationships-tooltip": "Kavita是否展示沒有關係的系列或前傳",
         "share-series-reviews-label": "分享系列評論",
         "share-series-reviews-tooltip": "是否對其他用戶顯示您對系列的評論",
-        "image-reader-settings-title": "圖片閱讀器",
-        "reading-direction-label": "閱讀方向",
-        "reading-direction-tooltip": "單擊方向或滑動畫面移動到下一頁。",
-        "scaling-option-label": "縮放選項",
-        "scaling-option-tooltip": "如何將影像縮放到螢幕大小。",
-        "page-splitting-label": "頁面分割",
-        "page-splitting-tooltip": "如何分割全寬影像(擊左右影像合併)",
-        "reading-mode-label": "閱讀模式",
-        "layout-mode-label": "佈局模式",
-        "layout-mode-tooltip": "將單個影像或兩個並排影像顯示到螢幕上",
-        "background-color-label": "背景顏色",
-        "auto-close-menu-label": "自動關閉選單",
-        "show-screen-hints-label": "顯示螢幕提示",
-        "emulate-comic-book-label": "模擬漫畫書",
-        "swipe-to-paginate-label": "滑動到分頁",
-        "book-reader-settings-title": "書本閱讀器",
-        "tap-to-paginate-label": "點擊翻頁",
-        "tap-to-paginate-tooltip": "書本閱讀器的畫面兩側是否允許點擊以移到上一頁/下一頁",
-        "immersive-mode-label": "沉浸式模式",
-        "immersive-mode-tooltip": "這將隱藏點擊閱讀器文檔後的選單，然後打開“點擊翻頁”功能",
-        "reading-direction-book-label": "閱讀方向",
-        "reading-direction-book-tooltip": "單擊方向移動到下一頁。 從右到左意味著您單擊屏幕左側以移至下一頁。",
-        "font-family-label": "字體系列",
-        "font-family-tooltip": "要加載的字體系列。 默認將加載書籍的默認字體",
-        "writing-style-label": "文字排版",
-        "writing-style-tooltip": "更改文字方向。橫向從左到右，縱向從上到下。",
-        "layout-mode-book-label": "佈局模式",
-        "layout-mode-book-tooltip": "決定內容在設備螢幕上的呈現方式。“滾動”會按書本內容自然上下滾動，而“單欄”或“雙欄”會根據設備高度調整，一頁顯示一欄或兩欄文字",
-        "color-theme-book-label": "主題顏色",
-        "color-theme-book-tooltip": "閱讀器內容與選單的主題顏色",
-        "font-size-book-label": "字體大小",
-        "line-height-book-label": "單行間距",
-        "line-height-book-tooltip": "書的行距是多少",
-        "margin-book-label": "頁邊距",
-        "margin-book-tooltip": "與螢幕兩側的距離，在行動裝置上會忽略此設定，間距固定為0。",
-        "pdf-reader-settings-title": "PDF 閱讀器",
-        "pdf-scroll-mode-label": "全螢幕模式",
-        "pdf-scroll-mode-tooltip": "當您瀏覽頁面時，可以選擇垂直/水平滾動，或者點擊分頁(無需滾動)",
-        "pdf-spread-mode-label": "跨頁模式",
-        "pdf-spread-mode-tooltip": "頁面應該如何排列。第一頁為單頁或雙頁（奇數跨頁/偶數跨頁）",
-        "pdf-theme-label": "主題",
         "clients-opds-alert": "此伺服器上未啟用 OPDS。 這不會影響 Tachiyomi 用戶。",
         "clients-opds-description": "所有第三方客戶端都將使用 API 密鑰或下面的連接 URL。 這些就像密碼一樣，請保密。",
         "clients-api-key-tooltip": "API 金鑰就像密碼一樣。重置它會使任何現有的客戶端失效。",
         "clients-opds-url-tooltip": "查看支持的 OPDS 客户端列表： ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "background-color-tooltip": "圖片閱讀器的背景顏色",
-        "auto-close-menu-tooltip": "菜單是否應自動關閉",
-        "show-screen-hints-tooltip": "顯示一個覆蓋層，以幫助理解翻頁區域和方向",
-        "swipe-to-paginate-tooltip": "在屏幕上滑動是否應移到上一頁/下一頁",
-        "font-size-book-tooltip": "書中字體的縮放比例",
         "clients-opds-url-label": "OPDS 網址",
-        "clients-api-key-label": "API 密鑰",
-        "reading-mode-tooltip": "將閱讀器更改為縱向翻頁、橫向翻頁，或設置為無限滾動",
-        "emulate-comic-book-tooltip": "套用陰影以模擬書籍閱讀效果",
-        "pdf-theme-tooltip": "閱讀器的顏色主題"
+        "clients-api-key-label": "API 密鑰"
     },
     "user-holds": {
         "title": "記錄保留",
@@ -439,20 +394,20 @@
         "years-ago": "{{value}}年前"
     },
     "relationship-pipe": {
-        "adaptation": "適應",
-        "alternative-setting": "替代設定",
-        "alternative-version": "替代版本",
-        "character": "角色",
+        "adaptation": "改編",
+        "alternative-setting": "同世界觀",
+        "alternative-version": "IF線",
+        "character": "客串角色",
         "contains": "包含",
         "doujinshi": "同人",
         "other": "其他",
         "prequel": "前傳",
         "sequel": "續集",
         "side-story": "番外",
-        "spin-off": "拆分",
-        "parent": "家長",
-        "edition": "編輯",
-        "annual": "年度"
+        "spin-off": "衍伸作",
+        "parent": "主系列",
+        "edition": "特別版",
+        "annual": "年度特刊"
     },
     "publication-status-pipe": {
         "ongoing": "連載中",
@@ -773,8 +728,7 @@
         "all-series": "所有系列",
         "more": "更多",
         "donate-tooltip": "您可以通過訂閱 Kavita+ 來移除這個",
-        "donate": "捐款",
-        "browse-authors": "瀏覽作者"
+        "donate": "捐款"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1428,7 +1382,6 @@
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "series-progress": "系列進度：{{percentage}}",
         "back": "返回",
-        "save-globally": "全域儲存",
         "left-to-right-alt": "從左到右",
         "reading-direction-tooltip": "閱讀方向： ",
         "reading-mode-tooltip": "閱讀模式",
@@ -1449,7 +1402,6 @@
         "next-page-tooltip": "下一頁",
         "unbookmark-page-tooltip": "移除書籤",
         "bookmarks-title": "書籤",
-        "user-preferences-updated": "使用者偏好更新",
         "height": "高度",
         "shortcuts-menu-alt": "鍵盤快捷鍵視窗",
         "incognito-title": "無痕模式：",
@@ -2388,9 +2340,12 @@
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "cover-image-description-extra": "或者，您可以從 CoversDB 下載封面（如果有）。"
     },
-    "browse-authors": {
-        "title": "瀏覽作者／作家",
-        "author-count": "{{num}} 人",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    "reviews": {
+        "user-reviews-local": "本地評論",
+        "user-reviews-plus": "外部評論"
+    },
+    "review-modal": {
+        "title": "編輯評論",
+        "review-label": "評論"
     }
 }

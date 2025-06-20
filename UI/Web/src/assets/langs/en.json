@@ -42,6 +42,8 @@
         "series-header": "Series",
         "data-header": "Data",
         "is-processed-header": "Is Processed",
+        "select-all-label": "Select all",
+        "delete-selected-label": "Delete selected",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
         "volume-num": "Volume {{num}}",

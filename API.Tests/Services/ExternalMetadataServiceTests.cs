@@ -2935,6 +2935,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
        metadataSettings.EnableTags = false;
        metadataSettings.EnablePublicationStatus = false;
        metadataSettings.EnableStartDate = false;
+       metadataSettings.FieldMappings = [];
+       metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>();
        Context.MetadataSettings.Update(metadataSettings);
 
        await Context.SaveChangesAsync();

@@ -56,6 +56,12 @@ public static class RestrictByAgeExtensions
             sm.Metadata.AgeRating <= restriction.AgeRating && sm.Metadata.AgeRating > AgeRating.Unknown));
     }
 
+    /// <summary>
+    /// Returns all Genres where any of the linked Series/Chapters are less than or equal to restriction age rating
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="restriction"></param>
+    /// <returns></returns>
     public static IQueryable<Genre> RestrictAgainstAgeRestriction(this IQueryable<Genre> queryable, AgeRestriction restriction)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;

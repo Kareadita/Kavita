@@ -72,7 +72,8 @@
         "your-review": "Dies ist deine Rezension",
         "external-review": "Externe Rezension",
         "local-review": "Lokale Rezension",
-        "rating-percentage": "Bewertung {{r}}%"
+        "rating-percentage": "Bewertung {{r}}%",
+        "critic": "Kritiker"
     },
     "want-to-read": {
         "title": "Favoriten",
@@ -106,55 +107,6 @@
         "collapse-series-relationships-tooltip": "Sollte Kavita Serien zeigen, die keine Verbindungen haben, oder ist das Elternteil/Prequel",
         "share-series-reviews-label": "Bewertungen von Serien teilen",
         "share-series-reviews-tooltip": "Soll Kavita deine Rezensionen zu Serien für andere Nutzer aufnehmen",
-        "image-reader-settings-title": "Bildleser",
-        "reading-direction-label": "Leserichtung",
-        "reading-direction-tooltip": "Richtung, in die geklicken werden müssen, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass man auf die linke Seite des Bildschirms klickt, um zur nächsten Seite zu gelangen.",
-        "scaling-option-label": "Skalierungsoptionen",
-        "scaling-option-tooltip": "So wird das Bild auf den Bildschirm skaliert.",
-        "page-splitting-label": "Seitenaufteilung",
-        "page-splitting-tooltip": "Wie wird ein Bild in voller Breite geteilt (d.h. linkes und rechtes Bild werden kombiniert)",
-        "reading-mode-label": "Lesemodus",
-        "reading-mode-tooltip": "Ändern Sie den Reader so, dass er vertikal oder horizontal paginiert oder einen unendlichen Bildlauf hat",
-        "layout-mode-label": "Layoutmodus",
-        "layout-mode-tooltip": "Rendert ein einzelnes Bild auf dem Bildschirm oder zwei nebeneinander liegende Bilder",
-        "background-color-label": "Hintergrundfarbe",
-        "background-color-tooltip": "Hintergrundfarbe des Bildlesers",
-        "auto-close-menu-label": "Menü Automatisch schließen",
-        "auto-close-menu-tooltip": "Soll sich das Menü automatisch schließen",
-        "show-screen-hints-label": "Bildschirmtipps anzeigen",
-        "show-screen-hints-tooltip": "Einblenden eines Overlays zum besseren Verständnis des Seitenbereichs und der Seitenausrichtung",
-        "emulate-comic-book-label": "Comicbuch nachbilden",
-        "emulate-comic-book-tooltip": "Wendet einen Schatteneffekt an, um das Lesen aus einem Buch zu simulieren",
-        "swipe-to-paginate-label": "Zum Umblättern wischen",
-        "swipe-to-paginate-tooltip": "Soll die nächste oder vorherige Seite durch Wischen über den Bildschirm aufgerufen werden",
-        "book-reader-settings-title": "Buch-Reader",
-        "tap-to-paginate-label": "Tippen zum Umblättern",
-        "tap-to-paginate-tooltip": "Sollten die Seiten des Buchlesebildschirms ein Antippen erlauben, um zur vorherigen/nächsten Seite zu gelangen",
-        "immersive-mode-label": "Immersiver Modus",
-        "immersive-mode-tooltip": "Das Menü wird nach einem Klick auf das Reader-Dokument ausgeblendet und das Tippen zum Umblättern eingeschaltet",
-        "reading-direction-book-label": "Leserichtung",
-        "reading-direction-book-tooltip": "Richtung, in die zu klicken ist, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass man auf die linke Seite des Bildschirms klickt, um zur nächsten Seite zu gelangen.",
-        "font-family-label": "Schriftart",
-        "font-family-tooltip": "Schriftart, die geladen werden soll. Standard lädt die Standardschriftart des Buches",
-        "writing-style-label": "Schreibstil",
-        "writing-style-tooltip": "Ändert die Richtung des Textes. Horizontal ist von links nach rechts, vertikal von oben nach unten.",
-        "layout-mode-book-label": "Layoutmodus",
-        "layout-mode-book-tooltip": "Wie soll der Inhalt aufgebaut sein. Scrollen ist so, wie das Buch es verpackt. 1- oder 2-spaltig entspricht der Höhe des Geräts und fasst 1 oder 2 Spalten Text pro Seite",
-        "color-theme-book-label": "Farbe Motiv",
-        "color-theme-book-tooltip": "Welches Farb Motiv soll für den Inhalt und das Menü des Buchlesers verwendet werden",
-        "font-size-book-label": "Schriftgröße",
-        "font-size-book-tooltip": "Prozentsatz der Skalierung, der auf die Schrift im Buch anzuwenden ist",
-        "line-height-book-label": "Zeilenabstände",
-        "line-height-book-tooltip": "Wie viel Abstand zwischen den Zeilen im Buch",
-        "margin-book-label": "Seitenrand",
-        "margin-book-tooltip": "Wie viel Abstand auf jeder Seite des Bildschirms. Auf mobilen Geräten wird dieser Wert unabhängig von dieser Einstellung auf 0 gesetzt.",
-        "pdf-reader-settings-title": "PDF Viewer",
-        "pdf-scroll-mode-label": "Scroll Modus",
-        "pdf-scroll-mode-tooltip": "So Scrollen sie durch Seiten. Vertikal/Horizontal und Tippen zum Paginieren (kein Scrollen)",
-        "pdf-spread-mode-label": "Ausbreitungs Modus",
-        "pdf-spread-mode-tooltip": "Wie sollten die Seiten angeordnet werden. Einzeln oder Doppelt (Gerade/Ungrade)",
-        "pdf-theme-label": "Thema",
-        "pdf-theme-tooltip": "Farbschema des Lesers",
         "clients-opds-alert": "OPDS ist auf diesem Server nicht aktiviert. Tachiyomi-Benutzer sind davon nicht betroffen.",
         "clients-opds-description": "Alle Clients von Drittanbietern verwenden entweder den API-Schlüssel oder die unten stehende Verbindungs-URL. Diese sind wie Passwörter, vertraulich zu behandeln.",
         "clients-api-key-tooltip": "Der API-Schlüssel ist wie ein Passwort. Wenn Sie ihn zurücksetzen, werden alle bestehenden Kunden ungültig.",
@@ -167,9 +119,7 @@
         "want-to-read-sync-label": "Willst du lesen synchronisieren",
         "kavitaplus-settings-title": "Kavita+",
         "want-to-read-sync-tooltip": "Erlaube Kavita, basierend auf AniList und MAL-Serien Elemente zu deiner „Want to Read“-Liste in „Pending readlist“ hinzuzufügen",
-        "anilist-scrobbling-tooltip": "Erlaube Kavita, ihren Lesefortschritt und ihre Bewertungen zu AniList zu scrobbeln (Einweg-Synchronisierung)",
-        "allow-auto-webtoon-reader-tooltip": "Wechsle in den Webtoon-Lesemodus, wenn die Seiten wie ein Webtoon aussehen. Es kann zu einer falschen Positivrate kommen.",
-        "allow-auto-webtoon-reader-label": "Automatischer Webtoon-Lesemodus"
+        "anilist-scrobbling-tooltip": "Erlaube Kavita, ihren Lesefortschritt und ihre Bewertungen zu AniList zu scrobbeln (Einweg-Synchronisierung)"
     },
     "user-holds": {
         "title": "Scrobble pausiert",
@@ -679,7 +629,10 @@
         "incognito-mode-label": "Unsichtbarkeits Modus",
         "next": "Nächste",
         "previous": "Vorherige",
-        "go-to-page-prompt": "Es gibt {{totalPages}} Seiten. Auf welche Seite möchten sie gehen?"
+        "go-to-page-prompt": "Es gibt {{totalPages}} Seiten. Auf welche Seite möchten sie gehen?",
+        "go-to-first-page": "Zur ersten Seite gehen",
+        "go-to-section": "Zum Abschnitt gehen",
+        "go-to-section-prompt": "Es gibt {{totalSections}} Abschnitte. Zu welchem Abschnitt möchten Sie springen?"
     },
     "personal-table-of-contents": {
         "no-data": "Noch nichts mit Lesezeichen versehen",
@@ -727,7 +680,7 @@
     "series-detail": {
         "page-settings-title": "Seiteneinstellungen",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-option-card": "Karte",
         "layout-mode-option-list": "Liste",
         "continue-from": "Fortsetzen: {{title}}",
@@ -849,7 +802,6 @@
         "back": "Zurück",
         "more": "Mehr",
         "customize": "{{settings.customize}}",
-        "browse-authors": "Autoren durchsuchen",
         "edit": "{{common.edit}}",
         "cancel-edit": "Schließen Neu ordnen"
     },
@@ -914,10 +866,8 @@
     },
     "reader-settings": {
         "general-settings-title": "Allgemeine Einstellungen",
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "Auf Standardwerte zurücksetzen",
         "reader-settings-title": "Reader-Einstellungen",
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
@@ -946,7 +896,15 @@
         "theme-dark": "Dunkel",
         "theme-black": "Schwarz",
         "theme-white": "Weiß",
-        "theme-paper": "Papier"
+        "theme-paper": "Papier",
+        "line-spacing-max-label": "2.5x",
+        "create-new-tooltip": "Erstellen Sie aus Ihrem aktuellen impliziten Profil ein neues verwaltbares Profil",
+        "update-parent": "Unter {{name}} speichern",
+        "loading": "laden",
+        "create-new": "Neues Profil von impliziert",
+        "reading-profile-updated": "Leseprofil aktualisiert",
+        "reading-profile-promoted": "Leseprofil beworben",
+        "line-spacing-min-label": "1x"
     },
     "table-of-contents": {
         "no-data": "Dieses Buch hat kein Inhaltsverzeichnis in den Metadaten oder eine toc-Datei"
@@ -1387,7 +1345,8 @@
         "admin-matched-metadata": "Passende Metadaten",
         "admin-manage-tokens": "Verwalte Benutzertoken",
         "scrobble-holds": "Scrobble-Holds",
-        "admin-metadata": "Verwalte Metadaten"
+        "admin-metadata": "Verwalte Metadaten",
+        "reading-profiles": "Leseprofile"
     },
     "collection-detail": {
         "no-data": "Es sind keine Artikel vorhanden. Versuchen Sie, eine Serie hinzuzufügen.",
@@ -1511,7 +1470,8 @@
         "logout": "Abmelden",
         "all-filters": "Intelligente Filter",
         "nav-link-header": "Navigation Optionen",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Entspricht einem Alias"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1622,7 +1582,6 @@
     },
     "manga-reader": {
         "back": "Zurück",
-        "save-globally": "Global speichern",
         "incognito-alt": "Der Inkognito-Modus ist eingeschaltet. Zum Ausschalten schalten Sie um.",
         "incognito-title": "Inkognito-Modus:",
         "shortcuts-menu-alt": "Tastaturkurzbefehle Modal",
@@ -1644,9 +1603,7 @@
         "height": "Höhe",
         "width": "Breite",
         "width-override-label": "Breite Override",
-        "off": "Aus",
         "original": "Original",
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe aktiviert",
         "enable-comic-book-label": "Comicbuch nachahmen",
         "brightness-label": "Helligkeit",
@@ -1657,9 +1614,9 @@
         "layout-mode-switched": "Layoutmodus auf Einfach umgestellt, da nicht genügend Platz zum Rendern des Doppellayouts vorhanden ist",
         "no-next-chapter": "Kein nächstes Kapitel",
         "no-prev-chapter": "Kein vorheriges Kapitel",
-        "user-preferences-updated": "Benutzereinstellungen aktualisiert",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
-        "series-progress": "Fortschritt der Serie: {{percentage}}"
+        "series-progress": "Fortschritt der Serie: {{percentage}}",
+        "reading-profile-updated": "Leseprofil aktualisiert",
+        "reading-profile-promoted": "Leseprofil beworben"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1853,8 +1810,6 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -2249,7 +2204,11 @@
         "bulk-delete-libraries": "Möchten Sie wirklich {{count}} Bibliotheken löschen?",
         "match-success": "Reihenfolge korrekt zugeordnet",
         "webtoon-override": "Wechsel in den Webtoon-Modus, da die Bilder einen Webtoon darstellen.",
-        "scrobble-gen-init": "Hat einen Auftrag in die Warteschlange gestellt, um Scrobble-Ereignisse aus dem bisherigen Leseverlauf und Bewertungen zu generieren und diese mit verbundenen Diensten zu synchronisieren."
+        "scrobble-gen-init": "Hat einen Auftrag in die Warteschlange gestellt, um Scrobble-Ereignisse aus dem bisherigen Leseverlauf und Bewertungen zu generieren und diese mit verbundenen Diensten zu synchronisieren.",
+        "confirm-delete-multiple-volumes": "Sind sie sicher, dass Sie {{count}} Bände löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
+        "series-bound-to-reading-profile": "Serie gebunden an Leseprofil {{name}}",
+        "library-bound-to-reading-profile": "Bibliothek, verknüpft mit Leseprofil {{name}}",
+        "series-added-want-to-read": "Serie aus der Liste „Möchte lesen“ hinzugefügt"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2324,7 +2283,14 @@
         "match-tooltip": "Spielserie mit Kavita+ manuell abgleichen",
         "reorder": "Nachbestellung",
         "rename": "Umbenennen",
-        "rename-tooltip": "Smart Filter umbenennen"
+        "rename-tooltip": "Smart Filter umbenennen",
+        "reading-profiles": "Leseprofile",
+        "set-reading-profile": "Leseprofil festlegen",
+        "set-reading-profile-tooltip": "Ein Leseprofil mit dieser Bibliothek verknüpfen",
+        "clear-reading-profile": "Leseprofil löschen",
+        "clear-reading-profile-tooltip": "Leseprofil für diese Bibliothek löschen",
+        "cleared-profile": "Lese-Profil gelöscht",
+        "merge": "Zusammenführen"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",
@@ -2450,7 +2416,8 @@
         "confirm": "Bestätigen",
         "info": "Info",
         "ok": "Ok",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "prompt": "Frage"
     },
     "person-detail": {
         "all-roles": "Funktionen",
@@ -2458,12 +2425,9 @@
         "individual-role-title": "Als eine {{role}}",
         "browse-person-title": "Alle Werke von {{name}}",
         "browse-person-by-role-title": "Alle Werke von {{name}} als {{role}}",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
-    },
-    "browse-authors": {
-        "author-count": "{{num}} Personen",
-        "title": "Autoren & Schriftsteller durchsuchen",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "aka-title": "Auch bekannt als ",
+        "no-info": "Keine Informationen zu dieser Person"
     },
     "edit-person-modal": {
         "title": "Details zu {{personName}}",
@@ -2486,7 +2450,11 @@
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "aliases-tooltip": "Wenn eine Serie mit einem Alias einer Person versehen ist, wird diese Person zugewiesen, anstatt eine neue Person anzulegen. Wenn Sie einen Alias löschen, müssen Sie die Serie erneut scannen, damit die Änderung übernommen wird.",
+        "aliases-tab": "Aliases",
+        "aliases-label": "Aliase bearbeiten",
+        "alias-overlap": "Dieser Alias verweist bereits auf eine andere Person oder ist der Name dieser Person. Bitte erwäge, sie zusammenzuführen."
     },
     "changelog-update-item": {
         "download": "Download",
@@ -2511,7 +2479,7 @@
     },
     "match-series-modal": {
         "description": "Wähle einen Treffer aus, um die Metadaten von Kavita+ neu zu verknüpfen und Scrobble-Ereignisse neu zu generieren. „Nicht übereinstimmend“ kann verwendet werden, um Kavita daran zu hindern, Metadaten abzugleichen und zu scrobbeln.",
-        "query-tooltip": "Gib den Namen der Serie ein, AniList/MyAnimeList-URL. URLs werden direkt aufgerufen.",
+        "query-tooltip": "Geben Sie den Seriennamen und die URL von AniList/MyAnimeList/ComicBookRoundup ein. Die URLs werden direkt nachgeschlagen.",
         "no-results": "Es wurde keine Übereinstimmung gefunden. Versuche, die URL eines unterstützten Anbieters hinzuzufügen und versuche es erneut.",
         "query-label": "Abfrage",
         "dont-match-label": "Keine Übereinstimmung",
@@ -2610,7 +2578,16 @@
         "enable-cover-image-tooltip": "Erlaubt Kavita, das Titelbild für die Serie zu schreiben",
         "enable-cover-image-label": "Cover Bild",
         "overrides-label": "Überschreibungen",
-        "overrides-description": "Erlaube Kavita, gesperrte Felder zu überschreiben."
+        "overrides-description": "Erlaube Kavita, gesperrte Felder zu überschreiben.",
+        "enable-chapter-release-date-tooltip": "Veröffentlichungsdatum des Kapitels/der Ausgabe darf angegeben werden",
+        "enable-chapter-publisher-label": "Publisher",
+        "enable-chapter-release-date-label": "Veröffentlichungsdatum",
+        "enable-chapter-title-label": "Titel",
+        "enable-chapter-title-tooltip": "Titel des Kapitels/der Ausgabe darf geschrieben werden",
+        "chapter-header": "Kapitel Felder",
+        "enable-chapter-publisher-tooltip": "Zulassen, dass der Herausgeber des Kapitels/der Ausgabe geschrieben wird",
+        "enable-chapter-cover-label": "Kapitel-Cover",
+        "enable-chapter-cover-tooltip": "Cover von Kapitel/Ausgabe festlegen"
     },
     "metadata-setting-field-pipe": {
         "covers": "Covers",
@@ -2621,7 +2598,12 @@
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "localized-name": "{{edit-series-modal.localized-name-label}}"
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "chapter-release-date": "Veröffentlichungsdatum (Kapitel)",
+        "chapter-summary": "Zusammenfassung (Kapitel)",
+        "chapter-covers": "Covers (Kapitel)",
+        "chapter-title": "Titel (Kapitel)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitel)"
     },
     "role-localized-pipe": {
         "bookmark": "Lesezeichen",
@@ -2639,5 +2621,90 @@
         "critical": "Kritisch",
         "information": "Information",
         "warning": "Warnung"
+    },
+    "reviews": {
+        "user-reviews-local": "Lokale Bewertungen",
+        "user-reviews-plus": "Externe Rezension"
+    },
+    "review-modal": {
+        "review-label": "Rezension",
+        "title": "Rezension Bearbeiten",
+        "min-length": "Die Rezension muss mindestens {{count}} Zeichen lang sein"
+    },
+    "manage-reading-profiles": {
+        "description": "Nicht alle Ihre Serien können auf dieselbe Weise gelesen werden. Richten Sie daher für jede Bibliothek oder Serie separate Leseprofile ein, damit Sie so nahtlos wie möglich zu Ihrer Serie zurückkehren können.",
+        "extra-tip": "Weisen Sie Leseprofile über das Aktionsmenü in Serien und Bibliotheken oder in großen Mengen zu. Wenn Sie die Einstellungen in einem Reader ändern, wird ein verstecktes Profil erstellt, das Ihre Auswahl für diese Serie speichert (nicht für PDFs). Dieses Profil wird entfernt, wenn Sie der Serie eines Ihrer eigenen Leseprofile zuweisen oder aktualisieren.",
+        "tap-to-paginate-tooltip": "Sollten die Seiten des E-Book-Reader-Bildschirms durch Antippen umblätterbar sein vorherige/nächste Seite",
+        "show-screen-hints-tooltip": "Zeige eine Überlagerung an, um den Bereich und die Richtung der Paginierung besser zu verstehen",
+        "font-size-book-tooltip": "Prozentuale Skalierung für die Schriftart im Buch",
+        "pdf-reader-settings-title": "PDF Reader",
+        "line-height-book-label": "Zeilenabstand",
+        "layout-mode-book-tooltip": "Wie Inhalte angeordnet werden sollen. Der Bildlauf entspricht dem Aufbau des Buches. 1 oder 2 Spalten passen zur Höhe des Geräts und es passen 1 oder 2 Spalten Text pro Seite",
+        "profiles-title": "Ihre Leseprofil",
+        "default-profile": "Standard",
+        "add-tooltip": "Ihr neues Profil wird nach der Änderung gespeichert",
+        "make-default": "Als Standard festlegen",
+        "no-selected": "Kein Profil ausgewählt",
+        "confirm": "Möchten Sie das Leseprofil {{name}} wirklich löschen?",
+        "selection-tip": "Wählen Sie ein Profil aus der Liste aus oder erstellen Sie oben rechts ein neues Profil",
+        "image-reader-settings-title": "Bild Reader",
+        "reading-direction-label": "Leserichtung",
+        "reading-direction-tooltip": "Klicken Sie hier, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass Sie auf die linke Seite des Bildschirms klicken, um zur nächsten Seite zu gelangen.",
+        "scaling-option-label": "Skalierungsoptionen",
+        "scaling-option-tooltip": "So skalieren Sie das Bild an Ihren Bildschirm.",
+        "page-splitting-label": "Seitenaufteilung",
+        "page-splitting-tooltip": "So teilen Sie ein Bild in voller Breite (d. h. beide Bilder, links und rechts, werden kombiniert)",
+        "reading-mode-label": "Lesemodus",
+        "reading-mode-tooltip": "Ändern Sie den Reader, um vertikal, horizontal oder unbegrenzt zu scrollen",
+        "layout-mode-label": "Layout-Modus",
+        "layout-mode-tooltip": "Ein einzelnes Bild auf dem Bildschirm oder zwei Bilder nebeneinander rendern",
+        "background-color-label": "Hintergrundfarbe",
+        "background-color-tooltip": "Hintergrundfarbe des Bildlesers",
+        "auto-close-menu-label": "Menü automatisch schließen",
+        "auto-close-menu-tooltip": "Soll das Menü automatisch schließen",
+        "show-screen-hints-label": "Bildschirmhinweise anzeigen",
+        "emulate-comic-book-label": "Comicbuch nachahmen",
+        "emulate-comic-book-tooltip": "Wendet einen Schatteneffekt an, um das Lesen aus einem Buch zu imitieren",
+        "swipe-to-paginate-label": "Zum Blättern wischen",
+        "swipe-to-paginate-tooltip": "Soll durch Wischen auf dem Bildschirm die nächste oder vorherige Seite aufgerufen werden",
+        "allow-auto-webtoon-reader-label": "Automatischer Webtoon-Lesemodus",
+        "allow-auto-webtoon-reader-tooltip": "Wechseln Sie in den Webtoon-Reader-Modus, wenn die Seiten wie ein Webtoon aussehen. Es können einige Fehlalarme auftreten.",
+        "width-override-tooltip": "Breite von Bildern im Reader überschreiben",
+        "book-reader-settings-title": "Buch Reader",
+        "tap-to-paginate-label": "Zum Blättern antippen",
+        "immersive-mode-label": "Immersiver Modus",
+        "reading-direction-book-label": "Leserichtung",
+        "reading-direction-book-tooltip": "Klicken Sie hier, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass Sie auf die linke Seite des Bildschirms klicken, um zur nächsten Seite zu gelangen.",
+        "immersive-mode-tooltip": "Dadurch wird das Menü hinter einem Klick auf das Lesedokument ausgeblendet und die Seitenumblätterung per Fingertipp aktiviert.",
+        "font-family-label": "Schriftfamilie",
+        "font-family-tooltip": "Zu ladende Schriftfamilie. Standardmäßig wird die Standardschriftart des Buches geladen",
+        "writing-style-label": "Schreibstil",
+        "writing-style-tooltip": "Ändert die Ausrichtung des Textes. Horizontal bedeutet von links nach rechts, vertikal bedeutet von oben nach unten.",
+        "layout-mode-book-label": "Layout-Modus",
+        "color-theme-book-label": "Farbschema",
+        "color-theme-book-tooltip": "Welches Farbschema soll für den Inhalt und das Menü des Buchlesers verwendet werden",
+        "font-size-book-label": "Schriftgröße",
+        "line-height-book-tooltip": "Wie viel Abstand zwischen den Zeilen des Buches",
+        "margin-book-label": "Rand",
+        "margin-book-tooltip": "Wie viel Abstand soll auf jeder Seite des Bildschirms sein? Diese Einstellung wird auf Mobilgeräten unabhängig von dieser Einstellung auf 0 gesetzt.",
+        "pdf-scroll-mode-label": "Scroll-Modus",
+        "pdf-scroll-mode-tooltip": "Wie Sie durch die Seiten scrollen. Vertikal/horizontal und durch Antippen blättern (kein Scrollen)",
+        "pdf-spread-mode-label": "Verteilungsmodus",
+        "pdf-spread-mode-tooltip": "Wie Seiten angelegt werden sollen. Einfach oder doppelt (ungerade/gerade)",
+        "pdf-theme-label": "Theme",
+        "pdf-theme-tooltip": "Farbschema des Readers",
+        "reading-profile-series-settings-title": "Serie",
+        "reading-profile-library-settings-title": "Bibliothek"
+    },
+    "bulk-set-reading-profile-modal": {
+        "no-data": "Es wurden noch keine Sammlungen erstellt",
+        "bound": "Gebunden",
+        "title": "Leseprofil festlegen"
+    },
+    "merge-person-modal": {
+        "alias-title": "Neue Aliase",
+        "known-for-title": "Bekannt für",
+        "src": "Person zusammenführen",
+        "merge-warning": "Wenn Sie fortfahren, wird die ausgewählte Person entfernt. Der Name der ausgewählten Person wird als Alias hinzugefügt und alle ihre Rollen werden übertragen."
     }
 }

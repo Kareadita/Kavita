@@ -104,6 +104,10 @@ export class ScrobblingService {
 
   triggerScrobbleEventGeneration() {
     return this.httpClient.post(this.baseUrl + 'scrobbling/generate-scrobble-events', TextResonse);
-
   }
+
+  bulkRemoveEvents(eventIds: number[]) {
+    return this.httpClient.post(this.baseUrl + "scrobbling/bulk-remove-events", eventIds)
+  }
+
 }

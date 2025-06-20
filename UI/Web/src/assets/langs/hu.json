@@ -25,7 +25,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Mentés…",
         "update": "Frissítés",
-        "account-detail-title": "Fiók Részletei"
+        "account-detail-title": "Fiók Részletei",
+        "invalid-email-warning": "Érvénytelen email esetén a Kavita néhány funkciója zárolva lesz"
     },
     "user-scrobble-history": {
         "title": "Feldolgozás történet",
@@ -44,7 +45,10 @@
         "not-applicable": "Nem alkalmazható",
         "processed": "Feldolgozva",
         "not-processed": "Nincs feldolgozva",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "A scrobbling ki van kapcsolva a Fiók beállításaidban.",
+        "description": "Itt található minden a fiókodhoz tartozó srobble esemény. Ahhoz, hogy az események létrejöjjenek, be kell állítanod egy scrobble szolgáltatót. A feldolgozott események egy hónap után törlődnek. Ha vannak fel nem dolgozott események, azok adatait valószínűleg nem sikerült egyeztetni a feltöltés során. Ilyen esetben vedd fel a kapcsolatot az adminoddal, hogy javításra kerüljenek.",
+        "token-expired": "Az AniList tokened lejárt! A scrobble események nem kerülnek feldolgozásra, amíg a Fiókok oldalon nem frissíted."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Olvasás folyamata",
@@ -66,7 +70,8 @@
         "your-review": "A te áttekintésed",
         "external-review": "Külső áttekintés",
         "local-review": "Helyi áttekintés",
-        "rating-percentage": "Értékelés {{r}}%"
+        "rating-percentage": "Értékelés {{r}}%",
+        "critic": "kritikus"
     },
     "want-to-read": {
         "title": "Olvasandó",
@@ -82,7 +87,6 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
-        "background-color-label": "Háttérszín",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "locale-tooltip": "Kavita által használt nyelv",
@@ -91,7 +95,19 @@
         "disable-animations-tooltip": "Oldalon lévő animációk kikapcsolása. Hasznos az e-ink olvasóknak.",
         "prompt-on-download-label": "Letöltés esetében kérdezzen",
         "prompt-on-download-tooltip": "Kérdezzen, amikor a letöltés mérete túlhaladja a {{size}}MB-ot",
-        "collapse-series-relationships-label": "Sorozat Kapcsolatok Összezárása"
+        "collapse-series-relationships-label": "Sorozat Kapcsolatok Összezárása",
+        "title": "Felhasználó irányítópultja",
+        "page-layout-mode-label": "Oldal elrendezési mód",
+        "global-settings-title": "Globális beállítások",
+        "blur-unread-summaries-tooltip": "Elmossa a kötetek vagy fejezetek összefoglaló szövegét, ha még nem olvastad (a spoilerek elkerülése érdekében)",
+        "kavitaplus-settings-title": "Kavita+",
+        "page-layout-mode-tooltip": "Elemek mutatása kártyákként vagy listanézetben a Sorozat részletei oldalon.",
+        "anilist-scrobbling-tooltip": "Scrobble (egyirányú szinkronizáció) engedélyezése a Kavitából az AniList felé (olvasási előrehaladottság és kritikák)",
+        "pref-description": "Ezek olyan globális beállítások, melyek a fiókodhoz vannak rendelve.",
+        "success-toast": "Felhasználó beállításai frissítve",
+        "locale-label": "Nyelv",
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "want-to-read-sync-label": "Olvasási várólista szinkronizálás"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}"
@@ -721,5 +737,18 @@
     },
     "actionable": {
         "clear": "{{common.clear}}"
+    },
+    "reviews": {
+        "user-reviews-local": "Helyi kritikák",
+        "user-reviews-plus": "Külsős kritikák"
+    },
+    "review-modal": {
+        "title": "Kritika szerkesztése",
+        "review-label": "Kritika",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "min-length": "A kritika minimum {{count}} karakter hosszúságú kell legyen",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}"
     }
 }

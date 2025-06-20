@@ -68,4 +68,14 @@ public class ScrobbleEvent : IEntityDate
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+    /// <summary>
+    /// Sets the ErrorDetail and marks the event as <see cref="IsErrored"/>
+    /// </summary>
+    /// <param name="errorMessage"></param>
+    public void SetErrorMessage(string errorMessage)
+    {
+        ErrorDetails = errorMessage;
+        IsErrored = true;
+    }
 }
