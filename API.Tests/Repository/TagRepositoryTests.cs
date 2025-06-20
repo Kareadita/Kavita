@@ -49,6 +49,7 @@ public class TagRepositoryTests : AbstractDbTest
     protected override async Task ResetDb()
     {
         Context.Tag.RemoveRange(Context.Tag);
+        Context.Library.RemoveRange(Context.Library);
         await Context.SaveChangesAsync();
     }
 
@@ -129,6 +130,7 @@ public class TagRepositoryTests : AbstractDbTest
     [Fact]
     public async Task GetBrowseableTag()
     {
+        await ResetDb();
         await SeedDb();
 
         var fullAccessTags = await UnitOfWork.TagRepository.GetBrowseableTag(_fullAccess.Id, new UserParams());
@@ -155,6 +157,7 @@ public class TagRepositoryTests : AbstractDbTest
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesChaptersTag));
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesTag));
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChaptersTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
 
         // Verify Count is correctly limited
         Assert.Equal(1, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
@@ -167,9 +170,12 @@ public class TagRepositoryTests : AbstractDbTest
         // Should see: 3 shared + 3 library 1 specific = 6 tags
         Assert.Equal(6, restrictedAgeAccessTags.TotalCount);
 
-        Assert.Contains(restrictedAgeAccessTags, ContainsTagCheck(SharedSeriesChaptersTag));
-        Assert.Contains(restrictedAgeAccessTags, ContainsTagCheck(SharedSeriesTag));
-        Assert.Contains(restrictedAgeAccessTags, ContainsTagCheck(Lib1ChaptersTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesChaptersTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedChaptersTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesChaptersTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesTag));
+        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChaptersTag));
 
         Assert.DoesNotContain(restrictedAgeAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
 

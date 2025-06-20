@@ -159,10 +159,20 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
 
     public ChapterBuilder WithTags(IList<Tag> tags)
     {
-        _chapter.Tags ??= new List<Tag>();
+        _chapter.Tags ??= [];
         foreach (var tag in tags)
         {
             _chapter.Tags.Add(tag);
+        }
+        return this;
+    }
+
+    public ChapterBuilder WithGenres(IList<Genre> genres)
+    {
+        _chapter.Genres ??= [];
+        foreach (var genre in genres)
+        {
+            _chapter.Genres.Add(genre);
         }
         return this;
     }
