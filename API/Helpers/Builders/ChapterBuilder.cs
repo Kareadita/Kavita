@@ -156,4 +156,14 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
 
         return this;
     }
+
+    public ChapterBuilder WithTags(IList<Tag> tags)
+    {
+        _chapter.Tags ??= new List<Tag>();
+        foreach (var tag in tags)
+        {
+            _chapter.Tags.Add(tag);
+        }
+        return this;
+    }
 }
