@@ -187,9 +187,8 @@ export class PersonDetailComponent implements OnInit {
     filter.combination = FilterCombination.Or;
     filter.limitTo = 20;
 
-    // I might want to use roles$ to do all this
-    allPeople.forEach(f => {
-      filter.statements.push({comparison: FilterComparison.Contains, value: this.person!.id + '', field: f});
+    roles.forEach(pr => {
+      filter.statements.push({comparison: FilterComparison.Contains, value: this.person!.id + '', field: personRoleForFilterField(pr)});
     });
 
     return filter;

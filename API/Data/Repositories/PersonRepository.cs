@@ -315,10 +315,9 @@ public class PersonRepository : IPersonRepository
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId)
     {
-        List<PersonRole> notValidRoles = [PersonRole.Location, PersonRole.Team, PersonRole.Other, PersonRole.Publisher, PersonRole.Translator];
         return await _context.Person
             .Where(p => p.Id == personId)
-            .SelectMany(p => p.SeriesMetadataPeople.Where(smp => !notValidRoles.Contains(smp.Role)))
+            .SelectMany(p => p.SeriesMetadataPeople)
             .Select(smp => smp.SeriesMetadata)
             .Select(sm => sm.Series)
             .Distinct()
