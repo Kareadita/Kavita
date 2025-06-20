@@ -453,15 +453,18 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
+        var isAnyProgressOnSeries = await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId);
+
         var volumeNumber = (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
         var chapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
 
         // Check if there is an existing not yet processed event, if so update it
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead, true);
+
         if (existingEvt is {IsProcessed: false})
         {
-            if (volumeNumber == 0 && chapterNumber == 0)
+            if (!isAnyProgressOnSeries)
             {
                 _unitOfWork.ScrobbleRepository.Remove(existingEvt);
                 await _unitOfWork.CommitAsync();
@@ -483,7 +486,7 @@ public class ScrobblingService : IScrobblingService
             return;
         }
 
-        if (volumeNumber == 0 && chapterNumber == 0)
+        if (!isAnyProgressOnSeries)
         {
             // Do not create a new scrobble event if there is no progress
             return;
@@ -594,23 +597,23 @@ public class ScrobblingService : IScrobblingService
         foreach (var webLink in webLinks.Split(','))
         {
             if (!webLink.StartsWith(website)) continue;
+
             var tokens = webLink.Split(website)[1].Split('/');
             var value = tokens[index];
+
             if (typeof(T) == typeof(int?))
             {
-                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue))
-                    return (T)(object)intValue;
+                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue)) return (T)(object)intValue;
             }
             else if (typeof(T) == typeof(int))
             {
-                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue))
-                    return (T)(object)intValue;
+                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue)) return (T)(object)intValue;
+
                 return default;
             }
             else if (typeof(T) == typeof(long?))
             {
-                if (long.TryParse(value, CultureInfo.InvariantCulture, out var longValue))
-                    return (T)(object)longValue;
+                if (long.TryParse(value, CultureInfo.InvariantCulture, out var longValue)) return (T)(object)longValue;
             }
             else if (typeof(T) == typeof(string))
             {
