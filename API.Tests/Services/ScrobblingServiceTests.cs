@@ -286,7 +286,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         await _readerService.MarkChaptersAsRead(user, 1, new List<Chapter>() {volume.Chapters[0]});
         await UnitOfWork.CommitAsync();
 
-        // Call Scrobble without having any progress
+        // Call Scrobble while having some progress
         await _service.ScrobbleReadingUpdate(user.Id, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
@@ -334,14 +334,24 @@ public class ScrobblingServiceTests : AbstractDbTest
         var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
+        var volume = await UnitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        Assert.NotNull(volume);
+
+        await _readerService.MarkChaptersAsRead(user, 1, new List<Chapter>() {volume.Chapters[0]});
+        await UnitOfWork.CommitAsync();
+
         await _service.ScrobbleReadingUpdate(1, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
+        Assert.Single(events);
+
+        var readEvent = events.First();
+        Assert.False(readEvent.IsProcessed);
 
         await _hookedUpReaderService.MarkSeriesAsUnread(user, 1);
         await UnitOfWork.CommitAsync();
 
         // Existing event is deleted
+        await _service.ScrobbleReadingUpdate(1, 1);
         events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
 

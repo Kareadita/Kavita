@@ -427,6 +427,7 @@ public class ScrobblingService : IScrobblingService
                 _unitOfWork.ScrobbleRepository.Remove(existingEvt);
                 await _unitOfWork.CommitAsync();
                 _logger.LogDebug("Removed scrobble event for {Series} as there is no reading progress", series.Name);
+                return;
             }
 
             // We need to just update Volume/Chapter number
