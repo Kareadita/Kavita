@@ -19,7 +19,7 @@
     >
       <ng-template #cardItem let-item let-position="idx">
 
-        <div class="tag-card" (click)="openFilter(FilterField.Genres, item.id)">
+        <div class="tag-card" [ngClass]="{'not-selectable': item.seriesCount === 0}" (click)="openFilter(FilterField.Genres, item)">
           <div class="tag-name">{{ item.title }}</div>
           <div class="tag-meta">
             <span>{{t('series-count', {num: item.seriesCount | compactNumber})}}</span>

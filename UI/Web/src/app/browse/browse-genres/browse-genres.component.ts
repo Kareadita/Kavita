@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, OnInit} from '@angular/core';
 import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-detail-layout.component";
-import {DecimalPipe} from "@angular/common";
+import {DecimalPipe, NgClass} from "@angular/common";
 import {
   SideNavCompanionBarComponent
 } from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
@@ -24,7 +24,8 @@ import {Title} from "@angular/platform-browser";
     DecimalPipe,
     SideNavCompanionBarComponent,
     TranslocoDirective,
-    CompactNumberPipe
+    CompactNumberPipe,
+    NgClass
   ],
   templateUrl: './browse-genres.component.html',
   styleUrl: './browse-genres.component.scss',
@@ -62,7 +63,8 @@ export class BrowseGenresComponent implements OnInit {
     });
   }
 
-  openFilter(field: FilterField, value: string | number) {
-    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
+  openFilter(field: FilterField, genre: BrowseGenre) {
+    if (genre.seriesCount === 0) return; // We don't yet have an issue page
+    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${genre.id}`).subscribe();
   }
 }

@@ -5,6 +5,11 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   transition: transform 0.2s ease, background 0.3s ease;
   cursor: pointer;
+
+  &.not-selectable:hover {
+    cursor: not-allowed;
+    background-color: var(--bs-card-color, #2c2c2c) !important;
+  }
 }
 
 .tag-card:hover {
