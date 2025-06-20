@@ -63,7 +63,7 @@ public interface IPersonRepository
     Task<Person?> GetPersonByNameOrAliasAsync(string name, PersonIncludes includes = PersonIncludes.Aliases);
     Task<bool> IsNameUnique(string name);
 
-    Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId);
+    Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId, int userId);
     Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role);
     /// <summary>
     /// Returns all people with a matching name, or alias
@@ -179,20 +179,25 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         // Query roles from ChapterPeople
         var chapterRoles = await _context.Person
             .Where(p => p.Id == personId)
+            .SelectMany(p => p.ChapterPeople)
             .RestrictAgainstAgeRestriction(ageRating)
-            .SelectMany(p => p.ChapterPeople.Select(cp => cp.Role))
+            .RestrictByLibrary(userLibs)
+            .Select(cp => cp.Role)
             .Distinct()
             .ToListAsync();
 
         // Query roles from SeriesMetadataPeople
         var seriesRoles = await _context.Person
             .Where(p => p.Id == personId)
+            .SelectMany(p => p.SeriesMetadataPeople)
             .RestrictAgainstAgeRestriction(ageRating)
-            .SelectMany(p => p.SeriesMetadataPeople.Select(smp => smp.Role))
+            .RestrictByLibrary(userLibs)
+            .Select(smp => smp.Role)
             .Distinct()
             .ToListAsync();
 
@@ -204,26 +209,33 @@ public class PersonRepository : IPersonRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var query = CreateFilteredPersonQueryable(userId, filter, ageRating);
+        var query = await CreateFilteredPersonQueryable(userId, filter, ageRating);
 
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    private IQueryable<BrowsePersonDto> CreateFilteredPersonQueryable(int userId, BrowsePersonFilterDto filter, AgeRestriction ageRating)
+    private async Task<IQueryable<BrowsePersonDto>> CreateFilteredPersonQueryable(int userId, BrowsePersonFilterDto filter, AgeRestriction ageRating)
     {
+        var libs = await _context.Library.Includes(LibraryIncludes.AppUser).ToListAsync();
+        var libIds = libs.Select(l => l.Id).ToList();
+        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId))
+            .Select(lib => lib.Id).ToList();
+
         var query = _context.Person.AsNoTracking();
 
         // Apply filtering based on statements
         query = BuildPersonFilterQuery(userId, filter, query);
 
-        // Apply age restriction
+        // Apply restrictions
         query = query.RestrictAgainstAgeRestriction(ageRating);
+        query = query.RestrictByLibrary(userLibs, libIds);
 
         // Apply sorting and limiting
         var sortedQuery = query.SortBy(filter.SortOptions);
 
         var limitedQuery = ApplyPersonLimit(sortedQuery, filter.LimitTo);
 
+        // I cannot get the counting to work without errors...
         // Project to DTO
         var projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
         {
@@ -232,11 +244,17 @@ public class PersonRepository : IPersonRepository
             Description = p.Description,
             CoverImage = p.CoverImage,
             SeriesCount = p.SeriesMetadataPeople
-                .Select(smp => smp.SeriesMetadata.SeriesId)
+                .Select(smp => smp.SeriesMetadata)
+                //.RestrictByLibrary(userLibs, libIds)
+                //.RestrictAgainstAgeRestriction(ageRating)
+                .Select(smp => smp.SeriesId)
                 .Distinct()
                 .Count(),
             ChapterCount = p.ChapterPeople
-                .Select(cp => cp.Chapter.Id)
+                .Select(chp => chp.Chapter)
+                //.RestrictByLibrary(userLibs, libIds)
+                //.RestrictAgainstAgeRestriction(ageRating)
+                .Select(cp => cp.Id)
                 .Distinct()
                 .Count()
         });
@@ -287,11 +305,13 @@ public class PersonRepository : IPersonRepository
     {
         var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         return await _context.Person
             .Where(p => p.NormalizedName == normalized)
             .Includes(includes)
             .RestrictAgainstAgeRestriction(ageRating)
+            .RestrictByLibrary(userLibs)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
@@ -313,13 +333,18 @@ public class PersonRepository : IPersonRepository
             .AnyAsync(p => p.Name == name || p.Aliases.Any(pa => pa.Alias == name)));
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId)
+    public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId, int userId)
     {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+
         return await _context.Person
             .Where(p => p.Id == personId)
             .SelectMany(p => p.SeriesMetadataPeople)
             .Select(smp => smp.SeriesMetadata)
             .Select(sm => sm.Series)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .Where(s => userLibs.Contains(s.LibraryId))
             .Distinct()
             .OrderByDescending(s => s.ExternalSeriesMetadata.AverageExternalRating)
             .Take(20)
@@ -330,11 +355,13 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         return await _context.ChapterPeople
             .Where(cp => cp.PersonId == personId && cp.Role == role)
             .Select(cp => cp.Chapter)
             .RestrictAgainstAgeRestriction(ageRating)
+            .RestrictByLibrary(userLibs)
             .OrderBy(ch => ch.SortOrder)
             .Take(20)
             .ProjectTo<StandaloneChapterDto>(_mapper.ConfigurationProvider)
@@ -385,27 +412,31 @@ public class PersonRepository : IPersonRepository
             .ToListAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.Aliases)
+    public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.None)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         return await _context.Person
             .Includes(includes)
-            .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
+            .RestrictByLibrary(userLibs)
+            .OrderBy(p => p.Name)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.Aliases)
+    public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.None)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         return await _context.Person
             .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == role) || p.ChapterPeople.Any(cp => cp.Role == role)) // Filter by role in both series and chapters
             .Includes(includes)
-            .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
+            .RestrictByLibrary(userLibs)
+            .OrderBy(p => p.Name)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

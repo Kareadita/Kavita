@@ -185,7 +185,7 @@ public class PersonController : BaseApiController
     [HttpGet("series-known-for")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId));
+        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId, User.GetUserId()));
     }
 
     /// <summary>
@@ -206,6 +206,7 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
+    [Authorize("RequireAdminRole")]
     public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
     {
         var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);
