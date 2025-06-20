@@ -190,7 +190,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
         destinationValue: value.destinationValue,
         excludeFromSource: value.excludeFromSource
       }
-    }).filter(m => m.sourceValue.length > 0);
+    }).filter(m => m.sourceValue.length > 0 && m.destinationValue.length > 0);
 
     // Translate blacklist string -> Array<string>
     return {
@@ -230,15 +230,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
       destinationValue: [mapping?.destinationValue || ''],
       excludeFromSource: [mapping?.excludeFromSource || false]
     });
-
-    // Autofill destination value if empty when source value loses focus
-    mappingGroup.get('sourceValue')?.valueChanges
-      .pipe(
-        filter(() => !mappingGroup.get('destinationValue')?.value)
-      )
-      .subscribe(sourceValue => {
-        mappingGroup.get('destinationValue')?.setValue(sourceValue);
-      });
 
     //@ts-ignore
     this.fieldMappings.push(mappingGroup);
