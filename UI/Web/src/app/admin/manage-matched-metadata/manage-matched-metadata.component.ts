@@ -74,12 +74,14 @@ export class ManageMatchedMetadataComponent implements OnInit {
       }
 
       this.messageHub.messages$.subscribe(message => {
-        if (message.event !== EVENTS.ScanSeries) return;
-
-        const evt = message.payload as ScanSeriesEvent;
-        if (this.data.filter(d => d.series.id === evt.seriesId).length > 0) {
-          this.loadData();
+        if (message.event == EVENTS.ScanSeries) {
+          const evt = message.payload as ScanSeriesEvent;
+          if (this.data.filter(d => d.series.id === evt.seriesId).length > 0) {
+            this.loadData();
+          }
         }
+
+
       });
 
       this.filterGroup.valueChanges.pipe(

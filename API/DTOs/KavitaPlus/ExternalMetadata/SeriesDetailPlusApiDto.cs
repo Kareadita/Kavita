@@ -6,7 +6,7 @@ using API.DTOs.SeriesDetail;
 
 namespace API.DTOs.KavitaPlus.ExternalMetadata;
 
-internal sealed record SeriesDetailPlusApiDto
+public sealed record SeriesDetailPlusApiDto
 {
     public IEnumerable<MediaRecommendationDto> Recommendations { get; set; }
     public IEnumerable<UserReviewDto> Reviews { get; set; }

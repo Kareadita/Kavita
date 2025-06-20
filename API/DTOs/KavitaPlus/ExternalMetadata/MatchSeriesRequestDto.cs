@@ -7,7 +7,7 @@ namespace API.DTOs.KavitaPlus.ExternalMetadata;
 /// <summary>
 /// Represents a request to match some series from Kavita to an external id which K+ uses.
 /// </summary>
-internal sealed record MatchSeriesRequestDto
+public sealed record MatchSeriesRequestDto
 {
     public required string SeriesName { get; set; }
     public ICollection<string> AlternativeNames { get; set; } = [];

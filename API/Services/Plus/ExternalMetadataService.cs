@@ -67,6 +67,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IScrobblingService _scrobblingService;
     private readonly IEventHub _eventHub;
     private readonly ICoverDbService _coverDbService;
+    private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
         [LibraryType.Comic, LibraryType.Book, LibraryType.Image];
@@ -82,7 +83,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
-        ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService)
+        ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
+        IKavitaPlusApiService kavitaPlusApiService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -91,6 +93,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _scrobblingService = scrobblingService;
         _eventHub = eventHub;
         _coverDbService = coverDbService;
+        _kavitaPlusApiService = kavitaPlusApiService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -179,9 +182,7 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            var result = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={user.MalUserName}")
-                .WithKavitaPlusHeaders(license)
-                .GetJsonAsync<IList<MalStackDto>>();
+            var result = await _kavitaPlusApiService.GetMalStacks(user.MalUserName, license);
 
             if (result == null)
             {
@@ -207,7 +208,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto)
     {
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
             SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library);
         if (series == null) return [];
@@ -239,14 +240,9 @@ public class ExternalMetadataService : IExternalMetadataService
             MalId = potentialMalId ?? ScrobblingService.GetMalId(series)
         };
 
-        var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
-
         try
         {
-            var results = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
-                .WithKavitaPlusHeaders(license, token)
-                .PostJsonAsync(matchRequest)
-                .ReceiveJson<IList<ExternalSeriesMatchDto>>();
+            var results = await _kavitaPlusApiService.MatchSeries(matchRequest);
 
             // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
             foreach (var result in results)
@@ -287,9 +283,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
-
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        var details = await GetSeriesDetail(license, aniListId, malId, seriesId);
+        var details = await GetSeriesDetail(aniListId, malId, seriesId);
 
         return details;
 
@@ -442,16 +436,12 @@ public class ExternalMetadataService : IExternalMetadataService
         try
         {
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
-            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
             SeriesDetailPlusApiDto? result = null;
 
             try
             {
-                result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                    .WithKavitaPlusHeaders(license, token)
-                    .PostJsonAsync(data)
-                    .ReceiveJson<SeriesDetailPlusApiDto>(); // This returns an AniListSeries and Match returns ExternalSeriesDto
+                // This returns an AniListSeries and Match returns ExternalSeriesDto
+                result = await _kavitaPlusApiService .GetSeriesDetail(data);
             }
             catch (FlurlHttpException ex)
             {
@@ -466,11 +456,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
                         await Task.Delay(3000);
 
-                        result = await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-                            .WithKavitaPlusHeaders(license, token)
-                            .PostJsonAsync(data)
-                            .ReceiveJson<
-                                SeriesDetailPlusApiDto>();
+                        result = await _kavitaPlusApiService.GetSeriesDetail(data);
                     }
                     else if (errorMessage.Contains("Unknown Series"))
                     {
@@ -1777,7 +1763,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="malId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(string license, int? aniListId, long? malId, int? seriesId)
+    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? seriesId)
     {
         var payload = new ExternalMetadataIdsDto()
         {
@@ -1809,11 +1795,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
-            var token = (await _unitOfWork.UserRepository.GetDefaultAdminUser()).AniListAccessToken;
-            var ret =  await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
-                .WithKavitaPlusHeaders(license, token)
-                .PostJsonAsync(payload)
-                .ReceiveJson<ExternalSeriesDetailDto>();
+            var ret =  await _kavitaPlusApiService.GetSeriesDetailById(payload);
 
             ret.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(ret.Summary));
 
