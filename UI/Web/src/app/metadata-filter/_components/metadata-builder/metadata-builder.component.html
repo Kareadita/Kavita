@@ -24,7 +24,7 @@
           @for (filterStmt of filter.statements; track filterStmt; let i = $index) {
             <div class="row mb-2">
               <div class="col-md-10">
-                <app-metadata-row-filter [index]="i + 100" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
+                <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
                   <div class="col-md-1 ms-2">
                     @if (i < (filter.statements.length - 1) && filter.statements.length > 1) {
                       <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)">
@@ -59,7 +59,7 @@
           @for (filterStmt of filter.statements; track filterStmt; let i = $index) {
             <div class="row mb-3">
               <div class="col-md-12">
-                <app-metadata-row-filter [index]="i" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
+                <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
                   <div class="col-md-1 ms-2 col-1">
                     @if (i < (filter.statements.length - 1) && filter.statements.length > 1) {
                       <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)">

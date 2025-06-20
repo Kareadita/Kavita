@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -23,6 +25,7 @@ public interface ITagRepository
     Task RemoveAllTagNoLongerAssociated();
     Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null);
     Task<List<string>> GetAllTagsNotInListAsync(ICollection<string> tags);
+    Task<PagedList<BrowseTagDto>> GetBrowseableTag(int userId, UserParams userParams);
 }
 
 public class TagRepository : ITagRepository
@@ -102,6 +105,30 @@ public class TagRepository : ITagRepository
 
         // Return the original non-normalized genres for the missing ones
         return missingTags.Select(normalizedName => normalizedToOriginalMap[normalizedName]).ToList();
+    }
+
+    public async Task<PagedList<BrowseTagDto>> GetBrowseableTag(int userId, UserParams userParams)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        var query = _context.Tag
+            .RestrictAgainstAgeRestriction(ageRating)
+            .Select(g => new BrowseTagDto
+            {
+                Id = g.Id,
+                Title = g.Title,
+                SeriesCount = g.SeriesMetadatas
+                    .Select(sm => sm.Id)
+                    .Distinct()
+                    .Count(),
+                ChapterCount = g.Chapters
+                    .Select(ch => ch.Id)
+                    .Distinct()
+                    .Count()
+            })
+            .OrderBy(g => g.Title);
+
+        return await PagedList<BrowseTagDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IList<Tag>> GetAllTagsAsync()

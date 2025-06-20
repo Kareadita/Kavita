@@ -55,6 +55,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<IReadingProfileService, ReadingProfileService>();
+        services.AddScoped<IKoreaderService, KoreaderService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();

@@ -33,10 +33,10 @@
   } @else {
     <div class="d-flex pt-3 justify-content-between">
       @if ((item.series.volumes || 0) > 0 || (item.series.chapters || 0) > 0) {
-        <span class="me-1">{{t('volume-count', {num: item.series.volumes})}}</span>
         @if (item.series.plusMediaFormat === PlusMediaFormat.Comic) {
           <span class="me-1">{{t('issue-count', {num: item.series.chapters})}}</span>
         } @else {
+          <span class="me-1">{{t('volume-count', {num: item.series.volumes})}}</span>
           <span class="me-1">{{t('chapter-count', {num: item.series.chapters})}}</span>
         }
       } @else {

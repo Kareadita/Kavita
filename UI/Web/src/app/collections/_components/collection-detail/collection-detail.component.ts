@@ -19,7 +19,6 @@ import {ToastrService} from 'ngx-toastr';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -27,7 +26,7 @@ import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
@@ -49,8 +48,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -62,6 +60,10 @@ import {
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {MetadataService} from "../../../_services/metadata.service";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 @Component({
   selector: 'app-collection-detail',
@@ -95,6 +97,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
+  private readonly metadataService = inject(MetadataService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly Breakpoint = Breakpoint;
@@ -109,13 +112,13 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<UserCollection>[] = [];
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   summary: string = '';
   user!: User;
 
   actionInProgress: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -188,18 +191,26 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-        if (this.filter.statements.filter(stmt => stmt.field === FilterField.CollectionTags).length === 0) {
-          this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        const defaultStmt =  {field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(defaultStmt);
         }
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+
+        if (this.filter.statements.filter((stmt: FilterStatement<FilterField>) => stmt.field === FilterField.CollectionTags).length === 0) {
+          this.filter!.statements.push(defaultStmt);
+        }
+
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+        this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
-        this.cdRef.markForCheck();
 
         this.updateTag(tagId);
+        this.cdRef.markForCheck();
       });
   }
 
@@ -271,7 +282,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

@@ -1,6 +1,6 @@
 ﻿using API.DTOs.Person;
 
-namespace API.DTOs;
+namespace API.DTOs.Metadata.Browse;
 
 /// <summary>
 /// Used to browse writers and click in to see their series
@@ -12,7 +12,7 @@ public class BrowsePersonDto : PersonDto
     /// </summary>
     public int SeriesCount { get; set; }
     /// <summary>
-    /// Number or Issues this Person is the Writer for
+    /// Number of Issues this Person is the Writer for
     /// </summary>
-    public int IssueCount { get; set; }
+    public int ChapterCount { get; set; }
 }

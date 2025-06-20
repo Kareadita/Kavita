@@ -23,7 +23,7 @@ import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carousel-reel.component";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {allPeople, FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -44,6 +44,7 @@ import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
+import {MetadataService} from "../_services/metadata.service";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -87,6 +88,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly toastr = inject(ToastrService);
   private readonly messageHubService = inject(MessageHubService)
+  private readonly metadataService = inject(MetadataService)
 
   protected readonly FilterField = FilterField;
 
@@ -98,7 +100,7 @@ export class PersonDetailComponent implements OnInit {
   roles$: Observable<PersonRole[]> | null = null;
   roles: PersonRole[] | null = null;
   works$: Observable<Series[]> | null = null;
-  filter: SeriesFilterV2 | null = null;
+  filter: FilterV2<FilterField> | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
   anilistUrl: string = '';
@@ -181,7 +183,7 @@ export class PersonDetailComponent implements OnInit {
   }
 
   createFilter(roles: PersonRole[]) {
-    const filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
+    const filter = this.metadataService.createDefaultFilterDto('series');
     filter.combination = FilterCombination.Or;
     filter.limitTo = 20;
 
@@ -217,7 +219,7 @@ export class PersonDetailComponent implements OnInit {
     params['page'] = 1;
     params['title'] = translate('person-detail.browse-person-by-role-title', {name: this.person!.name, role: personPipe.transform(role)});
 
-    const searchFilter = this.filterUtilityService.createSeriesV2Filter();
+    const searchFilter = this.metadataService.createDefaultFilterDto('series');
     searchFilter.limitTo = 0;
     searchFilter.combination = FilterCombination.Or;
 

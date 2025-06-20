@@ -1,18 +1,18 @@
 <ng-container *transloco="let t; read: 'card-detail-layout'">
   <app-loading [loading]="isLoading"></app-loading>
 
-  @if (header.length > 0) {
+  @if (header().length > 0) {
     <div class="row mt-2 g-0 pb-2">
       <div class="col me-auto">
         <h4>
-          @if (actions.length > 0) {
+          @if (actions().length > 0) {
             <span>
-              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions()" [labelBy]="header()"></app-card-actionables>&nbsp;
             </span>
           }
 
           <span>
-              {{header}}&nbsp;
+            {{header()}}&nbsp;
             @if (pagination) {
               <span class="badge bg-primary rounded-pill"
                     [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
@@ -24,7 +24,10 @@
     </div>
   }
 
-  <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
+  @if (filterSettings) {
+    <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
+  }
+
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
       <div class="card-container">
@@ -34,13 +37,14 @@
 
         <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
-            <div class="card col-auto mt-2 mb-2"
-                 (click)="tryToSaveJumpKey()"
-                 *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i"
-                 id="jumpbar-index--{{i}}"
-                 [attr.jumpbar-index]="i">
-              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
-            </div>
+            @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
+              <div class="card col-auto mt-2 mb-2"
+                   (click)="tryToSaveJumpKey()"
+                   id="jumpbar-index--{{i}}"
+                   [attr.jumpbar-index]="i">
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
+              </div>
+            }
           </div>
         </virtual-scroller>
       </div>
@@ -54,9 +58,11 @@
   <ng-template #cardTemplate>
     <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
+
         <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
           <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
+
       </div>
     </virtual-scroller>
 

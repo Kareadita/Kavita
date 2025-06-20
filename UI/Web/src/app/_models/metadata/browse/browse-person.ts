@@ -1,6 +1,6 @@
-import {Person} from "../metadata/person";
+import {Person} from "../person";
 
 export interface BrowsePerson extends Person {
   seriesCount: number;
-  issueCount: number;
+  chapterCount: number;
 }

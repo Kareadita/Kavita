@@ -17,7 +17,7 @@ import {SeriesAddedEvent} from '../_models/events/series-added-event';
 import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
-import {FilterEvent} from '../_models/metadata/series-filter';
+import {FilterEvent, SortField} from '../_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 import {ActionService} from '../_services/action.service';
 import {LibraryService} from '../_services/library.service';
@@ -25,7 +25,6 @@ import {EVENTS, MessageHubService} from '../_services/message-hub.service';
 import {SeriesService} from '../_services/series.service';
 import {NavService} from '../_services/nav.service';
 import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
-import {FilterSettings} from '../metadata-filter/filter-settings';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -37,12 +36,14 @@ import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
+import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
+import {MetadataService} from "../_services/metadata.service";
 
 @Component({
     selector: 'app-library-detail',
@@ -68,6 +69,7 @@ export class LibraryDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly metadataService = inject(MetadataService);
 
   libraryId!: number;
   libraryName = '';
@@ -75,11 +77,11 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
   actions: ActionItem<Library>[] = [];
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys: Array<JumpKey> = [];
   bulkLoader: boolean = false;
@@ -184,16 +186,19 @@ export class LibraryDetailComponent implements OnInit {
 
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
-    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-      this.filter = filter;
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-        this.filter!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal};
+
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('series');
+        this.filter.statements.push(defaultStmt);
       }
 
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
 
+      this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+      this.filterActiveCheck!.statements.push(defaultStmt);
       this.filterSettings.presetsV2 =  this.filter;
 
       this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100), tap(_ => this.loadPage())).subscribe();
@@ -311,7 +316,7 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

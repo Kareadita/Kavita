@@ -192,6 +192,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       } else {
         return this.manageService.getAllKavitaPlusSeries({
           matchStateOption: MatchStateOption.Error,
+          libraryType: -1,
           searchTerm: ''
         }).pipe(
           takeUntilDestroyed(this.destroyRef),
@@ -272,13 +273,11 @@ export class PreferenceNavComponent implements AfterViewInit {
   hasAnyChildren(user: User, section: PrefSection) {
     // Filter out items where the user has a restricted role
     const visibleItems = section.children.filter(item =>
-      item.restrictRoles.length === 0 || !this.accountService.hasAnyRole(user, item.restrictRoles)
+      (item.restrictRoles.length === 0 || !this.accountService.hasAnyRestrictedRole(user, item.restrictRoles)) &&
+      (item.roles.length === 0 || this.accountService.hasAnyRole(user, item.roles))
     );
 
-    // Check if the user has any allowed roles in the remaining items
-    return visibleItems.some(item =>
-      this.accountService.hasAnyRole(user, item.roles)
-    );
+    return visibleItems.length > 0;
   }
 
   collapse() {

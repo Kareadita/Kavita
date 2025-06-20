@@ -2,7 +2,6 @@ import {IHasCover} from "../common/i-has-cover";
 
 export enum PersonRole {
   Other = 1,
-  Artist = 2,
   Writer = 3,
   Penciller = 4,
   Inker = 5,
@@ -32,3 +31,22 @@ export interface Person extends IHasCover {
   primaryColor: string;
   secondaryColor: string;
 }
+
+/**
+ * Excludes Other as it's not in use
+ */
+export const allPeopleRoles = [
+  PersonRole.Writer,
+  PersonRole.Penciller,
+  PersonRole.Inker,
+  PersonRole.Colorist,
+  PersonRole.Letterer,
+  PersonRole.CoverArtist,
+  PersonRole.Editor,
+  PersonRole.Publisher,
+  PersonRole.Character,
+  PersonRole.Translator,
+  PersonRole.Imprint,
+  PersonRole.Team,
+  PersonRole.Location
+]

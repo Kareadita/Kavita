@@ -21,20 +21,23 @@ import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
 import {AsyncPipe} from "@angular/common";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
+import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
+import {allKavitaPlusMetadataApplicableTypes} from "../../_models/library/library";
 
 @Component({
   selector: 'app-manage-matched-metadata',
   imports: [
-      TranslocoDirective,
-      ImageComponent,
-      VirtualScrollerModule,
-      ReactiveFormsModule,
-      MatchStateOptionPipe,
-      UtcToLocalTimePipe,
-      DefaultValuePipe,
-      NgxDatatableModule,
-      LibraryNamePipe,
-      AsyncPipe,
+    TranslocoDirective,
+    ImageComponent,
+    VirtualScrollerModule,
+    ReactiveFormsModule,
+    MatchStateOptionPipe,
+    UtcToLocalTimePipe,
+    DefaultValuePipe,
+    NgxDatatableModule,
+    LibraryNamePipe,
+    AsyncPipe,
+    LibraryTypePipe,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -44,6 +47,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   protected readonly ColumnMode = ColumnMode;
   protected readonly MatchStateOption = MatchStateOption;
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
+  protected readonly allLibraryTypes = allKavitaPlusMetadataApplicableTypes;
 
   private readonly licenseService = inject(LicenseService);
   private readonly actionService = inject(ActionService);
@@ -58,6 +62,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   data: Array<ManageMatchSeries> = [];
   filterGroup = new FormGroup({
     'matchState': new FormControl(MatchStateOption.Error, []),
+    'libraryType': new FormControl(-1, []), // Denotes all
   });
 
   ngOnInit() {
@@ -99,6 +104,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   loadData() {
     const filter: ManageMatchFilter = {
       matchStateOption: parseInt(this.filterGroup.get('matchState')!.value + '', 10),
+      libraryType: parseInt(this.filterGroup.get('libraryType')!.value + '', 10),
       searchTerm: ''
     };
 

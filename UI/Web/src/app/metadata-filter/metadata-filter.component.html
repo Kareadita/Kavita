@@ -26,8 +26,8 @@
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
           <app-metadata-builder [filter]="filterV2"
-                                [availableFilterFields]="allFilterFields"
-                                [statementLimit]="filterSettings.statementLimit"
+                                [entityType]="filterSettings().type"
+                                [statementLimit]="filterSettings().statementLimit"
                                 (update)="handleFilters($event)">
           </app-metadata-builder>
         </div>
@@ -41,23 +41,21 @@
             </div>
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <button class="btn btn-sm btn-icon" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
-                @if (isAscendingSort) {
-                  <i class="fa fa-arrow-up" [title]="t('ascending-alt')"></i>
-                } @else {
-                  <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
-                }
-              </button>
+              <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                @for(field of allSortFields; track field.value) {
+                @for(field of sortFieldOptions(); track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
                 }
               </select>
             </div>
-            <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
-              <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
-              <input id="filter-name" type="text" class="form-control" formControlName="name">
-            </div>
+
+            @if (filterSettings().supportsSmartFilter) {
+              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
+                <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
+                <input id="filter-name" type="text" class="form-control" formControlName="name">
+              </div>
+            }
+
 
             @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
               <ng-container [ngTemplateOutlet]="buttons"></ng-container>
@@ -82,7 +80,7 @@
       <button class="btn btn-primary col-6" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
     </div>
     <div class="col-md-2 col-sm-6 mt-4 pt-2">
-      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled || !this.sortGroup.get('name')?.value">
+      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
         {{t('save')}}
       </button>

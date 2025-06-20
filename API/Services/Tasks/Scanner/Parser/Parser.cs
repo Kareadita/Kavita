@@ -1159,6 +1159,12 @@ public static partial class Parser
         return !string.IsNullOrEmpty(name) && SeriesAndYearRegex.IsMatch(name);
     }
 
+    /// <summary>
+    /// Parse a Year from a Comic Series: Series Name (YEAR)
+    /// </summary>
+    /// <example>Harley Quinn (2024) returns 2024</example>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static string ParseYear(string? name)
     {
         if (string.IsNullOrEmpty(name)) return string.Empty;

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { JumpKey } from '../_models/jumpbar/jump-key';
+import {Injectable} from '@angular/core';
+import {JumpKey} from '../_models/jumpbar/jump-key';
 
 const keySize = 25; // Height of the JumpBar button
 
@@ -105,14 +105,18 @@ export class JumpbarService {
    getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
     const keys: {[key: string]: number} = {};
     data.forEach(obj => {
-      let ch = keySelector(obj).charAt(0).toUpperCase();
-      if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
-        ch = '#';
+      try {
+        let ch = keySelector(obj).charAt(0).toUpperCase();
+        if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
+          ch = '#';
+        }
+        if (!keys.hasOwnProperty(ch)) {
+          keys[ch] = 0;
+        }
+        keys[ch] += 1;
+      } catch (e) {
+        console.error('Failed to calculate jump key for ', obj, e);
       }
-      if (!keys.hasOwnProperty(ch)) {
-        keys[ch] = 0;
-      }
-      keys[ch] += 1;
     });
     return Object.keys(keys).map(k => {
       k = k.toUpperCase();

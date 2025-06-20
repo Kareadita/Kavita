@@ -38,7 +38,7 @@ import {ReadingProfileService} from "../../../_services/reading-profile.service"
 export class SideNavComponent implements OnInit {
 
   protected readonly WikiLink = WikiLink;
-  protected readonly ItemLimit = 10;
+  protected readonly ItemLimit = 13;
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly Breakpoint = Breakpoint;

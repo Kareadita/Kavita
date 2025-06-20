@@ -2,32 +2,41 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
+  Injector,
+  input,
   Input,
   OnInit,
   Output,
+  Signal,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
-import {PersonRole} from 'src/app/_models/metadata/person';
-import {LibraryService} from 'src/app/_services/library.service';
-import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
-import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
+import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe} from "@angular/common";
-import {FilterFieldPipe} from "../../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Select2, Select2Option} from "ng-select2-component";
 import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
-import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
+import {ValidFilterEntity} from "../../filter-settings";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+
+interface FieldConfig {
+  type: PredicateType;
+  baseComparisons: FilterComparison[];
+  defaultValue: any;
+  allowsDateComparisons?: boolean;
+  allowsNumberComparisons?: boolean;
+  excludesMustContains?: boolean;
+  allowsIsEmpty?: boolean;
+}
 
 enum PredicateType {
   Text = 1,
@@ -54,42 +63,42 @@ const unitLabels: Map<FilterField, FilterRowUi> = new Map([
     [FilterField.ReadLast, new FilterRowUi('unit-read-last')],
 ]);
 
-const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [
-  FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
-  FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
-];
-const DropdownFields = [
-  FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
-  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-  FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-  FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
-  FilterField.Imprint, FilterField.Team, FilterField.Location
-];
-const BooleanFields = [FilterField.WantToRead];
-const DateFields = [FilterField.ReadingDate];
-
-const DropdownFieldsWithoutMustContains = [
-  FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
-];
-const DropdownFieldsThatIncludeNumberComparisons = [
-  FilterField.AgeRating
-];
-const NumberFieldsThatIncludeDateComparisons = [
-  FilterField.ReleaseYear
-];
-
-const FieldsThatShouldIncludeIsEmpty = [
-  FilterField.Summary, FilterField.UserRating, FilterField.Genres,
-  FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
-  FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-  FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-  FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-  FilterField.Writers, FilterField.Imprint, FilterField.Team,
-  FilterField.Location,
-];
+// const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name];
+// const NumberFields = [
+//   FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
+//   FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
+// ];
+// const DropdownFields = [
+//   FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
+//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+//   FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+//   FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
+//   FilterField.Imprint, FilterField.Team, FilterField.Location, PersonFilterField.Role
+// ];
+// const BooleanFields = [FilterField.WantToRead];
+// const DateFields = [FilterField.ReadingDate];
+//
+// const DropdownFieldsWithoutMustContains = [
+//   FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
+// ];
+// const DropdownFieldsThatIncludeNumberComparisons = [
+//   FilterField.AgeRating
+// ];
+// const NumberFieldsThatIncludeDateComparisons = [
+//   FilterField.ReleaseYear
+// ];
+//
+// const FieldsThatShouldIncludeIsEmpty = [
+//   FilterField.Summary, FilterField.UserRating, FilterField.Genres,
+//   FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
+//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+//   FilterField.Writers, FilterField.Imprint, FilterField.Team,
+//   FilterField.Location,
+// ];
 
 const StringComparisons = [
   FilterComparison.Equal,
@@ -126,7 +135,6 @@ const BooleanComparisons = [
   imports: [
     ReactiveFormsModule,
     AsyncPipe,
-    FilterFieldPipe,
     FilterComparisonPipe,
     NgbTooltip,
     TranslocoDirective,
@@ -135,60 +143,75 @@ const BooleanComparisons = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent implements OnInit {
-
-  protected readonly FilterComparison = FilterComparison;
-  protected readonly PredicateType = PredicateType;
+export class MetadataFilterRowComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dateParser = inject(NgbDateParserFormatter);
   private readonly metadataService = inject(MetadataService);
-  private readonly libraryService = inject(LibraryService);
-  private readonly collectionTagService = inject(CollectionTagService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly filterUtilitiesService = inject(FilterUtilitiesService);
+  private readonly injector = inject(Injector);
 
-
-  @Input() index: number = 0; // This is only for debugging
   /**
    * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
    */
-  @Input() preset!: FilterStatement;
-  @Input() availableFields: Array<FilterField> = allFields;
-  @Output() filterStatement = new EventEmitter<FilterStatement>();
+  @Input() preset!: FilterStatement<TFilter>;
+  entityType = input.required<ValidFilterEntity>();
+  @Output() filterStatement = new EventEmitter<FilterStatement<TFilter>>();
 
 
-  formGroup: FormGroup = new FormGroup({
-    'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
-    'filterValue': new FormControl<string | number>('', []),
-  });
+  formGroup!: FormGroup;
   validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   dropdownOptions$ = of<Select2Option[]>([]);
 
   loaded: boolean = false;
-  private readonly mangaFormatPipe = new MangaFormatPipe(this.translocoService);
-  private readonly ageRatingPipe = new AgeRatingPipe();
-
-  get IsEmptySelected() {
-    return parseInt(this.formGroup.get('comparison')?.value + '', 10) !== FilterComparison.IsEmpty;
-  }
 
 
-  get UiLabel(): FilterRowUi | null {
-    const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
-    if (!unitLabels.has(field)) return null;
-    return unitLabels.get(field) as FilterRowUi;
-  }
+  private comparisonSignal!: Signal<FilterComparison>;
+  private inputSignal!: Signal<TFilter>;
 
-  get MultipleDropdownAllowed() {
-    const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains || comp === FilterComparison.MustContains;
-  }
+  isEmptySelected: Signal<boolean> = computed(() => false);
+  uiLabel: Signal<FilterRowUi | null> = computed(() => null);
+  isMultiSelectDropdownAllowed: Signal<boolean> = computed(() => false);
 
+  filterFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
 
   ngOnInit() {
-    this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
+
+    this.formGroup = new FormGroup({
+      'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
+      'filterValue': new FormControl<string | number>('', []),
+      'input': new FormControl<TFilter>(this.filterUtilitiesService.getDefaultFilterField<TFilter>(this.entityType()), [])
+    });
+
+    this.comparisonSignal = toSignal<FilterComparison>(
+      this.formGroup.get('comparison')!.valueChanges.pipe(
+        startWith(this.formGroup.get('comparison')!.value),
+        map(d => parseInt(d + '', 10) as FilterComparison)
+      )
+      , {requireSync: true, injector: this.injector});
+    this.inputSignal = toSignal<TFilter>(
+      this.formGroup.get('input')!.valueChanges.pipe(
+        startWith(this.formGroup.get('input')!.value),
+        map(d => parseInt(d + '', 10) as TFilter)
+      )
+      , {requireSync: true, injector: this.injector});
+
+    this.isEmptySelected = computed(() => this.comparisonSignal() !== FilterComparison.IsEmpty);
+    this.uiLabel = computed(() => {
+      if (!unitLabels.has(this.inputSignal())) return null;
+      return unitLabels.get(this.inputSignal()) as FilterRowUi;
+    });
+
+    this.isMultiSelectDropdownAllowed = computed(() => {
+      return this.comparisonSignal() === FilterComparison.Contains || this.comparisonSignal() === FilterComparison.NotContains || this.comparisonSignal() === FilterComparison.MustContains;
+    });
+
+    this.filterFieldOptions = computed(() => {
+      return this.filterUtilitiesService.getFilterFields(this.entityType());
+    });
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
@@ -200,12 +223,12 @@ export class MetadataFilterRowComponent implements OnInit {
       startWith(this.preset.value),
       distinctUntilChanged(),
       filter(() => {
-        const inputVal = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-        return DropdownFields.includes(inputVal);
+        return this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType()).includes(this.inputSignal());
       }),
       switchMap((_) => this.getDropdownObservable()),
       takeUntilDestroyed(this.destroyRef)
     );
+
 
 
     this.formGroup!.valueChanges.pipe(
@@ -221,11 +244,13 @@ export class MetadataFilterRowComponent implements OnInit {
   propagateFilterUpdate() {
     const stmt = {
       comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
-      field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
+      field: parseInt(this.formGroup.get('input')?.value, 10) as TFilter,
       value: this.formGroup.get('filterValue')?.value!
     };
 
-    if (typeof stmt.value === 'object' && DateFields.includes(stmt.field)) {
+    const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
+    if (typeof stmt.value === 'object' && dateFields.includes(stmt.field)) {
       stmt.value = this.dateParser.format(stmt.value);
     }
 
@@ -239,7 +264,7 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (stmt.comparison !== FilterComparison.IsEmpty) {
-      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !BooleanFields.includes(stmt.field))) return;
+      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !booleanFields.includes(stmt.field))) return;
     }
 
     this.filterStatement.emit(stmt);
@@ -250,15 +275,20 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
     this.formGroup.get('input')?.patchValue(this.preset.field);
 
-    if (StringFields.includes(this.preset.field)) {
+    const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
+    const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
+    const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
+
+    if (stringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (BooleanFields.includes(this.preset.field)) {
+    } else if (booleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (DateFields.includes(this.preset.field)) {
+    } else if (dateFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }
-    else if (DropdownFields.includes(this.preset.field)) {
-      if (this.MultipleDropdownAllowed || val.includes(',')) {
+    else if (dropdownFields.includes(this.preset.field)) {
+      if (this.isMultiSelectDropdownAllowed() || val.includes(',')) {
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
         if (this.preset.field === FilterField.Languages) {
@@ -276,72 +306,28 @@ export class MetadataFilterRowComponent implements OnInit {
   }
 
   getDropdownObservable(): Observable<Select2Option[]> {
-      const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-      switch (filterField) {
-        case FilterField.PublicationStatus:
-          return this.metadataService.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
-            return {value: pub.value, label: pub.title}
-          })));
-        case FilterField.AgeRating:
-          return this.metadataService.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
-            return {value: rating.value, label: this.ageRatingPipe.transform(rating.value)}
-          })));
-        case FilterField.Genres:
-          return this.metadataService.getAllGenres().pipe(map(genres => genres.map(genre => {
-            return {value: genre.id, label: genre.title}
-          })));
-        case FilterField.Languages:
-          return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
-            return {value: status.isoCode, label: status.title + ` (${status.isoCode})`}
-          })));
-        case FilterField.Formats:
-          return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
-            return {value: status.value, label: this.mangaFormatPipe.transform(status.value)}
-          })));
-        case FilterField.Libraries:
-          return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
-            return {value: lib.id, label: lib.name}
-          })));
-        case FilterField.Tags:
-          return this.metadataService.getAllTags().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, label: status.title}
-          })));
-        case FilterField.CollectionTags:
-          return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, label: status.title}
-          })));
-        case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
-        case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
-        case FilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
-        case FilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
-        case FilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
-        case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
-        case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
-        case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
-        case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
-        case FilterField.Team: return this.getPersonOptions(PersonRole.Team);
-        case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
-        case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
-        case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
-      }
-      return of([]);
+      const filterField = this.inputSignal();
+      return this.metadataService.getOptionsForFilterField<TFilter>(filterField, this.entityType());
   }
-
-  getPersonOptions(role: PersonRole) {
-    return this.metadataService.getAllPeopleByRole(role).pipe(map(people => people.map(person => {
-      return {value: person.id, label: person.name}
-    })));
-  }
-
 
   handleFieldChange(val: string) {
-    const inputVal = parseInt(val, 10) as FilterField;
+    const inputVal = parseInt(val, 10) as TFilter;
 
+    const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
+    const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
+    const numberFields = this.filterUtilitiesService.getNumberFields<TFilter>(this.entityType());
+    const booleanFields = this.filterUtilitiesService.getBooleanFields<TFilter>(this.entityType());
+    const dateFields = this.filterUtilitiesService.getDateFields<TFilter>(this.entityType());
+    const fieldsThatShouldIncludeIsEmpty = this.filterUtilitiesService.getFieldsThatShouldIncludeIsEmpty<TFilter>(this.entityType());
+    const numberFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getNumberFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
+    const dropdownFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
+    const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
+    const dropdownFieldsThatIncludeNumberComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeNumberComparisons<TFilter>(this.entityType());
 
-    if (StringFields.includes(inputVal)) {
+    if (stringFields.includes(inputVal)) {
       let comps = [...StringComparisons];
 
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -356,13 +342,13 @@ export class MetadataFilterRowComponent implements OnInit {
       return;
     }
 
-    if (NumberFields.includes(inputVal)) {
+    if (numberFields.includes(inputVal)) {
       const comps = [...NumberComparisons];
 
-      if (NumberFieldsThatIncludeDateComparisons.includes(inputVal)) {
+      if (numberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         comps.push(...DateComparisons);
       }
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -378,9 +364,9 @@ export class MetadataFilterRowComponent implements OnInit {
       return;
     }
 
-    if (DateFields.includes(inputVal)) {
+    if (dateFields.includes(inputVal)) {
       const comps = [...DateComparisons];
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -395,9 +381,9 @@ export class MetadataFilterRowComponent implements OnInit {
       return;
     }
 
-    if (BooleanFields.includes(inputVal)) {
+    if (booleanFields.includes(inputVal)) {
       let comps = [...DateComparisons];
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -413,15 +399,15 @@ export class MetadataFilterRowComponent implements OnInit {
       return;
     }
 
-    if (DropdownFields.includes(inputVal)) {
+    if (dropdownFields.includes(inputVal)) {
       let comps = [...DropdownComparisons];
-      if (DropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
+      if (dropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
         comps.push(...NumberComparisons);
       }
-      if (DropdownFieldsWithoutMustContains.includes(inputVal)) {
+      if (dropdownFieldsWithoutMustContains.includes(inputVal)) {
         comps = comps.filter(c => c !== FilterComparison.MustContains);
       }
-      if (FieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
+      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
 
@@ -443,4 +429,7 @@ export class MetadataFilterRowComponent implements OnInit {
   updateIfDateFilled() {
     this.propagateFilterUpdate();
   }
+
+  protected readonly FilterComparison = FilterComparison;
+  protected readonly PredicateType = PredicateType;
 }

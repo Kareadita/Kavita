@@ -12,6 +12,7 @@ import {PdfLayoutMode} from "./pdf-layout-mode";
 import {PdfSpreadMode} from "./pdf-spread-mode";
 import {Series} from "../series";
 import {Library} from "../library/library";
+import {UserBreakpoint} from "../../shared/_services/utility.service";
 
 export enum ReadingProfileKind {
   Default = 0,
@@ -39,6 +40,7 @@ export interface ReadingProfile {
   swipeToPaginate: boolean;
   allowAutomaticWebtoonReaderDetection: boolean;
   widthOverride?: number;
+  disableWidthOverride: UserBreakpoint;
 
   // Book Reader
   bookReaderMargin: number;
@@ -75,3 +77,4 @@ export const pdfLayoutModes = [{text: 'pdf-multiple', value: PdfLayoutMode.Multi
 export const pdfScrollModes = [{text: 'pdf-vertical', value: PdfScrollMode.Vertical}, {text: 'pdf-horizontal', value: PdfScrollMode.Horizontal}, {text: 'pdf-page', value: PdfScrollMode.Page}];
 export const pdfSpreadModes = [{text: 'pdf-none', value: PdfSpreadMode.None}, {text: 'pdf-odd', value: PdfSpreadMode.Odd}, {text: 'pdf-even', value: PdfSpreadMode.Even}];
 export const pdfThemes = [{text: 'pdf-light', value: PdfTheme.Light}, {text: 'pdf-dark', value: PdfTheme.Dark}];
+export const breakPoints = [UserBreakpoint.Never, UserBreakpoint.Mobile, UserBreakpoint.Tablet, UserBreakpoint.Desktop]

@@ -206,6 +206,8 @@
                 </button>
                 <div ngbDropdownMenu>
                   <a ngbDropdownItem routerLink="/all-filters/">{{t('all-filters')}}</a>
+                  <a ngbDropdownItem routerLink="/browse/genres">{{t('browse-genres')}}</a>
+                  <a ngbDropdownItem routerLink="/browse/tags">{{t('browse-tags')}}</a>
                   <a ngbDropdownItem routerLink="/announcements/">{{t('announcements')}}</a>
                   <a ngbDropdownItem [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
                   <a ngbDropdownItem (click)="logout()">{{t('logout')}}</a>

@@ -20,5 +20,6 @@ export enum WikiLink {
   UpdateNative = 'https://wiki.kavitareader.com/guides/updating/updating-native',
   UpdateDocker = 'https://wiki.kavitareader.com/guides/updating/updating-docker',
   OpdsClients = 'https://wiki.kavitareader.com/guides/features/opds/#opds-capable-clients',
-  Guides = 'https://wiki.kavitareader.com/guides'
+  Guides = 'https://wiki.kavitareader.com/guides',
+  ReadingProfiles = "https://wiki.kavitareader.com/guides/user-settings/reading-profiles/",
 }

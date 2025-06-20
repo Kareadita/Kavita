@@ -36,4 +36,10 @@
         <None Remove="Extensions\Test Data\modified on run.txt" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Data\AesopsFables.epub">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

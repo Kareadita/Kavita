@@ -1,8 +1,21 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.Entities;
+
+public enum BreakPoint
+{
+    [Description("Never")]
+    Never = 0,
+    [Description("Mobile")]
+    Mobile = 1,
+    [Description("Tablet")]
+    Tablet = 2,
+    [Description("Desktop")]
+    Desktop = 3,
+}
 
 public class AppUserReadingProfile
 {
@@ -72,6 +85,10 @@ public class AppUserReadingProfile
     /// Manga Reader Option: Optional fixed width override
     /// </summary>
     public int? WidthOverride { get; set; } = null;
+    /// <summary>
+    /// Manga Reader Option: Disable the width override if the screen is past the breakpoint
+    /// </summary>
+    public BreakPoint DisableWidthOverride { get; set; } = BreakPoint.Never;
 
     #endregion
 

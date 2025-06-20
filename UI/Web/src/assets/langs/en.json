@@ -721,6 +721,8 @@
         "library-name-header": "Library",
         "valid-until-header": "Next Refresh",
         "actions-header": "Actions",
+        "library-type": "Library Type",
+        "matched-state-label": "Match State",
         "matched-status-label": "Matched",
         "unmatched-status-label": "Not Matched",
         "blacklist-status-label": "Needs Manual Match",
@@ -1036,7 +1038,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
-        "browse-authors": "Browse Authors",
+        "browse-people": "Browse People",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -1049,10 +1051,31 @@
         "edit": "{{common.edit}}"
     },
 
-    "browse-authors": {
-        "title": "Browse Authors & Writers",
+    "browse-people": {
+        "title": "Browse People",
         "author-count": "{{num}} People",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "Roles",
+        "sort-label": "Sort",
+        "name-label": "Name",
+        "issue-count-label": "Issue Count",
+        "series-count-label": "Series Count"
+    },
+
+    "browse-genres": {
+        "title": "Browse Genres",
+        "genre-count": "{{num}} Genres",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+
+    "browse-tags": {
+        "title": "Browse Tags",
+        "genre-count": "{{num}} Tags",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
 
     "person-detail": {
@@ -1834,7 +1857,9 @@
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
         "close": "{{common.close}}",
-        "person-aka-status": "Matches an alias"
+        "person-aka-status": "Matches an alias",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags"
     },
 
     "promoted-icon": {
@@ -2062,7 +2087,10 @@
         "release-year": "Release Year",
         "read-progress": "Last Read",
         "average-rating": "Average Rating",
-        "random": "Random"
+        "random": "Random",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
     },
 
     "edit-series-modal": {
@@ -2485,7 +2513,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
 
     "filter-field-pipe": {
@@ -2560,6 +2588,38 @@
         "ok": "Ok",
         "prompt": "Question"
     },
+
+    "browse-title-pipe": {
+        "publication-status": "{{value}} works",
+        "age-rating": "Rated {{value}}",
+        "user-rating": "{{value}} star rating",
+        "tag": "Has Tag {{value}}",
+        "translator": "Translated by {{value}}",
+        "character": "Has character {{value}}",
+        "publisher": "Published by {{value}}",
+        "editor": "Edited by {{value}}",
+        "artist": "Drawn by {{value}}",
+        "letterer": "Lettered by {{value}}",
+        "colorist": "Colored by {{value}}",
+        "inker": "Inked by {{value}}",
+        "penciller": "Pencilled by {{value}}",
+        "writer": "Written by {{value}}",
+        "genre": "Has Genre {{value}}",
+        "library": "Within {{value}} library",
+        "format": "Format of {{value}}",
+        "release-year": "Released in {{value}}",
+        "imprint": "Imprint of {{value}}",
+        "team": "Team {{value}}",
+        "location": "In {{value}} location"
+    },
+
+    "generic-filter-field-pipe": {
+        "person-role": "Role",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
+    },
+
 
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
@@ -2824,10 +2884,17 @@
         "pdf-light": "Light",
         "pdf-dark": "Dark"
     },
+    "breakpoint-pipe": {
+        "never": "Never",
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+    },
 
     "manage-reading-profiles": {
         "description": "Not all your series may be read in the same way, set up distinct reading profiles per library or series to make getting back in your series as seamless as possible.",
-        "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign or update one of your own reading profiles to the series.",
+        "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
+        "wiki-title": "wiki",
         "profiles-title": "Your reading profiles",
         "default-profile": "Default",
         "add": "{{common.add}}",
@@ -2862,6 +2929,8 @@
         "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
         "width-override-label": "{{manga-reader.width-override-label}}",
         "width-override-tooltip": "Override width of images in the reader",
+        "disable-width-override-label": "Disable width override",
+        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is at least the configured breakpoint or smaller",
         "reset": "{{common.reset}}",
 
         "book-reader-settings-title": "Book Reader",
@@ -2973,6 +3042,7 @@
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
+        "issue-count": "{{num}} Issues",
         "no-data": "No Data",
 
         "book-num": "Book",

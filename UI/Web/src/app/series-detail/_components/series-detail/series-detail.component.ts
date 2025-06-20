@@ -895,10 +895,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.cdRef.markForCheck();
         }
 
-
-
-
-
         this.isLoading = false;
         this.cdRef.markForCheck();
       });
@@ -1092,19 +1088,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   }
 
-  openVolume(volume: Volume) {
-    if (this.bulkSelectionService.hasSelections()) return;
-    if (volume.chapters === undefined || volume.chapters?.length === 0) {
-      this.toastr.error(this.translocoService.translate('series-detail.no-chapters'));
-      return;
-    }
-
-    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', volume.id]);
-    return;
-
-
-    this.readerService.readVolume(this.libraryId, this.seriesId, volume, false);
-  }
 
   openEditChapter(chapter: Chapter) {
     const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);

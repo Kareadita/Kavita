@@ -49,6 +49,11 @@ public sealed record ReadingListDto : IHasCoverImage
     /// </summary>
     public required AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
+    /// <summary>
+    /// Username of the User that owns (in the case of a promoted list)
+    /// </summary>
+    public string OwnerUserName { get; set; }
+
     public void ResetColorScape()
     {
         PrimaryColor = string.Empty;

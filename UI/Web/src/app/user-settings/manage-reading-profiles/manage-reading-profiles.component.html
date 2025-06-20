@@ -10,13 +10,13 @@
     </div>
 
     <p class="ps-2">{{t('description')}}</p>
-    <p class="ps-2 text-muted">{{t('extra-tip')}}</p>
+    <p class="ps-2 text-muted">{{t('extra-tip')}} <a target="_blank" rel="noopener noreferrer" [href]="WikiLink.ReadingProfiles">{{t('wiki-title')}}</a></p>
 
 
     <div class="row g-0 ">
 
-      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
-        <div class="pe-2">
+      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller mb-2 mb-sm-0">
+        <div class="pe-sm-2">
 
           @if (readingProfiles.length < virtualScrollerBreakPoint) {
             @for (readingProfile of readingProfiles; track readingProfile.id) {
@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
+      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-0 ps-sm-3">
         <div class="card p-3">
           @if (selectedProfile === null) {
             <p class="ps-2">{{t('no-selected')}}</p>
@@ -46,7 +46,9 @@
               <div class="mb-2 d-flex justify-content-between align-items-center">
                 <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default">
                   <ng-template #view>
-                    {{readingProfileForm.get('name')!.value}}
+                    <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
+                      {{readingProfileForm.get('name')!.value}}
+                    </span>
                   </ng-template>
                   <ng-template #edit>
                     <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
@@ -249,6 +251,22 @@
                               </app-setting-item>
                             </div>
                           }
+
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('disable-width-override-label')" [subtitle]="t('disable-width-override-tooltip')">
+                              <ng-template #view>
+                                {{readingProfileForm.get('disableWidthOverride')!.value | breakpoint}}
+                              </ng-template>
+                              <ng-template #edit>
+                                <select class="form-select" aria-describedby="image-reader-heading"
+                                        formControlName="disableWidthOverride">
+                                  @for (opt of breakPoints; track opt) {
+                                    <option [value]="opt">{{opt | breakpoint}}</option>
+                                  }
+                                </select>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
 
                         </div>
                       }

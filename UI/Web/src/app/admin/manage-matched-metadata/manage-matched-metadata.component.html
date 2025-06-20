@@ -3,8 +3,17 @@
 
   <form [formGroup]="filterGroup">
     <div class="row g-0">
-      <div class="col-auto ms-auto">
-        <label for="match-filter">Match State</label>
+      <div class="col-auto ms-auto me-3">
+        <label for="libtype-filter">{{t('library-type')}}</label>
+        <select class="form-select" formControlName="libraryType" id="libtype-filter">
+          <option [value]="-1">{{t('all-status-label')}}</option>
+          @for(libType of allLibraryTypes; track libType) {
+            <option [value]="libType">{{libType | libraryType}}</option>
+          }
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="match-filter">{{t('matched-state-label')}}</label>
         <select class="form-select" formControlName="matchState" id="match-filter">
           @for(state of allMatchStates; track state) {
             <option [value]="state">{{state | matchStateOption}}</option>
