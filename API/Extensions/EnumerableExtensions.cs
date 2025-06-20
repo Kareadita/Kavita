@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using API.Data.Misc;
+using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 
@@ -45,6 +46,18 @@ public static class EnumerableExtensions
     }
 
     public static IEnumerable<SeriesMetadata> RestrictAgainstAgeRestriction(this IEnumerable<SeriesMetadata> items, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return items;
+        var q = items.Where(s => s.AgeRating <= restriction.AgeRating);
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(s => s.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
+    }
+
+    public static IEnumerable<Chapter> RestrictAgainstAgeRestriction(this IEnumerable<Chapter> items, AgeRestriction restriction)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return items;
         var q = items.Where(s => s.AgeRating <= restriction.AgeRating);

@@ -173,23 +173,58 @@ public class GenreRepository : IGenreRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var query = _context.Genre
-            .RestrictAgainstAgeRestriction(ageRating)
-            .Select(g => new BrowseGenreDto
-            {
-                Id = g.Id,
-                Title = g.Title,
-                SeriesCount = g.SeriesMetadatas
-                    .Select(sm => sm.Id)
-                    .Distinct()
-                    .Count(),
-                ChapterCount = g.Chapters
-                    .Select(ch => ch.Id)
-                    .Distinct()
-                    .Count()
-            })
-            .OrderBy(g => g.Title);
+        var libs = await _context.Library.Includes(LibraryIncludes.AppUser).ToListAsync();
+        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId))
+            .Select(lib => lib.Id).ToList();
 
-        return await PagedList<BrowseGenreDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        var query = _context.Genre.RestrictAgainstAgeRestriction(ageRating);
+
+        IQueryable<BrowseGenreDto> finalQuery;
+        if (libs.Count != userLibs.Count)
+        {
+            var seriesIds = _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id);
+            query = query.Where(s => s.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
+                                     s.SeriesMetadatas.Any(sm => seriesIds.Contains(sm.SeriesId)));
+
+            finalQuery = query.Select(g => new BrowseGenreDto
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    SeriesCount = g.SeriesMetadatas
+                        .Where(sm => seriesIds.Contains(sm.SeriesId))
+                        .RestrictAgainstAgeRestriction(ageRating)
+                        //.Select(sm => sm.Id)
+                        .Distinct()
+                        .Count(),
+                    ChapterCount = g.Chapters
+                        .Where(cp => seriesIds.Contains(cp.Volume.SeriesId))
+                        .RestrictAgainstAgeRestriction(ageRating)
+                        //.Select(ch => ch.Id)
+                        .Distinct()
+                        .Count()
+                })
+                .OrderBy(g => g.Title);
+        }
+        else
+        {
+            finalQuery = query.Select(g => new BrowseGenreDto
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    SeriesCount = g.SeriesMetadatas
+                        .Select(sm => sm.Id)
+                        .Distinct()
+                        .Count(),
+                    ChapterCount = g.Chapters
+                        .Select(ch => ch.Id)
+                        .Distinct()
+                        .Count()
+                })
+                .OrderBy(g => g.Title);
+        }
+
+
+
+        return await PagedList<BrowseGenreDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
     }
 }
