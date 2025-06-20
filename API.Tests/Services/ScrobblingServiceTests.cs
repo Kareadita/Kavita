@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data.Repositories;
@@ -226,6 +227,37 @@ public class ScrobblingServiceTests : AbstractDbTest
     #region K+ API Request data tests
 
     [Fact]
+    public async Task ProcessReadEvents_CreatesNoEventsWhenNoProgress()
+    {
+        await ResetDb();
+        await SeedData();
+
+        // Set Returns
+        _licenseService.HasActiveLicense().Returns(Task.FromResult(true));
+        _kavitaPlusApiService.GetRateLimit(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(100);
+
+        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        // Ensure CanProcessScrobbleEvent returns true
+        user.AniListAccessToken = ValidJwtToken;
+        UnitOfWork.UserRepository.Update(user);
+        await UnitOfWork.CommitAsync();
+
+        var chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(4);
+        Assert.NotNull(chapter);
+
+        var volume = await UnitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        Assert.NotNull(volume);
+
+        // Call Scrobble without having any progress
+        await _service.ScrobbleReadingUpdate(1, 1);
+        var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+    }
+
+    [Fact]
     public async Task ProcessReadEvents_UpdateVolumeAndChapterData()
     {
         await ResetDb();
@@ -250,7 +282,12 @@ public class ScrobblingServiceTests : AbstractDbTest
         var volume = await UnitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
         Assert.NotNull(volume);
 
-        await _service.ScrobbleReadingUpdate(1, 1);
+        // Mark something as read to trigger event creation
+        await _readerService.MarkChaptersAsRead(user, 1, new List<Chapter>() {volume.Chapters[0]});
+        await UnitOfWork.CommitAsync();
+
+        // Call Scrobble without having any progress
+        await _service.ScrobbleReadingUpdate(user.Id, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
@@ -334,12 +371,9 @@ public class ScrobblingServiceTests : AbstractDbTest
 
         _licenseService.HasActiveLicense().Returns(true);
 
-        await _service.ScrobbleReadingUpdate(1, 1);
         var events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Single(events);
+        Assert.Empty(events);
 
-        var readEvent = events.First();
-        Assert.False(readEvent.IsProcessed);
 
         await _readerService.MarkChaptersAsRead(user, 1, [chapter1]);
         await UnitOfWork.CommitAsync();
@@ -349,7 +383,7 @@ public class ScrobblingServiceTests : AbstractDbTest
         events = await UnitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
-        readEvent = events.First();
+        var readEvent = events[0];
         Assert.False(readEvent.IsProcessed);
         Assert.Equal(1, readEvent.ChapterNumber);
 
