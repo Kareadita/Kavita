@@ -38,7 +38,7 @@ public enum ScrobbleProvider
     Kavita = 0,
     AniList = 1,
     Mal = 2,
-    [Obsolete]
+    [Obsolete("No longer supported")]
     GoogleBooks = 3,
     Cbr = 4
 }
@@ -350,52 +350,10 @@ public class ScrobblingService : IScrobblingService
 
     #region Scrobble ingest
 
-    public async Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody)
+    public Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody)
     {
         // Currently disabled until at least hardcover is implemented
-        return;
-        if (!await _licenseService.HasActiveLicense()) return;
-
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
-        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-
-        _logger.LogInformation("Processing Scrobbling review event for {AppUserId} on {SeriesName}", userId, series.Name);
-        if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
-
-        if (IsAniListReviewValid(reviewTitle, reviewBody))
-        {
-            _logger.LogDebug(
-                "Rejecting Scrobble event for {Series}. Review is not long enough to meet requirements", series.Name);
-            return;
-        }
-
-        var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
-            ScrobbleEventType.Review);
-        if (existingEvt is {IsProcessed: false})
-        {
-            _logger.LogDebug("Overriding Review scrobble event for {Series}", existingEvt.Series.Name);
-            existingEvt.ReviewBody = reviewBody;
-            existingEvt.ReviewTitle = reviewTitle;
-            _unitOfWork.ScrobbleRepository.Update(existingEvt);
-            await _unitOfWork.CommitAsync();
-            return;
-        }
-
-        var evt = new ScrobbleEvent()
-        {
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
-            ScrobbleEventType = ScrobbleEventType.Review,
-            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = GetMalId(series),
-            AppUserId = userId,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-            ReviewBody = reviewBody,
-            ReviewTitle = reviewTitle
-        };
-        _unitOfWork.ScrobbleRepository.Attach(evt);
-        await _unitOfWork.CommitAsync();
-        _logger.LogDebug("Added Scrobbling Review update on {SeriesName} with Userid {AppUserId} ", series.Name, userId);
+        return Task.CompletedTask;
     }
 
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
@@ -739,14 +697,6 @@ public class ScrobblingService : IScrobblingService
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
 
-        /*// Clear any events that are already on error table
-        var erroredEvents = await _unitOfWork.ScrobbleRepository.GetAllEventsWithSeriesIds(erroredSeries);
-        if (erroredEvents.Count > 0)
-        {
-            _unitOfWork.ScrobbleRepository.Remove(erroredEvents);
-            await _unitOfWork.CommitAsync();
-        }*/
-
         return new ScrobbleSyncContext
         {
             ReadEvents = readEvents,
@@ -897,7 +847,7 @@ public class ScrobblingService : IScrobblingService
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = (int?) evt.VolumeNumber,
-                AniListToken = evt.AppUser.AniListAccessToken ?? "",
+                AniListToken = evt.AppUser.AniListAccessToken ?? string.Empty,
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
                 Year = evt.Series.Metadata.ReleaseYear
@@ -925,7 +875,7 @@ public class ScrobblingService : IScrobblingService
                 AniListId = evt.AniListId,
                 MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
-                AniListToken = evt.AppUser.AniListAccessToken ?? "",
+                AniListToken = evt.AppUser.AniListAccessToken ?? string.Empty,
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
                 Rating = evt.Rating,
@@ -956,7 +906,7 @@ public class ScrobblingService : IScrobblingService
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = (int?) evt.VolumeNumber,
-                AniListToken = evt.AppUser.AniListAccessToken  ?? "",
+                AniListToken = evt.AppUser.AniListAccessToken  ?? string.Empty,
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
                 ScrobbleDateUtc = evt.LastModifiedUtc,
@@ -1027,10 +977,16 @@ public class ScrobblingService : IScrobblingService
         // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
         // which could happen in v0.8.3
         if (data.VolumeNumber is Parser.SpecialVolumeNumber or Parser.DefaultChapterNumber)
+        {
             data.VolumeNumber = 0;
+        }
+
 
         if (data.ChapterNumber is Parser.DefaultChapterNumber)
+        {
             data.ChapterNumber = 0;
+        }
+
 
         return data;
     }
