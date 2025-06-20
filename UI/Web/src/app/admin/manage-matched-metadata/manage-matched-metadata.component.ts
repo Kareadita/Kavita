@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {LicenseService} from "../../_services/license.service";
 import {Router} from "@angular/router";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 import {Series} from "../../_models/series";
@@ -23,6 +23,8 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {allKavitaPlusMetadataApplicableTypes} from "../../_models/library/library";
+import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-match-rate-limit-error-event";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -55,6 +57,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   private readonly manageService = inject(ManageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
   protected readonly imageService = inject(ImageService);
 
 
@@ -79,6 +82,11 @@ export class ManageMatchedMetadataComponent implements OnInit {
           if (this.data.filter(d => d.series.id === evt.seriesId).length > 0) {
             this.loadData();
           }
+        }
+
+        if (message.event == EVENTS.ExternalMatchRateLimitError) {
+          const evt = message.payload as ExternalMatchRateLimitErrorEvent;
+          this.toastr.error(translate('toasts.external-match-rate-error', {seriesName: evt.seriesName}))
         }
 
 

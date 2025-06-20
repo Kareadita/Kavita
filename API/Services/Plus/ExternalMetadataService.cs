@@ -386,6 +386,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             // We can't rethrow because Fix match is done in a background thread and Hangfire will requeue multiple times
             _logger.LogInformation(ex, "Rate limit hit for matching {SeriesName} with Kavita+", series.Name);
+            // Fire SignalR event about this
+            await _eventHub.SendMessageAsync(MessageFactory.ExternalMatchRateLimitError,
+                MessageFactory.ExternalMatchRateLimitErrorEvent(series.Id, series.Name));
         }
     }
 

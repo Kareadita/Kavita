@@ -2743,7 +2743,8 @@
         "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
         "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
         "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
-        "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}"
+        "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
+        "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes."
     },
 
     "read-time-pipe": {
