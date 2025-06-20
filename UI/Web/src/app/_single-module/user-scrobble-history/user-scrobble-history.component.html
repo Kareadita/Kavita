@@ -22,7 +22,7 @@
         <label for="filter">{{t('filter-label')}}</label>
         <div class="input-group">
           <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off" [placeholder]="t('filter-label')"/>
-          <button class="btn btn-primary" type="button" [disabled]="!selections.hasAnySelected()" (click)="bulkDelete()">{{t('delete-selected')}}</button>
+          <button class="btn btn-primary" type="button" [disabled]="!selections.hasAnySelected()" (click)="bulkDelete()">{{t('delete-selected-label')}}</button>
         </div>
       </div>
     </form>
@@ -47,8 +47,8 @@
       <ng-template let-column="column" ngx-datatable-header-template>
         <div class="form-check">
           <input id="select-all" type="checkbox" class="form-check-input"
-                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="selections?.hasSomeSelected()">
-          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-header')}}</label>
+                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="selections.hasSomeSelected()">
+          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all-label')}}</label>
         </div>
       </ng-template>
       <ng-template let-event="row" let-idx="index" ngx-datatable-cell-template>
