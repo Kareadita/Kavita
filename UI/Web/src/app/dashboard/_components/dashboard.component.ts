@@ -219,7 +219,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-updated-title');
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
@@ -230,7 +230,7 @@ export class DashboardComponent implements OnInit {
       params['page'] = 1;
       params['title'] = translate('dashboard.on-deck-title');
 
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
       if (filter.sortOptions) {
@@ -242,7 +242,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-added-title');
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.Created;
         filter.sortOptions.isAscending = false;
@@ -252,7 +252,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.more-in-genre-title', {genre: this.genre?.title});
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }

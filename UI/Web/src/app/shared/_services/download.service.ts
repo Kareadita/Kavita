@@ -1,24 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, inject, Inject, Injectable} from '@angular/core';
-import { Series } from 'src/app/_models/series';
-import { environment } from 'src/environments/environment';
-import { ConfirmService } from '../confirm.service';
-import { Chapter } from 'src/app/_models/chapter';
-import { Volume } from 'src/app/_models/volume';
-import {
-  asyncScheduler,
-  BehaviorSubject,
-  Observable,
-  tap,
-  finalize,
-  of,
-  filter,
-} from 'rxjs';
-import { download, Download } from '../_models/download';
-import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
+import {Series} from 'src/app/_models/series';
+import {environment} from 'src/environments/environment';
+import {ConfirmService} from '../confirm.service';
+import {Chapter} from 'src/app/_models/chapter';
+import {Volume} from 'src/app/_models/volume';
+import {asyncScheduler, BehaviorSubject, filter, finalize, Observable, of, tap,} from 'rxjs';
+import {download, Download} from '../_models/download';
+import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {switchMap, take, takeWhile, throttleTime} from 'rxjs/operators';
-import { AccountService } from 'src/app/_services/account.service';
-import { BytesPipe } from 'src/app/_pipes/bytes.pipe';
+import {AccountService} from 'src/app/_services/account.service';
+import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
 import {translate} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SAVER, Saver} from "../../_providers/saver.provider";
@@ -26,7 +18,7 @@ import {UtilityService} from "./utility.service";
 import {UserCollection} from "../../_models/collection-tag";
 import {RecentlyAddedItem} from "../../_models/recently-added-item";
 import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 
 export const DEBOUNCE_TIME = 100;
 

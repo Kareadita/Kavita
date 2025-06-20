@@ -13,6 +13,8 @@ export enum LibraryType {
 }
 
 export const allLibraryTypes = [LibraryType.Manga, LibraryType.ComicVine, LibraryType.Comic, LibraryType.Book, LibraryType.LightNovel, LibraryType.Images];
+export const allKavitaPlusMetadataApplicableTypes = [LibraryType.Manga, LibraryType.LightNovel, LibraryType.ComicVine, LibraryType.Comic];
+export const allKavitaPlusScrobbleEligibleTypes = [LibraryType.Manga, LibraryType.LightNovel];
 
 export interface Library {
     id: number;

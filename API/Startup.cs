@@ -293,6 +293,9 @@ public class Startup
                     await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
                     await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
 
+                    // v0.8.7
+                    await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
+
                     #endregion
 
                     //  Update the version in the DB after all migrations are run

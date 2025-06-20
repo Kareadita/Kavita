@@ -1,0 +1,34 @@
+<div class="main-container container-fluid">
+  <ng-container *transloco="let t; read:'browse-genres'" >
+    <app-side-nav-companion-bar [hasFilter]="false">
+      <h2 title>
+        <span>{{t('title')}}</span>
+      </h2>
+      <h6 subtitle>{{t('genre-count', {num: pagination.totalItems | number})}} </h6>
+
+    </app-side-nav-companion-bar>
+
+    <app-card-detail-layout
+      [isLoading]="isLoading"
+      [items]="genres"
+      [pagination]="pagination"
+      [trackByIdentity]="trackByIdentity"
+      [jumpBarKeys]="jumpKeys"
+      [filteringDisabled]="true"
+      [refresh]="refresh"
+    >
+      <ng-template #cardItem let-item let-position="idx">
+
+        <div class="tag-card" (click)="openFilter(FilterField.Genres, item.id)">
+          <div class="tag-name">{{ item.title }}</div>
+          <div class="tag-meta">
+            <span>{{t('series-count', {num: item.seriesCount | compactNumber})}}</span>
+            <span>{{t('issue-count', {num: item.chapterCount | compactNumber})}}</span>
+          </div>
+        </div>
+
+      </ng-template>
+    </app-card-detail-layout>
+
+  </ng-container>
+</div>

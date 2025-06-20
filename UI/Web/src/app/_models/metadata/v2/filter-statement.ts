@@ -1,8 +1,7 @@
-import { FilterComparison } from "./filter-comparison";
-import { FilterField } from "./filter-field";
+import {FilterComparison} from "./filter-comparison";
 
-export interface FilterStatement {
+export interface FilterStatement<T extends number = number> {
     comparison: FilterComparison;
-    field: FilterField;
+    field: T;
     value: string;
 }

@@ -153,6 +153,9 @@ public class AccountController : BaseApiController
             // Assign default streams
             AddDefaultStreamsToUser(user);
 
+            // Assign default reading profile
+            await AddDefaultReadingProfileToUser(user);
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
             if (!await ConfirmEmailToken(token, user)) return BadRequest(await _localizationService.Get("en",  "validate-email", token));
@@ -609,7 +612,7 @@ public class AccountController : BaseApiController
     }
 
     /// <summary>
-    /// Requests the Invite Url for the UserId. Will return error if user is already validated.
+    /// Requests the Invite Url for the AppUserId. Will return error if user is already validated.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
@@ -668,6 +671,9 @@ public class AccountController : BaseApiController
 
             // Assign default streams
             AddDefaultStreamsToUser(user);
+
+            // Assign default reading profile
+            await AddDefaultReadingProfileToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -777,6 +783,16 @@ public class AccountController : BaseApiController
         {
             user.SideNavStreams.Add(stream);
         }
+    }
+
+    private async Task AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
+            .Build();
+        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>

@@ -110,6 +110,7 @@ import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
 import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 
 enum TabID {
@@ -175,6 +176,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
@@ -551,7 +553,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.location.replaceState(newUrl)
   }
 
-  handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+  async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     this.cdRef.markForCheck();
     switch(action.action) {
       case(Action.MarkAsRead):
@@ -565,16 +567,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
       case(Action.Scan):
-        this.actionService.scanSeries(series);
+        await this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshSeriesMetadata(series, undefined, true, false);
+        await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
         break;
       case(Action.GenerateColorScape):
-        this.actionService.refreshSeriesMetadata(series, undefined, false, true);
+        await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
         break;
       case(Action.Delete):
-        this.deleteSeries(series);
+        await this.deleteSeries(series);
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series);
@@ -609,6 +611,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(chapterIds, device);
           break;
         }
+      case Action.SetReadingProfile:
+        this.actionService.setReadingProfileForMultiple([this.series]);
+        break;
+      case Action.ClearReadingProfile:
+        this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
+          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+        });
+        break;
       default:
         break;
     }
@@ -645,6 +655,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(volume.chapters.map(c => c.id), device);
           break;
         }
+      case (Action.Download):
+        this.downloadService.download('volume', volume);
+        break;
       default:
         break;
     }
@@ -678,6 +691,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.chapters = this.chapters.filter(c => c.id != chapter.id);
           this.cdRef.markForCheck();
         });
+        break;
+      case (Action.Download):
+        this.downloadService.download('chapter', chapter);
         break;
       default:
         break;
@@ -879,10 +895,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.cdRef.markForCheck();
         }
 
-
-
-
-
         this.isLoading = false;
         this.cdRef.markForCheck();
       });
@@ -1076,19 +1088,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   }
 
-  openVolume(volume: Volume) {
-    if (this.bulkSelectionService.hasSelections()) return;
-    if (volume.chapters === undefined || volume.chapters?.length === 0) {
-      this.toastr.error(this.translocoService.translate('series-detail.no-chapters'));
-      return;
-    }
-
-    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', volume.id]);
-    return;
-
-
-    this.readerService.readVolume(this.libraryId, this.seriesId, volume, false);
-  }
 
   openEditChapter(chapter: Chapter) {
     const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);

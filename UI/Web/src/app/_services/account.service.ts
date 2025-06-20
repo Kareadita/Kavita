@@ -102,9 +102,20 @@ export class AccountService {
     return true;
   }
 
+  /**
+   * If the user has any role in the restricted roles array or is an Admin
+   * @param user
+   * @param roles
+   * @param restrictedRoles
+   */
   hasAnyRole(user: User, roles: Array<Role>, restrictedRoles: Array<Role> = []) {
     if (!user || !user.roles) {
       return false;
+    }
+
+    // If the user is an admin, they have the role
+    if (this.hasAdminRole(user)) {
+      return true;
     }
 
     // If restricted roles are provided and the user has any of them, deny access
@@ -119,6 +130,33 @@ export class AccountService {
 
     // Allow access if the user has any of the allowed roles
     return roles.some(role => user.roles.includes(role));
+  }
+
+  /**
+   * If User or Admin, will return false
+   * @param user
+   * @param restrictedRoles
+   */
+  hasAnyRestrictedRole(user: User, restrictedRoles: Array<Role> = []) {
+    if (!user || !user.roles) {
+      return true;
+    }
+
+    if (restrictedRoles.length === 0) {
+      return false;
+    }
+
+    // If the user is an admin, they have the role
+    if (this.hasAdminRole(user)) {
+      return false;
+    }
+
+
+    if (restrictedRoles.length > 0 && restrictedRoles.some(role => user.roles.includes(role))) {
+      return true;
+    }
+
+    return false;
   }
 
   hasAdminRole(user: User) {

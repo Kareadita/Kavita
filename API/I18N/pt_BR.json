@@ -208,5 +208,6 @@
     "dashboard-stream-only-delete-smart-filter": "Somente fluxos de filtros inteligentes podem ser excluídos do painel",
     "smart-filter-system-name": "Você não pode usar o nome de um fluxo fornecido pelo sistema",
     "sidenav-stream-only-delete-smart-filter": "Somente fluxos de filtros inteligentes podem ser excluídos do Navegador Lateral",
-    "aliases-have-overlap": "Um ou mais dos pseudônimos se sobrepõem a outras pessoas, não pode atualizar"
+    "aliases-have-overlap": "Um ou mais dos pseudônimos se sobrepõem a outras pessoas, não pode atualizar",
+    "generated-reading-profile-name": "Gerado a partir de {0}"
 }

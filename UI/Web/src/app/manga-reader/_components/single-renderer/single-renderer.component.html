@@ -3,7 +3,7 @@
        [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
     @if(currentImage) {
       <img alt=" "
-            style="width: {{widthOverride$ | async}}"
+           [style.width]="widthOverride()"
            #image
            [src]="currentImage.src"
            id="image-1"

@@ -1,0 +1,30 @@
+.tag-card {
+  background-color: var(--bs-card-color, #2c2c2c);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, background 0.3s ease;
+  cursor: pointer;
+}
+
+.tag-card:hover {
+  background-color: #3a3a3a;
+  //transform: translateY(-3px); // Cool effect but has a weird background issue. ROBBIE: Fix this
+}
+
+.tag-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  max-height: 8rem;
+  height: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag-meta {
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted-color, #bbb);
+}

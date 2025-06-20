@@ -21,7 +21,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             ApiKey = HashUtil.ApiKey(),
             UserPreferences = new AppUserPreferences
             {
-                Theme = theme ?? Seed.DefaultThemes.First()
+                Theme = theme ?? Seed.DefaultThemes.First(),
             },
             ReadingLists = new List<ReadingList>(),
             Bookmarks = new List<AppUserBookmark>(),
@@ -31,7 +31,8 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Devices = new List<Device>(),
             Id = 0,
             DashboardStreams = new List<AppUserDashboardStream>(),
-            SideNavStreams = new List<AppUserSideNavStream>()
+            SideNavStreams = new List<AppUserSideNavStream>(),
+            ReadingProfiles = [],
         };
     }
 

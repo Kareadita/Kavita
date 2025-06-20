@@ -1,7 +1,7 @@
-import { ConfirmButton } from './confirm-button';
+import {ConfirmButton} from './confirm-button';
 
 export class ConfirmConfig {
-    _type: 'confirm' | 'alert' | 'info' = 'confirm';
+    _type: 'confirm' | 'alert' | 'info' | 'prompt' = 'confirm';
     header: string = 'Confirm';
     content: string = '';
     buttons: Array<ConfirmButton> = [];

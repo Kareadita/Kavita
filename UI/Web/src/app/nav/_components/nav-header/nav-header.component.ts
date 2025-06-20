@@ -47,6 +47,7 @@ import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.comp
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
+import {MetadataService} from "../../../_services/metadata.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -70,6 +71,8 @@ export class NavHeaderComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
+  protected readonly metadataService = inject(MetadataService);
+
 
   protected readonly FilterField = FilterField;
   protected readonly WikiLink = WikiLink;
@@ -159,9 +162,9 @@ export class NavHeaderComponent implements OnInit {
       });
   }
 
-  goTo(statement: FilterStatement) {
+  goTo(statement: FilterStatement<number>) {
     let params: any = {};
-    const filter = this.filterUtilityService.createSeriesV2Filter();
+    const filter = this.metadataService.createDefaultFilterDto('series');
     filter.statements = [statement];
     params['page'] = 1;
     this.clearSearch();

@@ -200,6 +200,9 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <summary>
     /// Returns the match results for a Series from UI Flow
     /// </summary>
+    /// <remarks>
+    /// Will extract alternative names like Localized name, year will send as ReleaseYear but fallback to Comic Vine syntax if applicable
+    /// </remarks>
     /// <param name="dto"></param>
     /// <returns></returns>
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto)
@@ -212,19 +215,26 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialAnilistId = ScrobblingService.ExtractId<int?>(dto.Query, ScrobblingService.AniListWeblinkWebsite);
         var potentialMalId = ScrobblingService.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
 
-        List<string> altNames = [series.LocalizedName, series.OriginalName];
-        if (potentialAnilistId == null && potentialMalId == null && !string.IsNullOrEmpty(dto.Query))
+        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+        var otherNames = ExtractAlternativeNames(series);
+
+        var year = series.Metadata.ReleaseYear;
+        if (year == 0 && format == PlusMediaFormat.Comic && !string.IsNullOrWhiteSpace(series.Name))
         {
-            altNames.Add(dto.Query);
+            var potentialYear = Parser.ParseYear(series.Name);
+            if (!string.IsNullOrEmpty(potentialYear))
+            {
+                year = int.Parse(potentialYear);
+            }
         }
 
         var matchRequest = new MatchSeriesRequestDto()
         {
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            Format = format,
             Query = dto.Query,
             SeriesName = series.Name,
-            AlternativeNames = altNames.Where(s => !string.IsNullOrEmpty(s)).ToList(),
-            Year = series.Metadata.ReleaseYear,
+            AlternativeNames = otherNames,
+            Year = year,
             AniListId = potentialAnilistId ?? ScrobblingService.GetAniListId(series),
             MalId = potentialMalId ?? ScrobblingService.GetMalId(series)
         };
@@ -252,6 +262,12 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return ArraySegment<ExternalSeriesMatchDto>.Empty;
+    }
+
+    private static List<string> ExtractAlternativeNames(Series series)
+    {
+        List<string> altNames = [series.LocalizedName, series.OriginalName];
+        return altNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
     }
 
 

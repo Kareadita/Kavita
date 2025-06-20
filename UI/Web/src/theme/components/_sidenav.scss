@@ -28,13 +28,18 @@
   }
   //START closed state of the sidebar
   &.closed {
-    width: 2.825rem;
+    width: 3.125rem;
     overflow-x: hidden;
     overflow-y: hidden;
     background-color: var(--side-nav-closed-bg-color);
     border: var(--side-nav-border-closed);
     height: calc((var(--vh) * 100) - 6.5rem);
     border-radius: unset;
+
+    // For Firefox
+    @supports (-moz-appearance: none) {
+      width: 2.5rem;
+    }
 
     .side-nav {
       .side-nav-item {
@@ -44,6 +49,10 @@
           &.active {
             color: var(--side-nav-item-active-text-color);
           }
+        }
+
+        .phone-hidden:first-of-type {
+          margin-left: unset;
         }
 
         .active-highlight {
@@ -83,10 +92,10 @@
         display: flex;
 
         &:first-of-type {
-          text-align: center;
           width: 2.5rem;
           min-width: 2.5rem;
           margin-left: 0.3rem;
+          justify-content: center;
         }
 
         &:last-child {
@@ -95,9 +104,7 @@
         }
 
         div {
-          align-items: center;
           height: 100%;
-          justify-content: inherit;
           padding: 0 0.625rem;
 
           i {
@@ -193,10 +200,12 @@
     .side-nav {
       overflow-x: hidden;
       padding-bottom: 0.625rem;
+      padding-left: 1.125rem;
 
       .side-nav-header {
         color: #ffffff;
         font-size: 1rem;
+        margin-left: unset;
 
         &:first-of-type {
           margin-top: 0.7rem;
@@ -207,7 +216,6 @@
         font-size: 1rem;
         min-height: 1.875rem;
         justify-content: unset;
-        margin-left: 1.125rem;
 
         &.active {
           .side-nav-text {
@@ -220,6 +228,14 @@
           margin-left: 0.75rem;
           font-size: 0.9rem;
           color: #999999;
+          
+          div {
+            display: flex;
+            
+            .badge {
+              align-self: center;
+            }
+          }
         }
 
         .card-actions {
@@ -278,9 +294,9 @@
       }
     }
   }
-  //START sidebar closed
+  //START sidebar bottom closed
   &.closed {
-    width: 3.4375rem;
+    width: 2.5rem;
     overflow-x: hidden;
     overflow-y: auto;
     background-color: unset;
@@ -295,7 +311,7 @@
       }
     }
   }
-  //END sidebar closed
+  //END sidebar bottom closed
 }
 //END kavita+ subscription bottom heart button
 

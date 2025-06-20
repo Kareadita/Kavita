@@ -1,28 +1,26 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { UtilityService } from '../shared/_services/utility.service';
-import { Chapter } from '../_models/chapter';
-import { PaginatedResult } from '../_models/pagination';
-import { Series } from '../_models/series';
-import { RelatedSeries } from '../_models/series-detail/related-series';
-import { SeriesDetail } from '../_models/series-detail/series-detail';
-import { SeriesGroup } from '../_models/series-group';
-import { SeriesMetadata } from '../_models/metadata/series-metadata';
-import { Volume } from '../_models/volume';
-import { ImageService } from './image.service';
-import { TextResonse } from '../_types/text-response';
-import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
-import {UserReview} from "../_single-module/review-card/user-review";
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {environment} from 'src/environments/environment';
+import {UtilityService} from '../shared/_services/utility.service';
+import {Chapter} from '../_models/chapter';
+import {PaginatedResult} from '../_models/pagination';
+import {Series} from '../_models/series';
+import {RelatedSeries} from '../_models/series-detail/related-series';
+import {SeriesDetail} from '../_models/series-detail/series-detail';
+import {SeriesGroup} from '../_models/series-group';
+import {SeriesMetadata} from '../_models/metadata/series-metadata';
+import {Volume} from '../_models/volume';
+import {TextResonse} from '../_types/text-response';
+import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {Rating} from "../_models/rating";
 import {Recommendation} from "../_models/series-detail/recommendation";
 import {ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
 import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapter";
 import {QueryContext} from "../_models/metadata/v2/query-context";
-import {ExternalSeries} from "../_models/series-detail/external-series";
 import {ExternalSeriesMatch} from "../_models/series-detail/external-series-match";
+import {FilterField} from "../_models/metadata/v2/filter-field";
 
 @Injectable({
   providedIn: 'root'
@@ -33,10 +31,9 @@ export class SeriesService {
   paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
-  constructor(private httpClient: HttpClient, private imageService: ImageService,
-    private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
-  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2, context: QueryContext = QueryContext.None) {
+  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, context: QueryContext = QueryContext.None) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
@@ -48,7 +45,7 @@ export class SeriesService {
     );
   }
 
-  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
+  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
@@ -100,7 +97,7 @@ export class SeriesService {
     return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
 
-  getRecentlyAdded(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
+  getRecentlyAdded(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
@@ -116,7 +113,7 @@ export class SeriesService {
     return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
   }
 
-  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2): Observable<PaginatedResult<Series[]>> {
+  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>): Observable<PaginatedResult<Series[]>> {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
@@ -134,7 +131,7 @@ export class SeriesService {
     }));
   }
 
-  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
+  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
@@ -230,5 +227,4 @@ export class SeriesService {
   updateDontMatch(seriesId: number, dontMatch: boolean) {
     return this.httpClient.post<string>(this.baseUrl + `series/dont-match?seriesId=${seriesId}&dontMatch=${dontMatch}`, {}, TextResonse);
   }
-
 }

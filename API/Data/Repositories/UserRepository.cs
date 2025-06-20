@@ -757,7 +757,7 @@ public class UserRepository : IUserRepository
 
 
     /// <summary>
-    /// Fetches the UserId by API Key. This does not include any extra information
+    /// Fetches the AppUserId by API Key. This does not include any extra information
     /// </summary>
     /// <param name="apiKey"></param>
     /// <returns></returns>

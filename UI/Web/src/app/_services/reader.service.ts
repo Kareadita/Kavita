@@ -16,13 +16,14 @@ import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {FullProgress} from "../_models/readers/full-progress";
 import {Volume} from "../_models/volume";
 import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
+import {FilterField} from "../_models/metadata/v2/filter-field";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -107,7 +108,7 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
   }
 
-  getAllBookmarks(filter: SeriesFilterV2 | undefined) {
+  getAllBookmarks(filter: FilterV2<FilterField> | undefined) {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
 

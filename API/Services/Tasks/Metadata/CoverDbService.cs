@@ -206,17 +206,12 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            _logger.LogTrace("Fetching publisher image from {Url}", publisherLink.Sanitize());
-            // Download the publisher file using Flurl
-            var publisherStream = await publisherLink
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
-
             // Create the destination file path
-            using var image = Image.NewFromStream(publisherStream);
             var filename = ImageService.GetPublisherFormat(publisherName, encodeFormat);
 
-            image.WriteToFile(Path.Combine(_directoryService.PublisherDirectory, filename));
+            _logger.LogTrace("Fetching publisher image from {Url}", publisherLink.Sanitize());
+            await DownloadImageFromUrl(publisherName, encodeFormat, publisherLink, _directoryService.PublisherDirectory);
+
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
 
             return filename;
@@ -302,7 +297,27 @@ public class CoverDbService : ICoverDbService
             .GetStreamAsync();
 
         using var image = Image.NewFromStream(imageStream);
-        image.WriteToFile(targetFile);
+        try
+        {
+            image.WriteToFile(targetFile);
+        }
+        catch (Exception ex)
+        {
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+        }
 
         return filename;
     }
@@ -385,14 +400,13 @@ public class CoverDbService : ICoverDbService
     private async Task<string> FallbackToKavitaReaderPublisher(string publisherName)
     {
         const string publisherFileName = "publishers.txt";
-        var externalLink = string.Empty;
         var allOverrides = await GetCachedData(publisherFileName) ??
                            await $"{NewHost}publishers/{publisherFileName}".GetStringAsync();
 
         // Cache immediately
         await CacheDataAsync(publisherFileName, allOverrides);
 
-        if (string.IsNullOrEmpty(allOverrides)) return externalLink;
+        if (string.IsNullOrEmpty(allOverrides)) return string.Empty;
 
         var externalFile = allOverrides
             .Split("\n")
@@ -415,7 +429,7 @@ public class CoverDbService : ICoverDbService
             throw new KavitaException($"Could not grab publisher image for {publisherName}");
         }
 
-        return $"{NewHost}publishers/{externalLink}";
+        return $"{NewHost}publishers/{externalFile}";
     }
 
     private async Task CacheDataAsync(string fileName, string? content)
@@ -572,8 +586,7 @@ public class CoverDbService : ICoverDbService
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
                         {
-
-                            // Don't delete series cover, unless it's an override, otherwise the first chapter cover will be null
+                            // Don't delete the Series cover unless it is an override, otherwise the first chapter will be null
                             if (existingPath.Contains(ImageService.GetSeriesFormat(series.Id)))
                             {
                                 _directoryService.DeleteFiles([existingPath]);
@@ -624,6 +637,7 @@ public class CoverDbService : ICoverDbService
         }
     }
 
+    // TODO: Refactor this to IHasCoverImage instead of a hard entity type
     public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false)
     {
         if (!string.IsNullOrEmpty(url))

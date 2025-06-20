@@ -5,10 +5,13 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.KavitaPlus.Manage;
+using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 
@@ -271,6 +274,27 @@ public static class QueryableExtensions
             ScrobbleEventSortField.ScrobbleEventFilter => query.OrderBy(s => s.ScrobbleEventType),
             _ => query
         };
+    }
+
+    public static IQueryable<Person> SortBy(this IQueryable<Person> query, PersonSortOptions? sort)
+    {
+        if (sort == null)
+        {
+            return query.OrderBy(p => p.Name);
+        }
+
+        return sort.SortField switch
+        {
+            PersonSortField.Name when sort.IsAscending => query.OrderBy(p => p.Name),
+            PersonSortField.Name => query.OrderByDescending(p => p.Name),
+            PersonSortField.SeriesCount when sort.IsAscending => query.OrderBy(p => p.SeriesMetadataPeople.Count),
+            PersonSortField.SeriesCount => query.OrderByDescending(p => p.SeriesMetadataPeople.Count),
+            PersonSortField.ChapterCount when sort.IsAscending => query.OrderBy(p => p.ChapterPeople.Count),
+            PersonSortField.ChapterCount => query.OrderByDescending(p => p.ChapterPeople.Count),
+            _ => query.OrderBy(p => p.Name)
+        };
+
+
     }
 
     /// <summary>
