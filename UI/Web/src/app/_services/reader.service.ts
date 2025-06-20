@@ -266,13 +266,13 @@ export class ReaderService {
 
 
   getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    let params: {[key: string]: any} = {};
-    if (incognitoMode) {
-      params['incognitoMode'] = true;
-    }
+    const params: {[key: string]: any} = {};
+    params['incognitoMode'] = incognitoMode;
+
     if (readingListMode) {
       params['readingListId'] = readingListId;
     }
+
     return params;
   }
 
