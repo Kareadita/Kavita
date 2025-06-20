@@ -1,3 +1,4 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
 using API.DTOs.Koreader;
@@ -39,7 +40,7 @@ public class KoreaderBookDtoBuilder : IEntityBuilder<KoreaderBookDto>
     public KoreaderBookDtoBuilder WithDeviceId(string installId, int userId)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(installId + userId));
-        _dto.Device_id = hash.ToString();
+        _dto.Device_id = Convert.ToHexString(hash);
         return this;
     }
 }
