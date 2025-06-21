@@ -105,15 +105,16 @@ export class LibrarySettingsModalComponent implements OnInit {
   libraryForm: FormGroup = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] }),
-    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageCollections: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
-    manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
-    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
+    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    manageCollections: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
   });
 
   selectedFolders: string[] = [];
@@ -155,7 +156,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.disable();
 
       if (this.IsMetadataDownloadEligible) {
-        this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching);
+        this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching ?? true);
         this.libraryForm.get('allowMetadataMatching')?.enable();
       } else {
         this.libraryForm.get('allowMetadataMatching')?.setValue(false);
@@ -183,6 +184,20 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+
+    // Turn on/off manage collections/rl
+    this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
+      tap(enabled => {
+        const manageCollectionsFc = this.libraryForm.get('manageCollections');
+        const manageReadingListsFc = this.libraryForm.get('manageReadingLists');
+
+        manageCollectionsFc?.setValue(enabled);
+        manageReadingListsFc?.setValue(enabled);
+
+        this.cdRef.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
 
     // This needs to only apply after first render
     this.libraryForm.get('type')?.valueChanges.pipe(
@@ -257,6 +272,8 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
+      this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
+      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata, true);
       this.selectedFolders = this.library.folders;
 
       this.madeChanges = false;

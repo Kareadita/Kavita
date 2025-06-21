@@ -1129,6 +1129,8 @@
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-search-label": "Include in Search",
         "include-in-search-tooltip": "Should series and any derived information (genres, people, files) from the library be included in search results.",
+        "enable-metadata-label": "Enable Metadata (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Allow Kavita to read metadata files which override filename parsing.",
         "force-scan": "Force Scan",
         "force-scan-tooltip": "This will force a scan on the library, treating like a fresh scan",
         "reset": "{{common.reset}}",

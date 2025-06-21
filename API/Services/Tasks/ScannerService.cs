@@ -521,6 +521,11 @@ public class ScannerService : IScannerService
         // Validations are done, now we can start actual scan
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
+        if (!library.EnableMetadata)
+        {
+            _logger.LogInformation("[ScannerService] Warning! {LibraryName} has metadata turned off", library.Name);
+        }
+
         // This doesn't work for something like M:/Manga/ and a series has library folder as root
         var shouldUseLibraryScan = !(await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)

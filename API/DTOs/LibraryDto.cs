@@ -65,5 +65,5 @@ public sealed record LibraryDto
     /// </summary>
     /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
     /// <remarks>Requires a valid LicenseKey</remarks>
-    public bool AllowMetadataMatching { get; set; } = true;
+    public bool EnableMetadata { get; set; } = true;
 }

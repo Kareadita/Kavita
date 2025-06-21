@@ -42,7 +42,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
 
         _externalMetadataService = new ExternalMetadataService(UnitOfWork, Substitute.For<ILogger<ExternalMetadataService>>(),
             Mapper, Substitute.For<ILicenseService>(), Substitute.For<IScrobblingService>(), Substitute.For<IEventHub>(),
-            Substitute.For<ICoverDbService>());
+            Substitute.For<ICoverDbService>(), Substitute.For<IKavitaPlusApiService>());
     }
 
     #region Gloabl

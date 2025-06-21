@@ -147,6 +147,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.AllowMetadataMatching)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.EnableMetadata)
+            .HasDefaultValue(true);
 
         builder.Entity<Chapter>()
             .Property(b => b.WebLinks)
