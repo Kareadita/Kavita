@@ -43,7 +43,7 @@
     [sorts]="[{prop: 'createdUtc', dir: 'desc'}]"
   >
 
-    <ngx-datatable-column prop="select" [sortable]="false" [draggable]="false" [resizeable]="false" [width]="50">
+    <ngx-datatable-column prop="select" [sortable]="false" [draggable]="false" [resizeable]="false">
       <ng-template let-column="column" ngx-datatable-header-template>
         <div class="form-check">
           <input id="select-all" type="checkbox" class="form-check-input"
