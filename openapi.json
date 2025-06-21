@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.15",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.16",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.6.15"
+    "version": "0.8.6.16"
   },
   "servers": [
     {
@@ -10522,7 +10522,7 @@
         "tags": [
           "Scrobbling"
         ],
-        "summary": "Adds a hold against the Series for user's scrobbling",
+        "summary": "Remove a hold against the Series for user's scrobbling",
         "parameters": [
           {
             "name": "seriesId",
@@ -10567,6 +10567,51 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/bulk-remove-events": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Delete the given scrobble events if they belong to that user",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -23505,6 +23550,10 @@
       "ScrobbleEventDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
           "seriesName": {
             "type": "string",
             "nullable": true
