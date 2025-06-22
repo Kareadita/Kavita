@@ -61,7 +61,8 @@ export class ExternalRatingComponent implements OnInit {
   ngOnInit() {
     this.reviewService.overallRating(this.seriesId, this.chapterId).subscribe(r => {
         this.overallRating = r.averageScore;
-      });
+        this.cdRef.markForCheck();
+    });
   }
 
   updateRating(rating: number) {
@@ -92,6 +93,4 @@ export class ExternalRatingComponent implements OnInit {
 
     return '';
   }
-
-  protected readonly RatingAuthority = RatingAuthority;
 }
