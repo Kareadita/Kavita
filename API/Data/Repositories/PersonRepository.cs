@@ -218,8 +218,10 @@ public class PersonRepository : IPersonRepository
     {
         var libs = await _context.Library.Includes(LibraryIncludes.AppUser).ToListAsync();
         var libIds = libs.Select(l => l.Id).ToList();
-        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId))
-            .Select(lib => lib.Id).ToList();
+        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId)).Select(lib => lib.Id).ToList();
+        var shouldLibRestrict = libIds.Count != userLibs.Count;
+
+        var seriesIds = await _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
 
         var query = _context.Person.AsNoTracking();
 
@@ -228,36 +230,61 @@ public class PersonRepository : IPersonRepository
 
         // Apply restrictions
         query = query.RestrictAgainstAgeRestriction(ageRating);
-        query = query.RestrictByLibrary(userLibs, libIds);
+
+        if (shouldLibRestrict)
+        {
+            query = query.Where(p => p.ChapterPeople.Any(cp => seriesIds.Contains(cp.Chapter.Volume.SeriesId)) ||
+                                     p.SeriesMetadataPeople.Any(smp => seriesIds.Contains(smp.SeriesMetadata.SeriesId)));
+        }
 
         // Apply sorting and limiting
         var sortedQuery = query.SortBy(filter.SortOptions);
 
         var limitedQuery = ApplyPersonLimit(sortedQuery, filter.LimitTo);
 
-        // I cannot get the counting to work without errors...
-        // Project to DTO
-        var projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
+        IQueryable<BrowsePersonDto> projectedQuery;
+        if (shouldLibRestrict)
         {
-            Id = p.Id,
-            Name = p.Name,
-            Description = p.Description,
-            CoverImage = p.CoverImage,
-            SeriesCount = p.SeriesMetadataPeople
-                .Select(smp => smp.SeriesMetadata)
-                //.RestrictByLibrary(userLibs, libIds)
-                //.RestrictAgainstAgeRestriction(ageRating)
-                .Select(smp => smp.SeriesId)
-                .Distinct()
-                .Count(),
-            ChapterCount = p.ChapterPeople
-                .Select(chp => chp.Chapter)
-                //.RestrictByLibrary(userLibs, libIds)
-                //.RestrictAgainstAgeRestriction(ageRating)
-                .Select(cp => cp.Id)
-                .Distinct()
-                .Count()
-        });
+            projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                CoverImage = p.CoverImage,
+                SeriesCount = p.SeriesMetadataPeople
+                    .Select(smp => smp.SeriesMetadata)
+                    .Where(sm => seriesIds.Contains(sm.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count(),
+                ChapterCount = p.ChapterPeople
+                    .Select(chp => chp.Chapter)
+                    .Where(ch => seriesIds.Contains(ch.Volume.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count()
+            });
+        }
+        else
+        {
+            projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                CoverImage = p.CoverImage,
+                SeriesCount = p.SeriesMetadataPeople
+                    .Select(smp => smp.SeriesMetadata)
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count(),
+                ChapterCount = p.ChapterPeople
+                    .Select(chp => chp.Chapter)
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count()
+            });
+        }
 
         return projectedQuery;
     }

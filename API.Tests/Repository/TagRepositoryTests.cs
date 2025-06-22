@@ -96,16 +96,30 @@ public class TagRepositoryTests : AbstractDbTest
             .Build();
         var lib1 = new LibraryBuilder("lib1")
             .WithSeries(new SeriesBuilder("lib1-s0")
-                .WithMetadata(new SeriesMetadata
-                {
-                    Tags = [SharedSeriesChaptersTag, SharedSeriesTag, Lib1SeriesChaptersTag, Lib1SeriesTag]
-                })
+                .WithMetadata(new SeriesMetadataBuilder()
+                    .WithTags([SharedSeriesChaptersTag, SharedSeriesTag, Lib1SeriesChaptersTag, Lib1SeriesTag])
+                    .WithAgeRating(AgeRating.Mature17Plus)
+                    .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
                         .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
                         .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag, Lib1ChapterAgeTag])
+                        .WithAgeRating(AgeRating.Mature17Plus)
+                        .Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("lib1-s1")
+                .WithMetadata(new SeriesMetadataBuilder()
+                    .WithTags([SharedSeriesChaptersTag, SharedSeriesTag, Lib1SeriesChaptersTag, Lib1SeriesTag])
+                    .Build())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1")
+                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
+                        .Build())
+                    .WithChapter(new ChapterBuilder("2")
+                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
                         .WithAgeRating(AgeRating.Mature17Plus)
                         .Build())
                     .Build())
@@ -140,8 +154,9 @@ public class TagRepositoryTests : AbstractDbTest
             Assert.Contains(fullAccessTags, ContainsTagCheck(tag));
         }
 
-        Assert.Equal(2, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(4, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
+        // 1 series lib0, 2 series lib1
+        Assert.Equal(3, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
+        Assert.Equal(6, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
         Assert.Equal(1, fullAccessTags.First(dto => dto.Id == Lib0SeriesTag.Id).SeriesCount);
 
 
@@ -159,15 +174,16 @@ public class TagRepositoryTests : AbstractDbTest
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChaptersTag));
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
 
-        // Verify Count is correctly limited
-        Assert.Equal(1, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(2, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
-        Assert.Equal(1, restrictedAccessTags.First(dto => dto.Id == Lib1SeriesTag.Id).SeriesCount);
+        // Verify Count is correctly limited: 2 series lib1
+        Assert.Equal(2, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
+        Assert.Equal(4, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
+        Assert.Equal(2, restrictedAccessTags.First(dto => dto.Id == Lib1SeriesTag.Id).SeriesCount);
+        Assert.Equal(4, restrictedAccessTags.First(dto => dto.Id == Lib1ChaptersTag.Id).ChapterCount);
 
 
         var restrictedAgeAccessTags = await UnitOfWork.TagRepository.GetBrowseableTag(_restrictedAgeAccess.Id, new UserParams());
 
-        // Should see: 3 shared + 3 library 1 specific = 6 tags
+        // Should see: 3 shared + 3 lib1 specific = 6 tags
         Assert.Equal(6, restrictedAgeAccessTags.TotalCount);
 
         Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesChaptersTag));
@@ -179,12 +195,11 @@ public class TagRepositoryTests : AbstractDbTest
 
         Assert.DoesNotContain(restrictedAgeAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
 
-        // Verify Count is correctly limited
+        // Verify Count is correctly limited: 1 series lib1
         Assert.Equal(1, restrictedAgeAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(1, restrictedAgeAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
+        Assert.Equal(2, restrictedAgeAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
         Assert.Equal(1, restrictedAgeAccessTags.First(dto => dto.Id == Lib1SeriesTag.Id).SeriesCount);
-
-
+        Assert.Equal(2, restrictedAgeAccessTags.First(dto => dto.Id == Lib1ChaptersTag.Id).ChapterCount);
 
     }
 }
