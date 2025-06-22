@@ -25,7 +25,8 @@ import {ImageService} from 'src/app/_services/image.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {
   DraggableOrderedListComponent,
-  IndexUpdateEvent
+  IndexUpdateEvent,
+  ItemRemoveEvent
 } from '../draggable-ordered-list/draggable-ordered-list.component';
 import {forkJoin, startWith, tap} from 'rxjs';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -321,6 +322,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   editReadingList(readingList: ReadingList) {
+    if (!readingList) return;
     this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
       // Reload information around list
       this.readingListService.getReadingList(this.listId).subscribe(rl => {
@@ -347,10 +349,10 @@ export class ReadingListDetailComponent implements OnInit {
     });
   }
 
-  itemRemoved(item: ReadingListItem, position: number) {
+  removeItem(removeEvent: ItemRemoveEvent) {
     if (!this.readingList) return;
-    this.readingListService.deleteItem(this.readingList.id, item.id).subscribe(() => {
-      this.items.splice(position, 1);
+    this.readingListService.deleteItem(this.readingList.id, removeEvent.item.id).subscribe(() => {
+      this.items.splice(removeEvent.position, 1);
       this.items = [...this.items];
       this.cdRef.markForCheck();
       this.toastr.success(translate('toasts.item-removed'));

@@ -18,10 +18,10 @@
           {{item.title}}
           <div class="actions float-end">
             @if (showRemove) {
-              <button class="btn btn-danger" (click)="remove.emit(item)">
-              <span>
-                <i class="fa fa-trash me-1" aria-hidden="true"></i>
-              </span>
+              <button class="btn btn-danger" (click)="removeItem(item)">
+                <span>
+                  <i class="fa fa-trash me-1" aria-hidden="true"></i>
+                </span>
                 <span class="d-none d-md-inline-block">{{t('remove')}}</span>
               </button>
             }

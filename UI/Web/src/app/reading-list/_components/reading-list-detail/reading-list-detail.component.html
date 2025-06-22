@@ -229,14 +229,17 @@
                         </div>
                       }
 
-                      <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-                                                  [disabled]="!(formGroup.get('edit')?.value || false)" [showRemoveButton]="formGroup.get('edit')?.value || false">
+                      <app-draggable-ordered-list [items]="items" [accessibilityMode]="accessibilityMode"
+                                                  [disabled]="!(formGroup.get('edit')?.value || false)"
+                                                  (orderUpdated)="orderUpdated($event)"
+                                                  (itemRemove)="removeItem($event)"
+                                                  [showRemoveButton]="formGroup.get('edit')?.value || false">
 
                         <ng-template #draggableItem let-item let-position="idx">
                           <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item"
                                                  [position]="position" [libraryTypes]="libraryTypes"
                                                  [promoted]="item.promoted" (read)="readChapter($event)"
-                                                 (remove)="itemRemoved($event, position)"
+                                                 (remove)="removeItem($event)"
                                                  [showRemove]="false"/>
                         </ng-template>
                       </app-draggable-ordered-list>
