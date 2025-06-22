@@ -179,7 +179,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = _context.Library.GetUserLibraries(userId);
 
         // Query roles from ChapterPeople
         var chapterRoles = await _context.Person
@@ -332,7 +332,7 @@ public class PersonRepository : IPersonRepository
     {
         var normalized = name.ToNormalized();
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = _context.Library.GetUserLibraries(userId);
 
         return await _context.Person
             .Where(p => p.NormalizedName == normalized)
@@ -382,7 +382,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId, PersonRole role)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = _context.Library.GetUserLibraries(userId);
 
         return await _context.ChapterPeople
             .Where(cp => cp.PersonId == personId && cp.Role == role)
@@ -442,7 +442,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.None)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = _context.Library.GetUserLibraries(userId);
 
         return await _context.Person
             .Includes(includes)
@@ -456,7 +456,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.None)
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var userLibs = _context.Library.GetUserLibraries(userId);
 
         return await _context.Person
             .Where(p => p.SeriesMetadataPeople.Any(smp => smp.Role == role) || p.ChapterPeople.Any(cp => cp.Role == role)) // Filter by role in both series and chapters

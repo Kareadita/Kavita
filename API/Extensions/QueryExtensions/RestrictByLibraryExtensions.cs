@@ -12,33 +12,25 @@ namespace API.Extensions.QueryExtensions;
 public static class RestrictByLibraryExtensions
 {
 
-    public static IQueryable<Person> RestrictByLibrary(this IQueryable<Person> query, IList<int> userLibs, IList<int> allLibs = null)
+    public static IQueryable<Person> RestrictByLibrary(this IQueryable<Person> query, IQueryable<int> userLibs)
     {
-        if (allLibs != null && allLibs.Count == userLibs.Count) return query;
-
         return query.Where(p =>
             p.ChapterPeople.Any(cp => userLibs.Contains(cp.Chapter.Volume.Series.LibraryId)) ||
             p.SeriesMetadataPeople.Any(sm => userLibs.Contains(sm.SeriesMetadata.Series.LibraryId)));
     }
 
-    public static IQueryable<Chapter> RestrictByLibrary(this IQueryable<Chapter> query, IList<int> userLibs, IList<int> allLibs = null)
+    public static IQueryable<Chapter> RestrictByLibrary(this IQueryable<Chapter> query, IQueryable<int> userLibs)
     {
-        if (allLibs != null && allLibs.Count == userLibs.Count) return query;
-
         return query.Where(cp => userLibs.Contains(cp.Volume.Series.LibraryId));
     }
 
-    public static IQueryable<SeriesMetadataPeople> RestrictByLibrary(this IQueryable<SeriesMetadataPeople> query, IList<int> userLibs, IList<int> allLibs = null)
+    public static IQueryable<SeriesMetadataPeople> RestrictByLibrary(this IQueryable<SeriesMetadataPeople> query, IQueryable<int> userLibs)
     {
-        if (allLibs != null && allLibs.Count == userLibs.Count) return query;
-
         return query.Where(sm => userLibs.Contains(sm.SeriesMetadata.Series.LibraryId));
     }
 
-    public static IQueryable<ChapterPeople> RestrictByLibrary(this IQueryable<ChapterPeople> query, IList<int> userLibs, IList<int> allLibs = null)
+    public static IQueryable<ChapterPeople> RestrictByLibrary(this IQueryable<ChapterPeople> query, IQueryable<int> userLibs)
     {
-        if (allLibs != null && allLibs.Count == userLibs.Count) return query;
-
         return query.Where(cp => userLibs.Contains(cp.Chapter.Volume.Series.LibraryId));
     }
 }

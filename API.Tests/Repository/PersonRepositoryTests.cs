@@ -167,9 +167,14 @@ public class PersonRepositoryTests : AbstractDbTest
 
         foreach (var person in AllPeople) Assert.Contains(fullAccessPeople, ContainsPersonCheck(person));
 
+        // 1 lib0, 2 Lib1
         Assert.Equal(3, fullAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).SeriesCount);
+        // 2* the above
         Assert.Equal(6, fullAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).ChapterCount);
+        // 1 series in lib0
         Assert.Equal(1, fullAccessPeople.First(dto => dto.Id == Lib0SeriesPerson.Id).SeriesCount);
+        // 2 series in lib1
+        Assert.Equal(2, fullAccessPeople.First(dto => dto.Id == Lib1SeriesPerson.Id).SeriesCount);
 
 
         var restrictedAccessPeople =
@@ -186,8 +191,11 @@ public class PersonRepositoryTests : AbstractDbTest
         Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1ChaptersPerson));
         Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1ChapterAgePerson));
 
+        // 2 series in lib1, 0 in lib0
         Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).SeriesCount);
+        // 2* the above
         Assert.Equal(4, restrictedAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).ChapterCount);
+        // Access to both series
         Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == Lib1SeriesPerson.Id).SeriesCount);
 
 
