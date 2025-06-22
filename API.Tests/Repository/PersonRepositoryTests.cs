@@ -15,27 +15,6 @@ namespace API.Tests.Repository;
 
 public class PersonRepositoryTests : AbstractDbTest
 {
-    private static readonly Person SharedSeriesChaptersPerson =
-        new PersonBuilder("Shared Series Chapter Person").Build();
-
-    private static readonly Person SharedSeriesPerson = new PersonBuilder("Shared Series Person").Build();
-    private static readonly Person SharedChaptersPerson = new PersonBuilder("Shared Chapters Person").Build();
-    private static readonly Person Lib0SeriesChaptersPerson = new PersonBuilder("Lib0 Series Chapter Person").Build();
-    private static readonly Person Lib0SeriesPerson = new PersonBuilder("Lib0 Series Person").Build();
-    private static readonly Person Lib0ChaptersPerson = new PersonBuilder("Lib0 Chapters Person").Build();
-    private static readonly Person Lib1SeriesChaptersPerson = new PersonBuilder("Lib1 Series Chapter Person").Build();
-    private static readonly Person Lib1SeriesPerson = new PersonBuilder("Lib1 Series Person").Build();
-    private static readonly Person Lib1ChaptersPerson = new PersonBuilder("Lib1 Chapters Person").Build();
-    private static readonly Person Lib1ChapterAgePerson = new PersonBuilder("Lib1 Chapter Age Person").Build();
-
-    private static readonly List<Person> AllPeople =
-    [
-        SharedSeriesChaptersPerson, SharedSeriesPerson, SharedChaptersPerson,
-        Lib0SeriesChaptersPerson, Lib0SeriesPerson, Lib0ChaptersPerson,
-        Lib1SeriesChaptersPerson, Lib1SeriesPerson, Lib1ChaptersPerson, Lib1ChapterAgePerson
-    ];
-
-
     private AppUser _fullAccess;
     private AppUser _restrictedAccess;
     private AppUser _restrictedAgeAccess;
@@ -61,29 +40,62 @@ public class PersonRepositoryTests : AbstractDbTest
         Context.AppUser.Add(_restrictedAgeAccess);
         await Context.SaveChangesAsync();
 
-        Context.Person.AddRange(AllPeople);
+        var people = CreateTestPeople();
+        Context.Person.AddRange(people);
         await Context.SaveChangesAsync();
 
+        var libraries = CreateTestLibraries(people);
+        Context.Library.AddRange(libraries);
+        await Context.SaveChangesAsync();
+
+        _fullAccess.Libraries.Add(libraries[0]); // lib0
+        _fullAccess.Libraries.Add(libraries[1]); // lib1
+        _restrictedAccess.Libraries.Add(libraries[1]); // lib1 only
+        _restrictedAgeAccess.Libraries.Add(libraries[1]); // lib1 only
+
+        await Context.SaveChangesAsync();
+    }
+
+    private static List<Person> CreateTestPeople()
+    {
+        return new List<Person>
+        {
+            new PersonBuilder("Shared Series Chapter Person").Build(),
+            new PersonBuilder("Shared Series Person").Build(),
+            new PersonBuilder("Shared Chapters Person").Build(),
+            new PersonBuilder("Lib0 Series Chapter Person").Build(),
+            new PersonBuilder("Lib0 Series Person").Build(),
+            new PersonBuilder("Lib0 Chapters Person").Build(),
+            new PersonBuilder("Lib1 Series Chapter Person").Build(),
+            new PersonBuilder("Lib1 Series Person").Build(),
+            new PersonBuilder("Lib1 Chapters Person").Build(),
+            new PersonBuilder("Lib1 Chapter Age Person").Build()
+        };
+    }
+
+    private static List<Library> CreateTestLibraries(List<Person> people)
+    {
         var lib0 = new LibraryBuilder("lib0")
             .WithSeries(new SeriesBuilder("lib0-s0")
                 .WithMetadata(new SeriesMetadataBuilder()
-                    .WithPerson(SharedSeriesChaptersPerson, PersonRole.Writer)
-                    .WithPerson(SharedSeriesPerson, PersonRole.Writer)
-                    .WithPerson(Lib0SeriesChaptersPerson, PersonRole.Writer)
-                    .WithPerson(Lib0SeriesPerson, PersonRole.Writer)
+                    .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Writer)
+                    .WithPerson(GetPersonByName(people, "Shared Series Person"), PersonRole.Writer)
+                    .WithPerson(GetPersonByName(people, "Lib0 Series Chapter Person"), PersonRole.Writer)
+                    .WithPerson(GetPersonByName(people, "Lib0 Series Person"), PersonRole.Writer)
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.Colorist)
-                        .WithPerson(SharedChaptersPerson, PersonRole.Colorist)
-                        .WithPerson(Lib0SeriesChaptersPerson, PersonRole.Colorist)
-                        .WithPerson(Lib0ChaptersPerson, PersonRole.Colorist)
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Colorist)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.Colorist)
+                        .WithPerson(GetPersonByName(people, "Lib0 Series Chapter Person"), PersonRole.Colorist)
+                        .WithPerson(GetPersonByName(people, "Lib0 Chapters Person"), PersonRole.Colorist)
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.Editor)
-                        .WithPerson(SharedChaptersPerson, PersonRole.Editor)
-                        .WithPerson(Lib0SeriesChaptersPerson, PersonRole.Editor)
-                        .WithPerson(Lib0ChaptersPerson, PersonRole.Editor).Build())
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Editor)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.Editor)
+                        .WithPerson(GetPersonByName(people, "Lib0 Series Chapter Person"), PersonRole.Editor)
+                        .WithPerson(GetPersonByName(people, "Lib0 Chapters Person"), PersonRole.Editor)
+                        .Build())
                     .Build())
                 .Build())
             .Build();
@@ -91,62 +103,64 @@ public class PersonRepositoryTests : AbstractDbTest
         var lib1 = new LibraryBuilder("lib1")
             .WithSeries(new SeriesBuilder("lib1-s0")
                 .WithMetadata(new SeriesMetadataBuilder()
-                    .WithPerson(SharedSeriesChaptersPerson, PersonRole.Letterer)
-                    .WithPerson(SharedSeriesPerson, PersonRole.Letterer)
-                    .WithPerson(Lib1SeriesChaptersPerson, PersonRole.Letterer)
-                    .WithPerson(Lib1SeriesPerson, PersonRole.Letterer)
+                    .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Letterer)
+                    .WithPerson(GetPersonByName(people, "Shared Series Person"), PersonRole.Letterer)
+                    .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.Letterer)
+                    .WithPerson(GetPersonByName(people, "Lib1 Series Person"), PersonRole.Letterer)
                     .WithAgeRating(AgeRating.Mature17Plus)
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.Imprint)
-                        .WithPerson(SharedChaptersPerson, PersonRole.Imprint)
-                        .WithPerson(Lib1SeriesChaptersPerson, PersonRole.Imprint)
-                        .WithPerson(Lib1ChaptersPerson, PersonRole.Imprint)
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Imprint)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.Imprint)
+                        .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.Imprint)
+                        .WithPerson(GetPersonByName(people, "Lib1 Chapters Person"), PersonRole.Imprint)
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.CoverArtist)
-                        .WithPerson(SharedChaptersPerson, PersonRole.CoverArtist)
-                        .WithPerson(Lib1SeriesChaptersPerson, PersonRole.CoverArtist)
-                        .WithPerson(Lib1ChaptersPerson, PersonRole.CoverArtist)
-                        .WithPerson(Lib1ChapterAgePerson, PersonRole.CoverArtist)
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.CoverArtist)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.CoverArtist)
+                        .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.CoverArtist)
+                        .WithPerson(GetPersonByName(people, "Lib1 Chapters Person"), PersonRole.CoverArtist)
+                        .WithPerson(GetPersonByName(people, "Lib1 Chapter Age Person"), PersonRole.CoverArtist)
                         .WithAgeRating(AgeRating.Mature17Plus)
                         .Build())
                     .Build())
                 .Build())
             .WithSeries(new SeriesBuilder("lib1-s1")
                 .WithMetadata(new SeriesMetadataBuilder()
-                    .WithPerson(SharedSeriesChaptersPerson, PersonRole.Inker)
-                    .WithPerson(SharedSeriesPerson, PersonRole.Inker)
-                    .WithPerson(Lib1SeriesChaptersPerson, PersonRole.Inker)
-                    .WithPerson(Lib1SeriesPerson, PersonRole.Inker)
+                    .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Inker)
+                    .WithPerson(GetPersonByName(people, "Shared Series Person"), PersonRole.Inker)
+                    .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.Inker)
+                    .WithPerson(GetPersonByName(people, "Lib1 Series Person"), PersonRole.Inker)
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.Team)
-                        .WithPerson(SharedChaptersPerson, PersonRole.Team)
-                        .WithPerson(Lib1SeriesChaptersPerson, PersonRole.Team)
-                        .WithPerson(Lib1ChaptersPerson, PersonRole.Team)
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Team)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.Team)
+                        .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.Team)
+                        .WithPerson(GetPersonByName(people, "Lib1 Chapters Person"), PersonRole.Team)
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithPerson(SharedSeriesChaptersPerson, PersonRole.Translator)
-                        .WithPerson(SharedChaptersPerson, PersonRole.Translator)
-                        .WithPerson(Lib1SeriesChaptersPerson, PersonRole.Translator)
-                        .WithPerson(Lib1ChaptersPerson, PersonRole.Translator)
+                        .WithPerson(GetPersonByName(people, "Shared Series Chapter Person"), PersonRole.Translator)
+                        .WithPerson(GetPersonByName(people, "Shared Chapters Person"), PersonRole.Translator)
+                        .WithPerson(GetPersonByName(people, "Lib1 Series Chapter Person"), PersonRole.Translator)
+                        .WithPerson(GetPersonByName(people, "Lib1 Chapters Person"), PersonRole.Translator)
                         .Build())
                     .Build())
                 .Build())
             .Build();
 
+        return new List<Library> { lib0, lib1 };
+    }
 
-        await Context.SaveChangesAsync();
+    private static Person GetPersonByName(List<Person> people, string name)
+    {
+        return people.First(p => p.Name == name);
+    }
 
-        _fullAccess.Libraries.Add(lib0);
-        _fullAccess.Libraries.Add(lib1);
-        _restrictedAccess.Libraries.Add(lib1);
-        _restrictedAgeAccess.Libraries.Add(lib1);
-
-        await Context.SaveChangesAsync();
+    private Person GetPersonByName(string name)
+    {
+        return Context.Person.First(p => p.Name == name);
     }
 
     private static Predicate<BrowsePersonDto> ContainsPersonCheck(Person person)
@@ -160,22 +174,29 @@ public class PersonRepositoryTests : AbstractDbTest
         await ResetDb();
         await SeedDb();
 
+        // Get people from database for assertions
+        var sharedSeriesChaptersPerson = GetPersonByName("Shared Series Chapter Person");
+        var lib0SeriesPerson = GetPersonByName("Lib0 Series Person");
+        var lib1SeriesPerson = GetPersonByName("Lib1 Series Person");
+        var lib1ChapterAgePerson = GetPersonByName("Lib1 Chapter Age Person");
+        var allPeople = Context.Person.ToList();
+
         var fullAccessPeople =
             await UnitOfWork.PersonRepository.GetBrowsePersonDtos(_fullAccess.Id, new BrowsePersonFilterDto(),
                 new UserParams());
-        Assert.Equal(AllPeople.Count, fullAccessPeople.TotalCount);
+        Assert.Equal(allPeople.Count, fullAccessPeople.TotalCount);
 
-        foreach (var person in AllPeople) Assert.Contains(fullAccessPeople, ContainsPersonCheck(person));
+        foreach (var person in allPeople)
+            Assert.Contains(fullAccessPeople, ContainsPersonCheck(person));
 
         // 1 lib0, 2 Lib1
-        Assert.Equal(3, fullAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).SeriesCount);
+        Assert.Equal(3, fullAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).SeriesCount);
         // 2* the above
-        Assert.Equal(6, fullAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).ChapterCount);
+        Assert.Equal(6, fullAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).ChapterCount);
         // 1 series in lib0
-        Assert.Equal(1, fullAccessPeople.First(dto => dto.Id == Lib0SeriesPerson.Id).SeriesCount);
+        Assert.Equal(1, fullAccessPeople.First(dto => dto.Id == lib0SeriesPerson.Id).SeriesCount);
         // 2 series in lib1
-        Assert.Equal(2, fullAccessPeople.First(dto => dto.Id == Lib1SeriesPerson.Id).SeriesCount);
-
+        Assert.Equal(2, fullAccessPeople.First(dto => dto.Id == lib1SeriesPerson.Id).SeriesCount);
 
         var restrictedAccessPeople =
             await UnitOfWork.PersonRepository.GetBrowsePersonDtos(_restrictedAccess.Id, new BrowsePersonFilterDto(),
@@ -183,21 +204,20 @@ public class PersonRepositoryTests : AbstractDbTest
 
         Assert.Equal(7, restrictedAccessPeople.TotalCount);
 
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(SharedSeriesChaptersPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(SharedSeriesPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(SharedChaptersPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1SeriesChaptersPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1SeriesPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1ChaptersPerson));
-        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(Lib1ChapterAgePerson));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Shared Series Chapter Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Shared Series Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Shared Chapters Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Series Chapter Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Series Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Chapters Person")));
+        Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Chapter Age Person")));
 
         // 2 series in lib1, 0 in lib0
-        Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).SeriesCount);
+        Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).SeriesCount);
         // 2* the above
-        Assert.Equal(4, restrictedAccessPeople.First(dto => dto.Id == SharedSeriesChaptersPerson.Id).ChapterCount);
+        Assert.Equal(4, restrictedAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).ChapterCount);
         // Access to both series
-        Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == Lib1SeriesPerson.Id).SeriesCount);
-
+        Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == lib1SeriesPerson.Id).SeriesCount);
 
         var restrictedAgeAccessPeople = await UnitOfWork.PersonRepository.GetBrowsePersonDtos(_restrictedAgeAccess.Id,
             new BrowsePersonFilterDto(), new UserParams());
@@ -205,7 +225,7 @@ public class PersonRepositoryTests : AbstractDbTest
         // Note: There is a potential bug here where a person in a different chapter of an age restricted series will show up
         Assert.Equal(6, restrictedAgeAccessPeople.TotalCount);
 
-        Assert.DoesNotContain(restrictedAgeAccessPeople, ContainsPersonCheck(Lib1ChapterAgePerson));
+        Assert.DoesNotContain(restrictedAgeAccessPeople, ContainsPersonCheck(lib1ChapterAgePerson));
     }
 
     [Fact]
@@ -214,24 +234,27 @@ public class PersonRepositoryTests : AbstractDbTest
         await ResetDb();
         await SeedDb();
 
-        var sharedSeriesRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedSeriesPerson.Id, _fullAccess.Id);
-        var chapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedChaptersPerson.Id, _fullAccess.Id);
-        var ageChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(Lib1ChapterAgePerson.Id, _fullAccess.Id);
+        var sharedSeriesPerson = GetPersonByName("Shared Series Person");
+        var sharedChaptersPerson = GetPersonByName("Shared Chapters Person");
+        var lib1ChapterAgePerson = GetPersonByName("Lib1 Chapter Age Person");
+
+        var sharedSeriesRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedSeriesPerson.Id, _fullAccess.Id);
+        var chapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedChaptersPerson.Id, _fullAccess.Id);
+        var ageChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(lib1ChapterAgePerson.Id, _fullAccess.Id);
         Assert.Equal(3, sharedSeriesRoles.Count());
         Assert.Equal(6, chapterRoles.Count());
         Assert.Single(ageChapterRoles);
 
-
-        var restrictedRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedSeriesPerson.Id, _restrictedAccess.Id);
-        var restrictedChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedChaptersPerson.Id, _restrictedAccess.Id);
-        var restrictedAgePersonChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(Lib1ChapterAgePerson.Id, _restrictedAccess.Id);
+        var restrictedRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedSeriesPerson.Id, _restrictedAccess.Id);
+        var restrictedChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedChaptersPerson.Id, _restrictedAccess.Id);
+        var restrictedAgePersonChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(lib1ChapterAgePerson.Id, _restrictedAccess.Id);
         Assert.Equal(2, restrictedRoles.Count());
         Assert.Equal(4, restrictedChapterRoles.Count());
         Assert.Single(restrictedAgePersonChapterRoles);
 
-        var restrictedAgeRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedSeriesPerson.Id, _restrictedAgeAccess.Id);
-        var restrictedAgeChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(SharedChaptersPerson.Id, _restrictedAgeAccess.Id);
-        var restrictedAgeAgePersonChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(Lib1ChapterAgePerson.Id, _restrictedAgeAccess.Id);
+        var restrictedAgeRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedSeriesPerson.Id, _restrictedAgeAccess.Id);
+        var restrictedAgeChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(sharedChaptersPerson.Id, _restrictedAgeAccess.Id);
+        var restrictedAgeAgePersonChapterRoles = await UnitOfWork.PersonRepository.GetRolesForPersonByName(lib1ChapterAgePerson.Id, _restrictedAgeAccess.Id);
         Assert.Single(restrictedAgeRoles);
         Assert.Equal(2, restrictedAgeChapterRoles.Count());
         // Note: There is a potential bug here where a person in a different chapter of an age restricted series will show up
@@ -244,19 +267,21 @@ public class PersonRepositoryTests : AbstractDbTest
         await ResetDb();
         await SeedDb();
 
-        foreach (var person in AllPeople)
+        var allPeople = Context.Person.ToList();
+
+        foreach (var person in allPeople)
         {
             Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName(person.Name, _fullAccess.Id));
         }
 
-        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName(Lib0ChaptersPerson.Name, _restrictedAccess.Id));
-        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName(SharedSeriesPerson.Name, _restrictedAccess.Id));
-        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName(Lib1SeriesPerson.Name, _restrictedAccess.Id));
+        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName("Lib0 Chapters Person", _restrictedAccess.Id));
+        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName("Shared Series Person", _restrictedAccess.Id));
+        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName("Lib1 Series Person", _restrictedAccess.Id));
 
-        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName(Lib0ChaptersPerson.Name, _restrictedAgeAccess.Id));
-        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName(Lib1SeriesPerson.Name, _restrictedAgeAccess.Id));
+        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName("Lib0 Chapters Person", _restrictedAgeAccess.Id));
+        Assert.NotNull(await UnitOfWork.PersonRepository.GetPersonDtoByName("Lib1 Series Person", _restrictedAgeAccess.Id));
         // Note: There is a potential bug here where a person in a different chapter of an age restricted series will show up
-        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName(Lib1ChapterAgePerson.Name, _restrictedAgeAccess.Id));
+        Assert.Null(await UnitOfWork.PersonRepository.GetPersonDtoByName("Lib1 Chapter Age Person", _restrictedAgeAccess.Id));
     }
 
     [Fact]
@@ -265,16 +290,19 @@ public class PersonRepositoryTests : AbstractDbTest
         await ResetDb();
         await SeedDb();
 
-        var series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(SharedSeriesPerson.Id, _fullAccess.Id);
+        var sharedSeriesPerson = GetPersonByName("Shared Series Person");
+        var lib1SeriesPerson = GetPersonByName("Lib1 Series Person");
+
+        var series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(sharedSeriesPerson.Id, _fullAccess.Id);
         Assert.Equal(3, series.Count());
 
-        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(SharedSeriesPerson.Id, _restrictedAccess.Id);
+        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(sharedSeriesPerson.Id, _restrictedAccess.Id);
         Assert.Equal(2, series.Count());
 
-        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(SharedSeriesPerson.Id, _restrictedAgeAccess.Id);
+        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(sharedSeriesPerson.Id, _restrictedAgeAccess.Id);
         Assert.Single(series);
 
-        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(Lib1SeriesPerson.Id, _restrictedAgeAccess.Id);
+        series = await UnitOfWork.PersonRepository.GetSeriesKnownFor(lib1SeriesPerson.Id, _restrictedAgeAccess.Id);
         Assert.Single(series);
     }
 
@@ -284,26 +312,28 @@ public class PersonRepositoryTests : AbstractDbTest
         await ResetDb();
         await SeedDb();
 
+        var sharedChaptersPerson = GetPersonByName("Shared Chapters Person");
+
         // Lib0
-        var chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Colorist);
-        var restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Colorist);
-        var restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Colorist);
+        var chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Colorist);
+        var restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Colorist);
+        var restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Colorist);
         Assert.Single(chapters);
         Assert.Empty(restrictedChapters);
         Assert.Empty(restrictedAgeChapters);
 
         // Lib1 - age restricted
-        chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Imprint);
-        restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Imprint);
-        restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Imprint);
+        chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Imprint);
+        restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Imprint);
+        restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Imprint);
         Assert.Single(chapters);
         Assert.Single(restrictedChapters);
         Assert.Empty(restrictedAgeChapters);
 
         // Lib1 - not age restricted
-        chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Team);
-        restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Team);
-        restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(SharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Team);
+        chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Team);
+        restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Team);
+        restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Team);
         Assert.Single(chapters);
         Assert.Single(restrictedChapters);
         Assert.Single(restrictedAgeChapters);
