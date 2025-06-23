@@ -1612,7 +1612,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 status = PublicationStatus.Ended;
 
-                if (IsSeriesCompleted(series, chapters, externalMetadata, maxVolume, maxChapter))
+                if (IsSeriesCompleted(series, chapters, externalMetadata, maxVolume))
                 {
                     status = PublicationStatus.Completed;
                 }
@@ -1636,10 +1636,9 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="chapters"></param>
     /// <param name="externalMetadata"></param>
     /// <param name="maxVolumes"></param>
-    /// <param name="maxChapters"></param>
     /// <returns></returns>
     /// <remarks>Updates MaxCount and TotalCount if a loosy check is used to set as completed</remarks>
-    private static bool IsSeriesCompleted(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata, int maxVolumes, int maxChapters)
+    public static bool IsSeriesCompleted(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata, int maxVolumes)
     {
         // A series is completed if exactly the amount is found
         if (series.Metadata.MaxCount == series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
@@ -1651,6 +1650,9 @@ public class ExternalMetadataService : IExternalMetadataService
         //
         // TODO BUG: If the series has specials, that are not included in the external count. But you do own them
         //           This may mark the series as completed pre-maturely
+        // Note: I've currently opted to keep this an equals to prevent the above bug from happening
+        // We *could* change this to >= in the future in case this is reported by users
+        // If we do; test IsSeriesCompleted_Volumes_TooManySpecials needs to be updated
         if (maxVolumes != Parser.DefaultChapterNumber && series.Volumes.Count == externalMetadata.Volumes)
         {
             series.Metadata.MaxCount = series.Volumes.Count;

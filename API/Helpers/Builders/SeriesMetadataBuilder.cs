@@ -115,4 +115,16 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.TagsLocked = lockStatus;
         return this;
     }
+
+    public SeriesMetadataBuilder WithMaxCount(int count)
+    {
+        _seriesMetadata.MaxCount = count;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithTotalCount(int count)
+    {
+        _seriesMetadata.TotalCount = count;
+        return this;
+    }
 }

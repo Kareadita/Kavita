@@ -15,6 +15,7 @@ using API.Entities.Person;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -880,6 +881,181 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(PublicationStatus.Ended, postSeries.Metadata.PublicationStatus);
     }
 
+
+    [Fact]
+    public void IsSeriesCompleted_ExactMatch()
+    {
+        const string seriesName = "Test - Exact Match";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(5)
+                .WithTotalCount(5)
+                .Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 5, Volumes = 0 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, Parser.DefaultChapterNumber);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_Volumes_IncludeSpecialsCheck()
+    {
+        const string seriesName = "Test - Volume Complete";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(2)
+                .WithTotalCount(3)
+                .Build())
+            .WithVolume(new VolumeBuilder("1").WithNumber(1).Build())
+            .WithVolume(new VolumeBuilder("2").WithNumber(2).Build())
+            .WithVolume(new VolumeBuilder("2.5").WithNumber(2.5f).Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        // External metadata includes special (2.5)
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 3 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
+
+        Assert.True(result);
+        Assert.Equal(3, series.Metadata.MaxCount);
+        Assert.Equal(3, series.Metadata.TotalCount);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_Volumes_TooManySpecials()
+    {
+        const string seriesName = "Test - Volume Complete";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(2)
+                .WithTotalCount(3)
+                .Build())
+            .WithVolume(new VolumeBuilder("1").WithNumber(1).Build())
+            .WithVolume(new VolumeBuilder("2").WithNumber(2).Build())
+            .WithVolume(new VolumeBuilder("2.1").WithNumber(2.1f).Build())
+            .WithVolume(new VolumeBuilder("2.2").WithNumber(2.2f).Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        // External metadata includes no special. There are 3 volumes. And we're missing volume 3
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 3 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_NoVolumes_GEQChapterCheck()
+    {
+        const string seriesName = "Test - Chapter MaxCount, no volumes";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(10)
+                .WithTotalCount(8)
+                .Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 10, Volumes = 0 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, Parser.DefaultChapterNumber);
+
+        Assert.True(result);
+        Assert.Equal(10, series.Metadata.TotalCount);
+        Assert.Equal(10, series.Metadata.MaxCount);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_NoVolumes_IncludeAllChaptersCheck()
+    {
+        const string seriesName = "Test - Chapter Count";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(8)
+                .WithTotalCount(5)
+                .Build())
+            .Build();
+
+        var chapters = new List<Chapter>
+        {
+            new ChapterBuilder("0").Build(),
+            new ChapterBuilder("2").Build(),
+            new ChapterBuilder("3").Build(),
+            new ChapterBuilder("4").Build(),
+            new ChapterBuilder("5").Build(),
+            new ChapterBuilder("6").Build(),
+            new ChapterBuilder("7").Build(),
+            new ChapterBuilder("7.1").Build(),
+            new ChapterBuilder("7.2").Build(),
+            new ChapterBuilder("7.3").Build()
+        };
+        // External metadata includes prologues (0) and extra's (7.X)
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 10, Volumes = 0 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, Parser.DefaultChapterNumber);
+
+        Assert.True(result);
+        Assert.Equal(10, series.Metadata.TotalCount);
+        Assert.Equal(10, series.Metadata.MaxCount);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_NotEnoughVolumes()
+    {
+        const string seriesName = "Test - Incomplete Volume";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(2)
+                .WithTotalCount(5)
+                .Build())
+            .WithVolume(new VolumeBuilder("1").WithNumber(1).Build())
+            .WithVolume(new VolumeBuilder("2").WithNumber(2).Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 5 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void IsSeriesCompleted_NoVolumes_NotEnoughChapters()
+    {
+        const string seriesName = "Test - Incomplete Chapter";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(5)
+                .WithTotalCount(8)
+                .Build())
+            .Build();
+
+        var chapters = new List<Chapter>
+        {
+            new ChapterBuilder("1").Build(),
+            new ChapterBuilder("2").Build(),
+            new ChapterBuilder("3").Build()
+        };
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 10, Volumes = 0 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, Parser.DefaultChapterNumber);
+
+        Assert.False(result);
+    }
 
 
     #endregion
