@@ -941,9 +941,9 @@ public class ScannerServiceTests : AbstractDbTest
 
 
     [Fact]
-    public async Task ScanLibrary_MetadataEnabled_NoOverrides()
+    public async Task ScanLibrary_MetadataDisabled_NoOverrides()
     {
-        const string testcase = "Series with Localized 2 - Manga.json";
+        const string testcase = "Series with Localized No Metadata - Manga.json";
 
         // Get the first file and generate a ComicInfo
         var infos = new Dictionary<string, ComicInfo>();
@@ -962,6 +962,7 @@ public class ScannerServiceTests : AbstractDbTest
 
         var scanner = _scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
+
         var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
 
         // Validate that there are 2 series

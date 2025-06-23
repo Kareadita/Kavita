@@ -101,7 +101,12 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         }
 
         // Patch in other information from ComicInfo
-        UpdateFromComicInfo(ret);
+        if (enableMetadata)
+        {
+            UpdateFromComicInfo(ret);
+        }
+
+
 
         if (ret.Volumes == Parser.LooseLeafVolume && ret.Chapters == Parser.DefaultChapter)
         {

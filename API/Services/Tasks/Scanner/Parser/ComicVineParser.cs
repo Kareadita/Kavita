@@ -81,7 +81,10 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         info.IsSpecial = Parser.IsSpecial(info.Filename, type) || Parser.IsSpecial(info.ComicInfo?.Format, type);
 
         // Patch in other information from ComicInfo
-        UpdateFromComicInfo(info);
+        if (enableMetadata)
+        {
+            UpdateFromComicInfo(info);
+        }
 
         if (string.IsNullOrEmpty(info.Series))
         {
