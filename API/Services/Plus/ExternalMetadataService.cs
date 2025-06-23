@@ -444,7 +444,7 @@ public class ExternalMetadataService : IExternalMetadataService
             try
             {
                 // This returns an AniListSeries and Match returns ExternalSeriesDto
-                result = await _kavitaPlusApiService .GetSeriesDetail(data);
+                result = await _kavitaPlusApiService.GetSeriesDetail(data);
             }
             catch (FlurlHttpException ex)
             {
