@@ -189,9 +189,9 @@ public class PersonRepositoryTests : AbstractDbTest
         foreach (var person in allPeople)
             Assert.Contains(fullAccessPeople, ContainsPersonCheck(person));
 
-        // 1 lib0, 2 Lib1
+        // 1 series in lib0, 2 series in lib1
         Assert.Equal(3, fullAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).SeriesCount);
-        // 2* the above
+        // 3 series with each 2 chapters
         Assert.Equal(6, fullAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).ChapterCount);
         // 1 series in lib0
         Assert.Equal(1, fullAccessPeople.First(dto => dto.Id == lib0SeriesPerson.Id).SeriesCount);
@@ -212,11 +212,11 @@ public class PersonRepositoryTests : AbstractDbTest
         Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Chapters Person")));
         Assert.Contains(restrictedAccessPeople, ContainsPersonCheck(GetPersonByName("Lib1 Chapter Age Person")));
 
-        // 2 series in lib1, 0 in lib0
+        // 2 series in lib1, no series in lib0
         Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).SeriesCount);
-        // 2* the above
+        // 2 series with each 2 chapters
         Assert.Equal(4, restrictedAccessPeople.First(dto => dto.Id == sharedSeriesChaptersPerson.Id).ChapterCount);
-        // Access to both series
+        // 2 series in lib1
         Assert.Equal(2, restrictedAccessPeople.First(dto => dto.Id == lib1SeriesPerson.Id).SeriesCount);
 
         var restrictedAgeAccessPeople = await UnitOfWork.PersonRepository.GetBrowsePersonDtos(_restrictedAgeAccess.Id,
@@ -225,6 +225,7 @@ public class PersonRepositoryTests : AbstractDbTest
         // Note: There is a potential bug here where a person in a different chapter of an age restricted series will show up
         Assert.Equal(6, restrictedAgeAccessPeople.TotalCount);
 
+        // No access to the age restricted chapter
         Assert.DoesNotContain(restrictedAgeAccessPeople, ContainsPersonCheck(lib1ChapterAgePerson));
     }
 
@@ -322,7 +323,7 @@ public class PersonRepositoryTests : AbstractDbTest
         Assert.Empty(restrictedChapters);
         Assert.Empty(restrictedAgeChapters);
 
-        // Lib1 - age restricted
+        // Lib1 - age restricted series
         chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Imprint);
         restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Imprint);
         restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Imprint);
@@ -330,7 +331,7 @@ public class PersonRepositoryTests : AbstractDbTest
         Assert.Single(restrictedChapters);
         Assert.Empty(restrictedAgeChapters);
 
-        // Lib1 - not age restricted
+        // Lib1 - not age restricted series
         chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _fullAccess.Id, PersonRole.Team);
         restrictedChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAccess.Id, PersonRole.Team);
         restrictedAgeChapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(sharedChaptersPerson.Id, _restrictedAgeAccess.Id, PersonRole.Team);

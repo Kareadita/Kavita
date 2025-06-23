@@ -193,13 +193,11 @@ public class GenreRepository : IGenreRepository
                     SeriesCount = g.SeriesMetadatas
                         .Where(sm => seriesIds.Contains(sm.SeriesId))
                         .RestrictAgainstAgeRestriction(ageRating)
-                        //.Select(sm => sm.Id)
                         .Distinct()
                         .Count(),
                     ChapterCount = g.Chapters
                         .Where(cp => seriesIds.Contains(cp.Volume.SeriesId))
                         .RestrictAgainstAgeRestriction(ageRating)
-                        //.Select(ch => ch.Id)
                         .Distinct()
                         .Count()
                 })
@@ -212,11 +210,11 @@ public class GenreRepository : IGenreRepository
                     Id = g.Id,
                     Title = g.Title,
                     SeriesCount = g.SeriesMetadatas
-                        .Select(sm => sm.Id)
+                        .RestrictAgainstAgeRestriction(ageRating)
                         .Distinct()
                         .Count(),
                     ChapterCount = g.Chapters
-                        .Select(ch => ch.Id)
+                        .RestrictAgainstAgeRestriction(ageRating)
                         .Distinct()
                         .Count()
                 })

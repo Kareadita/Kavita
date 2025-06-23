@@ -132,13 +132,11 @@ public class TagRepository : ITagRepository
                     SeriesCount = g.SeriesMetadatas
                         .Where(sm => seriesIds.Contains(sm.SeriesId))
                         .RestrictAgainstAgeRestriction(ageRating)
-                        //.Select(sm => sm.SeriesId)
                         .Distinct()
                         .Count(),
                     ChapterCount = g.Chapters
                         .Where(ch => seriesIds.Contains(ch.Volume.SeriesId))
                         .RestrictAgainstAgeRestriction(ageRating)
-                        //.Select(ch => ch.Id)
                         .Distinct()
                         .Count()
                 })
@@ -152,11 +150,11 @@ public class TagRepository : ITagRepository
                     Id = g.Id,
                     Title = g.Title,
                     SeriesCount = g.SeriesMetadatas
-                        .Select(sm => sm.Id)
+                        .RestrictAgainstAgeRestriction(ageRating)
                         .Distinct()
                         .Count(),
                     ChapterCount = g.Chapters
-                        .Select(ch => ch.Id)
+                        .RestrictAgainstAgeRestriction(ageRating)
                         .Distinct()
                         .Count()
                 })
