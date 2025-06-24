@@ -216,10 +216,8 @@ public class PersonRepository : IPersonRepository
 
     private async Task<IQueryable<BrowsePersonDto>> CreateFilteredPersonQueryable(int userId, BrowsePersonFilterDto filter, AgeRestriction ageRating)
     {
-        var libs = await _context.Library.Includes(LibraryIncludes.AppUser).ToListAsync();
-        var libIds = libs.Select(l => l.Id).ToList();
-        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId)).Select(lib => lib.Id).ToList();
-        var shouldLibRestrict = libIds.Count != userLibs.Count;
+        var allLibrariesCount =  await _context.Library.CountAsync();
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         var seriesIds = await _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
 
@@ -229,64 +227,35 @@ public class PersonRepository : IPersonRepository
         query = BuildPersonFilterQuery(userId, filter, query);
 
         // Apply restrictions
-        query = query.RestrictAgainstAgeRestriction(ageRating);
-
-        if (shouldLibRestrict)
-        {
-            query = query.Where(p => p.ChapterPeople.Any(cp => seriesIds.Contains(cp.Chapter.Volume.SeriesId)) ||
-                                     p.SeriesMetadataPeople.Any(smp => seriesIds.Contains(smp.SeriesMetadata.SeriesId)));
-        }
+        query = query.RestrictAgainstAgeRestriction(ageRating)
+            .WhereIf(allLibrariesCount != userLibs.Count,
+                person => person.ChapterPeople.Any(cp => seriesIds.Contains(cp.Chapter.Volume.SeriesId)) ||
+                          person.SeriesMetadataPeople.Any(smp => seriesIds.Contains(smp.SeriesMetadata.SeriesId)));
 
         // Apply sorting and limiting
         var sortedQuery = query.SortBy(filter.SortOptions);
 
         var limitedQuery = ApplyPersonLimit(sortedQuery, filter.LimitTo);
 
-        IQueryable<BrowsePersonDto> projectedQuery;
-        if (shouldLibRestrict)
+        return limitedQuery.Select(p => new BrowsePersonDto
         {
-            projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CoverImage = p.CoverImage,
-                SeriesCount = p.SeriesMetadataPeople
-                    .Select(smp => smp.SeriesMetadata)
-                    .Where(sm => seriesIds.Contains(sm.SeriesId))
-                    .RestrictAgainstAgeRestriction(ageRating)
-                    .Distinct()
-                    .Count(),
-                ChapterCount = p.ChapterPeople
-                    .Select(chp => chp.Chapter)
-                    .Where(ch => seriesIds.Contains(ch.Volume.SeriesId))
-                    .RestrictAgainstAgeRestriction(ageRating)
-                    .Distinct()
-                    .Count()
-            });
-        }
-        else
-        {
-            projectedQuery = limitedQuery.Select(p => new BrowsePersonDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CoverImage = p.CoverImage,
-                SeriesCount = p.SeriesMetadataPeople
-                    .Select(smp => smp.SeriesMetadata)
-                    .RestrictAgainstAgeRestriction(ageRating)
-                    .Distinct()
-                    .Count(),
-                ChapterCount = p.ChapterPeople
-                    .Select(chp => chp.Chapter)
-                    .RestrictAgainstAgeRestriction(ageRating)
-                    .Distinct()
-                    .Count()
-            });
-        }
-
-        return projectedQuery;
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            CoverImage = p.CoverImage,
+            SeriesCount = p.SeriesMetadataPeople
+                .Select(smp => smp.SeriesMetadata)
+                .Where(sm => allLibrariesCount == userLibs.Count || seriesIds.Contains(sm.SeriesId))
+                .RestrictAgainstAgeRestriction(ageRating)
+                .Distinct()
+                .Count(),
+            ChapterCount = p.ChapterPeople
+                .Select(chp => chp.Chapter)
+                .Where(ch => allLibrariesCount == userLibs.Count || seriesIds.Contains(ch.Volume.SeriesId))
+                .RestrictAgainstAgeRestriction(ageRating)
+                .Distinct()
+                .Count(),
+        });
     }
 
     private static IQueryable<Person> BuildPersonFilterQuery(int userId, BrowsePersonFilterDto filterDto, IQueryable<Person> query)

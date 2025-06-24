@@ -1,14 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using API.Entities;
 using API.Entities.Person;
 
 namespace API.Extensions.QueryExtensions;
 
-// TODO: Refactor with IQueryable userLibs? But then I can't do the allLibs check?
-/// <summary>
-/// Optionally pass ids of all libraries, will then be smart and not restrict if the person has access to all
-/// </summary>
 public static class RestrictByLibraryExtensions
 {
 

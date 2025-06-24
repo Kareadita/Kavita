@@ -174,59 +174,32 @@ public class GenreRepository : IGenreRepository
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var allLibrariesCount =  await _context.Library.CountAsync();
-        var userLibs = await _context.Library
-            .Includes(LibraryIncludes.AppUser)
-            .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
-            .Select(lib => lib.Id)
-            .ToListAsync();
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
-        var query = _context.Genre.RestrictAgainstAgeRestriction(ageRating);
+        var seriesIds = await _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
 
-        IQueryable<BrowseGenreDto> finalQuery;
-        var seriesIds = _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id);
-        if (allLibrariesCount != userLibs.Count)
-        {
+        var query = _context.Genre
+            .RestrictAgainstAgeRestriction(ageRating)
+            .WhereIf(allLibrariesCount != userLibs.Count,
+                genre => genre.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
+                         genre.SeriesMetadatas.Any(sm => seriesIds.Contains(sm.SeriesId)))
+            .Select(g => new BrowseGenreDto
+            {
+                Id = g.Id,
+                Title = g.Title,
+                SeriesCount = g.SeriesMetadatas
+                    .Where(sm => allLibrariesCount == userLibs.Count || seriesIds.Contains(sm.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count(),
+                ChapterCount = g.Chapters
+                    .Where(cp => allLibrariesCount == userLibs.Count || seriesIds.Contains(cp.Volume.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count(),
+            })
+            .OrderBy(g => g.Title);
 
-            query = query.Where(s => s.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
-                                     s.SeriesMetadatas.Any(sm => seriesIds.Contains(sm.SeriesId)));
-
-            finalQuery = query.Select(g => new BrowseGenreDto
-                {
-                    Id = g.Id,
-                    Title = g.Title,
-                    SeriesCount = g.SeriesMetadatas
-                        .Where(sm => seriesIds.Contains(sm.SeriesId))
-                        .RestrictAgainstAgeRestriction(ageRating)
-                        .Distinct()
-                        .Count(),
-                    ChapterCount = g.Chapters
-                        .Where(cp => seriesIds.Contains(cp.Volume.SeriesId))
-                        .RestrictAgainstAgeRestriction(ageRating)
-                        .Distinct()
-                        .Count()
-                })
-                .OrderBy(g => g.Title);
-        }
-        else
-        {
-            finalQuery = query.Select(g => new BrowseGenreDto
-                {
-                    Id = g.Id,
-                    Title = g.Title,
-                    SeriesCount = g.SeriesMetadatas
-                        .RestrictAgainstAgeRestriction(ageRating)
-                        .Distinct()
-                        .Count(),
-                    ChapterCount = g.Chapters
-                        .RestrictAgainstAgeRestriction(ageRating)
-                        .Distinct()
-                        .Count()
-                })
-                .OrderBy(g => g.Title);
-        }
-
-
-
-        return await PagedList<BrowseGenreDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
+        return await PagedList<BrowseGenreDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 }
