@@ -1629,15 +1629,15 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
-    /// Returns true if the series should be marked as completed, checks loosy with #chapters and #series; Also tries
-    /// to use specials to reach the required amount
+    /// Returns true if the series should be marked as completed, checks loosey with chapter and series numbers.
+    /// Respects Specials to reach the required amount.
     /// </summary>
     /// <param name="series"></param>
     /// <param name="chapters"></param>
     /// <param name="externalMetadata"></param>
     /// <param name="maxVolumes"></param>
     /// <returns></returns>
-    /// <remarks>Updates MaxCount and TotalCount if a loosy check is used to set as completed</remarks>
+    /// <remarks>Updates MaxCount and TotalCount if a loosey check is used to set as completed</remarks>
     public static bool IsSeriesCompleted(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata, int maxVolumes)
     {
         // A series is completed if exactly the amount is found
@@ -1648,12 +1648,17 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // If volumes are collected, check if we reach the required volumes by including specials
         //
-        // TODO BUG: If the series has specials, that are not included in the external count. But you do own them
+        // TODO BUG: If the series has specials, that are not included in the  external count. But you do own them
         //           This may mark the series as completed pre-maturely
         // Note: I've currently opted to keep this an equals to prevent the above bug from happening
         // We *could* change this to >= in the future in case this is reported by users
         // If we do; test IsSeriesCompleted_Volumes_TooManySpecials needs to be updated
-        if (maxVolumes != Parser.DefaultChapterNumber && series.Volumes.Count == externalMetadata.Volumes)
+
+        // Note: If Kavita has specials, we should be lenient and ignore for the volume check
+        var volumeModifier = series.Volumes.Any(v => v.Name == Parser.SpecialVolume) ? 1 : 0;
+        var modifiedMinVolumeCount = series.Volumes.Count - volumeModifier;
+        if (maxVolumes != Parser.DefaultChapterNumber &&
+            (externalMetadata.Volumes == series.Volumes.Count || externalMetadata.Volumes == modifiedMinVolumeCount))
         {
             series.Metadata.MaxCount = series.Volumes.Count;
             series.Metadata.TotalCount = series.Volumes.Count;
