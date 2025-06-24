@@ -173,7 +173,7 @@ public class GenreRepository : IGenreRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var allLibrariesCount =  await _context.Library.CountAsync();
+        var allLibrariesCount = await _context.Library.CountAsync();
         var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         var seriesIds = await _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
