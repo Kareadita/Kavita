@@ -173,16 +173,20 @@ public class GenreRepository : IGenreRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var libs = await _context.Library.Includes(LibraryIncludes.AppUser).ToListAsync();
-        var userLibs = libs.Where(lib => lib.AppUsers.Any(user => user.Id == userId))
-            .Select(lib => lib.Id).ToList();
+        var allLibrariesCount =  await _context.Library.CountAsync();
+        var userLibs = await _context.Library
+            .Includes(LibraryIncludes.AppUser)
+            .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
+            .Select(lib => lib.Id)
+            .ToListAsync();
 
         var query = _context.Genre.RestrictAgainstAgeRestriction(ageRating);
 
         IQueryable<BrowseGenreDto> finalQuery;
-        if (libs.Count != userLibs.Count)
+        var seriesIds = _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id);
+        if (allLibrariesCount != userLibs.Count)
         {
-            var seriesIds = _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id);
+
             query = query.Where(s => s.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
                                      s.SeriesMetadatas.Any(sm => seriesIds.Contains(sm.SeriesId)));
 
