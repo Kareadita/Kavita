@@ -14,36 +14,8 @@ namespace API.Tests.Repository;
 
 public class TagRepositoryTests : AbstractDbTest
 {
-    private static readonly Tag SharedSeriesChaptersTag = new TagBuilder("Shared Series Chapter Tag").Build();
-    private static readonly Tag SharedSeriesTag = new TagBuilder("Shared Series Tag").Build();
-    private static readonly Tag SharedChaptersTag = new TagBuilder("Shared Chapters Tag").Build();
-    private static readonly Tag Lib0SeriesChaptersTag = new TagBuilder("Lib0 Series Chapter Tag").Build();
-    private static readonly Tag Lib0SeriesTag = new TagBuilder("Lib0 Series Tag").Build();
-    private static readonly Tag Lib0ChaptersTag = new TagBuilder("Lib0 Chapters Tag").Build();
-    private static readonly Tag Lib1SeriesChaptersTag = new TagBuilder("Lib1 Series Chapter Tag").Build();
-    private static readonly Tag Lib1SeriesTag = new TagBuilder("Lib1 Series Tag").Build();
-    private static readonly Tag Lib1ChaptersTag = new TagBuilder("Lib1 Chapters Tag").Build();
-    private static readonly Tag Lib1ChapterAgeTag = new TagBuilder("Lib1 Chapter Age Tag").Build();
-
-    private static readonly List<Tag> AllTags =
-    [
-        SharedSeriesChaptersTag, SharedSeriesTag, SharedChaptersTag,
-        Lib0SeriesChaptersTag, Lib0SeriesTag, Lib0ChaptersTag,
-        Lib1SeriesChaptersTag, Lib1SeriesTag, Lib1ChaptersTag, Lib1ChapterAgeTag
-    ];
-
-
-    /**
-     * Access to lib0, lib1
-     */
     private AppUser _fullAccess;
-    /**
-     * Access to lib1
-     */
     private AppUser _restrictedAccess;
-    /**
-     * Access to lib1, and Teen
-     */
     private AppUser _restrictedAgeAccess;
 
     protected override async Task ResetDb()
@@ -53,9 +25,33 @@ public class TagRepositoryTests : AbstractDbTest
         await Context.SaveChangesAsync();
     }
 
-    private async Task SeedDb()
+    private TestTagSet CreateTestTags()
     {
-        // Create users with different access levels
+        return new TestTagSet
+        {
+            SharedSeriesChaptersTag = new TagBuilder("Shared Series Chapter Tag").Build(),
+            SharedSeriesTag = new TagBuilder("Shared Series Tag").Build(),
+            SharedChaptersTag = new TagBuilder("Shared Chapters Tag").Build(),
+            Lib0SeriesChaptersTag = new TagBuilder("Lib0 Series Chapter Tag").Build(),
+            Lib0SeriesTag = new TagBuilder("Lib0 Series Tag").Build(),
+            Lib0ChaptersTag = new TagBuilder("Lib0 Chapters Tag").Build(),
+            Lib1SeriesChaptersTag = new TagBuilder("Lib1 Series Chapter Tag").Build(),
+            Lib1SeriesTag = new TagBuilder("Lib1 Series Tag").Build(),
+            Lib1ChaptersTag = new TagBuilder("Lib1 Chapters Tag").Build(),
+            Lib1ChapterAgeTag = new TagBuilder("Lib1 Chapter Age Tag").Build()
+        };
+    }
+
+    private async Task SeedDbWithTags(TestTagSet tags)
+    {
+        await CreateTestUsers();
+        await AddTagsToContext(tags);
+        await CreateLibrariesWithTags(tags);
+        await AssignLibrariesToUsers();
+    }
+
+    private async Task CreateTestUsers()
+    {
         _fullAccess = new AppUserBuilder("amelia", "amelia@example.com").Build();
         _restrictedAccess = new AppUserBuilder("mila", "mila@example.com").Build();
         _restrictedAgeAccess = new AppUserBuilder("eva", "eva@example.com").Build();
@@ -66,67 +62,75 @@ public class TagRepositoryTests : AbstractDbTest
         Context.Users.Add(_restrictedAccess);
         Context.Users.Add(_restrictedAgeAccess);
         await Context.SaveChangesAsync();
+    }
 
-        Context.Tag.Add(SharedSeriesChaptersTag);
-        Context.Tag.Add(SharedSeriesTag);
-        Context.Tag.Add(SharedChaptersTag);
-        Context.Tag.Add(Lib0SeriesChaptersTag);
-        Context.Tag.Add(Lib0SeriesTag);
-        Context.Tag.Add(Lib0ChaptersTag);
-        Context.Tag.Add(Lib1SeriesChaptersTag);
-        Context.Tag.Add(Lib1SeriesTag);
-        Context.Tag.Add(Lib1ChaptersTag);
+    private async Task AddTagsToContext(TestTagSet tags)
+    {
+        var allTags = tags.GetAllTags();
+        Context.Tag.AddRange(allTags);
         await Context.SaveChangesAsync();
+    }
 
+    private async Task CreateLibrariesWithTags(TestTagSet tags)
+    {
         var lib0 = new LibraryBuilder("lib0")
             .WithSeries(new SeriesBuilder("lib0-s0")
                 .WithMetadata(new SeriesMetadata
                 {
-                    Tags = [SharedSeriesChaptersTag, SharedSeriesTag, Lib0SeriesChaptersTag, Lib0SeriesTag]
+                    Tags = [tags.SharedSeriesChaptersTag, tags.SharedSeriesTag, tags.Lib0SeriesChaptersTag, tags.Lib0SeriesTag]
                 })
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib0SeriesChaptersTag, Lib0ChaptersTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib0SeriesChaptersTag, tags.Lib0ChaptersTag])
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib1SeriesChaptersTag, tags.Lib1ChaptersTag])
                         .Build())
                     .Build())
                 .Build())
             .Build();
+
         var lib1 = new LibraryBuilder("lib1")
             .WithSeries(new SeriesBuilder("lib1-s0")
                 .WithMetadata(new SeriesMetadataBuilder()
-                    .WithTags([SharedSeriesChaptersTag, SharedSeriesTag, Lib1SeriesChaptersTag, Lib1SeriesTag])
+                    .WithTags([tags.SharedSeriesChaptersTag, tags.SharedSeriesTag, tags.Lib1SeriesChaptersTag, tags.Lib1SeriesTag])
                     .WithAgeRating(AgeRating.Mature17Plus)
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib1SeriesChaptersTag, tags.Lib1ChaptersTag])
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag, Lib1ChapterAgeTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib1SeriesChaptersTag, tags.Lib1ChaptersTag, tags.Lib1ChapterAgeTag])
                         .WithAgeRating(AgeRating.Mature17Plus)
                         .Build())
                     .Build())
                 .Build())
             .WithSeries(new SeriesBuilder("lib1-s1")
                 .WithMetadata(new SeriesMetadataBuilder()
-                    .WithTags([SharedSeriesChaptersTag, SharedSeriesTag, Lib1SeriesChaptersTag, Lib1SeriesTag])
+                    .WithTags([tags.SharedSeriesChaptersTag, tags.SharedSeriesTag, tags.Lib1SeriesChaptersTag, tags.Lib1SeriesTag])
                     .Build())
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib1SeriesChaptersTag, tags.Lib1ChaptersTag])
                         .Build())
                     .WithChapter(new ChapterBuilder("2")
-                        .WithTags([SharedSeriesChaptersTag, SharedChaptersTag, Lib1SeriesChaptersTag, Lib1ChaptersTag])
+                        .WithTags([tags.SharedSeriesChaptersTag, tags.SharedChaptersTag, tags.Lib1SeriesChaptersTag, tags.Lib1ChaptersTag])
                         .WithAgeRating(AgeRating.Mature17Plus)
                         .Build())
                     .Build())
                 .Build())
             .Build();
 
+        Context.Library.Add(lib0);
+        Context.Library.Add(lib1);
         await Context.SaveChangesAsync();
+    }
+
+    private async Task AssignLibrariesToUsers()
+    {
+        var lib0 = Context.Library.First(l => l.Name == "lib0");
+        var lib1 = Context.Library.First(l => l.Name == "lib1");
 
         _fullAccess.Libraries.Add(lib0);
         _fullAccess.Libraries.Add(lib1);
@@ -136,70 +140,139 @@ public class TagRepositoryTests : AbstractDbTest
         await Context.SaveChangesAsync();
     }
 
-    private Predicate<BrowseTagDto> ContainsTagCheck(Tag tag)
+    private static Predicate<BrowseTagDto> ContainsTagCheck(Tag tag)
     {
         return t => t.Id == tag.Id;
     }
 
-    [Fact]
-    public async Task GetBrowseableTag()
+    private static void AssertTagPresent(IEnumerable<BrowseTagDto> tags, Tag expectedTag)
     {
-        await ResetDb();
-        await SeedDb();
+        Assert.Contains(tags, ContainsTagCheck(expectedTag));
+    }
 
+    private static void AssertTagNotPresent(IEnumerable<BrowseTagDto> tags, Tag expectedTag)
+    {
+        Assert.DoesNotContain(tags, ContainsTagCheck(expectedTag));
+    }
+
+    private static BrowseTagDto GetTagDto(IEnumerable<BrowseTagDto> tags, Tag tag)
+    {
+        return tags.First(dto => dto.Id == tag.Id);
+    }
+
+    [Fact]
+    public async Task GetBrowseableTag_FullAccess_ReturnsAllTagsWithCorrectCounts()
+    {
+        // Arrange
+        await ResetDb();
+        var tags = CreateTestTags();
+        await SeedDbWithTags(tags);
+
+        // Act
         var fullAccessTags = await UnitOfWork.TagRepository.GetBrowseableTag(_fullAccess.Id, new UserParams());
-        Assert.Equal(AllTags.Count, fullAccessTags.TotalCount);
-        foreach (var tag in AllTags)
+
+        // Assert
+        Assert.Equal(tags.GetAllTags().Count, fullAccessTags.TotalCount);
+
+        foreach (var tag in tags.GetAllTags())
         {
-            Assert.Contains(fullAccessTags, ContainsTagCheck(tag));
+            AssertTagPresent(fullAccessTags, tag);
         }
 
-        // 1 series lib0, 2 series lib1
-        Assert.Equal(3, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(6, fullAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
-        Assert.Equal(1, fullAccessTags.First(dto => dto.Id == Lib0SeriesTag.Id).SeriesCount);
+        // Verify counts - 1 series lib0, 2 series lib1 = 3 total series
+        Assert.Equal(3, GetTagDto(fullAccessTags, tags.SharedSeriesChaptersTag).SeriesCount);
+        Assert.Equal(6, GetTagDto(fullAccessTags, tags.SharedSeriesChaptersTag).ChapterCount);
+        Assert.Equal(1, GetTagDto(fullAccessTags, tags.Lib0SeriesTag).SeriesCount);
+    }
 
+    [Fact]
+    public async Task GetBrowseableTag_RestrictedAccess_ReturnsOnlyAccessibleTags()
+    {
+        // Arrange
+        await ResetDb();
+        var tags = CreateTestTags();
+        await SeedDbWithTags(tags);
 
+        // Act
         var restrictedAccessTags = await UnitOfWork.TagRepository.GetBrowseableTag(_restrictedAccess.Id, new UserParams());
 
-        // Should see: 3 shared + 4 library 1 specific = 7 tags
+        // Assert - Should see: 3 shared + 4 library 1 specific = 7 tags
         Assert.Equal(7, restrictedAccessTags.TotalCount);
 
-        // Verify Library 1 and shared tags are present
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
+        // Verify shared and Library 1 tags are present
+        AssertTagPresent(restrictedAccessTags, tags.SharedSeriesChaptersTag);
+        AssertTagPresent(restrictedAccessTags, tags.SharedSeriesTag);
+        AssertTagPresent(restrictedAccessTags, tags.SharedChaptersTag);
+        AssertTagPresent(restrictedAccessTags, tags.Lib1SeriesChaptersTag);
+        AssertTagPresent(restrictedAccessTags, tags.Lib1SeriesTag);
+        AssertTagPresent(restrictedAccessTags, tags.Lib1ChaptersTag);
+        AssertTagPresent(restrictedAccessTags, tags.Lib1ChapterAgeTag);
 
-        // Verify Count is correctly limited: 2 series lib1
-        Assert.Equal(2, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(4, restrictedAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
-        Assert.Equal(2, restrictedAccessTags.First(dto => dto.Id == Lib1SeriesTag.Id).SeriesCount);
-        Assert.Equal(4, restrictedAccessTags.First(dto => dto.Id == Lib1ChaptersTag.Id).ChapterCount);
+        // Verify Library 0 specific tags are not present
+        AssertTagNotPresent(restrictedAccessTags, tags.Lib0SeriesChaptersTag);
+        AssertTagNotPresent(restrictedAccessTags, tags.Lib0SeriesTag);
+        AssertTagNotPresent(restrictedAccessTags, tags.Lib0ChaptersTag);
 
+        // Verify counts - 2 series lib1
+        Assert.Equal(2, GetTagDto(restrictedAccessTags, tags.SharedSeriesChaptersTag).SeriesCount);
+        Assert.Equal(4, GetTagDto(restrictedAccessTags, tags.SharedSeriesChaptersTag).ChapterCount);
+        Assert.Equal(2, GetTagDto(restrictedAccessTags, tags.Lib1SeriesTag).SeriesCount);
+        Assert.Equal(4, GetTagDto(restrictedAccessTags, tags.Lib1ChaptersTag).ChapterCount);
+    }
 
+    [Fact]
+    public async Task GetBrowseableTag_RestrictedAgeAccess_FiltersAgeRestrictedContent()
+    {
+        // Arrange
+        await ResetDb();
+        var tags = CreateTestTags();
+        await SeedDbWithTags(tags);
+
+        // Act
         var restrictedAgeAccessTags = await UnitOfWork.TagRepository.GetBrowseableTag(_restrictedAgeAccess.Id, new UserParams());
 
-        // Should see: 3 shared + 3 lib1 specific = 6 tags
+        // Assert - Should see: 3 shared + 3 lib1 specific = 6 tags (age-restricted tag filtered out)
         Assert.Equal(6, restrictedAgeAccessTags.TotalCount);
 
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedSeriesTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(SharedChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesChaptersTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1SeriesTag));
-        Assert.Contains(restrictedAccessTags, ContainsTagCheck(Lib1ChaptersTag));
+        // Verify accessible tags are present
+        AssertTagPresent(restrictedAgeAccessTags, tags.SharedSeriesChaptersTag);
+        AssertTagPresent(restrictedAgeAccessTags, tags.SharedSeriesTag);
+        AssertTagPresent(restrictedAgeAccessTags, tags.SharedChaptersTag);
+        AssertTagPresent(restrictedAgeAccessTags, tags.Lib1SeriesChaptersTag);
+        AssertTagPresent(restrictedAgeAccessTags, tags.Lib1SeriesTag);
+        AssertTagPresent(restrictedAgeAccessTags, tags.Lib1ChaptersTag);
 
-        Assert.DoesNotContain(restrictedAgeAccessTags, ContainsTagCheck(Lib1ChapterAgeTag));
+        // Verify age-restricted tag is filtered out
+        AssertTagNotPresent(restrictedAgeAccessTags, tags.Lib1ChapterAgeTag);
 
-        // Verify Count is correctly limited: 1 series lib1
-        Assert.Equal(1, restrictedAgeAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).SeriesCount);
-        Assert.Equal(2, restrictedAgeAccessTags.First(dto => dto.Id == SharedSeriesChaptersTag.Id).ChapterCount);
-        Assert.Equal(1, restrictedAgeAccessTags.First(dto => dto.Id == Lib1SeriesTag.Id).SeriesCount);
-        Assert.Equal(2, restrictedAgeAccessTags.First(dto => dto.Id == Lib1ChaptersTag.Id).ChapterCount);
+        // Verify counts - 1 series lib1 (age-restricted series filtered out)
+        Assert.Equal(1, GetTagDto(restrictedAgeAccessTags, tags.SharedSeriesChaptersTag).SeriesCount);
+        Assert.Equal(2, GetTagDto(restrictedAgeAccessTags, tags.SharedSeriesChaptersTag).ChapterCount);
+        Assert.Equal(1, GetTagDto(restrictedAgeAccessTags, tags.Lib1SeriesTag).SeriesCount);
+        Assert.Equal(2, GetTagDto(restrictedAgeAccessTags, tags.Lib1ChaptersTag).ChapterCount);
+    }
 
+    private class TestTagSet
+    {
+        public Tag SharedSeriesChaptersTag { get; set; }
+        public Tag SharedSeriesTag { get; set; }
+        public Tag SharedChaptersTag { get; set; }
+        public Tag Lib0SeriesChaptersTag { get; set; }
+        public Tag Lib0SeriesTag { get; set; }
+        public Tag Lib0ChaptersTag { get; set; }
+        public Tag Lib1SeriesChaptersTag { get; set; }
+        public Tag Lib1SeriesTag { get; set; }
+        public Tag Lib1ChaptersTag { get; set; }
+        public Tag Lib1ChapterAgeTag { get; set; }
+
+        public List<Tag> GetAllTags()
+        {
+            return
+            [
+                SharedSeriesChaptersTag, SharedSeriesTag, SharedChaptersTag,
+                Lib0SeriesChaptersTag, Lib0SeriesTag, Lib0ChaptersTag,
+                Lib1SeriesChaptersTag, Lib1SeriesTag, Lib1ChaptersTag, Lib1ChapterAgeTag
+            ];
+        }
     }
 }
