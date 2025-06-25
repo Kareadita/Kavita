@@ -903,7 +903,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     }
 
     [Fact]
-    public void IsSeriesCompleted_Volumes_IncludeSpecialsCheck()
+    public void IsSeriesCompleted_Volumes_DecimalVolumes()
     {
         const string seriesName = "Test - Volume Complete";
         var series = new SeriesBuilder(seriesName)
@@ -918,7 +918,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
             .Build();
 
         var chapters = new List<Chapter>();
-        // External metadata includes special (2.5)
+        // External metadata includes decimal volume 2.5
         var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 3 };
 
         var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
@@ -958,8 +958,13 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(3, series.Metadata.TotalCount);
     }
 
+    /// <remarks>
+    /// This unit test also illustrates the bug where you may get a false positive if you had Volumes 1,2, and 2.1. While
+    /// missing volume 3. With the external metadata expecting non-decimal volumes.
+    /// i.e. it would fail if we only had one decimal volume
+    /// </remarks>
     [Fact]
-    public void IsSeriesCompleted_Volumes_TooManySpecials()
+    public void IsSeriesCompleted_Volumes_TooManyDecimalVolumes()
     {
         const string seriesName = "Test - Volume Complete";
         var series = new SeriesBuilder(seriesName)
@@ -975,7 +980,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
             .Build();
 
         var chapters = new List<Chapter>();
-        // External metadata includes no special. There are 3 volumes. And we're missing volume 3
+        // External metadata includes no special or decimals. There are 3 volumes. And we're missing volume 3
         var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 3 };
 
         var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
@@ -986,12 +991,13 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     [Fact]
     public void IsSeriesCompleted_NoVolumes_GEQChapterCheck()
     {
+        // We own 11 chapters, the external metadata expects 10
         const string seriesName = "Test - Chapter MaxCount, no volumes";
         var series = new SeriesBuilder(seriesName)
             .WithLibraryId(1)
             .WithMetadata(new SeriesMetadataBuilder()
-                .WithMaxCount(10)
-                .WithTotalCount(8)
+                .WithMaxCount(11)
+                .WithTotalCount(10)
                 .Build())
             .Build();
 
@@ -1001,8 +1007,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, Parser.DefaultChapterNumber);
 
         Assert.True(result);
-        Assert.Equal(10, series.Metadata.TotalCount);
-        Assert.Equal(10, series.Metadata.MaxCount);
+        Assert.Equal(11, series.Metadata.TotalCount);
+        Assert.Equal(11, series.Metadata.MaxCount);
     }
 
     [Fact]
@@ -1012,8 +1018,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         var series = new SeriesBuilder(seriesName)
             .WithLibraryId(1)
             .WithMetadata(new SeriesMetadataBuilder()
-                .WithMaxCount(8)
-                .WithTotalCount(5)
+                .WithMaxCount(7)
+                .WithTotalCount(10)
                 .Build())
             .Build();
 

@@ -1646,7 +1646,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return true;
         }
 
-        // If volumes are collected, check if we reach the required volumes by including specials
+        // If volumes are collected, check if we reach the required volumes by including specials, and decimal volumes
         //
         // TODO BUG: If the series has specials, that are not included in the  external count. But you do own them
         //           This may mark the series as completed pre-maturely
