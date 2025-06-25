@@ -928,6 +928,36 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(3, series.Metadata.TotalCount);
     }
 
+    /// <summary>
+    /// This is validating that we get a completed even though we have a special chapter and AL doesn't count it
+    /// </summary>
+    [Fact]
+    public void IsSeriesCompleted_Volumes_HasSpecialAndDecimal_ExternalNoSpecial()
+    {
+        const string seriesName = "Test - Volume Complete";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithMaxCount(2)
+                .WithTotalCount(3)
+                .Build())
+            .WithVolume(new VolumeBuilder("1").WithNumber(1).Build())
+            .WithVolume(new VolumeBuilder("1.5").WithNumber(1.5f).Build())
+            .WithVolume(new VolumeBuilder("2").WithNumber(2).Build())
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume).Build())
+            .Build();
+
+        var chapters = new List<Chapter>();
+        // External metadata includes volume 1.5, but not the special
+        var externalMetadata = new ExternalSeriesDetailDto { Chapters = 0, Volumes = 3 };
+
+        var result = ExternalMetadataService.IsSeriesCompleted(series, chapters, externalMetadata, 2);
+
+        Assert.True(result);
+        Assert.Equal(3, series.Metadata.MaxCount);
+        Assert.Equal(3, series.Metadata.TotalCount);
+    }
+
     [Fact]
     public void IsSeriesCompleted_Volumes_TooManySpecials()
     {

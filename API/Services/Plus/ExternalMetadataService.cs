@@ -1653,15 +1653,20 @@ public class ExternalMetadataService : IExternalMetadataService
         // Note: I've currently opted to keep this an equals to prevent the above bug from happening
         // We *could* change this to >= in the future in case this is reported by users
         // If we do; test IsSeriesCompleted_Volumes_TooManySpecials needs to be updated
+        if (maxVolumes != Parser.DefaultChapterNumber && externalMetadata.Volumes == series.Volumes.Count)
+        {
+            series.Metadata.MaxCount = series.Volumes.Count;
+            series.Metadata.TotalCount = series.Volumes.Count;
+            return true;
+        }
 
         // Note: If Kavita has specials, we should be lenient and ignore for the volume check
         var volumeModifier = series.Volumes.Any(v => v.Name == Parser.SpecialVolume) ? 1 : 0;
         var modifiedMinVolumeCount = series.Volumes.Count - volumeModifier;
-        if (maxVolumes != Parser.DefaultChapterNumber &&
-            (externalMetadata.Volumes == series.Volumes.Count || externalMetadata.Volumes == modifiedMinVolumeCount))
+        if (maxVolumes != Parser.DefaultChapterNumber && externalMetadata.Volumes == modifiedMinVolumeCount)
         {
-            series.Metadata.MaxCount = series.Volumes.Count;
-            series.Metadata.TotalCount = series.Volumes.Count;
+            series.Metadata.MaxCount = modifiedMinVolumeCount;
+            series.Metadata.TotalCount = modifiedMinVolumeCount;
             return true;
         }
 
