@@ -81,10 +81,6 @@ export class SeriesService {
     return this.httpClient.post<string>(this.baseUrl + 'series/delete-multiple', {seriesIds}, TextResonse).pipe(map(s => s === "true"));
   }
 
-  updateRating(seriesId: number, userRating: number) {
-    return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating});
-  }
-
   updateSeries(model: any) {
     return this.httpClient.post(this.baseUrl + 'series/update', model);
   }

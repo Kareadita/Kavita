@@ -78,6 +78,7 @@ export class ExternalRatingComponent implements OnInit {
     modalRef.componentInstance.userRating = this.userRating;
     modalRef.componentInstance.seriesId = this.seriesId;
     modalRef.componentInstance.hasUserRated = this.hasUserRated;
+    modalRef.componentInstance.chapterId = this.chapterId;
 
     modalRef.closed.subscribe((updated: {hasUserRated: boolean, userRating: number}) => {
       this.userRating = updated.userRating;
