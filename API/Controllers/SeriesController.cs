@@ -14,6 +14,7 @@ using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -224,6 +225,7 @@ public class SeriesController : BaseApiController
             needsRefreshMetadata = true;
             series.CoverImage = null;
             series.CoverImageLocked = false;
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Covers);
             _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
             series.ResetColorScape();
 

@@ -82,6 +82,7 @@ public interface ISeriesRepository
     void Attach(Series series);
     void Attach(SeriesRelation relation);
     void Update(Series series);
+    void Update(SeriesMetadata seriesMetadata);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
     void Detach(Series series);
@@ -217,6 +218,11 @@ public class SeriesRepository : ISeriesRepository
     public void Update(Series series)
     {
         _context.Entry(series).State = EntityState.Modified;
+    }
+
+    public void Update(SeriesMetadata seriesMetadata)
+    {
+        _context.Entry(seriesMetadata).State = EntityState.Modified;
     }
 
     public void Remove(Series series)

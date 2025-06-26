@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Uploads;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks.Metadata;
@@ -112,8 +113,10 @@ public class UploadController : BaseApiController
 
             series.CoverImage = filePath;
             series.CoverImageLocked = lockState;
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Covers);
             _imageService.UpdateColorScape(series);
             _unitOfWork.SeriesRepository.Update(series);
+            _unitOfWork.SeriesRepository.Update(series.Metadata);
 
             if (_unitOfWork.HasChanges())
             {
@@ -277,6 +280,7 @@ public class UploadController : BaseApiController
 
             chapter.CoverImage = filePath;
             chapter.CoverImageLocked = lockState;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterCovers);
             _unitOfWork.ChapterRepository.Update(chapter);
             var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
             if (volume != null)

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -18,7 +17,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace API.Data;
 
@@ -43,7 +41,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
-    [Obsolete]
+    [Obsolete("Use AppUserCollection")]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
     public DbSet<ReadingList> ReadingList { get; set; } = null!;
@@ -72,7 +70,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ExternalSeriesMetadata> ExternalSeriesMetadata { get; set; } = null!;
     public DbSet<ExternalRecommendation> ExternalRecommendation { get; set; } = null!;
     public DbSet<ManualMigrationHistory> ManualMigrationHistory { get; set; } = null!;
-    [Obsolete]
+    [Obsolete("Use IsBlacklisted field on Series")]
     public DbSet<SeriesBlacklist> SeriesBlacklist { get; set; } = null!;
     public DbSet<AppUserCollection> AppUserCollection { get; set; } = null!;
     public DbSet<ChapterPeople> ChapterPeople { get; set; } = null!;
@@ -286,6 +284,22 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
                 v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
             .HasColumnType("TEXT");
+
+        builder.Entity<SeriesMetadata>()
+            .Property(sm => sm.KPlusOverrides)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ??
+                     new List<MetadataSettingField>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<MetadataSettingField>());
+        builder.Entity<Chapter>()
+            .Property(sm => sm.KPlusOverrides)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ?? new List<MetadataSettingField>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<MetadataSettingField>());
     }
 
     #nullable enable

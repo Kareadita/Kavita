@@ -16,6 +16,7 @@ using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
@@ -526,6 +527,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     if (madeMetadataModification)
                     {
                         _unitOfWork.SeriesRepository.Update(series);
+                        _unitOfWork.SeriesRepository.Update(series.Metadata);
                     }
                 }
                 catch (Exception ex)
@@ -782,7 +784,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (externalCharacters == null || externalCharacters.Count == 0) return false;
 
-        if (series.Metadata.CharacterLocked && !settings.HasOverride(MetadataSettingField.People))
+        if (series.Metadata.CharacterLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.People))
         {
             return false;
         }
@@ -864,7 +866,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (upstreamArtists.Count == 0) return false;
 
-        if (series.Metadata.CoverArtistLocked && !settings.HasOverride(MetadataSettingField.People))
+        if (series.Metadata.CoverArtistLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.People))
         {
             return false;
         }
@@ -920,7 +922,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (upstreamWriters.Count == 0) return false;
 
-        if (series.Metadata.WriterLocked && !settings.HasOverride(MetadataSettingField.People))
+        if (series.Metadata.WriterLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.People))
         {
             return false;
         }
@@ -973,7 +975,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!settings.EnableTags || processedTags.Count == 0) return false;
 
-        if (series.Metadata.TagsLocked && !settings.HasOverride(MetadataSettingField.Tags))
+        if (series.Metadata.TagsLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Tags))
         {
             return false;
         }
@@ -1014,7 +1016,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!settings.EnableGenres || processedGenres.Count == 0) return false;
 
-        if (series.Metadata.GenresLocked && !settings.HasOverride(MetadataSettingField.Genres))
+        if (series.Metadata.GenresLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Genres))
         {
             return false;
         }
@@ -1044,7 +1046,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (!settings.EnablePublicationStatus) return false;
 
-        if (series.Metadata.PublicationStatusLocked && !settings.HasOverride(MetadataSettingField.PublicationStatus))
+        if (series.Metadata.PublicationStatusLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.PublicationStatus))
         {
             return false;
         }
@@ -1058,6 +1060,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             series.Metadata.PublicationStatus = status;
             series.Metadata.PublicationStatusLocked = true;
+            series.Metadata.AddKPlusOverride(MetadataSettingField.PublicationStatus);
             return true;
         }
         catch (Exception ex)
@@ -1071,7 +1074,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private bool UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
     {
 
-        if (series.Metadata.AgeRatingLocked && !settings.HasOverride(MetadataSettingField.AgeRating))
+        if (series.Metadata.AgeRatingLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.AgeRating))
         {
             return false;
         }
@@ -1087,6 +1090,7 @@ public class ExternalMetadataService : IExternalMetadataService
             if (series.Metadata.AgeRating <= ageRating)
             {
                 series.Metadata.AgeRating = ageRating;
+                series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
                 return true;
             }
         }
@@ -1127,6 +1131,7 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name) || madeModification;
             madeModification = UpdateChapterSummary(chapter, settings, potentialMatch.Summary) || madeModification;
             madeModification = UpdateChapterReleaseDate(chapter, settings, potentialMatch.ReleaseDate) || madeModification;
+            // TODO: Update to set KPlusOverride
             madeModification = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher) || madeModification;
 
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.CoverArtist, potentialMatch.Artists) || madeModification;
@@ -1245,17 +1250,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(summary)) return false;
 
-        if (chapter.SummaryLocked && !settings.HasOverride(MetadataSettingField.ChapterSummary))
+        if (chapter.SummaryLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
         {
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(summary) && !settings.HasOverride(MetadataSettingField.ChapterSummary))
+        if (!string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
         {
             return false;
         }
 
         chapter.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary));
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterSummary);
         return true;
     }
 
@@ -1265,17 +1271,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(title)) return false;
 
-        if (chapter.TitleNameLocked && !settings.HasOverride(MetadataSettingField.ChapterTitle))
+        if (chapter.TitleNameLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterTitle))
         {
             return false;
         }
 
-        if (!title.Contains(seriesName) && !settings.HasOverride(MetadataSettingField.ChapterTitle))
+        if (!title.Contains(seriesName) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterTitle))
         {
             return false;
         }
 
         chapter.TitleName = title;
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterTitle);
         return true;
     }
 
@@ -1285,17 +1292,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (releaseDate == null || releaseDate == DateTime.MinValue) return false;
 
-        if (chapter.ReleaseDateLocked && !settings.HasOverride(MetadataSettingField.ChapterReleaseDate))
+        if (chapter.ReleaseDateLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterReleaseDate))
         {
             return false;
         }
 
-        if (!settings.HasOverride(MetadataSettingField.ChapterReleaseDate))
+        if (!HasForceOverride(settings, chapter, MetadataSettingField.ChapterReleaseDate))
         {
             return false;
         }
 
         chapter.ReleaseDate = releaseDate.Value;
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterReleaseDate);
         return true;
     }
 
@@ -1305,12 +1313,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(publisher)) return false;
 
-        if (chapter.PublisherLocked && !settings.HasOverride(MetadataSettingField.ChapterPublisher))
+        if (chapter.PublisherLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterPublisher))
         {
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(publisher) && !settings.HasOverride(MetadataSettingField.ChapterPublisher))
+        if (!string.IsNullOrWhiteSpace(publisher) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterPublisher))
         {
             return false;
         }
@@ -1332,7 +1340,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(coverUrl)) return false;
 
-        if (chapter.CoverImageLocked && !settings.HasOverride(MetadataSettingField.ChapterCovers))
+        if (chapter.CoverImageLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterCovers))
         {
             return false;
         }
@@ -1343,6 +1351,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         await DownloadChapterCovers(chapter, coverUrl);
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
         return true;
     }
 
@@ -1352,7 +1361,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (staff?.Count == 0) return false;
 
-        if (chapter.IsPersonRoleLocked(role) && !settings.HasOverride(MetadataSettingField.People))
+        if (chapter.IsPersonRoleLocked(role) && !HasForceOverride(settings, chapter, MetadataSettingField.People))
         {
             return false;
         }
@@ -1401,7 +1410,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(externalMetadata.CoverUrl)) return false;
 
-        if (series.CoverImageLocked && !settings.HasOverride(MetadataSettingField.Covers))
+        if (series.CoverImageLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Covers))
         {
             return false;
         }
@@ -1412,6 +1421,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
+        series.Metadata.AddKPlusOverride(MetadataSettingField.Covers);
         return true;
     }
 
@@ -1422,17 +1432,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!externalMetadata.StartDate.HasValue) return false;
 
-        if (series.Metadata.ReleaseYearLocked && !settings.HasOverride(MetadataSettingField.StartDate))
+        if (series.Metadata.ReleaseYearLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.StartDate))
         {
             return false;
         }
 
-        if (series.Metadata.ReleaseYear != 0 && !settings.HasOverride(MetadataSettingField.StartDate))
+        if (series.Metadata.ReleaseYear != 0 && !HasForceOverride(settings, series.Metadata, MetadataSettingField.StartDate))
         {
             return false;
         }
 
         series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
+        series.Metadata.AddKPlusOverride(MetadataSettingField.StartDate);
         return true;
     }
 
@@ -1440,12 +1451,12 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (!settings.EnableLocalizedName) return false;
 
-        if (series.LocalizedNameLocked && !settings.HasOverride(MetadataSettingField.LocalizedName))
+        if (series.LocalizedNameLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.LocalizedName))
         {
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(series.LocalizedName) && !settings.HasOverride(MetadataSettingField.LocalizedName))
+        if (!string.IsNullOrWhiteSpace(series.LocalizedName) && !HasForceOverride(settings, series.Metadata, MetadataSettingField.LocalizedName))
         {
             return false;
         }
@@ -1471,6 +1482,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
 
+        series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
         return true;
     }
 
@@ -1480,17 +1492,18 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(externalMetadata.Summary)) return false;
 
-        if (series.Metadata.SummaryLocked && !settings.HasOverride(MetadataSettingField.Summary))
+        if (series.Metadata.SummaryLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Summary))
         {
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(series.Metadata.Summary) && !settings.HasOverride(MetadataSettingField.Summary))
+        if (!string.IsNullOrWhiteSpace(series.Metadata.Summary) && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Summary))
         {
             return false;
         }
 
         series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
+        series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
         return true;
     }
 
@@ -1509,7 +1522,8 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false, true);
+            // Only choose a better image if we're overriding a user provided cover
+            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false, !series.Metadata.HasSetKPlusMetadata(MetadataSettingField.Covers));
         }
         catch (Exception ex)
         {
@@ -1880,5 +1894,11 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return null;
+    }
+
+    private static bool HasForceOverride(MetadataSettingsDto settings, IHasKPlusMetadata kPlusMetadata,
+        MetadataSettingField field)
+    {
+        return settings.HasOverride(field) || kPlusMetadata.HasSetKPlusMetadata(field);
     }
 }
