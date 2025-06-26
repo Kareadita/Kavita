@@ -387,8 +387,8 @@ public class PersonRepository : IPersonRepository
 
         return await _context.Person
             .Includes(includes)
-            .Where(p => EF.Functions.Like(p.Name, $"%{searchQuery}%")
-            || p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%")))
+            .Where(p => EF.Functions.Like(p.NormalizedName, $"%{searchQuery}%")
+            || p.Aliases.Any(pa => EF.Functions.Like(pa.NormalizedAlias, $"%{searchQuery}%")))
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
