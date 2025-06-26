@@ -190,7 +190,7 @@ export class FilterUtilitiesService {
     switch (type) {
       case 'series':
         return [
-          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name
+          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath
         ] as unknown as T[];
       case 'person':
         return [
