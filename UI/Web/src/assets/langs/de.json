@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "token-expired": "Ihr AniList-Token ist abgelaufen! Scrobbling-Ereignisse werden nicht verarbeitet, bis Sie auf der Seite Konten erneuert haben.",
         "generate-scrobble-events": "Backfill Ereignisse",
-        "scrobbling-disabled": "Scrobbeln ist in deinen Kontoeinstellungen deaktiviert."
+        "scrobbling-disabled": "Scrobbeln ist in deinen Kontoeinstellungen deaktiviert.",
+        "select-all-label": "Alles auswählen",
+        "delete-selected-label": "Markiertes löschen"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Lesefortschritt",
@@ -83,7 +85,7 @@
     },
     "user-preferences": {
         "title": "Benutzer Dashboard",
-        "pref-description": "Dies sind globale Einstellungen, die an Ihr Konto gebunden sind.",
+        "pref-description": "Dies sind globale Einstellungen, die mit Ihrem Konto verknüpft sind. Die Reader-Einstellungen befinden sich in den Leseprofilen.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -803,7 +805,8 @@
         "more": "Mehr",
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}",
-        "cancel-edit": "Schließen Neu ordnen"
+        "cancel-edit": "Schließen Neu ordnen",
+        "browse-people": "Personen suchen"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -856,7 +859,9 @@
         "exclude-patterns-tooltip": "Konfigurieren Sie eine Reihe von Mustern (Glob-Syntax), die Kavita beim Scannen von Verzeichnissen abgleichen und von den Ergebnissen des Scanners ausschließen soll.",
         "help": "{{common.help}}",
         "allow-metadata-matching-tooltip": "Sollte Kavita Metadaten für Serien in dieser Bibliothek herunterladen. Dies geschieht nur, wenn der Server über ein aktives Kavita+-Abonnement verfügt.",
-        "allow-metadata-matching-label": "Erlaube Metadatenabgleich"
+        "allow-metadata-matching-label": "Erlaube Metadatenabgleich",
+        "enable-metadata-label": "Metadaten aktivieren (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Erlauben Sie Kavita, Metadaten-Dateien zu lesen, die Dateinamenanalyse überschreiben."
     },
     "file-type-group-pipe": {
         "archive": "Archive",
@@ -870,24 +875,24 @@
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "Auf Standardwerte zurücksetzen",
         "reader-settings-title": "Reader-Einstellungen",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "Von rechts nach links",
         "left-to-right": "Von links nach rechts",
         "horizontal": "Horizontal",
         "vertical": "Vertikal",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "Ändert die Richtung des Textes. Horizontal ist von links nach rechts, vertikal von oben nach unten.",
         "tap-to-paginate-label": "Paginierung antippen",
         "tap-to-paginate-tooltip": "Klicken Sie auf die Ränder des Bildschirms, um zu paginieren",
         "on": "An",
         "off": "Aus",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
         "immersive-mode-tooltip": "Dadurch wird das Menü nach einem Klick auf das Reader-Dokument ausgeblendet und das Tippen zum Paginieren eingeschaltet",
         "fullscreen-label": "Vollbild",
         "fullscreen-tooltip": "Reader in den Vollbildmodus versetzen",
         "exit": "Beenden",
         "enter": "Enter",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-tooltip": "Blättern: Spiegelt die epub-Datei (in der Regel eine lange Bildlaufseite pro Kapitel).<br/>1 Spalte: Erzeugt jeweils eine einzelne virtuelle Seite.<br/>2 Spalten: Erstellt zwei virtuelle Seiten gleichzeitig, die nebeneinander angeordnet sind.",
         "layout-mode-option-scroll": "Scrollen",
         "layout-mode-option-1col": "1 Reihe",
@@ -1471,7 +1476,9 @@
         "all-filters": "Intelligente Filter",
         "nav-link-header": "Navigation Optionen",
         "close": "{{common.close}}",
-        "person-aka-status": "Entspricht einem Alias"
+        "person-aka-status": "Entspricht einem Alias",
+        "browse-genres": "Genres durchsuchen",
+        "browse-tags": "Tags durchsuchen"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1673,7 +1680,9 @@
         "release-year": "Jahr der Veröffentlichung",
         "read-progress": "Zuletzt gelesen",
         "average-rating": "Durchschnittliche Bewertung",
-        "random": "Zufällig"
+        "random": "Zufällig",
+        "person-series-count": "Anzahl der Serien",
+        "person-name": "Name"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Einzelheiten",
@@ -2208,7 +2217,8 @@
         "confirm-delete-multiple-volumes": "Sind sie sicher, dass Sie {{count}} Bände löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "series-bound-to-reading-profile": "Serie gebunden an Leseprofil {{name}}",
         "library-bound-to-reading-profile": "Bibliothek, verknüpft mit Leseprofil {{name}}",
-        "series-added-want-to-read": "Serie aus der Liste „Möchte lesen“ hinzugefügt"
+        "series-added-want-to-read": "Serie aus der Liste „Möchte lesen“ hinzugefügt",
+        "external-match-rate-error": "Die Rate für die Suche nach {{seriesName}} ist abgelaufen. Versuch's in 5 Minuten nochmal."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2409,7 +2419,8 @@
         "volume-nums": "Bände",
         "author-count": "{{num}} Autoren",
         "no-data": "Keine Daten",
-        "chapter-count": "{{num}} Kapitel"
+        "chapter-count": "{{num}} Kapitel",
+        "issue-count": "{{num}} Probleme"
     },
     "confirm": {
         "alert": "Alarm",
@@ -2528,7 +2539,9 @@
         "actions-header": "Aktionen",
         "match-alt": "Entspricht {{seriesName}}",
         "dont-match-status-label": "{{dont-match-label}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "matched-state-label": "Match-Status",
+        "library-type": "Bibliotheksart"
     },
     "manage-user-tokens": {
         "description": "Die Token von Benutzern, die Scrobbeln verwenden, müssen gelegentlich erneuert werden. Kavita sendet ihnen automatisch eine E-Mail, wenn eine E-Mail-Adresse eingerichtet ist und sie eine gültige E-Mail-Adresse haben.",
@@ -2633,7 +2646,7 @@
     },
     "manage-reading-profiles": {
         "description": "Nicht alle Ihre Serien können auf dieselbe Weise gelesen werden. Richten Sie daher für jede Bibliothek oder Serie separate Leseprofile ein, damit Sie so nahtlos wie möglich zu Ihrer Serie zurückkehren können.",
-        "extra-tip": "Weisen Sie Leseprofile über das Aktionsmenü in Serien und Bibliotheken oder in großen Mengen zu. Wenn Sie die Einstellungen in einem Reader ändern, wird ein verstecktes Profil erstellt, das Ihre Auswahl für diese Serie speichert (nicht für PDFs). Dieses Profil wird entfernt, wenn Sie der Serie eines Ihrer eigenen Leseprofile zuweisen oder aktualisieren.",
+        "extra-tip": "Lese-Profile kannst du über das Aktionsmenü in Serien und Bibliotheken oder für mehrere gleichzeitig festlegen. Wenn du die Einstellungen in einem Reader änderst, wird ein verstecktes Profil erstellt, das deine Auswahl für diese Serie speichert (nicht für PDFs). Dieses Profil wird gelöscht, wenn du der Serie eines deiner eigenen Lese-Profile zuweist. Mehr Infos findest du auf der",
         "tap-to-paginate-tooltip": "Sollten die Seiten des E-Book-Reader-Bildschirms durch Antippen umblätterbar sein vorherige/nächste Seite",
         "show-screen-hints-tooltip": "Zeige eine Überlagerung an, um den Bereich und die Richtung der Paginierung besser zu verstehen",
         "font-size-book-tooltip": "Prozentuale Skalierung für die Schriftart im Buch",
@@ -2694,7 +2707,10 @@
         "pdf-theme-label": "Theme",
         "pdf-theme-tooltip": "Farbschema des Readers",
         "reading-profile-series-settings-title": "Serie",
-        "reading-profile-library-settings-title": "Bibliothek"
+        "reading-profile-library-settings-title": "Bibliothek",
+        "wiki-title": "Wiki",
+        "disable-width-override-label": "Breitenüberschreibung deaktivieren",
+        "disable-width-override-tooltip": "Verhindere, dass die Breitenüberschreibung wirksam wird, wenn dein Bildschirm mindestens den konfigurierten Haltepunkt erreicht oder kleiner ist"
     },
     "bulk-set-reading-profile-modal": {
         "no-data": "Es wurden noch keine Sammlungen erstellt",
@@ -2706,5 +2722,55 @@
         "known-for-title": "Bekannt für",
         "src": "Person zusammenführen",
         "merge-warning": "Wenn Sie fortfahren, wird die ausgewählte Person entfernt. Der Name der ausgewählten Person wird als Alias hinzugefügt und alle ihre Rollen werden übertragen."
+    },
+    "browse-people": {
+        "title": "Personen suchen",
+        "author-count": "{{num}} Personen",
+        "roles-label": "Rollen",
+        "sort-label": "Sortieren",
+        "name-label": "Name",
+        "issue-count-label": "Anzahl der Ausgabe",
+        "series-count-label": "Anzahl der Serien"
+    },
+    "browse-genres": {
+        "title": "Genres durchsuchen",
+        "genre-count": "{{num}} Genres"
+    },
+    "breakpoint-pipe": {
+        "never": "Niemals",
+        "tablet": "Tablet",
+        "desktop": "Desktop",
+        "mobile": "Mobil"
+    },
+    "browse-title-pipe": {
+        "user-rating": "{{value}} Sternebewertung",
+        "tag": "Hat Tag {{value}}",
+        "translator": "Übersetzt von {{value}}",
+        "character": "Hat den Charakter {{value}}",
+        "inker": "Inked von {{value}}",
+        "penciller": "Gezeichnet von {{value}}",
+        "writer": "Verfasst von {{value}}",
+        "genre": "Hat Genre {{value}}",
+        "library": "Innerhalb der Bibliothek {{value}}",
+        "publisher": "Veröffentlicht von {{value}}",
+        "editor": "Von {{value}} bearbeitet",
+        "artist": "Gezeichnet von {{value}}",
+        "letterer": "Letter von {{value}}",
+        "colorist": "Gefärbt durch {{value}}",
+        "format": "Format von {{value}}",
+        "release-year": "Veröffentlicht in {{value}}",
+        "imprint": "Imprint von {{value}}",
+        "location": "An {{value}} Standorten",
+        "team": "Team {{value}}"
+    },
+    "browse-tags": {
+        "title": "Tags durchsuchen",
+        "genre-count": "{{num}} Tags"
+    },
+    "generic-filter-field-pipe": {
+        "person-name": "Name",
+        "person-series-count": "Anzahl der Serien",
+        "person-chapter-count": "Kapitelanzahl",
+        "person-role": "Rolle"
     }
 }

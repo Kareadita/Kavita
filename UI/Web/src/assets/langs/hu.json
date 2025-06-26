@@ -5,10 +5,10 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Elfelejtett jelszó?",
-        "submit": "{{common.submit}}"
+        "submit": "{{common.submit}}Bejelentkezés"
     },
     "dashboard": {
-        "no-libraries": "Még nincs könyvtár beálltva. Állíts be egyet a",
+        "no-libraries": "Még nincs könyvtár beálltva. \nÁllíts be egyet a",
         "server-settings-link": "Szerver beállítások",
         "not-granted": "Nincs hozzáférésed semmilyen könyvtárhoz.",
         "on-deck-title": "A fedélzeten",
@@ -37,7 +37,7 @@
         "series-header": "Sorozat",
         "data-header": "Adat",
         "is-processed-header": "Feldolgozva",
-        "no-data": "Nincs adat",
+        "no-data": "Nincs adat{{common.no-data}}",
         "volume-and-chapter-num": "Kötet {{v}} Fejezet {{n}}",
         "volume-num": "Kötet {{num}}",
         "chapter-num": "Fejezet {{num}}",
@@ -48,7 +48,9 @@
         "special": "{{entity-title.special}}",
         "scrobbling-disabled": "A scrobbling ki van kapcsolva a Fiók beállításaidban.",
         "description": "Itt található minden a fiókodhoz tartozó srobble esemény. Ahhoz, hogy az események létrejöjjenek, be kell állítanod egy scrobble szolgáltatót. A feldolgozott események egy hónap után törlődnek. Ha vannak fel nem dolgozott események, azok adatait valószínűleg nem sikerült egyeztetni a feltöltés során. Ilyen esetben vedd fel a kapcsolatot az adminoddal, hogy javításra kerüljenek.",
-        "token-expired": "Az AniList tokened lejárt! A scrobble események nem kerülnek feldolgozásra, amíg a Fiókok oldalon nem frissíted."
+        "token-expired": "Az AniList tokened lejárt! A scrobble események nem kerülnek feldolgozásra, amíg a Fiókok oldalon nem frissíted.",
+        "select-all-label": "Összes kijelölése",
+        "delete-selected-label": "Kijelölt(ek) törlése"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Olvasás folyamata",
@@ -107,10 +109,16 @@
         "success-toast": "Felhasználó beállításai frissítve",
         "locale-label": "Nyelv",
         "anilist-scrobbling-label": "AniList Scrobbling",
-        "want-to-read-sync-label": "Olvasási várólista szinkronizálás"
+        "want-to-read-sync-label": "Olvasási várólista szinkronizálás",
+        "clients-opds-url-label": "OPDS URL",
+        "clients-api-key-label": "API Kulcs",
+        "share-series-reviews-label": "Sorozatértékelés megosztása"
     },
     "user-holds": {
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "download": "{{changelog.download}}",
@@ -118,20 +126,40 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "title": "Téma menedzser",
+        "set-default": "Alapértelmezett",
+        "updated-toastr": "A webhely alapértelmezett beállításai {{name}}-re frissültek",
+        "active-theme": "Aktív",
+        "upload-continued": "css fájl",
+        "site-themes": "Webhelytémák",
+        "downloaded": "Letöltött",
+        "applied": "Alkalmaz",
+        "preview-title": "Előnézet",
+        "default-theme": "Alapértelmezett",
+        "downloadable": "Letölthető"
     },
     "restriction-selector": {
-        "age-rating-label": "{{metadata-fields.age-rating-title}}"
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "title": "Korhatár besorolás",
+        "not-applicable-for-admins": "Ez nem vonatkozik az adminokra.",
+        "no-restriction": "Nincs korlátozás"
     },
     "site-theme-provider-pipe": {
-        "custom": "{{device-platform-pipe.custom}}"
+        "custom": "{{device-platform-pipe.custom}}",
+        "system": "Rendszer"
     },
     "manage-devices": {
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "title": "Eszközkezelő",
+        "devices-title": "Eszközök",
+        "email-label": "Email",
+        "name-label": "Név",
+        "no-devices": "Még nincsenek beállítva eszközök"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -149,7 +177,12 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "new-password-label": "Új jelszó",
+        "current-password-label": "Jelenlegi jelszó",
+        "confirm-password-label": "Jelszó megerősítése",
+        "passwords-must-match": "A jelszavaknak egyeznie kell",
+        "permission-error": "Nincs jogosultsága a jelszó megváltoztatására. Forduljon a szerver adminisztrátorához."
     },
     "change-email": {
         "required-field": "{{validation.required-field}}",
@@ -157,7 +190,13 @@
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "current-password-label": "Jelenlegi jelszó",
+        "email-not-confirmed": "Ez az e-mail nincs megerősítve",
+        "email-confirmed": "Ezt az e-mailt megerősítették",
+        "setup-user-account": "Felhasználói fiók beállítása",
+        "email-label": "Új e-mail",
+        "email-updated-title": "E-mail frissítve"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
@@ -750,5 +789,11 @@
         "min-length": "A kritika minimum {{count}} karakter hosszúságú kell legyen",
         "delete": "{{common.delete}}",
         "required": "{{validation.required-field}}"
+    },
+    "theme": {
+        "theme-dark": "Sötét",
+        "theme-black": "Fekete",
+        "theme-paper": "Papír",
+        "theme-white": "Fehér"
     }
 }

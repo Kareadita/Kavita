@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "generate-scrobble-events": "Imeachtaí Aislíonta",
         "token-expired": "Tá do chomhartha AniList imithe in éag! Ní phróiseálfar imeachtaí scrobála go dtí go ndéanfaidh tú athnuachan ar leathanach na gCuntas.",
-        "scrobbling-disabled": "Tá scrobbling díchumasaithe ar do Shocruithe Cuntais."
+        "scrobbling-disabled": "Tá scrobbling díchumasaithe ar do Shocruithe Cuntais.",
+        "select-all-label": "Roghnaigh gach rud",
+        "delete-selected-label": "Scrios na roghanna"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Dul Chun Cinn léitheoireachta",
@@ -858,7 +860,9 @@
         "exclude-patterns-tooltip": "Cumraigh sraith patrúin (comhréir Glob) a mheaitseálann Kavita nuair a scanadh eolairí agus eisiamh ó thorthaí Scanóir.",
         "help": "{{common.help}}",
         "allow-metadata-matching-tooltip": "Ar cheart do Kavita meiteashonraí a íoslódáil do Shraith laistigh den Leabharlann seo. Ní tharlóidh sé seo ach amháin má tá Síntiús gníomhach Kavita+ ag an bhfreastalaí.",
-        "allow-metadata-matching-label": "Ceadaigh Meaitseáil Meiteashonraí"
+        "allow-metadata-matching-label": "Ceadaigh Meaitseáil Meiteashonraí",
+        "enable-metadata-tooltip": "Lig do Kavita comhaid meiteashonraí a léamh a sháraíonn parsáil ainm comhaid.",
+        "enable-metadata-label": "Cumasaigh Meiteashonraí (ComicInfo/Epub/PDF)"
     },
     "file-type-group-pipe": {
         "archive": "Cartlann",
@@ -2226,7 +2230,8 @@
         "confirm-delete-multiple-volumes": "An bhfuil tú cinnte gur mian leat {{count}} imleabhar a scriosadh? Ní athróidh sé comhaid ar an diosca.",
         "series-added-want-to-read": "Sraith curtha leis ón liosta Ar Mhaith Leat Léamh",
         "series-bound-to-reading-profile": "Sraith atá ceangailte le Próifíl Léitheoireachta {{name}}",
-        "library-bound-to-reading-profile": "Leabharlann ceangailte le Próifíl Léitheoireachta {{name}}"
+        "library-bound-to-reading-profile": "Leabharlann ceangailte le Próifíl Léitheoireachta {{name}}",
+        "external-match-rate-error": "Rith Kavita as an ráta ag cuardach {{seriesName}}. Déan iarracht arís i gceann 5 nóiméad."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",

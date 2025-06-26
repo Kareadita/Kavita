@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "token-expired": "您的 AniList 令牌已过期！除非您在“帐户”页面续订，否则不会处理 Scrobbling 事件。",
         "generate-scrobble-events": "回填事件",
-        "scrobbling-disabled": "您的帐户设置中已禁用 Scrobbling。"
+        "scrobbling-disabled": "您的帐户设置中已禁用 Scrobbling。",
+        "select-all-label": "全选",
+        "delete-selected-label": "删除选定项"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "阅读进度",
@@ -858,7 +860,9 @@
         "exclude-patterns-tooltip": "配置一组模式（Glob语法），Kavita 将在扫描目录时匹配这些模式，并将其从扫描程序结果中排除。",
         "help": "{{common.help}}",
         "allow-metadata-matching-label": "允许元数据匹配",
-        "allow-metadata-matching-tooltip": "Kavita 是否应下载此库中系列的元数据。仅当服务器具有有效的 Kavita+ 订阅时才会发生这种情况。"
+        "allow-metadata-matching-tooltip": "Kavita 是否应下载此库中系列的元数据。仅当服务器具有有效的 Kavita+ 订阅时才会发生这种情况。",
+        "enable-metadata-label": "启用元数据（ComicInfo/Epub/PDF）",
+        "enable-metadata-tooltip": "允许 Kavita 读取覆盖文件名解析的元数据文件。"
     },
     "file-type-group-pipe": {
         "archive": "档案",
@@ -988,7 +992,7 @@
     },
     "edit-series-relation": {
         "description-part-1": "不确定添加哪一种关联？请查看",
-        "description-part-2": "维基百科的提示。",
+        "description-part-2": "Wiki 提示。",
         "target-series": "目标系列",
         "relationship": "关联",
         "remove": "{{common.remove}}",
@@ -1019,7 +1023,7 @@
     },
     "manage-media-issues": {
         "description-part-1": "此列表包含在扫描或读取媒体期间发现的问题。您可以随时清除它并使用资料库（强制）扫描进行分析。一些常见错误及其含义的列表可在以下位置找到 ",
-        "description-part-2": "维基百科。",
+        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
         "clear-alerts": "清除警报",
         "file-header": "文件",
@@ -2226,7 +2230,8 @@
         "confirm-delete-multiple-volumes": "您确定要删除这 {{count}} 个卷吗？这不会修改磁盘上的文件。",
         "series-added-want-to-read": "从“想读”列表中添加的系列",
         "series-bound-to-reading-profile": "系列绑定到阅读配置文件 {{name}}",
-        "library-bound-to-reading-profile": "资料库绑定到阅读配置文件 {{name}}"
+        "library-bound-to-reading-profile": "资料库绑定到阅读配置文件 {{name}}",
+        "external-match-rate-error": "Kavita 查找 {{seriesName}} 的速度已超出范围。请过 5 分钟再试。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2736,7 +2741,7 @@
         "reset": "{{common.reset}}",
         "selection-tip": "从列表中选择一个配置文件，或在右上角创建一个新的配置文件",
         "add-tooltip": "您的新配置文件将在更改后保存",
-        "wiki-title": "维基百科",
+        "wiki-title": "wiki",
         "disable-width-override-label": "禁用宽度覆盖",
         "disable-width-override-tooltip": "当屏幕尺寸至少等于或小于配置的断点时，防止宽度覆盖生效"
     },

@@ -193,7 +193,7 @@
     "update-yearly-stats": "更新年度統計",
     "invalid-email": "使用者檔案中的電子郵件無效。請查看日誌以獲得任何連結。",
     "browse-external-sources": "瀏覽外部來源",
-    "sidenav-stream-doesnt-exist": "側邊導覽串流不存在",
+    "sidenav-stream-doesnt-exist": "側邊導覽列的串流不存在",
     "smart-filter-already-in-use": "已存在具有此智慧篩選器的串流",
     "external-source-already-exists": "外部來源已存在",
     "generic-cover-volume-save": "無法保存封面圖片",
@@ -201,5 +201,13 @@
     "person-doesnt-exist": "此人不存在",
     "person-name-required": "名稱為必填欄位，且不得留空",
     "person-name-unique": "名稱不得重複",
-    "person-image-doesnt-exist": "CoversDB 中不存在此人"
+    "person-image-doesnt-exist": "CoversDB 中不存在此人",
+    "email-taken": "電子郵件已被使用",
+    "sidenav-stream-only-delete-smart-filter": "只有智慧篩選器可以從側邊導覽列中刪除",
+    "dashboard-stream-only-delete-smart-filter": "只有智慧篩選器串流可以從儀表板中刪除",
+    "smart-filter-name-required": "智慧篩選器名稱名稱不可為空",
+    "smart-filter-system-name": "您不能使用系統保留的串流名稱",
+    "kavitaplus-restricted": "此功能僅限 Kavita+ 使用",
+    "aliases-have-overlap": "一個或多個別名與其他人物重複，無法更新",
+    "generated-reading-profile-name": "由 {0} 生成"
 }

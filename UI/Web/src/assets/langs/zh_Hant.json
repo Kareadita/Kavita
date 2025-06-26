@@ -13,7 +13,7 @@
         "not-granted": "您沒有權限訪問書庫。",
         "on-deck-title": "繼續閱讀",
         "recently-updated-title": "最近更新系列",
-        "recently-added-title": "新增系列",
+        "recently-added-title": "最近新增系列",
         "more-in-genre-title": "{{genre}} 更多的內容分類"
     },
     "edit-user": {
@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "scrobbling-disabled": "你的帳戶設定中已停用Scrobbling。",
         "generate-scrobble-events": "回填事件",
-        "token-expired": "你的 AniList 權杖已過期！在你於帳戶頁面更新之前，追蹤事件將無法處理。"
+        "token-expired": "您的 AniList 授權憑證已過期！在您於帳戶頁面更新之前，追蹤事件將無法處理。",
+        "select-all-label": "全選",
+        "delete-selected-label": "刪除所選項目"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "閱讀進度",
@@ -72,7 +74,8 @@
         "your-review": "這是您的評論",
         "external-review": "外部評論",
         "local-review": "本地評論",
-        "rating-percentage": "評分{{r}}%"
+        "rating-percentage": "評分{{r}}%",
+        "critic": "評論者"
     },
     "want-to-read": {
         "title": "想讀",
@@ -81,8 +84,8 @@
         "no-items-filtered": "沒有項目符合您當前的過濾條件。"
     },
     "user-preferences": {
-        "title": "用戶控制台",
-        "pref-description": "這些是綁定到您帳戶的全局設置。",
+        "title": "用戶儀表板",
+        "pref-description": "這些是與您帳號綁定的全域設定，閱讀器的相關設定請至「閱讀設定檔」中調整。",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -90,7 +93,7 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
-        "success-toast": "更新使用者偏好",
+        "success-toast": "更新用戶偏好",
         "global-settings-title": "全域設定",
         "page-layout-mode-label": "頁面佈局模式",
         "page-layout-mode-tooltip": "在系列詳細信息頁面上將項目顯示為卡片或列表視圖。",
@@ -102,8 +105,8 @@
         "prompt-on-download-tooltip": "下載大小超過{{size}}MB時提示",
         "disable-animations-label": "禁用動畫",
         "disable-animations-tooltip": "關閉網站中的動畫，對於電子書閱讀器很有用。",
-        "collapse-series-relationships-label": "摺疊系列關係",
-        "collapse-series-relationships-tooltip": "Kavita是否展示沒有關係的系列或前傳",
+        "collapse-series-relationships-label": "摺疊系列關聯",
+        "collapse-series-relationships-tooltip": "Kavita是否展示沒有關聯的系列或前傳",
         "share-series-reviews-label": "分享系列評論",
         "share-series-reviews-tooltip": "是否對其他用戶顯示您對系列的評論",
         "clients-opds-alert": "此伺服器上未啟用 OPDS。 這不會影響 Tachiyomi 用戶。",
@@ -113,12 +116,20 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "clients-opds-url-label": "OPDS 網址",
-        "clients-api-key-label": "API 密鑰"
+        "clients-api-key-label": "API 密鑰",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-tooltip": "允許 Kavita 單向同步閱讀進度與評分至 AniList",
+        "want-to-read-sync-label": "想讀清單同步",
+        "want-to-read-sync-tooltip": "允許 Kavita 根據 AniList 和 MAL 的待讀清單系列，新增項目到您的「想讀」中",
+        "anilist-scrobbling-label": "AniList Scrobbling"
     },
     "user-holds": {
-        "title": "記錄保留",
-        "description": "這是用戶自主管理的系列列表，不會發送給 Scrobble 服務提供商。 您可以隨時刪除系列，下一次 Scrobble 事件(閱讀進度、評分、想讀狀態)將觸發事件。",
-        "no-data": "{{typeahead.no-data}}"
+        "title": "暫停 Scrobble",
+        "description": "這個清單由用戶管理，其中包含不會同步到外部服務的系列。你可以隨時將任何系列從此清單中移除。一旦移除，下次該系列發生任何 Scrobble 事件（例如：閱讀進度、評分或想讀狀態變更），就會立即觸發同步功能。",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "delete-label": "{{common.remove}}",
+        "created-header": "{{manage-media-issues.created-header}}"
     },
     "theme-manager": {
         "title": "主題管理器",
@@ -200,7 +211,7 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "passwords-must-match": "密碼必須匹配",
+        "passwords-must-match": "密碼必須一致",
         "permission-error": "您無權更改您的密碼。聯繫服務器管理員。"
     },
     "change-email": {
@@ -238,34 +249,41 @@
         "regen-warning": "重新生成 API 密鑰將使現有使用端失效。",
         "no-key": "錯誤 - 未設置密鑰",
         "confirm-reset": "這將使您設置的任何 OPDS 配置無效。 你確定要繼續嗎？",
-        "key-reset": "API密鑰重置"
+        "key-reset": "API密鑰重置",
+        "reset": "重設"
     },
     "scrobbling-providers": {
         "title": "Scrobbling供應商",
         "requires": "此功能需要有效的{{product}}授權",
-        "token-valid": "Token 有效",
-        "token-expired": "Token已過期",
-        "no-token-set": "未設定Token",
-        "token-set": "設定Token",
+        "token-valid": "授權憑證有效",
+        "token-expired": "授權憑證已過期",
+        "no-token-set": "未設定授權憑證",
+        "token-set": "設定授權憑證",
         "generate": "產生",
         "generic-instructions": "填寫有關不同外部服務的信息，以便讓 Kavita+ 能夠與它們互動。",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "instructions": "初次使用的用戶請點擊下方的「{{scrobbling-providers.generate}}」，以允許 Kavita+ 和 {{service}} 進行通訊。授權程式後，請將取得的憑證複製並貼到下方的輸入框中。您可以隨時重新產生新的憑證。",
         "mal-instructions": "Kavita 使用 MAL 客戶端 ID 進行身份驗證。為 Kavita 創建一個新的客戶端，一旦批准，提供客戶端 ID 和您的用戶名稱。",
         "scrobbling-applicable-label": "可以進行 Scrobbling",
-        "token-input-label": "Token：{{service}}",
+        "token-input-label": "{{service}} 授權憑證填寫處",
         "mal-token-input-label": "MAL 客戶端 ID",
         "mal-username-input-label": "MAL 用戶名稱",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "mal-used-for": "MyAnimeList 用於智慧收藏和同步「想讀」清單。",
+        "anilist-used-for": "AniList 用於 scrobbling （同步資料）和同步「想讀」清單。",
+        "anilist-first-later": "稍後",
+        "anilist-first-now": "現在",
+        "anilist-first-header": "AniList 授權憑證已儲存",
+        "anilist-first-description": "您的 AniList 授權憑證現在已設定完成。這個憑證的有效期限為一年，Kavita 會在到期前通知您來這裡更新憑證。設定完成後，Kavita 將會根據您的閱讀歷史、想讀清單和評分，自動產生scrobble（同步）事件。您可以選擇現在就開始同步，或稍後再進行。如果您有任何系列不希望被同步，請選擇「稍後」，並在這些系列上設定 「暫停 Scrobble」功能。您只需要執行這個任務一次，之後 Kavita 便會自動為您處理同步事宜。<br/>如果您選擇「稍後」，可以在 Scrobbling 頁面找到相關按鈕。"
     },
     "typeahead": {
         "locked-field": "已鎖定",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "新增 {{item}}…",
-        "no-data": "沒有資料",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": "，輸入以添加自定義項目"
     },
     "generic-list-modal": {
@@ -364,7 +382,7 @@
         "all-series-missing": "您的帳戶無法訪問列表中的所有系列，或者 Kavita 列表中沒有任何內容。",
         "chapter-missing": "{{series}}:Kavita缺少第{{chapter}}章，該項目將被跳過。",
         "empty-file": "cbl 檔案為空，無需執行任何操作。",
-        "name-conflict": "您的帳戶中已存在與 cbl 文件匹配的書單({{readingListName}})。",
+        "name-conflict": "您的帳戶中已存在與 cbl 文件相同的書單({{readingListName}})。",
         "series-collision": "該系列{{seriesLink}}與書庫中的系列名稱相同。",
         "series-missing": "Kavita中缺少系列{{series}}，或者您的帳戶沒有權限。 該系列的所有項目都將跳過導入。",
         "volume-missing": "{{series}}：卷 {{volume}} 在 Kavita 中缺失或您的帳戶沒有權限，所有具有此卷號的項目將被跳過。",
@@ -395,8 +413,8 @@
     },
     "relationship-pipe": {
         "adaptation": "改編",
-        "alternative-setting": "同世界觀",
-        "alternative-version": "IF線",
+        "alternative-setting": "架空世界／平行設定",
+        "alternative-version": "不同版本／IF線",
         "character": "客串角色",
         "contains": "包含",
         "doujinshi": "同人",
@@ -424,7 +442,7 @@
         "editor": "編輯",
         "inker": "勾線師",
         "letterer": "字體設計",
-        "penciller": "線稿師",
+        "penciller": "草稿師",
         "publisher": "出版社",
         "writer": "作者",
         "other": "其他",
@@ -442,9 +460,9 @@
     },
     "library-type-pipe": {
         "book": "書籍",
-        "comic": "美漫",
-        "manga": "漫畫",
-        "comicVine": "Comic Vine",
+        "comic": "漫畫（舊版）",
+        "manga": "漫畫（日漫）",
+        "comicVine": "漫畫",
         "image": "圖片",
         "lightNovel": "輕小說"
     },
@@ -489,7 +507,7 @@
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
         "create": "{{common.create}}",
-        "title": "所有的智慧篩選"
+        "title": "所有的智慧篩選器"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}",
@@ -528,11 +546,11 @@
         "loading": "{{common.loading}}",
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
+        "activate-reset": "重設授權",
         "activate-save": "{{common.save}}",
         "activate-reset-tooltip": "使用您的授權來使先前的註冊失效。需要提供授權金鑰和電子郵件",
         "invalid-license-tooltip": "如果您的訂閱已結束，您必須發送電子郵件給支援團隊以創建新的訂閱",
-        "title": "Kavita+ 許可證",
+        "title": "Kavita+ 授權",
         "license-not-valid": "授權無效",
         "license-valid": "授權有效",
         "buy": "購買",
@@ -546,11 +564,32 @@
         "activate-discordId-label": "Discord 用戶 ID",
         "activate-discordId-tooltip": "將您的 Discord 帳戶與 Kavita+ 連結。這將授予您訪問隱藏頻道的權限，以幫助塑造 Kavita。",
         "discord-validation": "這不是有效的 Discord 用戶 ID。您的用戶 ID 不是您的 Discord 用戶名。",
-        "kavita+-desc-part-2": "高級福利",
-        "kavita+-desc-part-3": "今天！",
-        "kavita+-desc-part-1": "Kavita+ 是一項高級訂閱服務，可為此 Kavita 實例上的所有用戶解鎖功能。購買訂閱以解鎖 ",
-        "kavita+-requirement": "Kavita+ 僅與最新版本（最近的兩個版本）配合使用。任何不在此範圍內的版本可能無法正常運作。",
-        "help-label": "{{common.help}}"
+        "kavita+-desc-part-2": "「進階福利」",
+        "kavita+-desc-part-3": "就在今天！",
+        "kavita+-desc-part-1": "Kavita+ 是一項加值訂閱服務，能為此 Kavita 實例上的所有使用者解鎖更多功能。立即購買訂閱，享受 ",
+        "kavita+-requirement": "Kavita+ 僅支援 Kavita 的最新三個版本。超出此範圍的版本，其功能可能無法正常運作。",
+        "help-label": "{{common.help}}",
+        "supported-version-label": "授權支援版本",
+        "faq-title": "常見問題",
+        "info-title": "授權資訊",
+        "k+-unlocked-description": "歡迎使用 Kavita+！Kavita 會根據您的閱讀進度、評分以及「想讀」清單產生 Scrobble 事件。一旦您在帳戶中註冊了 Scrobbling 提供者，即可啟用此功能。請花些時間為不想要進行 Scrobble 的書籍系列設定「暫停 Scrobble」，以確保不會同步這些內容。",
+        "license-active-label": "授權已啟用",
+        "reset-label": "重設",
+        "expiration-label": "到期",
+        "valid-tooltip": "有效",
+        "invalid-tooltip": "無效",
+        "manage-tooltip": "可以更新付款資訊、取消／暫停訂閱等操作",
+        "email-label": "註冊電子郵件",
+        "license-mismatch": "此授權可能已註冊到其他 Kavita 實例。請重新註冊以修正此問題。",
+        "k+-license-overwrite": "您的授權已註冊到另一個 Kavita 實例。這情況可能發生在您重新安裝 Kavita 時，或極少數情況下因系統更新而導致。請選擇「覆寫」以強制此實例註冊 Kavita+。",
+        "delete-label": "移除授權",
+        "actions-title": "操作",
+        "reset-tooltip": "這將重設 Kavita+ 授權綁定的伺服器實例。需要您的電子郵件和授權金鑰",
+        "delete-tooltip": "這會將授權從 Kavita 移除，停止 Kavita 與 Kavita+ 之間的通訊。此操作不會取消您的訂閱。 若要取消訂閱，請先使用「管理」功能。",
+        "total-subbed-months-label": "總訂閱月數",
+        "overwrite": "覆寫",
+        "k+-already-registered-header": "授權已被註冊",
+        "k+-unlocked": "Kavita+ 已解鎖！"
     },
     "book-line-overlay": {
         "copy": "複製",
@@ -583,7 +622,10 @@
         "go-to-page-prompt": "一共有 {{totalPages}} 頁，您想要跳轉到哪一頁？",
         "table-of-contents-header": "目錄",
         "close-reader": "關閉閱讀器",
-        "loading-book": "正在加載書籍…"
+        "loading-book": "正在加載書籍…",
+        "go-to-first-page": "前往第一頁",
+        "go-to-section-prompt": "共有 {{totalSections}} 個章節。您想前往？",
+        "go-to-section": "前往章節"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -619,7 +661,7 @@
     },
     "series-detail": {
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
@@ -652,7 +694,7 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "layout-mode-option-card": "卡片",
         "read-options-alt": "閱讀選項",
         "page-settings-title": "頁面設定",
@@ -673,7 +715,9 @@
         "time-left-alt": "剩餘時間",
         "publication-status-tooltip": "出版狀態",
         "continue-incognito": "以無痕模式繼續",
-        "read-incognito": "無痕閱讀"
+        "read-incognito": "無痕閱讀",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -685,7 +729,7 @@
         "editors-title": "編輯",
         "letterers-title": "字體設計師",
         "translators-title": "翻譯",
-        "pencillers-title": "草圖",
+        "pencillers-title": "草稿師",
         "publishers-title": "出版社",
         "teams-title": "團隊",
         "locations-title": "地點",
@@ -701,7 +745,8 @@
         "close": "{{common.close}}",
         "kavita-tooltip": "您的評分 + 總體評價",
         "kavita-rating-title": "您的評分",
-        "entry-label": "查看詳情"
+        "entry-label": "查看詳情",
+        "critic": "{{review-card.critic}}"
     },
     "update-notification-modal": {
         "close": "{{common.close}}",
@@ -728,7 +773,10 @@
         "all-series": "所有系列",
         "more": "更多",
         "donate-tooltip": "您可以通過訂閱 Kavita+ 來移除這個",
-        "donate": "捐款"
+        "donate": "捐款",
+        "browse-people": "瀏覽人物",
+        "edit": "{{common.edit}}",
+        "cancel-edit": "取消調整順序"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -765,39 +813,43 @@
         "edit-title": "編輯 {{name}}",
         "add-title": "添加書庫",
         "name-label": "名稱",
-        "type-tooltip": "書庫類型決定了檔案名的解析方式以及UI是否顯示章節（漫畫）或期刊（美漫），查看wiki了解有關書庫類型之間的更多差異。",
+        "type-tooltip": "書庫類型決定了檔案名的解析方式以及UI是否顯示章節（漫畫）或期數（美漫），查看wiki了解有關書庫類型之間的更多差異。",
         "folder-description": "將資料夾新增到您的書庫",
         "help-us-part-1": "請依照 ",
         "manage-reading-list-tooltip": "Kavita 可以用 ComicInfo.xml 或 opf 文件中的 StoryArc、StoryArcNumber 和 AlternativeSeries、AlternativeCount 標籤來創建書單",
         "allow-scrobbling-label": "允許Scrobbling",
         "allow-scrobbling-tooltip": "是否允許Kavita將閱讀事件、想讀狀態、評分和評論記錄至已配置的Scrobble服務提供商？這僅在伺服器具有有效的 Kavita+ 訂閱時才會生效。",
         "folder-watching-tooltip": "覆蓋此書庫的伺服器資料夾監控。如果關閉此功能，則不會監控此書庫包含的資料夾。如果多個書庫共享同一資料夾，那麼這些資料夾仍可能被監控。在每次觸發掃描之前，需等待10分鐘。",
-        "include-in-dashboard-tooltip": "是否應在控制台上包含來自此書庫的系列？這會影響所有清單，例如繼續閱讀、最近更新、最近添加或任何自訂添加。",
+        "include-in-dashboard-tooltip": "是否應將書庫中的系列包含在儀表板上？ 這會影響所有串流，例如「繼續閱讀」、「最近更新」、「最近新增」或任何自訂新增的內容。",
         "force-scan": "強制掃描",
         "next": "下一步",
         "file-type-group-label": "檔案類型",
         "file-type-group-tooltip": "Kavita 應掃描哪些類型的檔案。例如，“壓縮檔”會包含所有 cb*、zip、rar 等檔案。",
         "kavitaplus-eligible-label": "Kavita+資格符合",
-        "kavitaplus-eligible-tooltip": "Kavita+ 是否會拉取資訊或支援 Scrobbling",
-        "include-in-dashboard-label": "顯示在控制台上"
+        "kavitaplus-eligible-tooltip": "支援 Kavita+ 的元資料功能或 Scrobbling",
+        "include-in-dashboard-label": "顯示在儀表板上",
+        "allow-metadata-matching-label": "允許元資料匹配",
+        "allow-metadata-matching-tooltip": "是否允許 Kavita 為此資料庫中的書籍系列下載元資料？此功能僅在伺服器擁有有效的 Kavita+ 訂閱時才會啟用。",
+        "enable-metadata-tooltip": "允許 Kavita 讀取元資料檔案，以覆蓋檔名解析結果。",
+        "enable-metadata-label": "啟用元資料（ComicInfo／EPUB／PDF）"
     },
     "reader-settings": {
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "on": "開",
         "vertical": "縱向",
         "off": "關",
         "right-to-left": "從右到左",
-        "immersive-mode-tooltip": "這將隱藏點擊閱讀器文檔後的選單，然後打開“點擊翻頁”功能",
+        "immersive-mode-tooltip": "這將隱藏點擊閱讀器文檔後的選單，然後打開「點擊翻頁」功能",
         "fullscreen-label": "全螢幕",
         "exit": "退出",
-        "writing-style-tooltip": "更改文字方向。橫向從左到右，縱向從上到下。",
+        "writing-style-tooltip": "變更文字的書寫方向。橫排為由左至右，直排為由上至下。",
         "general-settings-title": "一般設定",
         "reset-to-defaults": "恢復默認",
         "reader-settings-title": "閱讀器設定",
@@ -815,7 +867,15 @@
         "theme-white": "白",
         "theme-paper": "紙",
         "enter": "打開",
-        "layout-mode-option-scroll": "滾動"
+        "layout-mode-option-scroll": "滾動",
+        "update-parent": "儲存到 {{name}}",
+        "create-new-tooltip": "從您目前的隱含設定建立一個可管理的新設定檔",
+        "reading-profile-updated": "閱讀設定已更新",
+        "reading-profile-promoted": "閱讀設定已設為主要",
+        "loading": "載入中",
+        "create-new": "從隱含設定建立新設定檔",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -855,12 +915,14 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "format-title": "{{metadata-filter.format-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
-        "length-title": "{{edit-chapter-modal.words-label}}"
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
@@ -882,9 +944,9 @@
         "parent": "{{relationship-pipe.parent}}",
         "description-part-2": "wiki 以獲取提示。",
         "target-series": "目標系列",
-        "description-part-1": "不確定要添加什麼關係？請參閱我們的",
-        "relationship": "關係",
-        "add-relationship": "添加關係"
+        "description-part-1": "不確定要添加什麼關聯？請參閱我們的",
+        "relationship": "關聯性",
+        "add-relationship": "添加關聯性"
     },
     "bulk-add-to-collection": {
         "promoted": "{{common.promoted}}",
@@ -910,10 +972,10 @@
         "description-part-2": "wiki 中找到。",
         "comment-header": "評論",
         "file-header": "檔案",
-        "clear-alerts": "清除警報",
+        "clear-alerts": "清除警示",
         "description-part-1": "這張表格包含了掃描或閱讀媒體時發現的問題。您可以隨時清除它，並使用書庫（強制）掃描來進行分析。有關一些常見錯誤及其含義的列表，可以在 ",
         "created-header": "創建",
-        "no-data": "沒有資料"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -926,7 +988,7 @@
         "send-to-warning": "如果您希望“發送至裝置”功能正常運作，您必須完善電子郵件設定",
         "test": "測試",
         "host-name-label": "主機名稱",
-        "host-name-tooltip": "域名（使用反向代理的話）。此項為電子郵件功能所必需。如果沒有反向代理，請使用任意網址。",
+        "host-name-tooltip": "請輸入您反向代理的網域名稱，此項為郵件功能所必須。若未使用反向代理，也可填入任意 URL，如：http://externalip:port/",
         "host-name-validation": "主機名稱必須以 http(s) 開頭，且不能以 / 結尾",
         "host-tooltip": "您電子郵件伺服器的發送／SMTP地址",
         "host-label": "主機",
@@ -984,7 +1046,7 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "media-issue-title": "媒體問題",
+        "media-issue-title": "檔案問題",
         "encode-as-description-part-2": "我可以使用WebP嗎？",
         "encode-as-warning": "一旦您將檔案轉換為 WebP/AVIF，將無法再轉換回 PNG。您需要重新整理您的書庫封面以重新生成所有封面。書籤和圖示無法被轉換。",
         "media-warning": "您必須在儲存後，從“任務”標籤中觸發媒體轉換任務。",
@@ -1033,8 +1095,8 @@
         "notice": "注意：",
         "base-url-label": "基礎網址",
         "cache-size-tooltip": "允許用於快取大型 API 的記憶體大小。默認為 75MB。",
-        "on-deck-last-chapter-add-label": "保留於“繼續閱讀”的“最近新增章節”天數",
-        "on-deck-last-progress-label": "保留於“繼續閱讀”的“最近閱讀”天數",
+        "on-deck-last-chapter-add-label": "「繼續閱讀」章節更新逾期（天數）",
+        "on-deck-last-progress-label": "「繼續閱讀」閱讀進度逾期（天數）",
         "send-data": "發送數據",
         "opds-label": "OPDS",
         "max-logs-validation": "您不能擁有超過{{num}}條日誌",
@@ -1045,7 +1107,7 @@
         "min-cache-validation": "至少得有50MB。",
         "max-backup-validation": "您不能擁有超過 {{num}} 個備份",
         "base-url-validation": "基礎網址必須以/開頭，以/收尾",
-        "on-deck-last-chapter-add-tooltip": "最近有新增章節的書籍將自動加入“繼續閱讀”，超過天數沒有新增章節將從“繼續閱讀”中移除。",
+        "on-deck-last-chapter-add-tooltip": "最近有新增章節的書籍將自動加入「繼續閱讀」，超過天數沒有新增章節將從「繼續閱讀」中移除。",
         "folder-watching-label": "資料夾監控",
         "enable-folder-watching": "啟用資料夾監控",
         "opds-tooltip": "若開啟此功能，將允許所有用戶使用 OPDS 從伺服器閱讀和下載內容。",
@@ -1056,9 +1118,9 @@
         "log-label": "日誌保留天數",
         "logging-level-label": "日誌級別",
         "cache-size-label": "快取大小",
-        "base-url-tooltip": "如果您希望在基礎網址上托管 Kavita，例如：yourdomain.com/kavita，請使用此選項。此功能在使用非root使用者的 Docker 環境中不支援。",
+        "base-url-tooltip": "如果您希望在基礎網址上托管 Kavita，例如：yourdomain.com/kavita，請使用此選項。此功能在使用非root用戶的 Docker 環境中不支援。",
         "backup-label": "備份保留天數",
-        "on-deck-last-progress-tooltip": "最近閱讀進度有變動的書籍將自動加入“繼續閱讀”，超過天數未閱讀將從“繼續閱讀”中移除。",
+        "on-deck-last-progress-tooltip": "最近閱讀進度有變動的書籍將自動加入「繼續閱讀」，超過天數未閱讀將從「繼續閱讀」中移除。",
         "folder-watching-tooltip": "允許 Kavita 監控書庫資料夾，以檢測變更，並在變更發生時自動觸發掃描。這使內容能在不手動觸發掃描或等待夜間掃描的情況下更新。掃描觸發前將始終等待 10 分鐘。",
         "min-logs-validation": "您必需至少有一條日誌"
     },
@@ -1145,7 +1207,8 @@
         "name-header": "名稱",
         "roles-header": "權限",
         "too-many-libraries": "很多",
-        "delete-user-alt": "刪除用戶{{user}}"
+        "delete-user-alt": "刪除用戶{{user}}",
+        "all-libraries": "所有書庫"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1166,7 +1229,7 @@
         "source-url-title": "來源網址：",
         "total-series-title": "全部系列：",
         "missing-series-title": "缺失系列：",
-        "promote-tooltip": "推廣意味著該標籤可以在伺服器範圍內被看到，而不僅限於管理員用戶。所有擁有此標籤的系列仍將受到用戶訪問限制。",
+        "promote-tooltip": "「推廣」 指的是該標籤將對伺服器上的所有使用者可見，而不僅限於管理員帳戶。即使標籤被推廣，所有帶有此標籤的系列仍然會受到使用者存取限制的約束。",
         "promote-label": "推廣",
         "title": "編輯 {{collectionName}} 收藏",
         "last-sync-tooltip": "Kavita 每天都會與上游内容提供商同步資料。"
@@ -1181,9 +1244,9 @@
         "highly-rated": "高評價"
     },
     "settings": {
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "Kavita+",
         "admin-logs": "日誌",
-        "admin-media-issues": "媒體問題",
+        "admin-media-issues": "檔案問題",
         "admin-email": "電子郵件",
         "admin-tasks": "任務",
         "theme": "主題",
@@ -1194,7 +1257,7 @@
         "server-section-title": "伺服器",
         "admin-libraries": "書庫",
         "admin-system": "系統",
-        "admin-kavitaplus": "Kavita+",
+        "admin-kavitaplus": "授權",
         "mal-stack-import": "MAL Stack",
         "account-section-title": "帳戶",
         "admin-statistics": "統計",
@@ -1206,7 +1269,13 @@
         "scrobbling": "Scrobbling",
         "customize": "自訂",
         "cbl-import": "CBL 書單",
-        "info-section-title": "資訊"
+        "info-section-title": "資訊",
+        "reading-profiles": "閱讀設定檔",
+        "admin-manage-tokens": "管理用戶憑證",
+        "scrobble-holds": "暫停 Scrobble",
+        "admin-email-history": "電子郵件紀錄",
+        "admin-metadata": "管理元資料",
+        "admin-matched-metadata": "匹配的元資料"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -1233,15 +1302,17 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "發布日期：{{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
         "external-source": "外部來源",
         "provided": "已提供的",
-        "smart-filter": "智慧篩選",
+        "smart-filter": "智慧篩選器",
         "library": "書庫",
-        "load-filter": "載入篩選器"
+        "load-filter": "載入篩選器",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
@@ -1253,7 +1324,19 @@
         "remove-read": "移除已閱讀",
         "continue": "繼續閱讀",
         "no-data": "未添加任何項目",
-        "incognito-alt": "（無痕模式）"
+        "incognito-alt": "（無痕模式）",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "more-alt": "{{series-detail.more-alt}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "edit-alt": "{{common.edit}}",
+        "items-title": "項目",
+        "date-range-title": "日期範圍",
+        "edit-label": "編輯模式",
+        "reorder-alt": "重新排序項目",
+        "dnd-warning": "在行動裝置上或當書單超過 100 項時，將無法使用拖放功能。"
     },
     "events-widget": {
         "close": "{{common.close}}",
@@ -1295,7 +1378,7 @@
     },
     "nav-header": {
         "help": "{{common.help}}",
-        "all-filters": "智慧篩選",
+        "all-filters": "智慧篩選器",
         "close": "{{common.close}}",
         "search-series-alt": "搜尋系列",
         "search-alt": "搜尋…",
@@ -1306,7 +1389,10 @@
         "skip-alt": "跳轉至主要內容",
         "no-data": "未找到結果",
         "announcements": "公告",
-        "nav-link-header": "導航選項"
+        "nav-link-header": "導航選項",
+        "browse-genres": "瀏覽類型",
+        "browse-tags": "瀏覽標籤",
+        "person-aka-status": "匹配到別名"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1359,7 +1445,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "cbl-repo": "您可以在社群<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>中找到更多書單。",
+        "cbl-repo": "您可以在社群<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>中找到更多書單。",
         "validate-warning": "CBL 檔案存在問題，匯入已停止。請修正這些問題後再試一次。",
         "import-description": "請先匯入一個 .cbl 檔案，Kavita 將在匯入之前進行多項檢查，某些步驟可能會因檔案問題而停止進行。",
         "validate-no-issue-description": "未發現 CBL 問題，請按“下一步”。",
@@ -1378,15 +1464,15 @@
         "help-label": "{{common.help}}"
     },
     "manga-reader": {
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "series-progress": "系列進度：{{percentage}}",
         "back": "返回",
         "left-to-right-alt": "從左到右",
-        "reading-direction-tooltip": "閱讀方向： ",
+        "reading-direction-tooltip": "翻頁方向： ",
         "reading-mode-tooltip": "閱讀模式",
         "width": "寬度",
-        "off": "關",
+        "off": "{{reader-settings.off}}",
         "original": "原始大小",
         "enable-comic-book-label": "模擬漫畫書",
         "width-override-label": "寬度控制",
@@ -1414,7 +1500,13 @@
         "fullscreen": "全螢幕",
         "image-scaling-label": "圖片縮放",
         "no-next-chapter": "已經到最後了",
-        "incognito-alt": "無痕模式已開啟，點擊以關閉。"
+        "incognito-alt": "無痕模式已開啟，點擊以關閉。",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "reading-profile-updated": "閱讀設定已更新",
+        "reading-profile-promoted": "閱讀設定檔已推廣"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1435,7 +1527,7 @@
         "publisher-label": "出版社",
         "cover-artist-label": "封面藝術家",
         "writer-label": "作者",
-        "penciller-label": "線稿師",
+        "penciller-label": "草稿師",
         "inker-label": "勾線師",
         "read": "已讀",
         "series-name-tooltip": "系列名稱將依據名稱、排序名稱或本地化名稱進行篩選",
@@ -1596,8 +1688,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -1716,36 +1808,38 @@
         "invalid-confirmation-url": "無效的確認網址"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "智慧篩選",
+        "title-smart-filters": "智慧篩選器",
         "close": "{{common.close}}",
-        "smart-filters": "智慧篩選",
+        "smart-filters": "智慧篩選器",
         "help": "{{common.help}}",
         "external-sources": "外部來源",
         "title-external-sources": "外部來源",
-        "title-dashboard": "自訂控制台",
-        "title-sidenav": "自訂側邊欄",
-        "sidenav": "側邊欄",
-        "dashboard": "控制台"
+        "title-dashboard": "自訂儀表板",
+        "title-sidenav": "自訂側邊導覽列",
+        "sidenav": "側邊導覽列",
+        "dashboard": "儀表板",
+        "description": "您可以透過重新排序、切換可見性，以及將智慧篩選器／外部來源綁定到首頁或側邊導覽列，來自訂 Kavita 的各個方面。"
     },
     "customize-dashboard-streams": {
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "no-data": "所有智慧篩選已添加到控制台，或尚未創建任何篩選。"
+        "no-data": "所有智慧篩選器都已新增至儀表板，或者尚未建立任何篩選器。",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filters-title": "智慧篩選",
+        "smart-filters-title": "智慧篩選器",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "reorder-when-filter-present": "當有篩選器存在時，您無法透過拖曳來重新排序項目。請使用「{{customize-sidenav-streams.order-numbers-label}}」來排序",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "批量選擇",
-        "no-data-external-source": "所有外部來源已添加到側邊欄，或尚未創建任何來源。",
-        "no-data": "所有智慧篩選已加入側邊欄，或尚未創建任何篩選。"
+        "no-data-external-source": "所有外部來源已添加到側邊導覽列，或尚未創建任何來源。",
+        "no-data": "所有智慧篩選器已加入側邊導覽列，或尚未創建任何篩選器。"
     },
     "manage-external-sources": {
         "clear": "{{common.clear}}",
@@ -1760,7 +1854,15 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "errored": "篩選器中存在編碼錯誤的，您需要重新創建它。",
-        "no-data": "尚未建立智慧篩選"
+        "no-data": "尚未建立智慧篩選器",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "編輯 {{name}}",
+        "name-label": "名稱",
+        "cancel": "{{common.cancel}}",
+        "filter-name-unique": "智慧篩選器名稱必須唯一",
+        "close": "{{common.close}}",
+        "required-field": "智慧篩選器需要一個名稱"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -1785,7 +1887,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -1815,7 +1917,7 @@
         "translators": "翻譯",
         "user-rating": "用戶評分",
         "file-path": "檔案路徑",
-        "penciller": "線稿師",
+        "penciller": "草稿師",
         "languages": "語言",
         "path": "路徑",
         "libraries": "書庫",
@@ -1833,8 +1935,8 @@
         "download-tooltip": "下載至裝置",
         "scan-library": "掃描書庫",
         "import-mal-stack": "匯入 MAL Stack",
-        "remove-from-on-deck-tooltip": "從“繼續閱讀”中移除系列",
-        "remove-from-on-deck": "從“繼續閱讀”中移除",
+        "remove-from-on-deck-tooltip": "從「繼續閱讀」中移除系列",
+        "remove-from-on-deck": "從「繼續閱讀」中移除",
         "customize": "自訂",
         "import-cbl-tooltip": "從 CBL 檔建立書單",
         "import-cbl": "匯入CBL",
@@ -1885,7 +1987,19 @@
         "details-tooltip": "TODO",
         "view-series": "查看系列",
         "read": "閱讀",
-        "view-series-tooltip": "TODO"
+        "view-series-tooltip": "TODO",
+        "reading-profiles": "閱讀設定檔",
+        "set-reading-profile": "設定閱讀偏好",
+        "set-reading-profile-tooltip": "將閱讀設定綁定到此書庫",
+        "reorder": "重新排序",
+        "merge": "合併",
+        "cleared-profile": "清除閱讀設定",
+        "match": "匹配",
+        "match-tooltip": "手動將系列與 Kavita+ 匹配",
+        "rename": "重新命名",
+        "clear-reading-profile-tooltip": "清除此書庫的閱讀設定",
+        "clear-reading-profile": "清除閱讀設定",
+        "rename-tooltip": "重新命名智能篩選器"
     },
     "common": {
         "volume-num": "卷",
@@ -1895,7 +2009,7 @@
         "issue-hash-num": "期＃",
         "book-nums": "書籍",
         "chapter-nums": "章節",
-        "issue-nums": "期刊",
+        "issue-nums": "期數",
         "read": "閱讀",
         "clear": "清空",
         "filter": "篩選",
@@ -1926,7 +2040,10 @@
         "add": "新增",
         "select-all": "全選",
         "chapter-num": "章",
-        "author-count": "{{num}}位作者"
+        "author-count": "{{num}}位作者",
+        "issue-count": "{{num}} 期",
+        "chapter-count": "{{num}} 章",
+        "no-data": "無資料"
     },
     "download-indicator": {
         "progress": "{{percentage}}%已下載"
@@ -1952,14 +2069,14 @@
         "delete-device": "您確定要刪除該裝置嗎？",
         "device-updated": "裝置已更新",
         "device-created": "裝置已創建",
-        "k+-delete-key": "這將僅刪除 Kavita 的授權金鑰並允許顯示購買連結。這不會取消您的訂閱！僅在支援指示下使用此功能！",
+        "k+-delete-key": "這將僅刪除 Kavita 的授權金鑰並允許顯示購買連結。 <b>這不會取消您的訂閱！</b> 僅在支援指示下使用此功能！請先使用「管理」功能取消訂閱。",
         "stack-imported": "Stack 已匯入",
         "reading-list-imported": "書單已匯入",
         "list-doesnt-exist": "此列表不存在",
         "reading-list-updated": "已更新書單",
         "reset-base-url": "基礎網址重設",
         "file-send-to": "檔案已透過郵件發送給{{name}}",
-        "k+-license-saved": "授權密鑰已保存，但目前尚未生效。點擊檢查以重新驗證訂閱資訊，首次註冊可能需要一些時間。",
+        "k+-license-saved": "授權金鑰已保存，但目前尚未生效。點擊檢查以重新驗證訂閱資訊，首次註冊可能需要一些時間。",
         "theme-missing": "當前主題已不存在，請刷新頁面。",
         "email-not-sent": "記錄的電子郵件不是有效的電子郵件，無法發送。相關連結已記錄在日誌中。管理員可以提供此連結以完成流程。",
         "k+-reset-key": "這會使之前您授權的註冊無效，並允許您重新註冊 Kavita。",
@@ -1967,19 +2084,19 @@
         "forced-scan-queued": "已開始強制掃描{{name}}",
         "change-email-no-email": "電子郵件已更新",
         "confirm-library-type-change": "更改書庫類型將觸發新的掃描，並使用不同的解析規則，這可能導致系列重新創建，因此您可能會丟失進度和書籤。您應該在這之前備份資料。您確定要繼續嗎？",
-        "smart-filter-deleted": "智慧篩選已刪除",
+        "smart-filter-deleted": "智慧篩選器已刪除",
         "confirm-delete-volume": "您確定要刪除這卷嗎？這不會修改硬碟上的檔案。",
         "reading-list-promoted": "書單已推廣",
         "reading-list-unpromoted": "書單已取消推廣",
         "confirm-delete-theme": "移除此主題將從硬碟中刪除它。在移除之前，您可以從臨時目錄中獲取它",
-        "mal-token-required": "需要 MAL 令牌，請在用戶設定中配置",
+        "mal-token-required": "需要 MAL 授權憑證，請在用戶設定中配置",
         "chapter-deleted": "章節已刪除",
         "volume-deleted": "卷已刪除",
         "regen-cover": "已將重新生成封面圖片的任務加入佇列",
         "reading-list-deleted": "已刪除書單",
         "library-deleted": "已將書庫 {{name}}移除",
         "library-created": "書庫創建成功，已開始掃描。",
-        "smart-filter-updated": "已創建/更新智慧篩選",
+        "smart-filter-updated": "已創建/更新智慧篩選器",
         "no-next-chapter": "找不到下一個{{entity}}",
         "refresh-covers-queued": "{{name}}的封面更新正在佇列中",
         "account-migration-complete": "帳戶遷移完成",
@@ -2002,11 +2119,11 @@
         "load-prev-chapter": "上一個 {{entity}} 已加載",
         "confirm-delete-user": "您確定要刪除此用戶嗎？",
         "confirm-delete-multiple-series": "您確定要刪除{{count}}個系列嗎？這不會修改硬碟上的檔案。",
-        "anilist-token-updated": "已更新 AniList 令牌",
-        "confirm-delete-smart-filter": "您確定要刪除此智慧篩選？",
+        "anilist-token-updated": "已更新 AniList 授權憑證",
+        "confirm-delete-smart-filter": "您確定要刪除此智慧篩選器？",
         "copied-to-clipboard": "已複製到剪貼簿",
         "confirm-library-delete": "您確定要刪除“{{name}}”嗎？此操作無法撤銷。",
-        "anilist-token-expired": "您的 AniList 令牌已過期。在您於用戶設定 > 帳戶中重新生成之前，將無法處理紀錄功能",
+        "anilist-token-expired": "您的 AniList 授權憑證已過期。在您於「用戶設定」>「帳戶」中重新生成之前，將無法處理紀錄功能",
         "confirm-delete-reading-list": "您確定要刪除書單嗎？此操作無法撤銷。",
         "select-files-warning": "您需要先選擇文件才能繼續操作",
         "entity-read": "{{name}}已標記為已讀",
@@ -2036,7 +2153,7 @@
         "email-sent-to-no-existing": "現有的電子郵件無效。相關連結已記錄在日誌中。請向管理員索取該連結以完成電子郵件變更。",
         "age-restriction-updated": "年齡限制已更新",
         "alert-bad-theme": "主題中有無效或不安全的CSS。請聯繫管理員進行修正，系統將預設為深色主題。",
-        "confirm-regen-covers": "刷新封面將強制重新計算所有封面圖像。這是一個高負載的操作。您確定要執行此操作，而不是使用掃描代替嗎？",
+        "confirm-regen-covers": "刷新封面將強制重新計算所有封面圖片。這是一個高負載的操作。您確定要執行此操作，而不是使用掃描代替嗎？",
         "delete-review": "您確定要刪除您的評論嗎？",
         "generate-colorscape-queued": "為{{name}}生成色彩主題已加入佇列",
         "confirm-delete-chapter": "您確定要刪除這個章節嗎？這不會修改硬碟上的檔案。",
@@ -2046,7 +2163,15 @@
         "bulk-covers": "刷新多個書庫的封面，是一項繁重的工作，可能需要很長時間，您確定要繼續嗎？",
         "person-image-downloaded": "已下載人物封面並套用。",
         "confirm-delete-multiple-chapters": "您確定要刪除 {{count}} 章節／卷嗎？這不會修改硬碟上的檔案。",
-        "bulk-delete-libraries": "您確定要刪除 {{count}} 個書庫嗎？"
+        "bulk-delete-libraries": "您確定要刪除 {{count}} 個書庫嗎？",
+        "confirm-delete-multiple-volumes": "您確定要刪除 {{count}} 個卷嗎？這不會修改磁碟上的檔案。",
+        "series-bound-to-reading-profile": "系列已綁定至閱讀設定 {{name}}",
+        "library-bound-to-reading-profile": "書庫已綁定至閱讀設定 {{name}}",
+        "scrobble-gen-init": "已將任務排入隊列，以根據過去的閱讀記錄和評分產生 scrobble 事件，並同步到已連接的服務。",
+        "series-added-want-to-read": "系列已加入「想讀」",
+        "webtoon-override": "偵測到圖片為條漫風格，正在切換到條漫模式。",
+        "external-match-rate-error": "Kavita 查詢 {{seriesName}} 時，已超出查詢頻率限制。請於 5 分鐘後再試。",
+        "match-success": "系列匹配正確"
     },
     "changelog": {
         "installed": "已安裝",
@@ -2062,7 +2187,7 @@
         "collection-created-label": "創建者：{{owner}}"
     },
     "tabs": {
-        "smart-filters-tab": "智慧篩選",
+        "smart-filters-tab": "智慧篩選器",
         "account-tab": "帳戶",
         "volumes-tab": "卷",
         "specials-tab": "特集",
@@ -2115,7 +2240,8 @@
     },
     "card-detail-layout": {
         "total-items": "共 {{count}} 項",
-        "jumpkey-count": "{{count}} 個系列"
+        "jumpkey-count": "{{count}} 個系列",
+        "no-data": "{{common.no-data}}"
     },
     "read-more": {
         "read-less": "收起",
@@ -2196,7 +2322,10 @@
         "release-year": "發行年份",
         "random": "隨機",
         "read-progress": "最近閱讀",
-        "average-rating": "平均評分"
+        "average-rating": "平均評分",
+        "person-name": "名稱",
+        "person-series-count": "系列數",
+        "person-chapter-count": "章數"
     },
     "manage-system": {
         "version-title": "版本",
@@ -2277,15 +2406,19 @@
         "title": "Kavita+ 元數據分析",
         "completed-series-label": "已完成的系列",
         "complete": "所有系列都有元數據",
-        "no-data": "沒有資料"
+        "no-data": "{{common.no-data}}"
     },
     "next-expected-card": {
         "title": "~{{date}}",
         "upcoming-title": "即將推出"
     },
     "confirm": {
-        "alert": "警報",
-        "confirm": "確認"
+        "alert": "警示",
+        "confirm": "確認",
+        "cancel": "{{common.cancel}}",
+        "ok": "確定",
+        "info": "訊息",
+        "prompt": "問題"
     },
     "day-breakdown": {
         "no-data": "尚未有進度，快來開始閱讀",
@@ -2315,7 +2448,10 @@
         "known-for-title": "代表作品",
         "individual-role-title": "作為{{role}}",
         "browse-person-title": "{{name}}的所有作品",
-        "browse-person-by-role-title": "{{name}}作為{{role}}的所有作品"
+        "browse-person-by-role-title": "{{name}}作為{{role}}的所有作品",
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "尚無此人物的相關資訊",
+        "aka-title": "又名 "
     },
     "edit-person-modal": {
         "save": "{{common.save}}",
@@ -2338,7 +2474,11 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "download-coversdb": "從 CoversDB 下載",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "cover-image-description-extra": "或者，您可以從 CoversDB 下載封面（如果有）。"
+        "cover-image-description-extra": "或者，您可以從 CoversDB 下載封面（如果有）。",
+        "alias-overlap": "此別名已指向其他人物，或者與此人的姓名相同，建議考慮合併資料。",
+        "aliases-tooltip": "當一個系列被標記為某個人的別名時，系統會將該系列歸屬於現有的人物，而不是建立一個新人物。刪除別名後，您需要重新掃描該系列，變更才會生效。",
+        "aliases-label": "編輯別名",
+        "aliases-tab": "別名"
     },
     "reviews": {
         "user-reviews-local": "本地評論",
@@ -2346,6 +2486,332 @@
     },
     "review-modal": {
         "title": "編輯評論",
-        "review-label": "評論"
+        "review-label": "評論",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "評論至少需要 {{count}} 個字元",
+        "required": "{{validation.required-field}}"
+    },
+    "manage-reading-profiles": {
+        "wiki-title": "wiki",
+        "no-selected": "未選擇設定檔",
+        "confirm": "您是否確定要刪除名為「{{name}}」的閱讀設定檔？",
+        "image-reader-settings-title": "圖片閱讀器",
+        "reading-direction-label": "翻頁方向",
+        "scaling-option-label": "縮放選項",
+        "scaling-option-tooltip": "如何將影像縮放到螢幕大小。",
+        "page-splitting-label": "頁面分割",
+        "reading-mode-label": "閱讀模式",
+        "reading-mode-tooltip": "將閱讀器更改為縱向翻頁、橫向翻頁，或設置為無限滾動",
+        "layout-mode-label": "排版模式",
+        "background-color-tooltip": "圖片閱讀器的背景顏色",
+        "layout-mode-tooltip": "將單個影像或兩個並排影像顯示到螢幕上",
+        "background-color-label": "背景顏色",
+        "auto-close-menu-label": "自動關閉選單",
+        "auto-close-menu-tooltip": "選單是否應自動關閉",
+        "show-screen-hints-label": "顯示螢幕提示",
+        "emulate-comic-book-label": "模擬書籍效果",
+        "swipe-to-paginate-tooltip": "是否允許透過滑動螢幕來翻到上一頁或下一頁",
+        "profiles-title": "您的閱讀設定檔",
+        "add-tooltip": "您的設定檔將在變更後儲存",
+        "make-default": "設為預設",
+        "default-profile": "預設",
+        "add": "{{common.add}}",
+        "swipe-to-paginate-label": "使用滑動手勢翻頁",
+        "width-override-tooltip": "覆寫閱讀器中圖片的寬度",
+        "reading-direction-tooltip": "點擊畫面哪個方向會翻到下一頁。「由右至左」意味著您單擊屏幕左側以移至下一頁。",
+        "page-splitting-tooltip": "如何拆分全寬圖片（即左右影像合併）",
+        "show-screen-hints-tooltip": "顯示一個覆蓋層，以幫助理解翻頁區域和方向",
+        "extra-tip": "您可以透過系列或書庫的操作選單，或是批次方式來指派閱讀設定檔。當您在閱讀器中變更設定時，系統會自動為該系列建立一個隱藏的設定檔，用來記住您的偏好（不適用於 PDF）。當您自行為該系列指派一個閱讀設定檔後，這個隱藏設定檔會被移除。更多資訊請參考",
+        "description": "由於不同系列可能需要不同的閱讀方式，建議您針對每個書庫或系列建立個別的閱讀設定檔，確保閱讀體驗一致且順暢。",
+        "selection-tip": "從清單中選擇，或點擊右上角建立新的設定檔",
+        "emulate-comic-book-tooltip": "套用陰影效果，以模擬實體書籍",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "reset": "{{common.reset}}",
+        "delete": "{{common.delete}}",
+        "disable-width-override-label": "停用寬度覆寫",
+        "allow-auto-webtoon-reader-label": "自動條漫閱讀模式",
+        "tap-to-paginate-tooltip": "書籍閱讀器螢幕兩側是否允許點擊，以切換到上一頁或下一頁",
+        "tap-to-paginate-label": "點擊翻頁",
+        "color-theme-book-label": "顏色主題",
+        "layout-mode-book-label": "排版模式",
+        "layout-mode-book-tooltip": "選擇內容的顯示方式。「捲動」會依書籍原始排版顯示；「單欄」或「雙欄」會根據裝置高度調整，一頁顯示一或兩欄文字",
+        "line-height-book-label": "行距",
+        "line-height-book-tooltip": "書籍中行與行之間的間距大小",
+        "font-size-book-tooltip": "套用於書籍字體的縮放百分比",
+        "pdf-theme-label": "主題",
+        "pdf-scroll-mode-tooltip": "設定您瀏覽頁面的方式。可選擇垂直／水平捲動，或點擊翻頁（不捲動）",
+        "pdf-spread-mode-label": "跨頁模式",
+        "pdf-theme-tooltip": "閱讀器的顏色主題",
+        "allow-auto-webtoon-reader-tooltip": "如果頁面看起來像條漫，則會自動切換到條漫閱讀模式。可能會有誤判的情況發生。",
+        "immersive-mode-tooltip": "啟用後，點擊閱讀頁面時會隱藏選單，並開啟點擊翻頁功能",
+        "pdf-scroll-mode-label": "捲動模式",
+        "pdf-reader-settings-title": "PDF 閱讀器",
+        "pdf-spread-mode-tooltip": "選擇頁面顯示方式。可單頁顯示，或雙頁對開（奇數跨頁／偶數跨頁）",
+        "reading-profile-library-settings-title": "書庫",
+        "reading-profile-series-settings-title": "系列",
+        "disable-width-override-tooltip": "當您的螢幕寬度達到或小於所設定的中斷點時，防止寬度覆寫生效",
+        "book-reader-settings-title": "書籍閱讀器",
+        "immersive-mode-label": "沉浸模式",
+        "reading-direction-book-label": "翻頁方向",
+        "reading-direction-book-tooltip": "點擊畫面哪個方向會翻到下一頁。「由右至左」意味著您單擊屏幕左側以移至下一頁。",
+        "font-family-label": "字型",
+        "font-family-tooltip": "選擇要使用的字型。若選擇「Default」，將採用書籍內建字型",
+        "writing-style-label": "書寫方向",
+        "writing-style-tooltip": "變更文字的書寫方向。橫排為由左至右，直排為由上至下。",
+        "color-theme-book-tooltip": "設定要應用於書籍閱讀器內容和選單的顏色主題",
+        "font-size-book-label": "字體大小",
+        "margin-book-tooltip": "設定螢幕左右兩側的間距大小。但在行動裝置上，不管設定為多少，間距都會被強制設為 0。",
+        "margin-book-label": "邊距"
+    },
+    "manage-matched-metadata": {
+        "matched-state-label": "匹配狀態",
+        "library-type": "書庫類型",
+        "unmatched-status-label": "未匹配",
+        "blacklist-status-label": "需手動匹配",
+        "title": "已匹配的元資料",
+        "description": "這裡會列出所有可以匹配外部元資料的書籍系列。Kavita 每天會自動預取或更新系列資料，每 24 小時最多處理 50 個系列。",
+        "status-header": "狀態",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "all-status-label": "全部狀態",
+        "dont-match-label": "不匹配",
+        "no-data": "{{common.no-data}}",
+        "match-alt": "匹配 {{seriesName}}",
+        "library-name-header": "書庫",
+        "actions-header": "操作",
+        "series-name-header": "系列",
+        "valid-until-header": "下次重新整理",
+        "matched-status-label": "已匹配"
+    },
+    "browse-people": {
+        "series-count": "{{common.series-count}}",
+        "roles-label": "角色",
+        "sort-label": "排序",
+        "issue-count-label": "作品數",
+        "series-count-label": "系列數",
+        "title": "瀏覽人物",
+        "author-count": "{{num}} 人",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "name-label": "名稱"
+    },
+    "browse-genres": {
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "title": "瀏覽類型",
+        "genre-count": "{{num}} 種類型"
+    },
+    "browse-tags": {
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "title": "瀏覽標籤",
+        "genre-count": "{{num}} 個標籤"
+    },
+    "bulk-set-reading-profile-modal": {
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "clear": "{{common.clear}}",
+        "create": "{{common.create}}",
+        "filter-label": "{{common.filter}}",
+        "no-data": "尚未建立收藏",
+        "title": "閱讀設定",
+        "bound": "綁定"
+    },
+    "metadata-setting-field-pipe": {
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "covers": "封面",
+        "chapter-title": "章節標題",
+        "chapter-covers": "章節封面",
+        "chapter-publisher": "章節{{person-role-pipe.publisher}}",
+        "chapter-release-date": "章節發行日期",
+        "chapter-summary": "章節摘要"
+    },
+    "manage-metadata-settings": {
+        "enable-start-date-tooltip": "允許將系列的開始日期寫入系列資訊",
+        "whitelist-label": "白名單標籤",
+        "age-rating-mapping-title": "年齡分級對應",
+        "blacklist-tooltip": "清單中的任何項目都將從類型和標籤處理中移除。您可以在此處新增<b>不想寫入</b>的類型／標籤。請確保它們以逗號分隔。",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-title-label": "標題",
+        "localized-name-tooltip": "允許在欄位解鎖時寫入譯名。Kavita 會盡力做出最佳判斷。",
+        "enable-chapter-release-date-tooltip": "允許寫入章節／期數的發行日期",
+        "enable-chapter-publisher-tooltip": "允許寫入章節／期數的出版社",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-publisher-label": "出版社",
+        "enable-chapter-cover-tooltip": "允許設定章節／期數的封面",
+        "enable-chapter-cover-label": "章節封面",
+        "description": "Kavita+ 具備下載並將部分元資料寫入資料庫的功能。此頁面可讓您切換哪些內容在啟用範圍內。",
+        "enabled-label": "啟用元資料下載",
+        "summary-label": "摘要",
+        "summary-tooltip": "允許在欄位解鎖時寫入摘要。",
+        "localized-name-label": "系列譯名",
+        "derive-publication-status-tooltip": "允許根據總章節／卷數來推斷出版狀態。",
+        "derive-publication-status-label": "出版狀態",
+        "enable-relations-label": "關聯性",
+        "enable-cover-image-label": "封面圖片",
+        "enable-cover-image-tooltip": "允許 Kavita 為系列寫入封面圖片",
+        "enable-genres-label": "類型",
+        "enable-genres-tooltip": "允許寫入系列類型。",
+        "enable-tags-tooltip": "允許寫入系列標籤。",
+        "enable-tags-label": "標籤",
+        "blacklist-label": "黑名單類型／標籤",
+        "first-last-name-tooltip": "確保人物的姓名寫法為名字在前，姓氏在後",
+        "enabled-tooltip": "允許 Kavita 下載元資料並寫入其資料庫。",
+        "enable-relations-tooltip": "允許 <b>新增</b>系列關聯性。",
+        "enable-people-label": "人物",
+        "enable-chapter-title-tooltip": "允許寫入章節／期數標題",
+        "enable-chapter-release-date-label": "發行日期",
+        "enable-start-date-label": "開始日期",
+        "enable-people-tooltip": "允許 <b>新增</b>.人物（角色、作者等）。所有人物都包含圖片。",
+        "whitelist-tooltip": "只允許寫入此清單中的特定字串作為<b>標籤</b>。 請確保這些字串以逗號分隔。",
+        "age-rating-mapping-description": "左側清單中的任何字串，如果存在於類型或標籤中，將設定該系列的年齡分級。",
+        "remove-source-tag-label": "移除來源標籤",
+        "genre": "類型",
+        "field-mapping-description": "設定規則，將在「類型 (Genre)」或「標籤 (Tag)」欄位中找到的特定字串，對應到新的「類型」或「標籤」，並可選擇是否從原始清單中移除。此功能僅在啟用「類型／標籤」寫入時才適用。",
+        "overrides-label": "覆寫",
+        "chapter-header": "章節欄位",
+        "field-mapping-title": "欄位對應",
+        "add-age-rating-mapping-label": "新增年齡分級對應",
+        "tag": "標籤",
+        "add-field-mapping-label": "新增欄位對應",
+        "first-last-name-label": "名／姓 命名方式",
+        "overrides-description": "允許 Kavita 寫入鎖定的欄位。",
+        "person-roles-label": "角色"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "合併人物",
+        "alias-title": "新別名",
+        "known-for-title": "代表作",
+        "merge-warning": "如果您繼續，選定的人物將被移除。該人物的姓名將被新增為別名，且其所有角色都將被轉移。"
+    },
+    "new-version-modal": {
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "title": "Kavita 已更新！",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "description": "Kavita 有新版本囉！請重新整理以更新。",
+        "fixed": "{{changelog.fixed}}",
+        "known-issues": "{{changelog.known-issues}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}",
+        "removed": "{{changelog.removed}}",
+        "refresh": "重新整理"
+    },
+    "changelog-update-item": {
+        "download": "下載",
+        "fixed": "修正",
+        "developer": "開發者",
+        "theme": "主題",
+        "removed": "已移除",
+        "published-label": "發佈時間： ",
+        "api": "API",
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "功能請求",
+        "added": "新增",
+        "changed": "變更",
+        "known-issues": "已知問題"
+    },
+    "manage-user-tokens": {
+        "mal-header": "MAL",
+        "no-data": "{{common.no-data}}",
+        "token-set-label": "設定授權憑證",
+        "anilist-header": "AniList",
+        "description": "有設定同步憑證的用戶，可能需要不時地更新憑證。如果用戶有設定電子郵件，並且提供的是有效信箱，Kavita 會在憑證需要更新時自動發送電子郵件通知。",
+        "username-header": "用戶名",
+        "expires-label": "到期日： {{date}}"
+    },
+    "email-history": {
+        "no-data": "{{common.no-data}}",
+        "not-sent-tooltip": "未發送",
+        "sent-tooltip": "發送",
+        "date-header": "發送日期",
+        "description": "這裡可以查看 Kavita 寄出的所有電子郵件以及收件使用者。",
+        "user-header": "發送到",
+        "sent-header": "成功",
+        "template-header": "範本"
+    },
+    "match-series-modal": {
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "query-label": "查詢",
+        "query-tooltip": "請輸入系列名稱，或是 AniList／MyAnimeList／ComicBookRoundup 的網址。若輸入網址，系統將會直接查詢對應資料。",
+        "dont-match-tooltip": "將此系列排除於匹配與 Scrobble 之外",
+        "no-results": "無法找到匹配項目。請嘗試新增支援的網址後再重試。",
+        "search": "搜尋",
+        "title": "匹配 {{seriesName}}",
+        "description": "選擇一個匹配項目以重新連結 Kavita+ 的元資料並重新產生 Scrobble 事件。若選擇 「不匹配」，則可禁止 Kavita 對該項目進行元資料匹配與 Scrobble 同步。",
+        "dont-match-label": "不匹配"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "releasing": "發行中",
+        "details": "查看頁面",
+        "updating-metadata-status": "更新元資料"
+    },
+    "role-localized-pipe": {
+        "admin": "管理員",
+        "bookmark": "書籤",
+        "change-restriction": "更改限制條件",
+        "login": "登入",
+        "promote": "推廣",
+        "change-password": "更改密碼",
+        "download": "下載",
+        "read-only": "只讀"
+    },
+    "log-level-pipe": {
+        "critical": "Critical",
+        "debug": "Debug",
+        "information": "Information",
+        "trace": "Trace",
+        "warning": "Warning"
+    },
+    "browse-title-pipe": {
+        "age-rating": "分級為 {{value}}",
+        "publication-status": "{{value}} 部作品",
+        "tag": "含有標籤 {{value}}",
+        "user-rating": "{{value}} 星評分",
+        "translator": "由 {{value}} 翻譯",
+        "publisher": "由 {{value}} 出版",
+        "artist": "由 {{value}} 繪製",
+        "editor": "由 {{value}} 編輯",
+        "penciller": "由 {{value}} 繪製草稿",
+        "genre": "含有類型 {{value}}",
+        "format": "{{value}} 的格式",
+        "writer": "由 {{value}}編劇",
+        "team": "{{value}} 團隊",
+        "location": "位於 {{value}}",
+        "character": "含有角色 {{value}}",
+        "inker": "由 {{value}} 勾線",
+        "library": "於 {{value}} 書庫中",
+        "release-year": "於 {{value}} 發行",
+        "letterer": "由 {{value}} 設計字體",
+        "colorist": "由 {{value}} 上色",
+        "imprint": "{{value}} 出版品牌"
+    },
+    "generic-filter-field-pipe": {
+        "person-name": "名稱",
+        "person-role": "角色",
+        "person-chapter-count": "章數",
+        "person-series-count": "系列數"
+    },
+    "breakpoint-pipe": {
+        "desktop": "桌面版",
+        "never": "從不",
+        "mobile": "手機",
+        "tablet": "平板"
     }
 }

@@ -5,15 +5,16 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "ลืมรหัสผ่าน?",
-        "submit": "ตกลง"
+        "submit": "เข้าสู่ระบบ"
     },
     "dashboard": {
-        "no-libraries": "ยังไม่ได้ตั้งค่ารายการหนังสือ กรุณาตั้งค่าใน",
-        "server-settings-link": "ตั้งค่าเซิฟเวอร์",
-        "not-granted": "คุณไม่ได้มีสิทธิ์ในการเข้าถึงรายการหนังสือ",
+        "no-libraries": "ยังไม่ได้ตั้งค่าห้องสมุด สร้างใหม่เพิ่มใน",
+        "server-settings-link": "ตั้งค่าเซิร์ฟเวอร์",
+        "not-granted": "คุณไม่ได้มีสิทธิ์ในการเข้าถึงห้องสมุด",
         "on-deck-title": "กำลังอ่าน",
-        "recently-updated-title": "ซีรี่ย์ที่เพิ่งอัพเดท",
-        "recently-added-title": "ซีรี่ย์ใหม่"
+        "recently-updated-title": "เรื่องที่อัพเดทล่าสุด",
+        "recently-added-title": "เรื่องที่เพิ่มใหม่",
+        "more-in-genre-title": "ดูเพิ่มใน {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -22,32 +23,36 @@
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "กำลังบันทึก…",
-        "update": "อัปเดท"
+        "saving": "กำลังจัดเก็บ…",
+        "update": "อัพเดท",
+        "invalid-email-warning": "อีเมล์ที่ไม่ถูกต้องจะปิดกั้นบางฟังก์ชั่นของ Kavita",
+        "account-detail-title": "รายละเอียดบัญชี"
     },
     "user-scrobble-history": {
         "title": "ประวัติการทำ Scrobble",
         "description": "ที่นี่คุณสามารถดูรายการ Scrobble ที่เกิดขึ้นภายใต้บัญชีคุณได้ โดยรายการจะเกิดขึ้นก็ต่อเมื่อคุณได้ตั้งค่า Scrobble เรียบร้อยแล้ว รายการต่างๆ จะถูกลบเมื่อผ่านไปหนึ่งเดือน ถ้ามีรายการที่ยังไม่ถูกประมวลผล นั่นหมายความว่าอาจเกิดปัญหาที่ต้นทาง กรุณาติดต่อผู้ดูแลระบบเพื่อแก้ไขปัญหานี้",
         "filter-label": "{{common.filter}}",
-        "created-header": "สร้างแล้ว",
+        "created-header": "สร้างเมื่อ",
         "last-modified-header": "แก้ไขล่าสุด",
-        "type-header": "ชนิด",
-        "series-header": "ซีรีส์",
+        "type-header": "ประเภท",
+        "series-header": "เรื่อง",
         "data-header": "ข้อมูล",
         "is-processed-header": "กำลังดำเนินการ",
-        "no-data": "ไม่มีข้อมูล",
-        "volume-and-chapter-num": "เล่มที่ {{v}} บทที่ {{n}}",
+        "no-data": "{{common.no-data}}",
+        "volume-and-chapter-num": "เล่มที่ {{v}} ตอนที่ {{n}}",
         "volume-num": "เล่มที่ {{num}}",
-        "chapter-num": "บทที่ {{num}}",
-        "rating": "เรตติ้ง {{r}}",
+        "chapter-num": "ตอนที่ {{num}}",
+        "rating": "คะแนน {{r}}",
         "not-applicable": "ไม่สามารถใช้ได้",
         "processed": "ดำเนินการ",
         "not-processed": "ยังไม่ได้ประมวลผล",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "select-all-label": "เลือกทั้งหมด",
+        "delete-selected-label": "ลบที่เลือก"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "ความคืบหน้าการอ่าน",
-        "score-updated": "อัปเดทเรตติ้ง",
+        "score-updated": "อัพเดทคะแนน",
         "want-to-read-add": "ต้องการอ่าน: เพิ่ม",
         "want-to-read-remove": "ต้องการอ่าน: นำออก",
         "review": "อัปเดทรีวิว"

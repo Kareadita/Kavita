@@ -50,7 +50,9 @@
         "volume-num": "Zväzok {{num}}",
         "generate-scrobble-events": "Záložné udalosti",
         "token-expired": "Platnosť vášho tokenu AniList vypršala! Scrobbling udalosti sa spracujú až po obnovení na stránke Účty.",
-        "scrobbling-disabled": "Scrobblovanie je zakázané v nastaveniach vášho účtu."
+        "scrobbling-disabled": "Scrobblovanie je zakázané v nastaveniach vášho účtu.",
+        "select-all-label": "Vybrať všetko",
+        "delete-selected-label": "Odstrániť vybraté"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Pokrok v čítaní",
@@ -800,7 +802,8 @@
         "more": "Viac",
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}",
-        "cancel-edit": "Zavrieť zmenu poradia"
+        "cancel-edit": "Zavrieť zmenu poradia",
+        "browse-people": "Prehľadávať ľudí"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -853,7 +856,9 @@
         "type-tooltip": "Typ knižnice určuje, ako sa analyzujú názvy súborov a či používateľské rozhranie zobrazuje kapitoly (manga) vs. čísla (komiksy). Viac podrobností o rozdieloch medzi typmi knižníc nájdete na wiki.",
         "kavitaplus-eligible-label": "Kavita+ Oprávnené",
         "allow-metadata-matching-label": "Povoliť zhodu metadát",
-        "allow-metadata-matching-tooltip": "Mala by Kavita stiahnuť metadáta pre série v rámci tejto knižnice. Toto sa uskutoční len vtedy, ak má server aktívne predplatné Kavita+."
+        "allow-metadata-matching-tooltip": "Mala by Kavita stiahnuť metadáta pre série v rámci tejto knižnice. Toto sa uskutoční len vtedy, ak má server aktívne predplatné Kavita+.",
+        "enable-metadata-label": "Povoliť metadáta (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Povoliť Kavite čítať súbory s metadátami, ktoré prepíšu analýzu názvov súborov."
     },
     "file-type-group-pipe": {
         "archive": "Archív",
@@ -1461,7 +1466,9 @@
         "all-filters": "Smart Filtre",
         "close": "{{common.close}}",
         "nav-link-header": "Možnosti navigácie",
-        "person-aka-status": "Zhoduje sa s aliasom"
+        "person-aka-status": "Zhoduje sa s aliasom",
+        "browse-tags": "Prehľadávať značky",
+        "browse-genres": "Prehľadávať žánre"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1500,7 +1507,7 @@
         "title": "MAL záujmy Stack Importovanie",
         "nothing-found": "Nič sa nenašlo",
         "description": "Importujte svoje MAL záujmy Stacks a vytvorte zbierky v rámci Kavita",
-        "restack-count": "{{num}} Restacks",
+        "restack-count": "{{num}} Restackov",
         "track": "Skladba"
     },
     "edit-chapter-progress": {
@@ -1646,7 +1653,10 @@
         "release-year": "Rok vydania",
         "read-progress": "Naposledy čítané",
         "average-rating": "Priemerné hodnotenie",
-        "random": "Náhodný"
+        "random": "Náhodný",
+        "person-chapter-count": "Počet kapitol",
+        "person-name": "Meno",
+        "person-series-count": "Počet sérií"
     },
     "edit-series-modal": {
         "title": "Podrobnosti o {{seriesName}}",
@@ -1993,7 +2003,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2171,7 +2181,8 @@
         "library-bound-to-reading-profile": "Knižnica prepojená s čitateľským profilom {{name}}",
         "scrobble-gen-init": "Zaradená úloha na generovanie udalostí Scrobblingu z histórie čítania a hodnotení v minulosti a ich synchronizáciu s pripojenými službami.",
         "series-added-want-to-read": "Séria bola pridaná zo zoznamu Chcem si prečítať",
-        "series-bound-to-reading-profile": "Séria viazaná na čitateľský profil {{name}}"
+        "series-bound-to-reading-profile": "Séria viazaná na čitateľský profil {{name}}",
+        "external-match-rate-error": "Kavite došla sadzba pri hľadaní {{seriesName}}. Skúste to znova o 5 minút."
     },
     "actionable": {
         "scan-library": "Skenovať knižnicu",
@@ -2338,7 +2349,8 @@
         "volume-nums": "Zväzky",
         "issue-nums": "Vydania",
         "chapter-count": "{{num}} kapitol",
-        "no-data": "Žiadne údaje"
+        "no-data": "Žiadne údaje",
+        "issue-count": "{{num}} Problémov"
     },
     "person-detail": {
         "all-roles": "Roly",
@@ -2511,7 +2523,9 @@
         "library-name-header": "Knižnica",
         "actions-header": "Akcie",
         "dont-match-status-label": "{{dont-match-label}}",
-        "match-alt": "Zhoda {{seriesName}}"
+        "match-alt": "Zhoda {{seriesName}}",
+        "matched-state-label": "Stav zhody",
+        "library-type": "Typ knižnice"
     },
     "match-series-modal": {
         "description": "Vyberte zhodu na opätovné prepojenie metadát Kavita+ a regeneráciu scrobble udalostí. \"Nezhoda\" sa dá použiť na obmedzenie Kavity v zhode metadát a scrobblingu.",
@@ -2680,7 +2694,7 @@
         "selection-tip": "Vyberte profil zo zoznamu alebo si vytvorte nový v pravom hornom rohu",
         "font-size-book-tooltip": "Percentuálna zmena mierky, ktorá sa má použiť na písmo v knihe",
         "line-height-book-tooltip": "Aké medzery medzi riadkami v knihe",
-        "extra-tip": "Priraďte čitateľské profily prostredníctvom ponuky akcií v sériách a knižniciach alebo hromadne. Pri zmene nastavení v čítačke sa vytvorí skrytý profil, ktorý si pamätá vaše voľby pre danú sériu (nie pre súbory PDF). Tento profil sa odstráni, keď k sérii priradíte alebo aktualizujete jeden z vlastných čitateľských profilov.",
+        "extra-tip": "Priraďte čitateľské profily prostredníctvom ponuky akcií v sériách a knižniciach alebo hromadne. Pri zmene nastavení v čítačke sa vytvorí skrytý profil, ktorý si pamätá vaše voľby pre danú sériu (nie pre súbory PDF). Tento profil sa odstráni, keď k sérii priradíte jeden z vlastných čitateľských profilov. Viac informácií nájdete na",
         "default-profile": "Predvolené",
         "add-tooltip": "Váš nový profil bude uložený po vykonaní zmien",
         "make-default": "Nastaviť ako predvolené",
@@ -2713,7 +2727,10 @@
         "font-family-tooltip": "Skupina písiem, ktoré sa majú načítať. Predvolené načíta predvolené písmo knihy",
         "color-theme-book-tooltip": "Akú farebnú tému použiť na obsah a ponuku čítačky kníh",
         "reading-mode-label": "Režim čítania",
-        "pdf-theme-label": "Téma"
+        "pdf-theme-label": "Téma",
+        "wiki-title": "wiki",
+        "disable-width-override-tooltip": "Zabráňte tomu, aby sa prepísanie šírky prejavilo, keď je obrazovka aspoň na úrovni nakonfigurovaného bodu zlomu alebo menšia",
+        "disable-width-override-label": "Zakázať prepísanie šírky"
     },
     "bulk-set-reading-profile-modal": {
         "close": "{{common.close}}",
@@ -2737,5 +2754,64 @@
         "delete": "{{common.delete}}",
         "min-length": "Recenzia musí mať aspoň {{count}} znakov",
         "required": "{{validation.required-field}}"
+    },
+    "browse-people": {
+        "title": "Prehľadávať ľudí",
+        "name-label": "Meno",
+        "series-count-label": "Počet sérií",
+        "roles-label": "Roly",
+        "sort-label": "Usporiadať",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count-label": "Počet vydaní",
+        "author-count": "{{num}} Ľudia"
+    },
+    "browse-genres": {
+        "title": "Prehľadávať žánre",
+        "genre-count": "{{num}} Žánrov",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-tags": {
+        "genre-count": "Značky ({{num}})",
+        "series-count": "{{common.series-count}}",
+        "title": "Prehľadávať značky",
+        "issue-count": "{{common.issue-count}}"
+    },
+    "browse-title-pipe": {
+        "user-rating": "Hodnotenie hviezdičkami: {{value}}",
+        "translator": "Preložil/a {{value}}",
+        "character": "Má charakter {{value}}",
+        "publisher": "Publikované {{value}}",
+        "editor": "Upravené {{value}}",
+        "colorist": "Kolorizované {{value}}",
+        "inker": "Tlačené {{value}}",
+        "penciller": "Kreslené {{value}}",
+        "writer": "Napísal/a {{value}}",
+        "letterer": "Spísané {{value}}",
+        "format": "Formát {{value}}",
+        "release-year": "Vydané v {{value}}",
+        "imprint": "Odtlačok {{value}}",
+        "publication-status": "{{value}} funguje",
+        "age-rating": "Hodnotené ako {{value}}",
+        "tag": "Má značku {{value}}",
+        "genre": "Má žáner {{value}}",
+        "team": "Tím {{value}}",
+        "location": "V lokalite {{value}}",
+        "artist": "Nakreslené {{value}}",
+        "library": "V knižnici {{value}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-name": "Meno",
+        "person-series-count": "Počet sérií",
+        "person-chapter-count": "Počet kapitol",
+        "person-role": "Rola"
+    },
+    "breakpoint-pipe": {
+        "never": "Nikdy",
+        "mobile": "Mobil",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
     }
 }

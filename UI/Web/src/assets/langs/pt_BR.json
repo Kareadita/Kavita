@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "generate-scrobble-events": "Eventos de Preenchimento",
         "token-expired": "Seu token AniList expirou! Os eventos de scrobbling não serão processados até que você renove na página Contas.",
-        "scrobbling-disabled": "O scrobbling está desativado nas configurações da sua conta."
+        "scrobbling-disabled": "O scrobbling está desativado nas configurações da sua conta.",
+        "select-all-label": "Selecionar tudo",
+        "delete-selected-label": "Excluir selecionado(s)"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progresso da Leitura",
@@ -858,7 +860,9 @@
         "exclude-patterns-tooltip": "Configure um conjunto de padrões (sintaxe Glob) que Kavita corresponderá ao verificar diretórios e excluirá dos resultados do Scanner.",
         "help": "{{common.help}}",
         "allow-metadata-matching-label": "Permitir Correspondência de Metadados",
-        "allow-metadata-matching-tooltip": "Deve o Kavita baixar os metadados para Séries nesta Biblioteca. Isso só ocorrerá se o servidor tiver uma Assinatura Kavita+ ativa."
+        "allow-metadata-matching-tooltip": "Deve o Kavita baixar os metadados para Séries nesta Biblioteca. Isso só ocorrerá se o servidor tiver uma Assinatura Kavita+ ativa.",
+        "enable-metadata-label": "Habilitar metadados (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Permitir que o Kavita leia arquivos de metadados que substituem a análise de nomes de arquivos."
     },
     "file-type-group-pipe": {
         "archive": "Arquivo",
@@ -2226,7 +2230,8 @@
         "confirm-delete-multiple-volumes": "Tem certeza de que deseja excluir {{count}} volumes? Isso não modificará os arquivos no disco.",
         "series-added-want-to-read": "Série adicionada da lista Quero Ler",
         "library-bound-to-reading-profile": "Biblioteca vinculada ao Perfil de Leitura {{name}}",
-        "series-bound-to-reading-profile": "Série vinculada ao Perfil de Leitura {{name}}"
+        "series-bound-to-reading-profile": "Série vinculada ao Perfil de Leitura {{name}}",
+        "external-match-rate-error": "Kavita ficou sem taxa ao procurar {{seriesName}}. Tente novamente em 5 minutos."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",

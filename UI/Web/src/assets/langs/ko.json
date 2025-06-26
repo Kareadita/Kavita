@@ -83,7 +83,7 @@
     },
     "user-preferences": {
         "title": "사용자 대시보드",
-        "pref-description": "계정에 연결된 전역 설정입니다.",
+        "pref-description": "계정에 연결된 전역 설정입니다. 리더 설정은 읽기 프로필에 있습니다.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -611,7 +611,7 @@
         "page-label": "페이지",
         "pagination-header": "섹션",
         "go-to-page": "페이지로 이동",
-        "go-to-last-page": "마지막 페이지로 이동",
+        "go-to-last-page": "마지막 페이지로",
         "prev-page": "이전 페이지",
         "next-page": "다음 페이지",
         "prev-chapter": "이전 챕터/볼륨",
@@ -629,7 +629,10 @@
         "incognito-mode-label": "시크릿 모드",
         "next": "다음",
         "previous": "이전",
-        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어떤 페이지로 이동하시겠습니까?"
+        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어떤 페이지로 이동하시겠습니까?",
+        "go-to-first-page": "첫 페이지로",
+        "go-to-section": "섹션으로 이동",
+        "go-to-section-prompt": "{{totalSections}} 섹션이 있습니다. 어떤 섹션으로 이동하시겠습니까?"
     },
     "personal-table-of-contents": {
         "no-data": "아직 북마크된 항목 없음",
@@ -677,7 +680,7 @@
     "series-detail": {
         "page-settings-title": "페이지 설정",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-option-card": "카드",
         "layout-mode-option-list": "리스트",
         "continue-from": "계속읽기 {{title}}",
@@ -801,7 +804,8 @@
         "more": "더 보기",
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}",
-        "cancel-edit": "재정렬 닫기"
+        "cancel-edit": "재정렬 닫기",
+        "browse-people": "사용자 탐색"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -864,30 +868,30 @@
     },
     "reader-settings": {
         "general-settings-title": "일반 설정",
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "기본값으로 재설정",
         "reader-settings-title": "리더 설정",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "오른쪽에서 왼쪽",
         "left-to-right": "왼쪽에서 오른쪽",
         "horizontal": "가로",
         "vertical": "세로",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "텍스트의 방향을 변경합니다. 가로는 왼쪽에서 오른쪽으로, 세로는 위에서 아래로.",
         "tap-to-paginate-label": "탭 해서 페이지 넘김",
         "tap-to-paginate-tooltip": "화면 가장자리를 클릭하여 페이지를 넘김",
         "on": "켜기",
         "off": "끄기",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
         "immersive-mode-tooltip": "이렇게 하면 리더 문서를 클릭하면 메뉴가 숨겨지고 탭하여 페이지 넘김이 켜집니다",
         "fullscreen-label": "전체 화면",
         "fullscreen-tooltip": "리더를 전체 화면 모드로 전환",
         "exit": "끄기",
         "enter": "켜기",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-tooltip": "스크롤: epub 파일을 미러링합니다(일반적으로 장당 하나의 긴 스크롤 페이지).<br/>1열: 한 번에 하나의 가상 페이지를 생성합니다.<br/>2열: 한 번에 두 개의 가상 페이지를 나란히 생성합니다.",
         "layout-mode-option-scroll": "스크롤",
         "layout-mode-option-1col": "1열",
@@ -896,7 +900,10 @@
         "theme-dark": "다크",
         "theme-black": "블랙",
         "theme-white": "화이트",
-        "theme-paper": "종이"
+        "theme-paper": "종이",
+        "update-parent": "{{name}}(으)로 저장",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "table-of-contents": {
         "no-data": "이 책에는 메타데이터 또는 toc 파일에 설정된 목차가 없습니다"
@@ -1593,9 +1600,9 @@
         "height": "높이",
         "width": "너비",
         "width-override-label": "너비 재지정",
-        "off": "끄기",
+        "off": "{{reader-settings.off}}",
         "original": "원본",
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "swipe-enabled-label": "스와이프 사용",
         "enable-comic-book-label": "만화책 에뮬레이션",
         "brightness-label": "밝기",
@@ -1606,8 +1613,12 @@
         "layout-mode-switched": "이중 레이아웃을 렌더링할 공간이 부족하여 레이아웃 모드가 단일로 전환됨",
         "no-next-chapter": "다음 챕터 없음",
         "no-prev-chapter": "이전 챕터 없음",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
-        "series-progress": "시리즈 진행률: {{percentage}}"
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
+        "series-progress": "시리즈 진행률: {{percentage}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1664,7 +1675,8 @@
         "release-year": "출시 연도",
         "read-progress": "마지막으로 읽음",
         "average-rating": "평균 평점",
-        "random": "랜덤"
+        "random": "랜덤",
+        "person-name": "이름"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -1801,8 +1813,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -2023,7 +2035,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2407,7 +2419,8 @@
         "browse-person-title": "{{name}}의 모든 작품",
         "all-roles": "역할",
         "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "no-info": "이 사람에 대한 정보 없음"
     },
     "edit-person-modal": {
         "general-tab": "{{edit-series-modal.general-tab}}",
@@ -2430,7 +2443,9 @@
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "hardcover-id-label": "Hardcover Id",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
-        "description-label": "설명"
+        "description-label": "설명",
+        "aliases-label": "별명 편집",
+        "aliases-tab": "별명"
     },
     "changelog-update-item": {
         "known-issues": "알려진 문제",
@@ -2475,7 +2490,9 @@
         "status-header": "상태",
         "series-name-header": "시리즈",
         "blacklist-status-label": "수동 일치 필요",
-        "all-status-label": "모두"
+        "all-status-label": "모두",
+        "matched-state-label": "일치 상태",
+        "library-type": "라이브러리 유형"
     },
     "manage-user-tokens": {
         "username-header": "사용자 이름",
@@ -2548,7 +2565,7 @@
         "close": "{{common.close}}",
         "query-label": "쿼리",
         "no-results": "일치하는 항목을 찾을 수 없습니다. 지원되는 공급자의 URL을 추가하고 다시 시도해 보세요.",
-        "query-tooltip": "시리즈 이름, AniList/MyAnimeList url을 입력하세요. url은 직접 조회를 사용합니다."
+        "query-tooltip": "시리즈 이름, AniList/MyAnimeList/ComicBookRoundup URL을 입력하세요. URL은 직접 조회를 사용합니다."
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
@@ -2613,5 +2630,43 @@
         "delete": "{{common.delete}}",
         "min-length": "리뷰는 최소 {{count}}자 이상이어야 합니다",
         "required": "{{validation.required-field}}"
+    },
+    "browse-people": {
+        "author-count": "{{num}} 사용자",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "roles-label": "역할",
+        "sort-label": "정렬",
+        "series-count": "{{common.series-count}}",
+        "title": "사용자 탐색",
+        "issue-count": "{{common.issue-count}}",
+        "name-label": "이름"
+    },
+    "merge-person-modal": {
+        "save": "{{common.save}}",
+        "merge-warning": "진행할 경우, 선택된 사용자가 제거됩니다. 선택된 사용자의 이름은 별명으로 추가되며, 모든 역할이 이전됩니다.",
+        "src": "사용자 병합",
+        "alias-title": "새 별명",
+        "close": "{{common.close}}",
+        "title": "{{personName}}"
+    },
+    "bulk-set-reading-profile-modal": {
+        "loading": "{{common.loading}}",
+        "clear": "{{common.clear}}",
+        "filter-label": "{{common.filter}}",
+        "close": "{{common.close}}",
+        "create": "{{common.create}}"
+    },
+    "manage-reading-profiles": {
+        "reset": "{{common.reset}}"
+    },
+    "browse-genres": {
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}"
+    },
+    "browse-tags": {
+        "title": "태그 탐색",
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "genre-count": "{{num}} 태그"
     }
 }

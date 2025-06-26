@@ -196,5 +196,9 @@
     "check-scrobbling-tokens": "Ellenőrizd a Feldolgozó tokeneket",
     "process-scrobbling-events": "Feldolgozó események feldolgozása",
     "process-processed-scrobbling-events": "A feldolgozott Feldolgozó események felolgozása",
-    "generic-cover-volume-save": "Nem lehet borítóképet menteni a kötethez"
+    "generic-cover-volume-save": "Nem lehet borítóképet menteni a kötethez",
+    "person-doesnt-exist": "A személy nem létezik",
+    "person-name-required": "A személy neve kötelező, és nem lehet üres",
+    "email-taken": "Az e-mail már használatban van",
+    "person-name-unique": "A személy nevének egyedinek kell lennie"
 }

@@ -207,5 +207,7 @@
     "sidenav-stream-only-delete-smart-filter": "Nur Smart-Filter-Streams können aus der Seitennavigation gelöscht werden",
     "dashboard-stream-only-delete-smart-filter": "Nur Smart-Filter-Streams können aus dem Dashboard gelöscht werden",
     "smart-filter-system-name": "Du kannst den Namen eines vom System bereitgestellten Streams nicht verwenden",
-    "smart-filter-name-required": "Name des Smart Filters erforderlich"
+    "smart-filter-name-required": "Name des Smart Filters erforderlich",
+    "aliases-have-overlap": "Ein oder mehrere Aliasnamen sind mit anderen Personen identisch und können nicht aktualisiert werden",
+    "generated-reading-profile-name": "Erstellt aus {0}"
 }
