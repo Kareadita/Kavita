@@ -338,7 +338,8 @@ public class ChapterController : BaseApiController
             _unitOfWork
         );
 
-        // TODO: If changes; remove ChapterPublisher from KPlusOverrides
+        // TODO: Only remove field if changes were made
+        chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterPublisher);
         // Update publishers
         await PersonHelper.UpdateChapterPeopleAsync(
             chapter,

@@ -1131,8 +1131,10 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name) || madeModification;
             madeModification = UpdateChapterSummary(chapter, settings, potentialMatch.Summary) || madeModification;
             madeModification = UpdateChapterReleaseDate(chapter, settings, potentialMatch.ReleaseDate) || madeModification;
-            // TODO: Update to set KPlusOverride
-            madeModification = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher) || madeModification;
+
+            var hasUpdatedPublisher = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher);
+            if (hasUpdatedPublisher) chapter.AddKPlusOverride(MetadataSettingField.ChapterPublisher);
+            madeModification = hasUpdatedPublisher || madeModification;
 
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.CoverArtist, potentialMatch.Artists) || madeModification;
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.Writer, potentialMatch.Writers) || madeModification;
@@ -1522,7 +1524,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            // Only choose a better image if we're overriding a user provided cover
+            // Only choose the better image if we're overriding a user provided cover
             await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false, !series.Metadata.HasSetKPlusMetadata(MetadataSettingField.Covers));
         }
         catch (Exception ex)
