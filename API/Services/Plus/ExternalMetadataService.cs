@@ -851,7 +851,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
-
+        series.Metadata.AddKPlusOverride(MetadataSettingField.People);
         return true;
     }
 
@@ -909,6 +909,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await DownloadAndSetPersonCovers(upstreamArtists);
 
+        series.Metadata.AddKPlusOverride(MetadataSettingField.People);
         return true;
     }
 
@@ -965,7 +966,7 @@ public class ExternalMetadataService : IExternalMetadataService
         await _unitOfWork.CommitAsync();
 
         await DownloadAndSetPersonCovers(upstreamWriters);
-
+        series.Metadata.AddKPlusOverride(MetadataSettingField.People);
         return true;
     }
 
@@ -991,6 +992,11 @@ public class ExternalMetadataService : IExternalMetadataService
             series.Metadata.Tags.Add(tag);
             madeModification = true;
         }, () => series.Metadata.TagsLocked = true);
+
+        if (madeModification)
+        {
+            series.Metadata.AddKPlusOverride(MetadataSettingField.Tags);
+        }
 
         return madeModification;
     }
@@ -1037,6 +1043,12 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             if (series.Metadata.Genres.FirstOrDefault(g => g.NormalizedTitle == genre.NormalizedTitle) != null) continue;
             series.Metadata.Genres.Add(genre);
+            madeModification = true;
+        }
+
+        if (madeModification)
+        {
+            series.Metadata.AddKPlusOverride(MetadataSettingField.Genres);
         }
 
         return madeModification;
