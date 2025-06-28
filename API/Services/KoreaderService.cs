@@ -39,7 +39,7 @@ public class KoreaderService : IKoreaderService
     /// <param name="userId"></param>
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
     {
-        _logger.LogDebug("Saving Koreader progress for {UserId}: {KoreaderProgress}", userId, koreaderBookDto.Progress);
+        _logger.LogDebug("Saving Koreader progress for User ({UserId}): {KoreaderProgress}", userId, koreaderBookDto.Progress);
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.Document);
         if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 

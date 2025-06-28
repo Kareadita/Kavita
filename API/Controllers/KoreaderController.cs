@@ -94,7 +94,7 @@ public class KoreaderController : BaseApiController
         {
             var userId = await GetUserId(apiKey);
             var response = await _koreaderService.GetProgress(ebookHash, userId);
-            _logger.LogDebug("Koreader response progress: {Progress}", response.Progress);
+            _logger.LogDebug("Koreader response progress for User ({UserId}): {Progress}", userId, response.Progress);
 
             return Ok(response);
         }

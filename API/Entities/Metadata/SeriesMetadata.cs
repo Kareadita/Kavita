@@ -46,7 +46,7 @@ public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata
     /// <summary>
     /// Tracks which metadata has been set by K+
     /// </summary>
-    public IList<MetadataSettingField> KPlusOverrides { get; set; }
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
 
     #region Locks
 

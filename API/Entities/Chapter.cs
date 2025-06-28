@@ -126,10 +126,11 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     /// </summary>
     public string WebLinks { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
+
     /// <summary>
     /// Tracks which metadata has been set by K+
     /// </summary>
-    public IList<MetadataSettingField> KPlusOverrides { get; set; }
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
 
     /// <summary>
     /// (Kavita+) Average rating from Kavita+ metadata
