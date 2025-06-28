@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Koreader;
 using API.DTOs.Progress;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using Kavita.Common;
@@ -39,7 +40,7 @@ public class KoreaderService : IKoreaderService
     /// <param name="userId"></param>
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
     {
-        _logger.LogDebug("Saving Koreader progress for User ({UserId}): {KoreaderProgress}", userId, koreaderBookDto.Progress);
+        _logger.LogDebug("Saving Koreader progress for User ({UserId}): {KoreaderProgress}", userId, koreaderBookDto.Progress.Sanitize());
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.Document);
         if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
