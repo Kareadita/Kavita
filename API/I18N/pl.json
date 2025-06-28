@@ -207,5 +207,7 @@
     "smart-filter-name-required": "Inteligentny filtr wymaga nazwy",
     "sidenav-stream-only-delete-smart-filter": "Tylko inteligentne filtry mogą zostać usunięte z panelu bocznego",
     "dashboard-stream-only-delete-smart-filter": "Tylko inteligentne strumienie filtrów może zostać usunięte z głównego panelu",
-    "smart-filter-system-name": "Nie można użyć nazwy systemu dostarczanego strumieniem"
+    "smart-filter-system-name": "Nie można użyć nazwy systemu dostarczanego strumieniem",
+    "aliases-have-overlap": "Jeden lub więcej aliasów pokrywa się z innymi osobami, nie można ich zaktualizować",
+    "generated-reading-profile-name": "Wygenerowano z {0}"
 }

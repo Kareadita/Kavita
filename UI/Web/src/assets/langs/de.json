@@ -1682,7 +1682,8 @@
         "average-rating": "Durchschnittliche Bewertung",
         "random": "Zufällig",
         "person-series-count": "Anzahl der Serien",
-        "person-name": "Name"
+        "person-name": "Name",
+        "person-chapter-count": "Anzahl der Kapitel"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Einzelheiten",
@@ -2038,8 +2039,7 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "all-series": "{{side-nav.all-series}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2761,7 +2761,9 @@
         "release-year": "Veröffentlicht in {{value}}",
         "imprint": "Imprint von {{value}}",
         "location": "An {{value}} Standorten",
-        "team": "Team {{value}}"
+        "team": "Team {{value}}",
+        "publication-status": "{{value}} Werke",
+        "age-rating": "Bewertet mit {{value}}"
     },
     "browse-tags": {
         "title": "Tags durchsuchen",

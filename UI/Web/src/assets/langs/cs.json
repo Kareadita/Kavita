@@ -50,7 +50,9 @@
         "generate-scrobble-events": "Zpětné plnění Události",
         "token-expired": "Platnost vašeho tokenu AniListu vypršela! Události Scrobbling nebudou zpracovány, dokud je neobnovíte na stránce Účty.",
         "not-read-warning": "Upstream poskytovatelé si vždy ponechají nejvyšší počet",
-        "scrobbling-disabled": "Skroblování je v nastavení účtu zakázáno."
+        "scrobbling-disabled": "Skroblování je v nastavení účtu zakázáno.",
+        "select-all-label": "Vybrat vše",
+        "delete-selected-label": "Odstranit vybrané"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Pokrok ve čtení",
@@ -854,7 +856,9 @@
         "file-type-group-tooltip": "Jaké typy souborů by měla Kavita vyhledávat. Například Archiv bude zahrnovat všechny soubory cb*, zip, rar atd.",
         "exclude-patterns-tooltip": "Konfigurace sady vzorů (syntaxe Glob), které bude Kavita při skenování adresářů porovnávat a vylučovat z výsledků skeneru.",
         "allow-metadata-matching-label": "Povolit přiřazování metadat",
-        "allow-metadata-matching-tooltip": "Měla by Kavita stáhnout metadata pro série v rámci této knihovny. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+."
+        "allow-metadata-matching-tooltip": "Měla by Kavita stáhnout metadata pro série v rámci této knihovny. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+.",
+        "enable-metadata-label": "Povolit metadata (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Povolit Kavitě číst soubory metadat, které přepisují analýzu názvů souborů."
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -2436,7 +2440,8 @@
         "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění.",
         "series-added-want-to-read": "Série přidána ze seznamu Chci číst",
         "series-bound-to-reading-profile": "Série vázaná na čtenářský profil {{name}}",
-        "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}"
+        "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}",
+        "external-match-rate-error": "Kavita vyčerpala limit pro vyhledávání {{seriesName}}. Zkuste to znovu za 5 minut."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
