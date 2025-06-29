@@ -13,6 +13,7 @@
     "oidc": {
         "title": "OpenID Connect Callback",
         "login": "Back to login screen",
+        "error-loading-info": "An error occurred loading OpenID Connect info, contact your administrator",
         "settings": {
             "save": "{{common.save}}",
             "notice": "Notice",

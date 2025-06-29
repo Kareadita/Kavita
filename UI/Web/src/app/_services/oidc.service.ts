@@ -7,6 +7,8 @@ import {OidcPublicConfig} from "../admin/_models/oidc-config";
 import {AccountService} from "./account.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {take} from "rxjs/operators";
+import {ToastrService} from "ngx-toastr";
+import {translate} from "@jsverse/transloco";
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +19,7 @@ export class OidcService {
   private readonly httpClient = inject(HttpClient);
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastR = inject(ToastrService);
 
   baseUrl = environment.apiUrl;
 
@@ -52,6 +55,7 @@ export class OidcService {
         showDebugInformation: !environment.production,
         responseType: 'code',
         scope: "openid profile email roles offline_access",
+        strictDiscoveryDocumentValidation: false,
       });
       this._settings.set(oidcSetting);
       this.oauth2.setupAutomaticSilentRefresh();
@@ -75,6 +79,7 @@ export class OidcService {
         },
         error: error => {
           console.log(error);
+          this.toastR.error(translate("oidc.error-loading-info"))
         }
       });
     })
