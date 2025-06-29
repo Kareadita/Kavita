@@ -13,13 +13,6 @@
     "oidc": {
         "title": "OpenID Connect Callback",
         "login": "Back to login screen",
-        "errors": {
-            "missing-external-id": "OpenID Connect provider did not return a valid identifier",
-            "missing-email": "OpenID Connect provider did not return a valid email",
-            "email-not-verified": "Your email must be verified to allow logging in via OpenID Connect",
-            "no-account": "No matching account found",
-            "disabled-account": "This account is disabled, please contact an administrator"
-        },
         "settings": {
             "save": "{{common.save}}",
             "notice": "Notice",
@@ -2455,7 +2448,14 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "oidc": {
+            "missing-external-id": "OpenID Connect provider did not return a valid identifier",
+            "missing-email": "OpenID Connect provider did not return a valid email",
+            "email-not-verified": "Your email must be verified to allow logging in via OpenID Connect",
+            "no-account": "No matching account found",
+            "disabled-account": "This account is disabled, please contact an administrator"
+        }
     },
 
     "metadata-builder": {

@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  DestroyRef, effect,
   HostListener,
   inject,
   OnInit
@@ -99,6 +99,21 @@ export class AppComponent implements OnInit {
     }), takeUntilDestroyed(this.destroyRef));
 
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
+
+    // Login automatically when a token is available
+    effect(() => {
+      const ready = this.oidcService.ready();
+      if (!ready || !this.oidcService.token) return;
+
+      this.accountService.loginByToken(this.oidcService.token).subscribe({
+        next: () => {
+          this.navService.handleLogin();
+        },
+        error: err => {
+          console.error(err);
+        }
+      });
+    });
 
   }
 

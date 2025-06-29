@@ -123,7 +123,7 @@ public static class IdentityServiceExtensions
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = SetTokenFromQuery,
-                    OnTokenValidated = OidcClaimsPrincipalConverter
+                    OnTokenValidated = OidcClaimsPrincipalConverter,
                 };
             });
         }

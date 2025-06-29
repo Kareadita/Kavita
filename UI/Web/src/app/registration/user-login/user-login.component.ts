@@ -1,4 +1,12 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, computed,
+  DestroyRef, effect, inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -13,6 +21,7 @@ import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
 import {OidcService} from "../../_services/oidc.service";
 import {forkJoin} from "rxjs";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -24,6 +33,15 @@ import {forkJoin} from "rxjs";
 })
 export class UserLoginComponent implements OnInit {
 
+  private readonly accountService = inject(AccountService);
+  private readonly router = inject(Router);
+  private readonly memberService = inject(MemberService);
+  private readonly toastr = inject(ToastrService);
+  private readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  protected readonly oidcService = inject(OidcService);
+
   baseUrl = environment.apiUrl;
 
   loginForm: FormGroup = new FormGroup({
@@ -34,27 +52,31 @@ export class UserLoginComponent implements OnInit {
   /**
    * If there are no admins on the server, this will enable the registration to kick in.
    */
-  firstTimeFlow: boolean = true;
+  firstTimeFlow = signal(true);
   /**
    * Used for first time the page loads to ensure no flashing
    */
-  isLoaded: boolean = false;
-  isSubmitting = false;
-  oidcEnabled = false;
+  isLoaded = signal(false);
+  isSubmitting = signal(false);
+  /**
+   * undefined until query params are read
+   */
+  skipAutoLogin = signal<boolean | undefined>(undefined)
 
-  constructor(
-    private accountService: AccountService,
-    private router: Router,
-    private memberService: MemberService,
-    private toastr: ToastrService,
-    private navService: NavService,
-    private readonly cdRef: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    protected oidcService: OidcService,
-  ) {
-      this.navService.hideNavBar();
-      this.navService.hideSideNav();
-    }
+  constructor() {
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
+
+    effect(() => {
+      const skipAutoLogin = this.skipAutoLogin();
+      const oidcConfig = this.oidcService.settings();
+      if (!oidcConfig || skipAutoLogin === undefined) return;
+
+      if (oidcConfig.autoLogin && !skipAutoLogin) {
+        this.oidcService.login()
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -68,34 +90,24 @@ export class UserLoginComponent implements OnInit {
 
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
-      this.firstTimeFlow = !adminExists;
+      this.firstTimeFlow.set(!adminExists);
 
-      if (this.firstTimeFlow) {
+      if (this.firstTimeFlow()) {
         this.router.navigateByUrl('registration/register');
         return;
       }
 
-      this.isLoaded = true;
-      this.cdRef.markForCheck();
+      this.isLoaded.set(true);
     });
 
     this.route.queryParamMap.subscribe(params => {
       const val = params.get('apiKey');
       if (val != null && val.length > 0) {
         this.login(val);
+        return;
       }
 
-      const skipAutoLogin = params.get('skipAutoLogin') === 'true';
-      this.oidcService.settings$.subscribe(cfg => {
-        if (!cfg) return;
-
-        this.oidcEnabled = cfg.authority !== "";
-        this.cdRef.markForCheck();
-
-        if (cfg.autoLogin && !skipAutoLogin) {
-          this.oidcService.oidcLogin()
-        }
-      });
+      this.skipAutoLogin.set(params.get('skipAutoLogin') === 'true')
     });
   }
 
@@ -104,33 +116,18 @@ export class UserLoginComponent implements OnInit {
   login(apiKey: string = '') {
     const model = this.loginForm.getRawValue();
     model.apiKey = apiKey;
-    this.isSubmitting = true;
-    this.cdRef.markForCheck();
-    this.accountService.login(model).subscribe(() => {
-      this.loginForm.reset();
-      this.doLogin()
+    this.isSubmitting.set(true);
+    this.accountService.login(model).subscribe({
+      next: () => {
+          this.loginForm.reset();
+          this.navService.handleLogin()
 
-      this.isSubmitting = false;
-      this.cdRef.markForCheck();
-    }, err => {
-      this.toastr.error(err.error);
-      this.isSubmitting = false;
-      this.cdRef.markForCheck();
+          this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        this.toastr.error(err.error);
+        this.isSubmitting.set(false);
+      }
     });
-  }
-
-  private doLogin() {
-    this.navService.showNavBar();
-    this.navService.showSideNav();
-
-    // Check if user came here from another url, else send to library route
-    const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-    if (pageResume && pageResume !== '/login') {
-      localStorage.setItem('kavita--auth-intersection-url', '');
-      this.router.navigateByUrl(pageResume);
-    } else {
-      localStorage.setItem('kavita--auth-intersection-url', '');
-      this.router.navigateByUrl('/home');
-    }
   }
 }

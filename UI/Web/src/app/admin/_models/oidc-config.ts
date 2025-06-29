@@ -7,3 +7,9 @@ export interface OidcConfig {
   provisionUserSettings: boolean;
   autoLogin: boolean;
 }
+
+export interface OidcPublicConfig {
+  authority: string;
+  clientId: string;
+  autoLogin: boolean;
+}

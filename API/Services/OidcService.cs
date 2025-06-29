@@ -41,21 +41,21 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         var externalId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(externalId))
-            throw new KavitaException("oidc.errors.missing-external-id");
+            throw new KavitaException("errors.oidc.missing-external-id");
 
         var user = await unitOfWork.UserRepository.GetByExternalId(externalId, AppUserIncludes.UserPreferences);
         if (user != null)
         {
-            // await ProvisionUserSettings(settings, principal, user);
+            //await SyncUserSettings(settings, principal, user);
             return user;
         }
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
-            throw new KavitaException("oidc.errors.missing-email");
+            throw new KavitaException("errors.oidc.missing-email");
 
         if (settings.RequireVerifiedEmail && !principal.HasVerifiedEmail())
-            throw new KavitaException("oidc.errors.email-not-verified");
+            throw new KavitaException("errors.oidc.email-not-verified");
 
 
         user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences)
@@ -64,11 +64,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         user.ExternalId = externalId;
 
-        // await ProvisionUserSettings(settings, principal, user);
+        //await SyncUserSettings(settings, principal, user);
 
         var roles = await userManager.GetRolesAsync(user);
         if (roles.Count > 0 && !roles.Contains(PolicyConstants.LoginRole))
-            throw new KavitaException("oidc.errors.disabled-account");
+            throw new KavitaException("errors.oidc.disabled-account");
 
         return user;
     }
@@ -101,7 +101,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             logger.LogError("Failed to create new user from OIDC: {Errors}",
                 res.Errors.Select(x => x.Description).ToString());
-            throw new KavitaException("oidc.errors.creating-user");
+            throw new KavitaException("errors.oidc.creating-user");
         }
 
         AddDefaultStreamsToUser(user, mapper);
@@ -151,7 +151,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (roles.Count == 0) return;
 
         var errors = await accountService.UpdateRolesForUser(user, roles);
-        if (errors.Any()) throw new KavitaException("oidc.errors.syncing-user");
+        if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
     }
 
     private async Task SyncLibraries(ClaimsPrincipal claimsPrincipal, AppUser user)

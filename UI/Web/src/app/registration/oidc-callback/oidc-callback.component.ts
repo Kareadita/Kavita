@@ -1,11 +1,10 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {SplashContainerComponent} from "../_components/splash-container/splash-container.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Router} from "@angular/router";
 import {NavService} from "../../_services/nav.service";
 import {take} from "rxjs/operators";
-import {OidcService} from "../../_services/oidc.service";
 
 @Component({
   selector: 'app-oidc-callback',
@@ -16,16 +15,15 @@ import {OidcService} from "../../_services/oidc.service";
   templateUrl: './oidc-callback.component.html',
   styleUrl: './oidc-callback.component.scss'
 })
-export class OidcCallbackComponent implements OnInit{
+export class OidcCallbackComponent implements OnInit {
 
-  error: string = '';
+  showSplash = signal(false);
 
   constructor(
     private accountService: AccountService,
     private router: Router,
     private navService: NavService,
     private readonly cdRef: ChangeDetectorRef,
-    private oidcService: OidcService,
   ) {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
@@ -40,6 +38,9 @@ export class OidcCallbackComponent implements OnInit{
         this.cdRef.markForCheck();
       }
     });
+
+    // Show back to log in splash only after 1s, for a more seamless experience
+    setTimeout(() => this.showSplash.set(true), 1000);
   }
 
   goToLogin() {

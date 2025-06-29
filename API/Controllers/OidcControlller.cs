@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Settings;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -8,16 +9,14 @@ using Microsoft.Extensions.Logging;
 namespace API.Controllers;
 
 [AllowAnonymous]
-public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWork): BaseApiController
+public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWork, IMapper mapper): BaseApiController
 {
 
-    // TODO: Decide what we want to expose here, not really anything useful in it. But the discussion is needed
-    //      Public endpoint
     [HttpGet("config")]
-    public async Task<ActionResult<OidcConfigDto>> GetOidcConfig()
+    public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        return Ok(settings.OidcConfig);
+        return Ok(mapper.Map<OidcPublicConfigDto>(settings.OidcConfig));
     }
 
 }
