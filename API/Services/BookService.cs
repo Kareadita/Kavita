@@ -57,7 +57,7 @@ public interface IBookService
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
-    Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl);
+    Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 }
 
@@ -320,6 +320,71 @@ public class BookService : IBookService
             stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + key);
         }
     }
+
+    /// <summary>
+    /// For each bookmark on this page, inject a specialized icon
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="book"></param>
+    /// <param name="ptocBookmarks"></param>
+    private static void InjectPTOCBookmarks(HtmlDocument doc, EpubBookRef book, List<PersonalToCDto> ptocBookmarks)
+    {
+        if (ptocBookmarks.Count == 0) return;
+
+        foreach (var bookmark in ptocBookmarks.Where(b => !string.IsNullOrEmpty(b.BookScrollId)))
+        {
+            var unscopedSelector = bookmark.BookScrollId.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
+            var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
+            elem?.PrependChild(HtmlNode.CreateNode($"<i class='fa-solid fa-bookmark ps-1 pe-1' role='button' id='ptoc-{bookmark.Id}' title='{bookmark.Title}'></i>"));
+        }
+    }
+
+
+    private static void InjectHighlights(HtmlDocument doc, EpubBookRef book, List<PersonalToCDto> ptocBookmarks)
+    {
+        if (ptocBookmarks.Count == 0) return;
+
+        foreach (var bookmark in ptocBookmarks.Where(b => !string.IsNullOrEmpty(b.BookScrollId)))
+        {
+            var unscopedSelector = bookmark.BookScrollId.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
+            var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
+            if (elem == null) continue;
+
+            // For this POC, assume we have 16 characters highlighted and those characters are: "For the past few"
+            // Get the original text content
+            var originalText = elem.InnerText;
+
+            // For POC: highlight first 16 characters
+            const int highlightLength = 16;
+
+            if (originalText.Length > highlightLength)
+            {
+                var highlightedText = originalText.Substring(0, highlightLength);
+                var remainingText = originalText.Substring(highlightLength);
+
+                // Clear the existing content
+                elem.RemoveAllChildren();
+
+                // Create the highlight element with the first 16 characters
+                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight>{highlightedText}</app-epub-highlight>");
+                elem.AppendChild(highlightNode);
+
+                // Add the remaining text as a text node
+                var remainingTextNode = HtmlNode.CreateNode(remainingText);
+                elem.AppendChild(remainingTextNode);
+            }
+            else
+            {
+                // If text is shorter than highlight length, wrap it all
+                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight>{originalText}</app-epub-highlight>");
+                elem.RemoveAllChildren();
+                elem.AppendChild(highlightNode);
+            }
+        }
+    }
+
+
+
 
     private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
     {
@@ -1016,14 +1081,22 @@ public class BookService : IBookService
     /// <param name="body">Body element from the epub</param>
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
+    /// <param name="ptocBookmarks">Ptoc Bookmarks to tie against</param>
     /// <returns></returns>
-    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
+    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks)
     {
         await InlineStyles(doc, book, apiBase, body);
 
         RewriteAnchors(page, doc, mappings);
 
         ScopeImages(doc, book, apiBase);
+
+        // Inject PTOC Bookmark Icons
+        InjectPTOCBookmarks(doc, book, ptocBookmarks);
+
+
+        // MOCK: This will mimic a highlight
+        InjectHighlights(doc, book, ptocBookmarks);
 
         return PrepareFinalHtml(doc, body);
     }
@@ -1215,7 +1288,7 @@ public class BookService : IBookService
     /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
     /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
     /// <exception cref="KavitaException">All exceptions throw this</exception>
-    public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl)
+    public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks)
     {
         using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book);
@@ -1257,7 +1330,7 @@ public class BookService : IBookService
                     body = doc.DocumentNode.SelectSingleNode("/html/body");
                 }
 
-                return await ScopePage(doc, book, apiBase, body, mappings, page);
+                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks);
             }
         } catch (Exception ex)
         {

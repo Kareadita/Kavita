@@ -1,0 +1,6 @@
+<span
+  [class]="highlightClasses()"
+  [attr.data-highlight-color]="color()">
+    <i class="fa-solid fa-pen-clip" role="button" (click)="toggleHighlight()"></i>
+      <ng-content></ng-content>
+</span>

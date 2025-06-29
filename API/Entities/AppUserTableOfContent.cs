@@ -31,6 +31,10 @@ public class AppUserTableOfContent : IEntityDate
     /// For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point. If empty, the ToC point is the beginning of the page
     /// </summary>
     public string? BookScrollId { get; set; }
+    /// <summary>
+    /// Text of the bookmark
+    /// </summary>
+    public string? SelectedText { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }

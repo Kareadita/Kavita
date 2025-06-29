@@ -13,7 +13,8 @@ import {
   OnInit,
   Renderer2,
   RendererStyleFlags2,
-  ViewChild
+  ViewChild,
+  ViewContainerRef
 } from '@angular/core';
 import {DOCUMENT, NgClass, NgIf, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -63,6 +64,7 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
+import {EpubHighlightComponent} from "../epub-highlight/epub-highlight.component";
 
 
 enum TabID {
@@ -351,6 +353,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: false}) reader!: ElementRef;
+  @ViewChild('readingHtml', { read: ViewContainerRef }) readingContainer!: ViewContainerRef;
 
   /**
    * Disables the Left most button
@@ -543,7 +546,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         })
       )
       .subscribe();
-
   }
 
   handleScrollEvent() {
@@ -1093,6 +1095,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saveProgress();
     this.isLoading = false;
     this.cdRef.markForCheck();
+
+    // Make the highlight components "real"
+    const highlightElems = this.document.querySelectorAll('app-epub-highlight');
+
+    for (let i = 0; i < highlightElems.length; i++) {
+      const highlight = highlightElems[i];
+      const componentRef = this.readingContainer.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
+        {projectableNodes: [[document.createTextNode(highlight.innerHTML)]]});
+      if (highlight.parentNode != null) {
+        highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
+      }
+      //componentRef.instance.cdRef.markForCheck();
+    }
+
+
   }
 
   private addEmptyPageIfRequired(): void {
@@ -1316,7 +1333,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
-    if (this.bookContentElemRef === null) return null;
+    if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
 
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))

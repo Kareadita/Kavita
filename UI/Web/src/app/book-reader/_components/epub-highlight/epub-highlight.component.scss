@@ -1,0 +1,32 @@
+.epub-highlight {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.epub-highlight-blue {
+  background-color: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+  padding: 1px 2px;
+}
+
+.epub-highlight-green {
+  background-color: rgba(34, 197, 94, 0.3);
+  border-radius: 3px;
+  padding: 1px 2px;
+}
+
+.epub-highlight-blue:hover {
+  background-color: rgba(59, 130, 246, 0.4);
+}
+
+.epub-highlight-green:hover {
+  background-color: rgba(34, 197, 94, 0.4);
+}
+
+.epub-highlight-blue {
+  border-bottom: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.epub-highlight-green {
+  border-bottom: 1px solid rgba(34, 197, 94, 0.5);
+}

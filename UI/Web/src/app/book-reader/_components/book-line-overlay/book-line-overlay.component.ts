@@ -1,11 +1,15 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef, EventEmitter, HostListener,
+  ElementRef,
+  EventEmitter,
+  HostListener,
   inject,
   Input,
-  OnInit, Output,
+  OnInit,
+  Output,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {fromEvent, merge, of} from "rxjs";
@@ -125,7 +129,7 @@ export class BookLineOverlayComponent implements OnInit {
 
   createPTOC() {
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
-      this.bookmarkForm.get('name')?.value, this.xPath).pipe(catchError(err => {
+      this.bookmarkForm.get('name')?.value, this.xPath, this.selectedText).pipe(catchError(err => {
         this.focusOnBookmarkInput();
         return of();
     })).subscribe(() => {

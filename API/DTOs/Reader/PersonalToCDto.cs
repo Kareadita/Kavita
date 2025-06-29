@@ -4,6 +4,7 @@
 
 public sealed record PersonalToCDto
 {
+    public required int Id { get; init; }
     public required int ChapterId { get; set; }
     public required int PageNumber { get; set; }
     public required string Title { get; set; }

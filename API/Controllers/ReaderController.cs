@@ -879,6 +879,7 @@ public class ReaderController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "duplicate-bookmark"));
         }
 
+
         _unitOfWork.UserTableOfContentRepository.Attach(new AppUserTableOfContent()
         {
             Title = dto.Title.Trim(),
@@ -887,6 +888,7 @@ public class ReaderController : BaseApiController
             SeriesId = dto.SeriesId,
             LibraryId = dto.LibraryId,
             BookScrollId = dto.BookScrollId,
+            SelectedText = dto.SelectedText,
             AppUserId = userId
         });
         await _unitOfWork.CommitAsync();

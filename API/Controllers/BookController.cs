@@ -157,7 +157,10 @@ public class BookController : BaseApiController
 
         try
         {
-            return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl));
+            var ptocBookmarks =
+                await _unitOfWork.UserTableOfContentRepository.GetPersonalToCForPage(User.GetUserId(), chapterId, page);
+
+            return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl, ptocBookmarks));
         }
         catch (KavitaException ex)
         {

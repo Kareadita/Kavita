@@ -10,4 +10,5 @@ public sealed record CreatePersonalToCDto
     public required int PageNumber { get; set; }
     public required string Title { get; set; }
     public string? BookScrollId { get; set; }
+    public string? SelectedText { get; set; }
 }
