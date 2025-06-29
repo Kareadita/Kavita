@@ -30,6 +30,8 @@ public sealed record UpdateLibraryDto
     public bool AllowMetadataMatching { get; init; }
     [Required]
     public bool EnableMetadata { get; init; }
+    [Required]
+    public bool RemovePrefixForSortName { get; set; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>
