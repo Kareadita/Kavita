@@ -9,6 +9,7 @@ using API.DTOs;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
@@ -208,6 +209,7 @@ public class ChapterController : BaseApiController
         if (chapter.AgeRating != dto.AgeRating)
         {
             chapter.AgeRating = dto.AgeRating;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
         }
 
         dto.Summary ??= string.Empty;
@@ -215,6 +217,7 @@ public class ChapterController : BaseApiController
         if (chapter.Summary != dto.Summary.Trim())
         {
             chapter.Summary = dto.Summary.Trim();
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterSummary);
         }
 
         if (chapter.Language != dto.Language)
@@ -230,11 +233,13 @@ public class ChapterController : BaseApiController
         if (chapter.TitleName != dto.TitleName)
         {
             chapter.TitleName = dto.TitleName;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterTitle);
         }
 
         if (chapter.ReleaseDate != dto.ReleaseDate)
         {
             chapter.ReleaseDate = dto.ReleaseDate;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterReleaseDate);
         }
 
         if (!string.IsNullOrEmpty(dto.ISBN) && ArticleNumberHelper.IsValidIsbn10(dto.ISBN) ||
@@ -333,6 +338,8 @@ public class ChapterController : BaseApiController
             _unitOfWork
         );
 
+        // TODO: Only remove field if changes were made
+        chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterPublisher);
         // Update publishers
         await PersonHelper.UpdateChapterPeopleAsync(
             chapter,

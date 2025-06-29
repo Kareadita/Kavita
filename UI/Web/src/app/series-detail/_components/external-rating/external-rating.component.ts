@@ -61,7 +61,8 @@ export class ExternalRatingComponent implements OnInit {
   ngOnInit() {
     this.reviewService.overallRating(this.seriesId, this.chapterId).subscribe(r => {
         this.overallRating = r.averageScore;
-      });
+        this.cdRef.markForCheck();
+    });
   }
 
   updateRating(rating: number) {
@@ -77,6 +78,7 @@ export class ExternalRatingComponent implements OnInit {
     modalRef.componentInstance.userRating = this.userRating;
     modalRef.componentInstance.seriesId = this.seriesId;
     modalRef.componentInstance.hasUserRated = this.hasUserRated;
+    modalRef.componentInstance.chapterId = this.chapterId;
 
     modalRef.closed.subscribe((updated: {hasUserRated: boolean, userRating: number}) => {
       this.userRating = updated.userRating;
@@ -92,6 +94,4 @@ export class ExternalRatingComponent implements OnInit {
 
     return '';
   }
-
-  protected readonly RatingAuthority = RatingAuthority;
 }

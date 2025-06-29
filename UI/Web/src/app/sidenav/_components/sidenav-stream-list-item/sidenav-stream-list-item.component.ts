@@ -4,7 +4,6 @@ import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
-import {RouterLink} from "@angular/router";
 
 @Component({
     selector: 'app-sidenav-stream-list-item',

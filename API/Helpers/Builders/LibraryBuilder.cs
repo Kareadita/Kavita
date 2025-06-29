@@ -110,6 +110,12 @@ public class LibraryBuilder : IEntityBuilder<Library>
         return this;
     }
 
+    public LibraryBuilder WithEnableMetadata(bool enable)
+    {
+        _library.EnableMetadata = enable;
+        return this;
+    }
+
     public LibraryBuilder WithAllowScrobbling(bool allowScrobbling)
     {
         _library.AllowScrobbling = allowScrobbling;

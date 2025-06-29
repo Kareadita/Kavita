@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.DTOs.SeriesDetail;
 
 namespace API.DTOs.KavitaPlus.Metadata;
+#nullable enable
 
 /// <summary>
 /// Information about an individual issue/chapter/book from Kavita+

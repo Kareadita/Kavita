@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
 using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
@@ -44,6 +46,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             .ToList();
 
         return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
+    }
+
+    /// <summary>
+    /// Returns a list of Genres with counts for counts when Genre is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("genres-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseGenreDto>>> GetBrowseGenres(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.GenreRepository.GetBrowseableGenre(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>
@@ -93,6 +111,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId(), ids));
         }
         return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Returns a list of Tags with counts for counts when Tag is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("tags-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseTagDto>>> GetBrowseTags(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.TagRepository.GetBrowseableTag(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>

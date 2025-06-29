@@ -29,7 +29,9 @@ public sealed record ExternalSeriesDetailDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public int AverageScore { get; set; }
+    /// <remarks>AniList returns the total count of unique chapters, includes 1.1 for example</remarks>
     public int Chapters { get; set; }
+    /// <remarks>AniList returns the total count of unique volumes, includes 1.1 for example</remarks>
     public int Volumes { get; set; }
     public IList<SeriesRelationship>? Relations { get; set; } = [];
     public IList<SeriesCharacter>? Characters { get; set; } = [];

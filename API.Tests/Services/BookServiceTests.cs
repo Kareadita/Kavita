@@ -137,7 +137,7 @@ public class BookServiceTests
         var comicInfo = _bookService.GetComicInfo(filePath);
         Assert.NotNull(comicInfo);
 
-        var parserInfo = pdfParser.Parse(filePath, testDirectory, ds.GetParentDirectoryName(testDirectory), LibraryType.Book, comicInfo);
+        var parserInfo = pdfParser.Parse(filePath, testDirectory, ds.GetParentDirectoryName(testDirectory), LibraryType.Book, true, comicInfo);
         Assert.NotNull(parserInfo);
         Assert.Equal(parserInfo.Title, comicInfo.Title);
         Assert.Equal(parserInfo.Series, comicInfo.Title);

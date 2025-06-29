@@ -23,7 +23,8 @@
         "cancel": "{{common.cancel}}",
         "saving": "Kaydediliyor…",
         "update": "Güncelle",
-        "account-detail-title": "Hesap ayrıntıları"
+        "account-detail-title": "Hesap ayrıntıları",
+        "invalid-email-warning": "Doğru olmayan bir e-posta, Kavita'nın bazı işlevlerini engelleyecektir"
     },
     "user-scrobble-history": {
         "title": "Arşiv geçmişi",
@@ -90,32 +91,12 @@
         "disable-animations-tooltip": "Sitedeki animasyonları kapat. E-kitap okuyucular için ideal.",
         "share-series-reviews-label": "Seri incelemelerini paylaş",
         "share-series-reviews-tooltip": "Kavita, Seriler hakkındaki yorumlarınızı diğer kullanıcılar için eklemeli mi?",
-        "image-reader-settings-title": "Resim okuyucu",
-        "reading-direction-label": "Okuma yönü",
-        "scaling-option-label": "Ölçekleme Ayarları",
-        "page-splitting-label": "Sayfa bölmesi",
-        "reading-mode-label": "Okuma Modu",
-        "layout-mode-label": "Düzen modu",
-        "background-color-label": "Arka plan rengi",
-        "auto-close-menu-label": "Otomatik Kapatma Menüsü",
-        "show-screen-hints-label": "Ekran ipuçlarını göster",
-        "emulate-comic-book-label": "Çizgi romanı emüle et",
-        "book-reader-settings-title": "Kitap okuyucu",
-        "reading-direction-book-label": "Okuma yönü",
-        "font-family-label": "Font ailesi",
-        "writing-style-label": "Yazı stili",
-        "color-theme-book-label": "Renk teması",
-        "font-size-book-label": "Font Boyutu",
-        "line-height-book-label": "Satır Aralığı",
-        "line-height-book-tooltip": "Kitapta satır aralıları ne kadar olmalıdır",
-        "margin-book-label": "Birleştir",
         "clients-opds-alert": "OPDS bu sunucuda aktif değil. Bu Tachiyomi kullanıcıları etkilemeyecek.",
         "clients-opds-description": "Tüm 3. Parti istemciler API key ya da alttaki bağlantı linkini kullanmak zorundadır. Bunlar şifre gibidir, başkalarıyla paylaşmayın.",
         "clients-api-key-tooltip": "API anahtarı bir şifre gibidir. Sıfırlamak mevcut istemcileri geçersiz kılar.",
         "clients-opds-url-tooltip": "Desteklenen OPDS istemcilerinin listesine bakın: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "pdf-reader-settings-title": "PDF okuyucu",
         "kavitaplus-settings-title": "Kavita+"
     },
     "user-holds": {
@@ -147,7 +128,9 @@
         "not-applicable-for-admins": "Bu yöneticiler için uygullanamaz.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "no-restriction": "Hiçbir sınırlama yok",
-        "include-unknowns-label": "Bilinmeyenleri ekle"
+        "include-unknowns-label": "Bilinmeyenleri ekle",
+        "description": "Seçildiğinde, seçilen kısıtlamadan daha büyük olan en az bir ögeye sahip tüm seri ve okuma listeleri sonuçlardan kaldırılır.",
+        "include-unknowns-tooltip": "Eğer doğruysa, bilinmeyenlere yaş kısıtlaması ile izin verilecektir. Bu, yaş kısıtlamaları olan kullanıcılara atılmayan medyanın sızmasına yol açabilir."
     },
     "site-theme-provider-pipe": {
         "system": "Sistem",
@@ -161,7 +144,9 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "email-setup-alert": "Cihazlarınıza dosya göndermek ister misiniz? Önce yönetici kurulum e-posta ayarlarınızı alın!",
+        "email-label": "E-posta"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -171,7 +156,8 @@
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "email-tooltip": "Bu e-posta, dosya göndermeyi kabul etmek için kullanılacaktır"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -194,13 +180,18 @@
         "setup-user-account": "Kullanıcının hesabını kur",
         "email-title": "E-posta",
         "email-label": "Yeni e-posta",
-        "current-password-label": "Geçerli parola"
+        "current-password-label": "Geçerli parola",
+        "email-updated-title": "E-posta güncellendi",
+        "email-not-confirmed": "Bu e-posta onaylanmadı",
+        "email-confirmed": "Bu e-posta onaylandı"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "age-restriction-label": "Yaş kısıtlaması",
+        "unknowns": "Bilinmeyenler"
     },
     "scrobbling-providers": {
         "instructions": "Kullanıcılar ilk kez Kavita+'nın {{service}} ile iletişimine izin vermek için aşağıdaki \"{{scrobbling-providers.generate}}\" üzerine tıklamalıdır. Uygulamaya yetki verdikten sonra, jetonu kopyalayıp aşağıdaki girişe yapıştırın. Jetonunuzu istediğiniz zaman yenileyebilirsiniz.",
@@ -209,7 +200,8 @@
         "save": "{{common.save}}",
         "loading": "{{common.loading}}",
         "anilist-first-later": "Sonra",
-        "anilist-first-now": "Şimdi"
+        "anilist-first-now": "Şimdi",
+        "generate": "Üret"
     },
     "typeahead": {
         "close": "{{common.close}}",
@@ -225,7 +217,9 @@
         "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}"
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "total-words-read-label": "Toplam okunan sözcük",
+        "total-pages-read-label": "Toplam okunan sayfa"
     },
     "top-readers": {
         "this-week": "{{time-periods.this-week}}",
@@ -237,12 +231,17 @@
     },
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "title": "Roller"
     },
     "directory-picker": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "path-label": "Yol",
+        "type-header": "Tür",
+        "name-header": "Ad",
+        "share": "Paylaş"
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -310,7 +309,8 @@
         "save": "{{common.save}}"
     },
     "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}"
+        "bookmarks-header": "{{side-nav.bookmarks}}",
+        "go-to-page-prompt": "{{totalPages}} sayfa vardır. Hangi sayfaya gitmek istiyorsunuz?"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -467,7 +467,8 @@
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}"
+        "book-num": "{{common.book-num-shorthand}}",
+        "single-volume": "Tek cilt"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}"
@@ -561,7 +562,8 @@
         "close": "{{common.close}}"
     },
     "shortcuts-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "double-click": "çift tık"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -604,7 +606,8 @@
     },
     "manga-reader": {
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "layout-mode-switched": "Düzen modu, çift düzeni oluşturmak için yetersiz alan nedeniyle tek düzene geçti"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -731,7 +734,14 @@
     },
     "server-stats": {
         "tags": "{{metadata-fields.tags-title}}",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "total-genres-tooltip": "Toplam tür: {{count}}",
+        "total-read-time-tooltip": "Toplam okuma süresi: {{count}}",
+        "total-volumes-tooltip": "Toplam cilt: {{count}}",
+        "total-files-tooltip": "Toplam dosya: {{count}}",
+        "total-tags-tooltip": "Toplam etiket: {{count}}",
+        "total-people-tooltip": "Toplam kişi: {{count}}",
+        "total-read-time-label": "Toplam okuma süresi"
     },
     "customize-dashboard-modal": {
         "close": "{{common.close}}",
@@ -797,7 +807,10 @@
         "1-column": "1 Sütun",
         "2-column": "2 Sütun",
         "cards": "Kartlar",
-        "up-to-down": "Yukarıdan Aşağıya"
+        "up-to-down": "Yukarıdan Aşağıya",
+        "double": "Çift",
+        "single": "Tek",
+        "double-manga": "Çift (Manga)"
     },
     "validation": {
         "required-field": "Bu alan gereklidir"
@@ -828,7 +841,8 @@
         "account-migration-complete": "Hesap taşıma tamamlandı",
         "reset-ip-address": "IP adresleri sıfırla",
         "password-reset": "Parola sıfırla",
-        "email-service-reset": "E-posta hizmeti sıfırla"
+        "email-service-reset": "E-posta hizmeti sıfırla",
+        "age-restriction-updated": "Yaş kısıtlaması güncellendi"
     },
     "api-key": {
         "hide": "Gizle",
@@ -841,5 +855,40 @@
     },
     "publication-status-pipe": {
         "cancelled": "İptal edildi"
+    },
+    "day-of-week-pipe": {
+        "monday": "Pazartesi",
+        "sunday": "Pazar",
+        "tuesday": "Salı",
+        "thursday": "Perşembe",
+        "friday": "Cuma",
+        "saturday": "Cumartesi",
+        "wednesday": "Çarşamba"
+    },
+    "role-localized-pipe": {
+        "change-restriction": "Kısıtlamayı değiştir"
+    },
+    "file-breakdown-stats": {
+        "total-file-size-title": "Toplam dosya boyutu:"
+    },
+    "cbl-import-result-pipe": {
+        "failure": "Başarısız",
+        "success": "Başarılı",
+        "partial": "Kısmi"
+    },
+    "relationship-pipe": {
+        "other": "Diğer",
+        "prequel": "Önsöz",
+        "character": "Karakter",
+        "parent": "Ebeveyn"
+    },
+    "manage-metadata-settings": {
+        "derive-publication-status-tooltip": "Yayın durumunun toplam bölüm/cilt sayılarından türetilmesine izin ver."
+    },
+    "card-detail-layout": {
+        "total-items": "Toplam {{count}} öge"
+    },
+    "pdf-layout-mode-pipe": {
+        "single": "Tek sayfa"
     }
 }

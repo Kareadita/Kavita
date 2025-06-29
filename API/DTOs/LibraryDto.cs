@@ -66,4 +66,8 @@ public sealed record LibraryDto
     /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
     /// <remarks>Requires a valid LicenseKey</remarks>
     public bool AllowMetadataMatching { get; set; } = true;
+    /// <summary>
+    /// Allow Kavita to read metadata (ComicInfo.xml, Epub, PDF)
+    /// </summary>
+    public bool EnableMetadata { get; set; } = true;
 }

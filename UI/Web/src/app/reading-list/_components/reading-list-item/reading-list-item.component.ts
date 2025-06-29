@@ -9,6 +9,7 @@ import {ImageComponent} from '../../../shared/image/image.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
+import {ItemRemoveEvent} from "../draggable-ordered-list/draggable-ordered-list.component";
 
 @Component({
   selector: 'app-reading-list-item',
@@ -33,9 +34,16 @@ export class ReadingListItemComponent {
   @Input() promoted: boolean = false;
 
   @Output() read: EventEmitter<ReadingListItem> = new EventEmitter();
-  @Output() remove: EventEmitter<ReadingListItem> = new EventEmitter();
+  @Output() remove: EventEmitter<ItemRemoveEvent> = new EventEmitter();
 
   readChapter(item: ReadingListItem) {
     this.read.emit(item);
+  }
+
+  removeItem(item: ReadingListItem) {
+    this.remove.emit({
+      item: item,
+      position: item.order
+    });
   }
 }

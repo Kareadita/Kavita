@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {Injectable} from '@angular/core';
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {environment} from "../../environments/environment";
-import { HttpClient } from "@angular/common/http";
-import {JumpKey} from "../_models/jumpbar/jump-key";
+import {HttpClient} from "@angular/common/http";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 
 @Injectable({
@@ -13,7 +12,7 @@ export class FilterService {
   baseUrl = environment.apiUrl;
   constructor(private httpClient: HttpClient) { }
 
-  saveFilter(filter: SeriesFilterV2) {
+  saveFilter(filter: FilterV2<number>) {
     return this.httpClient.post(this.baseUrl + 'filter/update', filter);
   }
   getAllFilters() {
@@ -26,5 +25,4 @@ export class FilterService {
   renameSmartFilter(filter: SmartFilter) {
     return this.httpClient.post(this.baseUrl + `filter/rename?filterId=${filter.id}&name=${filter.name.trim()}`, {});
   }
-
 }

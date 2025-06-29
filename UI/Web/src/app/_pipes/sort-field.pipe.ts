@@ -1,6 +1,8 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {SortField} from "../_models/metadata/series-filter";
 import {TranslocoService} from "@jsverse/transloco";
+import {ValidFilterEntity} from "../metadata-filter/filter-settings";
+import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 
 @Pipe({
   name: 'sortField',
@@ -11,7 +13,30 @@ export class SortFieldPipe implements PipeTransform {
   constructor(private translocoService: TranslocoService) {
   }
 
-  transform(value: SortField): string {
+  transform<T extends number>(value: T, entityType: ValidFilterEntity): string {
+
+    switch (entityType) {
+      case 'series':
+        return this.seriesSortFields(value as SortField);
+      case 'person':
+        return this.personSortFields(value as PersonSortField);
+
+    }
+  }
+
+  private personSortFields(value: PersonSortField) {
+    switch (value) {
+      case PersonSortField.Name:
+        return this.translocoService.translate('sort-field-pipe.person-name');
+      case PersonSortField.SeriesCount:
+        return this.translocoService.translate('sort-field-pipe.person-series-count');
+      case PersonSortField.ChapterCount:
+        return this.translocoService.translate('sort-field-pipe.person-chapter-count');
+
+    }
+  }
+
+  private seriesSortFields(value: SortField) {
     switch (value) {
       case SortField.SortName:
         return this.translocoService.translate('sort-field-pipe.sort-name');
@@ -32,7 +57,6 @@ export class SortFieldPipe implements PipeTransform {
       case SortField.Random:
         return this.translocoService.translate('sort-field-pipe.random');
     }
-
   }
 
 }

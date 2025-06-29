@@ -215,9 +215,9 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false),
             LicenseService.Cron, RecurringJobOptions);
 
-        // KavitaPlus Scrobbling (every hour)
+        // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
-            "0 */1 * * *", RecurringJobOptions);
+            Cron.Hourly(Rnd.Next(0, 60)), RecurringJobOptions);
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
             Cron.Daily, RecurringJobOptions);
 

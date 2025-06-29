@@ -3,8 +3,8 @@
         <div class="row g-0">
             <div class="col-md-3 me-2 col-10 mb-2">
                 <select class="form-select me-2" formControlName="input">
-                  @for (field of availableFields; track field) {
-                    <option [value]="field">{{field | filterField}}</option>
+                  @for (field of filterFieldOptions(); track field.value) {
+                    <option [value]="field.value">{{field.title}}</option>
                   }
                 </select>
             </div>
@@ -18,7 +18,7 @@
             </div>
 
             <div class="col-md-4 col-10 mb-2">
-              @if (IsEmptySelected) {
+              @if (isEmptySelected()) {
                 @if (predicateType$ | async; as predicateType) {
                   @switch (predicateType) {
                     @case (PredicateType.Text) {
@@ -50,7 +50,7 @@
                         <select2 [data]="opts"
                                  formControlName="filterValue"
                                  [hideSelectedItems]="true"
-                                 [multiple]="MultipleDropdownAllowed"
+                                 [multiple]="isMultiSelectDropdownAllowed()"
                                  [infiniteScroll]="true"
                                  [resettable]="true">
                         </select2>
@@ -62,10 +62,11 @@
             </div>
 
             <div class="col pt-2 ms-2">
-              @if (UiLabel !== null) {
-                <span class="text-muted">{{t(UiLabel.unit)}}</span>
-                @if (UiLabel.tooltip) {
-                  <i class="fa fa-info-circle ms-1" aria-hidden="true" [ngbTooltip]="t(UiLabel.tooltip)"></i>
+              @let label = uiLabel();
+              @if (label !== null) {
+                <span class="text-muted">{{t(label.unit)}}</span>
+                @if (label.tooltip) {
+                  <i class="fa fa-info-circle ms-1" aria-hidden="true" [ngbTooltip]="t(label.tooltip)"></i>
                 }
               }
             </div>

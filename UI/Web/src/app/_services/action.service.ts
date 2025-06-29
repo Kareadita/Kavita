@@ -31,6 +31,9 @@ import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
+import {
+  BulkSetReadingProfileModalComponent
+} from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -809,6 +812,58 @@ export class ActionService {
 
       if (callback) {
         callback(true);
+      }
+    });
+  }
+
+  /**
+   * Sets the reading profile for multiple series
+   * @param series
+   * @param callback
+   */
+  setReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
+    this.readingListModalRef.componentInstance.title = ""
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
+      }
+    });
+  }
+
+  /**
+   * Sets the reading profile for multiple series
+   * @param library
+   * @param callback
+   */
+  setReadingProfileForLibrary(library: Library, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.libraryId = library.id;
+    this.readingListModalRef.componentInstance.title = ""
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
       }
     });
   }

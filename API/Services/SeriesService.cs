@@ -11,7 +11,9 @@ using API.DTOs.Person;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
@@ -120,23 +122,27 @@ public class SeriesService : ISeriesService
             {
                 series.Metadata.ReleaseYear = updateSeriesMetadataDto.SeriesMetadata.ReleaseYear;
                 series.Metadata.ReleaseYearLocked = true;
+                series.Metadata.KPlusOverrides.Remove(MetadataSettingField.StartDate);
             }
 
             if (series.Metadata.PublicationStatus != updateSeriesMetadataDto.SeriesMetadata.PublicationStatus)
             {
                 series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
                 series.Metadata.PublicationStatusLocked = true;
+                series.Metadata.KPlusOverrides.Remove(MetadataSettingField.PublicationStatus);
             }
 
             if (string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata.Summary))
             {
                 updateSeriesMetadataDto.SeriesMetadata.Summary = string.Empty;
+                series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Summary);
             }
 
             if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
             {
                 series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim() ?? string.Empty;
                 series.Metadata.SummaryLocked = true;
+                series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Summary);
             }
 
             if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata?.Language)
@@ -195,6 +201,7 @@ public class SeriesService : ISeriesService
                 series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata?.AgeRating ?? AgeRating.Unknown;
                 series.Metadata.AgeRatingLocked = true;
                 await _readingListService.UpdateReadingListAgeRatingForSeries(series.Id, series.Metadata.AgeRating);
+                series.Metadata.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
             }
             else
             {
@@ -206,6 +213,7 @@ public class SeriesService : ISeriesService
                     if (updatedRating > series.Metadata.AgeRating)
                     {
                         series.Metadata.AgeRating = updatedRating;
+                        series.Metadata.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
                     }
                 }
             }
@@ -319,6 +327,7 @@ public class SeriesService : ISeriesService
                 return true;
             }
 
+            _unitOfWork.SeriesRepository.Update(series.Metadata);
             await _unitOfWork.CommitAsync();
 
             // Trigger code to clean up tags, collections, people, etc

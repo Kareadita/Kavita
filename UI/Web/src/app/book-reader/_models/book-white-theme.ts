@@ -51,6 +51,7 @@ export const BookWhiteTheme = `
     --btn-disabled-bg-color: #343a40;
     --btn-disabled-text-color: #efefef;
     --btn-disabled-border-color: #6c757d;
+    --btn-outline-primary-text-color: black;
 
     /* Inputs */
     --input-bg-color: white;

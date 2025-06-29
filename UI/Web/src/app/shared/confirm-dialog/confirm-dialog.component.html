@@ -5,8 +5,18 @@
       <button type="button" class="btn-close" [attr.aria-label]="t('common.close')" (click)="close()"></button>
     }
   </div>
-  <div class="modal-body" style="overflow-x: auto" [innerHtml]="(config.content | confirmTranslate)! | safeHtml">
-  </div>
+
+  @if (config._type === 'prompt') {
+    <div class="modal-body" style="overflow-x: auto">
+      <form [formGroup]="formGroup">
+        <div [innerHtml]="(config.content | confirmTranslate)! | safeHtml"></div>
+        <input type="text" class="form-control" aria-labelledby="modal-basic-title" formControlName="prompt" />
+      </form>
+    </div>
+  } @else {
+    <div class="modal-body" style="overflow-x: auto" [innerHtml]="(config.content | confirmTranslate)! | safeHtml"></div>
+  }
+
   <div class="modal-footer">
     @for(btn of config.buttons; track btn) {
       <div>

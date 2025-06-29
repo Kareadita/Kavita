@@ -107,13 +107,10 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 ## Mega Sponsors
 <img src="https://opencollective.com/Kavita/tiers/mega-sponsor.svg?width=890"></a>
 
-## JetBrains
-Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http://www.jetbrains.com/) for providing us with free licenses to their great tools.
-
-* [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
+## Powered By
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSource)
 
 ### License
-
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2020-2024
 

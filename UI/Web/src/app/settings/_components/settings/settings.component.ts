@@ -52,6 +52,9 @@ import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobb
 import {
   ManageMetadataSettingsComponent
 } from "../../../admin/manage-metadata-settings/manage-metadata-settings.component";
+import {
+  ManageReadingProfilesComponent
+} from "../../../user-settings/manage-reading-profiles/manage-reading-profiles.component";
 import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
 
 @Component({
@@ -89,6 +92,7 @@ import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect
     EmailHistoryComponent,
     ScrobblingHoldsComponent,
     ManageMetadataSettingsComponent,
+    ManageReadingProfilesComponent,
     ManageOpenIDConnectComponent
   ],
     templateUrl: './settings.component.html',

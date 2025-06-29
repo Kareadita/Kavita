@@ -71,6 +71,28 @@ export class SelectionModel<T> {
   }
 
   /**
+   * @return If at least one item is selected
+   */
+  hasAnySelected(): boolean {
+    for (const d of this._data) {
+      if (d.selected) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Marks every data entry has not selected
+   */
+  clearSelected() {
+    this._data = this._data.map(d => {
+      d.selected = false;
+      return d;
+    });
+  }
+
+  /**
    *
    * @returns All Selected items
    */

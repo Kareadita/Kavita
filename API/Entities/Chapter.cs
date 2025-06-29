@@ -4,13 +4,14 @@ using System.Globalization;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata
 {
     public int Id { get; set; }
     /// <summary>
@@ -125,6 +126,11 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public string WebLinks { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Tracks which metadata has been set by K+
+    /// </summary>
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
 
     /// <summary>
     /// (Kavita+) Average rating from Kavita+ metadata

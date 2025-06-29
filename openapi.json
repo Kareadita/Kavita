@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.10",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.6.19",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.6.10"
+    "version": "0.8.6.19"
   },
   "servers": [
     {
@@ -429,7 +429,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Requests the Invite Url for the UserId. Will return error if user is already validated.",
+        "summary": "Requests the Invite Url for the AppUserId. Will return error if user is already validated.",
         "parameters": [
           {
             "name": "userId",
@@ -2991,6 +2991,139 @@
         }
       }
     },
+    "/api/Koreader/{apiKey}/users/auth": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress": {
+      "put": {
+        "tags": [
+          "Koreader"
+        ],
+        "summary": "Syncs book progress with Kavita. Will attempt to save the underlying reader position if possible.",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderBookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderProgressUpdateDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Koreader/{apiKey}/syncs/progress/{ebookHash}": {
+      "get": {
+        "tags": [
+          "Koreader"
+        ],
+        "summary": "Gets book progress from Kavita, if not found will return a 400",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ebookHash",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Library/create": {
       "post": {
         "tags": [
@@ -4065,6 +4198,64 @@
         }
       }
     },
+    "/api/Metadata/genres-with-counts": {
+      "post": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Returns a list of Genres with counts for counts when Genre is on Series/Chapter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseGenreDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseGenreDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseGenreDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Metadata/people-by-role": {
       "get": {
         "tags": [
@@ -4221,6 +4412,64 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/TagDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Metadata/tags-with-counts": {
+      "post": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Returns a list of Tags with counts for counts when Tag is on Series/Chapter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseTagDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseTagDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrowseTagDto"
                   }
                 }
               }
@@ -5644,6 +5893,25 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -8678,6 +8946,593 @@
         }
       }
     },
+    "/api/reading-profile/all": {
+      "get": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Gets all non-implicit reading profiles for a user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/{seriesId}": {
+      "get": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Returns the ReadingProfile that should be applied to the given series, walks up the tree.\nSeries -> Library -> Default",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipImplicit",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/library": {
+      "get": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Returns the (potential) Reading Profile bound to the library",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/create": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Creates a new reading profile for the current user",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/promote": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Promotes the implicit profile to a user profile. Removes the series from other profiles",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/series": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Update the implicit reading profile for a series, creates one if none exists",
+        "description": "Any modification to the reader settings during reading will create an implicit profile. Use \"update-parent\" to save to the bound series profile.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/update-parent": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Updates the non-implicit reading profile for the given series, and removes implicit profiles",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Updates the given reading profile, must belong to the current user",
+        "description": "This does not update connected series and libraries.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Deletes the given profile, requires the profile to belong to the logged-in user",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/reading-profile/series/{seriesId}": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Sets the reading profile for a given series, removes the old one",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "profileId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Clears the reading profile for the given series for the currently logged-in user",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/reading-profile/library/{libraryId}": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Sets the reading profile for a given library, removes the old one",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "profileId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Clears the reading profile for the given library for the currently logged-in user",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/reading-profile/bulk": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Assigns the reading profile to all passes series, and deletes their implicit profiles",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [
@@ -9667,7 +10522,7 @@
         "tags": [
           "Scrobbling"
         ],
-        "summary": "Adds a hold against the Series for user's scrobbling",
+        "summary": "Remove a hold against the Series for user's scrobbling",
         "parameters": [
           {
             "name": "seriesId",
@@ -9712,6 +10567,51 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/bulk-remove-events": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Delete the given scrobble events if they belong to that user",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -10561,7 +11461,7 @@
           {
             "name": "libraryId",
             "in": "query",
-            "description": "",
+            "description": "This is not in use",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -15425,6 +16325,13 @@
           "userPreferences": {
             "$ref": "#/components/schemas/AppUserPreferences"
           },
+          "readingProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserReadingProfile"
+            },
+            "nullable": true
+          },
           "bookmarks": {
             "type": "array",
             "items": {
@@ -16342,6 +17249,239 @@
         },
         "additionalProperties": false
       },
+      "AppUserReadingProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedName": {
+            "type": "string",
+            "nullable": true
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "kind": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "seriesIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "readingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "scalingOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How should the image be scaled to screen",
+            "format": "int32"
+          },
+          "pageSplitOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Which side of a split image should we show first",
+            "format": "int32"
+          },
+          "readerMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\n<example>\nWebtoon uses scrolling to page, MANGA_LR uses paging by clicking left/right side of reader, MANGA_UD uses paging\nby clicking top/bottom sides of reader.\n</example>",
+            "format": "int32"
+          },
+          "autoCloseMenu": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Allow the menu to close after 6 seconds without interaction"
+          },
+          "showScreenHints": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
+          "layoutMode": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How many pages to display in the reader at once",
+            "format": "int32"
+          },
+          "backgroundColor": {
+            "type": "string",
+            "description": "Manga Reader Option: Background color of the reader",
+            "nullable": true
+          },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
+          },
+          "allowAutomaticWebtoonReaderDetection": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Allow Automatic Webtoon detection"
+          },
+          "widthOverride": {
+            "type": "integer",
+            "description": "Manga Reader Option: Optional fixed width override",
+            "format": "int32",
+            "nullable": true
+          },
+          "disableWidthOverride": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Disable the width override if the screen is past the breakpoint",
+            "format": "int32"
+          },
+          "bookReaderMargin": {
+            "type": "integer",
+            "description": "Book Reader Option: Override extra Margin",
+            "format": "int32"
+          },
+          "bookReaderLineSpacing": {
+            "type": "integer",
+            "description": "Book Reader Option: Override line-height",
+            "format": "int32"
+          },
+          "bookReaderFontSize": {
+            "type": "integer",
+            "description": "Book Reader Option: Override font size",
+            "format": "int32"
+          },
+          "bookReaderFontFamily": {
+            "type": "string",
+            "description": "Book Reader Option: Maps to the default Kavita font-family (inherit) or an override",
+            "nullable": true
+          },
+          "bookReaderTapToPaginate": {
+            "type": "boolean",
+            "description": "Book Reader Option: Allows tapping on side of screens to paginate"
+          },
+          "bookReaderReadingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
+          },
+          "bookReaderWritingStyle": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: Defines the writing styles vertical/horizontal",
+            "format": "int32"
+          },
+          "bookThemeName": {
+            "type": "string",
+            "description": "Book Reader Option: The color theme to decorate the book contents",
+            "nullable": true
+          },
+          "bookReaderLayoutMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: The way a page from a book is rendered. Default is as book dictates, 1 column is fit to height,\n2 column is fit to height, 2 columns",
+            "format": "int32"
+          },
+          "bookReaderImmersiveMode": {
+            "type": "boolean",
+            "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Theme of the Reader",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Scroll mode of the reader",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "PDF Reader: Spread Mode of the reader",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "AppUserRole": {
         "type": "object",
         "properties": {
@@ -16779,6 +17919,33 @@
         },
         "additionalProperties": false
       },
+      "BrowseGenreDto": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "description": "Number of Series this Entity is on",
+            "format": "int32"
+          },
+          "chapterCount": {
+            "type": "integer",
+            "description": "Number of Chapters this Entity is on",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "BrowsePersonDto": {
         "required": [
           "name"
@@ -16844,14 +18011,80 @@
             "description": "Number of Series this Person is the Writer for",
             "format": "int32"
           },
-          "issueCount": {
+          "chapterCount": {
             "type": "integer",
-            "description": "Number or Issues this Person is the Writer for",
+            "description": "Number of Issues this Person is the Writer for",
             "format": "int32"
           }
         },
         "additionalProperties": false,
         "description": "Used to browse writers and click in to see their series"
+      },
+      "BrowsePersonFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Not used - For parity with Series Filter",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "description": "Not used - For parity with Series Filter",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/PersonSortOptions"
+          },
+          "limitTo": {
+            "type": "integer",
+            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrowseTagDto": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesCount": {
+            "type": "integer",
+            "description": "Number of Series this Entity is on",
+            "format": "int32"
+          },
+          "chapterCount": {
+            "type": "integer",
+            "description": "Number of Chapters this Entity is on",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "BulkActionDto": {
         "type": "object",
@@ -17103,6 +18336,32 @@
           },
           "isbn": {
             "type": "string",
+            "nullable": true
+          },
+          "kPlusOverrides": {
+            "type": "array",
+            "items": {
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
+              "type": "integer",
+              "description": "Represents which field that can be written to as an override when already locked",
+              "format": "int32"
+            },
+            "description": "Tracks which metadata has been set by K+",
             "nullable": true
           },
           "averageExternalRating": {
@@ -19972,6 +21231,54 @@
         },
         "additionalProperties": false
       },
+      "KoreaderBookDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "description": "This is the Koreader hash of the book. It is used to identify the book.",
+            "nullable": true
+          },
+          "device_id": {
+            "type": "string",
+            "description": "A randomly generated id from the koreader device. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "device": {
+            "type": "string",
+            "description": "The Koreader device name. Only used to maintain the Koreader interface.",
+            "nullable": true
+          },
+          "percentage": {
+            "type": "number",
+            "description": "Percent progress of the book. Only used to maintain the Koreader interface.",
+            "format": "float"
+          },
+          "progress": {
+            "type": "string",
+            "description": "An XPath string read by Koreader to determine the location within the epub.\nEssentially, it is Koreader's equivalent to ProgressDto.BookScrollId.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "This is the interface for receiving and sending updates to Koreader. The only fields\nthat are actually used are the Document and Progress fields."
+      },
+      "KoreaderProgressUpdateDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "description": "This is the Koreader hash of the book. It is used to identify the book.",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "UTC Timestamp to return to KOReader",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "LanguageDto": {
         "required": [
           "isoCode",
@@ -20059,6 +21366,10 @@
           "allowMetadataMatching": {
             "type": "boolean",
             "description": "Allow any series within this Library to download metadata."
+          },
+          "enableMetadata": {
+            "type": "boolean",
+            "description": "Should Kavita read metadata files from the library"
           },
           "created": {
             "type": "string",
@@ -20218,6 +21529,10 @@
           "allowMetadataMatching": {
             "type": "boolean",
             "description": "Allow any series within this Library to download metadata."
+          },
+          "enableMetadata": {
+            "type": "boolean",
+            "description": "Allow Kavita to read metadata (ComicInfo.xml, Epub, PDF)"
           }
         },
         "additionalProperties": false
@@ -20419,6 +21734,11 @@
             "description": "Represents an option in the UI layer for Filtering",
             "format": "int32"
           },
+          "libraryType": {
+            "type": "integer",
+            "description": "Library Type in int form. -1 indicates to ignore the field.",
+            "format": "int32"
+          },
           "searchTerm": {
             "type": "string",
             "nullable": true
@@ -20460,6 +21780,11 @@
           "filePath": {
             "type": "string",
             "description": "Absolute path to the archive file",
+            "nullable": true
+          },
+          "koreaderHash": {
+            "type": "string",
+            "description": "A hash of the document using Koreader's unique hashing algorithm",
             "nullable": true
           },
           "pages": {
@@ -21216,6 +22541,49 @@
         },
         "additionalProperties": false
       },
+      "PersonFilterStatementDto": {
+        "type": "object",
+        "properties": {
+          "comparison": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "field": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "PersonMergeDto": {
         "required": [
           "destId",
@@ -21235,6 +22603,25 @@
           }
         },
         "additionalProperties": false
+      },
+      "PersonSortOptions": {
+        "type": "object",
+        "properties": {
+          "sortField": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAscending": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "All Sorting Options for a query related to Person Entity"
       },
       "PersonalToCDto": {
         "required": [
@@ -21668,6 +23055,11 @@
             "type": "integer",
             "description": "The highest age rating from all Series within the reading list",
             "format": "int32"
+          },
+          "ownerUserName": {
+            "type": "string",
+            "description": "Username of the User that owns (in the case of a promoted list)",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22192,6 +23584,10 @@
       "ScrobbleEventDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
           "seriesName": {
             "type": "string",
             "nullable": true
@@ -23059,6 +24455,32 @@
           "webLinks": {
             "type": "string",
             "description": "A Comma-separated list of strings representing links from the series",
+            "nullable": true
+          },
+          "kPlusOverrides": {
+            "type": "array",
+            "items": {
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
+              "type": "integer",
+              "description": "Represents which field that can be written to as an override when already locked",
+              "format": "int32"
+            },
+            "description": "Tracks which metadata has been set by K+",
             "nullable": true
           },
           "languageLocked": {
@@ -25005,6 +26427,7 @@
         "required": [
           "allowMetadataMatching",
           "allowScrobbling",
+          "enableMetadata",
           "excludePatterns",
           "fileGroupTypes",
           "folders",
@@ -25064,6 +26487,9 @@
             "type": "boolean"
           },
           "allowMetadataMatching": {
+            "type": "boolean"
+          },
+          "enableMetadata": {
             "type": "boolean"
           },
           "fileGroupTypes": {
@@ -25858,162 +27284,35 @@
         },
         "additionalProperties": false
       },
+      "UserParams": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "If set to 0, will set as MaxInt",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "UserPreferencesDto": {
         "required": [
-          "allowAutomaticWebtoonReaderDetection",
-          "autoCloseMenu",
-          "backgroundColor",
           "blurUnreadSummaries",
-          "bookReaderFontFamily",
-          "bookReaderFontSize",
-          "bookReaderImmersiveMode",
-          "bookReaderLayoutMode",
-          "bookReaderLineSpacing",
-          "bookReaderMargin",
-          "bookReaderReadingDirection",
-          "bookReaderTapToPaginate",
-          "bookReaderThemeName",
-          "bookReaderWritingStyle",
           "collapseSeriesRelationships",
-          "emulateBook",
-          "globalPageLayoutMode",
-          "layoutMode",
           "locale",
           "noTransitions",
-          "pageSplitOption",
-          "pdfScrollMode",
-          "pdfSpreadMode",
-          "pdfTheme",
           "promptForDownloadSize",
-          "readerMode",
-          "readingDirection",
-          "scalingOption",
           "shareReviews",
-          "showScreenHints",
-          "swipeToPaginate",
           "theme"
         ],
         "type": "object",
         "properties": {
-          "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "readerMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "layoutMode": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "emulateBook": {
-            "type": "boolean"
-          },
-          "backgroundColor": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "swipeToPaginate": {
-            "type": "boolean"
-          },
-          "autoCloseMenu": {
-            "type": "boolean"
-          },
-          "showScreenHints": {
-            "type": "boolean"
-          },
-          "allowAutomaticWebtoonReaderDetection": {
-            "type": "boolean"
-          },
-          "bookReaderMargin": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderLineSpacing": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderFontSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderFontFamily": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "bookReaderTapToPaginate": {
-            "type": "boolean"
-          },
-          "bookReaderReadingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderWritingStyle": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "description": "Represents the writing styles for the book-reader",
-            "format": "int32"
-          },
           "theme": {
             "$ref": "#/components/schemas/SiteThemeDto"
-          },
-          "bookReaderThemeName": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "bookReaderLayoutMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookReaderImmersiveMode": {
-            "type": "boolean"
           },
           "globalPageLayoutMode": {
             "enum": [
@@ -26041,33 +27340,6 @@
           "locale": {
             "minLength": 1,
             "type": "string"
-          },
-          "pdfTheme": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "pdfScrollMode": {
-            "enum": [
-              0,
-              1,
-              3
-            ],
-            "type": "integer",
-            "description": "Enum values match PdfViewer's enums",
-            "format": "int32"
-          },
-          "pdfSpreadMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
           },
           "aniListScrobblingEnabled": {
             "type": "boolean"
@@ -26114,6 +27386,218 @@
               "$ref": "#/components/schemas/SingleStatCount"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReadingProfileDto": {
+        "required": [
+          "allowAutomaticWebtoonReaderDetection",
+          "autoCloseMenu",
+          "backgroundColor",
+          "bookReaderFontFamily",
+          "bookReaderFontSize",
+          "bookReaderImmersiveMode",
+          "bookReaderLayoutMode",
+          "bookReaderLineSpacing",
+          "bookReaderMargin",
+          "bookReaderReadingDirection",
+          "bookReaderTapToPaginate",
+          "bookReaderThemeName",
+          "bookReaderWritingStyle",
+          "emulateBook",
+          "layoutMode",
+          "pageSplitOption",
+          "pdfScrollMode",
+          "pdfSpreadMode",
+          "pdfTheme",
+          "readerMode",
+          "readingDirection",
+          "scalingOption",
+          "showScreenHints",
+          "swipeToPaginate"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "kind": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "readingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "scalingOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSplitOption": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "readerMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "autoCloseMenu": {
+            "type": "boolean"
+          },
+          "showScreenHints": {
+            "type": "boolean"
+          },
+          "emulateBook": {
+            "type": "boolean"
+          },
+          "layoutMode": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "backgroundColor": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "swipeToPaginate": {
+            "type": "boolean"
+          },
+          "allowAutomaticWebtoonReaderDetection": {
+            "type": "boolean"
+          },
+          "widthOverride": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "disableWidthOverride": {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderMargin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderLineSpacing": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderFontSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderFontFamily": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "bookReaderTapToPaginate": {
+            "type": "boolean"
+          },
+          "bookReaderReadingDirection": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderWritingStyle": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Represents the writing styles for the book-reader",
+            "format": "int32"
+          },
+          "bookReaderThemeName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "bookReaderLayoutMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookReaderImmersiveMode": {
+            "type": "boolean"
+          },
+          "pdfTheme": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "pdfScrollMode": {
+            "enum": [
+              0,
+              1,
+              3
+            ],
+            "type": "integer",
+            "description": "Enum values match PdfViewer's enums",
+            "format": "int32"
+          },
+          "pdfSpreadMode": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -26475,6 +27959,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Koreader",
+      "description": "The endpoint to interface with Koreader's Progress Sync plugin."
     },
     {
       "name": "Manage",

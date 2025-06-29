@@ -128,6 +128,16 @@
             </div>
 
             <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('enable-metadata-label')" [subtitle]="t('enable-metadata-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="enable-metadata" role="switch" formControlName="enableMetadata" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
               <app-setting-switch [title]="t('manage-collection-label')" [subtitle]="t('manage-collection-tooltip')">
                 <ng-template #switch>
                   <div class="form-check form-switch float-end">

@@ -6,21 +6,22 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body">
+
     <div class="mb-3">
       <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" (click)="closeIfOnSettings()" [title]="t('settings')">{{t('settings')}}</a>
     </div>
-    <div class="mb-3">
-      <a routerLink="/all-filters/">{{t('all-filters')}}</a>
-    </div>
-    <div class="mb-3">
-      <a routerLink="/announcements/">{{t('announcements')}}</a>
-    </div>
-    <div class="mb-3">
-      <a [href]="WikiLink.Guides" rel="noopener noreferrer" target="_blank">{{t('help')}}</a>
-    </div>
-    <div class="mb-3">
-      <a href="javascript:void(0);" (click)="logout()">{{t('logout')}}</a>
-    </div>
+
+    @for (navItem of navService.navItems; track $index) {
+      <div class="mb-3">
+        @if (navItem.routerLink) {
+          <a [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>
+        } @else if (navItem.href) {
+          <a [href]="navItem.href" rel="noopener noreferrer" target="_blank">{{t(navItem.transLocoKey)}}</a>
+        } @else if (navItem.click) {
+          <a href="javascript:void(0);" (click)="navItem.click()">{{t(navItem.transLocoKey)}}</a>
+        }
+      </div>
+    }
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>

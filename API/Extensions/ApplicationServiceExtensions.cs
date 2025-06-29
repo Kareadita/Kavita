@@ -54,6 +54,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IStreamService, StreamService>();
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IReadingProfileService, ReadingProfileService>();
+        services.AddScoped<IKoreaderService, KoreaderService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
@@ -74,6 +76,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISettingsService, SettingsService>();
 
 
+        services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();

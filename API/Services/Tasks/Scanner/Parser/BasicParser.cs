@@ -12,7 +12,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 /// </summary>
 public class BasicParser(IDirectoryService directoryService, IDefaultParser imageParser) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
@@ -20,7 +20,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
 
         if (Parser.IsImage(filePath))
         {
-            return imageParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Image, comicInfo);
+            return imageParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Image, enableMetadata, comicInfo);
         }
 
         var ret = new ParserInfo()
@@ -101,7 +101,12 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         }
 
         // Patch in other information from ComicInfo
-        UpdateFromComicInfo(ret);
+        if (enableMetadata)
+        {
+            UpdateFromComicInfo(ret);
+        }
+
+
 
         if (ret.Volumes == Parser.LooseLeafVolume && ret.Chapters == Parser.DefaultChapter)
         {

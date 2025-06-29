@@ -10,5 +10,5 @@ public enum SideNavStreamType
     ExternalSource = 6,
     AllSeries = 7,
     WantToRead = 8,
-    BrowseAuthors = 9
+    BrowsePeople = 9
 }

@@ -1,6 +1,6 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read:'browse-authors'" >
-    <app-side-nav-companion-bar [hasFilter]="false">
+  <ng-container *transloco="let t; read:'browse-people'" >
+    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <h2 title>
         <span>{{t('title')}}</span>
       </h2>
@@ -16,13 +16,16 @@
       [jumpBarKeys]="jumpKeys"
       [filteringDisabled]="true"
       [refresh]="refresh"
+      [filterSettings]="filterSettings"
+      [filterOpen]="filterOpen"
+      (applyFilter)="updateFilter($event)"
     >
       <ng-template #cardItem let-item let-position="idx">
         <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">
           <ng-template #subtitle>
-            <div class="d-flex justify-content-evenly">
-                <div style="font-size: 12px">{{item.seriesCount | compactNumber}} series</div>
-                <div style="font-size: 12px">{{item.issueCount | compactNumber}} issues</div>
+            <div class="tag-meta">
+                <div style="font-size: 12px">{{t('series-count', {num: item.seriesCount | compactNumber})}}</div>
+                <div style="font-size: 12px">{{t('issue-count', {num: item.chapterCount | compactNumber})}}</div>
             </div>
           </ng-template>
         </app-person-card>

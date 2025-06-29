@@ -483,7 +483,7 @@ public class ScannerServiceTests : AbstractDbTest
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
-        library.LibraryExcludePatterns = [new LibraryExcludePattern() {Pattern = "**/Extra/*"}];
+        library.LibraryExcludePatterns = [new LibraryExcludePattern() {  Pattern = "**/Extra/*"  }];
         UnitOfWork.LibraryRepository.Update(library);
         await UnitOfWork.CommitAsync();
 
@@ -507,7 +507,7 @@ public class ScannerServiceTests : AbstractDbTest
         var infos = new Dictionary<string, ComicInfo>();
         var library = await _scannerHelper.GenerateScannerData(testcase, infos);
 
-        library.LibraryExcludePatterns = [new LibraryExcludePattern() {Pattern = "**\\Extra\\*"}];
+        library.LibraryExcludePatterns = [new LibraryExcludePattern() {  Pattern = "**\\Extra\\*"  }];
         UnitOfWork.LibraryRepository.Update(library);
         await UnitOfWork.CommitAsync();
 
@@ -937,5 +937,39 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.True(sortedChapters[0].SortOrder.Is(1f));
         Assert.True(sortedChapters[1].SortOrder.Is(4f));
         Assert.True(sortedChapters[2].SortOrder.Is(5f));
+    }
+
+
+    [Fact]
+    public async Task ScanLibrary_MetadataDisabled_NoOverrides()
+    {
+        const string testcase = "Series with Localized No Metadata - Manga.json";
+
+        // Get the first file and generate a ComicInfo
+        var infos = new Dictionary<string, ComicInfo>();
+        infos.Add("Immoral Guild v01.cbz", new ComicInfo()
+        {
+            Series = "Immoral Guild",
+            LocalizedSeries = "Futoku no Guild" // Filename has a capital N and localizedSeries has lowercase
+        });
+
+        var library = await _scannerHelper.GenerateScannerData(testcase, infos);
+
+        // Disable metadata
+        library.EnableMetadata = false;
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        // Validate that there are 2 series
+        Assert.NotNull(postLib);
+        Assert.Equal(2, postLib.Series.Count);
+
+        Assert.Contains(postLib.Series, x => x.Name == "Immoral Guild");
+        Assert.Contains(postLib.Series, x => x.Name == "Futoku No Guild");
     }
 }

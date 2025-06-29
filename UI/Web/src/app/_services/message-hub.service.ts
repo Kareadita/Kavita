@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
-import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
-import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { User } from '../_models/user';
+import {Injectable} from '@angular/core';
+import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
+import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {LibraryModifiedEvent} from '../_models/events/library-modified-event';
+import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
+import {ThemeProgressEvent} from '../_models/events/theme-progress-event';
+import {UserUpdateEvent} from '../_models/events/user-update-event';
+import {User} from '../_models/user';
 import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
 import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
+import {ExternalMatchRateLimitErrorEvent} from "../_models/events/external-match-rate-limit-error-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -114,6 +115,10 @@ export enum EVENTS {
    * A Person merged has been merged into another
    */
   PersonMerged = 'PersonMerged',
+  /**
+   * A Rate limit error was hit when matching a series with Kavita+
+   */
+  ExternalMatchRateLimitError = 'ExternalMatchRateLimitError'
 }
 
 export interface Message<T> {
@@ -233,6 +238,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.SideNavUpdate,
         payload: resp.body as SideNavUpdateEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ExternalMatchRateLimitError, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ExternalMatchRateLimitError,
+        payload: resp.body as ExternalMatchRateLimitErrorEvent
       });
     });
 

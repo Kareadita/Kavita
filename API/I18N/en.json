@@ -230,6 +230,8 @@
     "scan-libraries": "Scan Libraries",
     "kavita+-data-refresh": "Kavita+ Data Refresh",
     "backup": "Backup",
-    "update-yearly-stats": "Update Yearly Stats"
+    "update-yearly-stats": "Update Yearly Stats",
+
+    "generated-reading-profile-name": "Generated from {0}"
 
 }

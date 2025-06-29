@@ -165,9 +165,9 @@ public static partial class Parser
         new Regex(
             @"(卷|册)(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
-        // Korean Volume: 제n화|권|회|장 -> Volume n, n화|권|회|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
+        // Korean Volume: 제n화|회|장 -> Volume n, n화|권|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
         new Regex(
-            @"제?(?<Volume>\d+(\.\d+)?)(권|회|화|장)",
+            @"제?(?<Volume>\d+(\.\d+)?)(권|화|장)",
             MatchOptions, RegexTimeout),
         // Korean Season: 시즌n -> Season n,
         new Regex(
@@ -1159,6 +1159,12 @@ public static partial class Parser
         return !string.IsNullOrEmpty(name) && SeriesAndYearRegex.IsMatch(name);
     }
 
+    /// <summary>
+    /// Parse a Year from a Comic Series: Series Name (YEAR)
+    /// </summary>
+    /// <example>Harley Quinn (2024) returns 2024</example>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static string ParseYear(string? name)
     {
         if (string.IsNullOrEmpty(name)) return string.Empty;

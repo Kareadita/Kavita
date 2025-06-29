@@ -207,5 +207,7 @@
     "dashboard-stream-only-delete-smart-filter": "대시보드에서 스마트 필터 스트림만 삭제할 수 있습니다",
     "sidenav-stream-only-delete-smart-filter": "사이드 메뉴에서 스마트 필터 스트림만 삭제할 수 있습니다",
     "smart-filter-name-required": "스마트 필터 이름이 필요합니다",
-    "smart-filter-system-name": "시스템 제공 스트림 이름은 사용할 수 없습니다"
+    "smart-filter-system-name": "시스템 제공 스트림 이름은 사용할 수 없습니다",
+    "aliases-have-overlap": "하나 이상의 별명이 다른 사용자와 중복되어 업데이트할 수 없습니다",
+    "generated-reading-profile-name": "{0}(으)로부터 생성됨"
 }

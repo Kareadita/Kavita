@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering.v2;
+using API.DTOs.Metadata.Browse;
+using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Person;
 using API.Entities.Enums;
 using API.Extensions;
@@ -77,11 +80,13 @@ public class PersonController : BaseApiController
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetAuthorsForBrowse([FromQuery] UserParams? userParams)
+    public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetPeopleForBrowse(BrowsePersonFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        var list = await _unitOfWork.PersonRepository.GetAllWritersAndSeriesCount(User.GetUserId(), userParams);
+
+        var list = await _unitOfWork.PersonRepository.GetBrowsePersonDtos(User.GetUserId(), filter, userParams);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
         return Ok(list);
     }
 
@@ -112,6 +117,7 @@ public class PersonController : BaseApiController
 
 
         person.Name = dto.Name?.Trim();
+        person.NormalizedName = person.Name.ToNormalized();
         person.Description = dto.Description ?? string.Empty;
         person.CoverImageLocked = dto.CoverImageLocked;
 
@@ -179,7 +185,7 @@ public class PersonController : BaseApiController
     [HttpGet("series-known-for")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId));
+        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId, User.GetUserId()));
     }
 
     /// <summary>
@@ -200,6 +206,7 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
+    [Authorize("RequireAdminRole")]
     public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
     {
         var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);

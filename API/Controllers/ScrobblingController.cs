@@ -254,7 +254,7 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
-    /// Adds a hold against the Series for user's scrobbling
+    /// Remove a hold against the Series for user's scrobbling
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
@@ -280,5 +280,19 @@ public class ScrobblingController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         return Ok(user is {HasRunScrobbleEventGeneration: true});
+    }
+
+    /// <summary>
+    /// Delete the given scrobble events if they belong to that user
+    /// </summary>
+    /// <param name="eventIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-remove-events")]
+    public async Task<ActionResult> BulkRemoveScrobbleEvents(IList<long> eventIds)
+    {
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), eventIds);
+        _unitOfWork.ScrobbleRepository.Remove(events);
+        await _unitOfWork.CommitAsync();
+        return Ok();
     }
 }

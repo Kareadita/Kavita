@@ -4,7 +4,10 @@ export interface Language {
 }
 
 export interface KavitaLocale {
-  fileName: string; // isoCode aka what maps to the file on disk and what transloco loads
+  /**
+   * isoCode aka what maps to the file on disk and what transloco loads
+   */
+  fileName: string;
   renderName: string;
   translationCompletion: number;
   isRtL: boolean;

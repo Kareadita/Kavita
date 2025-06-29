@@ -77,6 +77,8 @@
         "series-header": "Series",
         "data-header": "Data",
         "is-processed-header": "Is Processed",
+        "select-all-label": "Select all",
+        "delete-selected-label": "Delete selected",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
         "volume-num": "Volume {{num}}",
@@ -141,7 +143,7 @@
 
     "user-preferences": {
         "title": "User Dashboard",
-        "pref-description": "These are global settings that are bound to your account.",
+        "pref-description": "These are global settings that are bound to your account. Reader settings are located in Reading Profiles.",
 
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
@@ -174,60 +176,6 @@
         "anilist-scrobbling-tooltip": "Allow Kavita to Scrobble (one-way sync) reading progress and ratings to AniList",
         "want-to-read-sync-label": "Want To Read Sync",
         "want-to-read-sync-tooltip": "Allow Kavita to add items to your Want to Read list based on AniList and MAL series in Pending readlist",
-
-        "image-reader-settings-title": "Image Reader",
-        "reading-direction-label": "Reading Direction",
-        "reading-direction-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
-        "scaling-option-label": "Scaling Options",
-        "scaling-option-tooltip": "How to scale the image to your screen.",
-        "page-splitting-label": "Page Splitting",
-        "page-splitting-tooltip": "How to split a full width image (ie both left and right images are combined)",
-        "reading-mode-label": "Reading Mode",
-        "reading-mode-tooltip": "Change reader to paginate vertically, horizontally, or have an infinite scroll",
-        "layout-mode-label": "Layout Mode",
-        "layout-mode-tooltip": "Render a single image to the screen or two side-by-side images",
-        "background-color-label": "Background Color",
-        "background-color-tooltip": "Background Color of Image Reader",
-        "auto-close-menu-label": "Auto Close Menu",
-        "auto-close-menu-tooltip": "Should menu auto close",
-        "show-screen-hints-label": "Show Screen Hints",
-        "show-screen-hints-tooltip": "Show an overlay to help understand pagination area and direction",
-        "emulate-comic-book-label": "Emulate comic book",
-        "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
-        "swipe-to-paginate-label": "Swipe to Paginate",
-        "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
-        "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
-        "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
-
-        "book-reader-settings-title": "Book Reader",
-        "tap-to-paginate-label": "Tap to Paginate",
-        "tap-to-paginate-tooltip": "Should the sides of the book reader screen allow tapping on it to move to prev/next page",
-        "immersive-mode-label": "Immersive Mode",
-        "immersive-mode-tooltip": "This will hide the menu behind a click on the reader document and turn tap to paginate on",
-        "reading-direction-book-label": "Reading Direction",
-        "reading-direction-book-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
-        "font-family-label": "Font Family",
-        "font-family-tooltip": "Font family to load up. Default will load the book's default font",
-        "writing-style-label": "Writing Style",
-        "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
-        "layout-mode-book-label": "Layout Mode",
-        "layout-mode-book-tooltip": "How content should be laid out. Scroll is as the book packs it. 1 or 2 Column fits to the height of the device and fits 1 or 2 columns of text per page",
-        "color-theme-book-label": "Color Theme",
-        "color-theme-book-tooltip": "What color theme to apply to the book reader content and menu",
-        "font-size-book-label": "Font Size",
-        "font-size-book-tooltip": "Percent of scaling to apply to font in the book",
-        "line-height-book-label": "Line Spacing",
-        "line-height-book-tooltip": "How much spacing between the lines of the book",
-        "margin-book-label": "Margin",
-        "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
-
-        "pdf-reader-settings-title": "PDF Reader",
-        "pdf-scroll-mode-label": "Scroll Mode",
-        "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",
-        "pdf-spread-mode-label": "Spread Mode",
-        "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
-        "pdf-theme-label": "Theme",
-        "pdf-theme-tooltip": "Color theme of the reader",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Tachiyomi users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
@@ -808,6 +756,8 @@
         "library-name-header": "Library",
         "valid-until-header": "Next Refresh",
         "actions-header": "Actions",
+        "library-type": "Library Type",
+        "matched-state-label": "Match State",
         "matched-status-label": "Matched",
         "unmatched-status-label": "Not Matched",
         "blacklist-status-label": "Needs Manual Match",
@@ -896,7 +846,7 @@
         "page-label": "Page",
 
         "pagination-header": "Section",
-        "go-to-page": "Go to page",
+        "go-to-first-page": "Go to first page",
         "go-to-last-page": "Go to last page",
         "prev-page": "Prev Page",
         "next-page": "Next Page",
@@ -917,7 +867,12 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous",
-        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?"
+
+        "go-to-page": "Go to page",
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?",
+
+        "go-to-section": "Go to section",
+        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
     },
 
     "personal-table-of-contents": {
@@ -971,7 +926,7 @@
     "series-detail": {
         "page-settings-title": "Page Settings",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-option-card": "Card",
         "layout-mode-option-list": "List",
         "continue-from": "Continue {{title}}",
@@ -1118,7 +1073,7 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
-        "browse-authors": "Browse Authors",
+        "browse-people": "Browse People",
         "filter-label": "{{common.filter}}",
         "all-series": "All Series",
         "clear": "{{common.clear}}",
@@ -1131,10 +1086,31 @@
         "edit": "{{common.edit}}"
     },
 
-    "browse-authors": {
-        "title": "Browse Authors & Writers",
+    "browse-people": {
+        "title": "Browse People",
         "author-count": "{{num}} People",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "Roles",
+        "sort-label": "Sort",
+        "name-label": "Name",
+        "issue-count-label": "Issue Count",
+        "series-count-label": "Series Count"
+    },
+
+    "browse-genres": {
+        "title": "Browse Genres",
+        "genre-count": "{{num}} Genres",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+
+    "browse-tags": {
+        "title": "Browse Tags",
+        "genre-count": "{{num}} Tags",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
 
     "person-detail": {
@@ -1188,6 +1164,8 @@
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-search-label": "Include in Search",
         "include-in-search-tooltip": "Should series and any derived information (genres, people, files) from the library be included in search results.",
+        "enable-metadata-label": "Enable Metadata (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Allow Kavita to read metadata files which override filename parsing.",
         "force-scan": "Force Scan",
         "force-scan-tooltip": "This will force a scan on the library, treating like a fresh scan",
         "reset": "{{common.reset}}",
@@ -1211,35 +1189,44 @@
 
     "reader-settings": {
         "general-settings-title": "General Settings",
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "Reset to Defaults",
+        "update-parent": "Save to {{name}}",
+        "loading": "loading",
+        "create-new": "New profile from implicit",
+        "create-new-tooltip": "Create a new manageable profile from your current implicit one",
+        "reading-profile-updated": "Reading profile updated",
+        "reading-profile-promoted": "Reading profile promoted",
         "reader-settings-title": "Reader Settings",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "Right to Left",
         "left-to-right": "Left to Right",
         "horizontal": "Horizontal",
         "vertical": "Vertical",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
         "tap-to-paginate-label": "Tap Pagination",
         "tap-to-paginate-tooltip": "Click the edges of the screen to paginate",
         "on": "On",
         "off": "Off",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
         "immersive-mode-tooltip": "This will hide the menu behind a click on the reader document and turn tap to paginate on",
         "fullscreen-label": "Fullscreen",
         "fullscreen-tooltip": "Put reader in fullscreen mode",
         "exit": "Exit",
         "enter": "Enter",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-tooltip": "Scroll: Mirrors epub file (usually one long scrolling page per chapter).<br/>1 Column: Creates a single virtual page at a time.<br/>2 Column: Creates two virtual pages at a time laid out side-by-side.",
         "layout-mode-option-scroll": "Scroll",
         "layout-mode-option-1col": "1 Column",
         "layout-mode-option-2col": "2 Column",
         "color-theme-title": "Color Theme",
+
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x",
 
         "theme-dark": "Dark",
         "theme-black": "Black",
@@ -1352,6 +1339,17 @@
         "loading": "{{common.loading}}",
         "collection-label": "Collection",
         "create": "{{common.create}}"
+    },
+
+    "bulk-set-reading-profile-modal": {
+        "title": "Set Reading profile",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "No collections created yet",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}",
+        "bound":  "Bound"
     },
 
     "entity-title": {
@@ -1751,6 +1749,7 @@
         "scrobble-holds": "Scrobble Holds",
         "account": "Account",
         "preferences": "Preferences",
+        "reading-profiles": "Reading Profiles",
         "clients": "API Key / OPDS",
         "devices": "Devices",
         "user-stats": "Stats",
@@ -1896,7 +1895,9 @@
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
         "close": "{{common.close}}",
-        "person-aka-status": "Matches an alias"
+        "person-aka-status": "Matches an alias",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags"
     },
 
     "promoted-icon": {
@@ -2021,7 +2022,10 @@
 
     "manga-reader": {
         "back": "Back",
-        "save-globally": "Save Globally",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "incognito-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-title": "Incognito Mode:",
         "shortcuts-menu-alt": "Keyboard Shortcuts Modal",
@@ -2043,9 +2047,9 @@
         "height": "Height",
         "width": "Width",
         "width-override-label": "Width Override",
-        "off": "Off",
+        "off": "{{reader-settings.off}}",
         "original": "Original",
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe Enabled",
         "enable-comic-book-label": "Emulate comic book",
         "brightness-label": "Brightness",
@@ -2057,8 +2061,9 @@
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
-        "user-preferences-updated": "User preferences updated",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "reading-profile-updated": "Reading profile updated",
+        "reading-profile-promoted": "Reading profile promoted",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "series-progress": "Series Progress: {{percentage}}"
     },
 
@@ -2120,7 +2125,10 @@
         "release-year": "Release Year",
         "read-progress": "Last Read",
         "average-rating": "Average Rating",
-        "random": "Random"
+        "random": "Random",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
     },
 
     "edit-series-modal": {
@@ -2265,8 +2273,8 @@
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
 
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -2543,7 +2551,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
 
     "filter-field-pipe": {
@@ -2615,8 +2623,41 @@
         "confirm": "Confirm",
         "info": "Info",
         "cancel": "{{common.cancel}}",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "Question"
     },
+
+    "browse-title-pipe": {
+        "publication-status": "{{value}} works",
+        "age-rating": "Rated {{value}}",
+        "user-rating": "{{value}} star rating",
+        "tag": "Has Tag {{value}}",
+        "translator": "Translated by {{value}}",
+        "character": "Has character {{value}}",
+        "publisher": "Published by {{value}}",
+        "editor": "Edited by {{value}}",
+        "artist": "Drawn by {{value}}",
+        "letterer": "Lettered by {{value}}",
+        "colorist": "Colored by {{value}}",
+        "inker": "Inked by {{value}}",
+        "penciller": "Pencilled by {{value}}",
+        "writer": "Written by {{value}}",
+        "genre": "Has Genre {{value}}",
+        "library": "Within {{value}} library",
+        "format": "Format of {{value}}",
+        "release-year": "Released in {{value}}",
+        "imprint": "Imprint of {{value}}",
+        "team": "Team {{value}}",
+        "location": "In {{value}} location"
+    },
+
+    "generic-filter-field-pipe": {
+        "person-role": "Role",
+        "person-name": "Name",
+        "person-series-count": "Series Count",
+        "person-chapter-count": "Chapter Count"
+    },
+
 
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
@@ -2738,7 +2779,10 @@
         "bulk-delete-libraries": "Are you sure you want to delete {{count}} libraries?",
         "match-success": "Series matched correctly",
         "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
-        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services."
+        "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
+        "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
+        "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
+        "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes."
     },
 
     "read-time-pipe": {
@@ -2791,6 +2835,13 @@
         "remove-from-want-to-read-tooltip": "Remove series from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
         "remove-from-on-deck-tooltip": "Remove series from showing from On Deck",
+
+        "reading-profiles": "Reading Profiles",
+        "set-reading-profile": "Set Reading Profile",
+        "set-reading-profile-tooltip": "Bind a Reading Profile to this Library",
+        "clear-reading-profile": "Clear Reading Profile",
+        "clear-reading-profile-tooltip": "Clear Reading Profile for this Library",
+        "cleared-profile": "Cleared Reading Profile",
 
         "others": "Others",
         "add-to-reading-list": "Add to Reading List",
@@ -2872,6 +2923,89 @@
         "pdf-light": "Light",
         "pdf-dark": "Dark"
     },
+    "breakpoint-pipe": {
+        "never": "Never",
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+    },
+
+    "manage-reading-profiles": {
+        "description": "Not all your series may be read in the same way, set up distinct reading profiles per library or series to make getting back in your series as seamless as possible.",
+        "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
+        "wiki-title": "wiki",
+        "profiles-title": "Your reading profiles",
+        "default-profile": "Default",
+        "add": "{{common.add}}",
+        "add-tooltip": "Your new profile will be saved after making a change to it",
+        "make-default": "Set as default",
+        "no-selected": "No profile selected",
+        "confirm": "Are you sure you want to delete the reading profile {{name}}?",
+        "selection-tip": "Select a profile from the list, or create a new one at the top right",
+
+        "image-reader-settings-title": "Image Reader",
+        "reading-direction-label": "Reading Direction",
+        "reading-direction-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
+        "scaling-option-label": "Scaling Options",
+        "scaling-option-tooltip": "How to scale the image to your screen.",
+        "page-splitting-label": "Page Splitting",
+        "page-splitting-tooltip": "How to split a full width image (ie both left and right images are combined)",
+        "reading-mode-label": "Reading Mode",
+        "reading-mode-tooltip": "Change reader to paginate vertically, horizontally, or have an infinite scroll",
+        "layout-mode-label": "Layout Mode",
+        "layout-mode-tooltip": "Render a single image to the screen or two side-by-side images",
+        "background-color-label": "Background Color",
+        "background-color-tooltip": "Background Color of Image Reader",
+        "auto-close-menu-label": "Auto Close Menu",
+        "auto-close-menu-tooltip": "Should menu auto close",
+        "show-screen-hints-label": "Show Screen Hints",
+        "show-screen-hints-tooltip": "Show an overlay to help understand pagination area and direction",
+        "emulate-comic-book-label": "Emulate comic book",
+        "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
+        "swipe-to-paginate-label": "Swipe to Paginate",
+        "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
+        "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
+        "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "Override width of images in the reader",
+        "disable-width-override-label": "Disable width override",
+        "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is at least the configured breakpoint or smaller",
+        "reset": "{{common.reset}}",
+
+        "book-reader-settings-title": "Book Reader",
+        "tap-to-paginate-label": "Tap to Paginate",
+        "tap-to-paginate-tooltip": "Should the sides of the book reader screen allow tapping on it to move to prev/next page",
+        "immersive-mode-label": "Immersive Mode",
+        "immersive-mode-tooltip": "This will hide the menu behind a click on the reader document and turn tap to paginate on",
+        "reading-direction-book-label": "Reading Direction",
+        "reading-direction-book-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
+        "font-family-label": "Font Family",
+        "font-family-tooltip": "Font family to load up. Default will load the book's default font",
+        "writing-style-label": "Writing Style",
+        "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
+        "layout-mode-book-label": "Layout Mode",
+        "layout-mode-book-tooltip": "How content should be laid out. Scroll is as the book packs it. 1 or 2 Column fits to the height of the device and fits 1 or 2 columns of text per page",
+        "color-theme-book-label": "Color Theme",
+        "color-theme-book-tooltip": "What color theme to apply to the book reader content and menu",
+        "font-size-book-label": "Font Size",
+        "font-size-book-tooltip": "Percent of scaling to apply to font in the book",
+        "line-height-book-label": "Line Spacing",
+        "line-height-book-tooltip": "How much spacing between the lines of the book",
+        "margin-book-label": "Margin",
+        "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
+
+        "pdf-reader-settings-title": "PDF Reader",
+        "pdf-scroll-mode-label": "Scroll Mode",
+        "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",
+        "pdf-spread-mode-label": "Spread Mode",
+        "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
+        "pdf-theme-label": "Theme",
+        "pdf-theme-tooltip": "Color theme of the reader",
+
+        "reading-profile-series-settings-title": "Series",
+        "reading-profile-library-settings-title": "Library",
+        "delete": "{{common.delete}}"
+    },
 
 
     "validation": {
@@ -2947,6 +3081,7 @@
         "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
+        "issue-count": "{{num}} Issues",
         "no-data": "No Data",
 
         "book-num": "Book",

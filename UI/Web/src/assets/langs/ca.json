@@ -31,29 +31,11 @@
         "success-toast": "S'han actualitzat les preferències d'ús",
         "global-settings-title": "Paràmetres globals",
         "locale-label": "Configuració local",
-        "scaling-option-label": "Opcions d'escala",
-        "background-color-label": "Color de fons",
-        "writing-style-label": "Estil d'escriptura",
-        "font-size-book-label": "Mida de la lletra",
-        "line-height-book-label": "Interlineat",
-        "pdf-scroll-mode-label": "Mode de desplaçament",
-        "pdf-theme-label": "Tema",
-        "immersive-mode-label": "Mode immersiu",
         "locale-tooltip": "La llengua que ha d'usar el Kavita",
         "prompt-on-download-label": "Pregunta en baixar",
         "disable-animations-label": "Desactiva les animacions",
-        "auto-close-menu-label": "Tanca automàticament el menú",
-        "font-family-label": "Família tipogràfica",
-        "margin-book-label": "Marge",
         "clients-api-key-label": "Clau de l'API",
-        "clients-api-key-tooltip": "La clau de l'API és com una contrasenya. Reinicialitzar-la invalidarà tots els clients existents.",
-        "image-reader-settings-title": "Lector d'imatges",
-        "reading-direction-label": "Direcció de lectura",
-        "layout-mode-label": "Mode de disposició",
-        "book-reader-settings-title": "Lector de llibres",
-        "reading-direction-book-label": "Direcció de lectura",
-        "layout-mode-book-label": "Mode de disposició",
-        "pdf-reader-settings-title": "Lector de PDF"
+        "clients-api-key-tooltip": "La clau de l'API és com una contrasenya. Reinicialitzar-la invalidarà tots els clients existents."
     },
     "theme-manager": {
         "title": "Gestor de temes",
@@ -493,8 +475,7 @@
     "manga-reader": {
         "incognito-title": "Mode incògnit:",
         "next-page-tooltip": "Pàgina següent",
-        "back": "Enrere",
-        "save-globally": "Desa globalment"
+        "back": "Enrere"
     },
     "pdf-scroll-mode-pipe": {
         "vertical": "Vertical",

@@ -19,7 +19,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
     /// <param name="rootPath"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
         if (type != LibraryType.ComicVine) return null;
 
@@ -81,7 +81,10 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         info.IsSpecial = Parser.IsSpecial(info.Filename, type) || Parser.IsSpecial(info.ComicInfo?.Format, type);
 
         // Patch in other information from ComicInfo
-        UpdateFromComicInfo(info);
+        if (enableMetadata)
+        {
+            UpdateFromComicInfo(info);
+        }
 
         if (string.IsNullOrEmpty(info.Series))
         {
