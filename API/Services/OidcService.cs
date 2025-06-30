@@ -127,6 +127,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         AddDefaultStreamsToUser(user, mapper);
+        await AddDefaultReadingProfileToUser(user);
 
         if (settings.RequireVerifiedEmail)
         {
@@ -222,5 +223,15 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             user.SideNavStreams.Add(stream);
         }
+    }
+
+    private async Task AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
+            .Build();
+        unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await unitOfWork.CommitAsync();
     }
 }
