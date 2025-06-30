@@ -1106,6 +1106,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (highlight.parentNode != null) {
         highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
       }
+
+      // TODO: Load the highlight instance with information from the Annotation
+      //componentRef.instance.highlightClasses =
       //componentRef.instance.cdRef.markForCheck();
     }
 
