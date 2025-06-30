@@ -464,6 +464,13 @@ public class SettingsService : ISettingsService
             _unitOfWork.SettingsRepository.Update(setting);
         }
 
+        if (setting.Key == ServerSettingKey.OidcProviderName &&
+            updateSettingsDto.OidcConfig.ProviderName + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.ProviderName + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

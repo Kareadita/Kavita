@@ -6,9 +6,7 @@
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
         "submit": "Sign in",
-        "oidc": "Log in with OpenID Connect",
-        "bypass": "Password login has been disabled. Bypass ",
-        "here": "here"
+        "oidc": "OpenID Connect"
     },
 
     "oidc": {
@@ -18,11 +16,12 @@
         "settings": {
             "save": "{{common.save}}",
             "notice": "Notice",
-            "restart-required": "Changing OpenID Connect Authority requires a restart",
+            "restart-required": "Changing Authority, or Client ID requires a manual restart of Kavita to take effect.",
             "provider": "Provider",
             "behaviour": "Behaviour",
             "field-required": "{{name}} is required when {{other}} is set",
             "invalidUri": "The provider URL is not valid",
+            "manual-save": "Changing provider settings requires a manual save",
 
             "authority": "Authority",
             "authority-tooltip": "The URL to your OpenID Connect provider",
@@ -37,7 +36,9 @@
             "autoLogin": "Auto login",
             "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen",
             "disablePasswordAuthentication": "Disable password authentication",
-            "disablePasswordAuthentication-tooltip": "Users with the admin role can bypass this restriction"
+            "disablePasswordAuthentication-tooltip": "Users with the admin role can bypass this restriction",
+            "providerName": "Provider name",
+            "providerName-tooltip": "Name show on the login screen"
         }
     },
 

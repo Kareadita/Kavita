@@ -232,4 +232,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("DisablePasswordAuthentication")]
     DisablePasswordAuthentication = 46,
+    /// <summary>
+    /// Name of your provider, used to display on the login screen
+    /// </summary>
+    /// <remarks>Default to OpenID Connect</remarks>
+    [Description("OidcProviderName")]
+    OidcProviderName = 47,
 }

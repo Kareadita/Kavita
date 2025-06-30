@@ -157,6 +157,10 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.OidcConfig ??= new OidcConfigDto();
                     destination.OidcConfig.DisablePasswordAuthentication = bool.Parse(row.Value);
                     break;
+                case ServerSettingKey.OidcProviderName:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.ProviderName = row.Value;
+                    break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:
                 case ServerSettingKey.EmailServiceUrl:

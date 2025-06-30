@@ -59,9 +59,9 @@ export class UserLoginComponent implements OnInit {
    * undefined until query params are read
    */
   skipAutoLogin = signal<boolean | undefined>(undefined);
-
   /**
    * Display the login form, regardless if the password authentication is disabled (admins can still log in)
+   * Set from query
    */
   forceShowPasswordLogin = signal(false);
   /**
@@ -121,6 +121,7 @@ export class UserLoginComponent implements OnInit {
       }
 
       this.skipAutoLogin.set(params.get('skipAutoLogin') === 'true')
+      this.forceShowPasswordLogin.set(params.get('forceShowPassword') === 'true');
     });
   }
 

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, DestroyRef, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
@@ -14,7 +14,8 @@ import {SettingsService} from "../settings.service";
 import {OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {map, of} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -36,6 +37,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
   constructor(
     private settingsService: SettingsService,
     private cdRef: ChangeDetectorRef,
+    private destroyRef: DestroyRef,
   ) {
   }
 
@@ -52,12 +54,27 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.settingsForm.addControl('provisionUserSettings', new FormControl(this.oidcSettings.provisionUserSettings, []));
         this.settingsForm.addControl('autoLogin', new FormControl(this.oidcSettings.autoLogin, []));
         this.settingsForm.addControl('disablePasswordAuthentication', new FormControl(this.oidcSettings.disablePasswordAuthentication, []));
+        this.settingsForm.addControl('providerName', new FormControl(this.oidcSettings.providerName, []));
         this.cdRef.markForCheck();
+
+        this.settingsForm.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef),
+          filter(() => {
+            // Do not auto save when provider settings have changed
+            const settings: OidcConfig = this.settingsForm.getRawValue();
+            return settings.authority == this.oidcSettings.authority && settings.clientId == this.oidcSettings.clientId;
+          }),
+          tap(() => this.save())
+        ).subscribe();
       }
-    })
+    });
   }
 
   save() {
+    if (!this.settingsForm.valid) return;
+
     const data = this.settingsForm.getRawValue();
     const newSettings = Object.assign({}, this.serverSettings);
     newSettings.oidcConfig = data as OidcConfig;

@@ -10,6 +10,7 @@
     </div>
 
     <h4>{{t('provider')}}</h4>
+    <div class="text-muted">{{t('manual-save')}}</div>
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('authority'); as formControl) {
@@ -62,8 +63,22 @@
 
     <div class="setting-section-break"></div>
     <h4>{{t('behaviour')}}</h4>
-
     <ng-container>
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('providerName'); as formControl) {
+          <app-setting-item [title]="t('providerName')" [subtitle]="t('providerName-tooltip')">
+            <ng-template #view>
+              {{formControl.value}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="oid-providerName" aria-describedby="oidc-providerName-validations" class="form-control"
+                     formControlName="providerName" type="text"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('provisionAccounts'); as formControl) {
           <app-setting-switch [title]="t('provisionAccounts')" [subtitle]="t('provisionAccounts-tooltip')">

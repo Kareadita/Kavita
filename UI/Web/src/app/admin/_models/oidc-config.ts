@@ -7,6 +7,7 @@ export interface OidcConfig {
   provisionUserSettings: boolean;
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
+  providerName: string;
 }
 
 export interface OidcPublicConfig {
@@ -14,4 +15,5 @@ export interface OidcPublicConfig {
   clientId: string;
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
+  providerName: string;
 }
