@@ -1,32 +1,27 @@
 ﻿#nullable enable
+using API.Entities.Enums;
+
 namespace API.DTOs.Settings;
 
 public class OidcConfigDto
 {
-    /// <summary>
-    /// Base url for authority, must have /.well-known/openid-configuration
-    /// </summary>
+    /// <inheritdoc cref="ServerSettingKey.OidcAuthority"/>
     public string? Authority { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.OidcClientId"/>
+    public string? ClientId { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.OidcProvisionAccounts"/>
+    public bool ProvisionAccounts { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.OidcRequireVerifiedEmail"/>
+    public bool RequireVerifiedEmail { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.OidcProvisionUserSettings"/>
+    public bool ProvisionUserSettings { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.OidcAutoLogin"/>
+    public bool AutoLogin { get; set; }
+    /// <inheritdoc cref="ServerSettingKey.DisablePasswordAuthentication"/>
+    public bool DisablePasswordAuthentication { get; set; }
 
     /// <summary>
-    /// ClientId configured in your OpenID Connect provider
+    /// Returns true if the <see cref="Authority"/> has been set
     /// </summary>
-    public string? ClientId { get; set; }
-    /// <summary>
-    /// Create a new account when someone logs in with an unmatched account, if <see cref="RequireVerifiedEmail"/> is true,
-    /// will account will be verified by default
-    /// </summary>
-    public bool ProvisionAccounts { get; set; }
-    /// <summary>
-    /// Require emails from OpenIDConnect to be verified before use
-    /// </summary>
-    public bool RequireVerifiedEmail { get; set; }
-    /// <summary>
-    /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provides roles on log in.
-    /// </summary>
-    public bool ProvisionUserSettings { get; set; }
-    /// <summary>
-    /// Try logging in automatically when opening the app
-    /// </summary>
-    public bool AutoLogin { get; set; }
+    public bool Enabled => Authority != "";
 }

@@ -7,7 +7,8 @@
         "forgot-password": "Forgot Password?",
         "submit": "Sign in",
         "oidc": "Log in with OpenID Connect",
-        "oidc-tooltip": "This will connect you to an external site"
+        "bypass": "Password login has been disabled. Bypass ",
+        "here": "here"
     },
 
     "oidc": {
@@ -34,7 +35,9 @@
             "provisionUserSettings": "Provision user settings",
             "provisionUserSettings-tooltip": "Synchronise Kavita user settings (roles, libraries, age rating) with those provided by the OIDC. See documentation for more information",
             "autoLogin": "Auto login",
-            "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen"
+            "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen",
+            "disablePasswordAuthentication": "Disable password authentication",
+            "disablePasswordAuthentication-tooltip": "Users with the admin role can bypass this restriction"
         }
     },
 

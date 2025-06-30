@@ -91,7 +91,9 @@ export class OidcService {
   }
 
   logout() {
-    this.oauth2.logOut();
+    if (this.token) {
+      this.oauth2.logOut();
+    }
   }
 
   config() {

@@ -258,6 +258,7 @@ public static class Seed
             new() { Key = ServerSettingKey.OidcProvisionAccounts, Value = "false"},
             new() { Key = ServerSettingKey.OidcRequireVerifiedEmail, Value = "true"},
             new() { Key = ServerSettingKey.OidcProvisionUserSettings, Value = "false"},
+            new() { Key = ServerSettingKey.DisablePasswordAuthentication, Value = "false"},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
             new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},

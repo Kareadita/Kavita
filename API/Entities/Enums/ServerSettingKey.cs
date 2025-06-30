@@ -227,4 +227,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("OpenIDConnectSyncUserSettings")]
     OidcProvisionUserSettings = 45,
+    /// <summary>
+    /// Disables password authentication for non-admin users
+    /// </summary>
+    [Description("DisablePasswordAuthentication")]
+    DisablePasswordAuthentication = 46,
 }

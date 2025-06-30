@@ -366,8 +366,10 @@ public class SettingsService : ISettingsService
         var url = authority + "/.well-known/openid-configuration";
         try
         {
-            await url.GetJsonAsync<OpenIdConnectConfiguration>();
-            return true;
+            //await url.GetJsonAsync<OpenIdConnectConfiguration>();
+            //return true;
+            var res = await url.GetAsync();
+            return res.StatusCode == 200;
         }
         catch (Exception e)
         {
@@ -452,6 +454,13 @@ public class SettingsService : ISettingsService
             updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty != setting.Value)
         {
             setting.Value = updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty;
+            _unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.DisablePasswordAuthentication &&
+            updateSettingsDto.OidcConfig.DisablePasswordAuthentication + string.Empty != setting.Value)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.DisablePasswordAuthentication + string.Empty;
             _unitOfWork.SettingsRepository.Update(setting);
         }
 

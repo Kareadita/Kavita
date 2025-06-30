@@ -9,4 +9,6 @@ public sealed record OidcPublicConfigDto
     public string? ClientId { get; set; }
     /// <inheritdoc cref="OidcConfigDto.AutoLogin"/>
     public bool AutoLogin { get; set; }
+    /// <inheritdoc cref="OidcConfigDto.DisablePasswordAuthentication"/>
+    public bool DisablePasswordAuthentication { get; set; }
 }

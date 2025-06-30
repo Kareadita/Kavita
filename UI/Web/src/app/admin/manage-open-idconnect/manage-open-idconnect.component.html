@@ -112,6 +112,18 @@
         }
       </div>
 
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('disablePasswordAuthentication'); as formControl) {
+          <app-setting-switch [title]="t('disablePasswordAuthentication')" [subtitle]="t('disablePasswordAuthentication-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="disablePasswordAuthentication" type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
     </ng-container>
 
   </form>

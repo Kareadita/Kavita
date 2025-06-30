@@ -28,6 +28,13 @@ public interface IOidcService
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal);
     /// <summary>
+    /// Updates roles, library access and age rating. Does not assign admin role, or to admin roles
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="claimsPrincipal"></param>
+    /// <param name="user"></param>
+    Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user);
+    /// <summary>
     /// Remove <see cref="AppUser.ExternalId"/> from all users
     /// </summary>
     /// <returns></returns>
@@ -51,7 +58,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var user = await unitOfWork.UserRepository.GetByExternalId(externalId, AppUserIncludes.UserPreferences);
         if (user != null)
         {
-            // await SyncUserSettings(settings, principal, user);
             return user;
         }
 
@@ -135,14 +141,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         return user;
     }
 
-    /// <summary>
-    /// Updates roles, library access and age rating. Does not assign admin role, or to admin roles
-    /// </summary>
-    /// <param name="settings"></param>
-    /// <param name="claimsPrincipal"></param>
-    /// <param name="user"></param>
-    /// <remarks>Extra feature, little buggy for now</remarks>
-    private async Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
+    public async Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         if (!settings.ProvisionUserSettings) return;
 
@@ -196,7 +195,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .ToList();
         if (ageRatings.Count == 0) return;
 
-        var highestAgeRating = AgeRating.NotApplicable;
+        var highestAgeRating = AgeRating.Unknown;
 
         foreach (var ar in ageRatings)
         {

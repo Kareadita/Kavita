@@ -1,27 +1,24 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, computed,
-  DestroyRef, effect, inject,
+  effect, inject,
   OnInit,
   signal
 } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
-import { NgIf } from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
 import {OidcService} from "../../_services/oidc.service";
-import {forkJoin} from "rxjs";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -29,7 +26,7 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective, NgbTooltip]
+  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, NgbTooltip, NgOptimizedImage]
 })
 export class UserLoginComponent implements OnInit {
 
@@ -61,7 +58,23 @@ export class UserLoginComponent implements OnInit {
   /**
    * undefined until query params are read
    */
-  skipAutoLogin = signal<boolean | undefined>(undefined)
+  skipAutoLogin = signal<boolean | undefined>(undefined);
+
+  /**
+   * Display the login form, regardless if the password authentication is disabled (admins can still log in)
+   */
+  forceShowPasswordLogin = signal(false);
+  /**
+   * Display the login form
+   */
+  showPasswordLogin = computed(() => {
+    const loaded = this.isLoaded();
+    const config = this.oidcService.settings();
+    const force = this.forceShowPasswordLogin();
+    if (force) return true;
+
+    return loaded && config && !config.disablePasswordAuthentication;
+  });
 
   constructor() {
     this.navService.hideNavBar();

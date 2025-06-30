@@ -6,10 +6,12 @@ export interface OidcConfig {
   requireVerifiedEmail: boolean;
   provisionUserSettings: boolean;
   autoLogin: boolean;
+  disablePasswordAuthentication: boolean;
 }
 
 export interface OidcPublicConfig {
   authority: string;
   clientId: string;
   autoLogin: boolean;
+  disablePasswordAuthentication: boolean;
 }

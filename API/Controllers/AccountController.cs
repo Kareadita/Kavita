@@ -52,6 +52,7 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly IOidcService _oidcService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -60,7 +61,8 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IOidcService oidcService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -72,6 +74,7 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _oidcService = oidcService;
     }
 
     [HttpGet]
@@ -79,6 +82,9 @@ public class AccountController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
         if (user == null) throw new UnauthorizedAccessException();
+
+        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        await _oidcService.SyncUserSettings(oidcSettings, User, user);
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
@@ -235,6 +241,11 @@ public class AccountController : BaseApiController
         }
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        // Setting only takes effect if OIDC is funcitonal, and if we're not logging in via ApiKey
+        var disablePasswordAuthentication = oidcConfig is {Enabled: true, DisablePasswordAuthentication: true} && string.IsNullOrEmpty(loginDto.ApiKey);
+        if (disablePasswordAuthentication && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "password-authentication-disabled"));
 
         if (string.IsNullOrEmpty(loginDto.ApiKey))
         {

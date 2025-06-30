@@ -51,6 +51,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.oidcSettings.requireVerifiedEmail, []));
         this.settingsForm.addControl('provisionUserSettings', new FormControl(this.oidcSettings.provisionUserSettings, []));
         this.settingsForm.addControl('autoLogin', new FormControl(this.oidcSettings.autoLogin, []));
+        this.settingsForm.addControl('disablePasswordAuthentication', new FormControl(this.oidcSettings.disablePasswordAuthentication, []));
         this.cdRef.markForCheck();
       }
     })
