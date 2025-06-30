@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "token-expired": "Votre jeton AniList a expiré ! Les événements de scrobbling ne seront pas pris en compte tant que vous n'aurez pas renouvelé votre compte sur la page Comptes.",
         "scrobbling-disabled": "Le suivi de lecture est désactivé dans les paramètres de votre compte.",
-        "generate-scrobble-events": "Rattraper les Événements"
+        "generate-scrobble-events": "Rattraper les Événements",
+        "select-all-label": "Sélectionner tout",
+        "delete-selected-label": "Supprimer la sélection"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progression de la lecture",
@@ -83,7 +85,7 @@
     },
     "user-preferences": {
         "title": "Tableau de bord Utilisateur",
-        "pref-description": "Voici les paramètres globaux liés à votre compte.",
+        "pref-description": "Voici les paramètres globaux liés à votre compte. Les paramètres du lecteur se trouvent dans les profils de lecture.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -629,7 +631,10 @@
         "incognito-mode-label": "Navigation privée",
         "next": "Suivant",
         "previous": "Précédent",
-        "go-to-page-prompt": "Il y a {{totalPages}} pages. À quelle page voulez-vous aller ?"
+        "go-to-page-prompt": "Il y a {{totalPages}} pages. À quelle page voulez-vous aller ?",
+        "go-to-first-page": "Aller à la première page",
+        "go-to-section": "Aller à la section",
+        "go-to-section-prompt": "Il y a {{totalSections}} sections au total. Dans quelle section voulez-vous aller ?"
     },
     "personal-table-of-contents": {
         "no-data": "Rien n'a encore été mis en marque-page",
@@ -677,7 +682,7 @@
     "series-detail": {
         "page-settings-title": "Paramètres des pages",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-option-card": "Carte",
         "layout-mode-option-list": "Liste",
         "continue-from": "Continuer {{title}}",
@@ -764,7 +769,8 @@
         "entry-label": "Voir les détails",
         "kavita-tooltip": "Votre évaluation + évaluation globale",
         "kavita-rating-title": "Votre évaluation",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "et {{count}} de plus"
@@ -800,7 +806,8 @@
         "more": "Plus",
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}",
-        "cancel-edit": "Fermer la réorganisation"
+        "cancel-edit": "Fermer la réorganisation",
+        "browse-people": "Parcourir les personnes"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -853,7 +860,9 @@
         "exclude-patterns-tooltip": "Configurez un ensemble de modèles (syntaxe Global) que Kavita fera correspondre lors du scan des répertoires et exclura des résultats du scanner.",
         "help": "{{common.help}}",
         "allow-metadata-matching-label": "Permettre la correspondance des métadonnées",
-        "allow-metadata-matching-tooltip": "Kavita doit-il télécharger les métadonnées des séries de cette bibliothèque ? Cela ne se produira que si le serveur dispose d'un abonnement actif à Kavita+."
+        "allow-metadata-matching-tooltip": "Kavita doit-il télécharger les métadonnées des séries de cette bibliothèque ? Cela ne se produira que si le serveur dispose d'un abonnement actif à Kavita+.",
+        "enable-metadata-label": "Activer les métadonnées (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Permet à Kavita de lire les fichiers de métadonnées. Ceux-ci remplacent l'analyse des noms de fichiers."
     },
     "file-type-group-pipe": {
         "archive": "Archive",
@@ -863,30 +872,30 @@
     },
     "reader-settings": {
         "general-settings-title": "Réglages généraux",
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "Réinitialiser les paramètres par défaut",
         "reader-settings-title": "Paramètres de lecture",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "De droite à gauche",
         "left-to-right": "De gauche à droite",
         "horizontal": "Horizontal",
         "vertical": "Vertical",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "Change la direction du texte. L'horizontale est de gauche à droite, la verticale de haut en bas.",
         "tap-to-paginate-label": "Appuyez sur Pagination",
         "tap-to-paginate-tooltip": "Cliquez sur les bords de l'écran pour paginer",
         "on": "Activé",
         "off": "Désactivé",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
         "immersive-mode-tooltip": "Cela masquera le menu après un clic sur le document en lecture et activera le toucher pour lister les pages",
         "fullscreen-label": "Plein écran",
         "fullscreen-tooltip": "Mettre le lecteur en plein écran",
         "exit": "Sortir",
         "enter": "Entrer",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-tooltip": "Défilement : met en miroir le fichier epub (généralement une longue page défilante par chapitre).<br/>1 colonne : crée une seule page virtuelle à la fois.<br/>2 colonnes : crée deux pages virtuelles à la fois disposées côte à côte.",
         "layout-mode-option-scroll": "Faire défiler",
         "layout-mode-option-1col": "1 Colonne",
@@ -895,7 +904,15 @@
         "theme-dark": "Sombre",
         "theme-black": "Noir",
         "theme-white": "Blanc",
-        "theme-paper": "Papier"
+        "theme-paper": "Papier",
+        "update-parent": "Enregistrer dans {{name}}",
+        "loading": "chargement",
+        "create-new": "Nouveau profil à partir d'un profil implicite",
+        "create-new-tooltip": "Créez un nouveau profil gérable à partir de votre profil implicite actuel",
+        "reading-profile-updated": "Profil de lecture mis à jour",
+        "reading-profile-promoted": "Profil de lecture promu",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "table-of-contents": {
         "no-data": "Ce livre n'a pas de table des matières définie dans les métadonnées ou dans un fichier toc"
@@ -1336,7 +1353,8 @@
         "admin-email-history": "Historique des e-mails",
         "admin-matched-metadata": "Métadonnées correspondantes",
         "admin-manage-tokens": "Gérer les jetons utilisateur",
-        "admin-metadata": "Gérer les métadonnées"
+        "admin-metadata": "Gérer les métadonnées",
+        "reading-profiles": "Profils de lecture"
     },
     "collection-detail": {
         "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
@@ -1460,7 +1478,10 @@
         "logout": "Déconnexion",
         "all-filters": "Filtres intelligents",
         "nav-link-header": "Options de navigation",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Correspond à un alias",
+        "browse-genres": "Parcourir les genres",
+        "browse-tags": "Parcourir les étiquettes"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1592,9 +1613,9 @@
         "height": "Hauteur",
         "width": "Largeur",
         "width-override-label": "Remplacement de la largeur",
-        "off": "Désactivé",
+        "off": "{{reader-settings.off}}",
         "original": "Original",
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "swipe-enabled-label": "Balayage activé",
         "enable-comic-book-label": "Imiter le comportement de la bande dessinée",
         "brightness-label": "Luminosité",
@@ -1606,7 +1627,13 @@
         "no-next-chapter": "Pas de prochain chapitre",
         "no-prev-chapter": "Pas de chapitre précédent",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
-        "series-progress": "Progression de la série : {{percentage}}"
+        "series-progress": "Progression de la série : {{percentage}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "Profil de lecture mis à jour",
+        "reading-profile-promoted": "Profil de lecture promu"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1663,7 +1690,10 @@
         "release-year": "Année de sortie",
         "read-progress": "Dernière lecture",
         "average-rating": "Note moyenne",
-        "random": "Aléatoire"
+        "random": "Aléatoire",
+        "person-name": "Nom",
+        "person-series-count": "Nombre de séries",
+        "person-chapter-count": "Nombre de chapitres"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Détails",
@@ -1800,8 +1830,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -2022,7 +2052,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2395,7 +2425,8 @@
         "confirm": "Confirmer",
         "ok": "Ok",
         "cancel": "{{common.cancel}}",
-        "info": "Info"
+        "info": "Info",
+        "prompt": "Question"
     },
     "person-detail": {
         "all-roles": "Roles",
@@ -2403,7 +2434,9 @@
         "known-for-title": "Connu pour",
         "individual-role-title": "En tant que {{role}}",
         "browse-person-title": "Toutes les œuvres de {{name}}",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}"
+        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
+        "aka-title": "Également connu sous le nom de ",
+        "no-info": "Aucune information sur cette personne"
     },
     "edit-person-modal": {
         "save": "{{common.save}}",
@@ -2426,7 +2459,11 @@
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Vous pouvez également télécharger une couverture à partir de CoversDB, si elle est disponible.",
-        "download-coversdb": "Télécharger à partir de CoversDB"
+        "download-coversdb": "Télécharger à partir de CoversDB",
+        "aliases-tab": "Alias",
+        "aliases-label": "Modifier les alias",
+        "alias-overlap": "Cet alias pointe déjà vers une autre personne ou est le nom de cette personne, envisagez de les fusionner.",
+        "aliases-tooltip": "Lorsqu'une série est étiquetée avec l'alias d'une personne, cette personne est attribuée plutôt que d'en créer une nouvelle. Lorsque vous supprimez un alias, vous devez rescanner la série pour que la modification soit prise en compte."
     },
     "changelog-update-item": {
         "added": "Ajouté",
@@ -2447,7 +2484,7 @@
         "description": "Sélectionnez une correspondance pour recâbler les métadonnées de Kavita+ et régénérer les événements de scrobbling. L'option Ne pas faire correspondre peut être utilisée pour empêcher Kavita de faire correspondre les métadonnées et le scrobbler.",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "query-tooltip": "Entrez le nom de la série, l'URL AniList/MyAnimeList. Les URL utiliseront une recherche directe.",
+        "query-tooltip": "Entrez le nom de la série, l'URL AniList/MyAnimeList/ComicBookRoundup. Les URL utiliseront une recherche directe.",
         "dont-match-tooltip": "Exclure cette série de la correspondance et du scrobbling",
         "dont-match-label": "Ne pas correspondre",
         "search": "Recherche",
@@ -2492,7 +2529,9 @@
         "library-name-header": "Bibliothèque",
         "match-alt": "Correspondance {{seriesName}}",
         "actions-header": "Actions",
-        "dont-match-status-label": "{{dont-match-label}}"
+        "dont-match-status-label": "{{dont-match-label}}",
+        "library-type": "Type de bibliothèque",
+        "matched-state-label": "État de correspondance"
     },
     "manage-metadata-settings": {
         "enable-relations-label": "Relations",
@@ -2538,14 +2577,21 @@
         "enable-chapter-title-label": "Titre",
         "enable-chapter-release-date-label": "Date de diffusion",
         "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
-        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}"
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-release-date-tooltip": "Permettre la saisie de la date de publication d'un chapitre ou d'un numéro",
+        "enable-chapter-publisher-label": "Éditeur",
+        "enable-chapter-publisher-tooltip": "Permettre la saisie de l'éditeur des chapitres ou des numéros",
+        "enable-chapter-cover-label": "Couverture du chapitre",
+        "chapter-header": "Champs du chapitre",
+        "enable-chapter-cover-tooltip": "Permettre de définir la couverture d'un chapitre ou d'un numéro"
     },
     "match-series-result-item": {
         "chapter-count": "{{common.chapter-count}}",
         "updating-metadata-status": "Mise à jour des métadonnées",
         "volume-count": "{{server-stats.volume-count}}",
         "releasing": "Sorties",
-        "details": "Voir la page"
+        "details": "Voir la page",
+        "issue-count": "{{common.issue-count}}"
     },
     "metadata-setting-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2597,5 +2643,64 @@
         "review-label": "Avis",
         "title": "Editer Avis",
         "min-length": "L'avis doit faire au moins {{count}} caractères"
+    },
+    "browse-people": {
+        "title": "Parcourir les personnes",
+        "author-count": "{{num}} Personnes",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "Rôles",
+        "sort-label": "Trier",
+        "name-label": "Nom",
+        "issue-count-label": "Nombre de numéros",
+        "series-count-label": "Nombre de séries"
+    },
+    "browse-genres": {
+        "title": "Parcourir les genres",
+        "genre-count": "{{num}} Genres",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-tags": {
+        "title": "Parcourir les étiquettes",
+        "genre-count": "{{num}} Etiquettes",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "bulk-set-reading-profile-modal": {
+        "title": "Définir le profil de lecture",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "Aucune collection n'a encore été créée",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}",
+        "bound": "Liaison"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Fusionner une personne",
+        "merge-warning": "Si vous poursuivez, la personne sélectionnée sera supprimée. Le nom de la personne sélectionnée sera ajouté en tant qu'alias et tous ses rôles seront transférés.",
+        "alias-title": "Nouveaux alias",
+        "known-for-title": "Connu pour"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} travaux",
+        "age-rating": "Noté {{value}}",
+        "user-rating": "{{value}} classement par étoiles",
+        "tag": "A l'étiquette {{value}}",
+        "translator": "Traduit par {{value}}",
+        "character": "Possède le caractère {{value}}",
+        "publisher": "Publié par {{value}}",
+        "editor": "Edité par {{value}}",
+        "artist": "Dessiné par {{value}}",
+        "letterer": "Lettré par {{value}}",
+        "colorist": "Coloré par {{value}}",
+        "inker": "Encré par {{value}}",
+        "penciller": "Crayonné par {{value}}",
+        "writer": "Ecrit par {{value}}"
     }
 }
