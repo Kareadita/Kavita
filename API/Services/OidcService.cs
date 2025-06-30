@@ -27,6 +27,11 @@ public interface IOidcService
     /// <returns></returns>
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal);
+    /// <summary>
+    /// Remove <see cref="AppUser.ExternalId"/> from all users
+    /// </summary>
+    /// <returns></returns>
+    Task ClearOidcIds();
 }
 
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
@@ -46,7 +51,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var user = await unitOfWork.UserRepository.GetByExternalId(externalId, AppUserIncludes.UserPreferences);
         if (user != null)
         {
-            //await SyncUserSettings(settings, principal, user);
+            // await SyncUserSettings(settings, principal, user);
             return user;
         }
 
@@ -64,13 +69,24 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         user.ExternalId = externalId;
 
-        //await SyncUserSettings(settings, principal, user);
+        await SyncUserSettings(settings, principal, user);
 
         var roles = await userManager.GetRolesAsync(user);
         if (roles.Count > 0 && !roles.Contains(PolicyConstants.LoginRole))
             throw new KavitaException("errors.oidc.disabled-account");
 
         return user;
+    }
+
+    public async Task ClearOidcIds()
+    {
+        var users = await unitOfWork.UserRepository.GetAllUsersAsync();
+        foreach (var user in users)
+        {
+            user.ExternalId = null;
+        }
+
+        await unitOfWork.CommitAsync();
     }
 
     private async Task<AppUser?> NewUserFromOpenIdConnect(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal)
@@ -133,9 +149,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var userRoles = await userManager.GetRolesAsync(user);
         if (userRoles.Contains(PolicyConstants.AdminRole)) return;
 
+
         await SyncRoles(claimsPrincipal, user);
         await SyncLibraries(claimsPrincipal, user);
         SyncAgeRating(claimsPrincipal, user);
+
 
         if (unitOfWork.HasChanges())
             await unitOfWork.CommitAsync();

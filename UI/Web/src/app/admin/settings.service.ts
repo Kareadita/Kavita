@@ -78,6 +78,11 @@ export class SettingsService {
   isValidCronExpression(val: string) {
     if (val === '' || val === undefined || val === null) return of(false);
     return this.http.get<string>(this.baseUrl + 'settings/is-valid-cron?cronExpression=' + val, TextResonse).pipe(map(d => d === 'true'));
+  }
 
+  ifValidAuthority(authority: string) {
+    if (authority === '' || authority === undefined || authority === null) return of(false);
+
+    return this.http.post<boolean>(this.baseUrl + 'oidc/is-valid-authority', {authority});
   }
 }

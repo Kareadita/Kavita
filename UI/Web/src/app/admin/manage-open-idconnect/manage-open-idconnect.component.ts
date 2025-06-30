@@ -2,6 +2,8 @@ import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
+  AbstractControl,
+  AsyncValidatorFn,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -12,6 +14,7 @@ import {SettingsService} from "../settings.service";
 import {OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {map, of} from "rxjs";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -42,9 +45,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.serverSettings = data;
         this.oidcSettings = this.serverSettings.oidcConfig;
 
-
-        // TODO: Validator for authority, /.well-known/openid-configuration endpoint must be reachable
-        this.settingsForm.addControl('authority', new FormControl(this.oidcSettings.authority, []));
+        this.settingsForm.addControl('authority', new FormControl(this.oidcSettings.authority, [], [this.authorityValidator()]));
         this.settingsForm.addControl('clientId', new FormControl(this.oidcSettings.clientId, [this.requiredIf('authority')]));
         this.settingsForm.addControl('provisionAccounts', new FormControl(this.oidcSettings.provisionAccounts, []));
         this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.oidcSettings.requireVerifiedEmail, []));
@@ -70,6 +71,31 @@ export class ManageOpenIDConnectComponent implements OnInit {
         console.error(error);
       }
     })
+  }
+
+  authorityValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      let uri: string = control.value;
+      if (!uri || uri.trim().length === 0) {
+        return of(null);
+      }
+
+      try {
+        new URL(uri);
+      } catch {
+        return of({'invalidUri': {'uri': uri}} as ValidationErrors)
+      }
+
+      if (uri.endsWith('/')) {
+        uri = uri.substring(0, uri.length - 1);
+      }
+
+      return this.settingsService.ifValidAuthority(uri).pipe(map(ok => {
+        if (ok) return null;
+
+        return {'invalidUri': {'uri': uri}} as ValidationErrors;
+      }));
+    }
   }
 
   requiredIf(other: string): ValidatorFn {

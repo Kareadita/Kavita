@@ -17,10 +17,11 @@
         "settings": {
             "save": "{{common.save}}",
             "notice": "Notice",
-            "restart-required": "Changing OpenID Connect settings requires a restart",
+            "restart-required": "Changing OpenID Connect Authority requires a restart",
             "provider": "Provider",
             "behaviour": "Behaviour",
             "field-required": "{{name}} is required when {{other}} is set",
+            "invalidUri": "The provider URL is not valid",
 
             "authority": "Authority",
             "authority-tooltip": "The URL to your OpenID Connect provider",

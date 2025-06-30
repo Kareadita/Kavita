@@ -141,7 +141,7 @@ public static class IdentityServiceExtensions
 
             options.Events = new JwtBearerEvents
             {
-                OnMessageReceived = SetTokenFromQuery
+                OnMessageReceived = SetTokenFromQuery,
             };
         });
 
@@ -164,8 +164,12 @@ public static class IdentityServiceExtensions
         if (ctx.Principal == null) return;
 
         var user = await oidcService.LoginOrCreate(ctx.Principal);
-        if (user == null) return;
-
+        if (user == null)
+        {
+            ctx.Principal = null;
+            await ctx.HttpContext.SignOutAsync(OpenIdConnect);
+            return;
+        }
 
         var claims = new List<Claim>
         {

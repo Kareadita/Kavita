@@ -21,6 +21,14 @@
               <input id="oid-authority" class="form-control"
                      formControlName="authority" type="text"
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+              @if (settingsForm.dirty || !settingsForm.untouched) {
+                <div id="oidc-authority-validations" class="invalid-feedback">
+                  @if (formControl.errors?.invalidUri) {
+                    <div>{{t('invalidUri')}}</div>
+                  }
+                </div>
+              }
             </ng-template>
           </app-setting-item>
         }

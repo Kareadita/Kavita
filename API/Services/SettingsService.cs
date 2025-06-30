@@ -17,6 +17,7 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace API.Services;
 
@@ -24,6 +25,12 @@ public interface ISettingsService
 {
     Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto);
     Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
+    /// <summary>
+    /// Check if the server can reach the authority at the given uri
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
+    Task<bool> IsValidAuthority(string authority);
 }
 
 
@@ -34,16 +41,18 @@ public class SettingsService : ISettingsService
     private readonly ILibraryWatcher _libraryWatcher;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SettingsService> _logger;
+    private readonly IOidcService _oidcService;
 
     public SettingsService(IUnitOfWork unitOfWork, IDirectoryService directoryService,
         ILibraryWatcher libraryWatcher, ITaskScheduler taskScheduler,
-        ILogger<SettingsService> logger)
+        ILogger<SettingsService> logger, IOidcService oidcService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _libraryWatcher = libraryWatcher;
         _taskScheduler = taskScheduler;
         _logger = logger;
+        _oidcService = oidcService;
     }
 
     /// <summary>
@@ -347,7 +356,7 @@ public class SettingsService : ISettingsService
         return updateSettingsDto;
     }
 
-    private async Task<bool> IsValidAuthority(string authority)
+    public async Task<bool> IsValidAuthority(string authority)
     {
         if (string.IsNullOrEmpty(authority))
         {
@@ -357,8 +366,8 @@ public class SettingsService : ISettingsService
         var url = authority + "/.well-known/openid-configuration";
         try
         {
-            var resp = await url.GetAsync();
-            return resp.StatusCode == 200;
+            await url.GetJsonAsync<OpenIdConnectConfiguration>();
+            return true;
         }
         catch (Exception e)
         {
@@ -413,6 +422,8 @@ public class SettingsService : ISettingsService
             setting.Value = updateSettingsDto.OidcConfig.Authority + string.Empty;
             Configuration.OidcAuthority = setting.Value;
             _unitOfWork.SettingsRepository.Update(setting);
+
+            await _oidcService.ClearOidcIds();
         }
 
         if (setting.Key == ServerSettingKey.OidcClientId &&
