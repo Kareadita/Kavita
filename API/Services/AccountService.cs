@@ -31,6 +31,14 @@ public interface IAccountService
     Task<bool> HasDownloadPermission(AppUser? user);
     Task<bool> CanChangeAgeRestriction(AppUser? user);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="librariesIds"></param>
+    /// <param name="hasAdminRole"></param>
+    /// <returns></returns>
+    /// <remarks>Ensure that the users SideNavStreams are loaded</remarks>
     Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
     Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
 }

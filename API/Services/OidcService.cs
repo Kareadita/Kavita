@@ -69,7 +69,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.email-not-verified");
 
 
-        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences)
+        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams)
                ?? await NewUserFromOpenIdConnect(settings, principal);
         if (user == null) return null;
 

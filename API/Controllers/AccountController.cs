@@ -80,7 +80,7 @@ public class AccountController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user == null) throw new UnauthorizedAccessException();
 
         var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
