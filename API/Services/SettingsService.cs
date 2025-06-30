@@ -373,7 +373,7 @@ public class SettingsService : ISettingsService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "OpenIdConfiguration failed: {Reason}", e.Message);
+            _logger.LogTrace(e, "OpenIdConfiguration failed: {Reason}", e.Message);
             return false;
         }
     }

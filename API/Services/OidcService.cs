@@ -44,8 +44,8 @@ public interface IOidcService
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork, IMapper mapper, IAccountService accountService): IOidcService
 {
-    private const string LibraryAccessClaim = "library";
-    private const string AgeRatingClaim = "AgeRating";
+    private const string LibraryAccessPrefix = "library-";
+    private const string AgeRatingPrefix = "age-rating-";
 
     public async Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal)
     {
@@ -175,8 +175,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private async Task SyncLibraries(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         var libraryAccess = claimsPrincipal
-            .FindAll(LibraryAccessClaim)
-            .Select(r => r.Value)
+            .FindAll(ClaimTypes.Role)
+            .Where(r => r.Value.StartsWith(LibraryAccessPrefix))
+            .Select(r => r.Value.TrimPrefix(LibraryAccessPrefix))
             .ToList();
         if (libraryAccess.Count == 0) return;
 
@@ -191,8 +192,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
 
         var ageRatings = claimsPrincipal
-            .FindAll(AgeRatingClaim)
-            .Select(r => r.Value)
+            .FindAll(ClaimTypes.Role)
+            .Where(r => r.Value.StartsWith(AgeRatingPrefix))
+            .Select(r => r.Value.TrimPrefix(AgeRatingPrefix))
             .ToList();
         if (ageRatings.Count == 0) return;
 

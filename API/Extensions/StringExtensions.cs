@@ -53,9 +53,9 @@ public static class StringExtensions
         return string.IsNullOrEmpty(value) ? defaultValue : double.Parse(value, CultureInfo.InvariantCulture);
     }
 
-    public static string? TrimPrefix(this string? value, string prefix)
+    public static string TrimPrefix(this string? value, string prefix)
     {
-        if (string.IsNullOrEmpty(value)) return value;
+        if (string.IsNullOrEmpty(value)) return string.Empty;
 
         if (!value.StartsWith(prefix)) return value;
 
