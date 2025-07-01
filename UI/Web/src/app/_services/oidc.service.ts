@@ -5,10 +5,11 @@ import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
 import {AccountService} from "./account.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {translate} from "@jsverse/transloco";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
@@ -21,19 +22,32 @@ export class OidcService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastR = inject(ToastrService);
 
-  baseUrl = environment.apiUrl;
+  protected readonly baseUrl = inject(APP_BASE_HREF);
+  apiBaseUrl = environment.apiUrl;
 
-  private readonly loaded = new BehaviorSubject<boolean>(false);
-  public readonly loaded$: Observable<boolean> = this.loaded.asObservable();
+  /**
+   * True when the OIDC discovery document has been loaded, and login tried. Or no OIDC has been set up
+   */
+  private readonly _loaded = signal(false);
+  public readonly loaded = this._loaded.asReadonly();
+  public readonly loaded$ = toObservable(this.loaded);
+
+  /**
+   * OIDC discovery document has been loaded, and login tried and OIDC has been set up
+   */
   private readonly _ready = signal(false);
   public readonly ready = this._ready.asReadonly();
+
+  /**
+   * Public OIDC settings
+   */
   private readonly _settings = signal<OidcPublicConfig | undefined>(undefined);
   public readonly settings = this._settings.asReadonly();
 
   constructor() {
     // log events in dev
     if (!environment.production) {
-      this.oauth2.events.subscribe(event => {
+      this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
         if (event instanceof OAuthErrorEvent) {
           console.error('OAuthErrorEvent Object:', event);
         } else {
@@ -42,9 +56,20 @@ export class OidcService {
       });
     }
 
+    this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event.type !== "token_refreshed" && event.type != 'token_received') return;
+
+      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+        if (!user) return; // Don't update tokens when we're not logged in. But what's going on?
+
+        // TODO: Do we need to refresh the SignalR connection here?
+        user.oidcToken = this.token;
+      });
+    });
+
     this.config().subscribe(oidcSetting => {
       if (!oidcSetting.authority) {
-        this.loaded.next(true);
+        this._loaded.set(true);
         return
       }
 
@@ -53,30 +78,20 @@ export class OidcService {
         clientId: oidcSetting.clientId,
         // Require https in production unless localhost
         requireHttps: environment.production ? 'remoteOnly' : false,
-        redirectUri: window.location.origin + "/oidc/callback",
-        postLogoutRedirectUri: window.location.origin + "/login",
+        redirectUri: window.location.origin + this.baseUrl + "oidc/callback",
+        postLogoutRedirectUri: window.location.origin + this.baseUrl + "login",
         showDebugInformation: !environment.production,
         responseType: 'code',
         scope: "openid profile email roles offline_access",
+        // Not all OIDC providers follow this nicely
         strictDiscoveryDocumentValidation: false,
       });
       this._settings.set(oidcSetting);
       this.oauth2.setupAutomaticSilentRefresh();
 
-      this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-        if (event.type !== "token_refreshed") return;
-
-        this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-          if (!user) return; // Don't update tokens when we're not logged in. But what's going on?
-
-          // TODO: Do we need to refresh the SignalR connection here?
-          user.oidcToken = this.token;
-        });
-      });
-
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
         next: _ => {
-          this.loaded.next(true);
+          this._loaded.set(true);
           this._ready.set(true);
         },
         error: error => {
@@ -99,7 +114,7 @@ export class OidcService {
   }
 
   config() {
-    return this.httpClient.get<OidcPublicConfig>(this.baseUrl + "oidc/config");
+    return this.httpClient.get<OidcPublicConfig>(this.apiBaseUrl + "oidc/config");
   }
 
   get token() {
