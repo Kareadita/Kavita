@@ -3,7 +3,7 @@ import {UserOwner} from "../_models/user";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({
-  name: 'creationSourcePipe'
+  name: 'userOwnerPipe'
 })
 export class UserOwnerPipe implements PipeTransform {
 

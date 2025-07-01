@@ -38,7 +38,15 @@
             "disablePasswordAuthentication": "Disable password authentication",
             "disablePasswordAuthentication-tooltip": "Users with the admin role can bypass this restriction",
             "providerName": "Provider name",
-            "providerName-tooltip": "Name show on the login screen"
+            "providerName-tooltip": "Name show on the login screen",
+
+            "defaults": "Defaults",
+            "defaults-requirement": "The following settings are used when a user is registered via OIDC while SyncUserSettings is turned off",
+            "defaultIncludeUnknowns": "Include unknowns",
+            "defaultIncludeUnknowns-tooltip": "Include unknown age ratings",
+            "defaultAgeRating": "Age rating",
+            "defaultAgeRating-tooltip": "Maximum age rating shown to new users",
+            "no-restriction": "{{restriction-selector.no-restriction}}"
         }
     },
 

@@ -141,6 +141,55 @@
 
     </ng-container>
 
+    <div class="setting-section-break"></div>
+    <h4>{{t('defaults')}}</h4>
+    <div class="text-muted">{{t('defaults-requirement')}}</div>
+    <ng-container>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('defaultAgeRating'); as formControl) {
+          <app-setting-item [title]="t('defaultAgeRating')" [subtitle]="t('defaultAgeRating-tooltip')">
+            <ng-template #view>
+              <div>{{formControl.value | ageRating}}</div>
+            </ng-template>
+            <ng-template #edit>
+              <select class="form-select" formControlName="defaultAgeRating">
+                <option value="-1">{{t('no-restriction')}}</option>
+                @for (ageRating of ageRatings(); track ageRating.value) {
+                  <option [value]="ageRating.value">{{ageRating.title}}</option>
+                }
+              </select>
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('defaultIncludeUnknowns'); as formControl) {
+          <app-setting-switch [title]="t('defaultIncludeUnknowns')" [subtitle]="t('defaultIncludeUnknowns-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="defaultIncludeUnknowns" type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      @if (this.oidcSettings()) {
+        <div class="row g-0 mb-3">
+          <div class="col-md-6 pe-4">
+            <app-role-selector (selected)="updateRoles($event)" [allowAdmin]="true" [preSelectedRoles]="selectedRoles()"></app-role-selector>
+          </div>
+
+          <div class="col-md-6">
+            <app-library-selector (selected)="updateLibraries($event)" [preselectedLibraries]="selectedLibraries()"></app-library-selector>
+          </div>
+        </div>
+      }
+
+    </ng-container>
+
   </form>
 
 </ng-container>

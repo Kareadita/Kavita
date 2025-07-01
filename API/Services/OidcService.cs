@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -56,10 +57,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.missing-external-id");
 
         var user = await unitOfWork.UserRepository.GetByExternalId(externalId, AppUserIncludes.UserPreferences);
-        if (user != null)
-        {
-            return user;
-        }
+        if (user != null) return user;
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
@@ -68,17 +66,22 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (settings.RequireVerifiedEmail && !principal.HasVerifiedEmail())
             throw new KavitaException("errors.oidc.email-not-verified");
 
+
+        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        if (user != null)
+        {
+            logger.LogInformation("User {Name} has matched on email to {ExternalId}", user.UserName, externalId);
+            user.ExternalId = externalId;
+            await unitOfWork.CommitAsync();
+            return user;
+        }
+
+        // Cannot match on native account, try and create new one
         if (settings.SyncUserSettings && principal.GetAccessRoles().Count == 0)
             throw new KavitaException("errors.oidc.role-not-assigned");
 
-
-        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams)
-               ?? await NewUserFromOpenIdConnect(settings, principal);
+        user = await NewUserFromOpenIdConnect(settings, principal, externalId);
         if (user == null) return null;
-
-        user.ExternalId = externalId;
-
-        await SyncUserSettings(settings, principal, user);
 
         var roles = await userManager.GetRolesAsync(user);
         if (roles.Count > 0 && !roles.Contains(PolicyConstants.LoginRole))
@@ -98,14 +101,15 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
-    private async Task<AppUser?> NewUserFromOpenIdConnect(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal)
+    private async Task<AppUser?> NewUserFromOpenIdConnect(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, string externalId)
     {
         if (!settings.ProvisionAccounts) return null;
 
         var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
         if (emailClaim == null || string.IsNullOrWhiteSpace(emailClaim.Value)) return null;
 
-        var name = claimsPrincipal.FindFirstValue(ClaimTypes.Name);
+        var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
+        name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Name);
         name ??= claimsPrincipal.FindFirstValue(ClaimTypes.GivenName);
         name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Surname);
         name ??= emailClaim.Value;
@@ -116,6 +120,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             // We match by email, so this will always be unique
             name = emailClaim.Value;
         }
+
+        logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name, externalId);
 
         // TODO: Move to account service, as we're sharing code with AccountController
         var user = new AppUserBuilder(name, emailClaim.Value,
@@ -129,10 +135,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.creating-user");
         }
 
-        user.Owner = AppUserOwner.OpenIdConnect;
-        AddDefaultStreamsToUser(user, mapper);
-        await AddDefaultReadingProfileToUser(user);
-
         if (settings.RequireVerifiedEmail)
         {
             // Email has been verified by OpenID Connect provider
@@ -140,11 +142,34 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             await userManager.ConfirmEmailAsync(user, token);
         }
 
-        await userManager.AddToRoleAsync(user, PolicyConstants.LoginRole);
-        await userManager.AddToRoleAsync(user, PolicyConstants.PlebRole);
+        user.ExternalId = externalId;
+        user.Owner = AppUserOwner.OpenIdConnect;
+
+        AddDefaultStreamsToUser(user, mapper);
+        await AddDefaultReadingProfileToUser(user);
+        await SyncUserSettings(settings, claimsPrincipal, user);
+        await SetDefaults(settings, user);
 
         await unitOfWork.CommitAsync();
         return user;
+    }
+
+    private async Task SetDefaults(OidcConfigDto settings, AppUser user)
+    {
+        if (settings.SyncUserSettings) return;
+
+        // Assign roles
+        var errors = await accountService.UpdateRolesForUser(user, settings.DefaultRoles);
+        if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
+
+        // Assign libraries
+        await accountService.UpdateLibrariesForUser(user, settings.DefaultLibraries, settings.DefaultRoles.Contains(PolicyConstants.AdminRole));
+
+        // Assign age rating
+        user.AgeRestriction = settings.DefaultAgeRating;
+        user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
+
+        await unitOfWork.CommitAsync();
     }
 
     public async Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)

@@ -1,3 +1,4 @@
+import {AgeRating} from "../../_models/metadata/age-rating";
 
 export interface OidcConfig {
   authority: string;
@@ -8,6 +9,10 @@ export interface OidcConfig {
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
   providerName: string;
+  defaultRoles: string[];
+  defaultLibraries: number[];
+  defaultAgeRating: AgeRating;
+  defaultIncludeUnknowns: boolean;
 }
 
 export interface OidcPublicConfig {

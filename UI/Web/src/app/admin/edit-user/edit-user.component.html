@@ -78,12 +78,12 @@
             @if (userForm.get('owner'); as formControl) {
               <app-setting-item [title]="t('owner')" [subtitle]="t('owner-tooltip')">
                 <ng-template #view>
-                  <div>{{member().owner | UserOwnerPipe}}</div>
+                  <div>{{member().owner | userOwnerPipe}}</div>
                 </ng-template>
                 <ng-template #edit>
                   <select class="form-select" id="creationSource" formControlName="creationSource">
                     @for (source of UserOwners; track source) {
-                      <option [value]="source">{{source | UserOwnerPipe}}</option>
+                      <option [value]="source">{{source | userOwnerPipe}}</option>
                     }
                   </select>
                 </ng-template>

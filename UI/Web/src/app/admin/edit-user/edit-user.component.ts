@@ -77,7 +77,7 @@ export class EditUserComponent implements OnInit {
   ngOnInit(): void {
     this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required]));
     this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
-    this.userForm.addControl('creationSource', new FormControl(this.member().owner, [Validators.required]));
+    this.userForm.addControl('owner', new FormControl(this.member().owner, [Validators.required]));
 
     // TODO: Rework, bad hack
     // Work around isLocked so we're able to downgrade users
