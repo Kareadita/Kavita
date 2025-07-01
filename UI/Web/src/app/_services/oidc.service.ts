@@ -1,6 +1,6 @@
 import {DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
 import {OAuthErrorEvent, OAuthService} from "angular-oauth2-oidc";
-import {BehaviorSubject, from} from "rxjs";
+import {BehaviorSubject, from, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
@@ -23,6 +23,8 @@ export class OidcService {
 
   baseUrl = environment.apiUrl;
 
+  private readonly loaded = new BehaviorSubject<boolean>(false);
+  public readonly loaded$: Observable<boolean> = this.loaded.asObservable();
   private readonly _ready = signal(false);
   public readonly ready = this._ready.asReadonly();
   private readonly _settings = signal<OidcPublicConfig | undefined>(undefined);
@@ -42,6 +44,7 @@ export class OidcService {
 
     this.config().subscribe(oidcSetting => {
       if (!oidcSetting.authority) {
+        this.loaded.next(true);
         return
       }
 
@@ -72,9 +75,8 @@ export class OidcService {
       });
 
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
-        next: success => {
-          if (!success) return;
-
+        next: _ => {
+          this.loaded.next(true);
           this._ready.set(true);
         },
         error: error => {
