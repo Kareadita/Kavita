@@ -532,6 +532,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
+    /// <remarks>OIDC managed users cannot be edited if SyncUsers is enabled</remarks>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
@@ -543,6 +544,21 @@ public class AccountController : BaseApiController
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
+
+        // Disallowed editing users synced via OIDC
+        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.Owner == AppUserOwner.OpenIdConnect &&
+            dto.Owner != AppUserOwner.Native &&
+            oidcSettings.SyncUserSettings)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "oidc-managed"));
+        }
+
+        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        if (user.Id != defaultAdminUser.Id)
+        {
+            user.Owner = dto.Owner;
+        }
 
         // Check if username is changing
         if (!user.UserName!.Equals(dto.Username))

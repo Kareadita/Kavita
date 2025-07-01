@@ -16,4 +16,12 @@ export interface User {
   ageRestriction: AgeRestriction;
   hasRunScrobbleEventGeneration: boolean;
   scrobbleEventGenerationRan: string; // datetime
+  owner: UserOwner,
 }
+
+export enum UserOwner {
+  Native = 0,
+  OpenIdConnect = 1,
+}
+
+export const UserOwners: UserOwner[] = [UserOwner.Native, UserOwner.OpenIdConnect];

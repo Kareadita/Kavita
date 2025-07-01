@@ -12,7 +12,7 @@ import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, NgClass, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, NgClass, NgOptimizedImage, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -23,6 +23,9 @@ import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
+import {SettingsService} from "../settings.service";
+import {ServerSettings} from "../_models/server-settings";
+import {UserOwner} from "../../_models/user";
 
 @Component({
   selector: 'app-manage-users',
@@ -31,7 +34,7 @@ import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe,
-    RoleLocalizedPipe]
+    RoleLocalizedPipe, NgOptimizedImage]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -41,6 +44,7 @@ export class ManageUsersComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
   private readonly accountService = inject(AccountService);
+  private readonly settingsService = inject(SettingsService);
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
@@ -48,6 +52,7 @@ export class ManageUsersComponent implements OnInit {
   private readonly router = inject(Router);
 
   members: Member[] = [];
+  settings: ServerSettings | undefined = undefined;
   loggedInUsername = '';
   loadingMembers = false;
   libraryCount: number = 0;
@@ -64,6 +69,10 @@ export class ManageUsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMembers();
+
+    this.settingsService.getServerSettings().subscribe(settings => {
+      this.settings = settings;
+    });
   }
 
 
@@ -97,8 +106,11 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openEditUser(member: Member) {
+    if (!this.settings) return;
+
     const modalRef = this.modalService.open(EditUserComponent, DefaultModalOptions);
-    modalRef.componentInstance.member = member;
+    modalRef.componentInstance.member.set(member);
+    modalRef.componentInstance.settings.set(this.settings);
     modalRef.closed.subscribe(() => {
       this.loadMembers();
     });
@@ -154,4 +166,6 @@ export class ManageUsersComponent implements OnInit {
   getRoles(member: Member) {
     return member.roles.filter(item => item != 'Pleb');
   }
+
+  protected readonly UserOwner = UserOwner;
 }

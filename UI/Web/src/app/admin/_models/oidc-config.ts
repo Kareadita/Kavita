@@ -4,7 +4,7 @@ export interface OidcConfig {
   clientId: string;
   provisionAccounts: boolean;
   requireVerifiedEmail: boolean;
-  provisionUserSettings: boolean;
+  syncUserSettings: boolean;
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
   providerName: string;

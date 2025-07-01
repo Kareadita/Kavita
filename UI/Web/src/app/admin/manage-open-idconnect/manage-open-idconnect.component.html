@@ -104,11 +104,11 @@
       </div>
 
             <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('provisionUserSettings'); as formControl) {
-          <app-setting-switch [title]="t('provisionUserSettings')" [subtitle]="t('provisionUserSettings-tooltip')">
+        @if(settingsForm.get('syncUserSettings'); as formControl) {
+          <app-setting-switch [title]="t('syncUserSettings')" [subtitle]="t('syncUserSettings-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="provisionUserSettings" type="checkbox" class="form-check-input" formControlName="provisionUserSettings">
+                <input id="syncUserSettings" type="checkbox" class="form-check-input" formControlName="syncUserSettings">
               </div>
             </ng-template>
           </app-setting-switch>

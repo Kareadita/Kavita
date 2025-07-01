@@ -800,6 +800,7 @@ public class UserRepository : IUserRepository
                 LastActiveUtc = u.LastActiveUtc,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
                 IsPending = !u.EmailConfirmed,
+                Owner = u.Owner,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,
@@ -811,7 +812,7 @@ public class UserRepository : IUserRepository
                     Type = l.Type,
                     LastScanned = l.LastScanned,
                     Folders = l.Folders.Select(x => x.Path).ToList()
-                }).ToList()
+                }).ToList(),
             })
             .AsSplitQuery()
             .AsNoTracking()

@@ -1,6 +1,7 @@
 ﻿
-using System;
 using API.DTOs.Account;
+using API.Entities;
+using API.Entities.Enums;
 
 namespace API.DTOs;
 #nullable enable
@@ -15,4 +16,6 @@ public sealed record UserDto
     public UserPreferencesDto? Preferences { get; set; }
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public string KavitaVersion { get; set; }
+    /// <inheritdoc cref="AppUser.Owner"/>
+    public AppUserOwner Owner { get; init; }
 }

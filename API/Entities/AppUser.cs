@@ -1,6 +1,8 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Scrobble;
@@ -93,6 +95,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// The sub returned the by OIDC provider
     /// </summary>
     public string? ExternalId { get; set; }
+    /// <summary>
+    /// Describes how the account was created
+    /// </summary>
+    public AppUserOwner Owner { get; set; } = AppUserOwner.Native;
 
 
     /// <summary>

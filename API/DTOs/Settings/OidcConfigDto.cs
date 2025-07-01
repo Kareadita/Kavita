@@ -15,11 +15,7 @@ public record OidcConfigDto: OidcPublicConfigDto
     /// <summary>
     /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provides roles on log in.
     /// </summary>
-    public bool ProvisionUserSettings { get; set; }
-    /// <summary>
-    /// Requires roles to be configured in OIDC
-    /// </summary>
-    public bool RequireRoles { get; set; } = true;
+    public bool SyncUserSettings { get; set; }
 
     /// <summary>
     /// Returns true if the <see cref="OidcPublicConfigDto.Authority"/> has been set

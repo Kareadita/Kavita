@@ -28,7 +28,7 @@ public interface IOidcService
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal);
     /// <summary>
-    /// Updates roles, library access and age rating. Does not assign admin role, or to admin roles
+    /// Updates roles, library access and age rating. Will not modify the default admin
     /// </summary>
     /// <param name="settings"></param>
     /// <param name="claimsPrincipal"></param>
@@ -67,6 +67,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         if (settings.RequireVerifiedEmail && !principal.HasVerifiedEmail())
             throw new KavitaException("errors.oidc.email-not-verified");
+
+        if (settings.SyncUserSettings && principal.GetAccessRoles().Count == 0)
+            throw new KavitaException("errors.oidc.role-not-assigned");
 
 
         user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams)
@@ -126,6 +129,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.creating-user");
         }
 
+        user.Owner = AppUserOwner.OpenIdConnect;
         AddDefaultStreamsToUser(user, mapper);
         await AddDefaultReadingProfileToUser(user);
 
@@ -137,6 +141,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         await userManager.AddToRoleAsync(user, PolicyConstants.LoginRole);
+        await userManager.AddToRoleAsync(user, PolicyConstants.PlebRole);
 
         await unitOfWork.CommitAsync();
         return user;
@@ -144,11 +149,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     public async Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        if (!settings.ProvisionUserSettings) return;
+        if (!settings.SyncUserSettings) return;
 
-        var userRoles = await userManager.GetRolesAsync(user);
-        if (userRoles.Contains(PolicyConstants.AdminRole)) return;
-
+        var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
+        if (defaultAdminUser.Id == user.Id) return;
 
         await SyncRoles(claimsPrincipal, user);
         await SyncLibraries(claimsPrincipal, user);
@@ -161,29 +165,24 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private async Task SyncRoles(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        var roles = claimsPrincipal.FindAll(ClaimTypes.Role)
-            .Select(r => r.Value)
-            .Where(r => PolicyConstants.ValidRoles.Contains(r))
-            .Where(r => r != PolicyConstants.AdminRole)
-            .ToList();
-        if (roles.Count == 0) return;
-
+        var roles = claimsPrincipal.GetAccessRoles();
         var errors = await accountService.UpdateRolesForUser(user, roles);
         if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
     }
 
     private async Task SyncLibraries(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
+        var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+
         var libraryAccess = claimsPrincipal
             .FindAll(ClaimTypes.Role)
             .Where(r => r.Value.StartsWith(LibraryAccessPrefix))
             .Select(r => r.Value.TrimPrefix(LibraryAccessPrefix))
             .ToList();
-        if (libraryAccess.Count == 0) return;
+        if (libraryAccess.Count == 0 && !hasAdminRole) return;
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).ToList();
-        var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
 
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
     }

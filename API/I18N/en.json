@@ -18,6 +18,7 @@
     "generate-token": "There was an issue generating a confirmation email token. See logs",
     "age-restriction-update": "There was an error updating the age restriction",
     "no-user": "User does not exist",
+    "oidc-managed": "This user is managed by OIDC, cannot edit",
     "username-taken": "Username already taken",
     "email-taken": "Email already in use",
     "user-already-confirmed": "User is already confirmed",

@@ -31,8 +31,8 @@
             "provisionAccounts-tooltip": "Create a new account when someone logs in via OIDC, without already having an account",
             "requireVerifiedEmail": "Require verified emails",
             "requireVerifiedEmail-tooltip": "Requires emails to be verified when creation an account or matching with existing ones. A newly created account with a verified email, will be auto verified on Kavita's side",
-            "provisionUserSettings": "Provision user settings",
-            "provisionUserSettings-tooltip": "Synchronise Kavita user settings (roles, libraries, age rating) with those provided by the OIDC. See documentation for more information",
+            "syncUserSettings": "Sync user settings with OIDC roles",
+            "syncUserSettings-tooltip": "Users created from OIDC will be fully managed (Roles, Library Access, Age Rating) by the OIDC. If this is disabled, users will be unable to access any content after their account creation. Read the documentation for more information.",
             "autoLogin": "Auto login",
             "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen",
             "disablePasswordAuthentication": "Disable password authentication",
@@ -40,6 +40,11 @@
             "providerName": "Provider name",
             "providerName-tooltip": "Name show on the login screen"
         }
+    },
+
+    "creation-source-pipe": {
+        "native": "Native",
+        "oidc": "OpenID Connect"
     },
 
     "dashboard": {
@@ -62,7 +67,12 @@
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
         "update": "Update",
-        "account-detail-title": "Account Details"
+        "account-detail-title": "Account Details",
+        "notice": "Warning!",
+        "out-of-sync": "This user was created via OIDC, if the SynUsers setting is turned on changes made may be lost",
+        "oidc-managed": "This user is managed via OIDC, contact your OIDC administrator if they require changes.",
+        "creationSource": "User type",
+        "creationSource-tooltip": "Native users will never be synced with OIDC"
     },
 
     "user-scrobble-history": {
@@ -2461,7 +2471,8 @@
             "email-not-verified": "Your email must be verified to allow logging in via OpenID Connect",
             "no-account": "No matching account found",
             "disabled-account": "This account is disabled, please contact an administrator",
-            "creating-user": "Failed to create a new user, please contact an administrator"
+            "creating-user": "Failed to create a new user, please contact an administrator",
+            "role-not-assigned": "You do not have the required roles assigned to access this application"
         }
     },
 

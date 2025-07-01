@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
 using Kavita.Common;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
 using TokenValidatedContext = Microsoft.AspNetCore.Authentication.JwtBearer.TokenValidatedContext;
@@ -158,9 +160,10 @@ public static class IdentityServiceExtensions
 
     private static async Task OidcClaimsPrincipalConverter(TokenValidatedContext ctx)
     {
-        var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
         if (ctx.Principal == null) return;
 
+        var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+        var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
         var user = await oidcService.LoginOrCreate(ctx.Principal);
         if (user == null)
         {
@@ -169,17 +172,25 @@ public static class IdentityServiceExtensions
             return;
         }
 
+        // Add the following claims like Kavita expects them
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty)
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
         };
 
-        var userManager = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
-        var roles = await userManager.GetRolesAsync(user);
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        claims.AddRange(ctx.Principal.Claims);
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (user.Owner != AppUserOwner.OpenIdConnect || !settings.OidcConfig.SyncUserSettings)
+        {
+            var userManager = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+            var roles = await userManager.GetRolesAsync(user);
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        }
+        else
+        {
+            claims.AddRange(ctx.Principal.Claims);
+        }
 
         var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
