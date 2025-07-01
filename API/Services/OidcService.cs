@@ -107,7 +107,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Surname);
         name ??= emailClaim.Value;
 
-        var other = await unitOfWork.UserRepository.GetUserByUsernameAsync(name);
+        var other = await userManager.FindByNameAsync(name);
         if (other != null)
         {
             // We match by email, so this will always be unique
@@ -122,7 +122,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (!res.Succeeded)
         {
             logger.LogError("Failed to create new user from OIDC: {Errors}",
-                res.Errors.Select(x => x.Description).ToString());
+                res.Errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.creating-user");
         }
 
