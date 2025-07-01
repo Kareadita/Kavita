@@ -2226,7 +2226,12 @@
         "bulk-delete-libraries": "Êtes vous sûr de vouloir supprimer {{count}} bibliothèque(s) ?",
         "webtoon-override": "Passage en mode Webtoon en raison d'images représentant un webtoon.",
         "match-success": "Séries avec la bonne correspondance",
-        "scrobble-gen-init": "Mise en attente d'une tâche pour générer des événements de scrobble à partir de l'historique de lecture et des évaluations, en les synchronisant avec les services connectés."
+        "scrobble-gen-init": "Mise en attente d'une tâche pour générer des événements de scrobble à partir de l'historique de lecture et des évaluations, en les synchronisant avec les services connectés.",
+        "series-added-want-to-read": "Série ajoutée à la liste \"A lire\"",
+        "confirm-delete-multiple-volumes": "Êtes-vous sûr de vouloir supprimer les {{count}} volumes ? Cela ne modifiera pas les fichiers sur le disque.",
+        "series-bound-to-reading-profile": "Série liée au Profil de lecture {{nom}}",
+        "library-bound-to-reading-profile": "Bibliothèque liée au Profil de lecture {{nom}}",
+        "external-match-rate-error": "Kavita a manqué de rythme en cherchant {{seriesName}}. Réessayez dans 5 minutes."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",
@@ -2299,7 +2304,12 @@
         "copy-settings": "Copier les paramètres depuis",
         "match-tooltip": "Associer les séries manuellement avec Kavita+",
         "match": "Correspondance",
-        "reorder": "Réorganiser"
+        "reorder": "Réorganiser",
+        "reading-profiles": "Profils de lecture",
+        "set-reading-profile": "Définir le profil de lecture",
+        "set-reading-profile-tooltip": "Lier un profil de lecture à cette bibliothèque",
+        "clear-reading-profile": "Effacer le Profil de lecture",
+        "clear-reading-profile-tooltip": "Efface le Profil de lecture pour cette bibliothèque"
     },
     "preferences": {
         "left-to-right": "De gauche à droite",
@@ -2602,7 +2612,12 @@
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "localized-name": "{{edit-series-modal.localized-name-label}}"
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "chapter-release-date": "Date de publication (Chapitre)",
+        "chapter-summary": "Résumé (Chapitre)",
+        "chapter-covers": "Couvertures (Chapitre)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Chapitre)",
+        "chapter-title": "Titre (Chapitre)"
     },
     "email-history": {
         "not-sent-tooltip": "Non envoyé",
@@ -2691,7 +2706,7 @@
         "publication-status": "{{value}} travaux",
         "age-rating": "Noté {{value}}",
         "user-rating": "{{value}} classement par étoiles",
-        "tag": "A l'étiquette {{value}}",
+        "tag": "Étiquette {{value}}",
         "translator": "Traduit par {{value}}",
         "character": "Possède le caractère {{value}}",
         "publisher": "Publié par {{value}}",
@@ -2701,6 +2716,19 @@
         "colorist": "Coloré par {{value}}",
         "inker": "Encré par {{value}}",
         "penciller": "Crayonné par {{value}}",
-        "writer": "Ecrit par {{value}}"
+        "writer": "Ecrit par {{value}}",
+        "genre": "Genre {{value}}",
+        "library": "Au sein de la bibliothèque {{value}}",
+        "format": "Format de {{value}}",
+        "release-year": "Publié en {{value}}",
+        "imprint": "Empreinte de {{value}}",
+        "team": "Équipe {{value}}",
+        "location": "Localisation {{value}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "Rôle",
+        "person-name": "Nom",
+        "person-series-count": "Nombre de séries",
+        "person-chapter-count": "Nombre de chapitres"
     }
 }
