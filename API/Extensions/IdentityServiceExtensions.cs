@@ -97,8 +97,6 @@ public static class IdentityServiceExtensions
 
         if (Configuration.OidcEnabled)
         {
-            services.AddScoped<IClaimsTransformation, RolesClaimsTransformation>();
-
             // TODO: Investigate on how to make this not hardcoded at startup
             auth.AddJwtBearer(OpenIdConnect, options =>
             {

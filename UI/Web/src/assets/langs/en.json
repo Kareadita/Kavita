@@ -2460,7 +2460,8 @@
             "missing-email": "OpenID Connect provider did not return a valid email",
             "email-not-verified": "Your email must be verified to allow logging in via OpenID Connect",
             "no-account": "No matching account found",
-            "disabled-account": "This account is disabled, please contact an administrator"
+            "disabled-account": "This account is disabled, please contact an administrator",
+            "creating-user": "Failed to create a new user, please contact an administrator"
         }
     },
 
