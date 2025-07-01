@@ -80,8 +80,8 @@
         "notice": "Warning!",
         "out-of-sync": "This user was created via OIDC, if the SynUsers setting is turned on changes made may be lost",
         "oidc-managed": "This user is managed via OIDC, contact your OIDC administrator if they require changes.",
-        "creationSource": "User type",
-        "creationSource-tooltip": "Native users will never be synced with OIDC"
+        "owner": "User type",
+        "owner-tooltip": "Native users will never be synced with OIDC"
     },
 
     "user-scrobble-history": {

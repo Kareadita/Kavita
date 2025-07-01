@@ -26,6 +26,7 @@ import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
 import {UserOwner} from "../../_models/user";
+import {OwnerIconComponent} from "../../shared/_components/owner-icon/owner-icon.component";
 
 @Component({
   selector: 'app-manage-users',
@@ -34,7 +35,7 @@ import {UserOwner} from "../../_models/user";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe,
-    RoleLocalizedPipe, NgOptimizedImage]
+    RoleLocalizedPipe, NgOptimizedImage, OwnerIconComponent]
 })
 export class ManageUsersComponent implements OnInit {
 

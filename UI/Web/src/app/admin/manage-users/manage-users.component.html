@@ -23,14 +23,7 @@
         <tr>
           <td>
             <div class="-flex flex-row justify-content-center align-items-center">
-              @switch (member.owner) {
-                @case (UserOwner.OpenIdConnect) {
-                  <img width="16" height="16" ngSrc="assets/icons/open-id-connect-logo.svg" alt="open-id-connect-logo">
-                }
-                @case (UserOwner.Native) {
-                  <img ngSrc="assets/icons/favicon-16x16.png" height="16" width="16" alt="kavita-logo">
-                }
-              }
+              <app-owner-icon [owner]="member.owner" />
             </div>
           </td>
           <td id="username--{{idx}}">

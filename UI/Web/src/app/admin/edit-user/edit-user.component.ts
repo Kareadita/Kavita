@@ -28,6 +28,7 @@ import {ServerSettings} from "../_models/server-settings";
 import {UserOwner, UserOwners} from "../../_models/user";
 import {UserOwnerPipe} from "../../_pipes/user-owner.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {OwnerIconComponent} from "../../shared/_components/owner-icon/owner-icon.component";
 
 const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +37,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, UserOwnerPipe, SettingItemComponent],
+  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, UserOwnerPipe, SettingItemComponent, OwnerIconComponent],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {

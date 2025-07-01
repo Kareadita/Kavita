@@ -24,7 +24,18 @@
       <form [formGroup]="userForm">
         <h4>{{t('account-detail-title')}}</h4>
         <div class="row g-0 mb-2">
-            <div class="col-md-6 col-sm-12 pe-4">
+          <div class="col-md-4 col-sm-12 pe-4">
+            @if (userForm.get('owner'); as formControl) {
+              <label for="owner" class="form-label">{{t('owner')}}</label>
+              <select class="form-select" id="owner" formControlName="owner">
+                @for (owner of UserOwners; track owner) {
+                  <option [value]="owner">{{owner | userOwnerPipe}}</option>
+                }
+              </select>
+              <span class="text-muted">{{t('owner-tooltip')}}</span>
+            }
+          </div>
+          <div class="col-md-4 col-sm-12 pe-4">
               @if(userForm.get('username'); as formControl) {
                 <div class="mb-3">
                   <label for="username" class="form-label">{{t('username')}}</label>
@@ -46,7 +57,7 @@
                 </div>
               }
             </div>
-            <div class="col-md-6 col-sm-12">
+          <div class="col-md-4 col-sm-12">
               @if(userForm.get('email'); as formControl) {
                 <div class="mb-3" style="width:100%">
                   <label for="email" class="form-label">{{t('email')}}</label>
@@ -72,26 +83,6 @@
                 </div>
               }
             </div>
-
-          <!-- TODO: Change move, idk, it's bad now -->
-          <div class="col-md-6 col-sm-12">
-            @if (userForm.get('owner'); as formControl) {
-              <app-setting-item [title]="t('owner')" [subtitle]="t('owner-tooltip')">
-                <ng-template #view>
-                  <div>{{member().owner | userOwnerPipe}}</div>
-                </ng-template>
-                <ng-template #edit>
-                  <select class="form-select" id="creationSource" formControlName="creationSource">
-                    @for (source of UserOwners; track source) {
-                      <option [value]="source">{{source | userOwnerPipe}}</option>
-                    }
-                  </select>
-                </ng-template>
-              </app-setting-item>
-            }
-          </div>
-
-
         </div>
 
         <div class="row g-0 mb-3">
