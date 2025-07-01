@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -137,29 +138,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.OidcConfig ??= new OidcConfigDto();
                     destination.OidcConfig.ClientId = row.Value;
                     break;
-                case ServerSettingKey.OidcAutoLogin:
+                case ServerSettingKey.OidcConfiguration:
                     destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.AutoLogin = bool.Parse(row.Value);
-                    break;
-                case ServerSettingKey.OidcProvisionAccounts:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.ProvisionAccounts = bool.Parse(row.Value);
-                    break;
-                case ServerSettingKey.OidcRequireVerifiedEmail:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.RequireVerifiedEmail = bool.Parse(row.Value);
-                    break;
-                case ServerSettingKey.OidcProvisionUserSettings:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.ProvisionUserSettings = bool.Parse(row.Value);
-                    break;
-                case ServerSettingKey.DisablePasswordAuthentication:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.DisablePasswordAuthentication = bool.Parse(row.Value);
-                    break;
-                case ServerSettingKey.OidcProviderName:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.ProviderName = row.Value;
+                    var configuration = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
+                    configuration.Authority = destination.OidcConfig.Authority;
+                    configuration.ClientId = destination.OidcConfig.ClientId;
+                    destination.OidcConfig = configuration;
                     break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:

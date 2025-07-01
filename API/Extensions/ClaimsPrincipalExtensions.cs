@@ -1,4 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using API.Constants;
 using Kavita.Common;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
@@ -40,5 +43,13 @@ public static class ClaimsPrincipalExtensions
         }
 
         return true;
+    }
+
+    public static List<string> GetAccessRoles(this ClaimsPrincipal claimsPrincipal)
+    {
+        return claimsPrincipal.FindAll(ClaimTypes.Role)
+            .Select(r => r.Value)
+            .Where(r => PolicyConstants.ValidRoles.Contains(r))
+            .ToList();
     }
 }

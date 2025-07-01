@@ -208,34 +208,9 @@ public enum ServerSettingKey
     [Description("OpenIDConnectClientId")]
     OidcClientId = 41,
     /// <summary>
-    /// Optional OpenID Connect ClientSecret, required if authority is set
+    /// A Json object of type <see cref="API.DTOs.Settings.OidcConfigDto"/>
     /// </summary>
-    [Description("OpenIdConnectAutoLogin")]
-    OidcAutoLogin = 42,
-    /// <summary>
-    /// If true, auto creates a new account when someone logs in via OpenID Connect
-    /// </summary>
-    [Description("OpenIDConnectCreateAccounts")]
-    OidcProvisionAccounts = 43,
-    /// <summary>
-    /// Require emails to be verified by the OpenID Connect provider when creating accounts on login
-    /// </summary>
-    [Description("OpenIDConnectVerifiedEmail")]
-    OidcRequireVerifiedEmail = 44,
-    /// <summary>
-    /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provides roles on log in.
-    /// </summary>
-    [Description("OpenIDConnectSyncUserSettings")]
-    OidcProvisionUserSettings = 45,
-    /// <summary>
-    /// Disables password authentication for non-admin users
-    /// </summary>
-    [Description("DisablePasswordAuthentication")]
-    DisablePasswordAuthentication = 46,
-    /// <summary>
-    /// Name of your provider, used to display on the login screen
-    /// </summary>
-    /// <remarks>Default to OpenID Connect</remarks>
-    [Description("OidcProviderName")]
-    OidcProviderName = 47,
+    [Description("OidcConfiguration")]
+    OidcConfiguration = 42,
+
 }

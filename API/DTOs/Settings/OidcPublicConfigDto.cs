@@ -9,10 +9,17 @@ public record OidcPublicConfigDto
     public string? Authority { get; set; }
     /// <inheritdoc cref="ServerSettingKey.OidcClientId"/>
     public string? ClientId { get; set; }
-    /// <inheritdoc cref="ServerSettingKey.OidcAutoLogin"/>
+    /// <summary>
+    /// Optional OpenID Connect ClientSecret, required if authority is set
+    /// </summary>
     public bool AutoLogin { get; set; }
-    /// <inheritdoc cref="ServerSettingKey.DisablePasswordAuthentication"/>
+    /// <summary>
+    /// Disables password authentication for non-admin users
+    /// </summary>
     public bool DisablePasswordAuthentication { get; set; }
-    /// <inheritdoc cref="ServerSettingKey.OidcProviderName"/>
-    public string ProviderName { get; set; } = string.Empty;
+    /// <summary>
+    /// Name of your provider, used to display on the login screen
+    /// </summary>
+    /// <remarks>Default to OpenID Connect</remarks>
+    public string ProviderName { get; set; } = "OpenID Connect";
 }

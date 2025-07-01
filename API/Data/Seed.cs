@@ -5,9 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data.Repositories;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
@@ -254,12 +256,7 @@ public static class Seed
             }, // Not used from DB, but DB is sync with appSettings.json
             new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority },
             new() { Key = ServerSettingKey.OidcClientId, Value = Configuration.OidcClientId},
-            new() { Key = ServerSettingKey.OidcAutoLogin, Value = "false"},
-            new() { Key = ServerSettingKey.OidcProvisionAccounts, Value = "false"},
-            new() { Key = ServerSettingKey.OidcRequireVerifiedEmail, Value = "true"},
-            new() { Key = ServerSettingKey.OidcProvisionUserSettings, Value = "false"},
-            new() { Key = ServerSettingKey.DisablePasswordAuthentication, Value = "false"},
-            new() { Key = ServerSettingKey.OidcProviderName, Value = "OpenID Connect"},
+            new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
             new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},

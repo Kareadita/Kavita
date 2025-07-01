@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.KavitaPlus.Metadata;
@@ -413,64 +414,33 @@ public class SettingsService : ISettingsService
 
     private async Task UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
-        if (setting.Key == ServerSettingKey.OidcAuthority &&
-            updateSettingsDto.OidcConfig.Authority + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.OidcAuthority && setting.Value != updateSettingsDto.OidcConfig.Authority)
         {
             if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
             {
                 throw new KavitaException("oidc-invalid-authority");
             }
-
-            setting.Value = updateSettingsDto.OidcConfig.Authority + string.Empty;
-            Configuration.OidcAuthority = setting.Value;
+            setting.Value = updateSettingsDto.OidcConfig.Authority;
             _unitOfWork.SettingsRepository.Update(setting);
-
+            _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
             await _oidcService.ClearOidcIds();
+            return;
         }
 
-        if (setting.Key == ServerSettingKey.OidcClientId &&
-            updateSettingsDto.OidcConfig.ClientId + string.Empty != setting.Value)
+        if (setting.Key == ServerSettingKey.OidcClientId && setting.Value != updateSettingsDto.OidcConfig.ClientId)
         {
-            setting.Value = updateSettingsDto.OidcConfig.ClientId + string.Empty;
-            Configuration.OidcClientId = setting.Value;
+            setting.Value = updateSettingsDto.OidcConfig.ClientId;
             _unitOfWork.SettingsRepository.Update(setting);
+            return;
         }
 
-        if (setting.Key == ServerSettingKey.OidcAutoLogin &&
-            updateSettingsDto.OidcConfig.AutoLogin + string.Empty != setting.Value)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.AutoLogin + string.Empty;
-            _unitOfWork.SettingsRepository.Update(setting);
-        }
+        if (setting.Key != ServerSettingKey.OidcConfiguration) return;
 
-        if (setting.Key == ServerSettingKey.OidcProvisionAccounts &&
-            updateSettingsDto.OidcConfig.ProvisionAccounts + string.Empty != setting.Value)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.ProvisionAccounts + string.Empty;
-            _unitOfWork.SettingsRepository.Update(setting);
-        }
+        var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
+        if (setting.Value == newValue) return;
 
-        if (setting.Key == ServerSettingKey.OidcProvisionUserSettings &&
-            updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty != setting.Value)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.ProvisionUserSettings + string.Empty;
-            _unitOfWork.SettingsRepository.Update(setting);
-        }
-
-        if (setting.Key == ServerSettingKey.DisablePasswordAuthentication &&
-            updateSettingsDto.OidcConfig.DisablePasswordAuthentication + string.Empty != setting.Value)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.DisablePasswordAuthentication + string.Empty;
-            _unitOfWork.SettingsRepository.Update(setting);
-        }
-
-        if (setting.Key == ServerSettingKey.OidcProviderName &&
-            updateSettingsDto.OidcConfig.ProviderName + string.Empty != setting.Value)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.ProviderName + string.Empty;
-            _unitOfWork.SettingsRepository.Update(setting);
-        }
-
+        setting.Value = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
+        _unitOfWork.SettingsRepository.Update(setting);
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
