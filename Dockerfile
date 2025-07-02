@@ -1,7 +1,7 @@
 #This Dockerfile creates a build for all architectures
 
 #Image that copies in the files and passes them to the main image
-FROM ubuntu:focal AS copytask
+FROM ubuntu:22.04 AS copytask
 
 ARG TARGETPLATFORM
 
@@ -14,7 +14,7 @@ RUN /copy_runtime.sh
 RUN chmod +x /Kavita/Kavita
 
 #Production image
-FROM ubuntu:focal
+FROM ubuntu:22.04
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
