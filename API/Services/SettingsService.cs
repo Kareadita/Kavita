@@ -421,6 +421,7 @@ public class SettingsService : ISettingsService
                 throw new KavitaException("oidc-invalid-authority");
             }
             setting.Value = updateSettingsDto.OidcConfig.Authority;
+            Configuration.OidcAuthority = updateSettingsDto.OidcConfig.Authority;
             _unitOfWork.SettingsRepository.Update(setting);
             _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
             await _oidcService.ClearOidcIds();
@@ -430,6 +431,7 @@ public class SettingsService : ISettingsService
         if (setting.Key == ServerSettingKey.OidcClientId && setting.Value != updateSettingsDto.OidcConfig.ClientId)
         {
             setting.Value = updateSettingsDto.OidcConfig.ClientId;
+            Configuration.OidcClientId = updateSettingsDto.OidcConfig.ClientId;
             _unitOfWork.SettingsRepository.Update(setting);
             return;
         }
