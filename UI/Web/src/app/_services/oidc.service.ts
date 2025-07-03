@@ -18,7 +18,6 @@ export class OidcService {
 
   private readonly oauth2 = inject(OAuthService);
   private readonly httpClient = inject(HttpClient);
-  private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastR = inject(ToastrService);
 
@@ -55,17 +54,6 @@ export class OidcService {
         }
       });
     }
-
-    this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event.type !== "token_refreshed" && event.type != 'token_received') return;
-
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (!user) return; // Don't update tokens when we're not logged in. But what's going on?
-
-        // TODO: Do we need to refresh the SignalR connection here?
-        user.oidcToken = this.token;
-      });
-    });
 
     this.config().subscribe(oidcSetting => {
       if (!oidcSetting.authority) {
@@ -119,6 +107,10 @@ export class OidcService {
 
   get token() {
     return this.oauth2.getAccessToken();
+  }
+
+  hasValidToken() {
+    return this.oauth2.hasValidAccessToken();
   }
 
 }

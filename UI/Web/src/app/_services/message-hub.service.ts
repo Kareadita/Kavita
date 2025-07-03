@@ -11,6 +11,7 @@ import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
 import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {ExternalMatchRateLimitErrorEvent} from "../_models/events/external-match-rate-limit-error-event";
+import {OidcService} from "./oidc.service";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -146,7 +147,7 @@ export class MessageHubService {
    */
   public onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  constructor() {}
+  constructor(private oidcService: OidcService) {}
 
   /**
    * Tests that an event is of the type passed
@@ -165,7 +166,7 @@ export class MessageHubService {
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
-        accessTokenFactory: () => user.oidcToken ?? user.token
+        accessTokenFactory: () => this.oidcService.hasValidToken() ? this.oidcService.token : user.token
       })
       .withAutomaticReconnect()
       //.withStatefulReconnect() // Requires signalr@8.0
