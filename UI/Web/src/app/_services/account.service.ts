@@ -17,7 +17,6 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
-import {OidcService} from "./oidc.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -47,7 +46,6 @@ export const allRoles = [
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly oidcService = inject(OidcService);
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
 
@@ -92,6 +90,10 @@ export class AccountService {
       this.isOnline = true;
       this.refreshToken().subscribe();
     });
+  }
+
+  oidcEnabled() {
+    return this.httpClient.get<boolean>(this.baseUrl + "oidc/enabled");
   }
 
   canInvokeAction(user: User, action: Action) {
@@ -217,6 +219,7 @@ export class AccountService {
       tap((response: User) => {
         const user = response;
         if (user) {
+          user.oidcToken = token;
           this.setCurrentUser(user);
         }
       }),
@@ -260,7 +263,7 @@ export class AccountService {
         this.licenseService.hasValidLicense().subscribe();
       }
       // oidc handles refreshing itself
-      if (!this.oidcService.hasValidToken()) {
+      if (!this.currentUser.oidcToken) {
         this.startRefreshTokenTimer();
       }
     }

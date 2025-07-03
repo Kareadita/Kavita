@@ -3,22 +3,20 @@ import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/c
 import {Observable, switchMap} from 'rxjs';
 import { AccountService } from '../_services/account.service';
 import { take } from 'rxjs/operators';
-import { OidcService } from '../_services/oidc.service';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
 
-  constructor(private accountService: AccountService, private oidcService: OidcService) { }
+  constructor(private accountService: AccountService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return this.accountService.currentUser$.pipe(
       take(1),
       switchMap(user => {
         if (user) {
-          const token = this.oidcService.hasValidToken() ? this.oidcService.token : user.token;
           request = request.clone({
             setHeaders: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${user.oidcToken ?? user.token}`
             }
           });
         }
