@@ -1108,7 +1108,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // TODO: Load the highlight instance with information from the Annotation
-      //componentRef.instance.highlightClasses =
+
       //componentRef.instance.cdRef.markForCheck();
     }
 

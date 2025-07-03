@@ -1,32 +1,104 @@
 .epub-highlight {
   position: relative;
+  display: inline;
   transition: all 0.2s ease-in-out;
+
+  .epub-highlight-blue {
+    background-color: rgba(59, 130, 246, 0.3);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  .epub-highlight-green {
+    background-color: rgba(34, 197, 94, 0.3);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(34, 197, 94, 0.5);
+    }
+  }
 }
 
-.epub-highlight-blue {
-  background-color: rgba(59, 130, 246, 0.3);
-  border-radius: 3px;
-  padding: 1px 2px;
-}
+// Global styles for annotation cards (since they're appended to body)
+::ng-deep .annotation-card,
+.annotation-card {
+  position: absolute;
+  z-index: 1000;
+  width: 200px;
+  //background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  font-size: 14px;
 
-.epub-highlight-green {
-  background-color: rgba(34, 197, 94, 0.3);
-  border-radius: 3px;
-  padding: 1px 2px;
-}
+  &[data-position="left"] {
+    transform: translateX(0);
+  }
 
-.epub-highlight-blue:hover {
-  background-color: rgba(59, 130, 246, 0.4);
-}
+  &[data-position="right"] {
+    transform: translateX(0);
+  }
 
-.epub-highlight-green:hover {
-  background-color: rgba(34, 197, 94, 0.4);
-}
+  .annotation-content {
+    .annotation-text {
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
 
-.epub-highlight-blue {
-  border-bottom: 1px solid rgba(59, 130, 246, 0.5);
-}
+    .annotation-meta {
+      color: #6b7280;
+      border-top: 1px solid #f3f4f6;
+      padding-top: 8px;
+    }
+  }
 
-.epub-highlight-green {
-  border-bottom: 1px solid rgba(34, 197, 94, 0.5);
+  .connection-line {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 2px;
+    background-color: #9ca3af;
+    transform: translateY(-50%);
+    opacity: 0.3; // Default low opacity
+    transition: opacity 0.2s ease;
+
+    // Show line on hover
+    &.hovered {
+      opacity: 1;
+    }
+
+    &[data-direction="left"] {
+      right: -20px;
+    }
+
+    &[data-direction="right"] {
+      left: -20px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      background-color: #9ca3af;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    &[data-direction="left"]::after {
+      right: -3px;
+    }
+
+    &[data-direction="right"]::after {
+      left: -3px;
+    }
+  }
 }

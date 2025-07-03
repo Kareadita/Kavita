@@ -1,6 +1,16 @@
-<span
-  [class]="highlightClasses()"
-  [attr.data-highlight-color]="color()">
-    <i class="fa-solid fa-pen-clip" role="button" (click)="toggleHighlight()"></i>
-      <ng-content></ng-content>
+<!--<span class="epub-highlight">-->
+<!--    <i class="fa-solid fa-pen-clip" role="button" (click)="toggleHighlight()"></i>-->
+<!--    <span [class]="highlightClasses()" [attr.data-highlight-color]="color()">-->
+<!--      <ng-content />-->
+<!--    </span>-->
+<!--</span>-->
+
+<span class="epub-highlight"
+      #highlightSpan
+      (mouseenter)="onMouseEnter()"
+      (mouseleave)="onMouseLeave()">
+  <i class="fa-solid fa-pen-clip" role="button" (click)="toggleHighlight()"></i>
+  <span [class]="highlightClasses()" [attr.data-highlight-color]="color()">
+    <ng-content />
+  </span>
 </span>
