@@ -1,5 +1,7 @@
 import {ApplicationRef, ComponentRef, createComponent, EmbeddedViewRef, inject, Injectable} from '@angular/core';
-import {AnnotationCardComponent} from '../book-reader/_components/annotation-card/annotation-card.component';
+import {
+  AnnotationCardComponent
+} from '../book-reader/_components/_annotations/annotation-card/annotation-card.component';
 
 @Injectable({
   providedIn: 'root'

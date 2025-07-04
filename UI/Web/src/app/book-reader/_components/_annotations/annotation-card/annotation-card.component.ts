@@ -1,5 +1,5 @@
 import {Component, input, model, output} from '@angular/core';
-import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {DatePipe} from "@angular/common";
 
 @Component({

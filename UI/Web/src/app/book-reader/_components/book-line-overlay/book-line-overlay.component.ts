@@ -11,7 +11,6 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {fromEvent, merge, of} from "rxjs";
 import {catchError} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -20,15 +19,19 @@ import {ReaderService} from "../../../_services/reader.service";
 import {ToastrService} from "ngx-toastr";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
+import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
+import {CreateAnnotationRequest} from "../../_models/create-annotation-request";
+import {HightlightColor} from "../../_models/annotation";
 
 enum BookLineOverlayMode {
   None = 0,
-  Bookmark = 1
+  Annotate = 1,
+  Bookmark = 2
 }
 
 @Component({
     selector: 'app-book-line-overlay',
-    imports: [CommonModule, ReactiveFormsModule, TranslocoDirective],
+    imports: [ReactiveFormsModule, TranslocoDirective],
     templateUrl: './book-line-overlay.component.html',
     styleUrls: ['./book-line-overlay.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,9 +56,12 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
+  private readonly toastr = inject(ToastrService);
+  private readonly elementRef = inject(ElementRef);
+  private readonly epubMenuService = inject(EpubReaderMenuService);
 
-  get BookLineOverlayMode() { return BookLineOverlayMode; }
-  constructor(private elementRef: ElementRef, private toastr: ToastrService) {}
+  protected readonly BookLineOverlayMode = BookLineOverlayMode;
+
 
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
@@ -124,6 +130,26 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.mode === BookLineOverlayMode.Bookmark) {
       this.bookmarkForm.get('name')?.setValue(this.selectedText);
       this.focusOnBookmarkInput();
+      return;
+    }
+
+    if (this.mode === BookLineOverlayMode.Annotate) {
+      // TODO: Open annotation drawer
+      this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber, this.xPath, this.selectedText
+      const createAnnotation = {
+        chapterId: this.chapterId,
+        libraryId: this.libraryId,
+        volumeId: this.volumeId,
+        comment: null,
+        selectedText: this.selectedText,
+        containsSpoiler: false,
+        pageNumber: this.pageNumber,
+        xpath: this.xPath,
+        endingXPath: this.xPath, // TODO: Figure this out
+        highlightCount: this.selectedText.length,
+        hightlightColor: HightlightColor.Blue
+      } as CreateAnnotationRequest;
+      this.epubMenuService.openCreateAnnotationDrawer(createAnnotation);
     }
   }
 

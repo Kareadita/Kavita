@@ -827,6 +827,18 @@ public class ReaderController : BaseApiController
     }
 
     /// <summary>
+    /// Returns the annotations for the given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("annotations")]
+    public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
+    {
+
+        return Ok(await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
+    }
+
+    /// <summary>
     /// Returns the user's personal table of contents for the given chapter
     /// </summary>
     /// <param name="chapterId"></param>

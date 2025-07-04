@@ -8,14 +8,16 @@ export interface Annotation {
   xpath: string;
   endingXPath: string | null;
   selectedText: string | null;
-  noteText: string;
-  highlightCount: number;
+  comment: string;
   hightlightColor: HightlightColor;
+  containsSpoiler: boolean;
+  pageNumber: number;
 
-  seriesId: number;
-  volumeId: number;
+
   chapterId: number;
 
+  ownerUserId: number;
+  ownerUsername: string;
   createdUtc: string;
   lastModifiedUtc: string;
 }

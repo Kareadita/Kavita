@@ -1,0 +1,26 @@
+<ng-container *transloco="let t; prefix: 'view-bookmark-drawer'">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">
+      {{t('title')}}
+    </h5>
+    <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="offcanvas-body">
+
+    @let items = bookmarks();
+    @if (items) {
+      <virtual-scroller #scroll [items]="items" [bufferAmount]="1" [childHeight]="1">
+
+        <div class="card-container row g-0" #container>
+          @for(item of scroll.viewPortItems; let idx = $index; track item) {
+            <div>
+              <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.pageNum)" />
+            </div>
+          }
+        </div>
+      </virtual-scroller>
+    }
+
+  </div>
+</ng-container>

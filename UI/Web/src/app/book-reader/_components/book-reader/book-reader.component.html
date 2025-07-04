@@ -3,7 +3,7 @@
   <ng-container *transloco="let t; read: 'book-reader'">
     <div class="fixed-top" #stickyTop>
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
-      <ng-container [ngTemplateOutlet]="actionBar"  [ngTemplateOutletContext]="{isTop: true}"></ng-container>
+      <ng-container [ngTemplateOutlet]="topActionBar"  [ngTemplateOutletContext]="{isTop: true}"></ng-container>
       <app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
                              [libraryId]="libraryId"
                              [volumeId]="volumeId"
@@ -134,6 +134,56 @@
         </div>
       </div>
     </div>
+
+
+    <ng-template #topActionBar let-isTop>
+      @if (!immersiveMode || drawerOpen || actionBarVisible) {
+        <div class="action-bar d-flex align-items-center px-2">
+          <!-- Left: Drawer toggle -->
+          <button class="btn btn-secondary me-2" (click)="toggleDrawer()">
+            <i class="fa fa-bars" aria-hidden="true"></i>
+          </button>
+
+          <!-- Center: Book Title -->
+          <div class="flex-grow-1 text-center d-none d-md-block">
+            @if (isLoading) {
+              <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
+                <span class="visually-hidden">{{ t('loading-book') }}</span>
+              </div>
+            } @else {
+              <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
+        (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{ t('incognito-mode-label') }}</span>)
+      </span>
+              <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle">{{ bookTitle }}</span>
+            }
+          </div>
+
+          <!-- Right: Buttons -->
+          <div class="d-flex align-items-center ms-auto">
+            @if (!this.adhocPageHistory.isEmpty()) {
+              <button class="btn btn-outline-secondary btn-icon me-1" (click)="goBack()" [title]="t('go-back')">
+                <i class="fa fa-reply" aria-hidden="true"></i>
+              </button>
+            }
+            <button class="btn btn-secondary btn-icon me-1" (click)="closeReader()">
+              <i class="fa fa-times-circle" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-secondary btn-icon me-1" (click)="epubMenuService.openViewBookmarksDrawer(this.chapterId)">
+              <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-secondary btn-icon me-1" (click)="epubMenuService.openViewAnnotationsDrawer(this.chapterId)">
+              <i class="fa-solid fa-highlighter" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-secondary btn-icon" (click)="epubMenuService.openTocDrawer()">
+              <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      }
+    </ng-template>
+
+
+
     <ng-template #actionBar let-isTop>
       <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
         <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"

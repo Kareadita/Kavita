@@ -57,7 +57,7 @@ public interface IBookService
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
-    Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks);
+    Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 }
 
@@ -340,13 +340,13 @@ public class BookService : IBookService
     }
 
 
-    private static void InjectHighlights(HtmlDocument doc, EpubBookRef book, List<PersonalToCDto> ptocBookmarks)
+    private static void InjectAnnotations(HtmlDocument doc, EpubBookRef book, List<AnnotationDto> annotations)
     {
-        if (ptocBookmarks.Count == 0) return;
+        if (annotations.Count == 0) return;
 
-        foreach (var bookmark in ptocBookmarks.Where(b => !string.IsNullOrEmpty(b.BookScrollId)))
+        foreach (var annotation in annotations.Where(b => !string.IsNullOrEmpty(b.XPath)))
         {
-            var unscopedSelector = bookmark.BookScrollId.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
+            var unscopedSelector = annotation.XPath.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
             var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
             if (elem == null) continue;
 
@@ -355,7 +355,7 @@ public class BookService : IBookService
             var originalText = elem.InnerText;
 
             // For POC: highlight first 16 characters
-            const int highlightLength = 16;
+            var highlightLength = annotation.HighlightCount;
 
             if (originalText.Length > highlightLength)
             {
@@ -366,7 +366,7 @@ public class BookService : IBookService
                 elem.RemoveAllChildren();
 
                 // Create the highlight element with the first 16 characters
-                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight>{highlightedText}</app-epub-highlight>");
+                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight id=\"epub-highlight-{annotation.Id}\">{highlightedText}</app-epub-highlight>");
                 elem.AppendChild(highlightNode);
 
                 // Add the remaining text as a text node
@@ -376,7 +376,7 @@ public class BookService : IBookService
             else
             {
                 // If text is shorter than highlight length, wrap it all
-                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight>{originalText}</app-epub-highlight>");
+                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight  id=\"epub-highlight-{annotation.Id}\">{originalText}</app-epub-highlight>");
                 elem.RemoveAllChildren();
                 elem.AppendChild(highlightNode);
             }
@@ -1083,7 +1083,8 @@ public class BookService : IBookService
     /// <param name="page">Page number we are loading</param>
     /// <param name="ptocBookmarks">Ptoc Bookmarks to tie against</param>
     /// <returns></returns>
-    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks)
+    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body,
+        Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
     {
         await InlineStyles(doc, book, apiBase, body);
 
@@ -1094,9 +1095,7 @@ public class BookService : IBookService
         // Inject PTOC Bookmark Icons
         InjectPTOCBookmarks(doc, book, ptocBookmarks);
 
-
-        // MOCK: This will mimic a highlight
-        InjectHighlights(doc, book, ptocBookmarks);
+        InjectAnnotations(doc, book, annotations);
 
         return PrepareFinalHtml(doc, body);
     }
@@ -1288,7 +1287,8 @@ public class BookService : IBookService
     /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
     /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
     /// <exception cref="KavitaException">All exceptions throw this</exception>
-    public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks)
+    public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl,
+        List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
     {
         using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book);
@@ -1330,7 +1330,7 @@ public class BookService : IBookService
                     body = doc.DocumentNode.SelectSingleNode("/html/body");
                 }
 
-                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks);
+                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks, annotations);
             }
         } catch (Exception ex)
         {

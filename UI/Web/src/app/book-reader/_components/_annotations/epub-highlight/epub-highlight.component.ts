@@ -12,7 +12,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {Annotation} from "../../_models/annotation";
+import {Annotation} from "../../../_models/annotation";
 import {AnnotationCardComponent} from "../annotation-card/annotation-card.component";
 import {AnnotationCardService} from 'src/app/_service/annotation-card.service';
 
@@ -27,7 +27,7 @@ export type HighlightColor = 'blue' | 'green';
 export class EpubHighlightComponent implements OnInit, AfterViewChecked, OnDestroy {
   showHighlight = model<boolean>(false);
   color = input<HighlightColor>('blue');
-  annotation = input<Annotation | null>(null);
+  annotation = model.required<Annotation | null>();
   isHovered = signal<boolean>(false);
 
   @ViewChild('highlightSpan', { static: false }) highlightSpan!: ElementRef;
@@ -225,7 +225,7 @@ export class EpubHighlightComponent implements OnInit, AfterViewChecked, OnDestr
     if (!this.annotationCardRef) {
       this.annotationCardRef = this.annotationCardService.show({
         position: pos,
-        annotationText: 'This is test text',
+        annotationText: this.annotation()?.comment,
         createdDate: new Date('10/20/2025'),
         onMouseEnter: () => this.onMouseEnter(),
         onMouseLeave: () => this.onMouseLeave()

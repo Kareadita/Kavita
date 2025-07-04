@@ -46,6 +46,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// A list of Table of Contents for a given Chapter
     /// </summary>
     public ICollection<AppUserTableOfContent> TableOfContents { get; set; } = null!;
+    public ICollection<AppUserAnnotation> Annotations { get; set; } = null!;
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>

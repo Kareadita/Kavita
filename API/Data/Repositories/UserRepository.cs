@@ -107,6 +107,7 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetDashboardStreamsByIds(IList<int> streamIds);
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
+    Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId);
 }
 
 public class UserRepository : IUserRepository
@@ -550,11 +551,26 @@ public class UserRepository : IUserRepository
     /// </summary>
     /// <param name="deviceEmail"></param>
     /// <returns></returns>
-    public async Task<AppUser> GetUserByDeviceEmail(string deviceEmail)
+    public async Task<AppUser?> GetUserByDeviceEmail(string deviceEmail)
     {
         return await _context.AppUser
             .Where(u => u.Devices.Any(d => d.EmailAddress == deviceEmail))
             .FirstOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// Returns a list of annotations ordered by page number. If the user has
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    public async Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId)
+    {
+        // TODO: Check settings if I should include other user's annotations
+        return await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
 

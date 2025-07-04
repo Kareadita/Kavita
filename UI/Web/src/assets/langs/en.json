@@ -800,10 +800,31 @@
     "book-line-overlay": {
         "copy": "Copy",
         "bookmark": "Bookmark",
+        "annotate": "Annotate",
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "Bookmark Name",
         "save": "{{common.save}}"
+    },
+
+    "view-annotation-drawer": {
+        "title": "Annotations",
+        "close": "{{common.close}}"
+    },
+
+    "view-bookmark-drawer": {
+        "title": "Image Bookmarks",
+        "close": "{{common.close}}"
+    },
+
+    "view-toc-drawer": {
+        "title": "Table of Contents",
+        "close": "{{common.close}}"
+    },
+
+    "create-annotation-drawer": {
+        "title": "Create/Edit an Annotation",
+        "close": "{{common.close}}"
     },
 
     "book-reader": {

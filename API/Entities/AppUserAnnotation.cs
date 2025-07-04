@@ -7,7 +7,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents an annotation in the Epub reader
 /// </summary>
-public class Annotation : IEntityDate
+public class AppUserAnnotation : IEntityDate
 {
     public int Id { get; set; }
     /// <summary>
@@ -15,7 +15,7 @@ public class Annotation : IEntityDate
     /// </summary>
     public required string XPath { get; set; }
     /// <summary>
-    /// Ending point of the Hightlight. Can be the same as <see cref="XPath"/>
+    /// Ending point of the Highlight. Can be the same as <see cref="XPath"/>
     /// </summary>
     public string EndingXPath { get; set; }
 
@@ -24,11 +24,19 @@ public class Annotation : IEntityDate
     /// </summary>
     public string SelectedText { get; set; }
     /// <summary>
+    /// Rich text Comment
+    /// </summary>
+    public string? Comment { get; set; }
+    /// <summary>
     /// The number of characters selected
     /// </summary>
     public int HighlightCount { get; set; }
+    public int PageNumber { get; set; }
 
-    public HightlightColor HightlightColor { get; set; }
+    public HightlightColor HighlightColor { get; set; }
+    public bool ContainsSpoiler { get; set; }
+
+     // TODO: Figure out a simple mechansim to track upvotes (hashmap of userids?)
 
     public required int SeriesId { get; set; }
     public required int VolumeId { get; set; }

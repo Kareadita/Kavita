@@ -64,7 +64,9 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {EpubHighlightComponent} from "../epub-highlight/epub-highlight.component";
+import {EpubHighlightComponent} from "../_annotations/epub-highlight/epub-highlight.component";
+import {Annotation} from "../../_models/annotation";
+import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 
 
 enum TabID {
@@ -136,6 +138,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly confirmService = inject(ConfirmService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly epubMenuService = inject(EpubReaderMenuService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -337,6 +340,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * When the user is highlighting something, then we remove pagination
    */
   hidePagination = false;
+
+  annotations: Array<Annotation> = [];
 
   /**
    * Used to refresh the Personal PoC
@@ -1096,23 +1101,43 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
     this.cdRef.markForCheck();
 
+    this.readerService.getAnnotations(this.chapterId).subscribe(annotations => {
+      this.annotations = annotations;
+      this.setupAnnotationElements();
+      this.cdRef.markForCheck();
+    });
+
+
+  }
+
+  private setupAnnotationElements() {
+
+    const annoationMap: {[key: number]: Annotation} = this.annotations.reduce((map, obj) => {
+      // @ts-ignore
+      map[obj.id] = obj;
+      return map;
+    }, {});
+
     // Make the highlight components "real"
     const highlightElems = this.document.querySelectorAll('app-epub-highlight');
 
     for (let i = 0; i < highlightElems.length; i++) {
       const highlight = highlightElems[i];
+      const idAttr = highlight.getAttribute('id');
+
+      // Don't allow highlight injection unless the id is present
+      if (!idAttr) continue;
+
+
+      const annotationId = parseInt(idAttr.replace('epub-highlight-', ''), 10);
       const componentRef = this.readingContainer.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
         {projectableNodes: [[document.createTextNode(highlight.innerHTML)]]});
       if (highlight.parentNode != null) {
         highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
       }
 
-      // TODO: Load the highlight instance with information from the Annotation
-
-      //componentRef.instance.cdRef.markForCheck();
+      componentRef.instance.annotation.set(annoationMap[annotationId]);
     }
-
-
   }
 
   private addEmptyPageIfRequired(): void {
