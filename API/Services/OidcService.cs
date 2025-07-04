@@ -47,6 +47,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 {
     private const string LibraryAccessPrefix = "library-";
     private const string AgeRatingPrefix = "age-rating-";
+    private const string IncludeUnknowns = AgeRatingPrefix + "include-unknowns";
 
     public async Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal)
     {
@@ -108,6 +109,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
         if (emailClaim == null || string.IsNullOrWhiteSpace(emailClaim.Value)) return null;
 
+        // TODO?: Try one by one, for more chance of a nicer username
         var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
         name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Name);
         name ??= claimsPrincipal.FindFirstValue(ClaimTypes.GivenName);
@@ -147,6 +149,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         AddDefaultStreamsToUser(user, mapper);
         await AddDefaultReadingProfileToUser(user);
+
         await SyncUserSettings(settings, claimsPrincipal, user);
         await SetDefaults(settings, user);
 
@@ -179,9 +182,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
         if (defaultAdminUser.Id == user.Id) return;
 
+        logger.LogDebug("Syncing user {UserId} from OIDC", user.Id);
         await SyncRoles(claimsPrincipal, user);
         await SyncLibraries(claimsPrincipal, user);
-        SyncAgeRating(claimsPrincipal, user);
+        SyncAgeRestriction(claimsPrincipal, user);
 
 
         if (unitOfWork.HasChanges())
@@ -191,6 +195,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private async Task SyncRoles(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         var roles = claimsPrincipal.GetAccessRoles();
+        logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
         var errors = await accountService.UpdateRolesForUser(user, roles);
         if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
     }
@@ -204,6 +209,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(r => r.Value.StartsWith(LibraryAccessPrefix))
             .Select(r => r.Value.TrimPrefix(LibraryAccessPrefix))
             .ToList();
+        logger.LogDebug("Syncing libraries for user {UserId}, found library roles {Roles}", user.Id, libraryAccess);
         if (libraryAccess.Count == 0 && !hasAdminRole) return;
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
@@ -212,7 +218,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
     }
 
-    private static void SyncAgeRating(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private void SyncAgeRestriction(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
 
         var ageRatings = claimsPrincipal
@@ -220,6 +226,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(r => r.Value.StartsWith(AgeRatingPrefix))
             .Select(r => r.Value.TrimPrefix(AgeRatingPrefix))
             .ToList();
+        logger.LogDebug("Syncing age restriction for user {UserId}, found restrictions {Restrictions}", user.Id, ageRatings);
         if (ageRatings.Count == 0) return;
 
         var highestAgeRating = AgeRating.Unknown;
@@ -235,6 +242,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         user.AgeRestriction = highestAgeRating;
+        user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
     }
 
     // DUPLICATED CODE

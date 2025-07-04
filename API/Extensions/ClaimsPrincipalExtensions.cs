@@ -11,7 +11,7 @@ namespace API.Extensions;
 public static class ClaimsPrincipalExtensions
 {
     private const string NotAuthenticatedMessage = "User is not authenticated";
-    private static readonly string EmailVerifiedClaimType = "email_verified";
+    private const string EmailVerifiedClaimType = "email_verified";
 
     /// <summary>
     /// Get's the authenticated user's username
