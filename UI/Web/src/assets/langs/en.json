@@ -824,6 +824,11 @@
         "personal-header": "Personal"
     },
 
+    "epub-setting-drawer": {
+        "title": "Book Settings",
+        "close": "{{common.close}}"
+    },
+
     "create-annotation-drawer": {
         "title": "Create/Edit an Annotation",
         "close": "{{common.close}}"

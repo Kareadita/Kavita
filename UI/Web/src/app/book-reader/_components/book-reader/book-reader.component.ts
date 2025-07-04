@@ -9,6 +9,7 @@ import {
   HostListener,
   inject,
   Inject,
+  model,
   OnDestroy,
   OnInit,
   Renderer2,
@@ -16,7 +17,7 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {DOCUMENT, NgClass, NgIf, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {forkJoin, fromEvent, merge, of} from 'rxjs';
@@ -39,15 +40,13 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
-import {PageStyle, ReaderSettingsComponent} from '../reader-settings/reader-settings.component';
+import {PageStyle} from '../reader-settings/reader-settings.component';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbProgressbar, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {DrawerComponent} from '../../../shared/drawer/drawer.component';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
-import {PersonalToCEvent} from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
@@ -55,6 +54,9 @@ import {EpubHighlightComponent} from "../_annotations/epub-highlight/epub-highli
 import {Annotation} from "../../_models/annotation";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.component";
+import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
+import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
+import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
 
 
 interface HistoryPoint {
@@ -97,9 +99,8 @@ const elementLevelStyles = ['line-height', 'font-family'];
             transition('false <=> true', animate('4000ms'))
         ])
     ],
-    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar,
-        ReaderSettingsComponent, NgStyle, NgClass, NgbTooltip,
-        BookLineOverlayComponent, TranslocoDirective]
+  imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -120,6 +121,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly confirmService = inject(ConfirmService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly epubMenuService = inject(EpubReaderMenuService);
+  protected readonly readerSettingsService = inject(EpubReaderSettingsService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -177,7 +179,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Belongs to drawer component
    */
-  drawerOpen = false;
+  //drawerOpen = false;
   /**
    * If the word/line overlay is open
    */
@@ -245,7 +247,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Internal property used to capture all the different css properties to render on all elements. This is a cached version that is updated from reader-settings component
    */
-  pageStyles!: PageStyle;
+  pageStyles = model<PageStyle>(this.readerSettingsService.getDefaultPageStyles());
+  //pageStyles!: PageStyle;
 
   /**
    * Offset for drawer and rendering canvas. Fixed to 62px.
@@ -264,7 +267,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   darkMode = true;
   /**
-   * A anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
+   * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
    */
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
@@ -430,25 +433,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return '';
   }
 
-  get ColumnLayout() {
-    switch (this.layoutMode) {
-      case BookPageLayoutMode.Default:
-        return '';
-      case BookPageLayoutMode.Column1:
-        return 'column-layout-1';
-      case BookPageLayoutMode.Column2:
-        return 'column-layout-2';
-    }
-  }
-
-  get WritingStyleClass() {
-    switch (this.writingStyle) {
-        case WritingStyle.Horizontal:
-          return '';
-        case WritingStyle.Vertical:
-            return 'writing-style-vertical';
-    }
-  }
 
   get PageWidthForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
@@ -577,7 +561,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navService.showSideNav();
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
@@ -599,7 +583,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cdRef.markForCheck();
 
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (data) => {
       this.readingProfile = data['readingProfile'];
       this.cdRef.markForCheck();
 
@@ -610,16 +594,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
         if (!hasProgress) {
-          this.toggleDrawer();
+          this.toggleDrawer(); // TODO: Remove toggling drawer on first load
           this.toastr.info(translate('toasts.book-settings-info'));
         }
       });
 
-      this.init();
+      await this.init();
     });
   }
 
-  init() {
+  async init() {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -628,16 +612,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
 
-    this.bookService.getBookInfo(this.chapterId).subscribe(info => {
+    this.bookService.getBookInfo(this.chapterId).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
-        this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
+        await this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
         return;
       }
 
       this.bookTitle = info.bookTitle;
       this.cdRef.markForCheck();
+
+      await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
+
+
+
+      this.readerSettingsService.readingProfile$.pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(profile => {
+        if (profile) {
+          this.readingProfile = profile;
+          this.cdRef.markForCheck();
+        }
+      });
+
+      this.readerSettingsService.settingUpdates$.pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe((update: ReaderSettingUpdate) => {
+        this.handleReaderSettingsUpdate(update);
+      });
+
+      this.readerSettingsService.activeTheme$.pipe(take(1)).subscribe(res => {
+        if (!res) return;
+        this.updateColorTheme(res);
+      });
+      // TODO: I may need to do this for everything
 
       forkJoin({
         chapter: this.seriesService.getChapter(this.chapterId),
@@ -837,19 +846,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  loadChapterPage(event: {pageNum: number, part: string}) {
-    this.setPageNum(event.pageNum);
-    this.loadPage('id("' + event.part + '")');
-  }
-
-  /**
-   * From personal table of contents/bookmark
-   * @param event
-   */
-  loadChapterPart(event: PersonalToCEvent) {
-    this.setPageNum(event.pageNum);
-    this.loadPage(event.scrollPart);
-  }
 
   /**
    * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value
@@ -940,7 +936,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       setTimeout(() => {
         this.addLinkClickHandlers();
-        this.updateReaderStyles(this.pageStyles);
+        this.readerSettingsService.pageStyles$.pipe(take(1)).subscribe(res => {
+          this.updateReaderStyles(res);
+        });
+
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
         if (imgs === null || imgs.length === 0) {
@@ -1155,6 +1154,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1), catchError(err => {
           this.nextChapterDisabled = true;
+          console.error(err);
           this.cdRef.markForCheck();
           return of(null);
         })).subscribe(res => {
@@ -1165,6 +1165,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!this.prevChapterPrefetched && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST) {
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1), catchError(err => {
           this.prevChapterDisabled = true;
+          console.error(err);
           this.cdRef.markForCheck();
           return of(null);
         })).subscribe(res => {
@@ -1264,7 +1265,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
-    const margin = (this.convertVwToPx(parseInt(this.pageStyles['margin-left'], 10)) * 2);
+    const margin = (this.convertVwToPx(parseInt(this.pageStyles()['margin-left'], 10)) * 2);
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
   }
 
@@ -1276,7 +1277,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getVerticalPageWidth() {
-    const margin = (window.innerWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
+    if (!(this.pageStyles() || {}).hasOwnProperty('margin-left')) return 0; // TODO: Test this, added for safety during refactor
+
+    const margin = (window.innerWidth * (parseInt(this.pageStyles()['margin-left'], 10) / 100)) * 2;
     const windowWidth = window.innerWidth || document.documentElement.clientWidth;
     return windowWidth - margin;
   }
@@ -1358,7 +1361,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Applies styles onto the html of the book page
    */
   updateReaderStyles(pageStyles: PageStyle) {
-    this.pageStyles = pageStyles;
+    console.log('Got styles from settings: ', pageStyles);
+
+    this.pageStyles.set(pageStyles);
     if (this.bookContentElemRef === undefined || !this.bookContentElemRef.nativeElement) return;
 
     // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
@@ -1370,7 +1375,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Line Height must be placed on each element in the page
 
     // Apply page level overrides
-    Object.entries(this.pageStyles).forEach(item => {
+    Object.entries(this.pageStyles()).forEach(item => {
       if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
         // Remove the style or skip
         this.renderer.removeStyle(this.bookContentElemRef.nativeElement, item[0]);
@@ -1432,10 +1437,47 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  toggleDrawer() {
-    this.drawerOpen = !this.drawerOpen;
+  handleReaderSettingsUpdate(res: ReaderSettingUpdate) {
+    switch (res.setting) {
+      case "pageStyle":
+        this.updateReaderStyles(res.object as PageStyle);
+        break;
+      case "clickToPaginate":
+        this.showPaginationOverlay(res.object as boolean);
+        break;
+      case "fullscreen":
+        this.toggleFullscreen();
+        break;
+      case "writingStyle":
+        this.updateWritingStyle(res.object as WritingStyle);
+        break;
+      case "layoutMode":
+        this.updateLayoutMode(res.object as BookPageLayoutMode);
+        break;
+      case "readingDirection":
+        this.updateReadingDirection(res.object as ReadingDirection);
+        break;
+      case "immersiveMode":
+        this.updateImmersiveMode(res.object as boolean);
+        break;
+      case 'theme':
+        this.updateColorTheme(res.object as BookTheme);
+        return;
+    }
+  }
 
-    if (this.immersiveMode) {
+  toggleDrawer() {
+    const drawerIsOpen = this.epubMenuService.isDrawerOpen();
+    if (drawerIsOpen) {
+      this.epubMenuService.closeAll();
+    } else {
+      // TODO: BUG: Migrating the reader settings over into the drawer means default settings aren't being set on load
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile, (res => {
+        this.handleReaderSettingsUpdate(res);
+      }));
+    }
+
+    if (this.immersiveMode) { // NOTE: Shouldn't this check if drawer is open?
       this.actionBarVisible = false;
     }
     this.cdRef.markForCheck();
@@ -1458,12 +1500,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if(this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical ) {
       const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-      const scrollLeft = element.getBoundingClientRect().left + window.pageXOffset - (windowWidth - element.getBoundingClientRect().width);
+      const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
       setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
     }
     else if ((this.layoutMode === BookPageLayoutMode.Default) && (this.writingStyle === WritingStyle.Horizontal)) {
-      const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
-      // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
+      const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
+      // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     } else {
       setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
@@ -1534,6 +1576,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.layoutMode = mode;
     this.cdRef.markForCheck();
 
+    console.log('layout mode changed to: ', this.layoutMode);
+
     this.clearTimeout(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
       this.updateImageSizes()
@@ -1566,10 +1610,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateImmersiveMode(immersiveMode: boolean) {
     this.immersiveMode = immersiveMode;
-    if (this.immersiveMode && !this.drawerOpen) {
+    if (this.immersiveMode && !this.epubMenuService.isDrawerOpen()) {
       this.actionBarVisible = false;
+      this.updateReadingSectionHeight();
     }
-    this.updateReadingSectionHeight();
+
     this.cdRef.markForCheck();
   }
 
@@ -1580,7 +1625,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (renderer === undefined || elem === undefined) return;
       if (this.immersiveMode) {
       } else {
-        renderer.setStyle(elem, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
+        renderer.setStyle(elem.nativeElement, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
       }
     });
   }

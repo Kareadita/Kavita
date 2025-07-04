@@ -1,6 +1,5 @@
 @if (readingProfile !== null) {
   <ng-container *transloco="let t; read: 'reader-settings'">
-    <!-- IDEA: Move the whole reader drawer into this component and have it self contained -->
     <form [formGroup]="settingsForm">
       <div ngbAccordion [closeOthers]="false" #acc="ngbAccordion">
         <div ngbAccordionItem id="general-panel" title="General Settings" [collapsed]="false">
@@ -17,7 +16,9 @@
                     <div class="mb-3">
                       <label for="library-type" class="form-label">{{t('font-family-label')}}</label>
                       <select class="form-select" id="library-type" formControlName="bookReaderFontFamily">
-                        <option [value]="opt" *ngFor="let opt of fontOptions; let i = index">{{opt | titlecase}}</option>
+                        @for(opt of fontOptions; track opt) {
+                          <option [value]="opt">{{opt | titlecase}}</option>
+                        }
                       </select>
                     </div>
                   </div>
@@ -117,7 +118,9 @@
                 </span>
                   <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
                     <i class="fa {{isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
-                    <span *ngIf="activeTheme?.isDarkTheme">&nbsp;{{isFullscreen ? t('exit') : t('enter')}}</span>
+                    @if (activeTheme?.isDarkTheme) {
+                      <span class="ms-1">{{isFullscreen ? t('exit') : t('enter')}}</span>
+                    }
                   </button>
                 </div>
 
@@ -156,12 +159,12 @@
             <div ngbAccordionBody>
               <ng-template>
                 <div class="controls">
-                  <ng-container *ngFor="let theme of themes">
+                  @for(theme of themes; track theme.name) {
                     <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
                       <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
                       {{t(theme.translationKey)}}
                     </button>
-                  </ng-container>
+                  }
                 </div>
               </ng-template>
             </div>
