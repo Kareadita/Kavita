@@ -30,8 +30,10 @@ export class ViewBookmarkDrawerComponent {
   constructor() {
     effect(() => {
       const id = this.chapterId();
-      console.log('chapter id', id);
-      if (!id) return;
+      if (!id) {
+        console.error('You must pass chapterId');
+        return;
+      }
 
       this.readerService.getBookmarks(id).subscribe(bookmarks => {
         this.bookmarks.set(bookmarks);

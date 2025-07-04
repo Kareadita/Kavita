@@ -819,7 +819,9 @@
 
     "view-toc-drawer": {
         "title": "Table of Contents",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "toc-header": "Book",
+        "personal-header": "Personal"
     },
 
     "create-annotation-drawer": {

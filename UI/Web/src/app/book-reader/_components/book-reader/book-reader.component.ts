@@ -44,36 +44,17 @@ import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TableOfContentsComponent} from '../table-of-contents/table-of-contents.component';
-import {
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavItemRole,
-  NgbNavLink,
-  NgbNavOutlet,
-  NgbProgressbar,
-  NgbTooltip
-} from '@ng-bootstrap/ng-bootstrap';
+import {NgbProgressbar, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DrawerComponent} from '../../../shared/drawer/drawer.component';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
-import {
-  PersonalTableOfContentsComponent,
-  PersonalToCEvent
-} from "../personal-table-of-contents/personal-table-of-contents.component";
+import {PersonalToCEvent} from "../personal-table-of-contents/personal-table-of-contents.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubHighlightComponent} from "../_annotations/epub-highlight/epub-highlight.component";
 import {Annotation} from "../../_models/annotation";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
-
-
-enum TabID {
-  Settings = 1,
-  TableOfContents = 2,
-  PersonalTableOfContents = 3
-}
+import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.component";
 
 
 interface HistoryPoint {
@@ -116,9 +97,9 @@ const elementLevelStyles = ['line-height', 'font-family'];
             transition('false <=> true', animate('4000ms'))
         ])
     ],
-    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink,
-        NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip,
-        BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
+    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar,
+        ReaderSettingsComponent, NgStyle, NgClass, NgbTooltip,
+        BookLineOverlayComponent, TranslocoDirective]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -142,7 +123,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
-  protected readonly TabID = TabID;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly PAGING_DIRECTION = PAGING_DIRECTION;
 
@@ -194,14 +174,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * The current page only contains an image. This is used to determine if we should show the image in the center of the screen.
    */
   isSingleImagePage = false;
-  /**
-   * Belongs to the drawer component
-   */
-  activeTabId: TabID = TabID.Settings;
-  /**
-   * Sub Nav tab id
-   */
-  tocId: TabID = TabID.TableOfContents;
   /**
    * Belongs to drawer component
    */
@@ -1743,5 +1715,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateLineOverlayOpen(isOpen: boolean) {
     this.isLineOverlayOpen = isOpen;
     this.cdRef.markForCheck();
+  }
+
+
+  viewToCDrawer() {
+    this.epubMenuService.openViewTocDrawer(this.chapterId, (res: LoadPageEvent | null) => {
+      if (res === null) return;
+
+      this.setPageNum(res.pageNumber);
+      this.loadPage(res.part);
+    });
   }
 }

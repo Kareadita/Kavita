@@ -11,7 +11,11 @@ import {
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 import {ActivatedRoute} from "@angular/router";
-import {ViewTocDrawerComponent} from "../book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component";
+import {
+  LoadPageEvent,
+  ViewTocDrawerComponent
+} from "../book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component";
+import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -22,6 +26,7 @@ import {ViewTocDrawerComponent} from "../book-reader/_components/_drawers/view-t
 export class EpubReaderMenuService {
 
   private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly utilityService = inject(UtilityService);
   private readonly route = inject(ActivatedRoute);
 
 
@@ -38,11 +43,19 @@ export class EpubReaderMenuService {
     const ref = this.offcanvasService.open(ViewAnnotationDrawerComponent, {position: 'end', panelClass: ''});
   }
 
-  openTocDrawer() {
+  openViewTocDrawer(chapterId: number, callbackFn: (evt: LoadPageEvent | null) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
     const ref = this.offcanvasService.open(ViewTocDrawerComponent, {position: 'end', panelClass: ''});
+    ref.componentInstance.chapterId.set(chapterId);
+    ref.componentInstance.loadPage.subscribe((res: LoadPageEvent | null) => {
+      // Check if we are on mobile to collapse the menu
+      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+        this.closeAll();
+      }
+      callbackFn(res);
+    });
   }
 
   openViewBookmarksDrawer(chapterId: number) {
