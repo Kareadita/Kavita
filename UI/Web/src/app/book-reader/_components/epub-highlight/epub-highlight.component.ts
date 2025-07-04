@@ -1,8 +1,10 @@
 import {
   AfterViewChecked,
   Component,
+  ComponentRef,
   computed,
   ElementRef,
+  inject,
   input,
   model,
   OnDestroy,
@@ -11,6 +13,8 @@ import {
   ViewChild
 } from '@angular/core';
 import {Annotation} from "../../_models/annotation";
+import {AnnotationCardComponent} from "../annotation-card/annotation-card.component";
+import {AnnotationCardService} from 'src/app/_service/annotation-card.service';
 
 export type HighlightColor = 'blue' | 'green';
 
@@ -30,6 +34,9 @@ export class EpubHighlightComponent implements OnInit, AfterViewChecked, OnDestr
 
   private resizeObserver?: ResizeObserver;
   private annotationCardElement?: HTMLElement;
+  private annotationCardRef?: ComponentRef<AnnotationCardComponent>;
+
+  private annotationCardService = inject(AnnotationCardService);
 
   showAnnotationCard = computed(() => {
     const annotation = this.annotation();
@@ -147,90 +154,99 @@ export class EpubHighlightComponent implements OnInit, AfterViewChecked, OnDestr
   }
 
   private createOrUpdateAnnotationCard() {
+    // const pos = this.cardPosition();
+    // if (!pos) return;
+    //
+    // // Remove existing card if it exists
+    // this.removeAnnotationCard();
+    //
+    // // Create new card element
+    // this.annotationCardElement = document.createElement('div');
+    // this.annotationCardElement.className = `annotation-card ${this.isHovered() ? 'hovered' : ''}`;
+    // this.annotationCardElement.setAttribute('data-position', pos.isRight ? 'right' : 'left');
+    // this.annotationCardElement.style.position = 'absolute';
+    // this.annotationCardElement.style.top = `${pos.top}px`;
+    // this.annotationCardElement.style.left = `${pos.left}px`;
+    // this.annotationCardElement.style.zIndex = '1000';
+    //
+    // // Add event listeners for hover
+    // this.annotationCardElement.addEventListener('mouseenter', () => this.onMouseEnter());
+    // this.annotationCardElement.addEventListener('mouseleave', () => this.onMouseLeave());
+    //
+    // // Create card content
+    // this.annotationCardElement.innerHTML = `
+    //   <div class="annotation-content">
+    //     <div class="annotation-text">This is test text</div>
+    //     <div class="annotation-meta">
+    //       <small>10/20/2025</small>
+    //     </div>
+    //   </div>
+    // `;
+    //
+    // // Create connection line
+    // const lineElement = document.createElement('div');
+    // lineElement.className = `connection-line ${this.isHovered() ? 'hovered' : ''}`;
+    // lineElement.style.position = 'absolute';
+    // lineElement.style.left = `${pos.connection.startX}px`;
+    // lineElement.style.top = `${pos.connection.startY}px`;
+    // lineElement.style.width = `${pos.connection.distance}px`;
+    // lineElement.style.height = '2px';
+    // lineElement.style.backgroundColor = '#9ca3af';
+    // lineElement.style.transformOrigin = '0 50%';
+    // lineElement.style.transform = `rotate(${pos.connection.angle}deg)`;
+    // lineElement.style.opacity = this.isHovered() ? '1' : '0.3';
+    // lineElement.style.transition = 'opacity 0.2s ease';
+    // lineElement.style.zIndex = '999';
+    //
+    // // Add dot at the end
+    // const dotElement = document.createElement('div');
+    // dotElement.style.position = 'absolute';
+    // dotElement.style.right = '-3px';
+    // dotElement.style.top = '50%';
+    // dotElement.style.width = '6px';
+    // dotElement.style.height = '6px';
+    // dotElement.style.backgroundColor = '#9ca3af';
+    // dotElement.style.borderRadius = '50%';
+    // dotElement.style.transform = 'translateY(-50%)';
+    //
+    // lineElement.appendChild(dotElement);
+    //
+    // // Append to body
+    // document.body.appendChild(this.annotationCardElement);
+    // document.body.appendChild(lineElement);
+    //
+    // // Store reference to line for updates
+    // (this.annotationCardElement as any).lineElement = lineElement;
+
     const pos = this.cardPosition();
     if (!pos) return;
 
-    // Remove existing card if it exists
-    this.removeAnnotationCard();
-
-    // Create new card element
-    this.annotationCardElement = document.createElement('div');
-    this.annotationCardElement.className = `annotation-card ${this.isHovered() ? 'hovered' : ''}`;
-    this.annotationCardElement.setAttribute('data-position', pos.isRight ? 'right' : 'left');
-    this.annotationCardElement.style.position = 'absolute';
-    this.annotationCardElement.style.top = `${pos.top}px`;
-    this.annotationCardElement.style.left = `${pos.left}px`;
-    this.annotationCardElement.style.zIndex = '1000';
-
-    // Add event listeners for hover
-    this.annotationCardElement.addEventListener('mouseenter', () => this.onMouseEnter());
-    this.annotationCardElement.addEventListener('mouseleave', () => this.onMouseLeave());
-
-    // Create card content
-    this.annotationCardElement.innerHTML = `
-      <div class="annotation-content">
-        <div class="annotation-text">This is test text</div>
-        <div class="annotation-meta">
-          <small>10/20/2025</small>
-        </div>
-      </div>
-    `;
-
-    // Create connection line
-    const lineElement = document.createElement('div');
-    lineElement.className = `connection-line ${this.isHovered() ? 'hovered' : ''}`;
-    lineElement.style.position = 'absolute';
-    lineElement.style.left = `${pos.connection.startX}px`;
-    lineElement.style.top = `${pos.connection.startY}px`;
-    lineElement.style.width = `${pos.connection.distance}px`;
-    lineElement.style.height = '2px';
-    lineElement.style.backgroundColor = '#9ca3af';
-    lineElement.style.transformOrigin = '0 50%';
-    lineElement.style.transform = `rotate(${pos.connection.angle}deg)`;
-    lineElement.style.opacity = this.isHovered() ? '1' : '0.3';
-    lineElement.style.transition = 'opacity 0.2s ease';
-    lineElement.style.zIndex = '999';
-
-    // Add dot at the end
-    const dotElement = document.createElement('div');
-    dotElement.style.position = 'absolute';
-    dotElement.style.right = '-3px';
-    dotElement.style.top = '50%';
-    dotElement.style.width = '6px';
-    dotElement.style.height = '6px';
-    dotElement.style.backgroundColor = '#9ca3af';
-    dotElement.style.borderRadius = '50%';
-    dotElement.style.transform = 'translateY(-50%)';
-
-    lineElement.appendChild(dotElement);
-
-    // Append to body
-    document.body.appendChild(this.annotationCardElement);
-    document.body.appendChild(lineElement);
-
-    // Store reference to line for updates
-    (this.annotationCardElement as any).lineElement = lineElement;
-  }
-
-  private removeAnnotationCard() {
-    if (this.annotationCardElement) {
-      // Remove associated line element
-      const lineElement = (this.annotationCardElement as any).lineElement;
-      if (lineElement) {
-        lineElement.remove();
-      }
-
-      this.annotationCardElement.remove();
-      this.annotationCardElement = undefined;
+    // Only create if not already created
+    if (!this.annotationCardRef) {
+      this.annotationCardRef = this.annotationCardService.show({
+        position: pos,
+        annotationText: 'This is test text',
+        createdDate: new Date('10/20/2025'),
+        onMouseEnter: () => this.onMouseEnter(),
+        onMouseLeave: () => this.onMouseLeave()
+      });
     }
   }
 
-  private updateLineOpacity() {
-    if (this.annotationCardElement) {
-      const lineElement = (this.annotationCardElement as any).lineElement;
-      if (lineElement) {
-        lineElement.style.opacity = this.isHovered() ? '1' : '0.3';
-      }
+  private removeAnnotationCard() {
+    // if (this.annotationCardElement) {
+    //   // Remove associated line element
+    //   const lineElement = (this.annotationCardElement as any).lineElement;
+    //   if (lineElement) {
+    //     lineElement.remove();
+    //   }
+    //
+    //   this.annotationCardElement.remove();
+    //   this.annotationCardElement = undefined;
+    // }
+    if (this.annotationCardRef) {
+      this.annotationCardService.hide();
+      this.annotationCardRef = undefined;
     }
   }
 }

@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, input, model, output} from '@angular/core';
 import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {DatePipe} from "@angular/common";
 
@@ -14,7 +14,7 @@ import {DatePipe} from "@angular/common";
 export class AnnotationCardComponent {
   position = input.required<any>();
   annotationText = input<string>('This is test text');
-  createdDate = input<Date>(new Date());
+  createdDate = input<string>('01-01-0001');
   isHovered = model<boolean>(false);
 
   mouseEnter = output<void>();
