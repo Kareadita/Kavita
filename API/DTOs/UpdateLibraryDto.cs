@@ -31,7 +31,7 @@ public sealed record UpdateLibraryDto
     [Required]
     public bool EnableMetadata { get; init; }
     [Required]
-    public bool RemovePrefixForSortName { get; set; }
+    public bool RemovePrefixForSortName { get; init; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>

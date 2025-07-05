@@ -275,7 +275,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
       this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
-      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.enableMetadata);
+      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.selectedFolders = this.library.folders;
 
       this.madeChanges = false;
