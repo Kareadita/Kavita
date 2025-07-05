@@ -826,6 +826,37 @@ public class ReaderController : BaseApiController
         return _readerService.GetTimeEstimate(0, pagesLeft, false);
     }
 
+
+    /// <summary>
+    /// For the current user, returns an estimate on how long it would take to finish reading the chapter.
+    /// </summary>
+    /// <remarks>For Epubs, this does not check words inside a chapter due to overhead so may not work in all cases.</remarks>
+    /// <param name="seriesId"></param>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("time-left-for-chapter")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "chapterId"])]
+    public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletionForChapter(int seriesId, int chapterId)
+    {
+        var userId = User.GetUserId();
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        if (series == null || chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+
+        // Patch in the reading progress
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter);
+
+        if (series.Format == MangaFormat.Epub)
+        {
+            var progressCount = chapter.WordCount;
+            var wordsLeft = series.WordCount - progressCount;
+            return _readerService.GetTimeEstimate(wordsLeft, 0, true);
+        }
+
+        var pagesLeft = chapter.Pages - chapter.PagesRead;
+        return _readerService.GetTimeEstimate(0, pagesLeft, false);
+    }
+
     /// <summary>
     /// Returns the annotations for the given chapter
     /// </summary>

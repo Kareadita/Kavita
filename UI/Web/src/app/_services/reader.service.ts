@@ -224,6 +224,10 @@ export class ReaderService {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
   }
 
+  getTimeLeftForChapter(seriesId: number, chapterId: number) {
+    return this.httpClient.get<HourEstimateRange>(this.baseUrl + `reader/time-left-for-chapter?seriesId=${seriesId}&chapterId=${chapterId}`);
+  }
+
   /**
    * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
    */

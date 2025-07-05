@@ -4,5 +4,4 @@ export interface IHasReadingTime {
   avgHoursToRead: number;
   pages: number;
   wordCount: number;
-
 }

@@ -13,6 +13,8 @@ import {ReadingProfileService} from "./reading-profile.service";
 import {debounceTime, skip, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
+import {translate} from "@jsverse/transloco";
+import {ToastrService} from "ngx-toastr";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
@@ -28,6 +30,7 @@ export class EpubReaderSettingsService {
   private readonly bookService = inject(BookService);
   private readonly themeService = inject(ThemeService);
   private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
 
   private pageStylesSubject = new BehaviorSubject<PageStyle>(this.getDefaultPageStyles());
@@ -46,6 +49,7 @@ export class EpubReaderSettingsService {
   // Form and data
   private settingsForm: FormGroup = new FormGroup({});
   private currentReadingProfile: ReadingProfile | null = null;
+  private parentReadingProfile: ReadingProfile | null = null;
   private currentSeriesId: number | null = null;
   private fontFamilies: FontFamily[] = this.bookService.getFontFamilies();
 
@@ -69,13 +73,15 @@ export class EpubReaderSettingsService {
   async initialize(seriesId: number, readingProfile: ReadingProfile): Promise<void> {
     this.currentSeriesId = seriesId;
     this.currentReadingProfile = readingProfile;
+    console.log('init, reading profile: ', readingProfile);
     this.readingProfileSubject.next(readingProfile);
 
     // Load parent profile if needed
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       try {
-       // const parent = await this.readingProfileService.getForSeries(seriesId, true).toPromise();
-        // Keep the implicit profile but use parent as reference
+       const parent = await this.readingProfileService.getForSeries(seriesId, true).toPromise();
+       this.parentReadingProfile = parent || null;
+        // Keep the implicit profile but use parent as reference (TODO: Validate the code)
       } catch (error) {
         console.error('Failed to load parent reading profile:', error);
       }
@@ -83,7 +89,7 @@ export class EpubReaderSettingsService {
 
     // Setup defaults and form
     this.setupDefaultSettings();
-    this.setupSettingsForm();
+
 
     // Set initial theme
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
@@ -226,6 +232,8 @@ export class EpubReaderSettingsService {
     if (profile.bookReaderWritingStyle === undefined) {
       profile.bookReaderWritingStyle = WritingStyle.Horizontal;
     }
+
+    this.setupSettingsForm();
 
     // Update internal state
     this.readingDirectionSubject.next(profile.bookReaderReadingDirection);
@@ -418,6 +426,8 @@ export class EpubReaderSettingsService {
       data.bookReaderThemeName = activeTheme.name;
     }
 
+    console.log('packed reading profile:', data);
+
     return data;
   }
 
@@ -455,4 +465,16 @@ export class EpubReaderSettingsService {
   }
 
 
+  createNewProfileFromImplicit() {
+    const rp = this.getCurrentReadingProfile();
+    if (rp === null || rp.kind !== ReadingProfileKind.Implicit) {
+      return;
+    }
+
+    this.promoteProfile().subscribe(newProfile => {
+      this.currentReadingProfile = newProfile;
+      this.parentReadingProfile = newProfile;
+      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
+    });
+  }
 }

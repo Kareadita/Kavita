@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{layoutMode | columnLayoutClass}} {{writingStyle | writingStyleClass}}"
+<div class="container-flex {{darkMode() ? 'dark-mode' : ''}} reader-container {{layoutMode() | columnLayoutClass}} {{writingStyle | writingStyleClass}}"
      tabindex="0" #reader>
   <ng-container *transloco="let t; prefix: 'book-reader'">
     <div class="fixed-top" #stickyTop>
@@ -17,35 +17,35 @@
       }
     </div>
 
-    <div #readingSection class="reading-section {{layoutMode | columnLayoutClass}} {{writingStyle | writingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}"
-         [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
+    <div #readingSection class="reading-section {{layoutMode() | columnLayoutClass}} {{writingStyle | writingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}"
+         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
 
       @if (clickToPaginate && !hidePagination) {
         <div class="left {{clickOverlayClass('left')}} no-observe"
              (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-             [ngClass]="{'immersive' : immersiveMode}"
+             [ngClass]="{'immersive' : immersiveMode()}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
         <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
              (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-             [ngClass]="{'immersive' : immersiveMode}"
+             [ngClass]="{'immersive' : immersiveMode()}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
       }
 
       <div #bookContainer class="book-container {{writingStyle | writingStyleClass}}"
-        [ngClass]="{'immersive' : immersiveMode}"
+        [ngClass]="{'immersive' : immersiveMode()}"
            (mousedown)="mouseDown($event)" >
 
         @if (page !== undefined) {
-          <div #readingHtml class="book-content {{layoutMode | columnLayoutClass}} {{writingStyle | writingStyleClass}}"
+          <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle | writingStyleClass}}"
                [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
-               [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
+               [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
                [innerHtml]="page" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
-          @if ((scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)) {
+          @if ((scrollbarNeeded || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
             <div (click)="$event.stopPropagation();"
-                 [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
+                 [ngClass]="{'bottom-bar': layoutMode() !== BookPageLayoutMode.Default}">
               <ng-container [ngTemplateOutlet]="actionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
             </div>
           }
@@ -55,7 +55,7 @@
 
 
     <ng-template #topActionBar>
-      @if (!immersiveMode || epubMenuService.isDrawerOpen() || actionBarVisible) {
+      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible) {
         <div class="action-bar d-flex align-items-center px-2">
           <!-- Left: Drawer toggle -->
           <button class="btn btn-secondary me-2" (click)="toggleDrawer()">
@@ -105,7 +105,7 @@
 
 
     <ng-template #actionBar let-isTop>
-      @if (!immersiveMode || epubMenuService.isDrawerOpen() || actionBarVisible) {
+      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible) {
         <div class="action-bar row g-0 justify-content-between">
           <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
                   (click)="!isTop && movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
@@ -127,7 +127,16 @@
                 <span class="visually-hidden">{{t('loading-book')}}</span>
               </div>
             } @else {
-              20% complete, 3 hrs to go
+              @let timeLeft = readingTimeLeft();
+
+              20% complete,
+              @if (timeLeft) {
+                <span class="time-left" [ngbTooltip]="t('time-left-alt')">
+                  <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                  {{timeLeft | readTimeLeft }}
+                </span>
+              }
+
             }
           </div>
 

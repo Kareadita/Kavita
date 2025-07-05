@@ -57,6 +57,9 @@ import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.compone
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
 import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
+import {ChapterService} from "../../../_services/chapter.service";
+import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
+import {HourEstimateRange} from "../../../_models/series-detail/hour-estimate-range";
 
 
 interface HistoryPoint {
@@ -100,7 +103,7 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe]
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -108,6 +111,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
+  private readonly chapterService = inject(ChapterService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
   private readonly toastr = inject(ToastrService);
@@ -191,7 +195,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Book reader setting that hides the menuing system
    */
-  immersiveMode: boolean = false;
+  immersiveMode = model<boolean>(false);
   /**
    * If we are loading from backend
    */
@@ -265,7 +269,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Used solely for fullscreen to apply a hack
    */
-  darkMode = true;
+  darkMode = model<boolean>(true);
+  readingTimeLeft = model<HourEstimateRange | null>(null);
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
    */
@@ -287,7 +292,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * How to render the page content
    */
-  layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
+  //layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
+  layoutMode = model<BookPageLayoutMode>(BookPageLayoutMode.Default);
 
   /**
    * Width of the document (in non-column layout), used for column layout virtual paging
@@ -360,7 +366,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isNextPageDisabled() {
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum + 1 > this.maxPages - 1;
-      if (this.layoutMode !== BookPageLayoutMode.Default) {
+      if (this.layoutMode() !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === totalVirtualPages;
       }
       return condition;
@@ -369,7 +375,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isPrevPageDisabled() {
     const [currentVirtualPage,,] = this.getVirtualPage();
     const condition =  (this.prevPageDisabled || this.prevChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum === 0;
-      if (this.layoutMode !== BookPageLayoutMode.Default) {
+      if (this.layoutMode() !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === 0;
       }
       return condition;
@@ -379,7 +385,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Determines if we show >> or >
    */
   get IsNextChapter(): boolean {
-    if (this.layoutMode === BookPageLayoutMode.Default) {
+    if (this.layoutMode() === BookPageLayoutMode.Default) {
       return this.pageNum + 1 >= this.maxPages;
     }
 
@@ -392,7 +398,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Determines if we show << or <
    */
   get IsPrevChapter(): boolean {
-    if (this.layoutMode === BookPageLayoutMode.Default) {
+    if (this.layoutMode() === BookPageLayoutMode.Default) {
       return this.pageNum === 0;
     }
 
@@ -404,7 +410,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ColumnWidth() {
     const base = this.writingStyle === WritingStyle.Vertical ? this.windowHeight : this.windowWidth;
-    switch (this.layoutMode) {
+    switch (this.layoutMode()) {
       case BookPageLayoutMode.Default:
         return 'unset';
       case BookPageLayoutMode.Column1:
@@ -417,7 +423,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ColumnHeight() {
-    if (this.layoutMode !== BookPageLayoutMode.Default || this.writingStyle === WritingStyle.Vertical) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default || this.writingStyle === WritingStyle.Vertical) {
       // Take the height after page loads, subtract the top/bottom bar
       const height = this.windowHeight  - (this.topOffset * 2);
       return height + 'px';
@@ -426,7 +432,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get VerticalBookContentWidth() {
-    if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Horizontal ) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Horizontal ) {
       const width = this.getVerticalPageWidth()
       return width + 'px';
     }
@@ -435,23 +441,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   get PageWidthForPagination() {
-    if (this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
+    if (this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
       return 'unset';
     }
     return '100%'
   }
 
   get PageHeightForPagination() {
-    if (this.layoutMode === BookPageLayoutMode.Default) {
+    if (this.layoutMode() === BookPageLayoutMode.Default) {
       // if the book content is less than the height of the container, override and return height of container for pagination area
       if (this.bookContainerElemRef?.nativeElement?.clientHeight > this.bookContentElemRef?.nativeElement?.clientHeight) {
         return (this.bookContainerElemRef?.nativeElement?.clientHeight || 0) + 'px';
       }
 
-      return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0)  - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
+      return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0)  - ((this.topOffset * (this.immersiveMode() ? 0 : 1)) * 2) + 'px';
     }
 
-    if (this.immersiveMode) return this.windowHeight + 'px';
+    if (this.immersiveMode()) return this.windowHeight + 'px';
     return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
@@ -543,6 +549,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.incognitoMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
     }
+
+    // TODO: TEMP: Trigger reading time calculation update
+    // this.readerService.getTimeLeftForChapter(this.seriesId, this.chapterId).subscribe(c => {
+    //   this.readingTimeLeft.set(c);
+    // });
+
   }
 
   ngOnDestroy(): void {
@@ -718,7 +730,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateImageSizes();
 
     const resumeElement = this.getFirstVisibleElementXPath();
-    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
     }
   }
@@ -750,7 +762,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onWheel(event: WheelEvent) {
     // This allows the user to scroll the page horizontally without holding shift
-    if (this.layoutMode !== BookPageLayoutMode.Default || this.writingStyle !== WritingStyle.Vertical) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default || this.writingStyle !== WritingStyle.Vertical) {
       return;
     }
     if (event.deltaY !== 0) {
@@ -966,7 +978,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const height = this.windowHeight - (this.topOffset * 2);
     let maxHeight = 'unset';
     let maxWidth = '';
-    switch (this.layoutMode) {
+    switch (this.layoutMode()) {
       case BookPageLayoutMode.Default:
         if (isVerticalWritingStyle) {
           maxHeight = `${height}px`;
@@ -995,7 +1007,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateSingleImagePageStyles() {
-    if (this.isSingleImagePage && this.layoutMode !== BookPageLayoutMode.Default) {
+    if (this.isSingleImagePage && this.layoutMode() !== BookPageLayoutMode.Default) {
       this.document.documentElement.style.setProperty('--book-reader-content-position', 'absolute');
       this.document.documentElement.style.setProperty('--book-reader-content-top', '50%');
       this.document.documentElement.style.setProperty('--book-reader-content-left', '50%');
@@ -1032,7 +1044,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
-    this.updateLayoutMode(this.layoutMode);
+    this.updateLayoutMode(this.layoutMode());
     this.addEmptyPageIfRequired();
 
     // Find all the part ids and their top offset
@@ -1043,11 +1055,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
       setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
-    } else if ((this.writingStyle === WritingStyle.Vertical) && (this.layoutMode === BookPageLayoutMode.Default)) {
+    } else if ((this.writingStyle === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
     } else {
 
-      if (this.layoutMode === BookPageLayoutMode.Default) {
+      if (this.layoutMode() === BookPageLayoutMode.Default) {
         setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       } else if (this.writingStyle === WritingStyle.Vertical) {
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
@@ -1112,7 +1124,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addEmptyPageIfRequired(): void {
-    if (this.layoutMode !== BookPageLayoutMode.Column2 || this.isSingleImagePage) {
+    if (this.layoutMode() !== BookPageLayoutMode.Column2 || this.isSingleImagePage) {
       return;
     }
 
@@ -1194,7 +1206,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
 
     // We need to handle virtual paging before we increment the actual page
-    if (this.layoutMode !== BookPageLayoutMode.Default) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
       const [currentVirtualPage, _, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage > 1) {
@@ -1229,7 +1241,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     // We need to handle virtual paging before we increment the actual page
-    if (this.layoutMode !== BookPageLayoutMode.Default) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
       const [currentVirtualPage, totalVirtualPages, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage < totalVirtualPages) {
@@ -1401,7 +1413,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // After layout shifts, we need to refocus the scroll bar
-    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.updateWidthAndHeightCalcs();
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
     }
@@ -1415,7 +1427,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Remove all themes
     Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());
 
-    this.darkMode = theme.isDarkTheme;
+    this.darkMode.set(theme.isDarkTheme);
+    this.cdRef.markForCheck();
 
     const styleElem = this.renderer.createElement('style');
     styleElem.id = theme.selector;
@@ -1471,13 +1484,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      // TODO: BUG: Migrating the reader settings over into the drawer means default settings aren't being set on load
       this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile, (res => {
         this.handleReaderSettingsUpdate(res);
       }));
     }
 
-    if (this.immersiveMode) { // NOTE: Shouldn't this check if drawer is open?
+    if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?
       this.actionBarVisible = false;
     }
     this.cdRef.markForCheck();
@@ -1498,12 +1510,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    if(this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical ) {
+    if(this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical ) {
       const windowWidth = window.innerWidth || document.documentElement.clientWidth;
       const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
       setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
     }
-    else if ((this.layoutMode === BookPageLayoutMode.Default) && (this.writingStyle === WritingStyle.Horizontal)) {
+    else if ((this.layoutMode() === BookPageLayoutMode.Default) && (this.writingStyle === WritingStyle.Horizontal)) {
       const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
       // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
@@ -1545,7 +1557,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.markForCheck();
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
         this.renderer.setStyle(this.reader.nativeElement, 'background', this.themeService.getCssVariable('--bs-body-color'));
-        if (!this.darkMode) {
+        if (!this.darkMode()) {
           this.renderer.setStyle(this.reader.nativeElement, 'background', 'white');
         }
       });
@@ -1555,7 +1567,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateWritingStyle(writingStyle: WritingStyle) {
     this.writingStyle = writingStyle;
     setTimeout(() => this.updateImageSizes());
-    if (this.layoutMode !== BookPageLayoutMode.Default) {
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => {
         this.scrollTo(lastSelector);
@@ -1572,11 +1584,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateLayoutMode(mode: BookPageLayoutMode) {
-    const layoutModeChanged = mode !== this.layoutMode;
-    this.layoutMode = mode;
+    const layoutModeChanged = mode !== this.layoutMode();
+    this.layoutMode.set(mode);
     this.cdRef.markForCheck();
 
-    console.log('layout mode changed to: ', this.layoutMode);
+    console.log('layout mode changed to: ', this.layoutMode());
 
     this.clearTimeout(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
@@ -1587,7 +1599,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Calculate if bottom actionbar is needed. On a timeout to get accurate heights
     if (this.bookContentElemRef == null) {
-      setTimeout(() => this.updateLayoutMode(this.layoutMode), 10);
+      setTimeout(() => this.updateLayoutMode(this.layoutMode()), 10);
       return;
     }
     setTimeout(() => {
@@ -1609,8 +1621,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateImmersiveMode(immersiveMode: boolean) {
-    this.immersiveMode = immersiveMode;
-    if (this.immersiveMode && !this.epubMenuService.isDrawerOpen()) {
+    this.immersiveMode.set(immersiveMode);
+    if (immersiveMode && !this.epubMenuService.isDrawerOpen()) {
       this.actionBarVisible = false;
       this.updateReadingSectionHeight();
     }
@@ -1623,8 +1635,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const elem = this.readingSectionElemRef;
     setTimeout(() => {
       if (renderer === undefined || elem === undefined) return;
-      if (this.immersiveMode) {
-      } else {
+      if (!this.immersiveMode()) {
         renderer.setStyle(elem.nativeElement, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
       }
     });
@@ -1733,7 +1744,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const targetElement = (event.target as Element);
     const mouseOffset = 5;
 
-    if (!this.immersiveMode) return;
+    if (!this.immersiveMode()) return;
     if (targetElement.getAttribute('onclick') !== null || targetElement.getAttribute('href') !== null || targetElement.getAttribute('role') !== null || targetElement.getAttribute('kavita-part') != null) {
       // Don't do anything, it's actionable
       return;

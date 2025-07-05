@@ -271,16 +271,7 @@ export class ReaderSettingsComponent implements OnInit {
   }
 
   createNewProfileFromImplicit() {
-    if (this.readingProfile.kind !== ReadingProfileKind.Implicit) {
-      return;
-    }
-
-    this.readerSettingsService.promoteProfile().subscribe(newProfile => {
-      this.readingProfile = newProfile;
-      this.parentReadingProfile = newProfile;
-      this.cdRef.markForCheck();
-      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
-    });
+    this.readerSettingsService.createNewProfileFromImplicit();
   }
 
 

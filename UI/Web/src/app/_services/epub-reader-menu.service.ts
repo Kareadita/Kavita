@@ -100,13 +100,13 @@ export class EpubReaderMenuService {
     ref.componentInstance.seriesId.set(seriesId);
     ref.componentInstance.readingProfile.set(readingProfile);
 
-    ref.componentInstance.updated.subscribe((res: ReaderSettingUpdate) => {
-      // Check if we are on mobile to collapse the menu
-      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
-        this.closeAll();
-      }
-      callbackFn(res);
-    });
+    // ref.componentInstance.updated.subscribe((res: ReaderSettingUpdate) => {
+    //   // Check if we are on mobile to collapse the menu
+    //   if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+    //     this.closeAll();
+    //   }
+    //   callbackFn(res);
+    // });
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

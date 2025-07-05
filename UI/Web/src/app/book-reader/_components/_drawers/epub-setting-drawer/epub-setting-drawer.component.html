@@ -13,14 +13,6 @@
       <app-reader-settings
         [seriesId]="sId"
         [readingProfile]="rp"
-        (colorThemeUpdate)="updateColorTheme($event)"
-        (styleUpdate)="updateReaderStyles($event)"
-        (clickToPaginateChanged)="showPaginationOverlay($event)"
-        (fullscreen)="toggleFullscreen()"
-        (bookReaderWritingStyle)="updateWritingStyle($event)"
-        (layoutModeUpdate)="updateLayoutMode($event)"
-        (readingDirection)="updateReadingDirection($event)"
-        (immersiveMode)="updateImmersiveMode($event)"
       ></app-reader-settings>
     }
   </div>
