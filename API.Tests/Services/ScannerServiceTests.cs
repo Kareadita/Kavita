@@ -980,7 +980,6 @@ public class ScannerServiceTests : AbstractDbTest
 
         var library = await _scannerHelper.GenerateScannerData(testcase);
 
-        // Disable metadata
         library.RemovePrefixForSortName = true;
         UnitOfWork.LibraryRepository.Update(library);
         await UnitOfWork.CommitAsync();
