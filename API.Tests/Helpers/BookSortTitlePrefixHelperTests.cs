@@ -5,7 +5,7 @@ namespace API.Tests.Helpers;
 
 public class BookSortTitlePrefixHelperTests
 {
-     [Theory]
+    [Theory]
     [InlineData("The Avengers", "Avengers")]
     [InlineData("A Game of Thrones", "Game of Thrones")]
     [InlineData("An American Tragedy", "American Tragedy")]
