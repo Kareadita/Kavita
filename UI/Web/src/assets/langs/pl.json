@@ -413,7 +413,7 @@
     },
     "relationship-pipe": {
         "adaptation": "Adaptacja",
-        "alternative-setting": "Alternatywne miejsce akcji",
+        "alternative-setting": "Alternatywne uniwersum",
         "alternative-version": "Alternatywna wersja",
         "character": "Postać",
         "contains": "Zawiera",
@@ -421,18 +421,18 @@
         "other": "Inne",
         "prequel": "Prequel",
         "sequel": "Sequel",
-        "side-story": "Opowieść poboczna",
-        "spin-off": "Spin Off",
-        "parent": "Rodzic",
-        "edition": "Edycja",
-        "annual": "Coroczny"
+        "side-story": "Historia poboczna",
+        "spin-off": "Spin-off",
+        "parent": "Główna historia",
+        "edition": "Wersja wydania",
+        "annual": "Wydanie roczne"
     },
     "publication-status-pipe": {
         "ongoing": "W trakcie",
-        "hiatus": "Hiatus",
-        "completed": "Zakończono",
+        "hiatus": "Wstrzymano",
+        "completed": "Zakończono (kompletne)",
         "cancelled": "Anulowano",
-        "ended": "Zakończono"
+        "ended": "Zakończono (niekompletne)"
     },
     "person-role-pipe": {
         "artist": "Artysta",
