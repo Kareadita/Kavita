@@ -19,7 +19,6 @@ import {
   EpubSettingDrawerComponent,
 } from "../book-reader/_components/_drawers/epub-setting-drawer/epub-setting-drawer.component";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
-import {ReaderSettingUpdate} from "./epub-reader-settings.service";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -91,7 +90,7 @@ export class EpubReaderMenuService {
   }
 
 
-  openSettingsDrawer(chapterId: number, seriesId: number, readingProfile: ReadingProfile, callbackFn: (evt: ReaderSettingUpdate) => void) {
+  openSettingsDrawer(chapterId: number, seriesId: number, readingProfile: ReadingProfile) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
@@ -100,13 +99,6 @@ export class EpubReaderMenuService {
     ref.componentInstance.seriesId.set(seriesId);
     ref.componentInstance.readingProfile.set(readingProfile);
 
-    // ref.componentInstance.updated.subscribe((res: ReaderSettingUpdate) => {
-    //   // Check if we are on mobile to collapse the menu
-    //   if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
-    //     this.closeAll();
-    //   }
-    //   callbackFn(res);
-    // });
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

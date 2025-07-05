@@ -865,7 +865,10 @@
         "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?",
 
         "go-to-section": "Go to section",
-        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?"
+        "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?",
+
+        "page-num-label": "Page {{page}}",
+        "completion-label": "{{percent}} complete"
     },
 
     "personal-table-of-contents": {

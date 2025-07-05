@@ -10,7 +10,7 @@
                                [volumeId]="volumeId"
                                [chapterId]="chapterId"
                                [seriesId]="seriesId"
-                               [pageNumber]="pageNum"
+                               [pageNumber]="pageNum()"
                                (isOpen)="updateLineOverlayOpen($event)"
                                (refreshToC)="refreshPersonalToC()">
         </app-book-line-overlay>
@@ -40,7 +40,7 @@
 
         @if (page !== undefined) {
           <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
-               [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
+               [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
                [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
                [innerHtml]="page" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
@@ -128,10 +128,17 @@
                 <span class="visually-hidden">{{t('loading-book')}}</span>
               </div>
             } @else {
-              @let timeLeft = readingTimeLeft();
 
-              20% complete,
+              <span class="me-1">
+                {{t('page-num-label', {page: pageNum()})}} / {{maxPages}}
+              </span>
+
+              <span> {{t('completion-label', {percent: (pageNum() / maxPages) | percent})}}</span>
+
+
+              @let timeLeft = readingTimeLeft();
               @if (timeLeft) {
+                ,
                 <span class="time-left" [ngbTooltip]="t('time-left-alt')">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
                   {{timeLeft | readTimeLeft }}

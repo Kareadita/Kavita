@@ -26,7 +26,9 @@
                     <label for="fontsize" class="form-label col-6">{{t('font-size-label')}}</label>
                     <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
-                            <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
+                            <input type="range" class="form-range ms-2 me-2" id="fontsize"
+                                   min="50" max="300" step="10" formControlName="bookReaderFontSize"
+                                   [ngbTooltip]="pageStyles()['font-size']">
                             <i class="fa-solid fa-font" style="font-size: 24px;"></i>
                         </span>
                   </div>
@@ -35,7 +37,9 @@
                     <label for="linespacing" class="form-label col-6">{{t('line-spacing-label')}}</label>
                     <span class="col-6 float-end" style="display: inline-flex;">
                       {{t('line-spacing-min-label')}}
-                      <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
+                      <input type="range" class="form-range ms-2 me-2" id="linespacing"
+                             min="100" max="200" step="10" formControlName="bookReaderLineSpacing"
+                             [ngbTooltip]="pageStyles()['line-height']">
                       {{t('line-spacing-max-label')}}
                         </span>
                   </div>
