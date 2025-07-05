@@ -789,7 +789,7 @@
     },
     "side-nav": {
         "home": "Domov",
-        "want-to-read": "Chcem čítať",
+        "want-to-read": "Obľúbené",
         "collections": "Zbierky",
         "reading-lists": "Čítacie Zoznamy",
         "bookmarks": "Záložky",
@@ -2076,7 +2076,7 @@
         "series-added-to-collection": "Séria bola pridaná do zbierky {{collectionName}}",
         "no-series-collection-warning": "POZOR! Nie sú vybraté žiadne série, uložením sa zbierka odstráni. Ste si istý, že chcete pokračovať?",
         "collection-updated": "Zbierka bola aktualizovaná",
-        "reading-list-deleted": "Zoznam na čítanie bol odstránený",
+        "reading-list-deleted": "Zoznam na čítanie bo zmazaný",
         "reading-list-updated": "Zoznam na čítanie bol aktualizovaný",
         "confirm-delete-reading-list": "Naozaj chcete vymazať zoznam na čítanie? Toto nie je možné vrátiť späť.",
         "item-removed": "Položka bola odstránená",
