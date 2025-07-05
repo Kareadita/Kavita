@@ -5,6 +5,7 @@ using API.Data;
 using API.Entities.MetadataMatching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250629153840_LibraryRemoveSortPrefix")]
+    partial class LibraryRemoveSortPrefix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
@@ -152,69 +155,6 @@ namespace API.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserAnnotation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ChapterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("ContainsSpoiler")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EndingXPath")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("HighlightColor")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HighlightCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastModifiedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PageNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SelectedText")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VolumeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("XPath")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("ChapterId");
-
-                    b.ToTable("AppUserAnnotation");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserBookmark", b =>
@@ -906,9 +846,6 @@ namespace API.Data.Migrations
 
                     b.Property<int>("PageNumber")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("SelectedText")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
@@ -2889,25 +2826,6 @@ namespace API.Data.Migrations
                     b.ToTable("SeriesMetadataTag");
                 });
 
-            modelBuilder.Entity("API.Entities.AppUserAnnotation", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("Annotations")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Chapter", "Chapter")
-                        .WithMany()
-                        .HasForeignKey("ChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("Chapter");
-                });
-
             modelBuilder.Entity("API.Entities.AppUserBookmark", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -3694,8 +3612,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
-                    b.Navigation("Annotations");
-
                     b.Navigation("Bookmarks");
 
                     b.Navigation("ChapterRatings");

@@ -52,6 +52,10 @@ public class Library : IEntityDate, IHasCoverImage
     /// Should Kavita read metadata files from the library
     /// </summary>
     public bool EnableMetadata { get; set; } = true;
+    /// <summary>
+    /// Should Kavita remove sort articles "The" for the sort name
+    /// </summary>
+    public bool RemovePrefixForSortName { get; set; } = false;
 
 
     public DateTime Created { get; set; }

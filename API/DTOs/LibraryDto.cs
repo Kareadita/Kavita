@@ -70,4 +70,8 @@ public sealed record LibraryDto
     /// Allow Kavita to read metadata (ComicInfo.xml, Epub, PDF)
     /// </summary>
     public bool EnableMetadata { get; set; } = true;
+    /// <summary>
+    /// Should Kavita remove sort articles "The" for the sort name
+    /// </summary>
+    public bool RemovePrefixForSortName { get; set; } = false;
 }

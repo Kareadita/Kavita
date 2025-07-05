@@ -972,4 +972,27 @@ public class ScannerServiceTests : AbstractDbTest
         Assert.Contains(postLib.Series, x => x.Name == "Immoral Guild");
         Assert.Contains(postLib.Series, x => x.Name == "Futoku No Guild");
     }
+
+    [Fact]
+    public async Task ScanLibrary_SortName_NoPrefix()
+    {
+        const string testcase = "Series with Prefix - Book.json";
+
+        var library = await _scannerHelper.GenerateScannerData(testcase);
+
+        library.RemovePrefixForSortName = true;
+        UnitOfWork.LibraryRepository.Update(library);
+        await UnitOfWork.CommitAsync();
+
+        var scanner = _scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await UnitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        Assert.NotNull(postLib);
+        Assert.Equal(1, postLib.Series.Count);
+
+        Assert.Equal("The Avengers", postLib.Series.First().Name);
+        Assert.Equal("Avengers", postLib.Series.First().SortName);
+    }
 }
