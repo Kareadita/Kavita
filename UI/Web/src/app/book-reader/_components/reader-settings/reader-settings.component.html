@@ -71,18 +71,18 @@
               <ng-template>
                 <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                   <label id="readingdirection" class="form-label">{{t('reading-direction-label')}}</label>
-                  <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}">
-                    <i class="fa {{readingDirectionModel === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
-                    <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}</span>
+                  <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel() === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}">
+                    <i class="fa {{readingDirectionModel() === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
+                    <span class="phone-hidden">&nbsp;{{readingDirectionModel() === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}</span>
                   </button>
                 </div>
                 <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
                   <label for="writing-style" class="form-label">{{t('writing-style-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
                   <ng-template #writingStyleTooltip>{{t('writing-style-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip"></ng-container></span>
-                  <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel === WritingStyle.Horizontal ? t('horizontal') : t('vertical')}}">
-                    <i class="fa {{writingStyleModel === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
-                    <span class="phone-hidden"> {{writingStyleModel === WritingStyle.Horizontal ? t('horizontal') : t('vertical') }}</span>
+                  <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel() === WritingStyle.Horizontal ? t('horizontal') : t('vertical')}}">
+                    <i class="fa {{writingStyleModel() === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
+                    <span class="phone-hidden"> {{writingStyleModel() === WritingStyle.Horizontal ? t('horizontal') : t('vertical') }}</span>
                   </button>
 
                 </div>
@@ -117,9 +117,9 @@
                     <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
                 </span>
                   <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
-                    <i class="fa {{isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
-                    @if (activeTheme?.isDarkTheme) {
-                      <span class="ms-1">{{isFullscreen ? t('exit') : t('enter')}}</span>
+                    <i class="fa {{isFullscreen() ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen() ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
+                    @if (activeTheme()?.isDarkTheme) {
+                      <span class="ms-1">{{isFullscreen() ? t('exit') : t('enter')}}</span>
                     }
                   </button>
                 </div>
@@ -160,7 +160,7 @@
               <ng-template>
                 <div class="controls">
                   @for(theme of themes; track theme.name) {
-                    <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
+                    <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme()?.name === theme.name}">
                       <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
                       {{t(theme.translationKey)}}
                     </button>
@@ -171,15 +171,16 @@
           </div>
         </div>
 
+        @let currentRP = currentReadingProfile();
         <div class="row g-0 mt-2">
           <button class="btn btn-primary col-12 mb-2"
-                  [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
+                  [disabled]="!currentRP || currentRP.kind !== ReadingProfileKind.Implicit || !hasParentProfile()"
                   (click)="updateParentPref()">
-            {{ t('update-parent', {name: parentReadingProfile?.name || t('loading')}) }}
+            {{ t('update-parent', {name: parentReadingProfile()?.name || t('loading')}) }}
           </button>
           <button class="btn btn-primary col-12 mb-2"
                   [ngbTooltip]="t('create-new-tooltip')"
-                  [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit"
+                  [disabled]="!canPromoteProfile()"
                   (click)="createNewProfileFromImplicit()">
             {{ t('create-new') }}
           </button>

@@ -1,15 +1,5 @@
 import {NgClass, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
@@ -21,7 +11,6 @@ import {BookBlackTheme} from '../../_models/book-black-theme';
 import {BookDarkTheme} from '../../_models/book-dark-theme';
 import {BookWhiteTheme} from '../../_models/book-white-theme';
 import {BookPaperTheme} from '../../_models/book-paper-theme';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -31,12 +20,10 @@ import {
   NgbAccordionItem,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
-import {ToastrService} from "ngx-toastr";
 import {EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
-import {tap} from "rxjs/operators";
 
 /**
  * Used for book reader. Do not use for other components
@@ -107,138 +94,44 @@ export class ReaderSettingsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readingProfileService = inject(ReadingProfileService);
-  private readonly toastr = inject(ToastrService);
 
   @Input({required:true}) seriesId!: number;
   @Input({required:true}) readingProfile!: ReadingProfile;
-  /**
-   * Outputs when clickToPaginate is changed
-   */
-  @Output() clickToPaginateChanged: EventEmitter<boolean> = new EventEmitter();
-  /**
-   * Outputs when a style is updated and the reader needs to render it
-   */
-  @Output() styleUpdate: EventEmitter<PageStyle> = new EventEmitter();
-  /**
-   * Outputs when a theme/dark mode is updated
-   */
-  @Output() colorThemeUpdate: EventEmitter<BookTheme> = new EventEmitter();
-  /**
-   * Outputs when a layout mode is updated
-   */
-  @Output() layoutModeUpdate: EventEmitter<BookPageLayoutMode> = new EventEmitter();
-  /**
-   * Outputs when fullscreen is toggled
-   */
-  @Output() fullscreen: EventEmitter<void> = new EventEmitter();
-  /**
-   * Outputs when reading direction is changed
-   */
-  @Output() readingDirection: EventEmitter<ReadingDirection> = new EventEmitter();
-  /**
-   * Outputs when reading mode is changed
-   */
-  @Output() bookReaderWritingStyle: EventEmitter<WritingStyle> = new EventEmitter();
-  /**
-   * Outputs when immersive mode is changed
-   */
-  @Output() immersiveMode: EventEmitter<boolean> = new EventEmitter();
 
   /**
    * List of all font families user can select from
    */
   fontOptions: Array<string> = [];
   fontFamilies: Array<FontFamily> = [];
-  /**
-   * Internal property used to capture all the different css properties to render on all elements
-   */
-  pageStyles: PageStyle = this.readerSettingsService.getDefaultPageStyles();
-
-  readingDirectionModel: ReadingDirection = ReadingDirection.LeftToRight;
-
-  writingStyleModel: WritingStyle = WritingStyle.Horizontal;
-
-
-  activeTheme: BookTheme | undefined;
-
-  isFullscreen: boolean = false;
-
   settingsForm: FormGroup = new FormGroup({});
-
-  /**
-   * The reading profile itself, unless readingProfile is implicit
-   */
-  parentReadingProfile: ReadingProfile | null = null;
-
   /**
    * System provided themes
    */
-  themes: Array<BookTheme> = bookColorThemes;
+  themes: Array<BookTheme> = this.readerSettingsService.getThemes();
 
+  protected readonly pageStyles = this.readerSettingsService.pageStyles;
+  protected readonly readingDirectionModel = this.readerSettingsService.readingDirection;
+  protected readonly writingStyleModel = this.readerSettingsService.writingStyle;
+  protected readonly activeTheme = this.readerSettingsService.activeTheme;
+  protected readonly layoutMode = this.readerSettingsService.layoutMode;
+  protected readonly immersiveMode = this.readerSettingsService.immersiveMode;
+  protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
+  protected readonly isFullscreen = this.readerSettingsService.isFullscreen;
+  protected readonly canPromoteProfile = this.readerSettingsService.canPromoteProfile;
+  protected readonly hasParentProfile = this.readerSettingsService.hasParentProfile;
+  protected readonly parentReadingProfile = this.readerSettingsService.parentReadingProfile;
+  protected readonly currentReadingProfile = this.readerSettingsService.currentReadingProfile;
 
 
   async ngOnInit() {
-
     // Initialize the service if not already done
     if (!this.readerSettingsService.getCurrentReadingProfile()) {
       await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
     }
 
-    this.readerSettingsService.readingProfile$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      tap((profile) => {
-        if (profile) {
-          this.readingProfile = profile;
-          this.cdRef.markForCheck();
-        }
-      })
-    ).subscribe();
-
     this.settingsForm = this.readerSettingsService.getSettingsForm();
     this.fontFamilies = this.readerSettingsService.getFontFamilies();
     this.fontOptions = this.fontFamilies.map(f => f.title);
-    this.themes = this.readerSettingsService.getThemes();
-
-
-    // Subscribe to service state
-    this.readerSettingsService.pageStyles$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(styles => {
-      this.pageStyles = styles;
-      this.cdRef.markForCheck();
-    });
-
-    this.readerSettingsService.readingDirection$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(direction => {
-      this.readingDirectionModel = direction;
-      this.cdRef.markForCheck();
-    });
-
-    this.readerSettingsService.writingStyle$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(style => {
-      this.writingStyleModel = style;
-      this.cdRef.markForCheck();
-    });
-
-    this.readerSettingsService.activeTheme$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(theme => {
-      this.activeTheme = theme;
-      this.cdRef.markForCheck();
-    });
-
-    // Handle parent reading profile
-    if (this.readingProfile.kind === ReadingProfileKind.Implicit) {
-      this.readingProfileService.getForSeries(this.seriesId, true).subscribe(parent => {
-        this.parentReadingProfile = parent;
-        this.cdRef.markForCheck();
-      });
-    } else {
-      this.parentReadingProfile = this.readingProfile;
-    }
-
     this.cdRef.markForCheck();
   }
 
@@ -259,7 +152,6 @@ export class ReaderSettingsComponent implements OnInit {
   }
 
   toggleFullscreen() {
-    this.isFullscreen = !this.isFullscreen;
     this.readerSettingsService.toggleFullscreen();
     this.cdRef.markForCheck();
   }
@@ -267,7 +159,6 @@ export class ReaderSettingsComponent implements OnInit {
   // menu only code
   updateParentPref() {
     this.readerSettingsService.updateParentProfile();
-    this.toastr.success(translate('manga-reader.reading-profile-updated'));
   }
 
   createNewProfileFromImplicit() {
