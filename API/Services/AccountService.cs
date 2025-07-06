@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Account;
 using API.Entities;
+using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Helpers.Builders;
+using API.SignalR;
+using AutoMapper;
 using Kavita.Common;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -41,6 +42,8 @@ public interface IAccountService
     /// <remarks>Ensure that the users SideNavStreams are loaded</remarks>
     Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
     Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
+    void AddDefaultStreamsToUser(AppUser user);
+    Task AddDefaultReadingProfileToUser(AppUser user);
 }
 
 public class AccountService : IAccountService
@@ -48,13 +51,16 @@ public class AccountService : IAccountService
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<AccountService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
     public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
 
-    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork)
+    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork,
+        IMapper mapper)
     {
         _userManager = userManager;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
     }
 
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
@@ -158,11 +164,11 @@ public class AccountService : IAccountService
 
     public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole)
     {
-        var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
         List<Library> libraries;
         if (hasAdminRole)
         {
-            _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+            _logger.LogInformation("{UserName} is admin. Granting access to all libraries",
                 user.UserName);
             libraries = allLibraries;
         }
@@ -176,7 +182,7 @@ public class AccountService : IAccountService
                 user.RemoveSideNavFromLibrary(lib);
             }
 
-            libraries = (await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(librariesIds, LibraryIncludes.AppUser)).ToList();
+            libraries = allLibraries.Where(lib => librariesIds.Contains(lib.Id)).ToList();
         }
 
         foreach (var lib in libraries)
@@ -206,5 +212,28 @@ public class AccountService : IAccountService
         }
 
         return [];
+    }
+
+    public void AddDefaultStreamsToUser(AppUser user)
+    {
+        foreach (var newStream in Seed.DefaultStreams.Select(_mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
+        {
+            user.DashboardStreams.Add(newStream);
+        }
+
+        foreach (var stream in Seed.DefaultSideNavStreams.Select(_mapper.Map<AppUserSideNavStream, AppUserSideNavStream>))
+        {
+            user.SideNavStreams.Add(stream);
+        }
+    }
+
+    public async Task AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
+            .Build();
+        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await _unitOfWork.CommitAsync();
     }
 }

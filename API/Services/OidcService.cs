@@ -12,7 +12,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
-using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -43,7 +42,7 @@ public interface IOidcService
 }
 
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
-    IUnitOfWork unitOfWork, IMapper mapper, IAccountService accountService): IOidcService
+    IUnitOfWork unitOfWork, IAccountService accountService): IOidcService
 {
     private const string LibraryAccessPrefix = "library-";
     private const string AgeRatingPrefix = "age-rating-";
@@ -71,7 +70,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user != null)
         {
-            logger.LogInformation("User {Name} has matched on email to {ExternalId}", user.UserName, externalId);
+            logger.LogInformation("User {UserName} has matched on email to {ExternalId}", user.Id, externalId);
             user.ExternalId = externalId;
             await unitOfWork.CommitAsync();
             return user;
@@ -85,7 +84,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (user == null) return null;
 
         var roles = await userManager.GetRolesAsync(user);
-        if (roles.Count > 0 && !roles.Contains(PolicyConstants.LoginRole))
+        if (roles.Count == 0 || !roles.Contains(PolicyConstants.LoginRole))
             throw new KavitaException("errors.oidc.disabled-account");
 
         return user;
@@ -102,6 +101,30 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
+    private async Task<string?> FindBestAvailableName(ClaimsPrincipal claimsPrincipal)
+    {
+        var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
+        if (await IsNameAvailable(name)) return name;
+
+        name = claimsPrincipal.FindFirstValue(ClaimTypes.Name);
+        if (await IsNameAvailable(name)) return name;
+
+        name = claimsPrincipal.FindFirstValue(ClaimTypes.GivenName);
+        if (await IsNameAvailable(name)) return name;
+
+        name = claimsPrincipal.FindFirstValue(ClaimTypes.Surname);
+        if (await IsNameAvailable(name)) return name;
+
+        return null;
+    }
+
+    private async Task<bool> IsNameAvailable(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return false;
+
+        return await userManager.FindByNameAsync(name) == null;
+    }
+
     private async Task<AppUser?> NewUserFromOpenIdConnect(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, string externalId)
     {
         if (!settings.ProvisionAccounts) return null;
@@ -109,20 +132,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
         if (emailClaim == null || string.IsNullOrWhiteSpace(emailClaim.Value)) return null;
 
-        // TODO?: Try one by one, for more chance of a nicer username
-        var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
-        name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Name);
-        name ??= claimsPrincipal.FindFirstValue(ClaimTypes.GivenName);
-        name ??= claimsPrincipal.FindFirstValue(ClaimTypes.Surname);
-        name ??= emailClaim.Value;
-
-        var other = await userManager.FindByNameAsync(name);
-        if (other != null)
-        {
-            // We match by email, so this will always be unique
-            name = emailClaim.Value;
-        }
-
+        var name = await FindBestAvailableName(claimsPrincipal) ?? emailClaim.Value;
         logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name, externalId);
 
         // TODO: Move to account service, as we're sharing code with AccountController
@@ -147,8 +157,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user.ExternalId = externalId;
         user.Owner = AppUserOwner.OpenIdConnect;
 
-        AddDefaultStreamsToUser(user, mapper);
-        await AddDefaultReadingProfileToUser(user);
+        accountService.AddDefaultStreamsToUser(user);
+        await accountService.AddDefaultReadingProfileToUser(user);
 
         await SyncUserSettings(settings, claimsPrincipal, user);
         await SetDefaults(settings, user);
@@ -160,6 +170,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private async Task SetDefaults(OidcConfigDto settings, AppUser user)
     {
         if (settings.SyncUserSettings) return;
+
+        logger.LogDebug("Assigning defaults to newly created user; Roles: {Roles}, Libraries: {Libraries}, AgeRating: {AgeRating}, IncludeUnknowns: {IncludeUnknowns}",
+            settings.DefaultRoles, settings.DefaultLibraries, settings.DefaultAgeRating, settings.DefaultIncludeUnknowns);
 
         // Assign roles
         var errors = await accountService.UpdateRolesForUser(user, settings.DefaultRoles);
@@ -179,13 +192,14 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (!settings.SyncUserSettings) return;
 
+        // Never sync the default user
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
         if (defaultAdminUser.Id == user.Id) return;
 
-        logger.LogDebug("Syncing user {UserId} from OIDC", user.Id);
+        logger.LogInformation("Syncing user {UserName} from OIDC", user.UserName);
         await SyncRoles(claimsPrincipal, user);
         await SyncLibraries(claimsPrincipal, user);
-        SyncAgeRestriction(claimsPrincipal, user);
+        await SyncAgeRestriction(claimsPrincipal, user);
 
 
         if (unitOfWork.HasChanges())
@@ -195,39 +209,45 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private async Task SyncRoles(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         var roles = claimsPrincipal.GetAccessRoles();
-        logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
+        logger.LogDebug("Syncing access roles for user {UserName}, found roles {Roles}", user.UserName, roles);
+
         var errors = await accountService.UpdateRolesForUser(user, roles);
         if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
     }
 
     private async Task SyncLibraries(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
-
         var libraryAccess = claimsPrincipal
             .FindAll(ClaimTypes.Role)
             .Where(r => r.Value.StartsWith(LibraryAccessPrefix))
             .Select(r => r.Value.TrimPrefix(LibraryAccessPrefix))
             .ToList();
-        logger.LogDebug("Syncing libraries for user {UserId}, found library roles {Roles}", user.Id, libraryAccess);
-        if (libraryAccess.Count == 0 && !hasAdminRole) return;
+
+        logger.LogDebug("Syncing libraries for user {UserName}, found library roles {Roles}", user.UserName, libraryAccess);
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).ToList();
 
+        var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
     }
 
-    private void SyncAgeRestriction(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private async Task SyncAgeRestriction(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
+        if (await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+        {
+            logger.LogInformation("User {UserName} is admin, granting access to all age ratings", user.UserName);
+            user.AgeRestriction = AgeRating.NotApplicable;
+            user.AgeRestrictionIncludeUnknowns = true;
+            return;
+        }
 
         var ageRatings = claimsPrincipal
             .FindAll(ClaimTypes.Role)
             .Where(r => r.Value.StartsWith(AgeRatingPrefix))
             .Select(r => r.Value.TrimPrefix(AgeRatingPrefix))
             .ToList();
-        logger.LogDebug("Syncing age restriction for user {UserId}, found restrictions {Restrictions}", user.Id, ageRatings);
-        if (ageRatings.Count == 0) return;
+        logger.LogDebug("Syncing age restriction for user {UserName}, found restrictions {Restrictions}", user.UserName, ageRatings);
 
         var highestAgeRating = AgeRating.Unknown;
 
@@ -243,29 +263,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         user.AgeRestriction = highestAgeRating;
         user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
+
+        logger.LogDebug("Synced age restriction for user {UserName}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
+            user.UserName, ageRatings, user.AgeRestrictionIncludeUnknowns);
     }
 
-    // DUPLICATED CODE
-    private static void AddDefaultStreamsToUser(AppUser user, IMapper mapper)
-    {
-        foreach (var newStream in Seed.DefaultStreams.Select(mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
-        {
-            user.DashboardStreams.Add(newStream);
-        }
-
-        foreach (var stream in Seed.DefaultSideNavStreams.Select(mapper.Map<AppUserSideNavStream, AppUserSideNavStream>))
-        {
-            user.SideNavStreams.Add(stream);
-        }
-    }
-
-    private async Task AddDefaultReadingProfileToUser(AppUser user)
-    {
-        var profile = new AppUserReadingProfileBuilder(user.Id)
-            .WithName("Default Profile")
-            .WithKind(ReadingProfileKind.Default)
-            .Build();
-        unitOfWork.AppUserReadingProfileRepository.Add(profile);
-        await unitOfWork.CommitAsync();
-    }
 }

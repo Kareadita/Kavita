@@ -13,6 +13,10 @@ public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWo
     IMapper mapper, ISettingsService settingsService): BaseApiController
 {
 
+    /// <summary>
+    /// Retrieve publicly required configuration regarding Oidc
+    /// </summary>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("config")]
     public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
@@ -21,6 +25,11 @@ public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWo
         return Ok(mapper.Map<OidcPublicConfigDto>(settings.OidcConfig));
     }
 
+    /// <summary>
+    /// Validate if the given authority is reachable from the server
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpPost("is-valid-authority")]
     public async Task<ActionResult<bool>> IsValidAuthority([FromBody] IsValidAuthorityBody authority)

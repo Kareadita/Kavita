@@ -146,14 +146,10 @@ public static class IdentityServiceExtensions
         });
 
 
-        services.AddAuthorization(opt =>
-        {
-            opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole));
-            opt.AddPolicy("RequireDownloadRole",
-                policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole));
-            opt.AddPolicy("RequireChangePasswordRole",
-                policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
-        });
+        services.AddAuthorizationBuilder()
+            .AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole))
+            .AddPolicy("RequireDownloadRole", policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
+            .AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
 
         return services;
     }
@@ -163,7 +159,6 @@ public static class IdentityServiceExtensions
         if (ctx.Principal == null) return;
 
         var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-        var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
         var user = await oidcService.LoginOrCreate(ctx.Principal);
         if (user == null)
         {
@@ -180,6 +175,7 @@ public static class IdentityServiceExtensions
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
         };
 
+        var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (user.Owner != AppUserOwner.OpenIdConnect || !settings.OidcConfig.SyncUserSettings)
         {

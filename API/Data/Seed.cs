@@ -254,7 +254,7 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
-            new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority },
+            new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority},
             new() { Key = ServerSettingKey.OidcClientId, Value = Configuration.OidcClientId},
             new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 

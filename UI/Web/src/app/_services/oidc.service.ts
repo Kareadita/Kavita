@@ -10,6 +10,7 @@ import {take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {translate} from "@jsverse/transloco";
 import {APP_BASE_HREF} from "@angular/common";
+import {MessageHubService} from "./message-hub.service";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class OidcService {
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastR = inject(ToastrService);
+  private readonly messageHub = inject(MessageHubService);
 
   protected readonly baseUrl = inject(APP_BASE_HREF);
   apiBaseUrl = environment.apiUrl;
@@ -33,7 +35,7 @@ export class OidcService {
   public readonly loaded$ = toObservable(this.loaded);
 
   /**
-   * OIDC discovery document has been loaded, and login tried and OIDC has been set up
+   * OIDC discovery document has been loaded, login tried and OIDC has been set up
    */
   private readonly _ready = signal(false);
   public readonly ready = this._ready.asReadonly();
@@ -62,12 +64,15 @@ export class OidcService {
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (!user) return; // Don't update tokens when we're not logged in. But what's going on?
 
-        // TODO: Do we need to refresh the SignalR connection here?
         user.oidcToken = this.token;
+        this.messageHub.stopHubConnection();
+        this.messageHub.createHubConnection(user);
       });
     });
 
-    this.config().subscribe(oidcSetting => {
+    this.getPublicOidcConfig().subscribe(oidcSetting => {
+      this._settings.set(oidcSetting);
+
       if (!oidcSetting.authority) {
         this._loaded.set(true);
         return
@@ -86,7 +91,6 @@ export class OidcService {
         // Not all OIDC providers follow this nicely
         strictDiscoveryDocumentValidation: false,
       });
-      this._settings.set(oidcSetting);
       this.oauth2.setupAutomaticSilentRefresh();
 
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
@@ -113,7 +117,7 @@ export class OidcService {
     }
   }
 
-  config() {
+  getPublicOidcConfig() {
     return this.httpClient.get<OidcPublicConfig>(this.apiBaseUrl + "oidc/config");
   }
 

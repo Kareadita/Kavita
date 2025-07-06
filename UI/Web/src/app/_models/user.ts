@@ -6,7 +6,7 @@ export interface User {
   username: string;
   // This is set by the oidc service, will always take precedence over the Kavita generated token
   // When set, the refresh logic for the Kavita token will not run
-  oidcToken: string;
+  oidcToken?: string;
   token: string;
   refreshToken: string;
   roles: string[];

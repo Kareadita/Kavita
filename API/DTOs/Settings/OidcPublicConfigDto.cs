@@ -10,7 +10,7 @@ public record OidcPublicConfigDto
     /// <inheritdoc cref="ServerSettingKey.OidcClientId"/>
     public string? ClientId { get; set; }
     /// <summary>
-    /// Optional OpenID Connect ClientSecret, required if authority is set
+    /// Automatically redirect to the Oidc login screen
     /// </summary>
     public bool AutoLogin { get; set; }
     /// <summary>

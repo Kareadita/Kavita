@@ -92,10 +92,6 @@ export class AccountService {
     });
   }
 
-  oidcEnabled() {
-    return this.httpClient.get<boolean>(this.baseUrl + "oidc/enabled");
-  }
-
   canInvokeAction(user: User, action: Action) {
     const isAdmin = this.hasAdminRole(user);
     const canDownload = this.hasDownloadRole(user);

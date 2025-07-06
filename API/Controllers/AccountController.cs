@@ -77,14 +77,24 @@ public class AccountController : BaseApiController
         _oidcService = oidcService;
     }
 
+    /// <summary>
+    /// Returns the current user, as it would from login
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <remarks>Also throws UnauthorizedAccessException if the users is missing the Login role</remarks>
+    /// <remarks>Syncs Oidc settings if enabled, and user is Oidc owned</remarks>
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user == null) throw new UnauthorizedAccessException();
 
-        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-        await _oidcService.SyncUserSettings(oidcSettings, User, user);
+        if (user.Owner == AppUserOwner.OpenIdConnect)
+        {
+            var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+            await _oidcService.SyncUserSettings(oidcSettings, User, user);
+        }
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
@@ -169,10 +179,10 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            AddDefaultStreamsToUser(user);
+            _accountService.AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            await AddDefaultReadingProfileToUser(user);
+            await _accountService.AddDefaultReadingProfileToUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -243,7 +253,7 @@ public class AccountController : BaseApiController
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
         var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-        // Setting only takes effect if OIDC is funcitonal, and if we're not logging in via ApiKey
+        // Setting only takes effect if OIDC is functional, and if we're not logging in via ApiKey
         var disablePasswordAuthentication = oidcConfig is {Enabled: true, DisablePasswordAuthentication: true} && string.IsNullOrEmpty(loginDto.ApiKey);
         if (disablePasswordAuthentication && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "password-authentication-disabled"));
 
@@ -545,19 +555,24 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
 
-        // Disallowed editing users synced via OIDC
+        // Disallowed editing users owned by OIDC
         var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-        if (user.Owner == AppUserOwner.OpenIdConnect &&
-            dto.Owner != AppUserOwner.Native &&
-            oidcSettings.SyncUserSettings)
+        if (user.Owner == AppUserOwner.OpenIdConnect && dto.Owner != AppUserOwner.Native && oidcSettings.SyncUserSettings)
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "oidc-managed"));
         }
 
         var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (user.Id != defaultAdminUser.Id)
+        if (user.Id == defaultAdminUser.Id && dto.Owner != AppUserOwner.Native)
         {
-            user.Owner = dto.Owner;
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "cannot-change-ownership-original-user"));
+        }
+
+        if (user.Owner == AppUserOwner.OpenIdConnect)
+        {
+            // Do not change any other fields when the user is owned by OIDC
+            await _unitOfWork.CommitAsync();
+            return Ok();
         }
 
         // Check if username is changing
@@ -713,10 +728,10 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            AddDefaultStreamsToUser(user);
+            _accountService.AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            await AddDefaultReadingProfileToUser(user);
+            await _accountService.AddDefaultReadingProfileToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -813,29 +828,6 @@ public class AccountController : BaseApiController
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
-    }
-
-    private void AddDefaultStreamsToUser(AppUser user)
-    {
-        foreach (var newStream in Seed.DefaultStreams.Select(stream => _mapper.Map<AppUserDashboardStream, AppUserDashboardStream>(stream)))
-        {
-            user.DashboardStreams.Add(newStream);
-        }
-
-        foreach (var stream in Seed.DefaultSideNavStreams.Select(stream => _mapper.Map<AppUserSideNavStream, AppUserSideNavStream>(stream)))
-        {
-            user.SideNavStreams.Add(stream);
-        }
-    }
-
-    private async Task AddDefaultReadingProfileToUser(AppUser user)
-    {
-        var profile = new AppUserReadingProfileBuilder(user.Id)
-            .WithName("Default Profile")
-            .WithKind(ReadingProfileKind.Default)
-            .Build();
-        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
-        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>

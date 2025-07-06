@@ -3,10 +3,9 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef, effect,
+  DestroyRef,
   inject,
-  input,
-  Input, model,
+  model,
   OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -27,8 +26,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerSettings} from "../_models/server-settings";
 import {UserOwner, UserOwners} from "../../_models/user";
 import {UserOwnerPipe} from "../../_pipes/user-owner.pipe";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {OwnerIconComponent} from "../../shared/_components/owner-icon/owner-icon.component";
 
 const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,7 +34,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, UserOwnerPipe, SettingItemComponent, OwnerIconComponent],
+  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, UserOwnerPipe],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -80,8 +77,6 @@ export class EditUserComponent implements OnInit {
     this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
     this.userForm.addControl('owner', new FormControl(this.member().owner, [Validators.required]));
 
-    // TODO: Rework, bad hack
-    // Work around isLocked so we're able to downgrade users
     this.userForm.get('owner')!.valueChanges.pipe(
       tap(value => {
         const newOwner = parseInt(value, 10) as UserOwner;

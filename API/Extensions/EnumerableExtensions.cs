@@ -6,6 +6,7 @@ using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Extensions;
 #nullable enable
@@ -67,5 +68,10 @@ public static class EnumerableExtensions
         }
 
         return q;
+    }
+
+    public static string AsJoinedString(this IEnumerable<IdentityError> errors)
+    {
+        return string.Join(",", errors.Select(e => e.Description));
     }
 }

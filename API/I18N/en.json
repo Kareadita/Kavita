@@ -19,6 +19,7 @@
     "age-restriction-update": "There was an error updating the age restriction",
     "no-user": "User does not exist",
     "oidc-managed": "This user is managed by OIDC, cannot edit",
+    "cannot-change-ownership-original-user": "Ownership of the original admin account cannot be changed",
     "username-taken": "Username already taken",
     "email-taken": "Email already in use",
     "user-already-confirmed": "User is already confirmed",

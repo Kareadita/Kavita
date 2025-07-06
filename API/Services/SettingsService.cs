@@ -16,7 +16,6 @@ using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -367,10 +366,9 @@ public class SettingsService : ISettingsService
         var url = authority + "/.well-known/openid-configuration";
         try
         {
-            //await url.GetJsonAsync<OpenIdConnectConfiguration>();
-            //return true;
-            var res = await url.GetAsync();
-            return res.StatusCode == 200;
+            var json = await url.GetStringAsync();
+            var config = OpenIdConnectConfiguration.Create(json);
+            return config.Issuer == Configuration.OidcAuthority;
         }
         catch (Exception e)
         {
@@ -420,9 +418,11 @@ public class SettingsService : ISettingsService
             {
                 throw new KavitaException("oidc-invalid-authority");
             }
+
             setting.Value = updateSettingsDto.OidcConfig.Authority;
             Configuration.OidcAuthority = updateSettingsDto.OidcConfig.Authority;
             _unitOfWork.SettingsRepository.Update(setting);
+
             _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
             await _oidcService.ClearOidcIds();
             return;
@@ -441,7 +441,7 @@ public class SettingsService : ISettingsService
         var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
         if (setting.Value == newValue) return;
 
-        setting.Value = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
+        setting.Value = newValue;
         _unitOfWork.SettingsRepository.Update(setting);
     }
 
