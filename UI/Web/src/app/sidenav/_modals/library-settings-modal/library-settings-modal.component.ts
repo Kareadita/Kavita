@@ -115,6 +115,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
+    removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
   });
 
   selectedFolders: string[] = [];
@@ -273,7 +274,8 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
       this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
-      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata, true);
+      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
+      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.selectedFolders = this.library.folders;
 
       this.madeChanges = false;

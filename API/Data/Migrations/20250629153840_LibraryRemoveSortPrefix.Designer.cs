@@ -5,6 +5,7 @@ using API.Data;
 using API.Entities.MetadataMatching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250629153840_LibraryRemoveSortPrefix")]
+    partial class LibraryRemoveSortPrefix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
@@ -87,9 +90,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ExternalId")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("HasRunScrobbleEventGeneration")
                         .HasColumnType("INTEGER");
 
@@ -118,9 +118,6 @@ namespace API.Data.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Owner")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
@@ -3643,8 +3640,7 @@ namespace API.Data.Migrations
 
                     b.Navigation("TableOfContents");
 
-                    b.Navigation("UserPreferences")
-                        .IsRequired();
+                    b.Navigation("UserPreferences");
 
                     b.Navigation("UserRoles");
 

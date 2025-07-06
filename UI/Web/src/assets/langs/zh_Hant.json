@@ -14,7 +14,7 @@
         "on-deck-title": "繼續閱讀",
         "recently-updated-title": "最近更新系列",
         "recently-added-title": "最近新增系列",
-        "more-in-genre-title": "{{genre}} 更多的內容分類"
+        "more-in-genre-title": "更多{{genre}}作品"
     },
     "edit-user": {
         "edit": "{{common.edit}}",

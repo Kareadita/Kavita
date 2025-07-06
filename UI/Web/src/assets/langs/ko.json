@@ -50,7 +50,9 @@
         "special": "{{entity-title.special}}",
         "scrobbling-disabled": "계정 설정에서 스크로블링이 비활성화되어 있습니다.",
         "generate-scrobble-events": "채우기 이벤트",
-        "token-expired": "AniList 토큰이 만료되었습니다! 계정 페이지에서 갱신하기 전까지는 Scrobbling 이벤트가 처리되지 않습니다."
+        "token-expired": "AniList 토큰이 만료되었습니다! 계정 페이지에서 갱신하기 전까지는 Scrobbling 이벤트가 처리되지 않습니다.",
+        "select-all-label": "모두 선택",
+        "delete-selected-label": "선택 취소"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
@@ -858,7 +860,8 @@
         "exclude-patterns-tooltip": "디렉터리를 스캔할 때 Kavita가 일치시킬 패턴 집합(Glob 구문)을 구성하고, 스캐너 결과에서 제외할 수 있도록 설정하세요.",
         "help": "{{common.help}}",
         "allow-metadata-matching-tooltip": "Kavita가 이 라이브러리 내의 시리즈에 대한 메타데이터를 다운로드해야 합니까? 이는 서버에 활성 Kavita+ 구독이 있는 경우에만 발생합니다.",
-        "allow-metadata-matching-label": "메타데이터 일치 허용"
+        "allow-metadata-matching-label": "메타데이터 일치 허용",
+        "enable-metadata-label": "메타데이터 활성화 (ComicInfo/Epub/PDF)"
     },
     "file-type-group-pipe": {
         "archive": "아카이브",
@@ -2210,7 +2213,8 @@
         "webtoon-override": "웹툰을 나타내는 이미지가 있어 웹툰 모드로 전환합니다.",
         "match-success": "시리즈가 올바르게 일치함",
         "confirm-delete-multiple-volumes": "{{count}}개의 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
-        "scrobble-gen-init": "과거 열람 이력 및 평가를 추적하는 이벤트를 생성하여 연결된 서비스와 동기화하는 기능을 작업 예정 목록에 추가하였습니다."
+        "scrobble-gen-init": "과거 열람 이력 및 평가를 추적하는 이벤트를 생성하여 연결된 서비스와 동기화하는 기능을 작업 예정 목록에 추가하였습니다.",
+        "series-added-want-to-read": "읽고 싶어요 목록에 추가된 시리즈"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2285,7 +2289,10 @@
         "match-tooltip": "Kavita+에서 시리즈를 수동으로 일치시키기",
         "reorder": "정렬 변경",
         "rename": "이름 변경",
-        "rename-tooltip": "스마트 필터 이름 변경"
+        "rename-tooltip": "스마트 필터 이름 변경",
+        "reading-profiles": "읽기 프로필",
+        "set-reading-profile": "읽기 프로필 설정",
+        "merge": "병합"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2654,7 +2661,8 @@
         "clear": "{{common.clear}}",
         "filter-label": "{{common.filter}}",
         "close": "{{common.close}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "title": "읽기 프로필 설정"
     },
     "manage-reading-profiles": {
         "reset": "{{common.reset}}"

@@ -126,13 +126,17 @@ public class ProcessSeries : IProcessSeries
                 series.Format = firstParsedInfo.Format;
             }
 
+            var removePrefix = library.RemovePrefixForSortName;
+            var sortName = removePrefix ? BookSortTitlePrefixHelper.GetSortTitle(series.Name) : series.Name;
+
             if (string.IsNullOrEmpty(series.SortName))
             {
-                series.SortName = series.Name;
+                series.SortName = sortName;
             }
+
             if (!series.SortNameLocked)
             {
-                series.SortName = series.Name;
+                series.SortName = sortName;
                 if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
                 {
                     series.SortName = firstParsedInfo.SeriesSort;
