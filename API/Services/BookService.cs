@@ -430,6 +430,23 @@ public class BookService : IBookService
 
     }
 
+    private static void InjectImages(HtmlDocument doc, EpubBookRef book, string apiBase)
+    {
+        var images = doc.DocumentNode.SelectNodes("//img")
+                     ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
+
+        if (images == null) return;
+
+        var parent = images[0].ParentNode;
+
+        foreach (var image in images)
+        {
+            // TODO: How do I make images clickable with state?
+            //image.AddClass("kavita-scale-width");
+        }
+
+    }
+
     /// <summary>
     /// Returns the image key associated with the file. Contains some basic fallback logic.
     /// </summary>
@@ -1091,6 +1108,8 @@ public class BookService : IBookService
         RewriteAnchors(page, doc, mappings);
 
         ScopeImages(doc, book, apiBase);
+
+        InjectImages(doc, book, apiBase);
 
         // Inject PTOC Bookmark Icons
         InjectPTOCBookmarks(doc, book, ptocBookmarks);

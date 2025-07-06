@@ -423,11 +423,7 @@ public class EmailService : IEmailService
         smtpClient.Timeout = 20000;
         var ssl = smtpConfig.EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
 
-        await smtpClient.ConnectAsync(smtpConfig.Host, smtpConfig.Port, ssl);
-        if (!string.IsNullOrEmpty(smtpConfig.UserName) && !string.IsNullOrEmpty(smtpConfig.Password))
-        {
-            await smtpClient.AuthenticateAsync(smtpConfig.UserName, smtpConfig.Password);
-        }
+
 
         ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault;
 
@@ -445,6 +441,12 @@ public class EmailService : IEmailService
 
         try
         {
+            await smtpClient.ConnectAsync(smtpConfig.Host, smtpConfig.Port, ssl);
+            if (!string.IsNullOrEmpty(smtpConfig.UserName) && !string.IsNullOrEmpty(smtpConfig.Password))
+            {
+                await smtpClient.AuthenticateAsync(smtpConfig.UserName, smtpConfig.Password);
+            }
+
             await smtpClient.SendAsync(email);
             if (user != null)
             {

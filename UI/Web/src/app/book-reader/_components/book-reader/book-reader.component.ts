@@ -183,10 +183,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isSingleImagePage = false;
   /**
-   * Belongs to drawer component
-   */
-  //drawerOpen = false;
-  /**
    * If the word/line overlay is open
    */
   isLineOverlayOpen = false;
@@ -1191,6 +1187,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return of(null);
         })).subscribe(res => {
           this.nextChapterPrefetched = true;
+          this.cdRef.markForCheck();
         });
       }
     } else if (this.pageNum() <= 10) {
@@ -1202,6 +1199,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return of(null);
         })).subscribe(res => {
           this.prevChapterPrefetched = true;
+          this.cdRef.markForCheck();
         });
       }
     }
@@ -1468,6 +1466,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleReaderSettingsUpdate(res: ReaderSettingUpdate) {
+    console.log('Handling ', res.setting, ' setting update to ', res.object);
     switch (res.setting) {
       case "pageStyle":
         this.applyPageStyles(res.object as PageStyle);
