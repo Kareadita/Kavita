@@ -568,6 +568,8 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "cannot-change-ownership-original-user"));
         }
 
+        user.Owner = dto.Owner;
+
         if (user.Owner == AppUserOwner.OpenIdConnect)
         {
             // Do not change any other fields when the user is owned by OIDC
