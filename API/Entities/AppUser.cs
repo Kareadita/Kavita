@@ -96,8 +96,9 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public string? ExternalId { get; set; }
     /// <summary>
-    /// Describes how the account was created
+    /// Describes who manages the account (may further depend on other settings)
     /// </summary>
+    /// <remarks>Always fallbacks to native</remarks>
     public AppUserOwner Owner { get; set; } = AppUserOwner.Native;
 
 
