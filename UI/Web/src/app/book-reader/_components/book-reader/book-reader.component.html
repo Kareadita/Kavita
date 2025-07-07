@@ -127,6 +127,8 @@
               <!--Just render a blank div here-->
             } @else {
 
+              <!--BookFusion: Page X                10 pages left, 30% -->
+
               <span class="me-1">
                 {{t('page-num-label', {page: pageNum()})}} / {{maxPages}}
               </span>
@@ -134,12 +136,12 @@
               <span> {{t('completion-label', {percent: (pageNum() / maxPages) | percent})}}</span>
 
 
-              @let timeLeft = readingTimeLeft();
+              @let timeLeft = readingTimeLeftResource.value();
               @if (timeLeft) {
                 ,
                 <span class="time-left" [ngbTooltip]="t('time-left-alt')">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                  {{timeLeft | readTimeLeft }}
+                  {{timeLeft! | readTimeLeft }}
                 </span>
               }
 

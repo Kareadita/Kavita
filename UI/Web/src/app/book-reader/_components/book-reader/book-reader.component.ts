@@ -15,6 +15,7 @@ import {
   OnInit,
   Renderer2,
   RendererStyleFlags2,
+  resource,
   Signal,
   ViewChild,
   ViewContainerRef
@@ -61,7 +62,6 @@ import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
 import {ChapterService} from "../../../_services/chapter.service";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
-import {HourEstimateRange} from "../../../_models/series-detail/hour-estimate-range";
 
 
 interface HistoryPoint {
@@ -262,13 +262,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
-  // readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
-  // clickToPaginate = false;
   /**
    * Used solely for fullscreen to apply a hack
    */
   darkMode = model<boolean>(true);
-  readingTimeLeft = model<HourEstimateRange | null>(null);
+  readingTimeLeftResource =  resource({
+    request: () => ({
+      chapterId: this.chapterId,
+      seriesId: this.seriesId,
+      pageNumber: this.pageNum()
+    }),
+    loader: async ({ request }) => {
+      return this.readerService.getTimeLeftForChapter(this.seriesId, this.chapterId).toPromise();
+    }
+  });
+
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
    */
@@ -287,11 +295,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isFullscreen: boolean = false;
 
-  /**
-   * How to render the page content
-   */
-  //layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
-  //layoutMode = model<BookPageLayoutMode>(BookPageLayoutMode.Default);
 
   /**
    * Width of the document (in non-column layout), used for column layout virtual paging
@@ -1478,7 +1481,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyFullscreen();
         break;
       case "writingStyle":
-        this.applyWritingStyle(res.object as WritingStyle);
+        this.applyWritingStyle();
         break;
       case "layoutMode":
         this.applyLayoutMode(res.object as BookPageLayoutMode);
@@ -1553,7 +1556,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
   }
 
@@ -1578,8 +1581,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  applyWritingStyle(writingStyle: WritingStyle) {
-    //this.readerSettingsService.updateWritingStyle(writingStyle);
+  applyWritingStyle() {
     setTimeout(() => this.updateImageSizes());
     if (this.layoutMode() !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
