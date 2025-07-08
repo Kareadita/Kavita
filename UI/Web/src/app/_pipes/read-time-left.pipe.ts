@@ -1,7 +1,6 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
-import {DecimalPipe} from "@angular/common";
 
 @Pipe({
   name: 'readTimeLeft',
@@ -11,10 +10,10 @@ export class ReadTimeLeftPipe implements PipeTransform {
 
   constructor(private readonly translocoService: TranslocoService) {}
 
-  transform(readingTimeLeft: HourEstimateRange): string {
+  transform(readingTimeLeft: HourEstimateRange, includeLeftLabel = false): string {
     const hoursLabel = readingTimeLeft.avgHours > 1
-      ? this.translocoService.translate('read-time-pipe.hours')
-      : this.translocoService.translate('read-time-pipe.hour');
+      ? this.translocoService.translate(`read-time-pipe.hours${includeLeftLabel ? '-left' : ''}`)
+      : this.translocoService.translate(`read-time-pipe.hour${includeLeftLabel ? '-left' : ''}`);
 
     const formattedHours = this.customRound(readingTimeLeft.avgHours);
 

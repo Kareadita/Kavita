@@ -41,13 +41,12 @@ public class BookController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/book-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "includeWordCounts"])]
-    public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId, bool includeWordCounts = false)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId"])]
+    public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
     {
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var bookTitle = string.Empty;
-        IDictionary<int, int>? pageWordCounts = null;
 
         switch (dto.SeriesFormat)
         {
@@ -57,11 +56,6 @@ public class BookController : BaseApiController
                 using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.LenientBookReaderOptions);
                 bookTitle = book.Title;
 
-                if (includeWordCounts)
-                {
-                    // TODO: Cache this in temp/chapterId folder to avoid having to process file each time
-                    pageWordCounts = await _bookService.GetWordCountsPerPage(mangaFile.FilePath);
-                }
                 break;
             }
             case MangaFormat.Pdf:
@@ -94,7 +88,6 @@ public class BookController : BaseApiController
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
-            PageWordCounts = pageWordCounts
         };
 
 

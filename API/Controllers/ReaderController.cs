@@ -15,6 +15,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -222,7 +223,6 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <param name="includeDimensions">Include file dimensions. Only useful for image-based reading</param>
-    /// <param name="includeWordCounts">Include epub word counts per page. Only useful for epub-based reading</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf", "includeDimensions"])]
@@ -849,10 +849,18 @@ public class ReaderController : BaseApiController
         // Patch in the reading progress
         await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter);
 
-        // TODO: We need to actually use word count from the pages
         if (series.Format == MangaFormat.Epub)
         {
-            var progressCount = chapter.WordCount;
+            // Get the word counts for all the pages
+            var pageCounts = await _bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
+            if (pageCounts == null) return _readerService.GetTimeEstimate(series.WordCount, 0, true);
+
+            // Sum character counts only for pages that have been read
+            var totalCharactersRead = pageCounts
+                .Where(kvp => kvp.Key <= chapter.PagesRead)
+                .Sum(kvp => kvp.Value);
+
+            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
             var wordsLeft = series.WordCount - progressCount;
             return _readerService.GetTimeEstimate(wordsLeft, 0, true);
         }

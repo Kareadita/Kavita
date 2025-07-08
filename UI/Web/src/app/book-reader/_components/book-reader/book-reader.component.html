@@ -122,7 +122,7 @@
           }
 
 
-          <div class="book-title col-2 d-none d-sm-block">
+          <div class="book-title col-3 d-none d-sm-block">
             @if(isLoading) {
               <!--Just render a blank div here-->
             } @else {
@@ -139,9 +139,9 @@
               @let timeLeft = readingTimeLeftResource.value();
               @if (timeLeft) {
                 ,
-                <span class="time-left" [ngbTooltip]="t('time-left-alt')">
+                <span class="time-left">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                  {{timeLeft! | readTimeLeft }}
+                  {{timeLeft! | readTimeLeft:true }}
                 </span>
               }
 

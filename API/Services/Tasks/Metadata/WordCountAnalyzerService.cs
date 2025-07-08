@@ -247,7 +247,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _unitOfWork.MangaFileRepository.Update(file);
     }
 
-
     private async Task<int> GetWordCountFromHtml(EpubLocalTextContentFileRef bookFile, string filePath)
     {
         try
@@ -256,7 +255,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
             doc.LoadHtml(await bookFile.ReadContentAsync());
 
             var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-            return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) / AverageCharactersPerWord ?? 0;
+            var characterCount =  textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0;
+            return GetWordCount(characterCount);
         }
         catch (EpubContentException ex)
         {
@@ -265,6 +265,12 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 $"Invalid Epub Metadata, {bookFile.FilePath} does not exist", ex.Message);
             return 0;
         }
+    }
+
+    public static int GetWordCount(int characterCount)
+    {
+        if (characterCount == 0) return 0;
+        return characterCount / AverageCharactersPerWord;
     }
 
 }

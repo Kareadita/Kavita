@@ -6,8 +6,4 @@ export interface BookInfo {
   seriesId: number;
   libraryId: number;
   volumeId: number;
-  /**
-   * Maps the page number to character count. Only available on epub reader.
-   */
-  pageWordCounts: {[key: number]: number};
 }

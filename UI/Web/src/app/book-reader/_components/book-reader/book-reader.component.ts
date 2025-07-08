@@ -247,12 +247,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    nextPageDisabled = false;
 
   /**
-   * Internal property used to capture all the different css properties to render on all elements. This is a cached version that is updated from reader-settings component
-   */
-  //pageStyles = model<PageStyle>(this.readerSettingsService.getDefaultPageStyles());
-  //pageStyles!: PageStyle;
-
-  /**
    * Offset for drawer and rendering canvas. Fixed to 62px.
    */
   topOffset: number = 38;
@@ -270,7 +264,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     request: () => ({
       chapterId: this.chapterId,
       seriesId: this.seriesId,
-      pageNumber: this.pageNum()
+      pageNumber: this.pageNum(),
     }),
     loader: async ({ request }) => {
       return this.readerService.getTimeLeftForChapter(this.seriesId, this.chapterId).toPromise();
@@ -420,16 +414,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     return this.pageNum() === 0 && (currentVirtualPage === 0);
   }
-
-
-  // get VerticalBookContentWidth() {
-  //   if (this.layoutMode() !== BookPageLayoutMode.Default && this.writingStyle() !== WritingStyle.Horizontal ) {
-  //     const width = this.getVerticalPageWidth()
-  //     return width + 'px';
-  //   }
-  //   return '';
-  // }
-
+  
 
   get PageWidthForPagination() {
     if (this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {

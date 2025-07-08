@@ -2785,7 +2785,9 @@
     "read-time-pipe": {
         "less-than-hour": "<1 Hour",
         "hour": "Hour",
-        "hours": "Hours"
+        "hours": "Hours",
+        "hour-left": "Hour left",
+        "hours-left": "Hours left"
     },
 
     "metadata-setting-field-pipe": {
