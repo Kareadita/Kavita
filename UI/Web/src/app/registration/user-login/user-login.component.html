@@ -30,7 +30,7 @@
           </form>
         }
 
-        @if (oidcService.ready()) {
+        @if (oidcService.inUse()) {
           <button
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
             (click)="oidcService.login()">

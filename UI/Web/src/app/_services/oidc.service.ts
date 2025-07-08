@@ -1,6 +1,6 @@
-import {DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {OAuthErrorEvent, OAuthService} from "angular-oauth2-oidc";
-import {BehaviorSubject, from, Observable} from "rxjs";
+import {from} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
@@ -34,11 +34,11 @@ export class OidcService {
   public readonly loaded = this._loaded.asReadonly();
   public readonly loaded$ = toObservable(this.loaded);
 
-  /**
-   * OIDC discovery document has been loaded, login tried and OIDC has been set up
-   */
-  private readonly _ready = signal(false);
-  public readonly ready = this._ready.asReadonly();
+  public readonly inUse = computed(() => {
+    const loaded = this.loaded();
+    const settings = this.settings();
+    return loaded && settings && settings.authority.trim() !== '';
+  });
 
   /**
    * Public OIDC settings
@@ -96,7 +96,6 @@ export class OidcService {
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
         next: _ => {
           this._loaded.set(true);
-          this._ready.set(true);
         },
         error: error => {
           console.log(error);

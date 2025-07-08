@@ -102,9 +102,9 @@ export class AppComponent implements OnInit {
 
     // Login automatically when a token is available
     effect(() => {
-      const ready = this.oidcService.ready();
+      const inUse = this.oidcService.inUse();
       const user = this.accountService.currentUserSignal();
-      if (!ready || !this.oidcService.token || user) return;
+      if (!inUse || !this.oidcService.token || user) return;
 
       this.accountService.loginByToken(this.oidcService.token).subscribe({
         next: () => {
