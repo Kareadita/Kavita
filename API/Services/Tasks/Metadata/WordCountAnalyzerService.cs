@@ -35,7 +35,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private readonly IReaderService _readerService;
     private readonly IMediaErrorService _mediaErrorService;
 
-    private const int AverageCharactersPerWord = 5;
+    public const int AverageCharactersPerWord = 5;
 
     public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
         ICacheHelper cacheHelper, IReaderService readerService, IMediaErrorService mediaErrorService)

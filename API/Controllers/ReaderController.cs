@@ -41,6 +41,7 @@ public class ReaderController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly IBookService _bookService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
@@ -48,7 +49,8 @@ public class ReaderController : BaseApiController
         IReaderService readerService, IBookmarkService bookmarkService,
         IAccountService accountService, IEventHub eventHub,
         IScrobblingService scrobblingService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IBookService bookService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -59,6 +61,7 @@ public class ReaderController : BaseApiController
         _eventHub = eventHub;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _bookService = bookService;
     }
 
     /// <summary>
@@ -218,11 +221,11 @@ public class ReaderController : BaseApiController
     /// <remarks>This is generally the first call when attempting to read to allow pre-generation of assets needed for reading</remarks>
     /// <param name="chapterId"></param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
-    /// <param name="includeDimensions">Include file dimensions. Only useful for image based reading</param>
+    /// <param name="includeDimensions">Include file dimensions. Only useful for image-based reading</param>
+    /// <param name="includeWordCounts">Include epub word counts per page. Only useful for epub-based reading</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf", "includeDimensions"
-    ])]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf", "includeDimensions"])]
     public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
         if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
@@ -846,6 +849,7 @@ public class ReaderController : BaseApiController
         // Patch in the reading progress
         await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter);
 
+        // TODO: We need to actually use word count from the pages
         if (series.Format == MangaFormat.Epub)
         {
             var progressCount = chapter.WordCount;

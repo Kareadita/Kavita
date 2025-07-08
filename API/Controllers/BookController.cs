@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities.Enums;
@@ -40,11 +41,14 @@ public class BookController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/book-info")]
-    public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "includeWordCounts"])]
+    public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId, bool includeWordCounts = false)
     {
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var bookTitle = string.Empty;
+        IDictionary<int, int>? pageWordCounts = null;
+
         switch (dto.SeriesFormat)
         {
             case MangaFormat.Epub:
@@ -52,6 +56,12 @@ public class BookController : BaseApiController
                 var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId))[0];
                 using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.LenientBookReaderOptions);
                 bookTitle = book.Title;
+
+                if (includeWordCounts)
+                {
+                    // TODO: Cache this in temp/chapterId folder to avoid having to process file each time
+                    pageWordCounts = await _bookService.GetWordCountsPerPage(mangaFile.FilePath);
+                }
                 break;
             }
             case MangaFormat.Pdf:
@@ -72,9 +82,9 @@ public class BookController : BaseApiController
                 break;
         }
 
-        return Ok(new BookInfoDto()
+        var info = new BookInfoDto()
         {
-            ChapterNumber =  dto.ChapterNumber,
+            ChapterNumber = dto.ChapterNumber,
             VolumeNumber = dto.VolumeNumber,
             VolumeId = dto.VolumeId,
             BookTitle = bookTitle,
@@ -84,7 +94,14 @@ public class BookController : BaseApiController
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
-        });
+            PageWordCounts = pageWordCounts
+        };
+
+
+
+
+
+        return Ok(info);
     }
 
     /// <summary>

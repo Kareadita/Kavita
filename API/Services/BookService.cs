@@ -14,6 +14,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.Helpers;
+using API.Services.Tasks.Metadata;
 using Docnet.Core;
 using Docnet.Core.Converters;
 using Docnet.Core.Models;
@@ -59,6 +60,7 @@ public interface IBookService
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
+    Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
 }
 
 public class BookService : IBookService
@@ -953,6 +955,50 @@ public class BookService : IBookService
         }
 
         return dict;
+    }
+
+    public async Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath)
+    {
+        var ret = new Dictionary<int, int>();
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+            var mappings = await CreateKeyToPageMappingAsync(book);
+
+            var doc = new HtmlDocument {OptionFixNestedTags = true};
+
+
+            var bookPages = await book.GetReadingOrderAsync();
+            foreach (var contentFileRef in bookPages)
+            {
+                var page = mappings[contentFileRef.Key];
+                var content = await contentFileRef.ReadContentAsync();
+                doc.LoadHtml(content);
+
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("//html/body");
+                }
+
+                // Find all words in the html body
+                // TEMP: REfactor this to use WordCountAnalyzerService
+                var textNodes = body!.SelectNodes("//text()[not(parent::script)]");
+                ret.Add(page, textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0);
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue calculating word counts per page");
+            return null;
+        }
+
+        return ret;
     }
 
     /// <summary>
