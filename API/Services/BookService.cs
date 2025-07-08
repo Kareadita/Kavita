@@ -63,7 +63,7 @@ public interface IBookService
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
 }
 
-public class BookService : IBookService
+public partial class BookService : IBookService
 {
     private readonly ILogger<BookService> _logger;
     private readonly IDirectoryService _directoryService;
@@ -1226,6 +1226,88 @@ public class BookService : IBookService
     /// <returns></returns>
     public async Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter)
     {
+        // using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, LenientBookReaderOptions);
+        // var mappings = await CreateKeyToPageMappingAsync(book);
+        //
+        // var navItems = await book.GetNavigationAsync();
+        // var chaptersList = new List<BookChapterItem>();
+        //
+        // if (navItems != null)
+        // {
+        //     foreach (var navigationItem in navItems)
+        //     {
+        //         if (navigationItem.NestedItems.Count == 0)
+        //         {
+        //             CreateToCChapter(book, navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
+        //             continue;
+        //         }
+        //
+        //         var nestedChapters = new List<BookChapterItem>();
+        //
+        //         foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
+        //         {
+        //             var key = CoalesceKey(book, mappings, nestedChapter.Link?.ContentFilePath);
+        //             if (mappings.TryGetValue(key, out var mapping))
+        //             {
+        //                 nestedChapters.Add(new BookChapterItem
+        //                 {
+        //                     Title = nestedChapter.Title,
+        //                     Page = mapping,
+        //                     Part = nestedChapter.Link?.Anchor ?? string.Empty,
+        //                     Children = []
+        //                 });
+        //             }
+        //         }
+        //
+        //         CreateToCChapter(book, navigationItem, nestedChapters, chaptersList, mappings);
+        //     }
+        // }
+        //
+        // if (chaptersList.Count != 0) return chaptersList;
+        // // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
+        // var tocPage = book.Content.Html.Local.Select(s => s.Key)
+        //     .FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
+        //     k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
+        // if (string.IsNullOrEmpty(tocPage)) return chaptersList;
+        //
+        //
+        // // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
+        // if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
+        // var content = await file.ReadContentAsync();
+        //
+        // var doc = new HtmlDocument();
+        // doc.LoadHtml(content);
+        //
+        // // TODO: We may want to check if there is a toc.ncs file to better handle nested toc
+        // // We could do a fallback first with ol/lis
+        //
+        //
+        //
+        // var anchors = doc.DocumentNode.SelectNodes("//a");
+        // if (anchors == null) return chaptersList;
+        //
+        // foreach (var anchor in anchors)
+        // {
+        //     if (!anchor.Attributes.Contains("href")) continue;
+        //
+        //     var key = CoalesceKey(book, mappings, anchor.Attributes["href"].Value.Split("#")[0]);
+        //
+        //     if (string.IsNullOrEmpty(key) || !mappings.ContainsKey(key)) continue;
+        //     var part = string.Empty;
+        //     if (anchor.Attributes["href"].Value.Contains('#'))
+        //     {
+        //         part = anchor.Attributes["href"].Value.Split("#")[1];
+        //     }
+        //     chaptersList.Add(new BookChapterItem
+        //     {
+        //         Title = anchor.InnerText,
+        //         Page = mappings[key],
+        //         Part = part,
+        //         Children = []
+        //     });
+        // }
+        //
+        // return chaptersList;
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book);
 
@@ -1236,52 +1318,28 @@ public class BookService : IBookService
         {
             foreach (var navigationItem in navItems)
             {
-                if (navigationItem.NestedItems.Count == 0)
+                var tocItem = CreateToCChapterRecursively(book, navigationItem, mappings);
+                if (tocItem != null)
                 {
-                    CreateToCChapter(book, navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
-                    continue;
+                    chaptersList.Add(tocItem);
                 }
-
-                var nestedChapters = new List<BookChapterItem>();
-
-                foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
-                {
-                    var key = CoalesceKey(book, mappings, nestedChapter.Link?.ContentFilePath);
-                    if (mappings.TryGetValue(key, out var mapping))
-                    {
-                        nestedChapters.Add(new BookChapterItem
-                        {
-                            Title = nestedChapter.Title,
-                            Page = mapping,
-                            Part = nestedChapter.Link?.Anchor ?? string.Empty,
-                            Children = new List<BookChapterItem>()
-                        });
-                    }
-                }
-
-                CreateToCChapter(book, navigationItem, nestedChapters, chaptersList, mappings);
             }
         }
 
         if (chaptersList.Count != 0) return chaptersList;
+
+        // Rest of your fallback logic remains the same...
         // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
         var tocPage = book.Content.Html.Local.Select(s => s.Key)
             .FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
             k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
         if (string.IsNullOrEmpty(tocPage)) return chaptersList;
 
-
-        // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
         if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
         var content = await file.ReadContentAsync();
 
         var doc = new HtmlDocument();
         doc.LoadHtml(content);
-
-        // TODO: We may want to check if there is a toc.ncs file to better handle nested toc
-        // We could do a fallback first with ol/lis
-
-
 
         var anchors = doc.DocumentNode.SelectNodes("//a");
         if (anchors == null) return chaptersList;
@@ -1303,19 +1361,55 @@ public class BookService : IBookService
                 Title = anchor.InnerText,
                 Page = mappings[key],
                 Part = part,
-                Children = new List<BookChapterItem>()
+                Children = []
             });
         }
 
         return chaptersList;
     }
 
+    private BookChapterItem? CreateToCChapterRecursively(EpubBookRef book, EpubNavigationItemRef navigationItem, Dictionary<string, int> mappings)
+    {
+        // Get the page mapping for the current navigation item
+        var key = CoalesceKey(book, mappings, navigationItem.Link?.ContentFilePath);
+        int? page = null;
+        if (!string.IsNullOrEmpty(key) && mappings.TryGetValue(key, out var mapping))
+        {
+            page = mapping;
+        }
+
+        // Recursively process nested items
+        var children = new List<BookChapterItem>();
+        if (navigationItem.NestedItems?.Count > 0)
+        {
+            foreach (var nestedItem in navigationItem.NestedItems)
+            {
+                var childItem = CreateToCChapterRecursively(book, nestedItem, mappings);
+                if (childItem != null)
+                {
+                    children.Add(childItem);
+                }
+            }
+        }
+
+        // Only create a BookChapterItem if we have a valid page or children
+        if (page.HasValue || children.Count > 0)
+        {
+            return new BookChapterItem
+            {
+                Title = navigationItem.Title ?? string.Empty,
+                Page = page ?? 0, // You might want to handle this differently
+                Part = navigationItem.Link?.Anchor ?? string.Empty,
+                Children = children
+            };
+        }
+
+        return null;
+    }
+
     private static int CountParentDirectory(string path)
     {
-        const string pattern = @"\.\./";
-        var matches = Regex.Matches(path, pattern);
-
-        return matches.Count;
+        return ParentDirectoryRegex().Matches(path).Count;
     }
 
     /// <summary>
@@ -1481,6 +1575,28 @@ public class BookService : IBookService
         return string.Empty;
     }
 
+    public static string? GetChapterTitleFromToC(ICollection<BookChapterItem>? tableOfContents, int pageNumber)
+    {
+        if (tableOfContents == null) return null;
+
+        foreach (var item in tableOfContents)
+        {
+            // Check if current item matches the page number
+            if (item.Page == pageNumber)
+                return item.Title;
+
+            // Recursively search children if they exist
+            if (item.Children?.Count > 0)
+            {
+                var childResult = GetChapterTitleFromToC(item.Children, pageNumber);
+                if (childResult != null)
+                    return childResult;
+            }
+        }
+
+        return null;
+    }
+
 
     private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
@@ -1570,4 +1686,7 @@ public class BookService : IBookService
             _logger.LogError("Line {LineNumber}, Reason: {Reason}", error.Line, error.Reason);
         }
     }
+
+    [GeneratedRegex(@"\.\./")]
+    private static partial Regex ParentDirectoryRegex();
 }

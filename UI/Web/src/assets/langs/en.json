@@ -874,7 +874,9 @@
     "personal-table-of-contents": {
         "no-data": "Nothing Bookmarked yet",
         "page": "Page {{value}}",
-        "delete": "Delete {{bookmarkName}}"
+        "delete": "Delete {{bookmarkName}}",
+        "no-match": "No Bookmarks match filter",
+        "filter-label": "{{common.filter}}"
     },
 
     "confirm-email": {
@@ -2779,7 +2781,8 @@
         "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
         "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
         "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
-        "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes."
+        "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes.",
+        "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?"
     },
 
     "read-time-pipe": {

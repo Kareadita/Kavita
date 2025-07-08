@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250704153900_BookAnnotations")]
+    [Migration("20250708204811_BookAnnotations")]
     partial class BookAnnotations
     {
         /// <inheritdoc />
@@ -892,6 +892,9 @@ namespace API.Data.Migrations
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ChapterTitle")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -1409,6 +1412,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("PrimaryColor")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("RemovePrefixForSortName")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");

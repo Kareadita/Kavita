@@ -12,6 +12,12 @@ namespace API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
+                name: "ChapterTitle",
+                table: "AppUserTableOfContent",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
                 name: "SelectedText",
                 table: "AppUserTableOfContent",
                 type: "TEXT",
@@ -73,6 +79,10 @@ namespace API.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AppUserAnnotation");
+
+            migrationBuilder.DropColumn(
+                name: "ChapterTitle",
+                table: "AppUserTableOfContent");
 
             migrationBuilder.DropColumn(
                 name: "SelectedText",

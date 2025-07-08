@@ -1,32 +1,36 @@
-<ng-container *transloco="let t; read: 'personal-table-of-contents'">
+<ng-container *transloco="let t; prefix: 'personal-table-of-contents'">
   <div class="table-of-contents">
-    @if (Pages.length === 0) {
+    @let bookmarks = ptocBookmarks();
+
+    @if(bookmarks.length >= ShowFilterAfterItems) {
+      <form [formGroup]="formGroup">
+        <div class="row g-0 mb-3">
+          <div class="col-md-12">
+            <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+            <div class="input-group">
+              <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+            </div>
+          </div>
+        </div>
+      </form>
+    }
+
+    @for(bookmark of bookmarks | filter: filterList; track bookmark.pageNumber + bookmark.title) {
+      <div class="mb-2">
+        <app-text-bookmark-item [bookmark]="bookmark"
+                                (loadBookmark)="loadChapterPage($event.pageNumber, $event.bookScrollId)"
+                                (removeBookmark)="removeBookmark($event)" />
+      </div>
+    } @empty {
       <div>
-        <em>{{t('no-data')}}</em>
+        @if (formGroup.get('filter')?.value) {
+          <em>{{t('no-match')}}</em>
+        } @else {
+          <em>{{t('no-data')}}</em>
+        }
+
       </div>
     }
-    <ul>
-      @for (page of Pages; track page) {
-        <li>
-          <span (click)="loadChapterPage(page, '')">{{t('page', {value: page})}}</span>
-          <ul class="chapter-title">
-            @for(bookmark of bookmarks[page]; track bookmark) {
-              <li class="ellipsis"
-                  [ngbTooltip]="bookmark.title"
-                  placement="right"
-                  (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId); $event.stopPropagation();">
-                {{bookmark.title}}
-                <button class="btn btn-icon ms-1" (click)="removeBookmark(bookmark); $event.stopPropagation();">
-                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                  <span class="visually-hidden">{{t('delete', {bookmarkName: bookmark.title})}}</span>
-                </button>
-              </li>
-            }
 
-          </ul>
-        </li>
-      }
-
-    </ul>
   </div>
 </ng-container>

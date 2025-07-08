@@ -934,6 +934,11 @@ public class ReaderController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "duplicate-bookmark"));
         }
 
+        // Look up the chapter this PTOC is associated with to get the chapter title (if there is one)
+        var chapter =  await _unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+        if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
+        var toc = await _bookService.GenerateTableOfContents(chapter);
+        var chapterTitle = BookService.GetChapterTitleFromToC(toc, dto.PageNumber);
 
         _unitOfWork.UserTableOfContentRepository.Attach(new AppUserTableOfContent()
         {
@@ -944,6 +949,7 @@ public class ReaderController : BaseApiController
             LibraryId = dto.LibraryId,
             BookScrollId = dto.BookScrollId,
             SelectedText = dto.SelectedText,
+            ChapterTitle = chapterTitle,
             AppUserId = userId
         });
         await _unitOfWork.CommitAsync();

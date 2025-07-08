@@ -355,6 +355,10 @@ $pagination-opacity: 0;
 //$pagination-color: red;
 //$pagination-opacity: 0.7;
 
+.kavita-scale-width::after {
+  content: ' ';
+}
+
 
 .right {
     position: absolute;

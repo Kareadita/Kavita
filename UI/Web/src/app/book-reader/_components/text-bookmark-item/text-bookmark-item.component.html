@@ -1,0 +1,29 @@
+<ng-container *transloco="let t; prefix: 'personal-table-of-contents'">
+  @let ptoc = bookmark();
+  @if (ptoc) {
+
+    <div class="card clickable" (click)="goTo($event)">
+
+      <div class="card-body">
+        <div class="card-title" [ngbTooltip]="ptoc.title" placement="left" container="body">
+          <span class="ellipsis">{{ptoc.title}}</span>
+
+          <button class="btn btn-icon ms-auto" (click)="remove($event)">
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('delete', {bookmarkName: ptoc.title})}}</span>
+          </button>
+        </div>
+        <div class="subtitle text-muted">
+          @if (ptoc.chapterTitle) {
+            Chapter "{{ptoc.chapterTitle}}" -
+          }
+          {{t('page', {value: ptoc.pageNumber})}}
+        </div>
+      </div>
+
+
+
+
+    </div>
+  }
+</ng-container>
