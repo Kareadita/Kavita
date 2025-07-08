@@ -309,6 +309,7 @@ public class StatsService : IStatsService
             libDto.UsingFolderWatching = library.FolderWatching;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
+            libDto.EnabledMetadata = library.EnableMetadata;
             libDto.LibraryType = library.Type;
 
             dto.Libraries.Add(libDto);
