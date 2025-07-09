@@ -4,13 +4,20 @@ import {from} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
-import {AccountService} from "./account.service";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
-import {take} from "rxjs/operators";
 import {ToastrService} from "ngx-toastr";
 import {translate} from "@jsverse/transloco";
 import {APP_BASE_HREF} from "@angular/common";
-import {MessageHubService} from "./message-hub.service";
+
+/**
+ * Enum mirror of angular-oauth2-oidc events which are used in Kavita
+ */
+export enum OidcEvents {
+  /**
+   * Fired on token refresh, and when the first token is recieved
+   */
+  TokenRefreshed = "token_refreshed"
+}
 
 @Injectable({
   providedIn: 'root'
@@ -19,13 +26,13 @@ export class OidcService {
 
   private readonly oauth2 = inject(OAuthService);
   private readonly httpClient = inject(HttpClient);
-  private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastR = inject(ToastrService);
-  private readonly messageHub = inject(MessageHubService);
 
   protected readonly baseUrl = inject(APP_BASE_HREF);
   apiBaseUrl = environment.apiUrl;
+
+  public events$ = this.oauth2.events;
 
   /**
    * True when the OIDC discovery document has been loaded, and login tried. Or no OIDC has been set up
@@ -47,28 +54,18 @@ export class OidcService {
   public readonly settings = this._settings.asReadonly();
 
   constructor() {
+    this.oauth2.setStorage(localStorage);
+
     // log events in dev
     if (!environment.production) {
       this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
         if (event instanceof OAuthErrorEvent) {
-          console.error('OAuthErrorEvent Object:', event);
+          console.error('OAuthErrorEvent:', event);
         } else {
-          console.debug('OAuthEvent Object:', event);
+          console.debug('OAuthEvent:', event);
         }
       });
     }
-
-    this.oauth2.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event.type !== "token_refreshed" && event.type != 'token_received') return;
-
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (!user) return; // Don't update tokens when we're not logged in. But what's going on?
-
-        user.oidcToken = this.token;
-        this.messageHub.stopHubConnection();
-        this.messageHub.createHubConnection(user);
-      });
-    });
 
     this.getPublicOidcConfig().subscribe(oidcSetting => {
       this._settings.set(oidcSetting);
@@ -96,6 +93,10 @@ export class OidcService {
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
         next: _ => {
           this._loaded.set(true);
+
+          if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
+            this.oauth2.refreshToken().catch(err => console.error("failed to refresh token on startup", err));
+          }
         },
         error: error => {
           console.log(error);
