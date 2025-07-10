@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
@@ -316,7 +317,8 @@ public class ScannerService : IScannerService
         {
             // Process Series
             var seriesProcessStopWatch = Stopwatch.StartNew();
-            await _processSeries.ProcessSeriesAsync(parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+            var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+            await _processSeries.ProcessSeriesAsync(settings, parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
             seriesLeftToProcess--;
         }
@@ -614,6 +616,8 @@ public class ScannerService : IScannerService
         var toProcess = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         var scanSw = Stopwatch.StartNew();
 
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
         foreach (var series in parsedSeries)
         {
             if (!series.Key.HasChanged)
@@ -641,9 +645,8 @@ public class ScannerService : IScannerService
                                          .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
                                          .Select(g => g.Trim()) // Trim each genre
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
-                                     ?? [])); // Handle null Genre or ComicInfo safely
-
-            await CreateAllGenresAsync(allGenres.Distinct().ToList());
+                                     ?? []))  // Handle null Genre or ComicInfo safely
+                .Distinct().ToList();
 
             var allTags = toProcess
                 .SelectMany(s => s.Value
@@ -651,9 +654,24 @@ public class ScannerService : IScannerService
                                          .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
                                          .Select(g => g.Trim()) // Trim each genre
                                          .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
-                                     ?? [])); // Handle null Tag or ComicInfo safely
+                                     ?? []))  // Handle null Tag or ComicInfo safely
+                .Distinct().ToList();
 
-            await CreateAllTagsAsync(allTags.Distinct().ToList());
+            var processedGenres = new List<string>();
+            var processedTags = new List<string>();
+
+            if (settings.Enabled)
+            {
+                ExternalMetadataService.GenerateGenreAndTagLists(allGenres, allTags, settings, ref processedTags, ref processedGenres);
+            }
+            else
+            {
+                processedTags = allTags;
+                processedGenres = allGenres;
+            }
+
+            await CreateAllGenresAsync(processedGenres);
+            await CreateAllTagsAsync(processedTags);
         }
 
         var totalFiles = 0;
@@ -664,7 +682,7 @@ public class ScannerService : IScannerService
         {
             totalFiles += pSeries.Value.Count;
             var seriesProcessStopWatch = Stopwatch.StartNew();
-            await _processSeries.ProcessSeriesAsync(pSeries.Value, library, seriesLeftToProcess, forceUpdate);
+            await _processSeries.ProcessSeriesAsync(settings, pSeries.Value, library, seriesLeftToProcess, forceUpdate);
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
             seriesLeftToProcess--;
         }

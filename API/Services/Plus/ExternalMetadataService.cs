@@ -686,8 +686,14 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
+        GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
+            settings, ref processedTags, ref processedGenres);
+    }
 
-        var mappings = ApplyFieldMappings(externalMetadata.Tags.Select(t => t.Name), MetadataFieldType.Tag, settings.FieldMappings);
+    public static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
+        ref List<string> processedTags, ref List<string> processedGenres)
+    {
+        var mappings = ApplyFieldMappings(tags, MetadataFieldType.Tag, settings.FieldMappings);
         if (mappings.TryGetValue(MetadataFieldType.Tag, out var tagsToTags))
         {
             processedTags.AddRange(tagsToTags);
@@ -697,7 +703,7 @@ public class ExternalMetadataService : IExternalMetadataService
             processedGenres.AddRange(tagsToGenres);
         }
 
-        mappings = ApplyFieldMappings(externalMetadata.Genres, MetadataFieldType.Genre, settings.FieldMappings);
+        mappings = ApplyFieldMappings(genres, MetadataFieldType.Genre, settings.FieldMappings);
         if (mappings.TryGetValue(MetadataFieldType.Tag, out var genresToTags))
         {
             processedTags.AddRange(genresToTags);

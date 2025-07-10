@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
+using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -29,7 +30,7 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
+    Task ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -70,7 +71,7 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
+    public async Task ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
     {
         if (!parsedInfos.Any()) return;
 
@@ -116,7 +117,7 @@ public class ProcessSeries : IProcessSeries
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
-            await UpdateVolumes(series, parsedInfos, forceUpdate);
+            await UpdateVolumes(settings, series, parsedInfos, forceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = series.Name.ToNormalized();
@@ -340,16 +341,16 @@ public class ProcessSeries : IProcessSeries
         }
 
         #region PeopleAndTagsAndGenres
-            if (!series.Metadata.WriterLocked)
+        if (!series.Metadata.WriterLocked)
+        {
+            var personSw = Stopwatch.StartNew();
+            var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
+            if (ShouldUpdatePeopleForRole(series, chapterPeople, PersonRole.Writer))
             {
-                var personSw = Stopwatch.StartNew();
-                var chapterPeople = chapters.SelectMany(c => c.People.Where(p => p.Role == PersonRole.Writer)).ToList();
-                if (ShouldUpdatePeopleForRole(series, chapterPeople, PersonRole.Writer))
-                {
-                    await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
-                }
-                _logger.LogTrace("[TIME] Kavita took {Time} ms to process writer on Series: {File} for {Count} people", personSw.ElapsedMilliseconds, series.Name, chapterPeople.Count);
+                await UpdateSeriesMetadataPeople(series.Metadata, series.Metadata.People, chapterPeople, PersonRole.Writer);
             }
+            _logger.LogTrace("[TIME] Kavita took {Time} ms to process writer on Series: {File} for {Count} people", personSw.ElapsedMilliseconds, series.Name, chapterPeople.Count);
+        }
 
         if (!series.Metadata.ColoristLocked)
         {
@@ -676,7 +677,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private async Task UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task UpdateVolumes(MetadataSettingsDto settings, Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new volumes and update chapters per volume
         var distinctVolumes = parsedInfos.DistinctVolumes();
@@ -709,7 +710,7 @@ public class ProcessSeries : IProcessSeries
 
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
 
-            await UpdateChapters(series, volume, infos, forceUpdate);
+            await UpdateChapters(settings, series, volume, infos, forceUpdate);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
         }
 
@@ -746,7 +747,7 @@ public class ProcessSeries : IProcessSeries
         series.Volumes = nonDeletedVolumes;
     }
 
-    private async Task UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task UpdateChapters(MetadataSettingsDto settings, Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -799,7 +800,7 @@ public class ProcessSeries : IProcessSeries
 
             try
             {
-                await UpdateChapterFromComicInfo(chapter, info.ComicInfo, forceUpdate);
+                await UpdateChapterFromComicInfo(settings, chapter, info.ComicInfo, forceUpdate);
             }
             catch (Exception ex)
             {
@@ -900,7 +901,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private async Task UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
+    private async Task UpdateChapterFromComicInfo(MetadataSettingsDto settings, Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
     {
         if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -1069,16 +1070,31 @@ public class ProcessSeries : IProcessSeries
             await UpdateChapterPeopleAsync(chapter, people, PersonRole.Location);
         }
 
-        if (!chapter.GenresLocked)
+        if (!chapter.GenresLocked || !chapter.TagsLocked)
         {
             var genres = TagHelper.GetTagValues(comicInfo.Genre);
-            await UpdateChapterGenres(chapter, genres);
-        }
-
-        if (!chapter.TagsLocked)
-        {
             var tags = TagHelper.GetTagValues(comicInfo.Tags);
-            await UpdateChapterTags(chapter, tags);
+
+            var finalTags = new List<string>();
+            var finalGenres = new List<string>();
+
+            if (settings.Enabled)
+            {
+                ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
+            }
+            else
+            {
+                finalGenres.AddRange(genres);
+                finalTags.AddRange(tags);
+            }
+
+            if (!chapter.GenresLocked)
+                await UpdateChapterGenres(chapter, finalGenres);
+
+            if (!chapter.TagsLocked)
+                await UpdateChapterTags(chapter, finalTags);
+
+
         }
 
         _logger.LogTrace("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
