@@ -1,0 +1,81 @@
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {SettingsService} from "../settings.service";
+import {FormBuilder, FormGroup} from "@angular/forms";
+import {
+  ManageMetadataMappingsComponent,
+  MetadataMappingsExport
+} from "../manage-metadata-mappings/manage-metadata-mappings.component";
+import {MetadataSettings} from "../_models/metadata-settings";
+import {debounceTime, switchMap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map} from "rxjs/operators";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {TranslocoDirective} from "@jsverse/transloco";
+import {LicenseService} from "../../_services/license.service";
+
+/**
+ * Metadata settings for which a K+ license is not required
+ */
+@Component({
+  selector: 'app-manage-public-metadata-settings',
+  imports: [
+    ManageMetadataMappingsComponent,
+    TranslocoDirective
+  ],
+  templateUrl: './manage-public-metadata-settings.component.html',
+  styleUrl: './manage-public-metadata-settings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ManagePublicMetadataSettingsComponent implements OnInit {
+
+  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent?: ManageMetadataMappingsComponent;
+
+  private readonly settingService = inject(SettingsService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly licenseService = inject(LicenseService);
+
+  settingsForm: FormGroup = new FormGroup({});
+  settings: MetadataSettings | undefined = undefined;
+
+  ngOnInit(): void {
+    this.settingService.getMetadataSettings().subscribe(settings => {
+      this.settings = settings;
+      this.cdRef.markForCheck();
+    });
+
+    this.settingsForm.valueChanges.pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef),
+      map(_ => this.packData()),
+      switchMap((data) => this.settingService.updateMetadataSettings(data)),
+    ).subscribe();
+  }
+
+  packData() {
+    const model = Object.assign({}, this.settings);
+
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent ? this.manageMetadataMappingsComponent.packData() : {
+      ageRatingMappings: {} as Map<string, AgeRating>,
+      blacklist: [],
+      fieldMappings: [],
+      whitelist: [],
+    };
+
+    model.ageRatingMappings = exp.ageRatingMappings;
+    model.fieldMappings = exp.fieldMappings;
+    model.whitelist = exp.whitelist;
+    model.blacklist = exp.blacklist;
+
+    return model;
+  }
+
+}

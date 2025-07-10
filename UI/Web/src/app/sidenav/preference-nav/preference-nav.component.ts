@@ -30,6 +30,7 @@ export enum SettingsTabId {
   Statistics = 'admin-statistics',
   MediaIssues = 'admin-media-issues',
   EmailHistory = 'admin-email-history',
+  ManageMetadata = 'admin-public-metadata',
 
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
@@ -128,6 +129,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         new SideNavItem(SettingsTabId.Email, [Role.Admin]),
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
+        new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },

@@ -10,18 +10,11 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {SettingsService} from "../settings.service";
 import {debounceTime, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter, map} from "rxjs/operators";
-import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {AgeRating} from "../../_models/metadata/age-rating";
-import {MetadataService} from "../../_services/metadata.service";
-import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {MetadataFieldMapping, MetadataFieldType, MetadataSettings} from "../_models/metadata-settings";
+import {map} from "rxjs/operators";
+import {MetadataSettings} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
 import {allMetadataSettingField, MetadataSettingField} from "../_models/metadata-setting-field";
@@ -30,6 +23,7 @@ import {
   ManageMetadataMappingsComponent,
   MetadataMappingsExport
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
+import {AgeRating} from "../../_models/metadata/age-rating";
 
 
 @Component({
@@ -52,7 +46,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
   @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent?: ManageMetadataMappingsComponent;
 
   private readonly settingService = inject(SettingsService);
-  private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
@@ -146,7 +139,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     const model = this.settingsForm.value;
 
     const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent ? this.manageMetadataMappingsComponent.packData() : {
-      ageRatingMappings: {},
+      ageRatingMappings: {} as Map<string, AgeRating>,
       blacklist: [],
       fieldMappings: [],
       whitelist: [],

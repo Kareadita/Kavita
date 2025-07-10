@@ -11,7 +11,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
 
 export type MetadataMappingsExport = {
-  ageRatingMappings: {}
+  ageRatingMappings: Map<string, AgeRating>,
   fieldMappings: Array<MetadataFieldMapping>,
   blacklist: Array<string>,
   whitelist: Array<string>,
@@ -108,7 +108,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const whitelist = (this.settingsForm().get('whitelist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
 
     return {
-      ageRatingMappings: ageRatingMappings,
+      ageRatingMappings: ageRatingMappings as Map<string, AgeRating>,
       fieldMappings: fieldMappings,
       blacklist: blacklist,
       whitelist: whitelist,

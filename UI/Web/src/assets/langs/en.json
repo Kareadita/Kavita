@@ -744,6 +744,7 @@
     },
 
     "manage-metadata-settings": {
+        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
@@ -1723,7 +1724,8 @@
         "theme": "Theme",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
-        "mal-stack-import": "MAL Stack"
+        "mal-stack-import": "MAL Stack",
+        "admin-public-metadata": "Manage Metadata"
     },
 
     "collection-detail": {
