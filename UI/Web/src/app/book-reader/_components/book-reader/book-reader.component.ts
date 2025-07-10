@@ -1041,7 +1041,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.loadImageBookmarks();
           });
         } else {
-          this.readerService.bookmarkEpub(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
             const newState = !hasBookmark;
             icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
             hasBookmark = !hasBookmark;

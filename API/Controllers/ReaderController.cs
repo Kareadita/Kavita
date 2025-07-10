@@ -724,59 +724,51 @@ public class ReaderController : BaseApiController
     [HttpPost("bookmark")]
     public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
     {
-        // Don't let user save past total pages.
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return new UnauthorizedResult();
+        try
+        {
+            // Don't let user save past total pages.
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+                AppUserIncludes.Bookmarks);
+            if (user == null) return new UnauthorizedResult();
 
-        if (!await _accountService.HasBookmarkPermission(user))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
+            if (!await _accountService.HasBookmarkPermission(user))
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
 
-        var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
+            var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+            if (chapter == null || chapter.Files.Count == 0)
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
 
-        bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
+            bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
 
-        var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
 
-        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
+            string path;
+            if (Parser.IsEpub(chapter.Files.First().Extension!))
+            {
+                var cachedFilePath = _cacheService.GetCachedFile(chapter);
+                path = await _bookService.CopyImageToTempFromBook(chapter.Id, bookmarkDto, cachedFilePath);
+            }
+            else
+            {
+                path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
+            }
+
+
+            if (string.IsNullOrEmpty(path) || !await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
+            {
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
+            }
+
+
+            BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            _logger.LogError(ex, "There was an exception when trying to create a bookmark");
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
-
-        BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
-        return Ok();
+        }
     }
 
-    /// <summary>
-    /// Creates a bookmark for an epub image
-    /// </summary>
-    /// <param name="bookmarkDto"></param>
-    /// <returns></returns>
-    [HttpPost("bookmark-epub")]
-    public async Task<ActionResult> BookmarkEpubPage(BookmarkDto bookmarkDto)
-    {
-
-        // Don't let user save past total pages.
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return new UnauthorizedResult();
-
-        if (!await _accountService.HasBookmarkPermission(user))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
-
-
-
-        var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
-
-        bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
-
-        var cachedFilePath = _cacheService.GetCachedFile(chapter);
-        var path = await _bookService.CopyImageToTempFromBook(chapter.Id, bookmarkDto, cachedFilePath);
-
-        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
-
-        BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
-        return Ok();
-    }
 
     /// <summary>
     /// Removes a bookmarked page for a Chapter

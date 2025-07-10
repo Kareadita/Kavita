@@ -102,8 +102,8 @@ export class ReaderService {
     return `${this.baseUrl}reader/pdf?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, xPath: string | null = null) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page, xPath});
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page, imageNumber});
   }
 
   unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0) {
