@@ -1,22 +1,36 @@
 <ng-container *transloco="let t; prefix: 'manage-metadata-settings'" [formGroup]="settingsForm()">
-  <div class="row g-0 mt-4 mb-4">
-    @if(settingsForm().get('blacklist'); as formControl) {
-      <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
-        <ng-template #view>
-          @let val = breakTags(formControl.value);
 
-          @for(opt of val; track opt) {
-            <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-          } @empty {
-            {{null | defaultValue}}
-          }
-        </ng-template>s
-        <ng-template #edit>
-          <textarea rows="3" id="blacklist" class="form-control"  formControlName="blacklist"></textarea>
-        </ng-template>
-      </app-setting-item>
-    }
+  <div class="row g-0 align-items-start mb-4">
+    <div class="col">
+      @if(settingsForm().get('blacklist'); as formControl) {
+        <app-setting-item
+          [title]="t('blacklist-label')"
+          [subtitle]="t('blacklist-tooltip')">
+
+          <ng-template #view>
+            @let val = breakTags(formControl.value);
+            @for(opt of val; track opt) {
+              <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+            } @empty {
+              {{null | defaultValue}}
+            }
+          </ng-template>
+
+          <ng-template #edit>
+            <textarea rows="3" id="blacklist" class="form-control" formControlName="blacklist"></textarea>
+          </ng-template>
+
+        </app-setting-item>
+      }
+    </div>
+
+    <div class="col-auto ms-3">
+      <button class="btn btn-secondary" (click)="export()" [ngbTooltip]="t('export-tooltip')">
+        {{ t('export-settings') }}
+      </button>
+    </div>
   </div>
+
 
   <div class="row g-0 mt-4 mb-4">
     @if(settingsForm().get('whitelist'); as formControl) {

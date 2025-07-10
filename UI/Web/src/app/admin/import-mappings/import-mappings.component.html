@@ -1,0 +1,41 @@
+<ng-container *transloco="let t; read: 'import-mappings'">
+
+  <div class="row g-0" style="min-width: 135px;">
+    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex()"></app-step-tracker>
+  </div>
+
+  <app-loading [loading]="isLoading()" />
+  @if (!isLoading()) {
+    <div>
+      @switch (currentStepIndex()) {
+        @case (Step.Import) {
+          <div class="row g-0">
+            <p>{{t('import-description')}}</p>
+            <form [formGroup]="uploadForm" enctype="multipart/form-data">
+              <file-upload [multiple]="false" formControlName="files"></file-upload>
+            </form>
+          </div>
+        }
+        @case (Step.Configure) {
+
+        }
+        @case (Step.Overview) {
+
+        }
+        @case (Step.Finalize) {
+
+        }
+      }
+    </div>
+  }
+
+  <div class="modal-footer mt-3">
+    <div class="col-auto ms-1">
+      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
+    </div>
+    <div class="col-auto ms-1">
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+    </div>
+  </div>
+
+</ng-container>

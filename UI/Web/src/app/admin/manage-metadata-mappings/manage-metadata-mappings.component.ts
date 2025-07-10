@@ -9,6 +9,7 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataService} from "../../_services/metadata.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Map<string, AgeRating>,
@@ -26,7 +27,8 @@ export type MetadataMappingsExport = {
     ReactiveFormsModule,
     SettingItemComponent,
     TagBadgeComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    NgbTooltip
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss'
@@ -113,6 +115,19 @@ export class ManageMetadataMappingsComponent implements OnInit {
       blacklist: blacklist,
       whitelist: whitelist,
     }
+  }
+
+  export() {
+    const data = this.packData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "export.json";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   addAgeRatingMapping(str: string = '', rating: AgeRating = AgeRating.Unknown) {

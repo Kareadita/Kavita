@@ -217,6 +217,14 @@
           }
         }
 
+        @defer (when fragment === SettingsTabId.MappingsImport; prefetch on idle) {
+          @if (fragment === SettingsTabId.MappingsImport) {
+            <div class="scale col-md-12">
+              <app-import-mappings></app-import-mappings>
+            </div>
+          }
+        }
+
 
         @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
           @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {

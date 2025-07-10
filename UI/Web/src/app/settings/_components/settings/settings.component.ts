@@ -58,6 +58,7 @@ import {
 import {
   ManagePublicMetadataSettingsComponent
 } from "../../../admin/manage-public-metadata-settings/manage-public-metadata-settings.component";
+import {ImportMappingsComponent} from "../../../admin/import-mappings/import-mappings.component";
 
 @Component({
     selector: 'app-settings',
@@ -95,7 +96,8 @@ import {
     ScrobblingHoldsComponent,
     ManageMetadataSettingsComponent,
     ManageReadingProfilesComponent,
-    ManagePublicMetadataSettingsComponent
+    ManagePublicMetadataSettingsComponent,
+    ImportMappingsComponent
   ],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',

@@ -35,6 +35,7 @@ export enum SettingsTabId {
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
   MALStackImport = 'mal-stack-import',
+  MappingsImport = 'admin-mappings-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
   Metadata = 'admin-metadata',
@@ -137,6 +138,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       title: 'import-section-title',
       children: [
         new SideNavItem(SettingsTabId.CBLImport, [], undefined, [Role.ReadOnly]),
+        new SideNavItem(SettingsTabId.MappingsImport, [Role.Admin]),
       ]
     },
     {

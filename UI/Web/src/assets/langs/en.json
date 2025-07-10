@@ -745,6 +745,8 @@
 
     "manage-metadata-settings": {
         "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
+        "export-settings": "Export",
+        "export-tooltip": "Export your black- and whitelist, agerating-, and field mappings",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
@@ -1713,6 +1715,7 @@
         "admin-matched-metadata": "Matched Metadata",
         "admin-manage-tokens": "Manage User Tokens",
         "admin-metadata": "Manage Metadata",
+        "admin-mappings-import": "Import mappings",
         "scrobble-holds": "Scrobble Holds",
         "account": "Account",
         "preferences": "Preferences",
@@ -1929,6 +1932,20 @@
         "action-header": "{{common.edit}}",
         "edit-alt": "{{common.edit}}",
         "no-data": "{{user-scrobble-history.no-data}}"
+    },
+
+    "import-mappings": {
+        "import-step": "Import",
+        "configure-step": "Configure",
+        "overview-step": "Overview & Fix",
+        "finalize-step": "Finalize",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "import-description": "Upload a file you, or someone else has exported to replace or merge with your current settings.",
+        "select-files-warning": "You must upload a json file to continue",
+        "invalid-file": "Failed to parse your file, check your input",
+        "file-no-valid-content": "Your import did not contain any meaningful data to continue with"
     },
 
     "import-cbl-modal": {
