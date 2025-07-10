@@ -152,7 +152,7 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
-            await UpdateSeriesMetadata(series, library);
+            await UpdateSeriesMetadata(settings, series, library);
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -289,7 +289,7 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    private async Task UpdateSeriesMetadata(Series series, Library library)
+    private async Task UpdateSeriesMetadata(MetadataSettingsDto settings, Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
@@ -313,9 +313,8 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
             // Get the MetadataSettings and apply Age Rating Mappings here
-            var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
             var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
-            var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, metadataSettings.AgeRatingMappings);
+            var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
             if (updatedRating > series.Metadata.AgeRating)
             {
                 series.Metadata.AgeRating = updatedRating;
