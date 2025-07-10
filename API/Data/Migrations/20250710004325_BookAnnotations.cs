@@ -23,6 +23,13 @@ namespace API.Data.Migrations
                 type: "TEXT",
                 nullable: true);
 
+            migrationBuilder.AddColumn<int>(
+                name: "ImageOffset",
+                table: "AppUserBookmark",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
+
             migrationBuilder.CreateTable(
                 name: "AppUserAnnotation",
                 columns: table => new
@@ -87,6 +94,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "SelectedText",
                 table: "AppUserTableOfContent");
+
+            migrationBuilder.DropColumn(
+                name: "ImageOffset",
+                table: "AppUserBookmark");
         }
     }
 }

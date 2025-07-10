@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Services;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -734,7 +735,41 @@ public class ReaderController : BaseApiController
         if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
 
         bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
+
         var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
+
+        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
+
+        BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+        return Ok();
+    }
+
+    /// <summary>
+    /// Creates a bookmark for an epub image
+    /// </summary>
+    /// <param name="bookmarkDto"></param>
+    /// <returns></returns>
+    [HttpPost("bookmark-epub")]
+    public async Task<ActionResult> BookmarkEpubPage(BookmarkDto bookmarkDto)
+    {
+
+        // Don't let user save past total pages.
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return new UnauthorizedResult();
+
+        if (!await _accountService.HasBookmarkPermission(user))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
+
+
+
+        var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
+
+        bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
+
+        var cachedFilePath = _cacheService.GetCachedFile(chapter);
+        var path = await _bookService.CopyImageToTempFromBook(chapter.Id, bookmarkDto, cachedFilePath);
 
         if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));

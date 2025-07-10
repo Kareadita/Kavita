@@ -19,7 +19,11 @@ public class AppUserBookmark : IEntityDate
     /// Filename in the Bookmark Directory
     /// </summary>
     public string FileName { get; set; } = string.Empty;
-
+    /// <summary>
+    /// Only applicable for Epubs - handles multiple images on one page
+    /// </summary>
+    /// <remarks>0-based index of the image position on page</remarks>
+    public int ImageOffset { get; set; }
 
     // Relationships
     [JsonIgnore]

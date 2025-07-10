@@ -342,9 +342,7 @@ public class CacheService : ICacheService
         // Calculate what chapter the page belongs to
         var path = GetCachePath(chapterId);
         // NOTE: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
-        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
-            //.OrderByNatural(Path.GetFileNameWithoutExtension) // This is already done in GetPageFromFiles
-            .ToArray();
+        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions);
 
         return GetPageFromFiles(files, page);
     }

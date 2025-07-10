@@ -356,7 +356,7 @@ public class ReaderService : IReaderService
         return page;
     }
 
-    private int GetNextSpecialChapter(VolumeDto volume, ChapterDto currentChapter)
+    private static int GetNextSpecialChapter(VolumeDto volume, ChapterDto currentChapter)
     {
         if (volume.IsSpecial())
         {

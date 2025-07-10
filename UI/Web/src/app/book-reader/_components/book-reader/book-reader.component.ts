@@ -62,6 +62,7 @@ import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
 import {ChapterService} from "../../../_services/chapter.service";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
+import {PageBookmark} from "../../../_models/readers/page-bookmark";
 
 
 interface HistoryPoint {
@@ -128,6 +129,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly epubMenuService = inject(EpubReaderMenuService);
   protected readonly readerSettingsService = inject(EpubReaderSettingsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -271,6 +273,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   });
 
+  imageBookmarks = model<PageBookmark[]>([]);
+
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
    */
@@ -309,9 +313,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
-  //writingStyle: WritingStyle = WritingStyle.Horizontal;
-
-
   /**
    * When the user is highlighting something, then we remove pagination
    */
@@ -324,7 +325,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
 
-  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
   /**
@@ -414,7 +414,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     return this.pageNum() === 0 && (currentVirtualPage === 0);
   }
-  
+
 
   get PageWidthForPagination() {
     if (this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
@@ -646,6 +646,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterPrefetched = false;
     this.cdRef.markForCheck();
 
+    this.loadImageBookmarks();
+
 
     this.bookService.getBookInfo(this.chapterId, true).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
@@ -794,6 +796,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       return 0;
+  }
+
+  loadImageBookmarks() {
+    this.readerService.getBookmarks(this.chapterId).subscribe(res => {
+      this.imageBookmarks.set(res);
+    });
   }
 
   loadNextChapter() {
@@ -969,9 +977,80 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           .then(() => {
             this.setupPage(part, scrollTop);
             this.updateImageSizes();
+            this.injectImageBookmarkIndicators();
           });
       }, 10);
     });
+  }
+
+
+  /**
+   * Injects the new DOM needed to provide the bookmark functionality.
+   * We can't use a wrapper due to potential for styling issues.
+   */
+  injectImageBookmarkIndicators() {
+    const imgs = Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img') ?? []);
+
+
+    const bookmarksForPage = (this.imageBookmarks() ?? []).filter(b => b.page === this.pageNum());
+
+    imgs.forEach((img, index) => {
+      if (img.nextElementSibling?.classList.contains('bookmark-overlay')) return;
+
+      const matchingBookmarks = bookmarksForPage.filter(b => b.imageOffset == index);
+
+      let hasBookmark = false;
+      if (matchingBookmarks.length > 0) {
+        hasBookmark = true;
+      }
+
+      const icon = document.createElement('div');
+      icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+
+      //icon.attributes.title = hasBookmark ? 'Unbookmark' : 'Bookmark';
+      icon.style.cssText = `
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 6px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 16px;
+      pointer-events: auto;
+    `;
+
+      // Make parent relative if needed
+      const parent = img.parentElement;
+      if (parent == null) return;
+
+      if (getComputedStyle(parent).position === 'static') {
+        parent.style.position = 'relative';
+      }
+
+      parent.appendChild(icon);
+
+      icon.addEventListener('click', () => {
+        if (hasBookmark) {
+          this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
+            const newState = !hasBookmark;
+            icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+            hasBookmark = !hasBookmark;
+            this.loadImageBookmarks();
+          });
+        } else {
+          this.readerService.bookmarkEpub(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
+            const newState = !hasBookmark;
+            icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+            hasBookmark = !hasBookmark;
+            this.loadImageBookmarks();
+          });
+        }
+      });
+    });
+
   }
 
   /**

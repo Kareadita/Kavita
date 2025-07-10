@@ -15,6 +15,10 @@ public sealed record BookmarkDto
     [Required]
     public int ChapterId { get; set; }
     /// <summary>
+    /// Only applicable for Epubs
+    /// </summary>
+    public int ImageOffset { get; set; }
+    /// <summary>
     /// This is only used when getting all bookmarks.
     /// </summary>
     public SeriesDto? Series { get; set; }

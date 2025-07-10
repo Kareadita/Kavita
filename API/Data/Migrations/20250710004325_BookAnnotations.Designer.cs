@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250708204811_BookAnnotations")]
+    [Migration("20250710004325_BookAnnotations")]
     partial class BookAnnotations
     {
         /// <inheritdoc />
@@ -240,6 +240,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("ImageOffset")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
