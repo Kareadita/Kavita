@@ -54,6 +54,12 @@ export class OidcService {
   public readonly settings = this._settings.asReadonly();
 
   constructor() {
+    window.addEventListener('online', () => {
+      if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
+        this.oauth2.refreshToken().catch(err => console.error("failed to refresh token when coming online", err));
+      }
+    });
+
     this.oauth2.setStorage(localStorage);
 
     // log events in dev
