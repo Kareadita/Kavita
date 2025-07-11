@@ -997,6 +997,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     imgs.forEach((img, index) => {
       if (img.nextElementSibling?.classList.contains('bookmark-overlay')) return;
 
+      const xpath = this.readerService.getXPathTo(img);
       const matchingBookmarks = bookmarksForPage.filter(b => b.imageOffset == index);
 
       let hasBookmark = false;
@@ -1041,7 +1042,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.loadImageBookmarks();
           });
         } else {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index, xpath).subscribe(bookmark => {
             const newState = !hasBookmark;
             icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
             hasBookmark = !hasBookmark;
@@ -1842,6 +1843,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateLineOverlayOpen(isOpen: boolean) {
     this.isLineOverlayOpen = isOpen;
     this.cdRef.markForCheck();
+  }
+
+  viewBookmarkImages() {
+    this.epubMenuService.openViewBookmarksDrawer(this.chapterId, (res: PageBookmark | null) => {
+      if (res === null) return;
+
+      this.setPageNum(res.page);
+      if (res.xPath != null) {
+        this.loadPage(res.xPath);
+      }
+    });
   }
 
 

@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, model} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  EventEmitter,
+  inject,
+  model
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {ReaderService} from "../../../../_services/reader.service";
@@ -26,6 +34,9 @@ export class ViewBookmarkDrawerComponent {
 
   chapterId = model<number>();
   bookmarks = model<PageBookmark[]>();
+  loadPage: EventEmitter<PageBookmark | null> = new EventEmitter<PageBookmark | null>();
+
+
 
   constructor() {
     effect(() => {
@@ -36,10 +47,15 @@ export class ViewBookmarkDrawerComponent {
       }
 
       this.readerService.getBookmarks(id).subscribe(bookmarks => {
-        this.bookmarks.set(bookmarks);
+        this.bookmarks.set(bookmarks.sort((a, b) => a.page - b.page));
+        new Set(this.bookmarks());
         this.cdRef.markForCheck();
       });
     });
+  }
+
+  goToBookmark(bookmark: PageBookmark) {
+    this.loadPage.emit(bookmark);
   }
 
 

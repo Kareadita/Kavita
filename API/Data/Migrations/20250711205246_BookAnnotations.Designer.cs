@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250710004325_BookAnnotations")]
+    [Migration("20250711205246_BookAnnotations")]
     partial class BookAnnotations
     {
         /// <inheritdoc />
@@ -258,6 +258,9 @@ namespace API.Data.Migrations
 
                     b.Property<int>("VolumeId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("XPath")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

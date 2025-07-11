@@ -102,18 +102,13 @@ export class ReaderService {
     return `${this.baseUrl}reader/pdf?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page, imageNumber});
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0, xpath: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page, imageNumber, xpath});
   }
 
   unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0) {
     return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page, imageNumber});
   }
-
-  bookmarkEpub(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark-epub', {seriesId, volumeId, chapterId, page, imageNumber});
-  }
-
 
   getAllBookmarks(filter: FilterV2<FilterField> | undefined) {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);

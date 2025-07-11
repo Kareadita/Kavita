@@ -24,6 +24,10 @@ public class AppUserBookmark : IEntityDate
     /// </summary>
     /// <remarks>0-based index of the image position on page</remarks>
     public int ImageOffset { get; set; }
+    /// <summary>
+    /// Only applicable for Epubs
+    /// </summary>
+    public string? XPath { get; set; }
 
     // Relationships
     [JsonIgnore]

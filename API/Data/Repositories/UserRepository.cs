@@ -75,7 +75,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
-    Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId);
+    Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
@@ -222,18 +222,18 @@ public class UserRepository : IUserRepository
         return await _context.AppUserBookmark.ToListAsync();
     }
 
-    public async Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId)
+    public async Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId)
     {
         return await _context.AppUserBookmark
-            .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId)
-            .SingleOrDefaultAsync();
+            .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId && b.ImageOffset == imageOffset)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId)
     {
         return await _context.AppUserBookmark
             .Where(b => b.Id == bookmarkId)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
 

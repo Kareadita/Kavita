@@ -9,17 +9,15 @@
   <div class="offcanvas-body">
 
     @let items = bookmarks();
-    @if (items) {
-      <virtual-scroller #scroll [items]="items" [bufferAmount]="1" [childHeight]="1">
 
-        <div class="card-container row g-0" #container>
-          @for(item of scroll.viewPortItems; let idx = $index; track item) {
-            <div>
-              <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.pageNum)" />
-            </div>
-          }
-        </div>
-      </virtual-scroller>
+    @for(item of items; track item) {
+      <div class="mx-auto">
+        <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [styles]="{width: '50%', height: '50%'}" />
+        <a href="javascript:void(0);" (click)="goToBookmark(item)">Page {{item.page}}</a>
+      </div>
+    }
+    @empty {
+      <p>No bookmarks yet</p>
     }
 
   </div>

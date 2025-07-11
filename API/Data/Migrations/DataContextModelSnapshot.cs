@@ -256,6 +256,9 @@ namespace API.Data.Migrations
                     b.Property<int>("VolumeId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("XPath")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");

@@ -175,7 +175,7 @@ export class BookmarksComponent implements OnInit {
 
       const distinctSeriesMap = new Map();
       this.bookmarks.forEach(b => {
-        distinctSeriesMap.set(b.series.id, b.series);
+        distinctSeriesMap.set(b.series!.id, b.series!);
       });
       this.series = Array.from(distinctSeriesMap.values());
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (t: Series) => t.name);

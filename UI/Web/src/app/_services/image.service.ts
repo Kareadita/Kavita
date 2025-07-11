@@ -1,8 +1,8 @@
 import {DestroyRef, inject, Injectable} from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { ThemeService } from './theme.service';
-import { RecentlyAddedItem } from '../_models/recently-added-item';
-import { AccountService } from './account.service';
+import {environment} from 'src/environments/environment';
+import {ThemeService} from './theme.service';
+import {RecentlyAddedItem} from '../_models/recently-added-item';
+import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
@@ -93,8 +93,8 @@ export class ImageService {
     return `${this.baseUrl}image/chapter-cover?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
-  getBookmarkedImage(chapterId: number, pageNum: number) {
-    return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}`;
+  getBookmarkedImage(chapterId: number, pageNum: number, imageOffset: number = 0) {
+    return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}&imageOffset=${imageOffset}`;
   }
 
   getWebLinkImage(url: string) {

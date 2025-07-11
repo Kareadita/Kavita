@@ -10,5 +10,12 @@ export interface PageBookmark {
    * Only present on epub-based Bookmarks
    */
   imageOffset: number;
-  series: Series;
+  /**
+   * Only present on epub-based Bookmarks
+   */
+  xPath: string | null;
+  /**
+   * This is only used when getting all bookmarks.
+   */
+  series: Series | null;
 }

@@ -19,6 +19,7 @@ import {
   EpubSettingDrawerComponent,
 } from "../book-reader/_components/_drawers/epub-setting-drawer/epub-setting-drawer.component";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
+import {PageBookmark} from "../_models/readers/page-bookmark";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -76,12 +77,19 @@ export class EpubReaderMenuService {
     this.isDrawerOpen.set(true);
   }
 
-  openViewBookmarksDrawer(chapterId: number) {
+  openViewBookmarksDrawer(chapterId: number, callbackFn: (evt: PageBookmark | null) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
     const ref = this.offcanvasService.open(ViewBookmarkDrawerComponent, {position: 'end', panelClass: ''});
     ref.componentInstance.chapterId.set(chapterId);
+    ref.componentInstance.loadPage.subscribe((res: PageBookmark | null) => {
+      // Check if we are on mobile to collapse the menu
+      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+        this.closeAll();
+      }
+      callbackFn(res);
+    });
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

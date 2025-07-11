@@ -19,6 +19,10 @@ public sealed record BookmarkDto
     /// </summary>
     public int ImageOffset { get; set; }
     /// <summary>
+    /// Only applicable for Epubs
+    /// </summary>
+    public string? XPath { get; set; }
+    /// <summary>
     /// This is only used when getting all bookmarks.
     /// </summary>
     public SeriesDto? Series { get; set; }

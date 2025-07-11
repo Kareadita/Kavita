@@ -30,6 +30,12 @@ namespace API.Data.Migrations
                 nullable: false,
                 defaultValue: 0);
 
+            migrationBuilder.AddColumn<string>(
+                name: "XPath",
+                table: "AppUserBookmark",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "AppUserAnnotation",
                 columns: table => new
@@ -97,6 +103,10 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "ImageOffset",
+                table: "AppUserBookmark");
+
+            migrationBuilder.DropColumn(
+                name: "XPath",
                 table: "AppUserBookmark");
         }
     }
