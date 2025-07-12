@@ -10,7 +10,7 @@ import {
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {map, Observable, of, shareReplay} from 'rxjs';
-import {User} from 'src/app/_models/user';
+import {IdentityProvider, User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -53,7 +53,9 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     });
 
     this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
-      return user !== undefined && !this.accountService.hasReadOnlyRole(user) && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
+      return user !== undefined && !this.accountService.hasReadOnlyRole(user)
+        && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user))
+        && user.identityProvider !== IdentityProvider.OpenIdConnect;
     }));
     this.cdRef.markForCheck();
 

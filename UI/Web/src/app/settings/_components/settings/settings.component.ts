@@ -56,6 +56,7 @@ import {
   ManageReadingProfilesComponent
 } from "../../../user-settings/manage-reading-profiles/manage-reading-profiles.component";
 import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
+import {IdentityProvider} from "../../../_models/user";
 
 @Component({
     selector: 'app-settings',
@@ -137,4 +138,6 @@ export class SettingsComponent {
       }
     });
   }
+
+  protected readonly IdentityProvider = IdentityProvider;
 }

@@ -17,5 +17,5 @@ public sealed record UserDto
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public string KavitaVersion { get; set; }
     /// <inheritdoc cref="AppUser.IdentityProvider"/>
-    public IdentityProvider Owner { get; init; }
+    public IdentityProvider IdentityProvider { get; init; }
 }
