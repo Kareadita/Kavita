@@ -29,15 +29,16 @@
   }
 }
 
-::ng-deep .swiper-slide {
-    width: auto !important;
+::ng-deep swiper-slide {
+  width: auto !important;
+  margin: 0 .25rem;
 }
 
-::ng-deep .swiper-wrapper {
+::ng-deep swiper-container {
     margin-bottom: 10px;
 }
 
-::ng-deep .last-carousel {
+::ng-deep swiper-slide:last-child {
     margin-bottom: 0;
 }
 

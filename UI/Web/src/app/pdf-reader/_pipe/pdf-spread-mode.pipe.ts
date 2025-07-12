@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
-import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
+import {SpreadType} from "node_modules/ngx-extended-pdf-viewer/lib/options/spread-type";
 
 @Pipe({
   name: 'pdfSpreadType',

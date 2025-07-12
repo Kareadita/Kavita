@@ -31,7 +31,7 @@ import {PdfLayoutMode} from "../../../_models/preferences/pdf-layout-mode";
 import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
 import {PdfTheme} from "../../../_models/preferences/pdf-theme";
 import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
-import {SpreadType} from "ngx-extended-pdf-viewer/lib/options/spread-type";
+import {SpreadType} from "node_modules/ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";

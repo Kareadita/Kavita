@@ -263,13 +263,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   darkMode = model<boolean>(true);
   readingTimeLeftResource =  resource({
-    request: () => ({
+    params: () => ({
       chapterId: this.chapterId,
       seriesId: this.seriesId,
       pageNumber: this.pageNum(),
     }),
-    loader: async ({ request }) => {
-      return this.readerService.getTimeLeftForChapter(this.seriesId, this.chapterId).toPromise();
+    loader: async ({params}) => {
+      return this.readerService.getTimeLeftForChapter(params.seriesId, params.chapterId).toPromise();
     }
   });
 

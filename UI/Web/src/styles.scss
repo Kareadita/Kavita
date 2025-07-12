@@ -1,4 +1,4 @@
-@use '../node_modules/swiper/swiper' as swiper;
+@use 'swiper/swiper-bundle.min' as swiper;
 
 @use './theme/variables' as theme;
 

@@ -8,7 +8,7 @@ import {AppRoutingModule} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
 import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
-import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi} from '@angular/common/http';
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
@@ -20,8 +20,11 @@ import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
+import {register as registerSwiperElements} from 'swiper/element/bundle';
 
 const disableAnimations = !('animate' in document.documentElement);
+
+registerSwiperElements();
 
 export function preloadUser(userService: AccountService, transloco: TranslocoService) {
   return function() {
@@ -146,7 +149,7 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi(), withFetch())
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

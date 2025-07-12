@@ -27,22 +27,22 @@
       </div>
       @if (items.length > 0) {
         <div>
-          <swiper
-            [slidesPerView]="'auto'"
-            (init)="onSwiper($event)"
-            [freeMode]="true">
+          <swiper-container #swiperContainer
+            slides-per-view="auto"
+            free-mode="true"
+            (swiperprogress)="onProgress($event)">
             @for(item of items; track item; let i = $index;) {
-              <ng-template swiperSlide>
+              <swiper-slide>
                 <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-              </ng-template>
+              </swiper-slide>
             } @empty {
               @if (alwaysShow) {
-                <ng-template swiperSlide>
+                <swiper-slide>
                   <ng-container [ngTemplateOutlet]="carouselItemTemplate"></ng-container>
-                </ng-template>
+                </swiper-slide>
               }
             }
-          </swiper>
+          </swiper-container>
         </div>
       }
     </div>
