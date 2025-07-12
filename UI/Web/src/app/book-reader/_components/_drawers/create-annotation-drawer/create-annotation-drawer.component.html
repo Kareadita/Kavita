@@ -8,7 +8,24 @@
 
   <div class="offcanvas-body">
 
-    Hello
+    <div class="mx-auto mb-2 context-quote" id="render-target">
+      <div [innerHTML]="totalText()"></div>
+    </div>
+
+    <div class="row g-0">
+      <textarea  rows="3"></textarea>
+    </div>
+
+    <div class="">
+      <div style="width: 120px">
+        Highlight colors
+      </div>
+      <div style="width: 120px">
+        WYSIWYG
+      </div>
+
+
+    </div>
 
   </div>
 </ng-container>

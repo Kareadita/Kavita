@@ -764,9 +764,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     } else if (event.key === KEY_CODES.G) {
       await this.goToPage();
-    } else if (event.key === KEY_CODES.F) {
-      this.applyFullscreen()
     }
+    // else if (event.key === KEY_CODES.F) {
+    //   this.applyFullscreen()
+    // } // TODO: Find a better key bind
   }
 
   onWheel(event: WheelEvent) {
@@ -1534,7 +1535,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleReaderSettingsUpdate(res: ReaderSettingUpdate) {
-    console.log('Handling ', res.setting, ' setting update to ', res.object);
     switch (res.setting) {
       case "pageStyle":
         this.applyPageStyles(res.object as PageStyle);
@@ -1585,7 +1585,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let element: Element | null = null;
     if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
       // Part selector is a XPATH
-      element = this.getElementFromXPath(partSelector);
+      element = this.readerService.getElementFromXPath(partSelector);
     } else {
       element = this.document.querySelector('*[id="' + partSelector + '"]');
     }
@@ -1604,14 +1604,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
     }
-  }
-
-  getElementFromXPath(path: string) {
-    const node = this.document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (node?.nodeType === Node.ELEMENT_NODE) {
-      return node as Element;
-    }
-    return null;
   }
 
   /**

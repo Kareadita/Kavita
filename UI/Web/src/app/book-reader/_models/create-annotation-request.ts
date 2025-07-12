@@ -12,4 +12,8 @@ export interface CreateAnnotationRequest {
   highlightCount: number;
   containsSpoiler: boolean;
   pageNumber: number;
+  /**
+   * Ui Only - the full paragraph of selected context
+   */
+  context: string | null;
 }

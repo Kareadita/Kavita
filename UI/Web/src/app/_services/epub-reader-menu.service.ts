@@ -37,10 +37,10 @@ export class EpubReaderMenuService {
    */
   public readonly isDrawerOpen = signal<boolean>(false);
 
-  openCreateAnnotationDrawer(annotation: CreateAnnotationRequest) {
+  openCreateAnnotationDrawer(annotation: CreateAnnotationRequest, callbackFn: () => void) {
     const ref = this.offcanvasService.open(CreateAnnotationDrawerComponent, {position: 'bottom', panelClass: ''});
-    ref.closed.subscribe(() => this.setDrawerClosed());
-    ref.dismissed.subscribe(() => this.setDrawerClosed());
+    ref.closed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
+    ref.dismissed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
     ref.componentInstance.createAnnotation.set(annotation);
 
     this.isDrawerOpen.set(true);

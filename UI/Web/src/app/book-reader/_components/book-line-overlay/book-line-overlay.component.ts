@@ -47,6 +47,7 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
   xPath: string = '';
+  allTextFromSelection: string = '';
   selectedText: string = '';
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
   bookmarkForm: FormGroup = new FormGroup({
@@ -111,11 +112,14 @@ export class BookLineOverlayComponent implements OnInit {
 
     this.selectedText = selection ? selection.toString().trim() : '';
 
+
     if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
       this.xPath = this.readerService.getXPathTo(event.target);
       if (this.xPath !== '') {
         this.xPath = '//' + this.xPath;
       }
+
+      this.allTextFromSelection = (event.target as Element).textContent || '';
 
       this.isOpen.emit(true);
       event.preventDefault();
@@ -134,8 +138,6 @@ export class BookLineOverlayComponent implements OnInit {
     }
 
     if (this.mode === BookLineOverlayMode.Annotate) {
-      // TODO: Open annotation drawer
-      this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber, this.xPath, this.selectedText
       const createAnnotation = {
         chapterId: this.chapterId,
         libraryId: this.libraryId,
@@ -147,9 +149,13 @@ export class BookLineOverlayComponent implements OnInit {
         xpath: this.xPath,
         endingXPath: this.xPath, // TODO: Figure this out
         highlightCount: this.selectedText.length,
-        hightlightColor: HightlightColor.Blue
+        hightlightColor: HightlightColor.Blue,
+        context: this.allTextFromSelection,
       } as CreateAnnotationRequest;
-      this.epubMenuService.openCreateAnnotationDrawer(createAnnotation);
+
+      this.epubMenuService.openCreateAnnotationDrawer(createAnnotation, () => {
+        this.reset();
+      });
     }
   }
 
@@ -175,6 +181,7 @@ export class BookLineOverlayComponent implements OnInit {
     this.mode = BookLineOverlayMode.None;
     this.xPath = '';
     this.selectedText = '';
+    this.allTextFromSelection = '';
     const selection = window.getSelection();
     if (selection) {
       selection.removeAllRanges();

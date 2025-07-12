@@ -4,3 +4,9 @@
   display: flex;
   flex-direction: column;
 }
+
+.context-quote {
+  text-align: center;
+  line-clamp: 2;
+  font-style: italic;
+}
