@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Email;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
@@ -82,15 +83,15 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
-    /// <remarks>Also throws UnauthorizedAccessException if the users is missing the Login role</remarks>
-    /// <remarks>Syncs Oidc settings if enabled, and user is Oidc owned</remarks>
+    /// <remarks>If <see cref="OidcConfigDto.SyncUserSettings"/> is enabled, and the user </remarks>
+    /// <remarks>Updates the last active date for the user</remarks>
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (user.Owner == AppUserOwner.OpenIdConnect)
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
         {
             var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
             await _oidcService.SyncUserSettings(oidcSettings, User, user);
@@ -98,6 +99,12 @@ public class AccountController : BaseApiController
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+
+        // Update LastActive on account
+        user.UpdateLastActive();
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
 
         return Ok(await ConstructUserDto(user));
     }
@@ -281,11 +288,6 @@ public class AccountController : BaseApiController
             }
         }
 
-        return Ok(await ConstructUserDto(user));
-    }
-
-    private async Task<UserDto> ConstructUserDto(AppUser user)
-    {
         // Update LastActive on account
         user.UpdateLastActive();
 
@@ -300,6 +302,11 @@ public class AccountController : BaseApiController
 
         _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
+        return Ok(await ConstructUserDto(user));
+    }
+
+    private async Task<UserDto> ConstructUserDto(AppUser user)
+    {
         var dto = _mapper.Map<UserDto>(user);
         dto.Token = await _tokenService.CreateToken(user);
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
@@ -542,7 +549,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    /// <remarks>OIDC managed users cannot be edited if SyncUsers is enabled</remarks>
+    /// <remarks>Users who's <see cref="AppUser.IdentityProvider"/> is not <see cref="IdentityProvider.Kavita"/> cannot be edited if <see cref="OidcConfigDto.SyncUserSettings"/> is true</remarks>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
@@ -557,20 +564,20 @@ public class AccountController : BaseApiController
 
         // Disallowed editing users owned by OIDC
         var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-        if (user.Owner == AppUserOwner.OpenIdConnect && dto.Owner != AppUserOwner.Native && oidcSettings.SyncUserSettings)
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect && dto.IdentityProvider != IdentityProvider.Kavita && oidcSettings.SyncUserSettings)
         {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "oidc-managed"));
         }
 
         var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (user.Id == defaultAdminUser.Id && dto.Owner != AppUserOwner.Native)
+        if (user.Id == defaultAdminUser.Id && dto.IdentityProvider != IdentityProvider.Kavita)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "cannot-change-ownership-original-user"));
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "cannot-change-identity-provider-original-user"));
         }
 
-        user.Owner = dto.Owner;
+        user.IdentityProvider = dto.IdentityProvider;
 
-        if (user.Owner == AppUserOwner.OpenIdConnect)
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
         {
             // Do not change any other fields when the user is owned by OIDC
             await _unitOfWork.CommitAsync();

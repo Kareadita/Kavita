@@ -14,7 +14,7 @@ export interface OidcConfig extends OidcPublicConfig {
   syncUserSettings: boolean;
   defaultRoles: string[];
   defaultLibraries: number[];
-  defaultAgeRating: AgeRating;
+  defaultAgeRestriction: AgeRating;
   defaultIncludeUnknowns: boolean;
 }
 

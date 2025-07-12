@@ -3,6 +3,9 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Settings;
 
+/**
+ * The part of the OIDC configuration that is returned by the API without authentication
+ */
 public record OidcPublicConfigDto
 {
     /// <inheritdoc cref="ServerSettingKey.OidcAuthority"/>

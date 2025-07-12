@@ -80,7 +80,7 @@ public sealed record UserStatV3
     /// <summary>
     /// Who manages the user (OIDC, Kavita)
     /// </summary>
-    public AppUserOwner Owner { get; set; }
+    public IdentityProvider IdentityProvider { get; set; }
 
 
 }

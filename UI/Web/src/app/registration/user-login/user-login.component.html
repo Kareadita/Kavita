@@ -34,14 +34,7 @@
           <button
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
             (click)="oidcService.login()">
-            <img
-              ngSrc="assets/icons/open-id-connect-logo.svg"
-              alt="OIDC"
-              width="36"
-              height="36"
-              class="d-inline-block"
-              style="object-fit: contain;"
-            />
+            <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
             {{oidcService.settings()?.providerName || t('oidc')}}
           </button>
         }

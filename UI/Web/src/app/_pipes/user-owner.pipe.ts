@@ -1,18 +1,18 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {UserOwner} from "../_models/user";
+import {IdentityProvider} from "../_models/user";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({
-  name: 'userOwnerPipe'
+  name: 'IdentityProviderPipe'
 })
-export class UserOwnerPipe implements PipeTransform {
+export class IdentityProviderPipePipe implements PipeTransform {
 
-  transform(value: UserOwner, ...args: unknown[]): string {
+  transform(value: IdentityProvider): string {
     switch (value) {
-      case UserOwner.Native:
-        return translate("creation-source-pipe.native");
-      case UserOwner.OpenIdConnect:
-        return translate("creation-source-pipe.oidc");
+      case IdentityProvider.Kavita:
+        return translate("identity-provider-pipe.kavita");
+      case IdentityProvider.OpenIdConnect:
+        return translate("identity-provider-pipe.oidc");
     }
   }
 

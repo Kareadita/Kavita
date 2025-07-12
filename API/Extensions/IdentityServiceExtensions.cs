@@ -70,8 +70,7 @@ public static class IdentityServiceExtensions
                 var enabled = Configuration.OidcEnabled;
                 options.ForwardDefaultSelector = context =>
                 {
-                    if (!enabled)
-                        return LocalIdentity;
+                    if (!enabled) return LocalIdentity;
 
                     var fullAuth =
                         context.Request.Headers["Authorization"].FirstOrDefault() ??
@@ -79,8 +78,7 @@ public static class IdentityServiceExtensions
 
                     var token = fullAuth?.TrimPrefix("Bearer ");
 
-                    if (string.IsNullOrEmpty(token))
-                        return LocalIdentity;
+                    if (string.IsNullOrEmpty(token)) return LocalIdentity;
 
                     var handler = new JwtSecurityTokenHandler();
                     try
@@ -99,7 +97,6 @@ public static class IdentityServiceExtensions
 
         if (Configuration.OidcEnabled)
         {
-            // TODO: Investigate on how to make this not hardcoded at startup
             auth.AddJwtBearer(OpenIdConnect, options =>
             {
                 options.Authority = Configuration.OidcAuthority;
@@ -177,7 +174,7 @@ public static class IdentityServiceExtensions
 
         var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (user.Owner != AppUserOwner.OpenIdConnect || !settings.OidcConfig.SyncUserSettings)
+        if (user.IdentityProvider != IdentityProvider.OpenIdConnect || !settings.OidcConfig.SyncUserSettings)
         {
             var userManager = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
             var roles = await userManager.GetRolesAsync(user);

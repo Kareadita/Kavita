@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250701154425_AppUserOwner")]
-    partial class AppUserOwner
+    [Migration("20250711191021_OpenIDConnect")]
+    partial class OpenIDConnect
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,11 +90,13 @@ namespace API.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ExternalId")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("HasRunScrobbleEventGeneration")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("IdentityProvider")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("TEXT");
@@ -122,8 +124,8 @@ namespace API.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Owner")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("OidcId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
@@ -1349,6 +1351,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("PrimaryColor")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("RemovePrefixForSortName")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");

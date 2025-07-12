@@ -13,46 +13,47 @@
         "title": "OpenID Connect Callback",
         "login": "Back to login screen",
         "error-loading-info": "An error occurred loading OpenID Connect info, contact your administrator",
-        "timeout": "OIDC resolution has timed out or an error has occurred",
-        "settings": {
-            "save": "{{common.save}}",
-            "notice": "Notice",
-            "restart-required": "Changing Authority, or Client ID requires a manual restart of Kavita to take effect.",
-            "provider": "Provider",
-            "behaviour": "Behaviour",
-            "field-required": "{{name}} is required when {{other}} is set",
-            "invalidUri": "The provider URL is not valid",
-            "manual-save": "Changing provider settings requires a manual save",
-
-            "authority": "Authority",
-            "authority-tooltip": "The URL to your OpenID Connect provider",
-            "clientId": "Client ID",
-            "clientId-tooltip": "The ClientID set in your OIDC provider, can be anything",
-            "provisionAccounts": "Provision accounts",
-            "provisionAccounts-tooltip": "Create a new account when someone logs in via OIDC, without already having an account",
-            "requireVerifiedEmail": "Require verified emails",
-            "requireVerifiedEmail-tooltip": "Requires emails to be verified when creation an account or matching with existing ones. A newly created account with a verified email, will be auto verified on Kavita's side",
-            "syncUserSettings": "Sync user settings with OIDC roles",
-            "syncUserSettings-tooltip": "Users created from OIDC will be fully managed (Roles, Library Access, Age Rating) by the OIDC. If this is disabled, users will be unable to access any content after their account creation. Read the documentation for more information.",
-            "autoLogin": "Auto login",
-            "autoLogin-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen",
-            "disablePasswordAuthentication": "Disable password authentication",
-            "disablePasswordAuthentication-tooltip": "Users with the admin role can bypass this restriction",
-            "providerName": "Provider name",
-            "providerName-tooltip": "Name show on the login screen",
-
-            "defaults": "Defaults",
-            "defaults-requirement": "The following settings are used when a user is registered via OIDC while SyncUserSettings is turned off",
-            "defaultIncludeUnknowns": "Include unknowns",
-            "defaultIncludeUnknowns-tooltip": "Include unknown age ratings",
-            "defaultAgeRating": "Age rating",
-            "defaultAgeRating-tooltip": "Maximum age rating shown to new users",
-            "no-restriction": "{{restriction-selector.no-restriction}}"
-        }
+        "timeout": "OIDC resolution has timed out or an error has occurred"
     },
 
-    "creation-source-pipe": {
-        "native": "Native",
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "notice": "Notice",
+        "restart-required": "Changing Authority, or Client ID requires a manual restart of Kavita to take effect.",
+        "provider": "Provider",
+        "behaviour": "Behaviour",
+        "field-required": "{{name}} is required when {{other}} is set",
+        "invalidUri": "The provider URL is not valid",
+        "manual-save-label": "Changing provider settings requires a manual save",
+
+        "authority": "Authority",
+        "authority-tooltip": "The URL to your OpenID Connect provider",
+        "clientId": "Client ID",
+        "clientId-tooltip": "The ClientID set in your OIDC provider, can be anything",
+        "provision-accounts": "Provision accounts",
+        "provision-accounts-tooltip": "Create a new account when someone logs in via OIDC, without already having an account",
+        "require-verified-email": "Require verified emails",
+        "require-verified-email-tooltip": "Requires emails to be verified when creation an account or matching with existing ones. A newly created account with a verified email, will be auto verified on Kavita's side",
+        "sync-user-settings": "Sync user settings with OIDC roles",
+        "sync-user-settings-tooltip": "Users created from OIDC will be fully managed (Roles, Library Access, Age Rating) by the OIDC. If this is disabled, users will be unable to access any content after their account creation. Read the documentation for more information.",
+        "auto-login": "Auto login",
+        "auto-login-tooltip": "Auto redirect to OpenID Connect provider when opening the login screen",
+        "disable-password-authentication": "Disable password authentication",
+        "disable-password-authentication-tooltip": "Users with the admin role can bypass this restriction",
+        "provider-name": "Provider name",
+        "provider-name-tooltip": "Name show on the login screen",
+
+        "defaults": "Defaults",
+        "defaults-requirement": "The following settings are used when a user is registered via OIDC while SyncUserSettings is turned off",
+        "default-include-unknowns": "Include unknowns",
+        "default-include-unknowns-tooltip": "Include unknown age ratings",
+        "default-age-restriction": "Age rating",
+        "default-age-restriction-tooltip": "Maximum age rating shown to new users",
+        "no-restriction": "{{restriction-selector.no-restriction}}"
+    },
+
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
         "oidc": "OpenID Connect"
     },
 
@@ -80,8 +81,8 @@
         "notice": "Warning!",
         "out-of-sync": "This user was created via OIDC, if the SynUsers setting is turned on changes made may be lost",
         "oidc-managed": "This user is managed via OIDC, contact your OIDC administrator if they require changes.",
-        "owner": "Ownership",
-        "owner-tooltip": "Native users will never be synced with OIDC"
+        "identity-provider": "Identity provider",
+        "identity-provider-tooltip": "Kavita users will never be synced with OIDC"
     },
 
     "user-scrobble-history": {

@@ -410,6 +410,7 @@ public class SettingsService : ISettingsService
         return false;
     }
 
+    /// <remarks>Does not commit any changes</remarks>
     private async Task UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
         if (setting.Key == ServerSettingKey.OidcAuthority && setting.Value != updateSettingsDto.OidcConfig.Authority)

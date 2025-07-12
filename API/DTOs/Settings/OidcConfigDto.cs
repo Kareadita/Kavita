@@ -5,7 +5,10 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Settings;
 
-public record OidcConfigDto: OidcPublicConfigDto
+/**
+ All configuration regarding OIDC
+ */
+public sealed record OidcConfigDto: OidcPublicConfigDto
 {
     /// <summary>
     /// If true, auto creates a new account when someone logs in via OpenID Connect
@@ -16,7 +19,7 @@ public record OidcConfigDto: OidcPublicConfigDto
     /// </summary>
     public bool RequireVerifiedEmail { get; set; } = true;
     /// <summary>
-    /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provides roles on log in.
+    /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provided roles on log in.
     /// </summary>
     public bool SyncUserSettings { get; set; }
 
@@ -25,7 +28,7 @@ public record OidcConfigDto: OidcPublicConfigDto
 
     public List<string> DefaultRoles { get; set; } = [];
     public List<int> DefaultLibraries { get; set; } = [];
-    public AgeRating DefaultAgeRating { get; set; } = AgeRating.Unknown;
+    public AgeRating DefaultAgeRestriction { get; set; } = AgeRating.Unknown;
     public bool DefaultIncludeUnknowns { get; set; } = false;
 
     #endregion
@@ -34,5 +37,5 @@ public record OidcConfigDto: OidcPublicConfigDto
     /// <summary>
     /// Returns true if the <see cref="OidcPublicConfigDto.Authority"/> has been set
     /// </summary>
-    public bool Enabled => Authority != "";
+    public bool Enabled => !string.IsNullOrEmpty(Authority);
 }

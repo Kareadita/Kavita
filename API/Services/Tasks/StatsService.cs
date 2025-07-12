@@ -357,7 +357,7 @@ public class StatsService : IStatsService
             userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
             userDto.IsSharingReviews = user.UserPreferences.ShareReviews;
             userDto.WantToReadSeriesCount = user.WantToRead.Count;
-            userDto.Owner = user.Owner;
+            userDto.IdentityProvider = user.IdentityProvider;
 
             if (allLibraries.Count > 0 && userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraries))
             {

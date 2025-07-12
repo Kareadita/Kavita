@@ -1,9 +1,0 @@
-@switch (owner()) {
-  @case (UserOwner.OpenIdConnect) {
-    <img [width]="size()" [height]="size()" ngSrc="assets/icons/open-id-connect-logo.svg" alt="open-id-connect-logo">
-  }
-  @case (UserOwner.Native) {
-    <!-- TODO: SVG for scaling -->
-    <img ngSrc="assets/icons/favicon-16x16.png" [width]="size()" [height]="size()" alt="kavita-logo">
-  }
-}

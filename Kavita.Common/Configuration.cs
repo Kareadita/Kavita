@@ -64,7 +64,7 @@ public static class Configuration
         set => SetOidcClientId(GetAppSettingFilename(), value);
     }
 
-    public static bool OidcEnabled => GetOidcAuthority(GetAppSettingFilename()) != "";
+    public static bool OidcEnabled => !string.IsNullOrEmpty(GetOidcAuthority(GetAppSettingFilename()));
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
@@ -336,6 +336,7 @@ public static class Configuration
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
             return jsonObj.OidcAuthority;
         }
         catch (Exception ex)
@@ -368,6 +369,7 @@ public static class Configuration
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
             return jsonObj.OidcAudience;
         }
         catch (Exception ex)

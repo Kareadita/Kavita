@@ -30,7 +30,7 @@ export class OidcService {
   private readonly toastR = inject(ToastrService);
 
   protected readonly baseUrl = inject(APP_BASE_HREF);
-  apiBaseUrl = environment.apiUrl;
+  private readonly apiBaseUrl = environment.apiUrl;
 
   public events$ = this.oauth2.events;
 

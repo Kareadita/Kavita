@@ -63,7 +63,7 @@ export class AccountService {
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
 
-  public currentUserSignal = toSignal(this.currentUserSource);
+  public readonly currentUserSignal = toSignal(this.currentUserSource);
 
 
 

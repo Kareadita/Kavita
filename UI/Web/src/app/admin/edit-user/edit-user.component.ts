@@ -24,8 +24,8 @@ import {debounceTime, distinctUntilChanged, Observable, startWith, tap} from "rx
 import {map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerSettings} from "../_models/server-settings";
-import {UserOwner, UserOwners} from "../../_models/user";
-import {UserOwnerPipe} from "../../_pipes/user-owner.pipe";
+import {IdentityProvider, IdentityProviders} from "../../_models/user";
+import {IdentityProviderPipePipe} from "../../_pipes/user-owner.pipe";
 
 const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,7 +34,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, UserOwnerPipe],
+  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -44,15 +44,13 @@ export class EditUserComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly modal = inject(NgbActiveModal);
 
-
-  // Needs to be models, so we can set it manually
   member = model.required<Member>();
   settings = model.required<ServerSettings>();
 
   isLocked = computed(() => {
     const setting = this.settings();
     const member = this.member();
-    return setting.oidcConfig.syncUserSettings && member.owner === UserOwner.OpenIdConnect;
+    return setting.oidcConfig.syncUserSettings && member.identityProvider === IdentityProvider.OpenIdConnect;
   });
 
   selectedRoles: Array<string> = [];
@@ -75,15 +73,15 @@ export class EditUserComponent implements OnInit {
   ngOnInit(): void {
     this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required]));
     this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
-    this.userForm.addControl('owner', new FormControl(this.member().owner, [Validators.required]));
+    this.userForm.addControl('identityProvider', new FormControl(this.member().identityProvider, [Validators.required]));
 
-    this.userForm.get('owner')!.valueChanges.pipe(
+    this.userForm.get('identityProvider')!.valueChanges.pipe(
       tap(value => {
-        const newOwner = parseInt(value, 10) as UserOwner;
-        if (newOwner === UserOwner.OpenIdConnect) return;
+        const newIdentityProvider = parseInt(value, 10) as IdentityProvider;
+        if (newIdentityProvider === IdentityProvider.OpenIdConnect) return;
         this.member.set({
           ...this.member(),
-          owner: newOwner,
+          identityProvider: newIdentityProvider,
         })
       })).subscribe();
 
@@ -124,14 +122,19 @@ export class EditUserComponent implements OnInit {
     model.roles = this.selectedRoles;
     model.libraries = this.selectedLibraries;
     model.ageRestriction = this.selectedRestriction;
-    model.owner = parseInt(model.owner, 10) as UserOwner;
+    model.identityProvider = parseInt(model.identityProvider, 10) as IdentityProvider;
 
 
-    this.accountService.update(model).subscribe(() => {
-      this.modal.close(true);
+    this.accountService.update(model).subscribe({
+      next: () => {
+        this.modal.close(true);
+      },
+      error: err => {
+        console.error(err);
+      }
     });
   }
 
-  protected readonly UserOwner = UserOwner;
-  protected readonly UserOwners = UserOwners;
+  protected readonly IdentityProvider = IdentityProvider;
+  protected readonly IdentityProviders = IdentityProviders;
 }

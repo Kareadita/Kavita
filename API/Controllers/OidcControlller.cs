@@ -32,14 +32,11 @@ public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWo
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpPost("is-valid-authority")]
-    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] IsValidAuthorityBody authority)
+    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
     {
         return Ok(await settingsService.IsValidAuthority(authority.Authority));
     }
 
-    public class IsValidAuthorityBody
-    {
-        public string Authority { get; set; }
-    }
+    public sealed record AuthorityValidationDto(string Authority);
 
 }

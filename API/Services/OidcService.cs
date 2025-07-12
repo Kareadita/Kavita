@@ -28,14 +28,14 @@ public interface IOidcService
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal);
     /// <summary>
-    /// Updates roles, library access and age rating. Will not modify the default admin
+    /// Updates roles, library access and age rating restriction. Will not modify the default admin
     /// </summary>
     /// <param name="settings"></param>
     /// <param name="claimsPrincipal"></param>
     /// <param name="user"></param>
     Task SyncUserSettings(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user);
     /// <summary>
-    /// Remove <see cref="AppUser.ExternalId"/> from all users
+    /// Remove <see cref="AppUser.OidcId"/> from all users
     /// </summary>
     /// <returns></returns>
     Task ClearOidcIds();
@@ -45,47 +45,71 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     IUnitOfWork unitOfWork, IAccountService accountService): IOidcService
 {
     private const string LibraryAccessPrefix = "library-";
-    private const string AgeRatingPrefix = "age-rating-";
-    private const string IncludeUnknowns = AgeRatingPrefix + "include-unknowns";
+    private const string AgeRestrictionPrefix = "age-restriction-";
+    private const string IncludeUnknowns = AgeRestrictionPrefix + "include-unknowns";
 
     public async Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal)
     {
         var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
 
-        var externalId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(externalId))
+        var oidcId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(oidcId))
+        {
             throw new KavitaException("errors.oidc.missing-external-id");
+        }
 
-        var user = await unitOfWork.UserRepository.GetByExternalId(externalId, AppUserIncludes.UserPreferences);
+        var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences);
         if (user != null) return user;
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
+        {
             throw new KavitaException("errors.oidc.missing-email");
+        }
 
         if (settings.RequireVerifiedEmail && !principal.HasVerifiedEmail())
+        {
             throw new KavitaException("errors.oidc.email-not-verified");
+        }
 
 
         user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user != null)
         {
-            logger.LogInformation("User {UserName} has matched on email to {ExternalId}", user.Id, externalId);
-            user.ExternalId = externalId;
+            logger.LogDebug("User {UserName} has matched on email to {OidcId}", user.Id, oidcId);
+            user.OidcId = oidcId;
             await unitOfWork.CommitAsync();
+
             return user;
         }
 
         // Cannot match on native account, try and create new one
         if (settings.SyncUserSettings && principal.GetAccessRoles().Count == 0)
+        {
             throw new KavitaException("errors.oidc.role-not-assigned");
+        }
 
-        user = await NewUserFromOpenIdConnect(settings, principal, externalId);
+        try
+        {
+            user = await NewUserFromOpenIdConnect(settings, principal, oidcId);
+        }
+        catch (KavitaException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occured creating a new user");
+            throw new KavitaException("errors.oidc.creating-user");
+        }
+
         if (user == null) return null;
 
         var roles = await userManager.GetRolesAsync(user);
         if (roles.Count == 0 || !roles.Contains(PolicyConstants.LoginRole))
+        {
             throw new KavitaException("errors.oidc.disabled-account");
+        }
 
         return user;
     }
@@ -95,7 +119,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var users = await unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
-            user.ExternalId = null;
+            user.OidcId = null;
         }
 
         await unitOfWork.CommitAsync();
@@ -130,12 +154,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (!settings.ProvisionAccounts) return null;
 
         var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
-        if (emailClaim == null || string.IsNullOrWhiteSpace(emailClaim.Value)) return null;
+        if (string.IsNullOrWhiteSpace(emailClaim?.Value)) return null;
 
         var name = await FindBestAvailableName(claimsPrincipal) ?? emailClaim.Value;
         logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name, externalId);
 
-        // TODO: Move to account service, as we're sharing code with AccountController
         var user = new AppUserBuilder(name, emailClaim.Value,
             await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
@@ -154,8 +177,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             await userManager.ConfirmEmailAsync(user, token);
         }
 
-        user.ExternalId = externalId;
-        user.Owner = AppUserOwner.OpenIdConnect;
+        user.OidcId = externalId;
+        user.IdentityProvider = IdentityProvider.OpenIdConnect;
 
         accountService.AddDefaultStreamsToUser(user);
         await accountService.AddDefaultReadingProfileToUser(user);
@@ -164,15 +187,19 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await SetDefaults(settings, user);
 
         await unitOfWork.CommitAsync();
+
         return user;
     }
 
+    /// <summary>
+    /// Assign configured defaults (libraries, age ratings, roles) to the newly created user
+    /// </summary>
     private async Task SetDefaults(OidcConfigDto settings, AppUser user)
     {
         if (settings.SyncUserSettings) return;
 
         logger.LogDebug("Assigning defaults to newly created user; Roles: {Roles}, Libraries: {Libraries}, AgeRating: {AgeRating}, IncludeUnknowns: {IncludeUnknowns}",
-            settings.DefaultRoles, settings.DefaultLibraries, settings.DefaultAgeRating, settings.DefaultIncludeUnknowns);
+            settings.DefaultRoles, settings.DefaultLibraries, settings.DefaultAgeRestriction, settings.DefaultIncludeUnknowns);
 
         // Assign roles
         var errors = await accountService.UpdateRolesForUser(user, settings.DefaultRoles);
@@ -182,7 +209,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await accountService.UpdateLibrariesForUser(user, settings.DefaultLibraries, settings.DefaultRoles.Contains(PolicyConstants.AdminRole));
 
         // Assign age rating
-        user.AgeRestriction = settings.DefaultAgeRating;
+        user.AgeRestriction = settings.DefaultAgeRestriction;
         user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
 
         await unitOfWork.CommitAsync();
@@ -196,14 +223,24 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
         if (defaultAdminUser.Id == user.Id) return;
 
-        logger.LogInformation("Syncing user {UserName} from OIDC", user.UserName);
-        await SyncRoles(claimsPrincipal, user);
-        await SyncLibraries(claimsPrincipal, user);
-        await SyncAgeRestriction(claimsPrincipal, user);
+        logger.LogDebug("Syncing user {UserName} from OIDC", user.UserName);
+        try
+        {
+            await SyncRoles(claimsPrincipal, user);
+            await SyncLibraries(claimsPrincipal, user);
+            await SyncAgeRestriction(claimsPrincipal, user);
 
 
-        if (unitOfWork.HasChanges())
-            await unitOfWork.CommitAsync();
+            if (unitOfWork.HasChanges())
+            {
+                await unitOfWork.CommitAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to sync user {userName} from OIDC}", user.UserName);
+            await unitOfWork.RollbackAsync();
+        }
     }
 
     private async Task SyncRoles(ClaimsPrincipal claimsPrincipal, AppUser user)
@@ -236,7 +273,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
         {
-            logger.LogInformation("User {UserName} is admin, granting access to all age ratings", user.UserName);
+            logger.LogDebug("User {UserName} is admin, granting access to all age ratings", user.UserName);
             user.AgeRestriction = AgeRating.NotApplicable;
             user.AgeRestrictionIncludeUnknowns = true;
             return;
@@ -244,8 +281,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         var ageRatings = claimsPrincipal
             .FindAll(ClaimTypes.Role)
-            .Where(r => r.Value.StartsWith(AgeRatingPrefix))
-            .Select(r => r.Value.TrimPrefix(AgeRatingPrefix))
+            .Where(r => r.Value.StartsWith(AgeRestrictionPrefix))
+            .Select(r => r.Value.TrimPrefix(AgeRestrictionPrefix))
             .ToList();
         logger.LogDebug("Syncing age restriction for user {UserName}, found restrictions {Restrictions}", user.UserName, ageRatings);
 

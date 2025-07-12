@@ -33,7 +33,8 @@ public interface IAccountService
     Task<bool> CanChangeAgeRestriction(AppUser? user);
 
     /// <summary>
-    ///
+    /// Removes access to all libraries, then grant access to all given libraries or all libraries if the user is admin.
+    /// Creates side nav streams as well
     /// </summary>
     /// <param name="user"></param>
     /// <param name="librariesIds"></param>
@@ -168,8 +169,7 @@ public class AccountService : IAccountService
         List<Library> libraries;
         if (hasAdminRole)
         {
-            _logger.LogInformation("{UserName} is admin. Granting access to all libraries",
-                user.UserName);
+            _logger.LogDebug("{UserName} is admin. Granting access to all libraries", user.UserName);
             libraries = allLibraries;
         }
         else

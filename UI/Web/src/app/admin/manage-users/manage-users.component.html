@@ -23,7 +23,14 @@
         <tr>
           <td>
             <div class="-flex flex-row justify-content-center align-items-center">
-              <app-owner-icon [owner]="member.owner" />
+              @switch (member.identityProvider) {
+                @case (IdentityProvider.OpenIdConnect) {
+                  <app-image imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px"></app-image>
+                }
+                @case (IdentityProvider.Kavita) {
+                  <app-image imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px"></app-image>
+                }
+              }
             </div>
           </td>
           <td id="username--{{idx}}">

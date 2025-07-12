@@ -26,5 +26,5 @@ public sealed record UpdateUserDto
     public AgeRestrictionDto AgeRestriction { get; init; } = default!;
     /// <inheritdoc cref="API.Entities.AppUser.Email"/>
     public string? Email { get; set; } = default!;
-    public AppUserOwner Owner { get; init; }
+    public IdentityProvider IdentityProvider { get; init; } = IdentityProvider.Kavita;
 }

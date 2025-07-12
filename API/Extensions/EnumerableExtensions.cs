@@ -69,9 +69,4 @@ public static class EnumerableExtensions
 
         return q;
     }
-
-    public static string AsJoinedString(this IEnumerable<IdentityError> errors)
-    {
-        return string.Join(",", errors.Select(e => e.Description));
-    }
 }

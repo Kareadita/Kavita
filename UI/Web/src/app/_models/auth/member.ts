@@ -1,6 +1,6 @@
 import {AgeRestriction} from '../metadata/age-restriction';
 import {Library} from '../library/library';
-import {UserOwner} from "../user";
+import {IdentityProvider} from "../user";
 
 export interface Member {
   id: number;
@@ -14,5 +14,5 @@ export interface Member {
   libraries: Library[];
   ageRestriction: AgeRestriction;
   isPending: boolean;
-  owner: UserOwner;
+  identityProvider: IdentityProvider;
 }

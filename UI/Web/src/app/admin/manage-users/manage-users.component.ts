@@ -13,7 +13,7 @@ import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
 import {AsyncPipe, NgClass, NgOptimizedImage, TitleCasePipe} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
+import {size, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -25,8 +25,8 @@ import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
-import {UserOwner} from "../../_models/user";
-import {OwnerIconComponent} from "../../shared/_components/owner-icon/owner-icon.component";
+import {IdentityProvider} from "../../_models/user";
+import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
   selector: 'app-manage-users',
@@ -35,7 +35,7 @@ import {OwnerIconComponent} from "../../shared/_components/owner-icon/owner-icon
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe,
-    RoleLocalizedPipe, NgOptimizedImage, OwnerIconComponent]
+    RoleLocalizedPipe, ImageComponent]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -168,5 +168,7 @@ export class ManageUsersComponent implements OnInit {
     return member.roles.filter(item => item != 'Pleb');
   }
 
-  protected readonly UserOwner = UserOwner;
+  protected readonly UserOwner = IdentityProvider;
+  protected readonly IdentityProvider = IdentityProvider;
+  protected readonly size = size;
 }

@@ -94,12 +94,11 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// <summary>
     /// The sub returned the by OIDC provider
     /// </summary>
-    public string? ExternalId { get; set; }
+    public string? OidcId { get; set; }
     /// <summary>
-    /// Describes who manages the account (may further depend on other settings)
+    /// The IdentityProvider for the user, default to <see cref="Enums.IdentityProvider.Kavita"/>
     /// </summary>
-    /// <remarks>Always fallbacks to native</remarks>
-    public AppUserOwner Owner { get; set; } = AppUserOwner.Native;
+    public IdentityProvider IdentityProvider { get; set; } = IdentityProvider.Kavita;
 
 
     /// <summary>

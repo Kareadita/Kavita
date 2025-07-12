@@ -29,7 +29,8 @@ export class LibrarySelectorComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input() member: Member | undefined;
-  preselectedLibraries = input<number[]>([]);
+  preSelectedLibraries = input<number[]>([]);
+
   @Output() selected: EventEmitter<Array<Library>> = new EventEmitter<Array<Library>>();
 
   allLibraries: Library[] = [];
@@ -62,8 +63,8 @@ export class LibrarySelectorComponent implements OnInit {
       });
       this.selectAll = this.selections.selected().length === this.allLibraries.length;
       this.selected.emit(this.selections.selected());
-    } else if (this.preselectedLibraries().length > 0) {
-      this.preselectedLibraries().forEach((id) => {
+    } else if (this.preSelectedLibraries().length > 0) {
+      this.preSelectedLibraries().forEach((id) => {
         const foundLib = this.allLibraries.find(lib => lib.id === id);
         if (foundLib) {
           this.selections.toggle(foundLib, true, (a, b) => a.name === b.name);

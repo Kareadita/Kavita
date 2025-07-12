@@ -25,5 +25,5 @@ public sealed record MemberDto
     public DateTime LastActiveUtc { get; init; }
     public IEnumerable<LibraryDto>? Libraries { get; init; }
     public IEnumerable<string>? Roles { get; init; }
-    public AppUserOwner Owner { get; init; }
+    public IdentityProvider IdentityProvider { get; init; }
 }

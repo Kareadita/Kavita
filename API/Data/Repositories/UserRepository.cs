@@ -107,7 +107,13 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetDashboardStreamsByIds(IList<int> streamIds);
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
-    Task<AppUser?> GetByExternalId(string? externalId, AppUserIncludes includes = AppUserIncludes.None);
+    /// <summary>
+    /// Try getting a user by the id provided by OIDC
+    /// </summary>
+    /// <param name="oidcId"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
 }
 
 public class UserRepository : IUserRepository
@@ -558,12 +564,12 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<AppUser?> GetByExternalId(string? externalId, AppUserIncludes includes = AppUserIncludes.None)
+    public async Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None)
     {
-        if (string.IsNullOrEmpty(externalId)) return null;
+        if (string.IsNullOrEmpty(oidcId)) return null;
 
         return await _context.AppUser
-            .Where(u => u.ExternalId == externalId)
+            .Where(u => u.OidcId == oidcId)
             .Includes(includes)
             .FirstOrDefaultAsync();
     }
@@ -800,7 +806,7 @@ public class UserRepository : IUserRepository
                 LastActiveUtc = u.LastActiveUtc,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
                 IsPending = !u.EmailConfirmed,
-                Owner = u.Owner,
+                IdentityProvider = u.IdentityProvider,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,

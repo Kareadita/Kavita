@@ -8,17 +8,16 @@ import {
 } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
-import {NgOptimizedImage} from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
 import {OidcService} from "../../_services/oidc.service";
+import {ImageComponent} from "../../shared/image/image.component";
 
 
 @Component({
@@ -26,7 +25,7 @@ import {OidcService} from "../../_services/oidc.service";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, NgbTooltip, NgOptimizedImage]
+  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent]
 })
 export class UserLoginComponent implements OnInit {
 

@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix:'oidc.settings'">
+<ng-container *transloco="let t; prefix:'manage-oidc-connect'">
 
   <div class="position-relative">
     <button type="button" class="btn btn-primary position-absolute custom-position" (click)="save()">{{t('save')}}</button>
@@ -10,7 +10,7 @@
     </div>
 
     <h4>{{t('provider')}}</h4>
-    <div class="text-muted">{{t('manual-save')}}</div>
+    <div class="text-muted">{{t('manual-save-label')}}</div>
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('authority'); as formControl) {
@@ -24,7 +24,7 @@
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
               @if (settingsForm.dirty || !settingsForm.untouched) {
-                <div id="oidc-authority-validations" class="invalid-feedback">
+                <div id="invalid-uri-validation" class="invalid-feedback">
                   @if (formControl.errors?.invalidUri) {
                     <div>{{t('invalidUri')}}</div>
                   }
@@ -66,7 +66,7 @@
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('providerName'); as formControl) {
-          <app-setting-item [title]="t('providerName')" [subtitle]="t('providerName-tooltip')">
+          <app-setting-item [title]="t('provider-name')" [subtitle]="t('provider-name-tooltip')">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
@@ -81,7 +81,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('provisionAccounts'); as formControl) {
-          <app-setting-switch [title]="t('provisionAccounts')" [subtitle]="t('provisionAccounts-tooltip')">
+          <app-setting-switch [title]="t('provision-accounts')" [subtitle]="t('provision-accounts-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="provisionAccounts" type="checkbox" class="form-check-input" formControlName="provisionAccounts">
@@ -93,7 +93,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('requireVerifiedEmail'); as formControl) {
-          <app-setting-switch [title]="t('requireVerifiedEmail')" [subtitle]="t('requireVerifiedEmail-tooltip')">
+          <app-setting-switch [title]="t('require-verified-email')" [subtitle]="t('require-verified-email-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="requireVerifiedEmail" type="checkbox" class="form-check-input" formControlName="requireVerifiedEmail">
@@ -105,7 +105,7 @@
 
             <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('syncUserSettings'); as formControl) {
-          <app-setting-switch [title]="t('syncUserSettings')" [subtitle]="t('syncUserSettings-tooltip')">
+          <app-setting-switch [title]="t('sync-user-settings')" [subtitle]="t('sync-user-settings-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="syncUserSettings" type="checkbox" class="form-check-input" formControlName="syncUserSettings">
@@ -117,7 +117,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('autoLogin'); as formControl) {
-          <app-setting-switch [title]="t('autoLogin')" [subtitle]="t('autoLogin-tooltip')">
+          <app-setting-switch [title]="t('auto-login')" [subtitle]="t('auto-login-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="autoLogin" type="checkbox" class="form-check-input" formControlName="autoLogin">
@@ -129,7 +129,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('disablePasswordAuthentication'); as formControl) {
-          <app-setting-switch [title]="t('disablePasswordAuthentication')" [subtitle]="t('disablePasswordAuthentication-tooltip')">
+          <app-setting-switch [title]="t('disable-password-authentication')" [subtitle]="t('disable-password-authentication-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="disablePasswordAuthentication" type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
@@ -147,8 +147,8 @@
     <ng-container>
 
       <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('defaultAgeRating'); as formControl) {
-          <app-setting-item [title]="t('defaultAgeRating')" [subtitle]="t('defaultAgeRating-tooltip')">
+        @if(settingsForm.get('defaultAgeRestriction'); as formControl) {
+          <app-setting-item [title]="t('default-age-restriction')" [subtitle]="t('default-age-restriction-tooltip')">
             <ng-template #view>
               <div>{{formControl.value | ageRating}}</div>
             </ng-template>
@@ -166,7 +166,7 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('defaultIncludeUnknowns'); as formControl) {
-          <app-setting-switch [title]="t('defaultIncludeUnknowns')" [subtitle]="t('defaultIncludeUnknowns-tooltip')">
+          <app-setting-switch [title]="t('default-include-unknowns')" [subtitle]="t('default-include-unknowns-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="defaultIncludeUnknowns" type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
@@ -183,7 +183,7 @@
           </div>
 
           <div class="col-md-6">
-            <app-library-selector (selected)="updateLibraries($event)" [preselectedLibraries]="selectedLibraries()"></app-library-selector>
+            <app-library-selector (selected)="updateLibraries($event)" [preSelectedLibraries]="selectedLibraries()"></app-library-selector>
           </div>
         </div>
       }

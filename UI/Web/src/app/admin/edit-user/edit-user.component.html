@@ -9,7 +9,7 @@
 
     <div class="modal-body scrollable-modal">
 
-      @if (!isLocked() && member().owner === UserOwner.OpenIdConnect) {
+      @if (!isLocked() && member().identityProvider === IdentityProvider.OpenIdConnect) {
         <div class="alert alert-warning" role="alert">
           <strong>{{t('notice')}}</strong> {{t('out-of-sync')}}
         </div>
@@ -25,14 +25,14 @@
         <h4>{{t('account-detail-title')}}</h4>
         <div class="row g-0 mb-2">
           <div class="col-md-4 col-sm-12 pe-4">
-            @if (userForm.get('owner'); as formControl) {
-              <label for="owner" class="form-label">{{t('owner')}}</label>
-              <select class="form-select" id="owner" formControlName="owner">
-                @for (owner of UserOwners; track owner) {
-                  <option [value]="owner">{{owner | userOwnerPipe}}</option>
+            @if (userForm.get('identityProvider'); as formControl) {
+              <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
+              <select class="form-select" id="identityProvider" formControlName="identityProvider">
+                @for (idp of IdentityProviders; track idp) {
+                  <option [value]="idp">{{idp | IdentityProviderPipe}}</option>
                 }
               </select>
-              <span class="text-muted">{{t('owner-tooltip')}}</span>
+              <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
             }
           </div>
           <div class="col-md-4 col-sm-12 pe-4">

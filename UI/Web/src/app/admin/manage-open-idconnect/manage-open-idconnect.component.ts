@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, DestroyRef, effect, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
@@ -26,6 +26,7 @@ import {Library} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
 import {LibrarySelectorComponent} from "../library-selector/library-selector.component";
 import {RoleSelectorComponent} from "../role-selector/role-selector.component";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -39,7 +40,8 @@ import {RoleSelectorComponent} from "../role-selector/role-selector.component";
     RoleSelectorComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
-  styleUrl: './manage-open-idconnect.component.scss'
+  styleUrl: './manage-open-idconnect.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageOpenIDConnectComponent implements OnInit {
 
@@ -56,6 +58,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
     private destroyRef: DestroyRef,
     private metadataService: MetadataService,
+    private toastr: ToastrService,
   ) {
   }
 
@@ -79,7 +82,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.settingsForm.addControl('autoLogin', new FormControl(this.serverSettings.oidcConfig.autoLogin, []));
         this.settingsForm.addControl('disablePasswordAuthentication', new FormControl(this.serverSettings.oidcConfig.disablePasswordAuthentication, []));
         this.settingsForm.addControl('providerName', new FormControl(this.serverSettings.oidcConfig.providerName, []));
-        this.settingsForm.addControl("defaultAgeRating", new FormControl(this.serverSettings.oidcConfig.defaultAgeRating, []));
+        this.settingsForm.addControl("defaultAgeRestriction", new FormControl(this.serverSettings.oidcConfig.defaultAgeRestriction, []));
         this.settingsForm.addControl('defaultIncludeUnknowns', new FormControl(this.serverSettings.oidcConfig.defaultIncludeUnknowns, []));
         this.cdRef.markForCheck();
 
@@ -114,7 +117,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     const data = this.settingsForm.getRawValue();
     const newSettings = Object.assign({}, this.serverSettings);
     newSettings.oidcConfig = data as OidcConfig;
-    newSettings.oidcConfig.defaultAgeRating = parseInt(newSettings.oidcConfig.defaultAgeRating as unknown as string, 10) as AgeRating;
+    newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction as unknown as string, 10) as AgeRating;
     newSettings.oidcConfig.defaultRoles = this.selectedRoles();
     newSettings.oidcConfig.defaultLibraries = this.selectedLibraries();
 
@@ -126,6 +129,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
       },
       error: error => {
         console.error(error);
+        this.toastr.error("errors.generic")
       }
     })
   }
