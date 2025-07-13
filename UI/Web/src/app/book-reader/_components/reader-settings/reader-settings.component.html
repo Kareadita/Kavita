@@ -97,7 +97,7 @@
                   <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
                 </span>
                   <div class="form-check form-switch">
-                    <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help">
+                    <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help" switch>
                     <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? t('on') : t('off')}} </label>
                   </div>
                 </div>
@@ -108,7 +108,7 @@
                         <ng-container [ngTemplateOutlet]="immersiveModeTooltip"></ng-container>
                     </span>
                   <div class="form-check form-switch">
-                    <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help">
+                    <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help" switch>
                     <label>{{settingsForm.get('bookReaderImmersiveMode')?.value ? t('on') : t('off')}} </label>
                   </div>
                 </div>

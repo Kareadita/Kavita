@@ -118,7 +118,7 @@
                   <div class="hstack gap-2">
                     @for (group of fileTypeGroups; track group) {
                       <div class="form-check form-switch">
-                        <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group">
+                        <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group" switch>
                         <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
                       </div>
                     }

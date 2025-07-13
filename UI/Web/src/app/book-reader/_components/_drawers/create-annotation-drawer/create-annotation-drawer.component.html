@@ -7,25 +7,92 @@
   </div>
 
   <div class="offcanvas-body">
-
-    <div class="mx-auto mb-2 context-quote" id="render-target">
-      <div [innerHTML]="totalText()"></div>
-    </div>
-
-    <div class="row g-0">
-      <textarea  rows="3"></textarea>
-    </div>
-
-    <div class="">
-      <div style="width: 120px">
-        Highlight colors
-      </div>
-      <div style="width: 120px">
-        WYSIWYG
+    <form [formGroup]="formGroup" novalidate>
+      <div class="mx-auto context-quote" id="render-target" #renderTarget>
+        <div [innerHTML]="totalText()"></div>
       </div>
 
+      <div class="row g-0 mt-2">
+        <div class="col-6">
 
-    </div>
+            <div class="editor">
+             <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
+            </div>
 
+        </div>
+        <div class="col-6">
+          @let content = markdownContent();
+          @if (content) {
+            <markdown [data]="markdownContent()"></markdown>
+          } @else {
+            <p style="font-style: italic">Nothing to preview</p>
+          }
+        </div>
+
+      </div>
+
+      <div class="row g-0 mt-2">
+        <div class="col-3">
+          <div class="highlight-bar">
+            @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;
+            @for(highlightColor of allHighlightColors; track highlightColor) {
+              <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
+                <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="col-3 me-auto">
+          <div class="toolbar">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('**', '**', 'bold text')">
+                <i class="fas fa-bold" aria-hidden="true"></i>
+                <span class="visually-hidden">Bold</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('*', '*', 'italic text')">
+                <i class="fas fa-italic" aria-hidden="true"></i>
+                <span class="visually-hidden">Italic</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('## ', '', 'Heading')">
+                <i class="fas fa-heading" aria-hidden="true"></i>
+                <span class="visually-hidden">Heading</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('- ', '', 'List item')">
+                <i class="fas fa-list" aria-hidden="true"></i>
+                <span class="visually-hidden">List Item</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('[', '](url)', 'link text')">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                <span class="visually-hidden">Link</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      (click)="insertMarkdown('`', '`', 'code')">
+                <i class="fas fa-code" aria-hidden="true"></i>
+                <span class="visually-hidden">Code</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-auto">
+          <div class="form-check form-switch">
+            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
+            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+          </div>
+        </div>
+
+        <div class="col-auto">
+          <button class="btn btn-secondary me-1">Cancel</button>
+          <button class="btn btn-primary">Save</button>
+        </div>
+
+      </div>
+    </form>
   </div>
 </ng-container>

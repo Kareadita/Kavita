@@ -1,4 +1,4 @@
-import {HightlightColor} from "./annotation";
+import {HighlightColor} from "./annotation";
 
 export interface CreateAnnotationRequest {
   libraryId: number;
@@ -8,7 +8,7 @@ export interface CreateAnnotationRequest {
   endingXPath: string | null;
   selectedText: string | null;
   comment: string | null;
-  hightlightColor: HightlightColor;
+  highlightColor: HighlightColor;
   highlightCount: number;
   containsSpoiler: boolean;
   pageNumber: number;

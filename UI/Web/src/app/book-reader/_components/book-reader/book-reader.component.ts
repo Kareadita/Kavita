@@ -53,7 +53,6 @@ import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.c
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {EpubHighlightComponent} from "../_annotations/epub-highlight/epub-highlight.component";
 import {Annotation} from "../../_models/annotation";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.component";
@@ -63,6 +62,7 @@ import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
 import {ChapterService} from "../../../_services/chapter.service";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
+import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 
 
 interface HistoryPoint {
@@ -114,6 +114,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
+  private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly chapterService = inject(ChapterService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
@@ -1180,32 +1181,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private setupAnnotationElements() {
 
-    const annoationMap: {[key: number]: Annotation} = this.annotations.reduce((map, obj) => {
-      // @ts-ignore
-      map[obj.id] = obj;
-      return map;
-    }, {});
+    this.epubHighlightService.initializeHighlightElements(this.annotations, this.readingContainer);
 
-    // Make the highlight components "real"
-    const highlightElems = this.document.querySelectorAll('app-epub-highlight');
-
-    for (let i = 0; i < highlightElems.length; i++) {
-      const highlight = highlightElems[i];
-      const idAttr = highlight.getAttribute('id');
-
-      // Don't allow highlight injection unless the id is present
-      if (!idAttr) continue;
-
-
-      const annotationId = parseInt(idAttr.replace('epub-highlight-', ''), 10);
-      const componentRef = this.readingContainer.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
-        {projectableNodes: [[document.createTextNode(highlight.innerHTML)]]});
-      if (highlight.parentNode != null) {
-        highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
-      }
-
-      componentRef.instance.annotation.set(annoationMap[annotationId]);
-    }
+    // const annoationMap: {[key: number]: Annotation} = this.annotations.reduce((map, obj) => {
+    //   // @ts-ignore
+    //   map[obj.id] = obj;
+    //   return map;
+    // }, {});
+    //
+    // // Make the highlight components "real"
+    // const highlightElems = this.document.querySelectorAll('app-epub-highlight');
+    //
+    // for (let i = 0; i < highlightElems.length; i++) {
+    //   const highlight = highlightElems[i];
+    //   const idAttr = highlight.getAttribute('id');
+    //
+    //   // Don't allow highlight injection unless the id is present
+    //   if (!idAttr) continue;
+    //
+    //
+    //   const annotationId = parseInt(idAttr.replace('epub-highlight-', ''), 10);
+    //   const componentRef = this.readingContainer.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
+    //     {projectableNodes: [[document.createTextNode(highlight.innerHTML)]]});
+    //   if (highlight.parentNode != null) {
+    //     highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
+    //   }
+    //
+    //   componentRef.instance.annotation.set(annoationMap[annotationId]);
+    // }
   }
 
   private addEmptyPageIfRequired(): void {

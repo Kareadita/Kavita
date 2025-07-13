@@ -1,7 +1,9 @@
-export enum HightlightColor {
+export enum HighlightColor {
   Blue = 1,
   Green = 2,
 }
+
+export const allHighlightColors = [HighlightColor.Blue, HighlightColor.Green];
 
 export interface Annotation {
   id: number;
@@ -9,7 +11,7 @@ export interface Annotation {
   endingXPath: string | null;
   selectedText: string | null;
   comment: string;
-  hightlightColor: HightlightColor;
+  highlightColor: HighlightColor;
   containsSpoiler: boolean;
   pageNumber: number;
 

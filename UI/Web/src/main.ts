@@ -149,7 +149,7 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
-        provideHttpClient(withInterceptorsFromDi(), withFetch())
+        provideHttpClient(withInterceptorsFromDi(), withFetch()),
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));
