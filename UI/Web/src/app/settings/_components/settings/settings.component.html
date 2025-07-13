@@ -150,9 +150,6 @@
         @defer (when fragment === SettingsTabId.Account; prefetch on idle) {
           @if (fragment === SettingsTabId.Account) {
             <div class="col-xxl-6 col-12">
-              @if (accountService.currentUserSignal()?.identityProvider === IdentityProvider.OpenIdConnect) {
-                <p class="alert alert-warning">{{t(('oidc-provided-identity'))}}</p>
-              }
               <app-change-email></app-change-email>
               <div class="setting-section-break"></div>
               <app-change-password></app-change-password>

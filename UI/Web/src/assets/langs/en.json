@@ -1778,8 +1778,7 @@
         "theme": "Theme",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
-        "mal-stack-import": "MAL Stack",
-        "oidc-provided-identity": "Your identity is provided by OIDC, some settings cannot be changed. Contact your administrator"
+        "mal-stack-import": "MAL Stack"
     },
 
     "collection-detail": {

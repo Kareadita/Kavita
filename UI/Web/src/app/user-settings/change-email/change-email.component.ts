@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {shareReplay} from 'rxjs';
-import {IdentityProvider, User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ApiKeyComponent} from '../api-key/api-key.component';
@@ -42,7 +42,7 @@ export class ChangeEmailComponent implements OnInit {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
       this.user = user!;
-      this.canEdit = !this.accountService.hasReadOnlyRole(user!) && user?.identityProvider !== IdentityProvider.OpenIdConnect;
+      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));
       this.cdRef.markForCheck();
