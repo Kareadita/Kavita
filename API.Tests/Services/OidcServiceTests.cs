@@ -357,7 +357,7 @@ public class OidcServiceTests: AbstractDbTest
         await userManager.CreateAsync(user);
         await userManager.CreateAsync(defaultAdmin);
 
-        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), UnitOfWork, Mapper);
+        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), UnitOfWork, Mapper, Substitute.For<ILocalizationService>());
         var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, UnitOfWork, accountService);
         return (oidcService, user, accountService, userManager);
     }

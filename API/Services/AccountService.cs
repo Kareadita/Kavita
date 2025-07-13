@@ -33,6 +33,15 @@ public interface IAccountService
     Task<bool> CanChangeAgeRestriction(AppUser? user);
 
     /// <summary>
+    ///
+    /// </summary>
+    /// <param name="actingUserId">The user who is changing the identity</param>
+    /// <param name="user">the user being changed</param>
+    /// <param name="identityProvider"> the provider being changed to</param>
+    /// <returns>If true, user should not be updated by kavita (anymore)</returns>
+    /// <exception cref="KavitaException">Throws if invalid actions are being performed</exception>
+    Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider);
+    /// <summary>
     /// Removes access to all libraries, then grant access to all given libraries or all libraries if the user is admin.
     /// Creates side nav streams as well
     /// </summary>
@@ -41,6 +50,7 @@ public interface IAccountService
     /// <param name="hasAdminRole"></param>
     /// <returns></returns>
     /// <remarks>Ensure that the users SideNavStreams are loaded</remarks>
+    /// <remarks>Does NOT commit</remarks>
     Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
     Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
     void AddDefaultStreamsToUser(AppUser user);
@@ -49,6 +59,7 @@ public interface IAccountService
 
 public class AccountService : IAccountService
 {
+    private readonly ILocalizationService _localizationService;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<AccountService> _logger;
     private readonly IUnitOfWork _unitOfWork;
@@ -56,8 +67,9 @@ public class AccountService : IAccountService
     public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
 
     public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork,
-        IMapper mapper)
+        IMapper mapper, ILocalizationService localizationService)
     {
+        _localizationService = localizationService;
         _userManager = userManager;
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -163,9 +175,39 @@ public class AccountService : IAccountService
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
+    public async Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider)
+    {
+        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        if (user.Id == defaultAdminUser.Id)
+        {
+            throw new KavitaException(await _localizationService.Translate(actingUserId, "cannot-change-identity-provider-original-user"));
+        }
+
+        // Allow changes if users aren't being synced
+        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (!oidcSettings.SyncUserSettings)
+        {
+            user.IdentityProvider = identityProvider;
+            await _unitOfWork.CommitAsync();
+            return false;
+        }
+
+        // Don't allow changes to the user if they're managed by oidc, and their identity provider isn't being changed to something else
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect && identityProvider == IdentityProvider.OpenIdConnect)
+        {
+            throw new KavitaException(await _localizationService.Translate(actingUserId, "oidc-managed"));
+        }
+
+        user.IdentityProvider = identityProvider;
+        await _unitOfWork.CommitAsync();
+        return user.IdentityProvider == IdentityProvider.OpenIdConnect;
+    }
+
     public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole)
     {
         var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
+        var currentLibrary = allLibraries.Where(l => l.AppUsers.Contains(user)).ToList();
+
         List<Library> libraries;
         if (hasAdminRole)
         {
@@ -174,20 +216,22 @@ public class AccountService : IAccountService
         }
         else
         {
-            // Remove user from all libraries
-            foreach (var lib in allLibraries)
-            {
-                lib.AppUsers ??= new List<AppUser>();
-                lib.AppUsers.Remove(user);
-                user.RemoveSideNavFromLibrary(lib);
-            }
-
             libraries = allLibraries.Where(lib => librariesIds.Contains(lib.Id)).ToList();
         }
 
-        foreach (var lib in libraries)
+        var toRemove = currentLibrary.Except(libraries);
+        var toAdd = libraries.Except(currentLibrary);
+
+        foreach (var lib in toRemove)
         {
-            lib.AppUsers ??= new List<AppUser>();
+            lib.AppUsers ??= [];
+            lib.AppUsers.Remove(user);
+            user.RemoveSideNavFromLibrary(lib);
+        }
+
+        foreach (var lib in toAdd)
+        {
+            lib.AppUsers ??= [];
             lib.AppUsers.Add(user);
             user.CreateSideNavFromLibrary(lib);
         }

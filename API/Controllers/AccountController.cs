@@ -562,26 +562,14 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
 
-        // Disallowed editing users owned by OIDC
-        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-        if (user.IdentityProvider == IdentityProvider.OpenIdConnect && dto.IdentityProvider != IdentityProvider.Kavita && oidcSettings.SyncUserSettings)
+
+        try
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "oidc-managed"));
+            if (await _accountService.ChangeIdentityProvider(User.GetUserId(), user, dto.IdentityProvider)) return Ok();
         }
-
-        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (user.Id == defaultAdminUser.Id && dto.IdentityProvider != IdentityProvider.Kavita)
+        catch (KavitaException exception)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "cannot-change-identity-provider-original-user"));
-        }
-
-        user.IdentityProvider = dto.IdentityProvider;
-
-        if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
-        {
-            // Do not change any other fields when the user is owned by OIDC
-            await _unitOfWork.CommitAsync();
-            return Ok();
+            return BadRequest(exception.Message);
         }
 
         // Check if username is changing
