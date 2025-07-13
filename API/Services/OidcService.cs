@@ -44,9 +44,9 @@ public interface IOidcService
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork, IAccountService accountService): IOidcService
 {
-    private const string LibraryAccessPrefix = "library-";
-    private const string AgeRestrictionPrefix = "age-restriction-";
-    private const string IncludeUnknowns = AgeRestrictionPrefix + "include-unknowns";
+    public const string LibraryAccessPrefix = "library-";
+    public const string AgeRestrictionPrefix = "age-restriction-";
+    public const string IncludeUnknowns = AgeRestrictionPrefix + "include-unknowns";
 
     public async Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal)
     {
@@ -125,7 +125,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
-    private async Task<string?> FindBestAvailableName(ClaimsPrincipal claimsPrincipal)
+    public async Task<string?> FindBestAvailableName(ClaimsPrincipal claimsPrincipal)
     {
         var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
         if (await IsNameAvailable(name)) return name;
@@ -230,7 +230,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             await SyncLibraries(claimsPrincipal, user);
             await SyncAgeRestriction(claimsPrincipal, user);
 
-
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
@@ -238,7 +237,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to sync user {userName} from OIDC}", user.UserName);
+            logger.LogError(ex, "Failed to sync user {UserName} from OIDC", user.UserName);
             await unitOfWork.RollbackAsync();
         }
     }
@@ -263,7 +262,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         logger.LogDebug("Syncing libraries for user {UserName}, found library roles {Roles}", user.UserName, libraryAccess);
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).ToList();
+        // District as a failsafe for duplicate roles in the JWT
+        var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).Distinct().ToList();
 
         var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
@@ -290,7 +290,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         foreach (var ar in ageRatings)
         {
-            if (!Enum.TryParse(ar, out AgeRating ageRating)) continue;
+            if (!EnumExtensions.TryParse(ar, out AgeRating ageRating))
+            {
+                logger.LogDebug("Age Restriction role configured that failed to map to a known age rating: {RoleName}", OidcService.AgeRestrictionPrefix+ar);
+                continue;
+            }
 
             if (ageRating > highestAgeRating)
             {
