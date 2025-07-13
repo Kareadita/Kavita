@@ -147,10 +147,6 @@ export class ManageOpenIDConnectComponent implements OnInit {
         return of({'invalidUri': {'uri': uri}} as ValidationErrors)
       }
 
-      if (uri.endsWith('/')) {
-        uri = uri.substring(0, uri.length - 1);
-      }
-
       return this.settingsService.ifValidAuthority(uri).pipe(map(ok => {
         if (ok) return null;
 

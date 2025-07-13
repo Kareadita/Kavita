@@ -368,7 +368,7 @@ public class SettingsService : ISettingsService
         {
             var json = await url.GetStringAsync();
             var config = OpenIdConnectConfiguration.Create(json);
-            return config.Issuer == Configuration.OidcAuthority;
+            return config.Issuer == authority;
         }
         catch (Exception e)
         {

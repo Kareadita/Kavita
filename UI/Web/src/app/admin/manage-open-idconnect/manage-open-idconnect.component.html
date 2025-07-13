@@ -153,7 +153,7 @@
               <div>{{formControl.value | ageRating}}</div>
             </ng-template>
             <ng-template #edit>
-              <select class="form-select" formControlName="defaultAgeRating">
+              <select class="form-select" formControlName="defaultAgeRestriction">
                 <option value="-1">{{t('no-restriction')}}</option>
                 @for (ageRating of ageRatings(); track ageRating.value) {
                   <option [value]="ageRating.value">{{ageRating.title}}</option>
@@ -176,7 +176,7 @@
         }
       </div>
 
-      @if (this.oidcSettings()) {
+      @if (oidcSettings()) {
         <div class="row g-0 mb-3">
           <div class="col-md-6 pe-4">
             <app-role-selector (selected)="updateRoles($event)" [allowAdmin]="true" [preSelectedRoles]="selectedRoles()"></app-role-selector>
