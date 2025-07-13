@@ -26,7 +26,7 @@
               @if (settingsForm.dirty || !settingsForm.untouched) {
                 <div id="invalid-uri-validation" class="invalid-feedback">
                   @if (formControl.errors?.invalidUri) {
-                    <div>{{t('invalidUri')}}</div>
+                    <div>{{t('invalid-uri')}}</div>
                   }
                 </div>
               }
@@ -48,8 +48,8 @@
 
               @if (settingsForm.dirty || !settingsForm.untouched) {
                 <div id="oidc-clientId-validations" class="invalid-feedback">
-                  @if (formControl.errors?.requiredIf) {
-                    <div>{{t('field-required', {name: 'clientId', other: formControl.errors?.requiredIf.other})}}</div>
+                  @if (formControl.errors && formControl.errors.requiredIf) {
+                    <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
                   }
                 </div>
               }

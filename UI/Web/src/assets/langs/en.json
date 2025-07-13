@@ -22,8 +22,8 @@
         "restart-required": "Changing Authority, or Client ID requires a manual restart of Kavita to take effect.",
         "provider": "Provider",
         "behaviour": "Behaviour",
-        "field-required": "{{name}} is required when {{other}} is set",
-        "invalidUri": "The provider URL is not valid",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority": "Authority",
@@ -2329,7 +2329,7 @@
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Description",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
@@ -3041,9 +3041,11 @@
 
     "validation": {
         "required-field": "This field is required",
+        "other-field-required": "{{name}} is required when {{other}} is set",
         "valid-email": "This must be a valid email",
         "password-validation": "Password must be between 6 and 256 characters in length",
-        "year-validation": "This must be a valid year greater than 1000 and 4 characters long"
+        "year-validation": "This must be a valid year greater than 1000 and 4 characters long",
+        "invalid-uri": "The provided uri is invalid"
     },
 
     "entity-type": {
