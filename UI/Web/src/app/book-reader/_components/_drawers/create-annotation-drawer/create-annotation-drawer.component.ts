@@ -17,7 +17,7 @@ import {CreateAnnotationRequest} from "../../../_models/create-annotation-reques
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {MarkdownComponent, MarkdownService, MARKED_OPTIONS, provideMarkdown} from 'ngx-markdown';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DOCUMENT, NgClass, NgStyle} from "@angular/common";
@@ -25,6 +25,7 @@ import {allHighlightColors, Annotation, HighlightColor} from "../../../_models/a
 import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
+import {ReaderService} from "../../../../_services/reader.service";
 
 @Component({
     selector: 'app-create-annotation-drawer',
@@ -54,8 +55,8 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
   })
   export class CreateAnnotationDrawerComponent {
     private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
-    private readonly fb = inject(FormBuilder);
     private readonly markdownService = inject(MarkdownService);
+    private readonly readerService = inject(ReaderService);
     private readonly destroyRef = inject(DestroyRef);
     private readonly epubHighlightService = inject(EpubHighlightService);
     private readonly document = inject(DOCUMENT);
@@ -175,9 +176,18 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
         }, 100);
         return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-0">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
       });
+    }
 
 
+    save() {
+      const annotation = this.createAnnotation();
+      if (!annotation) return;
 
+      annotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+      annotation.comment = this.formGroup.get('note')!.value;
+      this.readerService.createAnnotation(annotation).subscribe(res => {
+        this.close(); // TODO: Maybe pass the state back?
+      });
     }
 
 

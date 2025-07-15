@@ -1,17 +1,13 @@
 import {Component, input, model, output} from '@angular/core';
-import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
-import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-annotation-card',
-  imports: [
-    UtcToLocaleDatePipe,
-    DatePipe
-  ],
+  imports: [],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss'
 })
 export class AnnotationCardComponent {
+  annotation = input.required()
   position = input.required<any>();
   annotationText = input<string>('This is test text');
   createdDate = input<string>('01-01-0001');

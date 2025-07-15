@@ -983,6 +983,46 @@ public class ReaderController : BaseApiController
         return Ok();
     }
 
+    [HttpPost("create-annotation")]
+    public async Task<ActionResult<AnnotationDto>> CreateAnnotation(CreateAnnotationRequest dto)
+    {
+        try
+        {
+            if (dto.HighlightCount == 0 || string.IsNullOrWhiteSpace(dto.SelectedText))
+            {
+                return BadRequest("Invalid Payload");
+            }
+
+
+
+            var annotation = new AppUserAnnotation()
+            {
+                XPath = dto.XPath,
+                EndingXPath = dto.EndingXPath,
+                ChapterId = dto.ChapterId,
+                SeriesId = dto.SeriesId,
+                VolumeId = dto.VolumeId,
+                HighlightCount = dto.HighlightCount,
+                SelectedText = dto.SelectedText,
+                Comment = dto.Comment,
+                ContainsSpoiler = dto.ContainsSpoiler,
+                PageNumber = dto.PageNumber,
+                HighlightColor = dto.HighlightColor,
+                AppUserId = User.GetUserId()
+            };
+
+            _unitOfWork.AnnotationRepository.Attach(annotation);
+            await _unitOfWork.CommitAsync();
+
+            return Ok(await _unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest("Failed to create annotation, try again");
+        }
+
+    }
+
     /// <summary>
     /// Get all progress events for a given chapter
     /// </summary>

@@ -34,6 +34,7 @@ public interface IUnitOfWork
     IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository { get; }
     IEmailHistoryRepository EmailHistoryRepository { get; }
     IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
+    IAnnotationRepository AnnotationRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -76,6 +77,7 @@ public class UnitOfWork : IUnitOfWork
         ExternalSeriesMetadataRepository = new ExternalSeriesMetadataRepository(_context, _mapper);
         EmailHistoryRepository = new EmailHistoryRepository(_context, _mapper);
         AppUserReadingProfileRepository = new AppUserReadingProfileRepository(_context, _mapper);
+        AnnotationRepository = new AnnotationRepository(_context, _mapper);
     }
 
     /// <summary>
@@ -106,6 +108,7 @@ public class UnitOfWork : IUnitOfWork
     public IExternalSeriesMetadataRepository ExternalSeriesMetadataRepository { get; }
     public IEmailHistoryRepository EmailHistoryRepository { get; }
     public IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
+    public IAnnotationRepository AnnotationRepository { get; }
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

@@ -341,7 +341,7 @@ export class ReaderService {
   }
 
   createAnnotation(data: CreateAnnotationRequest) {
-    return this.httpClient.post<Array<Annotation>>(this.baseUrl + 'reader/create-annotation', data);
+    return this.httpClient.post<Annotation>(this.baseUrl + 'reader/create-annotation', data);
   }
 
   getElementFromXPath(path: string) {

@@ -14,10 +14,9 @@
 
       <div class="row g-0 mt-2">
         <div class="col-6">
-
-            <div class="editor">
-             <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
-            </div>
+          <div class="editor">
+           <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
+          </div>
 
         </div>
         <div class="col-6">
@@ -40,6 +39,7 @@
                 <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
               </button>
             }
+            <!-- Potentially a dot that acts as a custom, on save will save as a custom color -->
           </div>
         </div>
         <div class="col-3 me-auto">
@@ -75,6 +75,10 @@
                 <i class="fas fa-code" aria-hidden="true"></i>
                 <span class="visually-hidden">Code</span>
               </button>
+
+              <!-- Additional needs: Bullet points, Image?, Table, quote?, Strikethru-->
+              <!-- Additional functionality - On enter, check if we need to append text -->
+
             </div>
           </div>
         </div>
@@ -88,8 +92,8 @@
         </div>
 
         <div class="col-auto">
-          <button class="btn btn-secondary me-1">Cancel</button>
-          <button class="btn btn-primary">Save</button>
+          <button class="btn btn-secondary me-1" (click)="close()">Cancel</button>
+          <button class="btn btn-primary" (click)="save()">Save</button>
         </div>
 
       </div>

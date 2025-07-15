@@ -32,4 +32,6 @@ public sealed record CreateAnnotationRequest
     public HightlightColor HighlightColor { get; set; }
 
     public required int ChapterId { get; set; }
+    public required int VolumeId { get; set; }
+    public required int SeriesId { get; set; }
 }

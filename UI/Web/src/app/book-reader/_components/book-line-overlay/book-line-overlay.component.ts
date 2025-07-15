@@ -142,6 +142,7 @@ export class BookLineOverlayComponent implements OnInit {
         chapterId: this.chapterId,
         libraryId: this.libraryId,
         volumeId: this.volumeId,
+        seriesId: this.seriesId,
         comment: null,
         selectedText: this.selectedText,
         containsSpoiler: false,

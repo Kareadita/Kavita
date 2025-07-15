@@ -3,9 +3,9 @@
       (mouseenter)="onMouseEnter()"
       (mouseleave)="onMouseLeave()">
   @if (showIcon()) {
-    <i class="fa-solid fa-pen-clip" role="button" (click)="toggleHighlight()"></i>
+    <i class="fa-solid fa-pen-clip icon-spacer" role="button" (click)="toggleHighlight()"></i>
   }
-  <span [class]="highlightClasses()" [attr.data-highlight-color]="annotation()!.highlightColor | highlightColor">
+  <span [class]="highlightClasses()" [attr.data-highlight-color]="annotation()!.highlightColor | highlightColor" (click)="viewAnnotation()">
     <ng-content />
   </span>
 </span>
