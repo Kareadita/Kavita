@@ -124,10 +124,7 @@ export class DashboardComponent implements OnInit {
 
     this.licenseService.hasValidLicense()
       .pipe(
-        filter((hasLic: boolean) => {
-          console.log(hasLic);
-          return hasLic;
-        }),
+        filter((hasLic: boolean) => hasLic),
         switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
       ).subscribe((hasExpired: boolean) => {
       if (hasExpired) {
