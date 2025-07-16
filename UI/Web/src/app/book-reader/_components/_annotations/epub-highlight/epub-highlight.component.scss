@@ -3,31 +3,51 @@
   font-size: 0.85rem;
 }
 
+$blue-color: rgba(59, 130, 246, 0.3);
+$green-color: rgba(34, 197, 94, 0.3);
+$blue-color-hover: rgba(59, 130, 246, 0.5);
+$green-color-hover: rgba(34, 197, 94, 0.5);
+
 .epub-highlight {
   position: relative;
   display: inline;
   transition: all 0.2s ease-in-out;
 
   .epub-highlight-blue {
-    background-color: rgba(59, 130, 246, 0.3);
+    background-color: $blue-color;
     border-radius: 2px;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: rgba(59, 130, 246, 0.5);
+      background-color: $blue-color-hover;
     }
   }
 
   .epub-highlight-green {
-    background-color: rgba(34, 197, 94, 0.3);
+    background-color: $green-color;
     border-radius: 2px;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: rgba(34, 197, 94, 0.5);
+      background-color: $green-color-hover;
     }
   }
 }
+
+.icon-color--blue {
+  color: $blue-color !important;
+  &:hover {
+    color: $blue-color-hover !important;
+  }
+}
+
+.icon-color--green {
+  color: $green-color !important;
+  &:hover {
+    color: $green-color-hover !important;
+  }
+}
+
 
 // Global styles for annotation cards (since they're appended to body)
 ::ng-deep .annotation-card,

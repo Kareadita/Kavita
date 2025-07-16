@@ -49,6 +49,11 @@ export class EpubHighlightComponent {
     return `${colorClass}`;
   });
 
+  iconClasses = computed(() => {
+
+    return `fa-solid fa-pen-clip icon-spacer icon-color--${this.highlightColorPipe.transform(this.annotation()!.highlightColor)}`;
+  });
+
   viewAnnotation() {
     if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Tablet) {
       // Open a modal to view the annotation?

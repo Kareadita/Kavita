@@ -10,22 +10,25 @@
     <form [formGroup]="formGroup" novalidate>
       <div class="mx-auto context-quote" id="render-target" #renderTarget>
         <div [innerHTML]="totalText()"></div>
+        <hr class="setting-section-break" />
       </div>
 
-      <div class="row g-0 mt-2">
-        <div class="col-6">
-          <div class="editor">
-           <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
-          </div>
+      <div class="row g-0 mt-2 ms-3 me-3">
 
-        </div>
-        <div class="col-6">
+        <div class="col-12">
           @let content = markdownContent();
           @if (content) {
             <markdown [data]="markdownContent()"></markdown>
           } @else {
             <p style="font-style: italic">Nothing to preview</p>
           }
+        </div>
+
+        <div class="col-12">
+          <div class="editor">
+            <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
+          </div>
+
         </div>
 
       </div>
