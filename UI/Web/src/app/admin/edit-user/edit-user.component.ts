@@ -25,7 +25,7 @@ import {map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerSettings} from "../_models/server-settings";
 import {IdentityProvider, IdentityProviders} from "../../_models/user";
-import {IdentityProviderPipePipe} from "../../_pipes/user-owner.pipe";
+import {IdentityProviderPipePipe} from "../../_pipes/identity-provider.pipe";
 
 const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

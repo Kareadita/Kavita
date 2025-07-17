@@ -210,7 +210,8 @@ export class AccountService {
   loginByToken(token: string) {
     const headers = new HttpHeaders({
       "Authorization": `Bearer ${token}`
-    })
+    });
+
     return this.httpClient.get<User>(this.baseUrl + 'account', {headers}).pipe(
       tap((response: User) => {
         const user = response;

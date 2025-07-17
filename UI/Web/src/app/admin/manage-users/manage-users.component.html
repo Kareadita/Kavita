@@ -22,7 +22,7 @@
       @for(member of members; track member.username + member.lastActiveUtc + member.roles.length; let idx = $index) {
         <tr>
           <td>
-            <div class="-flex flex-row justify-content-center align-items-center">
+            <div class="d-flex flex-row justify-content-center align-items-center">
               @switch (member.identityProvider) {
                 @case (IdentityProvider.OpenIdConnect) {
                   <app-image imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px"></app-image>

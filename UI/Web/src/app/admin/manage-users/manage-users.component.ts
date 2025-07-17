@@ -168,7 +168,5 @@ export class ManageUsersComponent implements OnInit {
     return member.roles.filter(item => item != 'Pleb');
   }
 
-  protected readonly UserOwner = IdentityProvider;
   protected readonly IdentityProvider = IdentityProvider;
-  protected readonly size = size;
 }

@@ -118,7 +118,7 @@ export class OidcService {
   }
 
   logout() {
-    if (this.token) {
+    if (this.token()) {
       this.oauth2.logOut();
     }
   }
@@ -127,7 +127,7 @@ export class OidcService {
     return this.httpClient.get<OidcPublicConfig>(this.apiBaseUrl + "oidc/config");
   }
 
-  get token() {
+  token() {
     return this.oauth2.getAccessToken();
   }
 

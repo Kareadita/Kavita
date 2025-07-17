@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnInit, signal} from '@angular/core';
 import {SplashContainerComponent} from "../_components/splash-container/splash-container.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -17,14 +17,14 @@ import {take} from "rxjs/operators";
 })
 export class OidcCallbackComponent implements OnInit {
 
+  private readonly accountService = inject(AccountService);
+  private readonly router = inject(Router);
+  private readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   showSplash = signal(false);
 
-  constructor(
-    private accountService: AccountService,
-    private router: Router,
-    private navService: NavService,
-    private readonly cdRef: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
   }

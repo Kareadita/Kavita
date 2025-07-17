@@ -83,6 +83,6 @@ export class SettingsService {
   ifValidAuthority(authority: string) {
     if (authority === '' || authority === undefined || authority === null) return of(false);
 
-    return this.http.post<boolean>(this.baseUrl + 'oidc/is-valid-authority', {authority});
+    return this.http.post<boolean>(this.baseUrl + 'oidc/is-valid-authority', {authority}, TextResonse).pipe(map(r => r + '' == 'true'));
   }
 }

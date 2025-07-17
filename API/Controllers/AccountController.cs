@@ -101,7 +101,14 @@ public class AccountController : BaseApiController
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
         // Update LastActive on account
-        user.UpdateLastActive();
+        try
+        {
+            user.UpdateLastActive();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
+        }
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
@@ -289,7 +296,14 @@ public class AccountController : BaseApiController
         }
 
         // Update LastActive on account
-        user.UpdateLastActive();
+        try
+        {
+            user.UpdateLastActive();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
+        }
 
         // NOTE: This can likely be removed
         user.UserPreferences ??= new AppUserPreferences

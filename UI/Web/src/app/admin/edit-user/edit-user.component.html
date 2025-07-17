@@ -29,7 +29,7 @@
               <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
               <select class="form-select" id="identityProvider" formControlName="identityProvider">
                 @for (idp of IdentityProviders; track idp) {
-                  <option [value]="idp">{{idp | IdentityProviderPipe}}</option>
+                  <option [value]="idp">{{idp | identityProviderPipe}}</option>
                 }
               </select>
               <span class="text-muted">{{t('identity-provider-tooltip')}}</span>

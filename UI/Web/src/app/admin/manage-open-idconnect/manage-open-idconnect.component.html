@@ -14,7 +14,7 @@
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('authority'); as formControl) {
-          <app-setting-item [title]="t('authority')" [subtitle]="t('authority-tooltip')">
+          <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
@@ -37,17 +37,17 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('clientId'); as formControl) {
-          <app-setting-item [title]="t('clientId')" [subtitle]="t('clientId-tooltip')">
+          <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
             <ng-template #edit>
-              <input id="oid-clientId" aria-describedby="oidc-clientId-validations" class="form-control"
+              <input id="oid-client-id" aria-describedby="oidc-client-id-validations" class="form-control"
                      formControlName="clientId" type="text"
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
               @if (settingsForm.dirty || !settingsForm.untouched) {
-                <div id="oidc-clientId-validations" class="invalid-feedback">
+                <div id="oidc-client-id-validations" class="invalid-feedback">
                   @if (formControl.errors && formControl.errors.requiredIf) {
                     <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
                   }
@@ -62,16 +62,16 @@
     </ng-container>
 
     <div class="setting-section-break"></div>
-    <h4>{{t('behaviour')}}</h4>
+    <h4>{{t('behavior-title')}}</h4>
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('providerName'); as formControl) {
-          <app-setting-item [title]="t('provider-name')" [subtitle]="t('provider-name-tooltip')">
+          <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
             <ng-template #edit>
-              <input id="oid-providerName" aria-describedby="oidc-providerName-validations" class="form-control"
+              <input id="oid-provider-name" aria-describedby="oidc-provider-name-validations" class="form-control"
                      formControlName="providerName" type="text"
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
             </ng-template>
@@ -81,10 +81,10 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('provisionAccounts'); as formControl) {
-          <app-setting-switch [title]="t('provision-accounts')" [subtitle]="t('provision-accounts-tooltip')">
+          <app-setting-switch [title]="t('provision-accounts-label')" [subtitle]="t('provision-accounts-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="provisionAccounts" type="checkbox" class="form-check-input" formControlName="provisionAccounts">
+                <input id="provision-accounts" type="checkbox" class="form-check-input" formControlName="provisionAccounts">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -93,10 +93,10 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('requireVerifiedEmail'); as formControl) {
-          <app-setting-switch [title]="t('require-verified-email')" [subtitle]="t('require-verified-email-tooltip')">
+          <app-setting-switch [title]="t('require-verified-email-label')" [subtitle]="t('require-verified-email-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="requireVerifiedEmail" type="checkbox" class="form-check-input" formControlName="requireVerifiedEmail">
+                <input id="require-verified-email" type="checkbox" class="form-check-input" formControlName="requireVerifiedEmail">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -105,10 +105,10 @@
 
             <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('syncUserSettings'); as formControl) {
-          <app-setting-switch [title]="t('sync-user-settings')" [subtitle]="t('sync-user-settings-tooltip')">
+          <app-setting-switch [title]="t('sync-user-settings-label')" [subtitle]="t('sync-user-settings-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="syncUserSettings" type="checkbox" class="form-check-input" formControlName="syncUserSettings">
+                <input id="sync-user-settings" type="checkbox" class="form-check-input" formControlName="syncUserSettings">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -117,10 +117,10 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('autoLogin'); as formControl) {
-          <app-setting-switch [title]="t('auto-login')" [subtitle]="t('auto-login-tooltip')">
+          <app-setting-switch [title]="t('auto-login-label')" [subtitle]="t('auto-login-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="autoLogin" type="checkbox" class="form-check-input" formControlName="autoLogin">
+                <input id="auto-login" type="checkbox" class="form-check-input" formControlName="autoLogin">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -129,10 +129,10 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('disablePasswordAuthentication'); as formControl) {
-          <app-setting-switch [title]="t('disable-password-authentication')" [subtitle]="t('disable-password-authentication-tooltip')">
+          <app-setting-switch [title]="t('disable-password-authentication-label')" [subtitle]="t('disable-password-authentication-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="disablePasswordAuthentication" type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
+                <input id="disable-password-authentication" type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -142,13 +142,13 @@
     </ng-container>
 
     <div class="setting-section-break"></div>
-    <h4>{{t('defaults')}}</h4>
+    <h4>{{t('defaults-title')}}</h4>
     <div class="text-muted">{{t('defaults-requirement')}}</div>
     <ng-container>
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('defaultAgeRestriction'); as formControl) {
-          <app-setting-item [title]="t('default-age-restriction')" [subtitle]="t('default-age-restriction-tooltip')">
+          <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')">
             <ng-template #view>
               <div>{{formControl.value | ageRating}}</div>
             </ng-template>
@@ -166,10 +166,10 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('defaultIncludeUnknowns'); as formControl) {
-          <app-setting-switch [title]="t('default-include-unknowns')" [subtitle]="t('default-include-unknowns-tooltip')">
+          <app-setting-switch [title]="t('default-include-unknowns-label')" [subtitle]="t('default-include-unknowns-tooltip')">
             <ng-template #switch>
               <div class="form-check form-switch float-end">
-                <input id="defaultIncludeUnknowns" type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
+                <input id="default-include-unknowns" type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
               </div>
             </ng-template>
           </app-setting-switch>

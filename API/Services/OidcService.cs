@@ -262,7 +262,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         logger.LogDebug("Syncing libraries for user {UserName}, found library roles {Roles}", user.UserName, libraryAccess);
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        // District as a failsafe for duplicate roles in the JWT
+        // Distinct to ensure each library (id) is only present once
         var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).Distinct().ToList();
 
         var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);

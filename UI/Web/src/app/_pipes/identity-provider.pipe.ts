@@ -3,7 +3,7 @@ import {IdentityProvider} from "../_models/user";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({
-  name: 'IdentityProviderPipe'
+  name: 'identityProviderPipe'
 })
 export class IdentityProviderPipePipe implements PipeTransform {
 

@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
@@ -45,22 +54,19 @@ import {ToastrService} from "ngx-toastr";
 })
 export class ManageOpenIDConnectComponent implements OnInit {
 
+  private readonly settingsService = inject(SettingsService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
+  private readonly toastr = inject(ToastrService);
+
   serverSettings!: ServerSettings;
-  oidcSettings = signal<OidcConfig | undefined>(undefined);
   settingsForm: FormGroup = new FormGroup({});
 
+  oidcSettings = signal<OidcConfig | undefined>(undefined);
   ageRatings = signal<AgeRatingDto[]>([]);
   selectedLibraries = signal<number[]>([]);
   selectedRoles = signal<string[]>([]);
-
-  constructor(
-    private settingsService: SettingsService,
-    private cdRef: ChangeDetectorRef,
-    private destroyRef: DestroyRef,
-    private metadataService: MetadataService,
-    private toastr: ToastrService,
-  ) {
-  }
 
   ngOnInit(): void {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -117,7 +123,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     const data = this.settingsForm.getRawValue();
     const newSettings = Object.assign({}, this.serverSettings);
     newSettings.oidcConfig = data as OidcConfig;
-    newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction as unknown as string, 10) as AgeRating;
+    newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction + '', 10) as AgeRating;
     newSettings.oidcConfig.defaultRoles = this.selectedRoles();
     newSettings.oidcConfig.defaultLibraries = this.selectedLibraries();
 

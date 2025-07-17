@@ -12,6 +12,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
 import {WikiLink} from "../_models/wiki";
 import {OidcService} from "./oidc.service";
+import {AuthGuard} from "../_guards/auth.guard";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -187,12 +188,12 @@ export class NavService {
     this.showSideNav();
 
     // Check if user came here from another url, else send to library route
-    const pageResume = localStorage.getItem('kavita--auth-intersection-url');
+    const pageResume = localStorage.getItem(AuthGuard.urlKey);
     if (pageResume && pageResume !== '/login') {
-      localStorage.setItem('kavita--auth-intersection-url', '');
+      localStorage.setItem(AuthGuard.urlKey, '');
       this.router.navigateByUrl(pageResume);
     } else {
-      localStorage.setItem('kavita--auth-intersection-url', '');
+      localStorage.setItem(AuthGuard.urlKey, '');
       this.router.navigateByUrl('/home');
     }
   }

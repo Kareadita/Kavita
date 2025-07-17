@@ -105,7 +105,7 @@ export class AppComponent implements OnInit {
       if (event.type !== OidcEvents.TokenRefreshed) return;
 
       const user = this.accountService.currentUserSignal();
-      this.accountService.loginByToken(this.oidcService.token).subscribe({
+      this.accountService.loginByToken(this.oidcService.token()).subscribe({
         next: () => {
           if (user) {
             // Do not trigger navService if we're already logged in
