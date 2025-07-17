@@ -23,8 +23,10 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update \
-  && apt-get install -y libicu-dev libgdiplus curl \
+  && apt-get install -y libicu-dev libgdiplus curl tzdata \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
@@ -38,6 +40,8 @@ HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=3 CMD curl
 
 # Enable detection of running in a container
 ENV DOTNET_RUNNING_IN_CONTAINER=true
+# Set the time zone
+ENV TZ=UTC
 
 ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]
