@@ -53,6 +53,9 @@ export class OidcService {
   private readonly _settings = signal<OidcPublicConfig | undefined>(undefined);
   public readonly settings = this._settings.asReadonly();
 
+  private readonly _isLoggingOut = signal(false);
+  public readonly isLoggingOut = this._isLoggingOut.asReadonly();
+
   constructor() {
     window.addEventListener('online', () => {
       if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
@@ -119,6 +122,7 @@ export class OidcService {
 
   logout() {
     if (this.token()) {
+      this._isLoggingOut.set(true);
       this.oauth2.logOut();
     }
   }
