@@ -1,105 +1,69 @@
 <ng-container *transloco="let t; prefix: 'create-annotation-drawer'">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title">
-      {{t('title')}}
-    </h5>
-    <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
-  </div>
-
-  <div class="offcanvas-body">
-    <form [formGroup]="formGroup" novalidate>
-      <div class="mx-auto context-quote" id="render-target" #renderTarget>
-        <div [innerHTML]="totalText()"></div>
-        <hr class="setting-section-break" />
-      </div>
-
-      <div class="row g-0 mt-2 ms-3 me-3">
-
-        <div class="col-12">
-          @let content = markdownContent();
-          @if (content) {
-            <markdown [data]="markdownContent()"></markdown>
-          } @else {
-            <p style="font-style: italic">Nothing to preview</p>
+  <form [formGroup]="formGroup" novalidate>
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">
+        {{t('title')}}
+        <div class="highlight-bar">
+          @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;
+          @for(highlightColor of allHighlightColors; track highlightColor) {
+            <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
+              <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
+            </button>
           }
         </div>
+      </h5>
+      <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
 
-        <div class="col-12">
-          <div class="editor">
-            <textarea id="annotation-note" rows="3" style="width: 100%" formControlName="note"></textarea>
-          </div>
+    <div class="offcanvas-body">
 
-        </div>
 
-      </div>
+        <div class="row g-0 mt-2">
+<!--          <div class="col-3">-->
+<!--            <div class="highlight-bar">-->
+<!--              @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;-->
+<!--              @for(highlightColor of allHighlightColors; track highlightColor) {-->
+<!--                <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">-->
+<!--                  <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>-->
+<!--                </button>-->
+<!--              }-->
+<!--            </div>-->
+<!--          </div>-->
 
-      <div class="row g-0 mt-2">
-        <div class="col-3">
-          <div class="highlight-bar">
-            @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;
-            @for(highlightColor of allHighlightColors; track highlightColor) {
-              <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
-                <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
-              </button>
-            }
-            <!-- Potentially a dot that acts as a custom, on save will save as a custom color -->
-          </div>
-        </div>
-        <div class="col-3 me-auto">
-          <div class="toolbar">
-            <div class="btn-group" role="group">
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('**', '**', 'bold text')">
-                <i class="fas fa-bold" aria-hidden="true"></i>
-                <span class="visually-hidden">Bold</span>
-              </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('*', '*', 'italic text')">
-                <i class="fas fa-italic" aria-hidden="true"></i>
-                <span class="visually-hidden">Italic</span>
-              </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('## ', '', 'Heading')">
-                <i class="fas fa-heading" aria-hidden="true"></i>
-                <span class="visually-hidden">Heading</span>
-              </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('- ', '', 'List item')">
-                <i class="fas fa-list" aria-hidden="true"></i>
-                <span class="visually-hidden">List Item</span>
-              </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('[', '](url)', 'link text')">
-                <i class="fas fa-link" aria-hidden="true"></i>
-                <span class="visually-hidden">Link</span>
-              </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm"
-                      (click)="insertMarkdown('`', '`', 'code')">
-                <i class="fas fa-code" aria-hidden="true"></i>
-                <span class="visually-hidden">Code</span>
-              </button>
 
-              <!-- Additional needs: Bullet points, Image?, Table, quote?, Strikethru-->
-              <!-- Additional functionality - On enter, check if we need to append text -->
-
+          <div class="col-auto me-auto">
+            <div class="form-check form-switch">
+              <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
+              <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
             </div>
           </div>
+
+          <div class="col-auto">
+            <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+          </div>
+
+        </div>
+
+        <div class="mx-auto context-quote" id="render-target" #renderTarget>
+          <div [innerHTML]="totalText()"></div>
+          <hr class="setting-section-break" />
         </div>
 
 
-        <div class="col-auto">
-          <div class="form-check form-switch">
-            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
-            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+
+        <div class="row g-0 mt-2 mb-2 mx-auto">
+          <quill-editor formControlName="note" (onContentChanged)="updateContent($event)" (keyup)="cancelEvent($event)"/>
+        </div>
+
+        <div class="row g-0 mt-5">
+          <div class="col-auto">
+            Page {{createAnnotation()?.pageNumber}}
+          </div>
+          <div class="col-auto ms-auto">
+            <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
           </div>
         </div>
 
-        <div class="col-auto">
-          <button class="btn btn-secondary me-1" (click)="close()">Cancel</button>
-          <button class="btn btn-primary" (click)="save()">Save</button>
-        </div>
-
-      </div>
-    </form>
-  </div>
+    </div>
+  </form>
 </ng-container>

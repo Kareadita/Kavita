@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix: 'view-annotation-drawer'">
+<ng-container *transloco="let t; prefix: 'view-annotations-drawer'">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
       {{t('title')}}
@@ -8,7 +8,9 @@
 
   <div class="offcanvas-body">
 
-    Hello
+    @for(annotation of annotations; track annotation.id) {
+      <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)"/>
+    }
 
   </div>
 </ng-container>

@@ -2,8 +2,8 @@ import {inject, Injectable, signal} from '@angular/core';
 import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 import {NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {
-  ViewAnnotationDrawerComponent
-} from "../book-reader/_components/_drawers/view-annotation-drawer/view-annotation-drawer.component";
+  ViewAnnotationsDrawerComponent
+} from "../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component";
 import {
   CreateAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/create-annotation-drawer/create-annotation-drawer.component";
@@ -20,6 +20,10 @@ import {
 } from "../book-reader/_components/_drawers/epub-setting-drawer/epub-setting-drawer.component";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
 import {PageBookmark} from "../_models/readers/page-bookmark";
+import {Annotation} from "../book-reader/_models/annotation";
+import {
+  ViewEditAnnotationDrawerComponent
+} from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -51,7 +55,8 @@ export class EpubReaderMenuService {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
-    const ref = this.offcanvasService.open(ViewAnnotationDrawerComponent, {position: 'end', panelClass: ''});
+    const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end', panelClass: ''});
+    ref.componentInstance.chapterId.set(chapterId);
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 
@@ -107,6 +112,19 @@ export class EpubReaderMenuService {
     ref.componentInstance.seriesId.set(seriesId);
     ref.componentInstance.readingProfile.set(readingProfile);
 
+    ref.closed.subscribe(() => this.setDrawerClosed());
+    ref.dismissed.subscribe(() => this.setDrawerClosed());
+
+    this.isDrawerOpen.set(true);
+  }
+
+  openViewAnnotationDrawer(annotation: Annotation, editMode: boolean = false, callbackFn: (res: Annotation) => void) {
+    if (this.offcanvasService.hasOpenOffcanvas()) {
+      this.offcanvasService.dismiss();
+    }
+    const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom', panelClass: ''});
+    ref.componentInstance.annotation.set(annotation);
+    ref.componentInstance.isEditMode.set(editMode);
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

@@ -343,51 +343,59 @@ public partial class BookService : IBookService
     }
 
 
-    private static void InjectAnnotations(HtmlDocument doc, EpubBookRef book, List<AnnotationDto> annotations)
+    private static void InjectAnnotations(HtmlDocument doc, List<AnnotationDto> annotations)
     {
         if (annotations.Count == 0) return;
 
-        foreach (var annotation in annotations.Where(b => !string.IsNullOrEmpty(b.XPath)))
+        var annotationsByElement = annotations
+            .Where(a => !string.IsNullOrEmpty(a.XPath))
+            .GroupBy(a => a.XPath.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant())
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var (xpath, elementAnnotations) in annotationsByElement)
         {
-            var unscopedSelector = annotation.XPath.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
-            var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
+            var elem = doc.DocumentNode.SelectSingleNode(xpath);
             if (elem == null) continue;
 
-            // For this POC, assume we have 16 characters highlighted and those characters are: "For the past few"
-            // Get the original text content
             var originalText = elem.InnerText;
 
-            // For POC: highlight first 16 characters
-            var highlightLength = annotation.HighlightCount;
+            // Calculate positions and sort by start position
+            var sortedAnnotations = elementAnnotations
+                .Select(a => new {
+                    Annotation = a,
+                    StartPos = originalText.IndexOf(a.SelectedText, StringComparison.Ordinal)
+                })
+                .Where(a => a.StartPos >= 0)
+                .OrderBy(a => a.StartPos)
+                .ToList();
 
-            if (originalText.Length > highlightLength)
+            elem.RemoveAllChildren();
+
+            var currentPos = 0;
+
+            foreach (var item in sortedAnnotations)
             {
-                var highlightedText = originalText.Substring(0, highlightLength);
-                var remainingText = originalText.Substring(highlightLength);
+                // Add text before highlight
+                if (item.StartPos > currentPos)
+                {
+                    var beforeText = originalText.Substring(currentPos, item.StartPos - currentPos);
+                    elem.AppendChild(HtmlNode.CreateNode(beforeText));
+                }
 
-                // Clear the existing content
-                elem.RemoveAllChildren();
-
-                // Create the highlight element with the first 16 characters
-                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight id=\"epub-highlight-{annotation.Id}\">{highlightedText}</app-epub-highlight>");
+                // Add highlight
+                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
                 elem.AppendChild(highlightNode);
 
-                // Add the remaining text as a text node
-                var remainingTextNode = HtmlNode.CreateNode(remainingText);
-                elem.AppendChild(remainingTextNode);
+                currentPos = item.StartPos + item.Annotation.SelectedText.Length;
             }
-            else
+
+            // Add remaining text
+            if (currentPos < originalText.Length)
             {
-                // If text is shorter than highlight length, wrap it all
-                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight  id=\"epub-highlight-{annotation.Id}\">{originalText}</app-epub-highlight>");
-                elem.RemoveAllChildren();
-                elem.AppendChild(highlightNode);
+                elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
             }
         }
     }
-
-
-
 
     private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
     {
@@ -1267,7 +1275,7 @@ public partial class BookService : IBookService
         InjectPTOCBookmarks(doc, book, ptocBookmarks);
 
         // Inject Annotations
-        InjectAnnotations(doc, book, annotations);
+        InjectAnnotations(doc, annotations);
 
 
         return PrepareFinalHtml(doc, body);

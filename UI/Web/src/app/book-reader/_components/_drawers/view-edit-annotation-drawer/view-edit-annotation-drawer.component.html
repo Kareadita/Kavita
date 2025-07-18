@@ -1,0 +1,68 @@
+<ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
+  <form [formGroup]="formGroup" novalidate>
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">
+        <span>{{t('title')}}</span>
+        <span class="highlight-bar ms-2">
+          @let color = annotation()?.highlightColor ?? HighlightColor.Blue;
+          @for(highlightColor of allHighlightColors; track highlightColor) {
+            <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
+              <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
+            </button>
+          }
+        </span>
+      </h5>
+      <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+
+    <div class="offcanvas-body">
+
+      <div class="row mx-auto text-muted">
+        {{annotation()?.selectedText}}
+        <div class="setting-section-break"></div>
+      </div>
+
+      <div class="row g-0 mt-2">
+        <!--          <div class="col-3">-->
+        <!--            <div class="highlight-bar">-->
+        <!--              @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;-->
+        <!--              @for(highlightColor of allHighlightColors; track highlightColor) {-->
+        <!--                <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">-->
+        <!--                  <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>-->
+        <!--                </button>-->
+        <!--              }-->
+        <!--            </div>-->
+        <!--          </div>-->
+
+        <div class="col-auto">
+          Page {{annotation()?.pageNumber}}
+        </div>
+
+
+        <div class="col-auto ms-auto">
+          <div class="form-check form-switch">
+            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
+            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-0 mt-2 mb-2 mx-auto">
+        @if (isEditMode()) {
+          <quill-editor formControlName="note" format="json" (onContentChanged)="updateContent($event)" (keyup)="cancelEvent($event)"/>
+        } @else {
+          <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
+        }
+
+      </div>
+
+      <div class="row g-0 mt-5">
+
+        <div class="col-auto ms-auto">
+          <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</ng-container>

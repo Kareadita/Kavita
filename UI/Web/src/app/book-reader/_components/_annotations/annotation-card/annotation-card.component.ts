@@ -1,26 +1,45 @@
-import {Component, input, model, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, model, Output} from '@angular/core';
+import {Annotation} from "../../../_models/annotation";
+import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
+import {QuillViewComponent} from "ngx-quill";
+import {DatePipe} from "@angular/common";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ConfirmService} from "../../../../shared/confirm.service";
+import {AnnotationService} from "../../../../_services/annotation.service";
+import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 
 @Component({
   selector: 'app-annotation-card',
-  imports: [],
+  imports: [
+    UtcToLocaleDatePipe,
+    QuillViewComponent,
+    DatePipe,
+    TranslocoDirective
+  ],
   templateUrl: './annotation-card.component.html',
-  styleUrl: './annotation-card.component.scss'
+  styleUrl: './annotation-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnnotationCardComponent {
-  annotation = input.required()
-  position = input.required<any>();
-  annotationText = input<string>('This is test text');
-  createdDate = input<string>('01-01-0001');
-  isHovered = model<boolean>(false);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly annotationService = inject(AnnotationService);
+  private readonly epubMenuService = inject(EpubReaderMenuService);
 
-  mouseEnter = output<void>();
-  mouseLeave = output<void>();
+  annotation = model.required<Annotation>();
+  @Output() delete = new EventEmitter();
 
-  onMouseEnter() {
-    this.mouseEnter.emit();
+  editAnnotation() {
+    this.epubMenuService.openViewAnnotationDrawer(this.annotation(), true, (updatedAnnotation: Annotation) => {
+      this.annotation.set(updatedAnnotation);
+    });
   }
 
-  onMouseLeave() {
-    this.mouseLeave.emit();
+  async deleteAnnotation() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'))) return;
+
+    this.annotationService.delete(this.annotation().id).subscribe(_ => {
+      this.delete.emit();
+    });
+
   }
 }

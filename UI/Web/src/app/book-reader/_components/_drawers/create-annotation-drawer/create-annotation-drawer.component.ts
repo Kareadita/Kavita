@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -16,7 +15,6 @@ import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {CreateAnnotationRequest} from "../../../_models/create-annotation-request";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
-import {MarkdownComponent, MarkdownService, MARKED_OPTIONS, provideMarkdown} from 'ngx-markdown';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -25,42 +23,29 @@ import {allHighlightColors, Annotation, HighlightColor} from "../../../_models/a
 import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {ReaderService} from "../../../../_services/reader.service";
+import {QuillModule} from "ngx-quill";
+import {AnnotationService} from "../../../../_services/annotation.service";
 
 @Component({
     selector: 'app-create-annotation-drawer',
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
-    MarkdownComponent,
     NgClass,
     NgStyle,
-    HighlightColorPipe
+    HighlightColorPipe,
+    QuillModule
   ],
     templateUrl: './create-annotation-drawer.component.html',
     styleUrl: './create-annotation-drawer.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-      provideMarkdown({
-        markedOptions: {
-          provide: MARKED_OPTIONS,
-          useValue: {
-            gfm: true,
-            breaks: false,
-            pedantic: false,
-          },
-        }
-      })
-    ]
   })
   export class CreateAnnotationDrawerComponent {
     private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
-    private readonly markdownService = inject(MarkdownService);
-    private readonly readerService = inject(ReaderService);
+    private readonly annotationService = inject(AnnotationService);
     private readonly destroyRef = inject(DestroyRef);
     private readonly epubHighlightService = inject(EpubHighlightService);
     private readonly document = inject(DOCUMENT);
-    private readonly cdRef = inject(ChangeDetectorRef);
     private readonly safeHtml = new SafeHtmlPipe();
     private readonly sanitizer = inject(DomSanitizer);
 
@@ -68,6 +53,7 @@ import {ReaderService} from "../../../../_services/reader.service";
     totalText!: Signal<SafeHtml>;
 
     formGroup!: FormGroup;
+    annotationNote = '';
     private _markdownContent = signal('');
 
     // Computed for any transformations if needed
@@ -184,8 +170,10 @@ import {ReaderService} from "../../../../_services/reader.service";
       if (!annotation) return;
 
       annotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-      annotation.comment = this.formGroup.get('note')!.value;
-      this.readerService.createAnnotation(annotation).subscribe(res => {
+      //annotation.comment = this.formGroup.get('note')!.value;
+      annotation.comment = JSON.stringify(this.annotationNote);
+
+      this.annotationService.createAnnotation(annotation).subscribe(res => {
         this.close(); // TODO: Maybe pass the state back?
       });
     }
@@ -322,6 +310,17 @@ import {ReaderService} from "../../../../_services/reader.service";
 
     close() {
       this.activeOffcanvas.close();
+    }
+
+    updateContent(event: any) {
+      this.annotationNote = event.content;
+      console.log(event);
+      console.log('form control: ', this.formGroup.get('note')?.value)
+    }
+
+    cancelEvent(event: any) {
+      event.stopPropagation();
+      event.preventDefault();
     }
 
     protected readonly HighlightColor = HighlightColor;

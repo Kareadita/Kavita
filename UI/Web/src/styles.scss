@@ -8,6 +8,8 @@
 // Import colors for overrides of bootstrap theme
 @use './theme/toastr' as toastr;
 
+@use '../node_modules/quill/dist/quill.snow.css' as quill;
+
 
 // Bootstrap must be after _colors since we define the colors there
 @use '../node_modules/bootstrap/scss/bootstrap';

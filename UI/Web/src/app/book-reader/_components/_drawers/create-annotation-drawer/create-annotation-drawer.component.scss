@@ -40,3 +40,17 @@
 .active {
   border: 1px solid var(--primary-color);
 }
+
+// TEMP: Override some snow theme stuff
+:host ::ng-deep .ql-snow .ql-stroke {
+  stroke: white;
+}
+:host ::ng-deep .ql-snow .ql-fill {
+  fill: white;
+}
+:host ::ng-deep .ql-snow .ql-picker {
+  color: white;
+}
+:host ::ng-deep .ql-snow .ql-editor.ql-blank::before {
+  color: white;
+}

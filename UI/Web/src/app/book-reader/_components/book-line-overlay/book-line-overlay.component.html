@@ -12,12 +12,14 @@
               </button>
             </div>
 
-            <div class="col-auto">
-              <button class="btn btn-icon btn-sm" (click)="switchMode(BookLineOverlayMode.Annotate)">
-                <i class="fa-solid fa-highlighter" aria-hidden="true"></i>
-                <div>{{t('annotate')}}</div>
-              </button>
-            </div>
+            @if (!hasSelectedAnnotation()) {
+              <div class="col-auto">
+                <button class="btn btn-icon btn-sm" (click)="switchMode(BookLineOverlayMode.Annotate)">
+                  <i class="fa-solid fa-highlighter" aria-hidden="true"></i>
+                  <div>{{t('annotate')}}</div>
+                </button>
+              </div>
+            }
 
             <div class="col-auto">
               <button class="btn btn-icon btn-sm" (click)="switchMode(BookLineOverlayMode.Bookmark)">

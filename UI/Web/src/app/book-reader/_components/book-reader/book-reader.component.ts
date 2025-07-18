@@ -29,7 +29,7 @@ import {Chapter} from 'src/app/_models/chapter';
 import {NavService} from 'src/app/_services/nav.service';
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'src/app/_services/reader.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DomSanitizer, SafeHtml, Title} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
 import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
@@ -63,6 +63,7 @@ import {ChapterService} from "../../../_services/chapter.service";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
+import {AnnotationService} from "../../../_services/annotation.service";
 
 
 interface HistoryPoint {
@@ -131,6 +132,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly epubMenuService = inject(EpubReaderMenuService);
   protected readonly readerSettingsService = inject(EpubReaderSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly annotationService = inject(AnnotationService);
+  private readonly titleService = inject(Title);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -659,6 +662,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.bookTitle = info.bookTitle;
+      this.titleService.setTitle('Kavita - ' + this.bookTitle);
       this.cdRef.markForCheck();
 
       await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
@@ -748,7 +752,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   async handleKeyPress(event: KeyboardEvent) {
     const activeElement = document.activeElement as HTMLElement;
-    const isInputFocused = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+    const isInputFocused = activeElement.tagName === 'INPUT'
+      || activeElement.tagName === 'TEXTAREA' ||
+      activeElement.contentEditable === 'true' ||
+      activeElement.closest('.ql-editor'); // Quill editor class
+
     if (isInputFocused) return;
 
     if (event.key === KEY_CODES.RIGHT_ARROW) {
@@ -759,11 +767,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const isHighlighting = window.getSelection()?.toString() != '';
       if (isHighlighting) return;
       this.closeReader();
-    } else if (event.key === KEY_CODES.SPACE) {
-      this.toggleDrawer();
-      event.stopPropagation();
-      event.preventDefault();
-    } else if (event.key === KEY_CODES.G) {
+    }
+    // else if (event.key === KEY_CODES.SPACE) {
+    //   this.toggleDrawer();
+    //   event.stopPropagation();
+    //   event.preventDefault();
+    // }
+    else if (event.key === KEY_CODES.G) {
       await this.goToPage();
     }
     // else if (event.key === KEY_CODES.F) {
@@ -1170,7 +1180,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
     this.cdRef.markForCheck();
 
-    this.readerService.getAnnotations(this.chapterId).subscribe(annotations => {
+    this.annotationService.getAnnotations(this.chapterId).subscribe(annotations => {
       this.annotations = annotations;
       this.setupAnnotationElements();
       this.cdRef.markForCheck();

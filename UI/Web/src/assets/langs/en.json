@@ -807,6 +807,11 @@
         "save": "{{common.save}}"
     },
 
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "Contains Spoilers"
+    },
+
     "view-annotation-drawer": {
         "title": "Annotations",
         "close": "{{common.close}}"
@@ -830,8 +835,10 @@
     },
 
     "create-annotation-drawer": {
-        "title": "Create/Edit an Annotation",
-        "close": "{{common.close}}"
+        "title": "Create Annotation",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "page-num": "{{book-reader.page-num}}"
     },
 
     "book-reader": {
@@ -2782,7 +2789,8 @@
         "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
         "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
         "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes.",
-        "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?"
+        "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?",
+        "confirm-delete-annotation": "Are you sure you want to delete this Annotation?"
     },
 
     "read-time-pipe": {

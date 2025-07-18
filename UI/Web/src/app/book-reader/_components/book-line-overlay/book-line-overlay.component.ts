@@ -8,6 +8,7 @@ import {
   HostListener,
   inject,
   Input,
+  model,
   OnInit,
   Output,
 } from '@angular/core';
@@ -53,6 +54,7 @@ export class BookLineOverlayComponent implements OnInit {
   bookmarkForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
   });
+  hasSelectedAnnotation = model<boolean>(false);
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -94,7 +96,8 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (!event.target) return;
 
-
+    // NOTE: This doesn't account for a partial occlusion with an annotation
+    this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
     if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
       if (this.selectedText !== '') {

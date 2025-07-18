@@ -1,1 +1,48 @@
+<ng-container *transloco="let t; prefix: 'annotation-card'">
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+      <div class="d-flex align-items-center">
+        <strong class="text-dark">{{ annotation().ownerUsername }}</strong>
+      </div>
+      <div class="text-muted ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+    </div>
 
+    <div class="card-body px-3 py-2">
+
+      <div class="mb-2 text-muted small">
+        <blockquote>{{annotation().selectedText}}</blockquote>
+      </div>
+
+      <div class="mb-2 small text-muted">
+        <quill-view [content]="annotation().comment" format="json" theme="snow"></quill-view>
+      </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center py-2 px-3">
+      <div class="d-flex align-items-center">
+        @if(annotation().containsSpoiler) {
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2" aria-hidden="true"></i>
+          <span class="small text-muted">{{t('contains-spoilers-label')}}</span>
+        }
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-secondary">{{t('page-num', {page: annotation().pageNumber})}}</span>
+
+        @if (false) {
+          <button class="btn btn-sm btn-outline-primary">
+            <i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>
+          </button>
+        }
+
+        <button class="btn btn-sm btn-outline-secondary" (click)="editAnnotation()">
+          <i class="fa-solid fa-pen-alt" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="deleteAnnotation()">
+          <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

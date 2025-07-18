@@ -24,8 +24,6 @@ import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
-import {Annotation} from "../book-reader/_models/annotation";
-import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -336,13 +334,7 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/create-ptoc', {libraryId, seriesId, volumeId, chapterId, pageNumber, title, bookScrollId, selectedText});
   }
 
-  getAnnotations(chapterId: number) {
-    return this.httpClient.get<Array<Annotation>>(this.baseUrl + 'reader/annotations?chapterId=' + chapterId);
-  }
 
-  createAnnotation(data: CreateAnnotationRequest) {
-    return this.httpClient.post<Annotation>(this.baseUrl + 'reader/create-annotation', data);
-  }
 
   getElementFromXPath(path: string) {
     const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
