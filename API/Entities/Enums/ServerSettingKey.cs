@@ -197,4 +197,20 @@ public enum ServerSettingKey
     /// </summary>
     [Description("FirstInstallVersion")]
     FirstInstallVersion = 39,
+    /// <summary>
+    /// Optional OpenID Connect Authority URL. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("OpenIDConnectAuthority")]
+    OidcAuthority = 40,
+    /// <summary>
+    /// Optional OpenID Connect ClientId, default to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("OpenIDConnectClientId")]
+    OidcClientId = 41,
+    /// <summary>
+    /// A Json object of type <see cref="API.DTOs.Settings.OidcConfigDto"/>
+    /// </summary>
+    [Description("OidcConfiguration")]
+    OidcConfiguration = 42,
+
 }

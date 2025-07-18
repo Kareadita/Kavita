@@ -5,7 +5,56 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
-        "submit": "Sign in"
+        "submit": "Sign in",
+        "oidc": "OpenID Connect"
+    },
+
+    "oidc": {
+        "title": "OIDC Callback",
+        "login": "Back to login screen",
+        "error-loading-info": "An error occurred loading OIDC info, contact your administrator",
+        "timeout": "OIDC resolution has timed out or an error has occurred"
+    },
+
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "notice": "Notice",
+        "restart-required": "Changing Authority or Client ID requires a manual restart of Kavita to take effect.",
+        "provider": "Provider",
+        "behavior-title": "Behavior",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Changing provider settings requires a manual save",
+
+        "authority-label": "Authority",
+        "authority-tooltip": "The URL to your OIDC provider",
+        "client-id-label": "Client ID",
+        "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything",
+        "provision-accounts-label": "Provision accounts",
+        "provision-accounts-tooltip": "Auto-create a new account when logging in via OIDC if it can't be matched to an existing one",
+        "require-verified-email-label": "Require verified emails",
+        "require-verified-email-tooltip": "Requires email verification when creating a new account or matching with an existing one. If a newly created account has a verified email, it will be automatically verified on Kavita's side.",
+        "sync-user-settings-label": "Sync user settings with OIDC roles",
+        "sync-user-settings-tooltip": "Users created via OIDC will be fully managed by the identity provider, including roles, library access, and age rating. If this option is disabled, users will not have access to any content after account creation. Refer to the documentation for more details.",
+        "auto-login-label": "Auto login",
+        "auto-login-tooltip": "Auto redirect to OIDC provider when opening the login screen",
+        "disable-password-authentication-label": "Disable password authentication",
+        "disable-password-authentication-tooltip": "Users with the admin role can bypass this restriction",
+        "provider-name-label": "Provider name",
+        "provider-name-tooltip": "Name shown on the login screen",
+
+        "defaults-title": "Defaults",
+        "defaults-requirement": "The following settings are used when a user is registered via OIDC while SyncUserSettings is turned off",
+        "default-include-unknowns-label": "Include unknowns",
+        "default-include-unknowns-tooltip": "Include unknown age ratings",
+        "default-age-restriction-label": "Age rating",
+        "default-age-restriction-tooltip": "Maximum age rating shown to new users",
+        "no-restriction": "{{restriction-selector.no-restriction}}"
+    },
+
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
     },
 
     "dashboard": {
@@ -28,7 +77,12 @@
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
         "update": "Update",
-        "account-detail-title": "Account Details"
+        "account-detail-title": "Account Details",
+        "notice": "Warning!",
+        "out-of-sync": "This user was created via OIDC. If the SyncUsers setting is enabled, any changes made to this account may be overwritten.",
+        "oidc-managed": "This user is managed via OIDC. Please contact your OIDC administrator to request any changes.",
+        "identity-provider": "Identity provider",
+        "identity-provider-tooltip": "Kavita users are never synced with OIDC accounts."
     },
 
     "user-scrobble-history": {
@@ -1698,6 +1752,7 @@
         "import-section-title": "Import",
         "kavitaplus-section-title": "Kavita+",
         "admin-general": "General",
+        "admin-oidc": "OpenID Connect",
         "admin-users": "Users",
         "admin-libraries": "Libraries",
         "admin-media": "Media",
@@ -2273,7 +2328,7 @@
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Description",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
@@ -2421,7 +2476,16 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "oidc": {
+            "missing-external-id": "OIDC did not return a valid identifier",
+            "missing-email": "OIDC did not return a valid email",
+            "email-not-verified": "Your email must be verified to allow login via OIDC",
+            "no-account": "No matching account found",
+            "disabled-account": "This account is disabled, please contact an administrator",
+            "creating-user": "Failed to create a new user, please contact an administrator",
+            "role-not-assigned": "You do not have the required roles assigned to access this application"
+        }
     },
 
     "metadata-builder": {
@@ -2976,9 +3040,11 @@
 
     "validation": {
         "required-field": "This field is required",
+        "other-field-required": "{{name}} is required when {{other}} is set",
         "valid-email": "This must be a valid email",
         "password-validation": "Password must be between 6 and 256 characters in length",
-        "year-validation": "This must be a valid year greater than 1000 and 4 characters long"
+        "year-validation": "This must be a valid year greater than 1000 and 4 characters long",
+        "invalid-uri": "The provided uri is invalid"
     },
 
     "entity-type": {

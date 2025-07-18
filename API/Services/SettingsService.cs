@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.KavitaPlus.Metadata;
@@ -10,12 +11,13 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
 using API.Services.Tasks.Scanner;
+using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace API.Services;
 
@@ -23,6 +25,12 @@ public interface ISettingsService
 {
     Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto);
     Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
+    /// <summary>
+    /// Check if the server can reach the authority at the given uri
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
+    Task<bool> IsValidAuthority(string authority);
 }
 
 
@@ -33,16 +41,18 @@ public class SettingsService : ISettingsService
     private readonly ILibraryWatcher _libraryWatcher;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SettingsService> _logger;
+    private readonly IOidcService _oidcService;
 
     public SettingsService(IUnitOfWork unitOfWork, IDirectoryService directoryService,
         ILibraryWatcher libraryWatcher, ITaskScheduler taskScheduler,
-        ILogger<SettingsService> logger)
+        ILogger<SettingsService> logger, IOidcService oidcService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _libraryWatcher = libraryWatcher;
         _taskScheduler = taskScheduler;
         _logger = logger;
+        _oidcService = oidcService;
     }
 
     /// <summary>
@@ -172,7 +182,7 @@ public class SettingsService : ISettingsService
             updateTask = updateTask || UpdateSchedulingSettings(setting, updateSettingsDto);
 
             UpdateEmailSettings(setting, updateSettingsDto);
-
+            await UpdateOidcSettings(setting, updateSettingsDto);
 
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
@@ -346,6 +356,27 @@ public class SettingsService : ISettingsService
         return updateSettingsDto;
     }
 
+    public async Task<bool> IsValidAuthority(string authority)
+    {
+        if (string.IsNullOrEmpty(authority))
+        {
+            return false;
+        }
+
+        var url = authority + "/.well-known/openid-configuration";
+        try
+        {
+            var json = await url.GetStringAsync();
+            var config = OpenIdConnectConfiguration.Create(json);
+            return config.Issuer == authority;
+        }
+        catch (Exception e)
+        {
+            _logger.LogTrace(e, "OpenIdConfiguration failed: {Reason}", e.Message);
+            return false;
+        }
+    }
+
     private void UpdateBookmarkDirectory(string originalBookmarkDirectory, string bookmarkDirectory)
     {
         _directoryService.ExistOrCreate(bookmarkDirectory);
@@ -377,6 +408,42 @@ public class SettingsService : ISettingsService
             return true;
         }
         return false;
+    }
+
+    /// <remarks>Does not commit any changes</remarks>
+    private async Task UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    {
+        if (setting.Key == ServerSettingKey.OidcAuthority && setting.Value != updateSettingsDto.OidcConfig.Authority)
+        {
+            if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
+            {
+                throw new KavitaException("oidc-invalid-authority");
+            }
+
+            setting.Value = updateSettingsDto.OidcConfig.Authority;
+            Configuration.OidcAuthority = updateSettingsDto.OidcConfig.Authority;
+            _unitOfWork.SettingsRepository.Update(setting);
+
+            _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
+            await _oidcService.ClearOidcIds();
+            return;
+        }
+
+        if (setting.Key == ServerSettingKey.OidcClientId && setting.Value != updateSettingsDto.OidcConfig.ClientId)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.ClientId;
+            Configuration.OidcClientId = updateSettingsDto.OidcConfig.ClientId;
+            _unitOfWork.SettingsRepository.Update(setting);
+            return;
+        }
+
+        if (setting.Key != ServerSettingKey.OidcConfiguration) return;
+
+        var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
+        if (setting.Value == newValue) return;
+
+        setting.Value = newValue;
+        _unitOfWork.SettingsRepository.Update(setting);
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

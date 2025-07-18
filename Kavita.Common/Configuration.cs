@@ -14,6 +14,8 @@ public static class Configuration
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
     public const long DefaultCacheMemory = 75;
+    public const string DefaultOidcAuthority = "";
+    public const string DefaultOidcClientId = "kavita";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static readonly string KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
@@ -49,6 +51,20 @@ public static class Configuration
         get => GetCacheSize(GetAppSettingFilename());
         set => SetCacheSize(GetAppSettingFilename(), value);
     }
+
+    public static string OidcAuthority
+    {
+        get => GetOidcAuthority(GetAppSettingFilename());
+        set => SetOidcAuthority(GetAppSettingFilename(), value);
+    }
+
+    public static string OidcClientId
+    {
+        get => GetOidcClientId(GetAppSettingFilename());
+        set => SetOidcClientId(GetAppSettingFilename(), value);
+    }
+
+    public static bool OidcEnabled => !string.IsNullOrEmpty(GetOidcAuthority(GetAppSettingFilename()));
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
@@ -312,6 +328,76 @@ public static class Configuration
     }
     #endregion
 
+    #region OIDC
+
+    private static string GetOidcAuthority(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
+            return jsonObj.OidcAuthority;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return string.Empty;
+    }
+
+    private static void SetOidcAuthority(string filePath, string authority)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.OidcAuthority = authority;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+
+    private static string GetOidcClientId(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
+            return jsonObj.OidcAudience;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return string.Empty;
+    }
+
+    private static void SetOidcClientId(string filePath, string audience)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.OidcAudience = audience;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+
+    #endregion
+
     private sealed class AppSettings
     {
         public string TokenKey { get; set; }
@@ -326,6 +412,8 @@ public static class Configuration
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public bool AllowIFraming { get; init; } = false;
+        public string OidcAuthority { get; set; } = DefaultOidcAuthority;
+        public string OidcAudience { get; set; } = DefaultOidcClientId;
 #pragma warning restore S3218
     }
 }

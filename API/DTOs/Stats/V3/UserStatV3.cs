@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Data.Misc;
+using API.Entities.Enums;
 using API.Entities.Enums.Device;
 
 namespace API.DTOs.Stats.V3;
@@ -76,6 +77,10 @@ public sealed record UserStatV3
     /// Roles for this user
     /// </summary>
     public ICollection<string> Roles { get; set; }
+    /// <summary>
+    /// Who manages the user (OIDC, Kavita)
+    /// </summary>
+    public IdentityProvider IdentityProvider { get; set; }
 
 
 }

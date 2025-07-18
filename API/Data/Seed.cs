@@ -5,9 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data.Repositories;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
@@ -252,6 +254,9 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
+            new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority},
+            new() { Key = ServerSettingKey.OidcClientId, Value = Configuration.OidcClientId},
+            new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
             new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},
@@ -288,6 +293,10 @@ public static class Seed
             DirectoryService.BackupDirectory + string.Empty;
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcAuthority)).Value =
+            Configuration.OidcAuthority + string.Empty;
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcClientId)).Value =
+            Configuration.OidcClientId + string.Empty;
 
         await context.SaveChangesAsync();
     }

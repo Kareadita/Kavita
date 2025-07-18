@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  DestroyRef, effect,
   HostListener,
   inject,
   OnInit
@@ -25,6 +25,7 @@ import {TranslocoService} from "@jsverse/transloco";
 import {VersionService} from "./_services/version.service";
 import {LicenseService} from "./_services/license.service";
 import {LocalizationService} from "./_services/localization.service";
+import {OidcEvents, OidcService} from "./_services/oidc.service";
 
 @Component({
     selector: 'app-root',
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly translocoService = inject(TranslocoService);
   private readonly versionService = inject(VersionService); // Needs to be injected to run background job
+  private readonly oidcService = inject(OidcService);
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
 
@@ -98,6 +100,25 @@ export class AppComponent implements OnInit {
 
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
 
+    // Update token, or login when one becomes available
+    this.oidcService.events$.subscribe(event => {
+      if (event.type !== OidcEvents.TokenRefreshed) return;
+
+      const user = this.accountService.currentUserSignal();
+      this.accountService.loginByToken(this.oidcService.token()).subscribe({
+        next: () => {
+          if (user) {
+            // Do not trigger navService if we're already logged in
+            return;
+          }
+
+          this.navService.handleLogin();
+        },
+        error: err => {
+          console.error(err);
+        }
+      });
+    });
   }
 
   @HostListener('window:resize', ['$event'])

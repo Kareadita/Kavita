@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
@@ -6,9 +6,14 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
 import {translate, TranslocoService} from "@jsverse/transloco";
+import {AuthGuard} from "../_guards/auth.guard";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+
+  baseURL = inject(APP_BASE_HREF);
+
   constructor(private router: Router, private toastr: ToastrService,
               private accountService: AccountService,
               private translocoService: TranslocoService) {}
@@ -119,6 +124,12 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (location.href.includes('/registration/confirm-email?token=')) {
       return;
     }
+
+    const path = window.location.pathname;
+    if (path !== '/login' && !path.startsWith(this.baseURL+"registration") && path !== '') {
+      localStorage.setItem(AuthGuard.urlKey, path);
+    }
+
     // NOTE: Signin has error.error or error.statusText available.
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
     this.accountService.logout();

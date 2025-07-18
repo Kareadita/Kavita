@@ -11,6 +11,8 @@ import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
 import {WikiLink} from "../_models/wiki";
+import {OidcService} from "./oidc.service";
+import {AuthGuard} from "../_guards/auth.guard";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -34,6 +36,7 @@ interface NavItem {
 export class NavService {
 
   private readonly accountService = inject(AccountService);
+  private readonly oidcService = inject(OidcService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -173,10 +176,26 @@ export class NavService {
   }
 
   logout() {
+    this.oidcService.logout();
     this.accountService.logout();
     this.hideNavBar();
     this.hideSideNav();
     this.router.navigateByUrl('/login');
+  }
+
+  handleLogin() {
+    this.showNavBar();
+    this.showSideNav();
+
+    // Check if user came here from another url, else send to library route
+    const pageResume = localStorage.getItem(AuthGuard.urlKey);
+    if (pageResume && pageResume !== '/login') {
+      localStorage.setItem(AuthGuard.urlKey, '');
+      this.router.navigateByUrl(pageResume);
+    } else {
+      localStorage.setItem(AuthGuard.urlKey, '');
+      this.router.navigateByUrl('/home');
+    }
   }
 
   /**

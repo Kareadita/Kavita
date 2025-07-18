@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -13,7 +13,7 @@ import {UserUpdateEvent} from '../_models/events/user-update-event';
 import {AgeRating} from '../_models/metadata/age-rating';
 import {AgeRestriction} from '../_models/metadata/age-restriction';
 import {TextResonse} from '../_types/text-response';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
@@ -62,6 +62,8 @@ export class AccountService {
     if (!u) return false;
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
+
+  public readonly currentUserSignal = toSignal(this.currentUserSource);
 
 
 
@@ -205,6 +207,23 @@ export class AccountService {
     );
   }
 
+  loginByToken(token: string) {
+    const headers = new HttpHeaders({
+      "Authorization": `Bearer ${token}`
+    });
+
+    return this.httpClient.get<User>(this.baseUrl + 'account', {headers}).pipe(
+      tap((response: User) => {
+        const user = response;
+        if (user) {
+          user.oidcToken = token;
+          this.setCurrentUser(user);
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
   setCurrentUser(user?: User, refreshConnections = true) {
 
     const isSameUser = this.currentUser === user;
@@ -240,7 +259,10 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      this.startRefreshTokenTimer();
+      // oidc handles refreshing itself
+      if (!this.currentUser.oidcToken) {
+        this.startRefreshTokenTimer();
+      }
     }
   }
 

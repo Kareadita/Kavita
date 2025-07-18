@@ -1,0 +1,10 @@
+<ng-container *transloco="let t; prefix: 'oidc'">
+  @if (showSplash()) {
+    <app-splash-container>
+      <ng-container title><h2>{{t('title')}}</h2></ng-container>
+      <ng-container body>
+        <button class="btn btn-outline-primary" (click)="goToLogin()">{{t('login')}}</button>
+      </ng-container>
+    </app-splash-container>
+  }
+</ng-container>

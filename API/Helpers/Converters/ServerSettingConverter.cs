@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -128,6 +129,21 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
+                    break;
+                case ServerSettingKey.OidcAuthority:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.Authority = row.Value;
+                    break;
+                case ServerSettingKey.OidcClientId:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.ClientId = row.Value;
+                    break;
+                case ServerSettingKey.OidcConfiguration:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    var configuration = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
+                    configuration.Authority = destination.OidcConfig.Authority;
+                    configuration.ClientId = destination.OidcConfig.ClientId;
+                    destination.OidcConfig = configuration;
                     break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:

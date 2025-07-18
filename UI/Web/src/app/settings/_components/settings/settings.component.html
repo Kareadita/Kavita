@@ -17,6 +17,14 @@
             }
           }
 
+          @defer (when fragment === SettingsTabId.OpenIDConnect; prefetch on idle) {
+            @if (fragment === SettingsTabId.OpenIDConnect) {
+              <div class="col-xxl-6 col-12">
+                <app-manage-open-idconnect></app-manage-open-idconnect>
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.Email; prefetch on idle) {
             @if (fragment === SettingsTabId.Email) {
               <div class="col-xxl-6 col-12">
