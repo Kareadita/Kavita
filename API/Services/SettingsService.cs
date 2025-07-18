@@ -363,7 +363,8 @@ public class SettingsService : ISettingsService
             return false;
         }
 
-        var url = authority + "/.well-known/openid-configuration";
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? "" : "/") + ".well-known/openid-configuration";
         try
         {
             var json = await url.GetStringAsync();
@@ -431,6 +432,12 @@ public class SettingsService : ISettingsService
 
         if (setting.Key == ServerSettingKey.OidcClientId && setting.Value != updateSettingsDto.OidcConfig.ClientId)
         {
+
+            if (updateSettingsDto.OidcConfig.ClientId == "Kavita")
+            {
+                throw new KavitaException("reserved-client-id");
+            }
+
             setting.Value = updateSettingsDto.OidcConfig.ClientId;
             Configuration.OidcClientId = updateSettingsDto.OidcConfig.ClientId;
             _unitOfWork.SettingsRepository.Update(setting);

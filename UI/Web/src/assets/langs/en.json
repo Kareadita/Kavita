@@ -24,6 +24,7 @@
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
+        "reserved-client-id": "Kavita cannot be used as client id for OIDC",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",
