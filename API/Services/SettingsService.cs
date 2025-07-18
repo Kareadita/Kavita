@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
@@ -445,6 +446,11 @@ public class SettingsService : ISettingsService
         }
 
         if (setting.Key != ServerSettingKey.OidcConfiguration) return;
+
+        if (updateSettingsDto.OidcConfig.RolesClaim.Trim() == string.Empty)
+        {
+            updateSettingsDto.OidcConfig.RolesClaim = ClaimTypes.Role;
+        }
 
         var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
         if (setting.Value == newValue) return;
