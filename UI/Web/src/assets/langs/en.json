@@ -18,19 +18,20 @@
 
     "manage-oidc-connect": {
         "save": "{{common.save}}",
+        "save-success": "Successfully updated your OIDC settings",
         "notice": "Notice",
         "restart-required": "Changing Authority or Client ID requires a manual restart of Kavita to take effect.",
-        "provider": "Provider",
+        "provider-title": "Provider",
+        "provider-tooltip": "Kavita must be configured as a public client, and requires a redirect url to be set. Read the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
-        "reserved-client-id": "Kavita cannot be used as client id for OIDC",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",
         "authority-tooltip": "The URL to your OIDC provider",
         "client-id-label": "Client ID",
-        "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything",
+        "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything except Kavita",
         "provision-accounts-label": "Provision accounts",
         "provision-accounts-tooltip": "Auto-create a new account when logging in via OIDC if it can't be matched to an existing one",
         "require-verified-email-label": "Require verified emails",
@@ -50,7 +51,14 @@
         "default-include-unknowns-tooltip": "Include unknown age ratings",
         "default-age-restriction-label": "Age rating",
         "default-age-restriction-tooltip": "Maximum age rating shown to new users",
-        "no-restriction": "{{restriction-selector.no-restriction}}"
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+
+        "advanced-title": "Advanced settings",
+        "advanced-tooltip": "Only modify the following options if you know what you're doing",
+        "roles-prefix-label": "Roles prefix",
+        "roles-prefix-tooltip": "Kavita will filter out roles which do not have the prefix",
+        "roles-claim-label": "Roles claim",
+        "roles-claim-tooltip": "The claim under which Kavita must look for your roles"
     },
 
     "identity-provider-pipe": {

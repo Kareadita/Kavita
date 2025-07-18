@@ -12,6 +12,8 @@ export interface OidcConfig extends OidcPublicConfig {
   provisionAccounts: boolean;
   requireVerifiedEmail: boolean;
   syncUserSettings: boolean;
+  rolesPrefix: string;
+  rolesClaim: string;
   defaultRoles: string[];
   defaultLibraries: number[];
   defaultAgeRestriction: AgeRating;

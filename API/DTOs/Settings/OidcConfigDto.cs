@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using System.Security.Claims;
 using API.Entities.Enums;
 
 namespace API.DTOs.Settings;
@@ -22,6 +23,14 @@ public sealed record OidcConfigDto: OidcPublicConfigDto
     /// Overwrite Kavita roles, libraries and age rating with OpenIDConnect provided roles on log in.
     /// </summary>
     public bool SyncUserSettings { get; set; }
+    /// <summary>
+    /// A prefix that all roles Kavita check for during sync must have
+    /// </summary>
+    public string RolesPrefix { get; set; } = string.Empty;
+    /// <summary>
+    /// The JWT claim roles are mapped under, defaults to <see cref="ClaimTypes.Role"/>
+    /// </summary>
+    public string RolesClaim { get; set; } = ClaimTypes.Role;
 
     // Default values used when SyncUserSettings is false
     #region Default user settings

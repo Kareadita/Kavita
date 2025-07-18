@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -46,7 +47,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 {
     public const string LibraryAccessPrefix = "library-";
     public const string AgeRestrictionPrefix = "age-restriction-";
-    public const string IncludeUnknowns = AgeRestrictionPrefix + "include-unknowns";
+    public const string IncludeUnknowns = "include-unknowns";
 
     public async Task<AppUser?> LoginOrCreate(ClaimsPrincipal principal)
     {
@@ -84,7 +85,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         // Cannot match on native account, try and create new one
-        if (settings.SyncUserSettings && principal.GetAccessRoles().Count == 0)
+        var accessRoles = principal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
+            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
+        if (settings.SyncUserSettings && accessRoles.Count == 0)
         {
             throw new KavitaException("errors.oidc.role-not-assigned");
         }
@@ -226,9 +229,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         logger.LogDebug("Syncing user {UserName} from OIDC", user.UserName);
         try
         {
-            await SyncRoles(claimsPrincipal, user);
-            await SyncLibraries(claimsPrincipal, user);
-            await SyncAgeRestriction(claimsPrincipal, user);
+            await SyncRoles(settings, claimsPrincipal, user);
+            await SyncLibraries(settings, claimsPrincipal, user);
+            await SyncAgeRestriction(settings, claimsPrincipal, user);
 
             if (unitOfWork.HasChanges())
             {
@@ -242,22 +245,20 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
     }
 
-    private async Task SyncRoles(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private async Task SyncRoles(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        var roles = claimsPrincipal.GetAccessRoles();
+        var roles = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
+            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
         logger.LogDebug("Syncing access roles for user {UserName}, found roles {Roles}", user.UserName, roles);
 
         var errors = await accountService.UpdateRolesForUser(user, roles);
         if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
     }
 
-    private async Task SyncLibraries(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private async Task SyncLibraries(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        var libraryAccess = claimsPrincipal
-            .FindAll(ClaimTypes.Role)
-            .Where(r => r.Value.StartsWith(LibraryAccessPrefix))
-            .Select(r => r.Value.TrimPrefix(LibraryAccessPrefix))
-            .ToList();
+        var libraryAccessPrefix = settings.RolesPrefix + LibraryAccessPrefix;
+        var libraryAccess = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, libraryAccessPrefix);
 
         logger.LogDebug("Syncing libraries for user {UserName}, found library roles {Roles}", user.UserName, libraryAccess);
 
@@ -269,7 +270,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
     }
 
-    private async Task SyncAgeRestriction(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private async Task SyncAgeRestriction(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         if (await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
         {
@@ -279,11 +280,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             return;
         }
 
-        var ageRatings = claimsPrincipal
-            .FindAll(ClaimTypes.Role)
-            .Where(r => r.Value.StartsWith(AgeRestrictionPrefix))
-            .Select(r => r.Value.TrimPrefix(AgeRestrictionPrefix))
-            .ToList();
+        var ageRatingPrefix = settings.RolesPrefix + AgeRestrictionPrefix;
+        var ageRatings = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, ageRatingPrefix);
         logger.LogDebug("Syncing age restriction for user {UserName}, found restrictions {Restrictions}", user.UserName, ageRatings);
 
         var highestAgeRating = AgeRating.Unknown;
