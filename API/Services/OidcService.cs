@@ -284,7 +284,16 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var ageRatings = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, ageRatingPrefix);
         logger.LogDebug("Syncing age restriction for user {UserName}, found restrictions {Restrictions}", user.UserName, ageRatings);
 
-        var highestAgeRating = AgeRating.Unknown;
+        if (ageRatings.Count == 0 || (ageRatings.Count == 1 && ageRatings.Contains(IncludeUnknowns)))
+        {
+            logger.LogDebug("No age restriction found in roles, setting to RatingPending");
+
+            user.AgeRestriction = AgeRating.RatingPending;
+            user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
+            return;
+        }
+
+        var highestAgeRestriction = AgeRating.NotApplicable;
 
         foreach (var ar in ageRatings)
         {
@@ -294,17 +303,17 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 continue;
             }
 
-            if (ageRating > highestAgeRating)
+            if (ageRating > highestAgeRestriction)
             {
-                highestAgeRating = ageRating;
+                highestAgeRestriction = ageRating;
             }
         }
 
-        user.AgeRestriction = highestAgeRating;
+        user.AgeRestriction = highestAgeRestriction;
         user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
 
         logger.LogDebug("Synced age restriction for user {UserName}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
-            user.UserName, ageRatings, user.AgeRestrictionIncludeUnknowns);
+            user.UserName, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);
     }
 
 }
