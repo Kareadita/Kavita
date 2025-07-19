@@ -1,10 +1,4 @@
-<span class="epub-highlight"
-      #highlightSpan
-      (mouseenter)="onMouseEnter()"
-      (mouseleave)="onMouseLeave()">
-  @if (showIcon()) {
-    <i [class]="iconClasses()"  role="button" (click)="toggleHighlight()"></i>
-  }
+<span class="epub-highlight" #highlightSpan>
   <span [class]="highlightClasses()" [attr.data-highlight-color]="annotation()!.highlightColor | highlightColor" (click)="viewAnnotation()">
     <ng-content />
   </span>

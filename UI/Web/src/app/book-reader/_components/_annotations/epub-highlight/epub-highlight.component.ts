@@ -1,7 +1,7 @@
-import {Component, computed, ElementRef, inject, input, model, signal, ViewChild} from '@angular/core';
+import {Component, computed, ElementRef, inject, input, model, ViewChild} from '@angular/core';
 import {Annotation, HighlightColor} from "../../../_models/annotation";
 import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
-import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {UtilityService} from "../../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 
 @Component({
@@ -18,13 +18,11 @@ export class EpubHighlightComponent {
 
   showHighlight = model<boolean>(true);
   color = input<HighlightColor>(HighlightColor.Blue);
+
   annotation = model.required<Annotation | null>();
-  isHovered = signal<boolean>(false);
-  showIcon = model<boolean>(true);
 
   @ViewChild('highlightSpan', { static: false }) highlightSpan!: ElementRef;
 
-  private resizeObserver?: ResizeObserver;
   private readonly highlightColorPipe = new HighlightColorPipe();
 
   constructor() {
@@ -50,27 +48,11 @@ export class EpubHighlightComponent {
     return `${colorClass}`;
   });
 
-  iconClasses = computed(() => {
-    return `fa-solid fa-pen-clip icon-spacer icon-color--${this.highlightColorPipe.transform(this.annotation()!.highlightColor)}`;
-  });
 
   viewAnnotation() {
-    if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Tablet) {
-      // Open a modal to view the annotation?
-    }
+    this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {
 
-    // this.epubMenuService.openViewAnnotationDrawer(this.annotation(), () => {
-    //
-    // });
-  }
-
-
-  onMouseEnter() {
-    this.isHovered.set(true);
-  }
-
-  onMouseLeave() {
-    this.isHovered.set(false);
+    });
   }
 
 

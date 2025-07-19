@@ -44,9 +44,9 @@ export class EpubHighlightService {
       }
 
       componentRef.instance.annotation.set(annotationsMap[annotationId]);
+
       if (configOptions != null) {
         componentRef.instance.showHighlight.set(configOptions.showHighlight);
-        componentRef.instance.showIcon.set(configOptions.showIcon);
       }
     }
   }

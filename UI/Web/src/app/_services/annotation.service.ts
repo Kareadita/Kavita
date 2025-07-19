@@ -14,6 +14,7 @@ import {toObservable} from "@angular/core/rxjs-interop";
 export interface AnnotationEvent {
   pageNumber: number;
   type: 'create' | 'delete' | 'edit';
+  annotation: Annotation;
 
 }
 
@@ -56,9 +57,23 @@ export class AnnotationService {
         this._events.set({
           pageNumber: newAnnotation.pageNumber,
           type: 'create',
+          annotation: newAnnotation
         });
       }),
       switchMap(newAnnotation => this.getAllAnnotations(newAnnotation.chapterId))
+    );
+  }
+
+  updateAnnotation(data: Annotation) {
+    return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/update', data).pipe(
+      tap(newAnnotation => {
+        this._events.set({
+          pageNumber: data.pageNumber,
+          type: 'edit',
+          annotation: data
+        });
+      }),
+      switchMap(newAnnotation => this.getAllAnnotations(data.chapterId))
     );
   }
 
@@ -74,6 +89,7 @@ export class AnnotationService {
       this._events.set({
         pageNumber: annotationToDelete.pageNumber,
         type: 'delete',
+        annotation: annotationToDelete
       });
     }));
   }

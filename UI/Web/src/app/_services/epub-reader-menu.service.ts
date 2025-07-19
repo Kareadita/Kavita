@@ -124,6 +124,10 @@ export class EpubReaderMenuService {
       this.offcanvasService.dismiss();
     }
 
+    if (!editMode && this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Tablet) {
+      // Open a modal to view the annotation?
+    }
+
     const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom'});
     ref.componentInstance.annotation.set(annotation);
     ref.componentInstance.isEditMode.set(editMode);

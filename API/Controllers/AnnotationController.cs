@@ -6,16 +6,19 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
 public class AnnotationController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<AnnotationController> _logger;
 
-    public AnnotationController(IUnitOfWork unitOfWork)
+    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger)
     {
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     /// <summary>
@@ -63,8 +66,33 @@ public class AnnotationController : BaseApiController
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "There was an exception when creating an annotation on {ChapterId} - Page {Page}", dto.ChapterId, dto.PageNumber);
             return BadRequest("Failed to create annotation, try again");
         }
+    }
+
+    [HttpPost("update")]
+    public async Task<ActionResult<AnnotationDto>> UpdateAnnotation(AnnotationDto dto)
+    {
+        try
+        {
+            var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(dto.Id);
+            if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest();
+
+            annotation.ContainsSpoiler = dto.ContainsSpoiler;
+            annotation.HighlightColor = dto.HighlightColor;
+            annotation.Comment = dto.Comment;
+            _unitOfWork.AnnotationRepository.Update(annotation);
+
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync()) return Ok(dto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception updating Annotation for Chapter {ChapterId} - Page {PageNumber}",  dto.ChapterId, dto.PageNumber);
+            return BadRequest();
+        }
+
+        return Ok();
     }
 
     [HttpDelete]

@@ -818,6 +818,14 @@
         "filter-label": "Filter Annotations"
     },
 
+    "view-edit-annotation-drawer": {
+        "view-title": "View Annotation",
+        "edit-title": "Edit Annotation",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+
     "view-bookmark-drawer": {
         "title": "Image Bookmarks",
         "close": "{{common.close}}"

@@ -11,6 +11,7 @@ namespace API.Data.Repositories;
 public interface IAnnotationRepository
 {
     void Attach(AppUserAnnotation annotation);
+    void Update(AppUserAnnotation annotation);
     void Remove(AppUserAnnotation annotation);
     Task<AnnotationDto?> GetAnnotationDto(int id);
     Task<AppUserAnnotation?> GetAnnotation(int id);
@@ -21,6 +22,11 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     public void Attach(AppUserAnnotation annotation)
     {
         context.AppUserAnnotation.Attach(annotation);
+    }
+
+    public void Update(AppUserAnnotation annotation)
+    {
+        context.AppUserAnnotation.Entry(annotation).State = EntityState.Modified;
     }
 
     public void Remove(AppUserAnnotation annotation)

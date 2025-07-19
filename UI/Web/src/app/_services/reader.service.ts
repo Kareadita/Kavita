@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from 'src/environments/environment';
@@ -40,6 +40,8 @@ export class ReaderService {
   private readonly location = inject(Location);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
 
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
@@ -50,7 +52,7 @@ export class ReaderService {
 
   private noSleep: NoSleep = new NoSleep();
 
-  constructor(private httpClient: HttpClient, @Inject(DOCUMENT) private document: Document) {
+  constructor() {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);

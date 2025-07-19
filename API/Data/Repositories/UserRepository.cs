@@ -569,6 +569,7 @@ public class UserRepository : IUserRepository
         // TODO: Check settings if I should include other user's annotations
         return await _context.AppUserAnnotation
             .Where(a => a.AppUserId == userId && a.ChapterId == chapterId)
+            .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

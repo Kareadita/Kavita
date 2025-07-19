@@ -99,7 +99,7 @@ export class BookLineOverlayComponent implements OnInit {
     // NOTE: This doesn't account for a partial occlusion with an annotation
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
-    if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
+    if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText) || this.hasSelectedAnnotation()) {
       if (this.selectedText !== '') {
         event.preventDefault();
         event.stopPropagation();
