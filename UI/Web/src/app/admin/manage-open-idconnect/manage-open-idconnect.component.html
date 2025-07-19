@@ -51,9 +51,6 @@
                   @if (formControl.errors && formControl.errors.requiredIf) {
                     <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
                   }
-                  @if (formControl.errors && formControl.errors.pattern) {
-                    <div>{{t('reserved-client-id')}}</div>
-                  }
                 </div>
               }
 

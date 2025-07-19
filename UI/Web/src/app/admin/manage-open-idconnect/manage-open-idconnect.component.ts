@@ -17,7 +17,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
-  ValidatorFn, Validators
+  ValidatorFn
 } from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {OidcConfig} from "../_models/oidc-config";
@@ -83,8 +83,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.selectedLibraries.set(this.serverSettings.oidcConfig.defaultLibraries);
 
         this.settingsForm.addControl('authority', new FormControl(this.serverSettings.oidcConfig.authority, [], [this.authorityValidator()]));
-        this.settingsForm.addControl('clientId', new FormControl(this.serverSettings.oidcConfig.clientId,
-          [this.requiredIf('authority'), Validators.pattern("^(?!Kavita$).+$")])); // Not equal to Kavita
+        this.settingsForm.addControl('clientId', new FormControl(this.serverSettings.oidcConfig.clientId, [this.requiredIf('authority')]));
         this.settingsForm.addControl('provisionAccounts', new FormControl(this.serverSettings.oidcConfig.provisionAccounts, []));
         this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.serverSettings.oidcConfig.requireVerifiedEmail, []));
         this.settingsForm.addControl('syncUserSettings', new FormControl(this.serverSettings.oidcConfig.syncUserSettings, []));
@@ -101,7 +100,6 @@ export class ManageOpenIDConnectComponent implements OnInit {
           debounceTime(300),
           distinctUntilChanged(),
           takeUntilDestroyed(this.destroyRef),
-          filter(() => this.settingsForm.valid),
           filter(() => {
             // Do not auto save when provider settings have changed
             const settings: OidcConfig = this.settingsForm.getRawValue();
