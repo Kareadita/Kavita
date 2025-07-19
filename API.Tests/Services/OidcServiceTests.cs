@@ -36,7 +36,7 @@ public class OidcServiceTests: AbstractDbTest
         var claims = new List<Claim>()
         {
             new (ClaimTypes.Name, "amelia"),
-            new (ClaimTypes.GivenName, "Kraft Lawrence"),
+            new (ClaimTypes.GivenName, "Lawrence"),
         };
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
@@ -50,13 +50,13 @@ public class OidcServiceTests: AbstractDbTest
         await oidcService.SyncUserSettings(null!, settings, principal, user);
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
-        Assert.Equal("Kraft Lawrence", user.UserName);
+        Assert.Equal("Lawrence", user.UserName);
 
         claims = new List<Claim>()
         {
             new (ClaimTypes.Name, "amelia"),
-            new (ClaimTypes.GivenName, "Kraft Lawrence"),
-            new (ClaimTypes.Surname, "Norah Arendt"),
+            new (ClaimTypes.GivenName, "Lawrence"),
+            new (ClaimTypes.Surname, "Norah"),
         };
         identity = new ClaimsIdentity(claims);
         principal = new ClaimsPrincipal(identity);
@@ -65,7 +65,7 @@ public class OidcServiceTests: AbstractDbTest
         await oidcService.SyncUserSettings(null!, settings, principal, user);
         dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
-        Assert.Equal("Kraft Lawrence", user.UserName);
+        Assert.Equal("Lawrence", user.UserName);
     }
 
     [Fact]

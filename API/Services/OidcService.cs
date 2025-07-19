@@ -164,9 +164,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private async Task<bool> IsNameAvailable(string? name)
     {
-        if (string.IsNullOrEmpty(name)) return false;
-
-        return await userManager.FindByNameAsync(name) == null;
+        return !(await accountService.ValidateUsername(name)).Any();
     }
 
     private async Task<AppUser?> NewUserFromOpenIdConnect(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, string externalId)
@@ -261,7 +259,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             logger.LogError(ex, "Failed to sync user {UserName} from OIDC", user.UserName);
             await unitOfWork.RollbackAsync();
-            throw new KavitaException("errors.oidc.syncing-user");
+            throw new KavitaException("errors.oidc.syncing-user", ex);
         }
     }
 

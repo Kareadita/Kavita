@@ -27,7 +27,7 @@ import {ServerSettings} from "../_models/server-settings";
 import {IdentityProvider, IdentityProviders} from "../../_models/user";
 import {IdentityProviderPipePipe} from "../../_pipes/identity-provider.pipe";
 
-const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
+const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
