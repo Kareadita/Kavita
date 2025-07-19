@@ -2496,7 +2496,8 @@
             "role-not-assigned": "You do not have the required roles assigned to access this application",
             "failed-to-update-email": "Failed to update email",
             "failed-to-update-username": "Failed to update username",
-            "email-in-use": "Email already in used by an other account"
+            "email-in-use": "Email already in used by an other account",
+            "syncing-user": "Failed to sync your account from OIDC,  please contact an administrator"
         }
     },
 

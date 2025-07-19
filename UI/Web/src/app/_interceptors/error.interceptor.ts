@@ -131,17 +131,19 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
 
     if (error.error && error.error !== 'Unauthorized') {
-      this.toastr.error(error.error);
+      this.toast(error.error);
     }
 
     // NOTE: Signin has error.error or error.statusText available.
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
+
+    // Ensure AutoLogin is skipped when the OIDC endpoint is called
     this.accountService.logout(req.method === 'GET' && req.url.endsWith('/api/account'));
   }
 
   // Assume the title is already translated
   private toast(message: string, title?: string) {
-    if (message.startsWith('errors.')) {
+    if ((message+'').startsWith('errors.')) {
       this.toastr.error(this.translocoService.translate(message), title);
     } else {
       this.toastr.error(message, title);

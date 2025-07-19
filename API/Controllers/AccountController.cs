@@ -94,7 +94,16 @@ public class AccountController : BaseApiController
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
         {
             var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-            await _oidcService.SyncUserSettings(HttpContext.Request, oidcSettings, User, user);
+
+            try
+            {
+                await _oidcService.SyncUserSettings(HttpContext.Request, oidcSettings, User, user);
+            }
+            catch (KavitaException ex)
+            {
+                // Log the user out if syncing fails
+                return Unauthorized(ex.Message);
+            }
         }
 
         var roles = await _userManager.GetRolesAsync(user);

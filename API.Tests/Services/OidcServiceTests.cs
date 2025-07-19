@@ -23,6 +23,52 @@ public class OidcServiceTests: AbstractDbTest
 {
 
     [Fact]
+    public async Task UserSync_Username()
+    {
+        await ResetDb();
+        var (oidcService, _, _, userManager) = await Setup();
+
+        var user = new AppUserBuilder("holo", "holo@localhost").Build();
+        var res = await userManager.CreateAsync(user);
+        Assert.Empty(res.Errors);
+        Assert.True(res.Succeeded);
+
+        var claims = new List<Claim>()
+        {
+            new (ClaimTypes.Name, "amelia"),
+            new (ClaimTypes.GivenName, "Kraft Lawrence"),
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+
+        var settings = new OidcConfigDto
+        {
+            SyncUserSettings = true,
+        };
+
+        // name is updated as the current username is not found, amelia is skipped as it is alredy in use
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
+        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal("Kraft Lawrence", user.UserName);
+
+        claims = new List<Claim>()
+        {
+            new (ClaimTypes.Name, "amelia"),
+            new (ClaimTypes.GivenName, "Kraft Lawrence"),
+            new (ClaimTypes.Surname, "Norah Arendt"),
+        };
+        identity = new ClaimsIdentity(claims);
+        principal = new ClaimsPrincipal(identity);
+
+        // Ensure a name longer down the list isn't picked if the current username is found
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
+        dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal("Kraft Lawrence", user.UserName);
+    }
+
+    [Fact]
     public async Task UserSync_CustomClaim()
     {
         await ResetDb();

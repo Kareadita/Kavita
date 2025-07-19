@@ -261,6 +261,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             logger.LogError(ex, "Failed to sync user {UserName} from OIDC", user.UserName);
             await unitOfWork.RollbackAsync();
+            throw new KavitaException("errors.oidc.syncing-user");
         }
     }
 
