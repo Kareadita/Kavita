@@ -109,17 +109,11 @@ export class ViewTocDrawerComponent {
    * @param event
    */
   loadChapterPart(event: PersonalToCEvent) {
-    // this.setPageNum(event.pageNum);
-    // this.loadPage(event.scrollPart);
-    // TODO: Emit this event to let the main book reader handle
     const evt = {pageNumber: event.pageNum, part:event.scrollPart} as LoadPageEvent;
     this.loadPage.emit(evt);
   }
 
   loadChapterPage(event: {pageNum: number, part: string}) {
-    // this.setPageNum(event.pageNum);
-    // this.loadPage('id("' + event.part + '")');
-    // TODO: Emit this event to let the main book reader handle
     const evt = {pageNumber: event.pageNum, part: `id("${event.part}")`} as LoadPageEvent;
     this.loadPage.emit(evt);
   }

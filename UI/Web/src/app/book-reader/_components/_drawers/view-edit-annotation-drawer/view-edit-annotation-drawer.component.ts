@@ -1,4 +1,4 @@
-import {Component, effect, inject, model} from '@angular/core';
+import {Component, computed, effect, inject, model, Signal} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgClass, NgStyle} from "@angular/common";
@@ -25,9 +25,11 @@ import {TranslocoDirective} from "@jsverse/transloco";
 export class ViewEditAnnotationDrawerComponent {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly annotationService = inject(AnnotationService);
+  private readonly highlightColorPipe = new HighlightColorPipe();
 
   annotation = model<Annotation | null>(null);
   isEditMode = model(false);
+  titleClass: Signal<string>;
 
   formGroup!: FormGroup;
   annotationNote = '';
@@ -37,6 +39,14 @@ export class ViewEditAnnotationDrawerComponent {
       'note': new FormControl(this.annotation()?.comment || '', []),
       'hasSpoiler': new FormControl(false, [])
     });
+
+    this.titleClass = computed(() => {
+      const annotation = this.annotation();
+      if (!annotation) return '';
+
+      return `${this.highlightColorPipe.transform(annotation.highlightColor)}-title`;
+    });
+
 
     effect(() => {
       this.formGroup.get('note')!.patchValue(this.annotation()?.comment);

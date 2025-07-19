@@ -1,16 +1,18 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
   <form [formGroup]="formGroup" novalidate>
-    <div class="offcanvas-header">
+    <div class="offcanvas-header {{titleClass()}}">
       <h5 class="offcanvas-title">
         <span>{{t('title')}}</span>
-        <span class="highlight-bar ms-2">
-          @let color = annotation()?.highlightColor ?? HighlightColor.Blue;
-          @for(highlightColor of allHighlightColors; track highlightColor) {
-            <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
+        @if (isEditMode()) {
+          <span class="highlight-bar ms-2">
+            @let color = annotation()?.highlightColor ?? HighlightColor.Blue;
+            @for(highlightColor of allHighlightColors; track highlightColor) {
+              <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
               <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
             </button>
-          }
+            }
         </span>
+        }
       </h5>
       <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
@@ -23,16 +25,18 @@
       </div>
 
       <div class="row g-0 mt-2">
-        <!--          <div class="col-3">-->
-        <!--            <div class="highlight-bar">-->
-        <!--              @let color = createAnnotation()?.highlightColor ?? HighlightColor.Blue;-->
-        <!--              @for(highlightColor of allHighlightColors; track highlightColor) {-->
-        <!--                <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">-->
-        <!--                  <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>-->
-        <!--                </button>-->
-        <!--              }-->
-        <!--            </div>-->
-        <!--          </div>-->
+<!--        @if (isEditMode()) {-->
+<!--          <div class="col-3">-->
+<!--            <div class="highlight-bar">-->
+<!--              @let color = annotation()?.highlightColor ?? HighlightColor.Blue;-->
+<!--              @for(highlightColor of allHighlightColors; track highlightColor) {-->
+<!--                <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">-->
+<!--                  <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>-->
+<!--                </button>-->
+<!--              }-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        }-->
 
         <div class="col-auto">
           Page {{annotation()?.pageNumber}}

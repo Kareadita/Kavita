@@ -809,12 +809,13 @@
 
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
-        "contains-spoilers-label": "Contains Spoilers"
+        "contains-spoilers-label": "Spoilers"
     },
 
-    "view-annotation-drawer": {
+    "view-annotations-drawer": {
         "title": "Annotations",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "filter-label": "Filter Annotations"
     },
 
     "view-bookmark-drawer": {

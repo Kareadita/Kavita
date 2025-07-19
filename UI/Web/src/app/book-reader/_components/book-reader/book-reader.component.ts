@@ -5,11 +5,11 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   EventEmitter,
   HostListener,
   inject,
-  Inject,
   model,
   OnDestroy,
   OnInit,
@@ -53,7 +53,6 @@ import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.c
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {Annotation} from "../../_models/annotation";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.component";
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
@@ -134,6 +133,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly annotationService = inject(AnnotationService);
   private readonly titleService = inject(Title);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -322,12 +322,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   hidePagination = false;
 
-  annotations: Array<Annotation> = [];
-
   /**
    * Used to refresh the Personal PoC
    */
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
+  /**
+   * Will be set to false once the initial page is injected, signalling that annotations can now process changes
+   */
+  firstLoad: boolean = true;
 
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
@@ -445,7 +447,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (widthHeight) - (this.topOffset * 2) + 'px';
   }
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
     this.themeService.clearThemes();
@@ -492,6 +494,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return '';
     });
+
+    //
+    effect(() => {
+      const annotationEvent = this.annotationService.events();
+      const pageNum = this.pageNum();
+
+      if (annotationEvent == null || annotationEvent.pageNumber !== pageNum) return;
+      if (this.firstLoad) return;
+
+      this.firstLoad = true;
+      console.log('refreshing page')
+      // TODO: Figure out how to restore exact position
+      const scrollProgress = window.scrollY;
+      this.loadPage(this.lastSeenScrollPartPath);
+
+      //this.setupAnnotationElements();
+    })
 
   }
 
@@ -576,11 +595,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.incognitoMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
     }
-
-    // TODO: TEMP: Trigger reading time calculation update
-    // this.readerService.getTimeLeftForChapter(this.seriesId, this.chapterId).subscribe(c => {
-    //   this.readingTimeLeft.set(c);
-    // });
 
   }
 
@@ -966,7 +980,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.bookService.getBookPage(this.chapterId, this.pageNum()).pipe(take(1)).subscribe(content => {
+    this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
       this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
@@ -991,6 +1005,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.updateImageSizes();
             this.injectImageBookmarkIndicators();
           });
+
+        this.firstLoad = false;
       }, 10);
     });
   }
@@ -1180,45 +1196,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
     this.cdRef.markForCheck();
 
-    this.annotationService.getAnnotations(this.chapterId).subscribe(annotations => {
-      this.annotations = annotations;
+    this.annotationService.getAllAnnotations(this.chapterId).subscribe(_ => {
       this.setupAnnotationElements();
-      this.cdRef.markForCheck();
     });
-
-
   }
 
   private setupAnnotationElements() {
-
-    this.epubHighlightService.initializeHighlightElements(this.annotations, this.readingContainer);
-
-    // const annoationMap: {[key: number]: Annotation} = this.annotations.reduce((map, obj) => {
-    //   // @ts-ignore
-    //   map[obj.id] = obj;
-    //   return map;
-    // }, {});
-    //
-    // // Make the highlight components "real"
-    // const highlightElems = this.document.querySelectorAll('app-epub-highlight');
-    //
-    // for (let i = 0; i < highlightElems.length; i++) {
-    //   const highlight = highlightElems[i];
-    //   const idAttr = highlight.getAttribute('id');
-    //
-    //   // Don't allow highlight injection unless the id is present
-    //   if (!idAttr) continue;
-    //
-    //
-    //   const annotationId = parseInt(idAttr.replace('epub-highlight-', ''), 10);
-    //   const componentRef = this.readingContainer.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
-    //     {projectableNodes: [[document.createTextNode(highlight.innerHTML)]]});
-    //   if (highlight.parentNode != null) {
-    //     highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
-    //   }
-    //
-    //   componentRef.instance.annotation.set(annoationMap[annotationId]);
-    // }
+    this.epubHighlightService.initializeHighlightElements(this.annotationService.annotations(), this.readingContainer);
+    this.cdRef.markForCheck();
   }
 
   private addEmptyPageIfRequired(): void {

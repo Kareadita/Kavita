@@ -24,6 +24,7 @@ import {Annotation} from "../book-reader/_models/annotation";
 import {
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
+import {HighlightColorPipe} from "../_pipes/highlight-color.pipe";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -35,6 +36,7 @@ export class EpubReaderMenuService {
 
   private readonly offcanvasService = inject(NgbOffcanvas);
   private readonly utilityService = inject(UtilityService);
+  private readonly highlightColorPipe = new HighlightColorPipe();
 
   /**
    * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded
@@ -42,7 +44,7 @@ export class EpubReaderMenuService {
   public readonly isDrawerOpen = signal<boolean>(false);
 
   openCreateAnnotationDrawer(annotation: CreateAnnotationRequest, callbackFn: () => void) {
-    const ref = this.offcanvasService.open(CreateAnnotationDrawerComponent, {position: 'bottom', panelClass: ''});
+    const ref = this.offcanvasService.open(CreateAnnotationDrawerComponent, {position: 'bottom'});
     ref.closed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
     ref.dismissed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
     ref.componentInstance.createAnnotation.set(annotation);
@@ -51,12 +53,11 @@ export class EpubReaderMenuService {
   }
 
 
-  openViewAnnotationsDrawer(chapterId: number) {
+  openViewAnnotationsDrawer() {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
-    const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end', panelClass: ''});
-    ref.componentInstance.chapterId.set(chapterId);
+    const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end'});
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 
@@ -67,7 +68,7 @@ export class EpubReaderMenuService {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
-    const ref = this.offcanvasService.open(ViewTocDrawerComponent, {position: 'end', panelClass: ''});
+    const ref = this.offcanvasService.open(ViewTocDrawerComponent, {position: 'end'});
     ref.componentInstance.chapterId.set(chapterId);
     ref.componentInstance.loadPage.subscribe((res: LoadPageEvent | null) => {
       // Check if we are on mobile to collapse the menu
@@ -122,7 +123,8 @@ export class EpubReaderMenuService {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
-    const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom', panelClass: ''});
+
+    const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom'});
     ref.componentInstance.annotation.set(annotation);
     ref.componentInstance.isEditMode.set(editMode);
     ref.closed.subscribe(() => this.setDrawerClosed());

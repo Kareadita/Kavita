@@ -1,28 +1,35 @@
 <ng-container *transloco="let t; prefix: 'annotation-card'">
   <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable {{titleClass()}}" (click)="viewAnnotation()">
       <div class="d-flex align-items-center">
         <strong class="text-dark">{{ annotation().ownerUsername }}</strong>
       </div>
-      <div class="text-muted ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+      <div class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
     </div>
 
     <div class="card-body px-3 py-2">
 
-      <div class="mb-2 text-muted small">
-        <blockquote>{{annotation().selectedText}}</blockquote>
-      </div>
+      <blockquote class="mb-2 text-muted small fst-italic fw-lighter">
+        <p class="content-quote">{{annotation().selectedText}}</p>
+      </blockquote>
 
       <div class="mb-2 small text-muted">
-        <quill-view [content]="annotation().comment" format="json" theme="snow"></quill-view>
+        @let content = annotation().comment;
+        @if (content !== '\"\"') {
+          <quill-view [content]="annotation().comment" format="json" theme="snow"></quill-view>
+        } @else {
+          {{null | defaultValue}}
+        }
       </div>
     </div>
 
     <div class="card-footer d-flex justify-content-between align-items-center py-2 px-3">
       <div class="d-flex align-items-center">
         @if(annotation().containsSpoiler) {
-          <i class="bi bi-exclamation-triangle-fill text-warning me-2" aria-hidden="true"></i>
-          <span class="small text-muted">{{t('contains-spoilers-label')}}</span>
+          <span class="small text-muted">
+            <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
+            {{t('contains-spoilers-label')}}
+          </span>
         }
       </div>
 

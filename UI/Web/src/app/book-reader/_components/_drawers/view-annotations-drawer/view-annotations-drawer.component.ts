@@ -1,15 +1,19 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
 import {Annotation} from "../../../_models/annotation";
 import {AnnotationService} from "../../../../_services/annotation.service";
+import {FilterPipe} from "../../../../_pipes/filter.pipe";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-view-annotations-drawer',
   imports: [
     TranslocoDirective,
-    AnnotationCardComponent
+    AnnotationCardComponent,
+    FilterPipe,
+    ReactiveFormsModule
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
@@ -21,30 +25,25 @@ export class ViewAnnotationsDrawerComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly annotationService = inject(AnnotationService);
 
-  chapterId = model<number>(0);
-  annotations: Annotation[] = [];
+  annotations: Annotation[] = this.annotationService.annotations();
+  formGroup = new FormGroup({
+    filter: new FormControl('', [])
+  });
+  readonly FilterAfter = 6;
 
-  constructor() {
-    effect(() => {
-      const chapterId = this.chapterId();
-      if (chapterId === 0) return;
-
-      this.annotationService.getAnnotations(chapterId).subscribe(annotations => {
-        this.annotations = annotations;
-        this.cdRef.markForCheck();
-      })
-    });
-  }
 
   handleDelete(annotation: Annotation) {
     this.annotations.splice(this.annotations.indexOf(annotation), 1);
     this.cdRef.markForCheck();
   }
 
-
-
   close() {
     this.activeOffcanvas.close();
   }
 
+  filterList = (listItem: Annotation) => {
+    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.pageNumber.toString().indexOf(query) >= 0
+      || (listItem.selectedText ?? '').toLowerCase().indexOf(query) >= 0;
+  }
 }
