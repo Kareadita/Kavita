@@ -4,7 +4,7 @@ import {HttpClient} from "@angular/common/http";
 import {Annotation} from '../book-reader/_models/annotation';
 import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 import {TextResonse} from "../_types/text-response";
-import {map, of, tap} from "rxjs";
+import {delay, map, of, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {toObservable} from "@angular/core/rxjs-interop";
 
@@ -73,6 +73,7 @@ export class AnnotationService {
           annotation: data
         });
       }),
+      delay(100), // Give a bit of time to allow the next api call to get fresh data
       switchMap(newAnnotation => this.getAllAnnotations(data.chapterId))
     );
   }

@@ -41,6 +41,7 @@ public interface ICacheService
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
+    string GetCachedFile(int chapterId, string firstFilePath);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
     void CleanupBookmarkCache(int seriesId);
@@ -151,6 +152,17 @@ public class CacheService : ICacheService
         if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
         {
             path = chapter.Files.First().FilePath;
+        }
+        return path;
+    }
+
+    public string GetCachedFile(int chapterId, string firstFilePath)
+    {
+        var extractPath = GetCachePath(chapterId);
+        var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(firstFilePath));
+        if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
+        {
+            path = firstFilePath;
         }
         return path;
     }

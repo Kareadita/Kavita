@@ -67,20 +67,19 @@ export class ViewEditAnnotationDrawerComponent {
       return `${this.highlightColorPipe.transform(annotation.highlightColor)}-title`;
     });
 
-
-    effect(() => {
-      this.formGroup.get('note')!.patchValue(this.annotation()?.comment);
-    });
-
     effect(() => {
       const isEditMode = this.isEditMode();
+      const annotation = this.annotation();
       const currentSubscription = this.formSubscription();
 
       if (isEditMode && !currentSubscription) {
+        // Side effect - patch in the current note
+        this.annotationNote = annotation?.comment ?? '';
+        this.formGroup.get('note')!.patchValue(this.annotationNote);
+
         const subscription = this.formGroup.valueChanges.pipe(
           debounceTime(350),
           switchMap(_ => {
-            const annotation = this.annotation();
             if (!annotation) return of();
 
             annotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
