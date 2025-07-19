@@ -94,7 +94,7 @@ public class AccountController : BaseApiController
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
         {
             var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-            await _oidcService.SyncUserSettings(oidcSettings, User, user);
+            await _oidcService.SyncUserSettings(HttpContext.Request, oidcSettings, User, user);
         }
 
         var roles = await _userManager.GetRolesAsync(user);

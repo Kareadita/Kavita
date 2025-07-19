@@ -54,7 +54,7 @@ public class OidcServiceTests: AbstractDbTest
             RolesClaim = claim,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check correct roles assigned
         var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
@@ -107,7 +107,7 @@ public class OidcServiceTests: AbstractDbTest
             RolesPrefix = prefix,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check correct roles assigned
         var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
@@ -147,7 +147,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
@@ -158,7 +158,7 @@ public class OidcServiceTests: AbstractDbTest
         identity = new ClaimsIdentity(claims);
         principal = new ClaimsPrincipal(identity);
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
@@ -190,7 +190,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
         Assert.Single(libraries);
@@ -202,7 +202,7 @@ public class OidcServiceTests: AbstractDbTest
         identity = new ClaimsIdentity(claims);
         principal = new ClaimsPrincipal(identity);
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check access has swicthed
         libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
@@ -230,7 +230,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -257,7 +257,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -284,7 +284,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -312,7 +312,7 @@ public class OidcServiceTests: AbstractDbTest
         };
 
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -333,7 +333,7 @@ public class OidcServiceTests: AbstractDbTest
             SyncUserSettings = true,
         };
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -343,7 +343,7 @@ public class OidcServiceTests: AbstractDbTest
         identity = new ClaimsIdentity([new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns)]);
         principal = new ClaimsPrincipal(identity);
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
@@ -373,7 +373,7 @@ public class OidcServiceTests: AbstractDbTest
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
 
-        await oidcService.SyncUserSettings(settings, principal, user);
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         var userFromDb = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(userFromDb);
@@ -384,7 +384,7 @@ public class OidcServiceTests: AbstractDbTest
         Assert.Empty(res.Errors);
         Assert.True(res.Succeeded);
 
-        await oidcService.SyncUserSettings(settings, principal, newUser);
+        await oidcService.SyncUserSettings(null!, settings, principal, newUser);
         userFromDb = await UnitOfWork.UserRepository.GetUserByIdAsync(newUser.Id);
         Assert.NotNull(userFromDb);
         Assert.True(await userManager.IsInRoleAsync(newUser, PolicyConstants.ChangePasswordRole));
@@ -522,7 +522,7 @@ public class OidcServiceTests: AbstractDbTest
         await userManager.CreateAsync(defaultAdmin);
 
         var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), UnitOfWork, Mapper, Substitute.For<ILocalizationService>());
-        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, UnitOfWork, accountService);
+        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, UnitOfWork, accountService, Substitute.For<IEmailService>());
         return (oidcService, user, accountService, userManager);
     }
 

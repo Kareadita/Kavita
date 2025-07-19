@@ -2493,7 +2493,10 @@
             "no-account": "No matching account found",
             "disabled-account": "This account is disabled, please contact an administrator",
             "creating-user": "Failed to create a new user, please contact an administrator",
-            "role-not-assigned": "You do not have the required roles assigned to access this application"
+            "role-not-assigned": "You do not have the required roles assigned to access this application",
+            "failed-to-update-email": "Failed to update email",
+            "failed-to-update-username": "Failed to update username",
+            "email-in-use": "Email already in used by an other account"
         }
     },
 
