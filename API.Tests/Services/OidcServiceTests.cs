@@ -23,6 +23,112 @@ public class OidcServiceTests: AbstractDbTest
 {
 
     [Fact]
+    public async Task UserSync_CustomClaim()
+    {
+        await ResetDb();
+        var (oidcService, user, _, _) = await Setup();
+
+        var mangaLib = new LibraryBuilder("Manga", LibraryType.Manga).Build();
+        var lightNovelsLib = new LibraryBuilder("Light Novels", LibraryType.LightNovel).Build();
+
+        UnitOfWork.LibraryRepository.Add(mangaLib);
+        UnitOfWork.LibraryRepository.Add(lightNovelsLib);
+        await UnitOfWork.CommitAsync();
+
+        const string claim = "groups";
+        var claims = new List<Claim>()
+        {
+            new (claim, PolicyConstants.LoginRole),
+            new (claim, PolicyConstants.DownloadRole),
+            new (ClaimTypes.Role, PolicyConstants.PromoteRole),
+            new (claim, OidcService.AgeRestrictionPrefix + "M"),
+            new (claim, OidcService.LibraryAccessPrefix + "Manga"),
+            new (ClaimTypes.Role, OidcService.LibraryAccessPrefix + "Light Novels"),
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+
+        var settings = new OidcConfigDto
+        {
+            SyncUserSettings = true,
+            RolesClaim = claim,
+        };
+
+        await oidcService.SyncUserSettings(settings, principal, user);
+
+        // Check correct roles assigned
+        var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        Assert.Contains(PolicyConstants.LoginRole, userRoles);
+        Assert.Contains(PolicyConstants.DownloadRole, userRoles);
+        Assert.DoesNotContain(PolicyConstants.PromoteRole, userRoles);
+
+        // Check correct libraries
+        var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        Assert.Single(libraries);
+        Assert.Contains(mangaLib.Name, libraries);
+        Assert.DoesNotContain(lightNovelsLib.Name, libraries);
+
+        // Check correct age restrictions
+        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
+        Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
+    }
+
+    [Fact]
+    public async Task UserSync_CustomPrefix()
+    {
+        await ResetDb();
+        var (oidcService, user, _, _) = await Setup();
+
+        var mangaLib = new LibraryBuilder("Manga", LibraryType.Manga).Build();
+        var lightNovelsLib = new LibraryBuilder("Light Novels", LibraryType.LightNovel).Build();
+
+        UnitOfWork.LibraryRepository.Add(mangaLib);
+        UnitOfWork.LibraryRepository.Add(lightNovelsLib);
+        await UnitOfWork.CommitAsync();
+
+        const string prefix = "kavita-";
+        var claims = new List<Claim>()
+        {
+            new (ClaimTypes.Role, prefix + PolicyConstants.LoginRole),
+            new (ClaimTypes.Role, prefix + PolicyConstants.DownloadRole),
+            new (ClaimTypes.Role, PolicyConstants.PromoteRole),
+            new (ClaimTypes.Role, prefix + OidcService.AgeRestrictionPrefix + "M"),
+            new (ClaimTypes.Role, prefix + OidcService.LibraryAccessPrefix + "Manga"),
+            new (ClaimTypes.Role, OidcService.LibraryAccessPrefix + "Light Novels"),
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+
+        var settings = new OidcConfigDto
+        {
+            SyncUserSettings = true,
+            RolesPrefix = prefix,
+        };
+
+        await oidcService.SyncUserSettings(settings, principal, user);
+
+        // Check correct roles assigned
+        var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        Assert.Contains(PolicyConstants.LoginRole, userRoles);
+        Assert.Contains(PolicyConstants.DownloadRole, userRoles);
+        Assert.DoesNotContain(PolicyConstants.PromoteRole, userRoles);
+
+        // Check correct libraries
+        var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        Assert.Single(libraries);
+        Assert.Contains(mangaLib.Name, libraries);
+        Assert.DoesNotContain(lightNovelsLib.Name, libraries);
+
+        // Check correct age restrictions
+        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
+        Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
+    }
+
+    [Fact]
     public async Task SyncRoles()
     {
         await ResetDb();
@@ -106,16 +212,15 @@ public class OidcServiceTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task SyncAgeRestrictions_IncludeUnknowns()
+    public async Task SyncAgeRestrictions_NoRestrictions()
     {
         await ResetDb();
         var (oidcService, user, _, _) = await Setup();
 
         var claims = new List<Claim>()
         {
-            new (ClaimTypes.Role, PolicyConstants.AdminRole),
-            new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + "M"),
-            new(ClaimTypes.Role, OidcService.IncludeUnknowns)
+            new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + "Not Applicable"),
+            new(ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns),
         };
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
@@ -130,6 +235,33 @@ public class OidcServiceTests: AbstractDbTest
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
+        Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
+    }
+
+    [Fact]
+    public async Task SyncAgeRestrictions_IncludeUnknowns()
+    {
+        await ResetDb();
+        var (oidcService, user, _, _) = await Setup();
+
+        var claims = new List<Claim>()
+        {
+            new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + "M"),
+            new(ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns),
+        };
+        var identity = new ClaimsIdentity(claims);
+        var principal = new ClaimsPrincipal(identity);
+
+        var settings = new OidcConfigDto
+        {
+            SyncUserSettings = true,
+        };
+
+        await oidcService.SyncUserSettings(settings, principal, user);
+
+        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
     }
 
@@ -185,6 +317,38 @@ public class OidcServiceTests: AbstractDbTest
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
+    }
+
+    [Fact]
+    public async Task SyncAgeRestriction_NoAgeRestrictionClaims()
+    {
+        await ResetDb();
+        var (oidcService, user, _, _) = await Setup();
+
+        var identity = new ClaimsIdentity([]);
+        var principal = new ClaimsPrincipal(identity);
+
+        var settings = new OidcConfigDto
+        {
+            SyncUserSettings = true,
+        };
+
+        await oidcService.SyncUserSettings(settings, principal, user);
+
+        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal(AgeRating.RatingPending,  dbUser.AgeRestriction);
+        Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
+
+        identity = new ClaimsIdentity([new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns)]);
+        principal = new ClaimsPrincipal(identity);
+
+        await oidcService.SyncUserSettings(settings, principal, user);
+
+        dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        Assert.NotNull(dbUser);
+        Assert.Equal(AgeRating.RatingPending,  dbUser.AgeRestriction);
+        Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
     }
 
     [Fact]

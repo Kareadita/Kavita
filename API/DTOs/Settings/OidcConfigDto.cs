@@ -24,7 +24,7 @@ public sealed record OidcConfigDto: OidcPublicConfigDto
     /// </summary>
     public bool SyncUserSettings { get; set; }
     /// <summary>
-    /// A prefix that all roles Kavita check for during sync must have
+    /// A prefix that all roles Kavita checks for during sync must have
     /// </summary>
     public string RolesPrefix { get; set; } = string.Empty;
     /// <summary>
