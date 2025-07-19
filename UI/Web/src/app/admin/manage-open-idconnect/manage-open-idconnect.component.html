@@ -224,6 +224,29 @@
           </app-setting-item>
         }
       </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('customScopes'); as formControl) {
+          <app-setting-item [title]="t('custom-scopes-label')" [subtitle]="t('custom-scopes-tooltip')">
+            <ng-template #view>
+              @let val = breakString(formControl.value);
+
+              @for(opt of val; track opt) {
+                <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+              } @empty {
+                {{null | defaultValue}}
+              }
+            </ng-template>
+
+            <ng-template #edit>
+              <textarea rows="3" id="blacklist" class="form-control"  formControlName="customScopes"></textarea>
+            </ng-template>
+
+          </app-setting-item>
+
+        }
+      </div>
+
     </ng-container>
 
   </form>

@@ -84,6 +84,8 @@ export class OidcService {
         return
       }
 
+      const scopes = "openid profile email roles offline_access " + oidcSetting.customScopes.join(" ");
+
       this.oauth2.configure({
         issuer: oidcSetting.authority,
         clientId: oidcSetting.clientId,
@@ -93,7 +95,7 @@ export class OidcService {
         postLogoutRedirectUri: window.location.origin + this.baseUrl + "login",
         showDebugInformation: !environment.production,
         responseType: 'code',
-        scope: "openid profile email roles offline_access",
+        scope: scopes.trim(),
         // Not all OIDC providers follow this nicely
         strictDiscoveryDocumentValidation: false,
       });

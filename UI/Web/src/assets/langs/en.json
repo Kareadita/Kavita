@@ -58,7 +58,9 @@
         "roles-prefix-label": "Roles prefix",
         "roles-prefix-tooltip": "Kavita will filter out roles which do not have the prefix",
         "roles-claim-label": "Roles claim",
-        "roles-claim-tooltip": "The claim under which Kavita must look for your roles"
+        "roles-claim-tooltip": "The claim under which Kavita must look for your roles, leave empty to reset",
+        "custom-scopes-label": "Custom scopes",
+        "custom-scopes-tooltip": "Additional scopes Kavita will request from your OIDC when trying to login, separate by comma. If these are configured wrong, your OIDC may prevent you from login in."
     },
 
     "identity-provider-pipe": {

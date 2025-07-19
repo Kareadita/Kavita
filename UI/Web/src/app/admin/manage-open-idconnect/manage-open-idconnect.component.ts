@@ -37,6 +37,8 @@ import {LibrarySelectorComponent} from "../library-selector/library-selector.com
 import {RoleSelectorComponent} from "../role-selector/role-selector.component";
 import {ToastrService} from "ngx-toastr";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -48,7 +50,9 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
     AgeRatingPipe,
     LibrarySelectorComponent,
     RoleSelectorComponent,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    DefaultValuePipe,
+    TagBadgeComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -94,6 +98,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.settingsForm.addControl('providerName', new FormControl(this.serverSettings.oidcConfig.providerName, []));
         this.settingsForm.addControl("defaultAgeRestriction", new FormControl(this.serverSettings.oidcConfig.defaultAgeRestriction, []));
         this.settingsForm.addControl('defaultIncludeUnknowns', new FormControl(this.serverSettings.oidcConfig.defaultIncludeUnknowns, []));
+        this.settingsForm.addControl('customScopes', new FormControl(this.serverSettings.oidcConfig.customScopes.join(","), []))
         this.cdRef.markForCheck();
 
         this.settingsForm.valueChanges.pipe(
@@ -130,6 +135,9 @@ export class ManageOpenIDConnectComponent implements OnInit {
     newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction + '', 10) as AgeRating;
     newSettings.oidcConfig.defaultRoles = this.selectedRoles();
     newSettings.oidcConfig.defaultLibraries = this.selectedLibraries();
+    newSettings.oidcConfig.customScopes = (data.customScopes as string)
+      .split(',').map((item: string) => item.trim())
+      .filter((scope: string) => scope.length > 0);
 
     this.settingsService.updateServerSettings(newSettings).subscribe({
       next: data => {
@@ -146,6 +154,14 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.toastr.error(translate('errors.generic'))
       }
     })
+  }
+
+  breakString(s: string) {
+    if (s) {
+      return s.split(',');
+    }
+
+    return [];
   }
 
   authorityValidator(): AsyncValidatorFn {

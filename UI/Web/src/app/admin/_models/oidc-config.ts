@@ -6,6 +6,7 @@ export interface OidcPublicConfig {
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
   providerName: string;
+  customScopes: string[];
 }
 
 export interface OidcConfig extends OidcPublicConfig {
