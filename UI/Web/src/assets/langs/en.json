@@ -31,7 +31,7 @@
         "authority-label": "Authority",
         "authority-tooltip": "The URL to your OIDC provider",
         "client-id-label": "Client ID",
-        "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything except Kavita",
+        "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything",
         "provision-accounts-label": "Provision accounts",
         "provision-accounts-tooltip": "Auto-create a new account when logging in via OIDC if it can't be matched to an existing one",
         "require-verified-email-label": "Require verified emails",
@@ -2498,8 +2498,8 @@
             "role-not-assigned": "You do not have the required roles assigned to access this application",
             "failed-to-update-email": "Failed to update email",
             "failed-to-update-username": "Failed to update username",
-            "email-in-use": "Email already in used by an other account",
-            "syncing-user": "Failed to sync your account from OIDC,  please contact an administrator"
+            "email-in-use": "Email already in use by another account",
+            "syncing-user": "Failed to sync your account from OIDC, please contact an administrator"
         }
     },
 
