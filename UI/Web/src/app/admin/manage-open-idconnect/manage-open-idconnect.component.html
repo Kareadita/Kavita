@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-oidc-connect'">
 
   <div class="position-relative">
-    <button type="button" class="btn btn-primary position-absolute custom-position" (click)="save()">{{t('save')}}</button>
+    <button type="button" class="btn btn-primary position-absolute custom-position" (click)="save(true)">{{t('save')}}</button>
   </div>
 
   <form [formGroup]="settingsForm">
@@ -9,8 +9,8 @@
       <strong>{{t('notice')}}</strong> {{t('restart-required')}}
     </div>
 
-    <h4>{{t('provider')}}</h4>
-    <div class="text-muted">{{t('manual-save-label')}}</div>
+    <h4>{{t('provider-title')}}</h4>
+    <div class="text-muted" [innerHtml]="t('provider-tooltip') | safeHtml"></div>
     <ng-container>
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('authority'); as formControl) {
@@ -187,6 +187,65 @@
           </div>
         </div>
       }
+
+    </ng-container>
+
+    <div class="setting-section-break"></div>
+    <h4>{{t('advanced-title')}}</h4>
+    <div class="text-muted">{{t('advanced-tooltip')}}</div>
+
+    <ng-container>
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('rolesPrefix'); as formControl) {
+          <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')">
+            <ng-template #view>
+              {{formControl.value}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="oidc-roles-prefix" class="form-control"
+                     formControlName="rolesPrefix" type="text"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('rolesClaim'); as formControl) {
+          <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')">
+            <ng-template #view>
+              {{formControl.value}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="oidc-roles-claim" class="form-control"
+                     formControlName="rolesClaim" type="text"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched">
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('customScopes'); as formControl) {
+          <app-setting-item [title]="t('custom-scopes-label')" [subtitle]="t('custom-scopes-tooltip')">
+            <ng-template #view>
+              @let val = breakString(formControl.value);
+
+              @for(opt of val; track opt) {
+                <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+              } @empty {
+                {{null | defaultValue}}
+              }
+            </ng-template>
+
+            <ng-template #edit>
+              <textarea rows="3" id="custom-scopes" class="form-control"  formControlName="customScopes"></textarea>
+            </ng-template>
+
+          </app-setting-item>
+
+        }
+      </div>
 
     </ng-container>
 

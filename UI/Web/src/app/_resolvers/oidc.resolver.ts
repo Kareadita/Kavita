@@ -3,6 +3,7 @@ import {inject, Injectable} from "@angular/core";
 import {catchError, filter, Observable, of, take, timeout} from "rxjs";
 import {OidcService} from "../_services/oidc.service";
 import {ToastrService} from "ngx-toastr";
+import {translate} from "@jsverse/transloco";
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import {ToastrService} from "ngx-toastr";
 export class OidcResolver implements Resolve<any> {
 
   private oidcService = inject(OidcService);
-  private toastR = inject(ToastrService);
+  private toastr = inject(ToastrService);
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     return this.oidcService.loaded$.pipe(
@@ -19,7 +20,7 @@ export class OidcResolver implements Resolve<any> {
       timeout(5000),
       catchError(err => {
         console.log(err);
-        this.toastR.error("oidc.timeout");
+        this.toastr.error(translate("oidc.timeout"));
         return of(true);
     }));
   }

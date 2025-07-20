@@ -156,7 +156,7 @@ public static class IdentityServiceExtensions
         if (ctx.Principal == null) return;
 
         var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-        var user = await oidcService.LoginOrCreate(ctx.Principal);
+        var user = await oidcService.LoginOrCreate(ctx.Request, ctx.Principal);
         if (user == null)
         {
             ctx.Principal = null;

@@ -8,7 +8,7 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
   AbstractControl,
@@ -36,6 +36,9 @@ import {LibraryService} from "../../_services/library.service";
 import {LibrarySelectorComponent} from "../library-selector/library-selector.component";
 import {RoleSelectorComponent} from "../role-selector/role-selector.component";
 import {ToastrService} from "ngx-toastr";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -46,7 +49,10 @@ import {ToastrService} from "ngx-toastr";
     SettingSwitchComponent,
     AgeRatingPipe,
     LibrarySelectorComponent,
-    RoleSelectorComponent
+    RoleSelectorComponent,
+    SafeHtmlPipe,
+    DefaultValuePipe,
+    TagBadgeComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -85,11 +91,14 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.settingsForm.addControl('provisionAccounts', new FormControl(this.serverSettings.oidcConfig.provisionAccounts, []));
         this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.serverSettings.oidcConfig.requireVerifiedEmail, []));
         this.settingsForm.addControl('syncUserSettings', new FormControl(this.serverSettings.oidcConfig.syncUserSettings, []));
+        this.settingsForm.addControl('rolesPrefix', new FormControl(this.serverSettings.oidcConfig.rolesPrefix, []));
+        this.settingsForm.addControl('rolesClaim', new FormControl(this.serverSettings.oidcConfig.rolesClaim, []));
         this.settingsForm.addControl('autoLogin', new FormControl(this.serverSettings.oidcConfig.autoLogin, []));
         this.settingsForm.addControl('disablePasswordAuthentication', new FormControl(this.serverSettings.oidcConfig.disablePasswordAuthentication, []));
         this.settingsForm.addControl('providerName', new FormControl(this.serverSettings.oidcConfig.providerName, []));
         this.settingsForm.addControl("defaultAgeRestriction", new FormControl(this.serverSettings.oidcConfig.defaultAgeRestriction, []));
         this.settingsForm.addControl('defaultIncludeUnknowns', new FormControl(this.serverSettings.oidcConfig.defaultIncludeUnknowns, []));
+        this.settingsForm.addControl('customScopes', new FormControl(this.serverSettings.oidcConfig.customScopes.join(","), []))
         this.cdRef.markForCheck();
 
         this.settingsForm.valueChanges.pipe(
@@ -117,7 +126,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     this.save();
   }
 
-  save() {
+  save(showConfirmation: boolean = false) {
     if (!this.settingsForm.valid || !this.serverSettings || !this.oidcSettings) return;
 
     const data = this.settingsForm.getRawValue();
@@ -126,18 +135,33 @@ export class ManageOpenIDConnectComponent implements OnInit {
     newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction + '', 10) as AgeRating;
     newSettings.oidcConfig.defaultRoles = this.selectedRoles();
     newSettings.oidcConfig.defaultLibraries = this.selectedLibraries();
+    newSettings.oidcConfig.customScopes = (data.customScopes as string)
+      .split(',').map((item: string) => item.trim())
+      .filter((scope: string) => scope.length > 0);
 
     this.settingsService.updateServerSettings(newSettings).subscribe({
       next: data => {
         this.serverSettings = data;
         this.oidcSettings.set(data.oidcConfig);
         this.cdRef.markForCheck();
+
+        if (showConfirmation) {
+          this.toastr.success(translate('manage-oidc-connect.save-success'))
+        }
       },
       error: error => {
         console.error(error);
-        this.toastr.error("errors.generic")
+        this.toastr.error(translate('errors.generic'))
       }
     })
+  }
+
+  breakString(s: string) {
+    if (s) {
+      return s.split(',');
+    }
+
+    return [];
   }
 
   authorityValidator(): AsyncValidatorFn {

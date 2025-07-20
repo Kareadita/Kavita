@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs.Settings;
@@ -25,4 +26,9 @@ public record OidcPublicConfigDto
     /// </summary>
     /// <remarks>Default to OpenID Connect</remarks>
     public string ProviderName { get; set; } = "OpenID Connect";
+    /// <summary>
+    /// Custom scopes Kavita should request from your OIDC provider
+    /// </summary>
+    /// <remarks>Advanced setting</remarks>
+    public IList<string> CustomScopes { get; set; } = [];
 }

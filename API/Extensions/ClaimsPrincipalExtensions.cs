@@ -45,11 +45,12 @@ public static class ClaimsPrincipalExtensions
         return true;
     }
 
-    public static List<string> GetAccessRoles(this ClaimsPrincipal claimsPrincipal)
+    public static IList<string> GetClaimsWithPrefix(this ClaimsPrincipal claimsPrincipal, string claimType, string prefix)
     {
-        return claimsPrincipal.FindAll(ClaimTypes.Role)
-            .Select(r => r.Value)
-            .Where(r => PolicyConstants.ValidRoles.Contains(r))
+        return claimsPrincipal
+            .FindAll(claimType)
+            .Where(c => c.Value.StartsWith(prefix))
+            .Select(c => c.Value.TrimPrefix(prefix))
             .ToList();
     }
 }

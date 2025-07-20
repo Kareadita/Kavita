@@ -266,14 +266,16 @@ export class AccountService {
     }
   }
 
-  logout() {
+  logout(skipAutoLogin: boolean = false) {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
     // Upon logout, perform redirection
-    this.router.navigateByUrl('/login');
+    this.router.navigate(['/login'], {
+      queryParams: {skipAutoLogin: skipAutoLogin}
+    });
   }
 
 

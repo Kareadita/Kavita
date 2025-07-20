@@ -18,9 +18,11 @@
 
     "manage-oidc-connect": {
         "save": "{{common.save}}",
+        "save-success": "Successfully updated your OIDC settings",
         "notice": "Notice",
         "restart-required": "Changing Authority or Client ID requires a manual restart of Kavita to take effect.",
-        "provider": "Provider",
+        "provider-title": "Provider",
+        "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a public client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
@@ -49,7 +51,16 @@
         "default-include-unknowns-tooltip": "Include unknown age ratings",
         "default-age-restriction-label": "Age rating",
         "default-age-restriction-tooltip": "Maximum age rating shown to new users",
-        "no-restriction": "{{restriction-selector.no-restriction}}"
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+
+        "advanced-title": "Advanced settings",
+        "advanced-tooltip": "Only modify these options if you understand their impact.",
+        "roles-prefix-label": "Roles prefix",
+        "roles-prefix-tooltip": "Kavita will only consider roles that start with this prefix.",
+        "roles-claim-label": "Roles claim",
+        "roles-claim-tooltip": "The claim Kavita will use to extract roles. Leave blank to use the default.",
+        "custom-scopes-label": "Custom scopes",
+        "custom-scopes-tooltip": "Additional scopes to request from your OIDC provider during login. Separate multiple scopes with commas. Incorrect values may prevent login."
     },
 
     "identity-provider-pipe": {
@@ -2484,7 +2495,11 @@
             "no-account": "No matching account found",
             "disabled-account": "This account is disabled, please contact an administrator",
             "creating-user": "Failed to create a new user, please contact an administrator",
-            "role-not-assigned": "You do not have the required roles assigned to access this application"
+            "role-not-assigned": "You do not have the required roles assigned to access this application",
+            "failed-to-update-email": "Failed to update email",
+            "failed-to-update-username": "Failed to update username",
+            "email-in-use": "Email already in use by another account",
+            "syncing-user": "Failed to sync your account from OIDC, please contact an administrator"
         }
     },
 

@@ -53,6 +53,9 @@ export class OidcService {
   private readonly _settings = signal<OidcPublicConfig | undefined>(undefined);
   public readonly settings = this._settings.asReadonly();
 
+  private readonly _isLoggingOut = signal(false);
+  public readonly isLoggingOut = this._isLoggingOut.asReadonly();
+
   constructor() {
     window.addEventListener('online', () => {
       if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
@@ -81,6 +84,8 @@ export class OidcService {
         return
       }
 
+      const scopes = "openid profile email roles offline_access " + oidcSetting.customScopes.join(" ");
+
       this.oauth2.configure({
         issuer: oidcSetting.authority,
         clientId: oidcSetting.clientId,
@@ -90,7 +95,7 @@ export class OidcService {
         postLogoutRedirectUri: window.location.origin + this.baseUrl + "login",
         showDebugInformation: !environment.production,
         responseType: 'code',
-        scope: "openid profile email roles offline_access",
+        scope: scopes.trim(),
         // Not all OIDC providers follow this nicely
         strictDiscoveryDocumentValidation: false,
       });
@@ -119,6 +124,7 @@ export class OidcService {
 
   logout() {
     if (this.token()) {
+      this._isLoggingOut.set(true);
       this.oauth2.logOut();
     }
   }

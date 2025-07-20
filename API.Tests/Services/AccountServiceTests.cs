@@ -23,6 +23,19 @@ namespace API.Tests.Services;
 public class AccountServiceTests: AbstractDbTest
 {
 
+    [Theory]
+    [InlineData("admin", true)]
+    [InlineData("^^$SomeBadChars", false)]
+    [InlineData("Lisa2003", true)]
+    [InlineData("Kraft Lawrance", false)]
+    public async Task ValidateUsername_Regex(string username, bool valid)
+    {
+        await ResetDb();
+        var (_, accountService, _, _) = await Setup();
+
+        Assert.Equal(valid, !(await accountService.ValidateUsername(username)).Any());
+    }
+
     [Fact]
     public async Task ChangeIdentityProvider_Throws_WhenDefaultAdminUser()
     {

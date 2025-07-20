@@ -6,12 +6,15 @@ export interface OidcPublicConfig {
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
   providerName: string;
+  customScopes: string[];
 }
 
 export interface OidcConfig extends OidcPublicConfig {
   provisionAccounts: boolean;
   requireVerifiedEmail: boolean;
   syncUserSettings: boolean;
+  rolesPrefix: string;
+  rolesClaim: string;
   defaultRoles: string[];
   defaultLibraries: number[];
   defaultAgeRestriction: AgeRating;

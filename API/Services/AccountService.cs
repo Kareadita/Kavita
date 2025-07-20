@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -26,7 +27,7 @@ public interface IAccountService
 {
     Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
     Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
-    Task<IEnumerable<ApiException>> ValidateUsername(string username);
+    Task<IEnumerable<ApiException>> ValidateUsername(string? username);
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
     Task<bool> HasBookmarkPermission(AppUser? user);
     Task<bool> HasDownloadPermission(AppUser? user);
@@ -57,7 +58,7 @@ public interface IAccountService
     Task AddDefaultReadingProfileToUser(AppUser user);
 }
 
-public class AccountService : IAccountService
+public partial class AccountService : IAccountService
 {
     private readonly ILocalizationService _localizationService;
     private readonly UserManager<AppUser> _userManager;
@@ -65,6 +66,8 @@ public class AccountService : IAccountService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
+    public static readonly Regex AllowedUsernameRegex = AllowedUsernameRegexAttr();
+
 
     public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork,
         IMapper mapper, ILocalizationService localizationService)
@@ -108,8 +111,13 @@ public class AccountService : IAccountService
 
         return Array.Empty<ApiException>();
     }
-    public async Task<IEnumerable<ApiException>> ValidateUsername(string username)
+    public async Task<IEnumerable<ApiException>> ValidateUsername(string? username)
     {
+        if (string.IsNullOrWhiteSpace(username) || !AllowedUsernameRegex.IsMatch(username))
+        {
+            return [new ApiException(400, "Invalid username")];
+        }
+
         // Reverted because of https://go.microsoft.com/fwlink/?linkid=2129535
         if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName != null
                                                    && x.NormalizedUserName == username.ToUpper()))
@@ -280,4 +288,7 @@ public class AccountService : IAccountService
         _unitOfWork.AppUserReadingProfileRepository.Add(profile);
         await _unitOfWork.CommitAsync();
     }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9\-._@+/]*$")]
+    private static partial Regex AllowedUsernameRegexAttr();
 }
