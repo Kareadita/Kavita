@@ -83,6 +83,7 @@ export class UserLoginComponent implements OnInit {
       const skipAutoLogin = this.skipAutoLogin();
       const oidcConfig = this.oidcService.settings();
       const isLoggingOut = this.oidcService.isLoggingOut();
+
       if (!oidcConfig || skipAutoLogin === undefined || isLoggingOut) return;
 
       if (oidcConfig.autoLogin && !skipAutoLogin) {

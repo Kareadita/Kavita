@@ -22,7 +22,7 @@
         "notice": "Notice",
         "restart-required": "Changing Authority or Client ID requires a manual restart of Kavita to take effect.",
         "provider-title": "Provider",
-        "provider-tooltip": "Kavita must be configured as a public client, and requires a redirect url to be set. Read the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+        "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a public client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
@@ -54,13 +54,13 @@
         "no-restriction": "{{restriction-selector.no-restriction}}",
 
         "advanced-title": "Advanced settings",
-        "advanced-tooltip": "Only modify the following options if you know what you're doing",
+        "advanced-tooltip": "Only modify these options if you understand their impact.",
         "roles-prefix-label": "Roles prefix",
-        "roles-prefix-tooltip": "Kavita will filter out roles which do not have the prefix",
+        "roles-prefix-tooltip": "Kavita will only consider roles that start with this prefix.",
         "roles-claim-label": "Roles claim",
-        "roles-claim-tooltip": "The claim under which Kavita must look for your roles, leave empty to reset",
+        "roles-claim-tooltip": "The claim Kavita will use to extract roles. Leave blank to use the default.",
         "custom-scopes-label": "Custom scopes",
-        "custom-scopes-tooltip": "Additional scopes Kavita will request from your OIDC when trying to login, separate by comma. If these are configured wrong, your OIDC may prevent you from login in."
+        "custom-scopes-tooltip": "Additional scopes to request from your OIDC provider during login. Separate multiple scopes with commas. Incorrect values may prevent login."
     },
 
     "identity-provider-pipe": {

@@ -83,7 +83,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             // Don't allow taking over accounts
             // This could happen if the user changes their email in OIDC, and then someone else uses the old one
-            if (user.OidcId is not (null or ""))
+            if (!string.IsNullOrEmpty(user.OidcId))
             {
                 throw new KavitaException("errors.oidc.email-in-use");
             }
@@ -273,7 +273,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.email-not-verified");
         }
 
-        // Ensure no other user, uses this email
+        // Ensure no other user uses this email
         var other = await userManager.FindByEmailAsync(email);
         if (other != null)
         {
@@ -305,7 +305,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await userManager.UpdateAsync(user);
 
         var emailLink = await emailService.GenerateEmailLink(request, user.ConfirmationToken, "confirm-email-update", email);
-        logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+        logger.LogCritical("[Update Email]: Automatic email update after OIDC sync, email Link for {UserName}: {Link}", user.UserName, emailLink);
 
         if (!shouldEmailUser)
         {
@@ -393,8 +393,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             logger.LogDebug("No age restriction found in roles, setting to RatingPending");
 
-            user.AgeRestriction = AgeRating.RatingPending;
-            user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
+            user.AgeRestriction = AgeRating.NotApplicable;
+            user.AgeRestrictionIncludeUnknowns = ageRatings.Count == 0 || ageRatings.Contains(IncludeUnknowns);
             return;
         }
 

@@ -365,7 +365,7 @@ public class SettingsService : ISettingsService
         }
 
         var hasTrailingSlash = authority.EndsWith('/');
-        var url = authority + (hasTrailingSlash ? "" : "/") + ".well-known/openid-configuration";
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
         try
         {
             var json = await url.GetStringAsync();
