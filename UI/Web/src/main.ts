@@ -1,18 +1,18 @@
 /// <reference types="@angular/localize" />
-import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom,} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer,} from '@angular/core';
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
-import {ToastrModule} from 'ngx-toastr';
+import {ToastrModule, ToastrService} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
 import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
-import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
+import {provideTransloco, translate, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {switchMap} from "rxjs";
+import {catchError, filter, firstValueFrom, of, switchMap, take, timeout} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -21,32 +21,10 @@ import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
 import {provideOAuthClient} from "angular-oauth2-oidc";
+import {OidcEvents, OidcService} from "./app/_services/oidc.service";
+import {NavService} from "./app/_services/nav.service";
 
 const disableAnimations = !('animate' in document.documentElement);
-
-export function preloadUser(userService: AccountService, transloco: TranslocoService) {
-  return function() {
-    return userService.currentUser$.pipe(distinctUntilChanged(), switchMap((user) => {
-      if (user && user.preferences.locale) {
-        transloco.setActiveLang(user.preferences.locale);
-        return transloco.load(user.preferences.locale)
-      }
-
-      // If no user or locale is available, fallback to the default language ('en')
-      const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
-      transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale);
-    })).subscribe();
-  };
-}
-
-
-export const preLoad = {
-  provide: APP_INITIALIZER,
-  multi: true,
-  useFactory: preloadUser,
-  deps: [AccountService, TranslocoService]
-};
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -113,6 +91,71 @@ function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
 }
 
+function setupOidcListener(oidcService: OidcService, accountService: AccountService, navService: NavService) {
+  // Update token, or login when one becomes available
+  oidcService.events$.subscribe(event => {
+    if (event.type !== OidcEvents.TokenRefreshed) return;
+
+    const user = accountService.currentUserSignal();
+    accountService.loginByToken(oidcService.token()).subscribe({
+      next: () => {
+        if (user) {
+          // Do not trigger navService if we're already logged in
+          return;
+        }
+
+        navService.handleLogin();
+      },
+      error: err => {
+        console.error(err);
+      }
+    });
+  });
+}
+
+/**
+ * First load all OIDC info, then setup user stuff and load the application
+ *
+ * If no OIDC is set up, loaded$ will return early. Otherwise, the discovery document will be loaded.
+ * Then, if no valid token is found, we'll try and refresh first.
+ *
+ * Afterwards, continue and load user and set locale
+ */
+function preLoadOidcAndUser() {
+  const oidc = inject(OidcService);
+  const toastr = inject(ToastrService);
+  const accountService = inject(AccountService);
+  const transloco = inject(TranslocoService);
+  const navService = inject(NavService);
+
+  // Register listener
+  setupOidcListener(oidc, accountService, navService);
+
+  return firstValueFrom(oidc.loaded$.pipe(
+    filter(value => value),
+    take(1),
+    timeout(2000),
+    catchError(err => {
+      console.log(err);
+      toastr.error(translate('errors.oidc.timeout'));
+      return of(true);
+    }),
+    switchMap(() => {
+      accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+      return accountService.currentUser$.pipe(distinctUntilChanged(), switchMap((user) => {
+        if (user && user.preferences.locale) {
+          transloco.setActiveLang(user.preferences.locale);
+          return transloco.load(user.preferences.locale)
+        }
+
+        // If no user or locale is available, fallback to the default language ('en')
+        const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
+        transloco.setActiveLang(localStorageLocale);
+        return transloco.load(localStorageLocale);
+      }));
+    })));
+}
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
@@ -139,7 +182,6 @@ bootstrapApplication(AppComponent, {
         }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
         {
@@ -148,7 +190,8 @@ bootstrapApplication(AppComponent, {
           deps: [PlatformLocation]
         },
         provideOAuthClient(),
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        provideAppInitializer(() => preLoadOidcAndUser()),
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

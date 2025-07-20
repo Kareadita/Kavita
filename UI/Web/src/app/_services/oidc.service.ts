@@ -1,6 +1,6 @@
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {OAuthErrorEvent, OAuthService} from "angular-oauth2-oidc";
-import {from} from "rxjs";
+import {filter, from, take, tap} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
@@ -58,7 +58,7 @@ export class OidcService {
 
   constructor() {
     window.addEventListener('online', () => {
-      if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
+      if (!this.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
         this.oauth2.refreshToken().catch(err => console.error("failed to refresh token when coming online", err));
       }
     });
@@ -103,15 +103,20 @@ export class OidcService {
 
       from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
         next: _ => {
-          this._loaded.set(true);
-
-          if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
-            this.oauth2.refreshToken().catch(err => console.error("failed to refresh token on startup", err));
+          // Refresh the token when Kavita starts
+          if (this.oauth2.getRefreshToken()) {
+            this.oauth2.refreshToken()
+              .catch(err => console.error("failed to refresh token on startup", err))
+              .finally(() => this._loaded.set(true));
+            return;
           }
+
+          this._loaded.set(true);
         },
         error: error => {
           console.log(error);
-          this.toastR.error(translate("oidc.error-loading-info"))
+          this.toastR.error(translate("oidc.error-loading-info"));
+          this._loaded.set(true);
         }
       });
     })
@@ -120,6 +125,11 @@ export class OidcService {
 
   login() {
     this.oauth2.initLoginFlow();
+  }
+
+  hasValidAccessToken(): boolean {
+    const expired = this.oauth2.getAccessTokenExpiration() < new Date().getTime();
+    return !expired && this.oauth2.hasValidAccessToken();
   }
 
   logout() {

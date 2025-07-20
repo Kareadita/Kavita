@@ -99,26 +99,6 @@ export class AppComponent implements OnInit {
     }), takeUntilDestroyed(this.destroyRef));
 
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
-
-    // Update token, or login when one becomes available
-    this.oidcService.events$.subscribe(event => {
-      if (event.type !== OidcEvents.TokenRefreshed) return;
-
-      const user = this.accountService.currentUserSignal();
-      this.accountService.loginByToken(this.oidcService.token()).subscribe({
-        next: () => {
-          if (user) {
-            // Do not trigger navService if we're already logged in
-            return;
-          }
-
-          this.navService.handleLogin();
-        },
-        error: err => {
-          console.error(err);
-        }
-      });
-    });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -139,9 +119,7 @@ export class AppComponent implements OnInit {
 
 
   setCurrentUser() {
-    const user = this.accountService.getUserFromLocalStorage();
-    this.accountService.setCurrentUser(user);
-
+    const user = this.accountService.currentUserSignal();
     if (!user) return;
 
     // Bootstrap anything that's needed
