@@ -394,7 +394,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             logger.LogDebug("No age restriction found in roles, setting to RatingPending");
 
             user.AgeRestriction = AgeRating.NotApplicable;
-            user.AgeRestrictionIncludeUnknowns = ageRatings.Count == 0 || ageRatings.Contains(IncludeUnknowns);
+            user.AgeRestrictionIncludeUnknowns = true;
             return;
         }
 

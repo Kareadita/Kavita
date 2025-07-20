@@ -383,17 +383,18 @@ public class OidcServiceTests: AbstractDbTest
 
         var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
-        Assert.Equal(AgeRating.RatingPending,  dbUser.AgeRestriction);
-        Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
+        Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
+        Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
 
-        identity = new ClaimsIdentity([new (ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns)]);
+        // Also default to no restrictions when only include unknowns is present
+        identity = new ClaimsIdentity([new Claim(ClaimTypes.Role, OidcService.AgeRestrictionPrefix + OidcService.IncludeUnknowns)]);
         principal = new ClaimsPrincipal(identity);
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
-        Assert.Equal(AgeRating.RatingPending,  dbUser.AgeRestriction);
+        Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
     }
 
