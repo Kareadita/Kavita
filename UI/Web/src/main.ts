@@ -144,7 +144,7 @@ function preLoadOidcAndUser() {
         switchMap(tokenRefreshed => {
           if (!tokenRefreshed) return of(null);
 
-          return syncOidcUser(oidc, accountService, navService);
+          return accountService.loginByToken(oidc.token());
         })
       );
     }),
