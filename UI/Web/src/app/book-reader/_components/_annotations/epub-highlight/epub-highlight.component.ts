@@ -1,20 +1,21 @@
-import {Component, computed, ElementRef, inject, input, model, ViewChild} from '@angular/core';
-import {Annotation, HighlightColor} from "../../../_models/annotation";
-import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
-import {UtilityService} from "../../../../shared/_services/utility.service";
+import {Component, computed, effect, ElementRef, inject, input, model, ViewChild} from '@angular/core';
+import {Annotation, HighlightColor} from "../../../_models/annotations/annotation";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
+import {AnnotationService} from "../../../../_services/annotation.service";
+import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
+import {NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-epub-highlight',
   imports: [
-    HighlightColorPipe
+    NgStyle
   ],
   templateUrl: './epub-highlight.component.html',
   styleUrl: './epub-highlight.component.scss'
 })
 export class EpubHighlightComponent {
   private epubMenuService = inject(EpubReaderMenuService);
-  private utilityService = inject(UtilityService);
+  private annotationService = inject(AnnotationService);
 
   showHighlight = model<boolean>(true);
   color = input<HighlightColor>(HighlightColor.Blue);
@@ -23,29 +24,35 @@ export class EpubHighlightComponent {
 
   @ViewChild('highlightSpan', { static: false }) highlightSpan!: ElementRef;
 
-  private readonly highlightColorPipe = new HighlightColorPipe();
+  private readonly highlightSlotPipe = new SlotColorPipe();
 
   constructor() {
+    effect(() => {
+      const updateEvent = this.annotationService.events();
+      const annotation = this.annotation();
+      const annotations = this.annotationService.annotations();
 
+      if (!updateEvent || !annotation || updateEvent.annotation.id !== annotation.id) return;
+      if (updateEvent.type !== 'edit') return;
+
+      console.log('[highlight] annotation updated', annotation);
+
+      this.annotation.set(annotations.filter(a => a.id === annotation.id)[0]);
+    });
   }
 
-
-
-  showAnnotationCard = computed(() => {
-    const annotation = this.annotation();
-    return this.showHighlight();
-  });
 
   highlightClasses = computed(() => {
     const showHighlight = this.showHighlight();
     const annotation = this.annotation();
+    const slots = this.annotationService.slots();
 
     if (!showHighlight || !annotation) {
       return '';
     }
 
-    const colorClass = `epub-highlight epub-highlight-${this.highlightColorPipe.transform(annotation.highlightColor)}`;
-    return `${colorClass}`;
+    console.log('[highlight] slot updated', annotation);
+    return this.highlightSlotPipe.transform(slots[annotation.selectedSlotIndex].color);
   });
 
 

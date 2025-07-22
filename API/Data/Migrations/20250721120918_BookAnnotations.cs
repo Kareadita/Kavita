@@ -23,6 +23,13 @@ namespace API.Data.Migrations
                 type: "TEXT",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "BookReaderHighlightSlots",
+                table: "AppUserPreferences",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "[]");
+
             migrationBuilder.AddColumn<int>(
                 name: "ImageOffset",
                 table: "AppUserBookmark",
@@ -48,8 +55,9 @@ namespace API.Data.Migrations
                     Comment = table.Column<string>(type: "TEXT", nullable: true),
                     HighlightCount = table.Column<int>(type: "INTEGER", nullable: false),
                     PageNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    HighlightColor = table.Column<int>(type: "INTEGER", nullable: false),
+                    SelectedSlotIndex = table.Column<int>(type: "INTEGER", nullable: false),
                     ContainsSpoiler = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ChapterTitle = table.Column<string>(type: "TEXT", nullable: true),
                     SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
                     VolumeId = table.Column<int>(type: "INTEGER", nullable: false),
                     ChapterId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -100,6 +108,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "SelectedText",
                 table: "AppUserTableOfContent");
+
+            migrationBuilder.DropColumn(
+                name: "BookReaderHighlightSlots",
+                table: "AppUserPreferences");
 
             migrationBuilder.DropColumn(
                 name: "ImageOffset",

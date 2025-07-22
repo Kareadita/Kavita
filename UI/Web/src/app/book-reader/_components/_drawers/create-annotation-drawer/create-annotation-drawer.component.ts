@@ -2,11 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
-  effect,
   inject,
   model,
-  signal,
   Signal,
   ViewChild,
   ViewContainerRef
@@ -16,11 +13,8 @@ import {CreateAnnotationRequest} from "../../../_models/create-annotation-reques
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {tap} from "rxjs/operators";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {DOCUMENT, NgClass, NgStyle} from "@angular/common";
-import {allHighlightColors, Annotation, HighlightColor} from "../../../_models/annotation";
-import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
+import {DOCUMENT} from "@angular/common";
+import {allHighlightColors, Annotation, HighlightColor} from "../../../_models/annotations/annotation";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 import {QuillModule} from "ngx-quill";
@@ -31,9 +25,6 @@ import {AnnotationService} from "../../../../_services/annotation.service";
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
-    NgClass,
-    NgStyle,
-    HighlightColorPipe,
     QuillModule
   ],
     templateUrl: './create-annotation-drawer.component.html',
@@ -43,7 +34,6 @@ import {AnnotationService} from "../../../../_services/annotation.service";
   export class CreateAnnotationDrawerComponent {
     private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
     private readonly annotationService = inject(AnnotationService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly epubHighlightService = inject(EpubHighlightService);
     private readonly document = inject(DOCUMENT);
     private readonly safeHtml = new SafeHtmlPipe();
@@ -53,13 +43,7 @@ import {AnnotationService} from "../../../../_services/annotation.service";
     totalText!: Signal<SafeHtml>;
 
     formGroup!: FormGroup;
-    annotationNote = '';
-    private _markdownContent = signal('');
-
-    // Computed for any transformations if needed
-    markdownContent = computed(() => {
-      return this._markdownContent();
-    });
+    annotationNote = {};
 
     @ViewChild('renderTarget', { read: ViewContainerRef }) renderTarget!: ViewContainerRef;
 
@@ -71,23 +55,8 @@ import {AnnotationService} from "../../../../_services/annotation.service";
         'hasSpoiler': new FormControl(false, [])
       });
 
-      this.formGroup.get('note')?.valueChanges.pipe(
-        tap((note: string) => this._markdownContent.set(note ?? '')),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
-
-      // Update formGroup whenever we modify markdownContent
-      effect(() => {
-        const existingNote = this.formGroup.get('note')!.value;
-        const currentMarkdown = this._markdownContent();
-
-        if (existingNote === currentMarkdown) return;
-
-        this.formGroup.get('note')?.patchValue(this._markdownContent());
-      });
-
-
       this.totalText = computed(() => {
+        // TODO: See if we can move this to annotation service and just use the view-edit-annotation-drawer to streamline all logic
         const annotation = this.createAnnotation();
         console.log('Calculating totalText()', annotation);
         if (annotation == null || annotation?.context === null) return '';
@@ -170,11 +139,10 @@ import {AnnotationService} from "../../../../_services/annotation.service";
       if (!annotation) return;
 
       annotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-      //annotation.comment = this.formGroup.get('note')!.value;
       annotation.comment = JSON.stringify(this.annotationNote);
 
       this.annotationService.createAnnotation(annotation).subscribe(res => {
-        this.close(); // TODO: Maybe pass the state back?
+        this.close();
       });
     }
 
@@ -187,15 +155,16 @@ import {AnnotationService} from "../../../../_services/annotation.service";
       // Clear any existing components first
       this.renderTarget.clear();
 
-      const properAnnotation = {id: 0,
+      const properAnnotation = {
+        id: 0,
         xpath: annotation.xpath,
         endingXPath: annotation.xpath,
         selectedText: annotation.selectedText,
         comment: annotation.comment,
-        highlightColor: annotation.highlightColor,
         containsSpoiler: annotation.containsSpoiler,
         pageNumber: annotation.pageNumber,
         chapterId: annotation.chapterId,
+        selectedSlotIndex: annotation.selectedSlotIndex
       } as Annotation;
 
       const parentElem = this.document.querySelector('#render-target');
@@ -256,56 +225,13 @@ import {AnnotationService} from "../../../../_services/annotation.service";
       return Math.floor(availableWidth / avgCharWidth);
     }
 
-
-    insertMarkdown(before: string, after: string, placeholder: string): void {
-      const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = textarea.value.substring(start, end);
-
-      let textToInsert: string;
-      let beforeSpaces = '';
-      let afterSpaces = '';
-
-      if (selectedText) {
-        // Extract leading and trailing whitespace
-        const leadingMatch = selectedText.match(/^\s*/);
-        const trailingMatch = selectedText.match(/\s*$/);
-
-        beforeSpaces = leadingMatch ? leadingMatch[0] : '';
-        afterSpaces = trailingMatch ? trailingMatch[0] : '';
-
-        // Get the trimmed text
-        textToInsert = selectedText.trim();
-      } else {
-        textToInsert = placeholder;
-      }
-
-      // Construct the replacement: spaces + before + trimmed text + after + spaces
-      const newText = beforeSpaces + before + textToInsert + after + afterSpaces;
-
-      const newValue =
-        textarea.value.substring(0, start) +
-        newText +
-        textarea.value.substring(end);
-
-      this._markdownContent.set(newValue);
-
-      // Set cursor position after insertion
-      setTimeout(() => {
-        // Position cursor after the closing marker but before trailing spaces
-        const newPosition = start + beforeSpaces.length + before.length + textToInsert.length + after.length;
-        textarea.setSelectionRange(newPosition, newPosition);
-        textarea.focus();
-      });
-    }
-
-    changeHighlight(highlight: HighlightColor) {
-      let annotation = this.createAnnotation();
-      if (annotation) {
-        this.createAnnotation.set({...annotation, highlightColor: highlight});
-      }
-    }
+    //
+    // changeHighlight(highlight: HighlightColor) {
+    //   let annotation = this.createAnnotation();
+    //   if (annotation) {
+    //     this.createAnnotation.set({...annotation, highlightColor: highlight});
+    //   }
+    // }
 
 
     close() {
@@ -314,8 +240,6 @@ import {AnnotationService} from "../../../../_services/annotation.service";
 
     updateContent(event: any) {
       this.annotationNote = event.content;
-      console.log(event);
-      console.log('form control: ', this.formGroup.get('note')?.value)
     }
 
     cancelEvent(event: any) {

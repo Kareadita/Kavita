@@ -3,24 +3,14 @@
     <div class="offcanvas-header {{titleClass()}}">
       <h5 class="offcanvas-title">
         <span>{{t(isEditMode() ? 'edit-title' : 'view-title')}}</span>
-        @if (isEditMode()) {
-          <span class="highlight-bar ms-2">
-            @let color = annotation()?.highlightColor ?? HighlightColor.Blue;
-            @for(highlightColor of allHighlightColors; track highlightColor) {
-              <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">
-              <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>
-            </button>
-            }
-        </span>
-        }
       </h5>
 
-      @if (isEditMode()) {
+      @if (isEditMode() && formGroup) {
         <form [formGroup]="formGroup" novalidate>
-        <div class="form-check form-switch">
-          <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
-          <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
-        </div>
+          <div class="form-check form-switch offcanvas-title-right">
+            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
+            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+          </div>
         </form>
       } @else {
         <div class="small offcanvas-title-right">
@@ -31,55 +21,37 @@
     </div>
 
     <div class="offcanvas-body">
-      <form [formGroup]="formGroup" novalidate>
-        <blockquote class="text-muted pb-2 small fw-lighter">
-          <p class="content-quote mb-0">{{annotation()?.selectedText}}
-          </p>
-          <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "Something"</cite>
-        </blockquote>
-        <div class="setting-section-break" aria-hidden="true"></div>
+      @let editMode = isEditMode();
 
 
-        <div class="row g-0 mt-2">
-  <!--        @if (isEditMode()) {-->
-  <!--          <div class="col-3">-->
-  <!--            <div class="highlight-bar">-->
-  <!--              @let color = annotation()?.highlightColor ?? HighlightColor.Blue;-->
-  <!--              @for(highlightColor of allHighlightColors; track highlightColor) {-->
-  <!--                <button class="btn btn-icon color" [ngClass]="{'active': color === highlightColor}" (click)="changeHighlight(highlightColor)">-->
-  <!--                  <div class="dot" [ngStyle]="{'background-color': highlightColor | highlightColor}"></div>-->
-  <!--                </button>-->
-  <!--              }-->
-  <!--            </div>-->
-  <!--          </div>-->
-  <!--        }-->
-
-  <!--        <div class="col-auto">-->
-  <!--          Page {{annotation()?.pageNumber}}-->
-  <!--        </div>-->
+      @if (annotation() && formGroup) {
+        <form [formGroup]="formGroup" novalidate>
+          <blockquote class="text-muted pb-2 small fw-lighter">
+            <p class="content-quote mb-0">{{annotation()?.selectedText}}
+            </p>
+            <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
+          </blockquote>
+          <div class="setting-section-break" aria-hidden="true"></div>
 
 
-  <!--        <div class="col-auto ms-auto">-->
-  <!--          <div class="form-check form-switch">-->
-  <!--            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>-->
-  <!--            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>-->
-  <!--          </div>-->
-  <!--        </div>-->
-        </div>
-
-        <div class="row g-0 mt-2 mb-2 mx-auto">
-          @if (isEditMode()) {
-            <quill-editor formControlName="note" format="json" (onContentChanged)="updateContent($event)" (keyup)="cancelEvent($event)"/>
-          } @else {
-            <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
+          @if (editMode && this.annotation()) {
+            <div class="row g-0 mt-2">
+              <div class="col-3">
+                <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
+              </div>
+            </div>
           }
-        </div>
 
-<!--        <div class="row g-0 mt-5">-->
-<!--          <div class="col-auto ms-auto">-->
-<!--            <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>-->
-<!--          </div>-->
-<!--        </div>-->
-      </form>
+          <div class="row g-0 mt-2 mb-2 mx-auto">
+            @if (editMode) {
+              <h6>Notes</h6>
+              <quill-editor theme="snow" formControlName="note" format="object" (onContentChanged)="updateContent($event)"/>
+            } @else {
+              <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
+            }
+          </div>
+        </form>
+      }
+
     </div>
 </ng-container>

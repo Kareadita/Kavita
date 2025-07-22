@@ -1,12 +1,15 @@
-import {inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
-import {Annotation} from '../book-reader/_models/annotation';
+import {Annotation} from '../book-reader/_models/annotations/annotation';
 import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 import {TextResonse} from "../_types/text-response";
-import {delay, map, of, tap} from "rxjs";
+import {map, of, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {toObservable} from "@angular/core/rxjs-interop";
+import {AccountService} from "./account.service";
+import {User} from "../_models/user";
+import {MessageHubService} from "./message-hub.service";
 
 /**
  * Represents any modification (create/delete/edit) that occurs to annotations
@@ -24,6 +27,8 @@ export interface AnnotationEvent {
 export class AnnotationService {
 
   private readonly httpClient = inject(HttpClient);
+  private readonly accountService = inject(AccountService);
+  private readonly messageHub = inject(MessageHubService);
   private readonly baseUrl = environment.apiUrl;
 
   private _annotations = signal<Annotation[]>([]);
@@ -37,19 +42,28 @@ export class AnnotationService {
   public readonly events = this._events.asReadonly();
   public readonly events$ = toObservable(this.events);
 
+  private readonly user = signal<User | null>(null);
+  public readonly slots = computed(() => {
+    const currentUser = this.user();
+
+    return currentUser?.preferences?.bookReaderHighlightSlots ?? [];
+  });
+
+  constructor() {
+    this.accountService.currentUser$.subscribe(user => {
+      this.user.set(user!);
+      console.log('[AnnotationService] setting user', user)
+    });
+
+
+  }
+
   getAllAnnotations(chapterId: number) {
     return this.httpClient.get<Array<Annotation>>(this.baseUrl + 'annotation/all?chapterId=' + chapterId).pipe(map(annotations => {
-      console.log('Annotations fetched/updated')
       this._annotations.set(annotations);
     }));
   }
 
-  getAnnotationsForPage(chapterId: number, pageNum: number) {
-    return this.httpClient.get<Array<Annotation>>(this.baseUrl + `annotation/page?chapterId=${chapterId}&pageNum=${pageNum}`).pipe(map(annotations => {
-      console.log('Annotations fetched/updated')
-      this._annotations.set(annotations);
-    }));
-  }
 
   createAnnotation(data: CreateAnnotationRequest) {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/create', data).pipe(
@@ -66,15 +80,17 @@ export class AnnotationService {
 
   updateAnnotation(data: Annotation) {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/update', data).pipe(
-      tap(newAnnotation => {
+      switchMap(newAnnotation => this.getAllAnnotations(data.chapterId)),
+      tap(_ => {
+        console.log('emitting edit event');
         this._events.set({
           pageNumber: data.pageNumber,
           type: 'edit',
           annotation: data
         });
       }),
-      delay(100), // Give a bit of time to allow the next api call to get fresh data
-      switchMap(newAnnotation => this.getAllAnnotations(data.chapterId))
+      //delay(100), // Give a bit of time to allow the next api call to get fresh data
+
     );
   }
 

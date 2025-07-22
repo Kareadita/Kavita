@@ -1,5 +1,5 @@
 import {inject, Injectable, ViewContainerRef} from '@angular/core';
-import {Annotation} from "../book-reader/_models/annotation";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {EpubHighlightComponent} from "../book-reader/_components/_annotations/epub-highlight/epub-highlight.component";
 import {DOCUMENT} from "@angular/common";
 

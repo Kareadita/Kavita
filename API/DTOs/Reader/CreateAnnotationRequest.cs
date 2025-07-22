@@ -1,6 +1,7 @@
 ﻿using API.Entities.Enums;
 
 namespace API.DTOs.Reader;
+#nullable enable
 
 public sealed record CreateAnnotationRequest
 {
@@ -12,12 +13,12 @@ public sealed record CreateAnnotationRequest
     /// <summary>
     /// Ending point of the Highlight. Can be the same as <see cref="XPath"/>
     /// </summary>
-    public string EndingXPath { get; set; }
+    public string? EndingXPath { get; set; }
 
     /// <summary>
     /// The text selected.
     /// </summary>
-    public string SelectedText { get; set; }
+    public string? SelectedText { get; set; }
     /// <summary>
     /// Rich text Comment
     /// </summary>
@@ -26,10 +27,13 @@ public sealed record CreateAnnotationRequest
     /// The number of characters selected
     /// </summary>
     public int HighlightCount { get; set; }
+
+    /// <summary>
+    /// Selected Highlight Slot Index [0-4]
+    /// </summary>
+    public int SelectedSlotIndex { get; set; }
     public bool ContainsSpoiler { get; set; }
     public int PageNumber { get; set; }
-
-    public HightlightColor HighlightColor { get; set; }
 
     public required int ChapterId { get; set; }
     public required int VolumeId { get; set; }

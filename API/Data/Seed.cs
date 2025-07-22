@@ -28,6 +28,45 @@ public static class Seed
     /// </summary>
     public static ImmutableArray<ServerSetting> DefaultSettings;
 
+    public static readonly ImmutableArray<HighlightSlot> DefaultHighlightSlots =
+    [
+        new()
+        {
+            Id = 1,
+            Title = "Blue",
+            SlotNumber = 0,
+            Color = new RgbaColor { R = 0, G = 123, B = 255, A = 255 }
+        },
+        new()
+        {
+            Id = 2,
+            Title = "Green",
+            SlotNumber = 1,
+            Color = new RgbaColor { R = 34, G = 197, B = 94, A = 255 }
+        },
+        new()
+        {
+            Id = 3,
+            Title = "Yellow",
+            SlotNumber = 2,
+            Color = new RgbaColor { R = 255, G = 235, B = 59, A = 255 }
+        },
+        new()
+        {
+            Id = 4,
+            Title = "Orange",
+            SlotNumber = 3,
+            Color = new RgbaColor { R = 255, G = 149, B = 0, A = 255 }
+        },
+        new()
+        {
+            Id = 5,
+            Title = "Purple",
+            SlotNumber = 4,
+            Color = new RgbaColor { R = 175, G = 82, B = 222, A = 255 }
+        }
+    ];
+
     public static readonly ImmutableArray<SiteTheme> DefaultThemes = [
         ..new List<SiteTheme>
         {
@@ -43,8 +82,8 @@ public static class Seed
         }.ToArray()
     ];
 
-    public static readonly ImmutableArray<AppUserDashboardStream> DefaultStreams = ImmutableArray.Create(
-        new List<AppUserDashboardStream>
+    public static readonly ImmutableArray<AppUserDashboardStream> DefaultStreams = [
+        ..new List<AppUserDashboardStream>
         {
             new()
             {
@@ -78,38 +117,40 @@ public static class Seed
                 IsProvided = true,
                 Visible = false
             },
-        }.ToArray());
+        }.ToArray()
+    ];
 
-    public static readonly ImmutableArray<AppUserSideNavStream> DefaultSideNavStreams = ImmutableArray.Create(
-        new AppUserSideNavStream()
+    public static readonly ImmutableArray<AppUserSideNavStream> DefaultSideNavStreams =
+    [
+        new()
     {
         Name = "want-to-read",
         StreamType = SideNavStreamType.WantToRead,
         Order = 1,
         IsProvided = true,
         Visible = true
-    }, new AppUserSideNavStream()
+    }, new()
     {
         Name = "collections",
         StreamType = SideNavStreamType.Collections,
         Order = 2,
         IsProvided = true,
         Visible = true
-    }, new AppUserSideNavStream()
+    }, new()
     {
         Name = "reading-lists",
         StreamType = SideNavStreamType.ReadingLists,
         Order = 3,
         IsProvided = true,
         Visible = true
-    }, new AppUserSideNavStream()
+    }, new()
     {
         Name = "bookmarks",
         StreamType = SideNavStreamType.Bookmarks,
         Order = 4,
         IsProvided = true,
         Visible = true
-    }, new AppUserSideNavStream()
+    }, new()
     {
         Name = "all-series",
         StreamType = SideNavStreamType.AllSeries,
@@ -117,14 +158,15 @@ public static class Seed
         IsProvided = true,
         Visible = true
     },
-    new AppUserSideNavStream()
+    new()
     {
         Name = "browse-authors",
         StreamType = SideNavStreamType.BrowsePeople,
         Order = 6,
         IsProvided = true,
         Visible = true
-    });
+    }
+    ];
 
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
@@ -213,58 +255,73 @@ public static class Seed
         }
     }
 
+    public static async Task SeedDefaultHighlightSlots(IUnitOfWork unitOfWork)
+    {
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences);
+        foreach (var user in allUsers)
+        {
+            if (user.UserPreferences.BookReaderHighlightSlots.Any()) break;
+
+            user.UserPreferences.BookReaderHighlightSlots = DefaultHighlightSlots.ToList();
+            unitOfWork.UserRepository.Update(user);
+        }
+        await unitOfWork.CommitAsync();
+    }
+
     public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)
     {
         await context.Database.EnsureCreatedAsync();
-        DefaultSettings = ImmutableArray.Create(new List<ServerSetting>()
-        {
-            new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
-            new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
-            new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
-            new() {Key = ServerSettingKey.TaskCleanup, Value = "daily"},
-            new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
-            new()
+        DefaultSettings = [
+            ..new List<ServerSetting>()
             {
-                Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)
-            },
-            new()
-            {
-                Key = ServerSettingKey.Port, Value = Configuration.DefaultHttpPort + string.Empty
-            }, // Not used from DB, but DB is sync with appSettings.json
-            new() {
-                Key = ServerSettingKey.IpAddresses, Value = Configuration.DefaultIpAddresses
-            }, // Not used from DB, but DB is sync with appSettings.json
-            new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
-            new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
-            new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
-            new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
-            new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
-            new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
-            new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
-            new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
-            new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
-            new() {Key = ServerSettingKey.HostName, Value = string.Empty},
-            new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
-            new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
-            new() {Key = ServerSettingKey.OnDeckProgressDays, Value = "30"},
-            new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = "7"},
-            new() {Key = ServerSettingKey.CoverImageSize, Value = CoverImageSize.Default.ToString()},
-            new() {
-                Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
-            }, // Not used from DB, but DB is sync with appSettings.json
+                new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
+                new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
+                new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
+                new() {Key = ServerSettingKey.TaskCleanup, Value = "daily"},
+                new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
+                new()
+                {
+                    Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)
+                },
+                new()
+                {
+                    Key = ServerSettingKey.Port, Value = Configuration.DefaultHttpPort + string.Empty
+                }, // Not used from DB, but DB is sync with appSettings.json
+                new() {
+                    Key = ServerSettingKey.IpAddresses, Value = Configuration.DefaultIpAddresses
+                }, // Not used from DB, but DB is sync with appSettings.json
+                new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
+                new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
+                new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
+                new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
+                new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
+                new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
+                new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
+                new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
+                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
+                new() {Key = ServerSettingKey.HostName, Value = string.Empty},
+                new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
+                new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
+                new() {Key = ServerSettingKey.OnDeckProgressDays, Value = "30"},
+                new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = "7"},
+                new() {Key = ServerSettingKey.CoverImageSize, Value = CoverImageSize.Default.ToString()},
+                new() {
+                    Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
+                }, // Not used from DB, but DB is sync with appSettings.json
 
-            new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailAuthPassword, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailAuthUserName, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailSenderAddress, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailSenderDisplayName, Value = string.Empty},
-            new() {Key = ServerSettingKey.EmailEnableSsl, Value = "true"},
-            new() {Key = ServerSettingKey.EmailSizeLimit, Value = 26_214_400 + string.Empty},
-            new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
-            new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
-            new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
-        }.ToArray());
+                new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailAuthPassword, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailAuthUserName, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailSenderAddress, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailSenderDisplayName, Value = string.Empty},
+                new() {Key = ServerSettingKey.EmailEnableSsl, Value = "true"},
+                new() {Key = ServerSettingKey.EmailSizeLimit, Value = 26_214_400 + string.Empty},
+                new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
+                new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
+                new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
+            }.ToArray()
+        ];
 
         foreach (var defaultSetting in DefaultSettings)
         {

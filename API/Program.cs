@@ -128,6 +128,7 @@ public class Program
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
                 await Seed.SeedUserApiKeys(context);
                 await Seed.SeedMetadataSettings(context);
+                await Seed.SeedDefaultHighlightSlots(unitOfWork);
             }
             catch (Exception ex)
             {

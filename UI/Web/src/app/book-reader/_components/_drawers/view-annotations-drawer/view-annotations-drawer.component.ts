@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, Signal} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Signal} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
-import {Annotation} from "../../../_models/annotation";
+import {Annotation} from "../../../_models/annotations/annotation";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FilterPipe} from "../../../../_pipes/filter.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -30,13 +30,6 @@ export class ViewAnnotationsDrawerComponent {
     filter: new FormControl('', [])
   });
   readonly FilterAfter = 6;
-
-  constructor() {
-    effect(() => {
-      console.log('annotations updated for drawer: ', this.annotations());
-    })
-  }
-
 
   handleDelete(annotation: Annotation) {
     this.annotationService.delete(annotation.id).subscribe();

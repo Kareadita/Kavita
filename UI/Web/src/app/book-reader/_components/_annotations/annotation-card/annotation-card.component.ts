@@ -1,14 +1,14 @@
 import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, model, Output, Signal} from '@angular/core';
-import {Annotation} from "../../../_models/annotation";
+import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
-import {DatePipe, JsonPipe} from "@angular/common";
+import {DatePipe, NgStyle} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
-import {HighlightColorPipe} from "../../../../_pipes/highlight-color.pipe";
 import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
+import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 
 @Component({
   selector: 'app-annotation-card',
@@ -18,7 +18,7 @@ import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
     DatePipe,
     TranslocoDirective,
     DefaultValuePipe,
-    JsonPipe
+    NgStyle
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',
@@ -28,18 +28,19 @@ export class AnnotationCardComponent {
   private readonly confirmService = inject(ConfirmService);
   private readonly annotationService = inject(AnnotationService);
   private readonly epubMenuService = inject(EpubReaderMenuService);
-  private readonly highlightColorPipe = new HighlightColorPipe();
+  private readonly highlightSlotPipe = new SlotColorPipe();
 
   annotation = model.required<Annotation>();
   @Output() delete = new EventEmitter();
 
-  titleClass: Signal<string>;
+  titleColor: Signal<string>;
 
   constructor() {
-    this.titleClass = computed(() => {
+    this.titleColor = computed(() => {
       const annotation = this.annotation();
       if (!annotation) return '';
-      return `${this.highlightColorPipe.transform(annotation.highlightColor)}-title`;
+      // TODO: Safefty check
+      return this.highlightSlotPipe.transform(this.annotationService.slots()[annotation.selectedSlotIndex].color);
     })
   }
 

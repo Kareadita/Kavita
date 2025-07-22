@@ -5,18 +5,27 @@ export enum HighlightColor {
 
 export const allHighlightColors = [HighlightColor.Blue, HighlightColor.Green];
 
+
+
+
 export interface Annotation {
   id: number;
   xpath: string;
   endingXPath: string | null;
   selectedText: string | null;
   comment: string;
-  highlightColor: HighlightColor;
   containsSpoiler: boolean;
   pageNumber: number;
+  selectedSlotIndex: number;
 
 
   chapterId: number;
+
+  chapterTitle: string | null;
+  /**
+   * UI Only
+   */
+  surroundingText: string | null;
 
   ownerUserId: number;
   ownerUsername: string;

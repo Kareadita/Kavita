@@ -301,6 +301,14 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ?? new List<MetadataSettingField>())
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
+
+        builder.Entity<AppUserPreferences>()
+            .Property(a => a.BookReaderHighlightSlots)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<HighlightSlot>>(v, JsonSerializerOptions.Default) ?? new List<HighlightSlot>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<HighlightSlot>());
     }
 
     #nullable enable

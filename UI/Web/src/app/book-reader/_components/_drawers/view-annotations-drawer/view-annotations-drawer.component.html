@@ -19,7 +19,7 @@
         </div>
       }
 
-      @for(annotation of annotations() | filter: filterList; track annotation.id) {
+      @for(annotation of annotations() | filter: filterList; track annotation.comment + annotation.highlightColor + annotation.containsSpolier) {
         <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)"/>
       }
     </form>

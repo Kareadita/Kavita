@@ -1536,37 +1536,37 @@ public partial class BookService : IBookService
         throw new KavitaException("epub-html-missing");
     }
 
-    private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
-        ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
-    {
-        if (navigationItem.Link == null)
-        {
-            var item = new BookChapterItem
-            {
-                Title = navigationItem.Title,
-                Children = nestedChapters
-            };
-            if (nestedChapters.Count > 0)
-            {
-                item.Page = nestedChapters[0].Page;
-            }
-
-            chaptersList.Add(item);
-        }
-        else
-        {
-            var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFilePath);
-            if (mappings.ContainsKey(groupKey))
-            {
-                chaptersList.Add(new BookChapterItem
-                {
-                    Title = navigationItem.Title,
-                    Page = mappings[groupKey],
-                    Children = nestedChapters
-                });
-            }
-        }
-    }
+    // private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+    //     ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
+    // {
+    //     if (navigationItem.Link == null)
+    //     {
+    //         var item = new BookChapterItem
+    //         {
+    //             Title = navigationItem.Title,
+    //             Children = nestedChapters
+    //         };
+    //         if (nestedChapters.Count > 0)
+    //         {
+    //             item.Page = nestedChapters[0].Page;
+    //         }
+    //
+    //         chaptersList.Add(item);
+    //     }
+    //     else
+    //     {
+    //         var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFilePath);
+    //         if (mappings.ContainsKey(groupKey))
+    //         {
+    //             chaptersList.Add(new BookChapterItem
+    //             {
+    //                 Title = navigationItem.Title,
+    //                 Page = mappings[groupKey],
+    //                 Children = nestedChapters
+    //             });
+    //         }
+    //     }
+    // }
 
 
     /// <summary>

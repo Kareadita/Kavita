@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -28,13 +29,21 @@ public sealed record AnnotationDto
     /// </summary>
     public string? Comment { get; set; }
     /// <summary>
+    /// Title of the TOC Chapter within Epub (not Chapter Entity)
+    /// </summary>
+    public string? ChapterTitle { get; set; }
+
+    /// <summary>
     /// The number of characters selected
     /// </summary>
     public int HighlightCount { get; set; }
     public bool ContainsSpoiler { get; set; }
     public int PageNumber { get; set; }
 
-    public HightlightColor HighlightColor { get; set; }
+    /// <summary>
+    /// Selected Highlight Slot Index [0-4]
+    /// </summary>
+    public int SelectedSlotIndex { get; set; }
 
     public required int ChapterId { get; set; }
 

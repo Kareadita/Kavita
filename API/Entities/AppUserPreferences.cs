@@ -108,6 +108,10 @@ public class AppUserPreferences
     /// </summary>
     /// <remarks>Defaults to false</remarks>
     public bool BookReaderImmersiveMode { get; set; } = false;
+    /// <summary>
+    /// Book Reader Option: A set of 5 distinct highlight slots with default colors. User can customize. Binds to all Highlight Annotations (<see cref="AppUserAnnotation"/>.
+    /// </summary>
+    public List<HighlightSlot> BookReaderHighlightSlots { get; set; }
     #endregion
 
     #region PdfReader

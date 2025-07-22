@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 
@@ -32,11 +33,20 @@ public class AppUserAnnotation : IEntityDate
     /// </summary>
     public int HighlightCount { get; set; }
     public int PageNumber { get; set; }
+    /// <summary>
+    /// Selected Highlight Slot Index [0-4]
+    /// </summary>
+    public int SelectedSlotIndex { get; set; }
 
-    public HightlightColor HighlightColor { get; set; }
+
     public bool ContainsSpoiler { get; set; }
 
      // TODO: Figure out a simple mechansim to track upvotes (hashmap of userids?)
+
+     /// <summary>
+     /// Title of the TOC Chapter within Epub (not Chapter Entity)
+     /// </summary>
+     public string? ChapterTitle { get; set; }
 
     public required int SeriesId { get; set; }
     public required int VolumeId { get; set; }

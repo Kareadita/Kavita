@@ -843,6 +843,10 @@
         "close": "{{common.close}}"
     },
 
+    "highlight-bar": {
+      "add-new-color-alt": "Add Custom Color"
+    },
+
     "create-annotation-drawer": {
         "title": "Create Annotation",
         "close": "{{common.close}}",

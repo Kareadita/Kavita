@@ -1,5 +1,3 @@
-import {HighlightColor} from "./annotation";
-
 export interface CreateAnnotationRequest {
   libraryId: number;
   seriesId: number;
@@ -9,10 +7,10 @@ export interface CreateAnnotationRequest {
   endingXPath: string | null;
   selectedText: string | null;
   comment: string | null;
-  highlightColor: HighlightColor;
   highlightCount: number;
   containsSpoiler: boolean;
   pageNumber: number;
+  selectedSlotIndex: number;
 
   /**
    * Ui Only - the full paragraph of selected context

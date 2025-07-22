@@ -22,7 +22,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {CreateAnnotationRequest} from "../../_models/create-annotation-request";
-import {HighlightColor} from "../../_models/annotation";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -153,7 +152,7 @@ export class BookLineOverlayComponent implements OnInit {
         xpath: this.xPath,
         endingXPath: this.xPath, // TODO: Figure this out
         highlightCount: this.selectedText.length,
-        highlightColor: HighlightColor.Blue,
+        selectedSlotIndex: 0,
         context: this.allTextFromSelection,
       } as CreateAnnotationRequest;
 

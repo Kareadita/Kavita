@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {HighlightColor} from "../book-reader/_models/annotation";
+import {HighlightColor} from "../book-reader/_models/annotations/annotation";
 
 @Pipe({
   name: 'highlightColor'

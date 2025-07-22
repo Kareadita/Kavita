@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250711205246_BookAnnotations")]
+    [Migration("20250721120918_BookAnnotations")]
     partial class BookAnnotations
     {
         /// <inheritdoc />
@@ -169,6 +169,9 @@ namespace API.Data.Migrations
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ChapterTitle")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Comment")
                         .HasColumnType("TEXT");
 
@@ -184,9 +187,6 @@ namespace API.Data.Migrations
                     b.Property<string>("EndingXPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("HighlightColor")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("HighlightCount")
                         .HasColumnType("INTEGER");
 
@@ -197,6 +197,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PageNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SelectedSlotIndex")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SelectedText")
@@ -497,6 +500,11 @@ namespace API.Data.Migrations
 
                     b.Property<int>("BookReaderFontSize")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("BookReaderHighlightSlots")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<bool>("BookReaderImmersiveMode")
                         .HasColumnType("INTEGER");

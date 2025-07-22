@@ -20,11 +20,11 @@ import {
 } from "../book-reader/_components/_drawers/epub-setting-drawer/epub-setting-drawer.component";
 import {ReadingProfile} from "../_models/preferences/reading-profiles";
 import {PageBookmark} from "../_models/readers/page-bookmark";
-import {Annotation} from "../book-reader/_models/annotation";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
-import {HighlightColorPipe} from "../_pipes/highlight-color.pipe";
+import {AccountService} from "./account.service";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -36,7 +36,7 @@ export class EpubReaderMenuService {
 
   private readonly offcanvasService = inject(NgbOffcanvas);
   private readonly utilityService = inject(UtilityService);
-  private readonly highlightColorPipe = new HighlightColorPipe();
+  private readonly accountService = inject(AccountService);
 
   /**
    * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded
@@ -130,6 +130,7 @@ export class EpubReaderMenuService {
 
     const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom'});
     ref.componentInstance.annotation.set(annotation);
+    //ref.componentInstance.slots.set(this.slots()); // Slots needs to be global to the user and also any changes need to reflect instantly
     ref.componentInstance.isEditMode.set(editMode);
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
@@ -145,7 +146,6 @@ export class EpubReaderMenuService {
   }
 
   setDrawerClosed() {
-    console.log('Drawer closed');
     this.isDrawerOpen.set(false);
   }
 

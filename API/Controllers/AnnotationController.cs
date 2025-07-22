@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -14,11 +15,15 @@ public class AnnotationController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AnnotationController> _logger;
+    private readonly ICacheService _cacheService;
+    private readonly IBookService _bookService;
 
-    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger)
+    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger, ICacheService cacheService, IBookService bookService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _cacheService = cacheService;
+        _bookService = bookService;
     }
 
     /// <summary>
@@ -43,6 +48,10 @@ public class AnnotationController : BaseApiController
                 return BadRequest("Invalid Payload");
             }
 
+            // TODO: Figure out how to get Chapter title
+            // await _cacheService.Ensure(dto.ChapterId);
+            // _bookService.GenerateTableOfContents();
+
             var annotation = new AppUserAnnotation()
             {
                 XPath = dto.XPath,
@@ -55,8 +64,9 @@ public class AnnotationController : BaseApiController
                 Comment = dto.Comment,
                 ContainsSpoiler = dto.ContainsSpoiler,
                 PageNumber = dto.PageNumber,
-                HighlightColor = dto.HighlightColor,
-                AppUserId = User.GetUserId()
+                SelectedSlotIndex = dto.SelectedSlotIndex,
+                AppUserId = User.GetUserId(),
+                //ChapterTitle =
             };
 
             _unitOfWork.AnnotationRepository.Attach(annotation);
@@ -80,7 +90,7 @@ public class AnnotationController : BaseApiController
             if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest();
 
             annotation.ContainsSpoiler = dto.ContainsSpoiler;
-            annotation.HighlightColor = dto.HighlightColor;
+            annotation.SelectedSlotIndex = dto.SelectedSlotIndex;
             annotation.Comment = dto.Comment;
             _unitOfWork.AnnotationRepository.Update(annotation);
 
