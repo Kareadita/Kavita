@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'import-mappings'">
+<ng-container *transloco="let t; prefix: 'import-mappings'">
 
   <div class="row g-0" style="min-width: 135px;">
     <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex()"></app-step-tracker>
@@ -17,13 +17,165 @@
           </div>
         }
         @case (Step.Configure) {
+          <form class="row" [formGroup]="importSettingsForm">
 
+            <p>{{t('configure-description')}}</p>
+
+            <div class="col-md-6 col-sm-12">
+              @if (importSettingsForm.get('importMode'); as control) {
+                <app-setting-item [control]="control" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
+                  <ng-template #view>{{control.value | importMode}}</ng-template>
+                  <ng-template #edit>
+                    <select formControlName="importMode" class="form-control">
+                      @for (mode of ImportModes; track mode) {
+                        <option [value]="mode">{{mode | importMode}}</option>
+                      }
+                    </select>
+                  </ng-template>
+                </app-setting-item>
+              }
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+              @if (importSettingsForm.get('resolution'); as control) {
+                <app-setting-item [control]="control" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
+                  <ng-template #view>{{control.value | conflictResolution}}</ng-template>
+                  <ng-template #edit>
+                    <select formControlName="resolution" class="form-control">
+                      @for (resolution of ConflictResolutions; track resolution) {
+                        <option [value]="resolution">{{resolution | conflictResolution}}</option>
+                      }
+                    </select>
+                  </ng-template>
+                </app-setting-item>
+              }
+            </div>
+
+            <div class="row pt-4">
+              <div class="col-md-6 col-sm-12">
+                @if (importSettingsForm.get('whitelist'); as control) {
+                  <app-setting-switch [title]="t('whitelist-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="whitelist">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12">
+                @if (importSettingsForm.get('blacklist'); as control) {
+                  <app-setting-switch [title]="t('blacklist-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="blacklist">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12">
+                @if (importSettingsForm.get('ageRatings'); as control) {
+                  <app-setting-switch [title]="t('age-ratings-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="ageRatings">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12">
+                @if (importSettingsForm.get('fieldMappings'); as control) {
+                  <app-setting-switch [title]="t('field-mappings-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="fieldMappings">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+            </div>
+
+          </form>
         }
-        @case (Step.Overview) {
+        @case (Step.Conflicts) {
+          @let res = importResult();
+          @if (res) {
+            <form class="row" [formGroup]="importSettingsForm">
 
+              <div class="col-md-12 col-sm-12 row">
+
+                @if (res.ageRatingConflicts.length > 0) {
+                  <div class="conflict-group-title">{{t('age-ratings-label')}}</div>
+                }
+
+                @for (arm of res.ageRatingConflicts; track arm) {
+                  <div class="col-md-6 col-sm-12 pt-4">
+                    @if (importSettingsForm.get('ageRatingConflictResolutions.'+arm); as control) {
+                      <div formGroupName="ageRatingConflictResolutions">
+                        <span class="conflict-title">{{arm}}</span>
+                        <select [formControlName]="arm" class="form-control mt-2">
+                          @for (resolution of ConflictResolutions; track resolution) {
+                            <option [value]="resolution">
+                              <ng-container [ngTemplateOutlet]="ageRatingConflict"
+                                            [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
+                              </ng-container>
+                            </option>
+                          }
+                        </select>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-12 col-sm-12 row">
+
+                @if (res.fieldMappingConflicts.length > 0) {
+                  <div class="setting-section-break"></div>
+                  <div class="conflict-group-title">{{t('field-mappings-label')}}</div>
+                }
+
+                @for (fmc of res.fieldMappingConflicts; track fmc) {
+                  @let origin = getFieldMapping(settings()!.fieldMappings, fmc.oldId);
+
+                  <div class="col-md-6 col-sm-12 pt-4">
+                    @if (importSettingsForm.get('fieldMappingsConflictResolutions.'+fmc.oldId); as control) {
+                      <div formGroupName="fieldMappingsConflictResolutions">
+                        <span class="conflict-title">
+                          {{ origin.sourceType | metadataFieldType }} - {{ origin.sourceValue }}
+                        </span>
+                        <select [formControlName]="fmc.oldId+''" class="form-control mt-2">
+                          @for (resolution of ConflictResolutions; track resolution) {
+                            <option [value]="resolution">
+                              <ng-container [ngTemplateOutlet]="fieldMappingConflict"
+                                            [ngTemplateOutletContext]="{$implicit: fmc, resolution: resolution }" >
+                              </ng-container>
+                            </option>
+                          }
+                        </select>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+
+            </form>
+          }
         }
-        @case (Step.Finalize) {
-
+        @case (Step.Success) {
+          <div class="d-flex justify-content-center align-items-center">
+            <div class="text-center p-4 rounded">
+              <div class="mb-3"><i class="fas fa-check-circle text-success fs-1"></i></div>
+              <h2 class="text-success mb-2">{{t('success')}}</h2>
+            </div>
+          </div>
         }
       }
     </div>
@@ -39,3 +191,25 @@
   </div>
 
 </ng-container>
+
+<ng-template #ageRatingConflict let-arm let-resolution='resolution'>
+  @let oldValue = getMapEntry(settings()!.ageRatingMappings, arm);
+  @let newValue = getMapEntry(importedMappings()!.ageRatingMappings, arm);
+
+  @switch (resolution) {
+    @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }
+    @case (ConflictResolution.Keep) { {{ oldValue | ageRating }} }
+    @case (ConflictResolution.Replace) { {{ newValue | ageRating }} }
+  }
+</ng-template>
+
+<ng-template #fieldMappingConflict let-fmc let-resolution='resolution'>
+  @let oldValue = getFieldMapping(settings()!.fieldMappings, fmc.oldId);
+  @let newValue = getFieldMapping(importedMappings()!.fieldMappings, fmc.newId);
+
+  @switch (resolution) {
+    @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }
+    @case (ConflictResolution.Keep) { {{ oldValue.destinationType | metadataFieldType }} - {{ oldValue.destinationValue }} }
+    @case (ConflictResolution.Replace) { {{ newValue.destinationType | metadataFieldType }} - {{ newValue.destinationValue }} }
+  }
+</ng-template>

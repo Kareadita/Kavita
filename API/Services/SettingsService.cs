@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Logging;
 using API.Services.Tasks.Scanner;
@@ -16,12 +19,21 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharpCompress.Common;
 
 namespace API.Services;
 
 public interface ISettingsService
 {
     Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto);
+    /// <summary>
+    /// Update <see cref="MetadataSettings.Whitelist"/>, <see cref="MetadataSettings.Blacklist"/>, <see cref="MetadataSettings.AgeRatingMappings"/>, <see cref="MetadataSettings.FieldMappings"/>
+    /// with data from the given dto.
+    /// </summary>
+    /// <param name="dto">Only the above fields need to be present</param>
+    /// <param name="settings">What and how should the importing be handled</param>
+    /// <returns></returns>
+    Task<FieldMappingsImportResultDto> ImportFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings);
     Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
 }
 
@@ -106,6 +118,160 @@ public class SettingsService : ISettingsService
 
         // Return updated settings
         return await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+    }
+
+    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    {
+        return settings.ImportMode switch
+        {
+            ImportMode.Merge => await MergeFieldMappings(dto, settings),
+            ImportMode.Replace => await ReplaceFieldMappings(dto, settings),
+            _ => throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid import mode {nameof(settings.ImportMode)}")
+        };
+    }
+
+    private async Task<FieldMappingsImportResultDto> ReplaceFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    {
+        var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
+        if (settings.Whitelist)
+        {
+            existingMetadataSetting.Whitelist = dto.Whitelist;
+        }
+
+        if (settings.Blacklist)
+        {
+            existingMetadataSetting.Blacklist = dto.Blacklist;
+        }
+
+        if (settings.AgeRatings)
+        {
+            existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings;
+        }
+
+        if (settings.FieldMappings)
+        {
+            existingMetadataSetting.FieldMappings = dto.FieldMappings;
+        }
+
+        await UpdateMetadataSettings(existingMetadataSetting);
+        return new FieldMappingsImportResultDto
+        {
+            Success = true,
+            AgeRatingConflicts = [],
+            FieldMappingConflicts = [],
+        };
+    }
+
+    private async Task<FieldMappingsImportResultDto> MergeFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    {
+        var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
+        if (settings.Whitelist)
+        {
+            existingMetadataSetting.Whitelist = existingMetadataSetting.Whitelist.Union(dto.Whitelist).DistinctBy(d => d.ToNormalized()).ToList();
+        }
+
+        if (settings.Blacklist)
+        {
+            existingMetadataSetting.Blacklist = existingMetadataSetting.Blacklist.Union(dto.Blacklist).DistinctBy(d => d.ToNormalized()).ToList();
+        }
+
+        List<string> ageRatingConflicts = [];
+
+        if (settings.AgeRatings)
+        {
+            foreach (var arm in dto.AgeRatingMappings)
+            {
+                if (!existingMetadataSetting.AgeRatingMappings.TryGetValue(arm.Key, out var mapping))
+                {
+                    existingMetadataSetting.AgeRatingMappings.Add(arm.Key, arm.Value);
+                    continue;
+                }
+
+                if (arm.Value == mapping)
+                {
+                    continue;
+                }
+
+                var resolution = settings.AgeRatingConflictResolutions.GetValueOrDefault(arm.Key, settings.Resolution);
+
+                switch (resolution)
+                {
+                    case ConflictResolution.Keep: continue;
+                    case ConflictResolution.Replace:
+                        existingMetadataSetting.AgeRatingMappings[arm.Key] = arm.Value;
+                        break;
+                    case ConflictResolution.Manual:
+                        ageRatingConflicts.Add(arm.Key);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid conflict resolution {nameof(ConflictResolution)}.");
+                }
+            }
+        }
+
+        List<ImportConflict>  fieldMappingConflicts = [];
+        Dictionary<(string,MetadataFieldType), MetadataFieldMappingDto> fieldMappings = existingMetadataSetting.FieldMappings
+            .ToDictionary(d => (d.SourceValue, d.SourceType));
+
+        if (settings.FieldMappings)
+        {
+            foreach (var mfm in dto.FieldMappings)
+            {
+                var key = (mfm.SourceValue, mfm.SourceType);
+
+                if (!fieldMappings.TryGetValue(key, out var existingMapping))
+                {
+                    existingMetadataSetting.FieldMappings.Add(mfm);
+                    continue;
+                }
+
+                if (mfm.DestinationValue == existingMapping.DestinationValue && mfm.DestinationType == existingMapping.DestinationType)
+                {
+                    continue;
+                }
+
+                var resolution = settings.FieldMappingsConflictResolutions.GetValueOrDefault(existingMapping.Id, settings.Resolution);
+
+                switch (resolution)
+                {
+                    case ConflictResolution.Keep: continue;
+                    case ConflictResolution.Replace:
+                        existingMetadataSetting.FieldMappings.Remove(existingMapping);
+                        existingMetadataSetting.FieldMappings.Add(mfm);
+                        break;
+                    case ConflictResolution.Manual:
+                        fieldMappingConflicts.Add(new ImportConflict
+                        {
+                            OldId = existingMapping.Id,
+                            NewId = mfm.Id,
+                        });
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid conflict resolution {nameof(ConflictResolution)}.");
+                }
+            }
+        }
+
+
+        if (ageRatingConflicts.Count > 0 || fieldMappingConflicts.Count > 0)
+        {
+            return new FieldMappingsImportResultDto
+            {
+                Success = false,
+                AgeRatingConflicts = ageRatingConflicts,
+                FieldMappingConflicts = fieldMappingConflicts,
+            };
+        }
+
+        await UpdateMetadataSettings(existingMetadataSetting);
+        return new FieldMappingsImportResultDto
+        {
+            Success = true,
+            AgeRatingConflicts = [],
+            FieldMappingConflicts = [],
+        };
     }
 
     /// <summary>

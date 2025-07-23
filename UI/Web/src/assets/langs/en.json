@@ -1937,15 +1937,34 @@
     "import-mappings": {
         "import-step": "Import",
         "configure-step": "Configure",
-        "overview-step": "Overview & Fix",
-        "finalize-step": "Finalize",
+        "conflicts-step": "Resolve collisions",
+        "success-step": "Success",
         "prev": "{{import-cbl-modal.prev}}",
         "import": "{{import-cbl-modal.import}}",
         "next": "{{import-cbl-modal.next}}",
+        "success": "Success",
+
         "import-description": "Upload a file you, or someone else has exported to replace or merge with your current settings.",
         "select-files-warning": "You must upload a json file to continue",
         "invalid-file": "Failed to parse your file, check your input",
-        "file-no-valid-content": "Your import did not contain any meaningful data to continue with"
+        "file-no-valid-content": "Your import did not contain any meaningful data to continue with",
+
+        "configure-description": "Configure how and what to import",
+        "whitelist-label": "Tags whitelist",
+        "blacklist-label": "Tags blacklist",
+        "age-ratings-label": "Age rating mappings",
+        "field-mappings-label": "Field mappings",
+
+        "import-mode-label": "Import mode",
+        "import-mode-tooltip": "Replace disregards your current settings, merge will try and resolve conflcits in the way you've configured",
+        "merge": "Merge",
+        "replace": "Replace",
+
+        "resolution-label": "Conflict resolution",
+        "resolution-tooltip": "Decide how Kavita should handle conflicts",
+        "manual": "Manual",
+        "keep": "Keep",
+        "to-pick": "Choose resolution"
     },
 
     "import-cbl-modal": {
@@ -3056,6 +3075,7 @@
         "submit": "Submit",
         "email": "Email",
         "read": "Read",
+        "unknown": "Unknown",
         "loading": "Loading…",
         "username": "Username",
         "password": "Password",

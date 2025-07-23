@@ -27,3 +27,14 @@ file-upload {
 ::ng-deep file-upload-list-item {
   color: var(--input-text-color) !important;
 }
+
+.conflict-group-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-text-color)
+}
+
+.conflict-title {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
