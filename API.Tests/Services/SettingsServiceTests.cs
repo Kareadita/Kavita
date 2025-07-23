@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
@@ -20,6 +21,11 @@ public class SettingsServiceTests
     private readonly ISettingsService _settingsService;
     private readonly IUnitOfWork _mockUnitOfWork;
 
+    private const string DefaultAgeKey = "default_age";
+    private const string DefaultFieldSource = "default_source";
+    private static AgeRating DefaultAgeRating = AgeRating.Everyone;
+    private static MetadataFieldType DefaultSourceField = MetadataFieldType.Genre;
+
     public SettingsServiceTests()
     {
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
@@ -29,6 +35,280 @@ public class SettingsServiceTests
             Substitute.For<ILibraryWatcher>(), Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SettingsService>>());
     }
+
+    #region ImportMetadataSettings
+
+    [Fact]
+    public async Task ImportFieldMappings_ReplaceMode()
+    {
+        var existingSettings = CreateDefaultMetadataSettings();
+        var newSettings = new MetadataSettingsDto
+        {
+            Whitelist = ["new_whitelist_item"],
+            Blacklist = ["new_blacklist_item"],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { ["new_age"] = AgeRating.R18Plus },
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto { Id = 10, SourceValue = "new_source", SourceType = MetadataFieldType.Genre, DestinationValue = "new_dest", DestinationType = MetadataFieldType.Tag }
+            ],
+        };
+
+        var importSettings = new ImportSettingsDto
+        {
+            ImportMode = ImportMode.Replace,
+            Whitelist = true,
+            Blacklist = true,
+            AgeRatings = true,
+            FieldMappings = true,
+            Resolution = ConflictResolution.Manual,
+            AgeRatingConflictResolutions = [],
+            FieldMappingsConflictResolutions = [],
+        };
+
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        settingsRepo.GetMetadataSettingDto().Returns(CreateDefaultMetadataSettingsDto());
+        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
+
+        Assert.True(result.Success);
+        Assert.Empty(result.AgeRatingConflicts);
+        Assert.Empty(result.FieldMappingConflicts);
+
+        Assert.Equal(existingSettings.Whitelist, newSettings.Whitelist);
+        Assert.Equal(existingSettings.Blacklist, newSettings.Blacklist);
+        Assert.Equal(existingSettings.AgeRatingMappings.Count, newSettings.AgeRatingMappings.Count);
+        Assert.Equal(existingSettings.FieldMappings.Count, newSettings.FieldMappings.Count);
+    }
+
+    [Fact]
+    public async Task ImportFieldMappings_MergeMode_WithNoConflicts()
+    {
+        var existingSettingsDto = CreateDefaultMetadataSettingsDto();
+        var existingSettings = CreateDefaultMetadataSettings();
+
+        var newSettings = new MetadataSettingsDto
+        {
+            Whitelist = ["new_whitelist_item"],
+            Blacklist = ["new_blacklist_item"],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { ["new_age"] = AgeRating.R18Plus },
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto { Id = 10, SourceValue = "new_source", SourceType = MetadataFieldType.Genre, DestinationValue = "new_dest", DestinationType = MetadataFieldType.Tag },
+            ],
+        };
+
+        var importSettings = new ImportSettingsDto
+        {
+            ImportMode = ImportMode.Merge,
+            Whitelist = true,
+            Blacklist = true,
+            AgeRatings = true,
+            FieldMappings = true,
+            Resolution = ConflictResolution.Manual,
+            AgeRatingConflictResolutions = [],
+            FieldMappingsConflictResolutions = [],
+        };
+
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        settingsRepo.GetMetadataSettingDto().Returns(existingSettingsDto);
+        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
+
+        Assert.True(result.Success);
+        Assert.Empty(result.AgeRatingConflicts);
+        Assert.Empty(result.FieldMappingConflicts);
+
+        Assert.Contains("default_white", existingSettingsDto.Whitelist);
+        Assert.Contains("new_whitelist_item", existingSettingsDto.Whitelist);
+        Assert.Contains("default_black", existingSettingsDto.Blacklist);
+        Assert.Contains("new_blacklist_item", existingSettingsDto.Blacklist);
+        Assert.Equal(2, existingSettingsDto.AgeRatingMappings.Count);
+        Assert.Equal(2, existingSettingsDto.FieldMappings.Count);
+    }
+
+    [Theory]
+    [InlineData(ConflictResolution.Manual, false, true, "default_dest", MetadataFieldType.Tag)]
+    [InlineData(ConflictResolution.Replace, true, false, "different_dest", MetadataFieldType.Genre)]
+    [InlineData(ConflictResolution.Keep, true, false, "default_dest", MetadataFieldType.Tag)]
+    public async Task ImportFieldMappings_MergeMode_DefaultResolutionHandling(ConflictResolution resolution, bool expectedSuccess, bool expectConflict, string expectedDestinationValue, MetadataFieldType expectedDestinationType)
+    {
+
+        var existingSettingsDto = CreateDefaultMetadataSettingsDto();
+        var existingSettings = CreateDefaultMetadataSettings();
+
+        var newSettings = new MetadataSettingsDto
+        {
+            Whitelist = [],
+            Blacklist = [],
+            AgeRatingMappings = new Dictionary<string, AgeRating>
+            {
+                [DefaultAgeKey] = AgeRating.R18Plus,
+            },
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto
+                {
+                    Id = 20,
+                    SourceValue = DefaultFieldSource,
+                    SourceType = DefaultSourceField,
+                    DestinationValue = "different_dest",
+                    DestinationType = MetadataFieldType.Genre,
+                }
+            ],
+        };
+
+        var importSettings = new ImportSettingsDto
+        {
+            ImportMode = ImportMode.Merge,
+            Whitelist = false,
+            Blacklist = false,
+            AgeRatings = true,
+            FieldMappings = true,
+            Resolution = resolution,
+            AgeRatingConflictResolutions = [],
+            FieldMappingsConflictResolutions = [],
+        };
+
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        settingsRepo.GetMetadataSettingDto().Returns(existingSettingsDto);
+        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
+
+        Assert.Equal(expectedSuccess, result.Success);
+
+        if (expectConflict)
+        {
+            Assert.Single(result.AgeRatingConflicts);
+            Assert.Contains(DefaultAgeKey, result.AgeRatingConflicts);
+            Assert.Single(result.FieldMappingConflicts);
+            Assert.Equal(1, result.FieldMappingConflicts[0].OldId);
+            Assert.Equal(20, result.FieldMappingConflicts[0].NewId);
+        }
+        else
+        {
+            Assert.Empty(result.AgeRatingConflicts);
+            Assert.Empty(result.FieldMappingConflicts);
+
+            var expectedAgeRating = resolution == ConflictResolution.Replace ? AgeRating.R18Plus : DefaultAgeRating;
+            Assert.Equal(expectedAgeRating, existingSettingsDto.AgeRatingMappings[DefaultAgeKey]);
+
+            Assert.Single(existingSettingsDto.FieldMappings);
+            var mapping = existingSettingsDto.FieldMappings[0];
+            Assert.Equal(expectedDestinationValue, mapping.DestinationValue);
+            Assert.Equal(expectedDestinationType, mapping.DestinationType);
+        }
+    }
+
+    [Fact]
+    public async Task ImportFieldMappings_MergeMode_UseConfiguredOverrides()
+    {
+        var existingSettingsDto = CreateDefaultMetadataSettingsDto();
+        var existingSettings = CreateDefaultMetadataSettings();
+
+        var newSettings = new MetadataSettingsDto
+        {
+            Whitelist = [],
+            Blacklist = [],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { [DefaultAgeKey] = AgeRating.R18Plus },
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto
+                {
+                    Id = 20,
+                    SourceValue = DefaultFieldSource,
+                    SourceType = DefaultSourceField,
+                    DestinationValue = "different_dest",
+                    DestinationType = MetadataFieldType.Genre,
+                }
+            ],
+        };
+
+        var importSettings = new ImportSettingsDto
+        {
+            ImportMode = ImportMode.Merge,
+            Whitelist = false,
+            Blacklist = false,
+            AgeRatings = true,
+            FieldMappings = true,
+            Resolution = ConflictResolution.Manual,
+            AgeRatingConflictResolutions = new Dictionary<string, ConflictResolution> { [DefaultAgeKey] = ConflictResolution.Replace },
+            FieldMappingsConflictResolutions = new Dictionary<int, ConflictResolution> { [1] = ConflictResolution.Keep },
+        };
+
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        settingsRepo.GetMetadataSettingDto().Returns(existingSettingsDto);
+        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
+
+        Assert.True(result.Success);
+        Assert.Empty(result.AgeRatingConflicts);
+        Assert.Empty(result.FieldMappingConflicts);
+
+        Assert.Equal(AgeRating.R18Plus, existingSettingsDto.AgeRatingMappings[DefaultAgeKey]);
+
+        var mapping = existingSettingsDto.FieldMappings[0];
+        Assert.Equal("default_dest", mapping.DestinationValue);
+        Assert.Equal(MetadataFieldType.Tag, mapping.DestinationType);
+    }
+
+    [Fact]
+    public async Task ImportFieldMappings_MergeMode_SkipIdenticalMappings()
+    {
+        var existingSettingsDto = CreateDefaultMetadataSettingsDto();
+        var existingSettings = CreateDefaultMetadataSettings();
+
+        var newSettings = new MetadataSettingsDto
+        {
+            Whitelist = [],
+            Blacklist = [],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { ["existing_age"] = AgeRating.Mature }, // Same value
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto
+                {
+                    Id = 20,
+                    SourceValue = "existing_source",
+                    SourceType = MetadataFieldType.Genre,
+                    DestinationValue = "existing_dest", // Same destination
+                    DestinationType = MetadataFieldType.Tag // Same destination type
+                }
+            ],
+        };
+
+        var importSettings = new ImportSettingsDto
+        {
+            ImportMode = ImportMode.Merge,
+            Whitelist = false,
+            Blacklist = false,
+            AgeRatings = true,
+            FieldMappings = true,
+            Resolution = ConflictResolution.Manual,
+            AgeRatingConflictResolutions = [],
+            FieldMappingsConflictResolutions = [],
+        };
+
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        settingsRepo.GetMetadataSettingDto().Returns(existingSettingsDto);
+        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
+
+        Assert.True(result.Success);
+        Assert.Empty(result.AgeRatingConflicts);
+        Assert.Empty(result.FieldMappingConflicts);
+    }
+
+
+    #endregion
 
     #region UpdateMetadataSettings
 
@@ -289,4 +569,46 @@ public class SettingsServiceTests
     }
 
     #endregion
+
+    private MetadataSettingsDto CreateDefaultMetadataSettingsDto()
+    {
+        return new MetadataSettingsDto
+        {
+            Whitelist = ["default_white"],
+            Blacklist = ["default_black"],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { ["default_age"] = AgeRating.Everyone },
+            FieldMappings =
+            [
+                new MetadataFieldMappingDto
+                {
+                    Id = 1,
+                    SourceValue = "default_source",
+                    SourceType = MetadataFieldType.Genre,
+                    DestinationValue = "default_dest",
+                    DestinationType = MetadataFieldType.Tag
+                },
+            ],
+        };
+    }
+
+    private MetadataSettings CreateDefaultMetadataSettings()
+    {
+        return new MetadataSettings
+        {
+            Whitelist = ["default_white"],
+            Blacklist = ["default_black"],
+            AgeRatingMappings = new Dictionary<string, AgeRating> { [DefaultAgeKey] = DefaultAgeRating },
+            FieldMappings =
+            [
+                new MetadataFieldMapping
+                {
+                    Id = 1,
+                    SourceValue = DefaultFieldSource,
+                    SourceType = DefaultSourceField,
+                    DestinationValue = "default_dest",
+                    DestinationType = MetadataFieldType.Tag
+                },
+            ],
+        };
+    }
 }

@@ -130,6 +130,12 @@ public class SettingsService : ISettingsService
         };
     }
 
+    /// <summary>
+    /// Will fully replace any enabled fields, always successful
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
     private async Task<FieldMappingsImportResultDto> ReplaceFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
@@ -163,6 +169,12 @@ public class SettingsService : ISettingsService
         };
     }
 
+    /// <summary>
+    /// Tries to merge all enabled fields, fails if any merge was marked as manual. Always goes through all items
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
     private async Task<FieldMappingsImportResultDto> MergeFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
