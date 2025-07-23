@@ -1,3 +1,4 @@
+import {MetadataSettings} from "../admin/_models/metadata-settings";
 
 export enum ImportMode {
   Replace = 0,
@@ -34,6 +35,7 @@ export interface ImportConflict {
 
 export interface FieldMappingsImportResult {
   success: boolean;
+  resultingMetadataSettings: MetadataSettings;
   ageRatingConflicts: string[];
   fieldMappingConflicts: ImportConflict[];
 }

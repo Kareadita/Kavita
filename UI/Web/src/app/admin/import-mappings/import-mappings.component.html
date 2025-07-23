@@ -18,14 +18,10 @@
         }
         @case (Step.Configure) {
           <form class="row" [formGroup]="importSettingsForm">
-
-            <p>{{t('configure-description')}}</p>
-
             <div class="col-md-6 col-sm-12">
               @if (importSettingsForm.get('importMode'); as control) {
-                <app-setting-item [control]="control" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
-                  <ng-template #view>{{control.value | importMode}}</ng-template>
-                  <ng-template #edit>
+                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
+                  <ng-template #view>
                     <select formControlName="importMode" class="form-control">
                       @for (mode of ImportModes; track mode) {
                         <option [value]="mode">{{mode | importMode}}</option>
@@ -38,9 +34,8 @@
 
             <div class="col-md-6 col-sm-12">
               @if (importSettingsForm.get('resolution'); as control) {
-                <app-setting-item [control]="control" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
-                  <ng-template #view>{{control.value | conflictResolution}}</ng-template>
-                  <ng-template #edit>
+                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
+                  <ng-template #view>
                     <select formControlName="resolution" class="form-control">
                       @for (resolution of ConflictResolutions; track resolution) {
                         <option [value]="resolution">{{resolution | conflictResolution}}</option>
@@ -51,8 +46,12 @@
               }
             </div>
 
-            <div class="row pt-4">
-              <div class="col-md-6 col-sm-12">
+            <div class="row">
+
+              <div class="conflict-group-title pt-4">{{t('fields-to-import')}}</div>
+              <div class="text-muted">{{t('fields-to-import-tooltip')}}</div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('whitelist'); as control) {
                   <app-setting-switch [title]="t('whitelist-label')">
                     <ng-template #switch>
@@ -64,7 +63,7 @@
                 }
               </div>
 
-              <div class="col-md-6 col-sm-12">
+              <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('blacklist'); as control) {
                   <app-setting-switch [title]="t('blacklist-label')">
                     <ng-template #switch>
@@ -76,7 +75,7 @@
                 }
               </div>
 
-              <div class="col-md-6 col-sm-12">
+              <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('ageRatings'); as control) {
                   <app-setting-switch [title]="t('age-ratings-label')">
                     <ng-template #switch>
@@ -88,7 +87,7 @@
                 }
               </div>
 
-              <div class="col-md-6 col-sm-12">
+              <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('fieldMappings'); as control) {
                   <app-setting-switch [title]="t('field-mappings-label')">
                     <ng-template #switch>
@@ -112,6 +111,7 @@
 
                 @if (res.ageRatingConflicts.length > 0) {
                   <div class="conflict-group-title">{{t('age-ratings-label')}}</div>
+                  <div class="text-muted">{{t('age-ratings-conflicts-tooltip')}}</div>
                 }
 
                 @for (arm of res.ageRatingConflicts; track arm) {
@@ -139,6 +139,7 @@
                 @if (res.fieldMappingConflicts.length > 0) {
                   <div class="setting-section-break"></div>
                   <div class="conflict-group-title">{{t('field-mappings-label')}}</div>
+                  <div class="text-muted">{{t('field-mappings-conflicts-tooltip')}}</div>
                 }
 
                 @for (fmc of res.fieldMappingConflicts; track fmc) {
@@ -169,13 +170,89 @@
             </form>
           }
         }
-        @case (Step.Success) {
-          <div class="d-flex justify-content-center align-items-center">
-            <div class="text-center p-4 rounded">
-              <div class="mb-3"><i class="fas fa-check-circle text-success fs-1"></i></div>
-              <h2 class="text-success mb-2">{{t('success')}}</h2>
+        @case (Step.Finalize) {
+          @let res = importResult();
+          @if (res) {
+            <div class="conflict-group-title" [style.color]="'var(--primary-color)'">{{t('finalize-title')}}</div>
+
+            <div class="row">
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                <app-setting-item [title]="t('whitelist-label')" [canEdit]="false" [showEdit]="false">
+                  <ng-template #view>
+                    @for(opt of res.resultingMetadataSettings.whitelist; track opt) {
+                      <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+                    } @empty {
+                      {{null | defaultValue}}
+                    }
+                  </ng-template>
+                </app-setting-item>
+              </div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                <app-setting-item [title]="t('blacklist-label')" [canEdit]="false" [showEdit]="false">
+                  <ng-template #view>
+                    @for(opt of res.resultingMetadataSettings.blacklist; track opt) {
+                      <app-tag-badge>{{opt.trim()}}</app-tag-badge>
+                    } @empty {
+                      {{null | defaultValue}}
+                    }
+                  </ng-template>
+                </app-setting-item>
+              </div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                <app-setting-item [title]="t('age-ratings-label')" [showEdit]="false" [canEdit]="false">
+                  <ng-template #view>
+                    <div class="row reset-color">
+                      @for (arm of res.resultingMetadataSettings.ageRatingMappings | keyvalue; track arm.key) {
+                        <div class="col-md-4 col-sm-12 pt-1">
+                          <div class="p-1 border rounded d-flex flex-column">
+                            <div class="text-muted small">{{ arm.key }}</div>
+                            <div class="small">
+                              <i class="fa fa-arrow-right fa-sm me-1 text-muted"></i>
+                              {{ arm.value | ageRating }}
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              </div>
+
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                <app-setting-item [title]="t('field-mappings-label')" [showEdit]="false" [canEdit]="false">
+                  <ng-template #view>
+                    <div class="row reset-color">
+                      @for (fm of res.resultingMetadataSettings.fieldMappings; track fm.id) {
+                        <div class="col-md-12 col-sm-12 pt-1">
+                          <div class="row border rounded p-1 align-items-center">
+                            <div class="col-md-4">
+                              <div class="text-muted small">{{ fm.sourceType | metadataFieldType }}</div>
+                              <div class="small">{{ fm.sourceValue }}</div>
+                            </div>
+
+                            <div class="col-md-1 text-center text-muted">
+                              <i class="fa fa-arrow-right fa-sm"></i>
+                            </div>
+
+                            <div class="col-md-7">
+                              <div class="text-muted small">{{ fm.destinationType | metadataFieldType }}</div>
+                              <div class="small">{{ fm.destinationValue }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              </div>
+
+
             </div>
-          </div>
+          }
         }
       }
     </div>

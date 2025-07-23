@@ -1938,22 +1938,26 @@
         "import-step": "Import",
         "configure-step": "Configure",
         "conflicts-step": "Resolve collisions",
-        "success-step": "Success",
+        "finalize-step": "Finalize",
         "prev": "{{import-cbl-modal.prev}}",
         "import": "{{import-cbl-modal.import}}",
         "next": "{{import-cbl-modal.next}}",
-        "success": "Success",
+        "save": "{{common.save}}",
 
         "import-description": "Upload a file you, or someone else has exported to replace or merge with your current settings.",
         "select-files-warning": "You must upload a json file to continue",
         "invalid-file": "Failed to parse your file, check your input",
         "file-no-valid-content": "Your import did not contain any meaningful data to continue with",
 
-        "configure-description": "Configure how and what to import",
+        "fields-to-import": "Settings",
+        "fields-to-import-tooltip": "Disable to skip a setting fully",
         "whitelist-label": "Tags whitelist",
         "blacklist-label": "Tags blacklist",
         "age-ratings-label": "Age rating mappings",
         "field-mappings-label": "Field mappings",
+
+        "age-ratings-conflicts-tooltip": "Decide which age rating to use",
+        "field-mappings-conflicts-tooltip": "Decide which destination result to use",
 
         "import-mode-label": "Import mode",
         "import-mode-tooltip": "Replace disregards your current settings, merge will try and resolve conflcits in the way you've configured",
@@ -1964,7 +1968,9 @@
         "resolution-tooltip": "Decide how Kavita should handle conflicts",
         "manual": "Manual",
         "keep": "Keep",
-        "to-pick": "Choose resolution"
+        "to-pick": "Choose resolution",
+
+        "finalize-title": "Preview of your settings, press save finish your import"
     },
 
     "import-cbl-modal": {
@@ -2459,7 +2465,11 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "import-fields": {
+            "non-unique-age-ratings": "Age rating mapping keys aren't unique, please correct your import file",
+            "non-unique-fields": "Field mappings do not have a unique id, please correct your import file"
+        }
     },
 
     "metadata-builder": {

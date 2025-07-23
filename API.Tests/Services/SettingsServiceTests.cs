@@ -41,7 +41,7 @@ public class SettingsServiceTests
     [Fact]
     public async Task ImportFieldMappings_ReplaceMode()
     {
-        var existingSettings = CreateDefaultMetadataSettings();
+        var existingSettings = CreateDefaultMetadataSettingsDto();
         var newSettings = new MetadataSettingsDto
         {
             Whitelist = ["new_whitelist_item"],
@@ -66,8 +66,7 @@ public class SettingsServiceTests
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
-        settingsRepo.GetMetadataSettingDto().Returns(CreateDefaultMetadataSettingsDto());
-        settingsRepo.GetMetadataSettings().Returns(existingSettings);
+        settingsRepo.GetMetadataSettingDto().Returns(existingSettings);
         _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
 
         var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);

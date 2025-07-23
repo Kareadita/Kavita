@@ -31,10 +31,14 @@ file-upload {
 .conflict-group-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--accent-text-color)
+  color: var(--accent-text-color);
 }
 
 .conflict-title {
   font-size: 1.2rem;
   color: var(--primary-color);
+}
+
+.reset-color {
+  color: var(--accent-text-color);
 }

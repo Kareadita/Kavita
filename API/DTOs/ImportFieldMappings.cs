@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using API.DTOs.KavitaPlus.Metadata;
 
 namespace API.DTOs;
@@ -73,6 +74,10 @@ public sealed record ImportConflict
 public sealed record FieldMappingsImportResultDto
 {
     public bool Success { get; init; }
+    /// <summary>
+    /// Only present if <see cref="Success"/> is true
+    /// </summary>
+    public MetadataSettingsDto ResultingMetadataSettings { get; init; }
     public List<string> AgeRatingConflicts { get; init; }
     public List<ImportConflict> FieldMappingConflicts { get; init; }
 }

@@ -122,6 +122,16 @@ public class SettingsService : ISettingsService
 
     public async Task<FieldMappingsImportResultDto> ImportFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
     {
+        if (dto.AgeRatingMappings.Keys.Distinct().Count() != dto.AgeRatingMappings.Count)
+        {
+            throw new KavitaException("errors.import-fields.non-unique-age-ratings");
+        }
+
+        if (dto.FieldMappings.Select(f => f.Id).Distinct().Count() != dto.FieldMappings.Count)
+        {
+            throw new KavitaException("errors.import-fields.non-unique-fields");
+        }
+
         return settings.ImportMode switch
         {
             ImportMode.Merge => await MergeFieldMappings(dto, settings),
@@ -160,10 +170,10 @@ public class SettingsService : ISettingsService
             existingMetadataSetting.FieldMappings = dto.FieldMappings;
         }
 
-        await UpdateMetadataSettings(existingMetadataSetting);
         return new FieldMappingsImportResultDto
         {
             Success = true,
+            ResultingMetadataSettings = existingMetadataSetting,
             AgeRatingConflicts = [],
             FieldMappingConflicts = [],
         };
@@ -277,10 +287,10 @@ public class SettingsService : ISettingsService
             };
         }
 
-        await UpdateMetadataSettings(existingMetadataSetting);
         return new FieldMappingsImportResultDto
         {
             Success = true,
+            ResultingMetadataSettings = existingMetadataSetting,
             AgeRatingConflicts = [],
             FieldMappingConflicts = [],
         };

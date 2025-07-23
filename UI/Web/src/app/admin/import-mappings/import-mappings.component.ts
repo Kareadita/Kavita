@@ -30,16 +30,20 @@ import {
   ImportSettings
 } from "../../_models/import-field-mappings";
 import {firstValueFrom, of, switchAll, switchMap} from "rxjs";
-import {tap} from "rxjs/operators";
+import {take, tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {NgTemplateOutlet} from "@angular/common";
+import {KeyValuePipe, NgTemplateOutlet} from "@angular/common";
 import {MetadataFieldTypePipe} from "../../_pipes/metadata-field-type.pipe";
+import {Router} from "@angular/router";
+import {LicenseService} from "../../_services/license.service";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 enum Step {
   Import = 0,
   Configure = 1,
   Conflicts = 2,
-  Success= 3,
+  Finalize = 3,
 }
 
 @Component({
@@ -59,12 +63,17 @@ enum Step {
     NgTemplateOutlet,
     TranslocoPipe,
     MetadataFieldTypePipe,
+    DefaultValuePipe,
+    TagBadgeComponent,
+    KeyValuePipe,
   ],
   templateUrl: './import-mappings.component.html',
   styleUrl: './import-mappings.component.scss'
 })
 export class ImportMappingsComponent implements OnInit {
 
+  private readonly router = inject(Router);
+  private readonly licenseService = inject(LicenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
 
@@ -72,7 +81,7 @@ export class ImportMappingsComponent implements OnInit {
     {title: translate('import-mappings.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
     {title: translate('import-mappings.configure-step'), index: Step.Configure, active: false, icon: 'fa-solid fa-gears'},
     {title: translate('import-mappings.conflicts-step'), index: Step.Conflicts, active: false, icon: 'fa-solid fa-hammer'},
-    {title: translate('import-mappings.success-step'), index: Step.Success, active: false, icon: 'fa-solid fa-check-double'},
+    {title: translate('import-mappings.finalize-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = signal(this.steps[0].index);
 
@@ -110,9 +119,11 @@ export class ImportMappingsComponent implements OnInit {
     switch(this.currentStepIndex()) {
       case Step.Configure:
       case Step.Conflicts:
-        return 'import'
+        return 'import';
+      case Step.Finalize:
+        return 'save';
       default:
-        return 'next'
+        return 'next';
     }
   }
 
@@ -120,17 +131,37 @@ export class ImportMappingsComponent implements OnInit {
     if (this.currentStepIndex() === Step.Import && !this.isFileSelected()) return;
 
     this.isLoading.set(true);
-    switch(this.currentStepIndex()) {
-      case Step.Import:
-        await this.validateImport();
-        break;
-      case Step.Conflicts:
-      case Step.Configure:
-        await this.tryImport();
-        break;
+    try {
+      switch(this.currentStepIndex()) {
+        case Step.Import:
+          await this.validateImport();
+          break;
+        case Step.Conflicts:
+        case Step.Configure:
+          await this.tryImport();
+          break;
+        case Step.Finalize:
+          this.save();
+      }
+    } catch (error) {
+      /** Swallow **/
     }
 
     this.isLoading.set(false);
+  }
+
+  save() {
+    const res = this.importResult();
+    if (!res) return;
+
+    this.settingsService.updateMetadataSettings(res.resultingMetadataSettings).subscribe({
+      next: () => {
+        const fragment = this.licenseService.hasValidLicenseSignal()
+          ? 'admin-metadata' : 'admin-public-metadata';
+
+        this.router.navigate(['settings'], { fragment: fragment });
+      }
+    });
   }
 
   async tryImport() {
@@ -149,21 +180,19 @@ export class ImportMappingsComponent implements OnInit {
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       tap((res) => this.importResult.set(res)),
       switchMap((res) => {
-        if (res.success) {
-          this.currentStepIndex.set(Step.Success)
-          return of(null);
-        }
-
-        // If we find conflicts, update settings to we are certain we have the most up to date copy
         return this.settingsService.getMetadataSettings().pipe(
-          tap((dto) => {
-            this.settings.set(dto);
+          tap(dto => this.settings.set(dto)),
+          tap(dto => {
+            if (res.success) {
+              this.currentStepIndex.set(Step.Finalize);
+              return;
+            }
+
             this.setupSettingConflicts(res, dto);
-            this.currentStepIndex.set(Step.Conflicts)
-          })
-        );
-      }),
-    )).then(() => {});
+            this.currentStepIndex.set(Step.Conflicts);
+          }),
+        )}),
+      ));
   }
 
   async validateImport() {
@@ -220,6 +249,16 @@ export class ImportMappingsComponent implements OnInit {
 
   prevStep() {
     if (this.currentStepIndex() === Step.Import) return;
+
+    if (this.currentStepIndex() === Step.Finalize) {
+      if (this.importResult()!.ageRatingConflicts.length === 0 && this.importResult()!.fieldMappingConflicts.length === 0) {
+        this.currentStepIndex.set(Step.Configure);
+      } else {
+        this.currentStepIndex.set(Step.Conflicts);
+      }
+      return;
+    }
+
     this.currentStepIndex.update(x => x-1);
   }
 
@@ -227,10 +266,10 @@ export class ImportMappingsComponent implements OnInit {
     switch (this.currentStepIndex()) {
       case Step.Import:
         return this.isFileSelected();
+      case Step.Finalize:
       case Step.Configure:
         return true;
       case Step.Conflicts:
-        const res = this.importResult();
         return this.importSettingsForm.valid;
       default:
           return false;
@@ -245,7 +284,6 @@ export class ImportMappingsComponent implements OnInit {
   canMoveToPrevStep() {
     switch (this.currentStepIndex()) {
       case Step.Import:
-      case Step.Success:
         return false;
       default:
         return true;
