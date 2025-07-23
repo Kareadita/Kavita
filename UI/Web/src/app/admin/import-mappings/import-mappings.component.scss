@@ -42,3 +42,9 @@ file-upload {
 .reset-color {
   color: var(--accent-text-color);
 }
+
+.break {
+  height: 1px;
+  background-color: var(--setting-break-color);
+  margin: 10px 0;
+}

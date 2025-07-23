@@ -207,13 +207,14 @@
                     <div class="row reset-color">
                       @for (arm of res.resultingMetadataSettings.ageRatingMappings | keyvalue; track arm.key) {
                         <div class="col-md-4 col-sm-12 pt-1">
-                          <div class="p-1 border rounded d-flex flex-column">
+                          <div class="p-1 d-flex flex-column">
                             <div class="text-muted small">{{ arm.key }}</div>
                             <div class="small">
                               <i class="fa fa-arrow-right fa-sm me-1 text-muted"></i>
                               {{ arm.value | ageRating }}
                             </div>
                           </div>
+                          <div class="break"></div>
                         </div>
                       }
                     </div>
@@ -227,8 +228,8 @@
                   <ng-template #view>
                     <div class="row reset-color">
                       @for (fm of res.resultingMetadataSettings.fieldMappings; track fm.id) {
-                        <div class="col-md-12 col-sm-12 pt-1">
-                          <div class="row border rounded p-1 align-items-center">
+                        <div class="col-md-12 col-sm-12">
+                          <div class="row p-1 align-items-center">
                             <div class="col-md-4">
                               <div class="text-muted small">{{ fm.sourceType | metadataFieldType }}</div>
                               <div class="small">{{ fm.sourceValue }}</div>
@@ -244,6 +245,7 @@
                             </div>
                           </div>
                         </div>
+                        <div class="break"></div>
                       }
                     </div>
                   </ng-template>
@@ -260,7 +262,7 @@
 
   <div class="modal-footer mt-3">
     <div class="col-auto ms-1">
-      <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
+      <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
     </div>
     <div class="col-auto ms-1">
       <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
