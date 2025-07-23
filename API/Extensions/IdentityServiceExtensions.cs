@@ -160,7 +160,7 @@ public static class IdentityServiceExtensions
         if (user == null)
         {
             ctx.Principal = null;
-            await ctx.HttpContext.SignOutAsync(OpenIdConnect);
+            ctx.HttpContext.User = new ClaimsPrincipal();
             return;
         }
 
