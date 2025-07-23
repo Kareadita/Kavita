@@ -690,6 +690,14 @@ public class ExternalMetadataService : IExternalMetadataService
             settings, ref processedTags, ref processedGenres);
     }
 
+    /// <summary>
+    /// Run all genres and tags through the Metadata settings
+    /// </summary>
+    /// <param name="genres">Genres to process</param>
+    /// <param name="tags">Tags to process</param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
     public static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
         ref List<string> processedTags, ref List<string> processedGenres)
     {
@@ -1009,16 +1017,19 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private static List<string> ApplyBlackWhiteList(MetadataSettingsDto settings, MetadataFieldType fieldType, List<string> processedStrings)
     {
+        var whiteList = settings.Whitelist.Select(t => t.ToNormalized()).ToList();
+        var blackList = settings.Blacklist.Select(t => t.ToNormalized()).ToList();
+
         return fieldType switch
         {
             MetadataFieldType.Genre => processedStrings.Distinct()
-                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
+                .Where(g => blackList.Count == 0 || !blackList.Contains(g.ToNormalized()))
                 .ToList(),
             MetadataFieldType.Tag => processedStrings.Distinct()
-                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
-                .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
+                .Where(g => blackList.Count == 0 || !blackList.Contains(g.ToNormalized()))
+                .Where(g => whiteList.Count == 0 || whiteList.Contains(g.ToNormalized()))
                 .ToList(),
-            _ => throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, null),
         };
     }
 
@@ -1726,7 +1737,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             var mapping = mappings.FirstOrDefault(m =>
                 m.SourceType == sourceType &&
-                m.SourceValue.Equals(value, StringComparison.OrdinalIgnoreCase));
+                m.SourceValue.ToNormalized().Equals(value.ToNormalized()));
 
             if (mapping != null && !string.IsNullOrWhiteSpace(mapping.DestinationValue))
             {
@@ -1766,9 +1777,10 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // Find highest age rating from mappings
         mappings ??= new Dictionary<string, AgeRating>();
+        mappings = mappings.ToDictionary(k => k.Key.ToNormalized(), k => k.Value);
 
         return values
-            .Select(v => mappings.TryGetValue(v, out var mapping) ? mapping : AgeRating.Unknown)
+            .Select(v => mappings.TryGetValue(v.ToNormalized(), out var mapping) ? mapping : AgeRating.Unknown)
             .DefaultIfEmpty(AgeRating.Unknown)
             .Max();
     }
