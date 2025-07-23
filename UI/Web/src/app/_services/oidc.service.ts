@@ -106,7 +106,7 @@ export class OidcService {
     return from(this.oauth2.refreshToken()).pipe(
       map(() => true),
       catchError(err => {
-        console.error("Failed to refresh token on startup", err);
+        console.error("Failed to refresh token", err);
         return of(false);
       })
     );
@@ -142,7 +142,8 @@ export class OidcService {
   }
 
   hasValidAccessToken(): boolean {
-    const expired = this.oauth2.getAccessTokenExpiration() < new Date().getTime();
+    const expiration = this.oauth2.getAccessTokenExpiration();
+    const expired = expiration == null || expiration < new Date().getTime();
     return !expired && this.oauth2.hasValidAccessToken();
   }
 

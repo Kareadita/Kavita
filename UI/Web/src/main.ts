@@ -88,6 +88,8 @@ const translocoOptions = {
   } as TranslocoConfig
 };
 
+const OIDC_TIMEOUT_MS = 2000;
+
 function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
 }
@@ -99,8 +101,7 @@ function setupOidcListener(oidcService: OidcService, accountService: AccountServ
   ).subscribe();
 }
 
-
-function syncOidcUser(oidcService: OidcService, accountService: AccountService, navService: NavService): Observable<User> {
+function syncOidcUser(oidcService: OidcService, accountService: AccountService, navService: NavService) {
   const currentUser = accountService.currentUserSignal();
 
   return accountService.loginByToken(oidcService.token()).pipe(
@@ -117,7 +118,7 @@ function syncOidcUser(oidcService: OidcService, accountService: AccountService, 
   );
 }
 
-function loadUserLocale(transloco: TranslocoService, accountService: AccountService): Observable<any> {
+function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
   return accountService.currentUser$.pipe(
     take(1), // Only need current value
     switchMap(user => {
@@ -148,23 +149,23 @@ function preLoadOidcAndUser() {
         })
       );
     }),
-    tap(user => {
-      if (!user) accountService.setCurrentUser(accountService.getUserFromLocalStorage());
-    }),
-    tap(() => setupOidcListener(oidc, accountService, navService)),
-    timeout(2000),
+    timeout(OIDC_TIMEOUT_MS), // Give the browser 2s to load the discovery document and login
     catchError(err => {
       console.error("OIDC setup failed:", err);
       if (err.name === 'TimeoutError') {
         toastr.error(translate('errors.oidc.timeout'));
       } else {
-        toastr.error(translate('errors.generic'));
+        toastr.error(err.message ?? '', translate('errors.generic'));
       }
 
       return of(null);
     }),
+    tap(user => {
+      if (!user) accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+    }),
+    tap(() => setupOidcListener(oidc, accountService, navService)),
     switchMap(() => loadUserLocale(transloco, accountService)),
-  )).then(() => void 0);
+  ));
 }
 
 bootstrapApplication(AppComponent, {
