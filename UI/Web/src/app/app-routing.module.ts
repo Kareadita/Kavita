@@ -2,19 +2,12 @@ import {NgModule} from '@angular/core';
 import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from './_guards/auth.guard';
 import {LibraryAccessGuard} from './_guards/library-access.guard';
-import {OidcResolver} from "./_resolvers/oidc.resolver";
 
 const routes: Routes = [
   {
     path: '',
     canActivate: [AuthGuard],
     runGuardsAndResolvers: 'always',
-    resolve: {
-      // Require OIDC discovery to be loaded before launching the app
-      // making sure we don't flash the login screen because we've made request before we could auto login
-      // If no OIDC is set up, this will resolve after one request to the backend
-      _: OidcResolver,
-    },
     children: [
       {
         path: 'settings',

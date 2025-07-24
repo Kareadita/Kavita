@@ -1,18 +1,18 @@
 /// <reference types="@angular/localize" />
-import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom,} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer,} from '@angular/core';
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
-import {ToastrModule} from 'ngx-toastr';
+import {ToastrModule, ToastrService} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
 import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
-import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
+import {provideTransloco, translate, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {switchMap} from "rxjs";
+import {catchError, filter, firstValueFrom, Observable, of, switchMap, take, tap, timeout} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -21,32 +21,11 @@ import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
 import {provideOAuthClient} from "angular-oauth2-oidc";
+import {OidcEvents, OidcService} from "./app/_services/oidc.service";
+import {NavService} from "./app/_services/nav.service";
+import {User} from "./app/_models/user";
 
 const disableAnimations = !('animate' in document.documentElement);
-
-export function preloadUser(userService: AccountService, transloco: TranslocoService) {
-  return function() {
-    return userService.currentUser$.pipe(distinctUntilChanged(), switchMap((user) => {
-      if (user && user.preferences.locale) {
-        transloco.setActiveLang(user.preferences.locale);
-        return transloco.load(user.preferences.locale)
-      }
-
-      // If no user or locale is available, fallback to the default language ('en')
-      const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
-      transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale);
-    })).subscribe();
-  };
-}
-
-
-export const preLoad = {
-  provide: APP_INITIALIZER,
-  multi: true,
-  useFactory: preloadUser,
-  deps: [AccountService, TranslocoService]
-};
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -109,8 +88,88 @@ const translocoOptions = {
   } as TranslocoConfig
 };
 
+const OIDC_TIMEOUT_MS = 2000;
+
 function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
+}
+
+function setupOidcListener(oidcService: OidcService, accountService: AccountService, navService: NavService) {
+  return oidcService.events$.pipe(
+    filter(event => event.type === OidcEvents.TokenRefreshed),
+    switchMap(() => syncOidcUser(oidcService, accountService, navService))
+  ).subscribe();
+}
+
+function syncOidcUser(oidcService: OidcService, accountService: AccountService, navService: NavService) {
+  const currentUser = accountService.currentUserSignal();
+
+  return accountService.loginByToken(oidcService.token()).pipe(
+    tap(() => {
+      // Only trigger navigation if we weren't already logged in
+      if (!currentUser) {
+        navService.handleLogin();
+      }
+    }),
+    catchError(err => {
+      console.error("Failed to sync OIDC user:", err);
+      throw err;
+    })
+  );
+}
+
+function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
+  return accountService.currentUser$.pipe(
+    take(1), // Only need current value
+    switchMap(user => {
+      const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
+
+      transloco.setActiveLang(locale);
+      return transloco.load(locale);
+    })
+  );
+}
+
+/**
+ * Loads OIDC info, and refreshen its token if applicable, otherwise sets the user from local storage.
+ * Then loads the users, or the default locale
+ */
+function bootstrapUser() {
+  const oidc = inject(OidcService);
+  const toastr = inject(ToastrService);
+  const accountService = inject(AccountService);
+  const transloco = inject(TranslocoService);
+  const navService = inject(NavService);
+
+  return firstValueFrom(oidc.setupOidc().pipe(
+    switchMap((isConfigured) => {
+      if (!isConfigured) return of(null);
+
+      return oidc.refreshTokenIfAvailable().pipe(
+        switchMap(tokenRefreshed => {
+          if (!tokenRefreshed) return of(null);
+
+          return accountService.loginByToken(oidc.token());
+        })
+      );
+    }),
+    timeout(OIDC_TIMEOUT_MS), // Give the browser 2s to load the discovery document and login
+    catchError(err => {
+      console.error("OIDC setup failed:", err);
+      if (err.name === 'TimeoutError') {
+        toastr.error(translate('errors.oidc.timeout'));
+      } else {
+        toastr.error(err.message ?? '', translate('errors.generic'));
+      }
+
+      return of(null);
+    }),
+    tap(user => {
+      if (!user) accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+    }),
+    tap(() => setupOidcListener(oidc, accountService, navService)),
+    switchMap(() => loadUserLocale(transloco, accountService)),
+  ));
 }
 
 bootstrapApplication(AppComponent, {
@@ -139,7 +198,6 @@ bootstrapApplication(AppComponent, {
         }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
         {
@@ -148,7 +206,8 @@ bootstrapApplication(AppComponent, {
           deps: [PlatformLocation]
         },
         provideOAuthClient(),
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        provideAppInitializer(() => bootstrapUser()),
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

@@ -1,6 +1,6 @@
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {OAuthErrorEvent, OAuthService} from "angular-oauth2-oidc";
-import {from} from "rxjs";
+import {catchError, filter, from, map, Observable, of, switchMap, take, tap} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {OidcPublicConfig} from "../admin/_models/oidc-config";
@@ -37,9 +37,7 @@ export class OidcService {
   /**
    * True when the OIDC discovery document has been loaded, and login tried. Or no OIDC has been set up
    */
-  private readonly _loaded = signal(false);
-  public readonly loaded = this._loaded.asReadonly();
-  public readonly loaded$ = toObservable(this.loaded);
+  private readonly loaded = signal(false);
 
   public readonly inUse = computed(() => {
     const loaded = this.loaded();
@@ -57,13 +55,13 @@ export class OidcService {
   public readonly isLoggingOut = this._isLoggingOut.asReadonly();
 
   constructor() {
+    this.oauth2.setStorage(localStorage);
+
     window.addEventListener('online', () => {
-      if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
+      if (!this.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
         this.oauth2.refreshToken().catch(err => console.error("failed to refresh token when coming online", err));
       }
     });
-
-    this.oauth2.setStorage(localStorage);
 
     // log events in dev
     if (!environment.production) {
@@ -75,51 +73,78 @@ export class OidcService {
         }
       });
     }
+  }
 
-    this.getPublicOidcConfig().subscribe(oidcSetting => {
-      this._settings.set(oidcSetting);
+  /**
+   * Retrieves OIDC config and sets up OAuth service
+   */
+  setupOidc(): Observable<boolean> {
+    return this.getPublicOidcConfig().pipe(
+      switchMap((oidcSettings) => {
+        this._settings.set(oidcSettings);
 
-      if (!oidcSetting.authority) {
-        this._loaded.set(true);
-        return
-      }
-
-      const scopes = "openid profile email roles offline_access " + oidcSetting.customScopes.join(" ");
-
-      this.oauth2.configure({
-        issuer: oidcSetting.authority,
-        clientId: oidcSetting.clientId,
-        // Require https in production unless localhost
-        requireHttps: environment.production ? 'remoteOnly' : false,
-        redirectUri: window.location.origin + this.baseUrl + "oidc/callback",
-        postLogoutRedirectUri: window.location.origin + this.baseUrl + "login",
-        showDebugInformation: !environment.production,
-        responseType: 'code',
-        scope: scopes.trim(),
-        // Not all OIDC providers follow this nicely
-        strictDiscoveryDocumentValidation: false,
-      });
-      this.oauth2.setupAutomaticSilentRefresh();
-
-      from(this.oauth2.loadDiscoveryDocumentAndTryLogin()).subscribe({
-        next: _ => {
-          this._loaded.set(true);
-
-          if (!this.oauth2.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
-            this.oauth2.refreshToken().catch(err => console.error("failed to refresh token on startup", err));
-          }
-        },
-        error: error => {
-          console.log(error);
-          this.toastR.error(translate("oidc.error-loading-info"))
+        if (!oidcSettings.authority) {
+          this.loaded.set(true);
+          return of(false);
         }
-      });
-    })
+
+        return this.setupOAuthService(oidcSettings);
+      }),
+      tap(() => this.loaded.set(true))
+    );
+  }
+
+  /**
+   * Attempts to refresh the token if available
+   * Returns observable that completes when refresh is done (success or failure)
+   */
+  refreshTokenIfAvailable(): Observable<boolean> {
+    if (!this.oauth2.getRefreshToken()) {
+      return of(false);
+    }
+
+    return from(this.oauth2.refreshToken()).pipe(
+      map(() => true),
+      catchError(err => {
+        console.error("Failed to refresh token", err);
+        return of(false);
+      })
+    );
+  }
+
+  /**
+   * Sets up the OAuthService, and loads the discovery document
+   */
+  setupOAuthService(oidcSettings: OidcPublicConfig) {
+    const scopes = "openid profile email roles offline_access " + oidcSettings.customScopes.join(" ");
+
+    this.oauth2.configure({
+      issuer: oidcSettings.authority,
+      clientId: oidcSettings.clientId,
+      // Require https in production unless localhost
+      requireHttps: environment.production ? 'remoteOnly' : false,
+      redirectUri: window.location.origin + this.baseUrl + "oidc/callback",
+      postLogoutRedirectUri: window.location.origin + this.baseUrl + "login",
+      showDebugInformation: !environment.production,
+      responseType: 'code',
+      scope: scopes.trim(),
+      // Not all OIDC providers follow this nicely
+      strictDiscoveryDocumentValidation: false,
+    });
+    this.oauth2.setupAutomaticSilentRefresh();
+
+    return from(this.oauth2.loadDiscoveryDocumentAndTryLogin());
   }
 
 
   login() {
     this.oauth2.initLoginFlow();
+  }
+
+  hasValidAccessToken(): boolean {
+    const expiration = this.oauth2.getAccessTokenExpiration();
+    const expired = expiration == null || expiration < new Date().getTime();
+    return !expired && this.oauth2.hasValidAccessToken();
   }
 
   logout() {
