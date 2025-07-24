@@ -478,6 +478,8 @@ public class CoverDbService : ICoverDbService
             var format = ImageService.GetPersonFormat(person.Id);
             var finalFileName = format + ".webp";
             var tempFileName = format + "_new";
+
+            // This is writing the image to CoverDirectory
             var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
 
             if (!string.IsNullOrEmpty(tempFilePath))
@@ -719,7 +721,7 @@ public class CoverDbService : ICoverDbService
     /// <param name="url"></param>
     /// <param name="filenameWithoutExtension">Filename without extension</param>
     /// <param name="fromBase64"></param>
-    /// <param name="targetDirectory">Not useable with fromBase64. Allows a different directory to be written to</param>
+    /// <param name="targetDirectory">Allows a different directory to be written to</param>
     /// <returns></returns>
     private async Task<string> CreateThumbnail(string url, string filenameWithoutExtension, bool fromBase64 = true, string? targetDirectory = null)
     {
@@ -732,7 +734,7 @@ public class CoverDbService : ICoverDbService
         if (fromBase64)
         {
             return _imageService.CreateThumbnailFromBase64(url,
-                filenameWithoutExtension, encodeFormat, coverImageSize.GetDimensions().Width);
+                filenameWithoutExtension, encodeFormat, coverImageSize.GetDimensions().Width, targetDirectory);
         }
 
         return await DownloadImageFromUrl(filenameWithoutExtension, encodeFormat, url, targetDirectory);
