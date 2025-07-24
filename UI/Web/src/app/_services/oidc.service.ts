@@ -7,7 +7,7 @@ import {OidcPublicConfig} from "../admin/_models/oidc-config";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {ToastrService} from "ngx-toastr";
 import {translate} from "@jsverse/transloco";
-import {APP_BASE_HREF} from "@angular/common";
+import {APP_BASE_HREF, DOCUMENT} from "@angular/common";
 
 /**
  * Enum mirror of angular-oauth2-oidc events which are used in Kavita
@@ -24,10 +24,13 @@ export enum OidcEvents {
 })
 export class OidcService {
 
+  public static OidcTimeOutKey = 'kavita-oidc-timeout';
+  public static DefaultOidcTimeOut = 6000;
+
   private readonly oauth2 = inject(OAuthService);
   private readonly httpClient = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastR = inject(ToastrService);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly baseUrl = inject(APP_BASE_HREF);
   private readonly apiBaseUrl = environment.apiUrl;
@@ -57,7 +60,14 @@ export class OidcService {
   constructor() {
     this.oauth2.setStorage(localStorage);
 
-    window.addEventListener('online', () => {
+    if (!localStorage.getItem(OidcService.OidcTimeOutKey)) {
+      localStorage.setItem(OidcService.OidcTimeOutKey, OidcService.DefaultOidcTimeOut+'');
+    }
+
+    // Refresh tokens when user returns to the page
+    this.document.addEventListener('visibilitychange', () => {
+      if (this.document.visibilityState === 'hidden') return;
+
       if (!this.hasValidAccessToken() && this.oauth2.getRefreshToken()) {
         this.oauth2.refreshToken().catch(err => console.error("failed to refresh token when coming online", err));
       }
