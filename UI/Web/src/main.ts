@@ -88,7 +88,18 @@ const translocoOptions = {
   } as TranslocoConfig
 };
 
-const OIDC_TIMEOUT_MS = 2000;
+function getOidcTimeOut(): number {
+  const timeOut = localStorage.getItem(OidcService.OidcTimeOutKey);
+  if (!timeOut) {
+    return OidcService.DefaultOidcTimeOut;
+  }
+
+  try {
+    return parseInt(timeOut)
+  } catch (e) {
+    return OidcService.DefaultOidcTimeOut;
+  }
+}
 
 function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
@@ -153,7 +164,7 @@ function bootstrapUser() {
         })
       );
     }),
-    timeout(OIDC_TIMEOUT_MS), // Give the browser 2s to load the discovery document and login
+    timeout(getOidcTimeOut()),
     catchError(err => {
       console.error("OIDC setup failed:", err);
       if (err.name === 'TimeoutError') {
