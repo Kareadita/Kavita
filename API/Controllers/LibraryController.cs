@@ -83,6 +83,7 @@ public class LibraryController : BaseApiController
             .WithManageReadingLists(dto.ManageReadingLists)
             .WithAllowScrobbling(dto.AllowScrobbling)
             .WithAllowMetadataMatching(dto.AllowMetadataMatching)
+            .WithEnableMetadata(dto.EnableMetadata)
             .Build();
 
         library.LibraryFileTypes = dto.FileGroupTypes
