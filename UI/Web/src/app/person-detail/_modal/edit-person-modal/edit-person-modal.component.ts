@@ -200,8 +200,7 @@ export class EditPersonModalComponent implements OnInit {
       if (!asin || asin.trim().length === 0) {
         return of(null);
       }
-
-      console.log('asin: ', asin);
+      
       return this.personService.isValidAsin(asin).pipe(map(valid => {
         if (valid) {
           return null;

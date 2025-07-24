@@ -476,12 +476,15 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   checkForFilesAtRoot() {
     this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
+      let containsMultipleFiles = false;
       Object.keys(results).forEach(key => {
         if (results[key]) {
-          this.filesAtRoot.set(true);
+          containsMultipleFiles = true;
           return;
         }
-      })
+      });
+
+      this.filesAtRoot.set(containsMultipleFiles);
     })
   }
 }
