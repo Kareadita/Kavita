@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Threading.Tasks;
+using API.Services;
 using Microsoft.Extensions.Logging;
 
 namespace API.Helpers;
@@ -41,7 +42,7 @@ public class PdfMetadataExtractorException : Exception
     }
 }
 
-public interface IPdfMetadataExtractor
+public interface IPdfMetadataExtractor : IDisposable
 {
     Dictionary<string, string> GetMetadata();
 }
@@ -349,10 +350,8 @@ internal class PdfLexer(Stream stream)
                         {
                             return (long)token.Value;
                         }
-                        else
-                        {
-                            throw new PdfMetadataExtractorException("Expected integer after startxref keyword");
-                        }
+
+                        throw new PdfMetadataExtractorException("Expected integer after startxref keyword");
                     }
 
                     continue;
@@ -772,14 +771,15 @@ internal class PdfLexer(Stream stream)
     }
 }
 
-internal class PdfMetadataExtractor : IPdfMetadataExtractor, IDisposable, IAsyncDisposable
+internal class PdfMetadataExtractor : IPdfMetadataExtractor
 {
-    private readonly ILogger<PdfMetadataExtractor> _logger;
+    private readonly ILogger<BookService> _logger;
     private readonly PdfLexer _lexer;
     private readonly FileStream _stream;
-    private readonly Dictionary<long, long> _objectOffsets = new();
+    private readonly Dictionary<long, long> _objectOffsets = [];
     private readonly Dictionary<string, string> _metadata = [];
     private readonly Stack<MetadataRef> _metadataRef = new();
+    private bool _disposed;
 
     private struct MetadataRef(long root, long info)
     {
@@ -793,7 +793,7 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor, IDisposable, IAsync
         public readonly long Count = count;
     }
 
-    public PdfMetadataExtractor(ILogger<PdfMetadataExtractor> logger, string filename)
+    public PdfMetadataExtractor(ILogger<BookService> logger, string filename)
     {
         _logger = logger;
         _stream = File.OpenRead(filename);
@@ -1617,13 +1617,16 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor, IDisposable, IAsync
 
     public void Dispose()
     {
-        _stream.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    public async ValueTask DisposeAsync()
+    protected virtual void Dispose(bool disposing)
     {
-        await _stream.DisposeAsync();
+        if (_disposed || !disposing) return;
+
+        _stream.Dispose();
+        _disposed = true;
     }
 
     private bool HasObject(long objNum)
