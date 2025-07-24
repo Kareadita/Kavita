@@ -69,6 +69,11 @@
         <li [ngbNavItem]="TabID.Folder" [disabled]="isAddLibrary && setupStep < 1">
           <a ngbNavLink>{{t(TabID.Folder)}}</a>
           <ng-template ngbNavContent>
+
+            @if (filesAtRoot()) {
+              <p class="alert alert-warning">{{t('files-at-root-warning')}}</p>
+            }
+
             <p>{{t('folder-description')}}</p>
             <ul class="list-group list-group-flush" style="width: 100%">
               @for(folder of selectedFolders; track folder) {
@@ -77,7 +82,6 @@
                   <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
                 </li>
               }
-
             </ul>
             <div class="row mt-2">
               <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">

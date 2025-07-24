@@ -773,10 +773,8 @@ public partial class BookService : IBookService
         {
             return _pdfComicInfoExtractor.GetComicInfo(filePath);
         }
-        else
-        {
-            return GetEpubComicInfo(filePath);
-        }
+
+        return GetEpubComicInfo(filePath);
     }
 
     private static void ExtractSortTitle(EpubMetadataMeta metadataItem, EpubBookRef epubBook, ComicInfo info)

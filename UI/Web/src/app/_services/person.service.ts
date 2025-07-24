@@ -78,6 +78,12 @@ export class PersonService {
     );
   }
 
+  isValidAsin(asin: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + `person/valid-asin?asin=${asin}`, TextResonse).pipe(
+      map(valid => valid + '' === 'true')
+    );
+  }
+
   mergePerson(destId: number, srcId: number) {
     return this.httpClient.post<Person>(this.baseUrl + 'person/merge', {destId, srcId});
   }

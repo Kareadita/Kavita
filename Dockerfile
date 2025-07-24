@@ -1,7 +1,7 @@
 #This Dockerfile creates a build for all architectures
 
 #Image that copies in the files and passes them to the main image
-FROM ubuntu:focal AS copytask
+FROM ubuntu:noble AS copytask
 
 ARG TARGETPLATFORM
 
@@ -16,15 +16,17 @@ RUN /copy_runtime.sh
 RUN chmod +x /Kavita/Kavita
 
 #Production image
-FROM ubuntu:focal
+FROM ubuntu:noble
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
 COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 libgdiplus curl \
+  && apt-get install -y libicu-dev libgdiplus curl tzdata \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
@@ -38,6 +40,8 @@ HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=3 CMD curl
 
 # Enable detection of running in a container
 ENV DOTNET_RUNNING_IN_CONTAINER=true
+# Set the time zone
+ENV TZ=UTC
 
 ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]

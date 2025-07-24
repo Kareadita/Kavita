@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, ReplaySubject, Subject} from 'rxjs';
-import {debounceTime, filter, map, shareReplay, switchMap, take, tap, throttleTime} from 'rxjs/operators';
+import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
