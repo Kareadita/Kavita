@@ -13,7 +13,6 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
-import {SettingsService} from 'src/app/admin/settings.service';
 import {
   DirectoryPickerComponent,
   DirectoryPickerResult
@@ -78,7 +77,6 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
   private readonly modalService = inject(NgbModal);
-  private readonly settingService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
@@ -310,7 +308,14 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   isDisabled() {
-    return !(this.libraryForm.valid && this.selectedFolders.length > 0);
+    const selectedFileTypes = [];
+    for(let fileTypeGroup of allFileTypeGroup) {
+      if (this.libraryForm.value[fileTypeGroup]) {
+        selectedFileTypes.push(fileTypeGroup);
+      }
+    }
+
+    return !(this.libraryForm.valid && this.selectedFolders.length > 0 && selectedFileTypes.length > 0);
   }
 
   reset() {
@@ -339,6 +344,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       }
     }
     model.excludePatterns = this.excludePatterns;
+
 
     if (this.libraryForm.errors) {
       return;
