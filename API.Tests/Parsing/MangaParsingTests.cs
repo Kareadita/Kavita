@@ -86,6 +86,7 @@ public class MangaParsingTests
     [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
     [InlineData("Adventure Time (2012)/Adventure Time  Ch 1 (2012)", Parser.LooseLeafVolume)]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
@@ -217,9 +218,10 @@ public class MangaParsingTests
     [InlineData("Monster #8 Ch. 001", "Monster #8")]
     [InlineData("Zom 100 - Bucket List of the Dead v01",  "Zom 100 - Bucket List of the Dead")]
     [InlineData("Zom 100 - Tome 2", "Zom 100")]
-    [InlineData("Max_l_explorateur_Tome_0", "Max l explorateur")]
+    [InlineData("Max_l_explorateur Tome 0", "Max l explorateur")]
     [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
     [InlineData("Bd Fr-Aldebaran-Antares-t6", "Bd Fr-Aldebaran-Antares")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "Monster")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseSeries(filename, LibraryType.Manga));
@@ -313,6 +315,7 @@ public class MangaParsingTests
     [InlineData("Max Level Returner ตอนที่ 5", "5")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     [InlineData("Monster #8 Ch. 001", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
@@ -334,6 +337,7 @@ public class MangaParsingTests
     {
         Assert.Equal(expected, Parser.ParseEdition(input));
     }
+
     [Theory]
     [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", false)]
     [InlineData("Beelzebub_Omake_June_2012_RHS", false)]

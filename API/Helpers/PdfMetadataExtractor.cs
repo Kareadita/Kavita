@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Text;
 using System.Xml;
 using System.IO;
-using System.Threading.Tasks;
 using API.Services;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +16,34 @@ namespace API.Helpers;
  * All references to the "PDF Spec" (section numbers, etc.) refer to the
  * PDF 1.7 Specification a.k.a. PDF32000-1:2008
  * https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
+ */
+
+/**
+ * Reference for PDF Metadata Format
+    %PDF-1.4                    ← Header
+
+    Object 1 0 obj             ← Objects containing content
+    << /Type /Catalog ... >>
+    endobj
+
+    Object 2 0 obj
+    << /Type /Info ... >>
+    endobj
+
+    ...more objects...
+
+    xref                       ← Cross-reference table
+    0 6
+    0000000000 65535 f
+    0000000015 00000 n        ← Object 1 is at byte offset 15
+    0000000109 00000 n        ← Object 2 is at byte offset 109
+    ...
+
+    trailer                    ← Trailer dictionary
+    << /Size 6 /Root 1 0 R /Info 2 0 R >>
+    startxref
+    1234                       ← Byte offset where xref starts
+    %%EOF
  */
 
 /// <summary>
@@ -362,10 +389,18 @@ internal class PdfLexer(Stream stream)
         }
     }
 
-    public bool NextXRefEntry(ref long obj, ref int generation)
+    /// <summary>
+    ///
+    /// </summary>
+    /// <example>
+    ///     0000000015 00000 n    <- offset=15, generation=0, in-use
+    ///     0000000109 00000 n    <- offset=109, generation=0, in-use
+    ///     0000000000 65535 f    <- offset=0, generation=65535, free
+    /// </example>
+    /// <remarks>Cross-reference table entry as per PDF Spec 7.5.4</remarks>
+    /// <exception cref="PdfMetadataExtractorException"></exception>
+    public bool NextXRefEntry(out long offset, out int generation)
     {
-        // Cross-reference table entry as per PDF Spec 7.5.4
-
         WantLookahead(20);
 
         if (_valid - _pos < 20)
@@ -373,14 +408,11 @@ internal class PdfLexer(Stream stream)
             throw new PdfMetadataExtractorException("End of stream");
         }
 
-        var inUse = true;
+        // Parse the 20-byte XRef entry: "nnnnnnnnnn ggggg n/f \r\n"
+        offset = Convert.ToInt64(Encoding.ASCII.GetString(_buffer, _pos, 10).Trim());
+        generation = Convert.ToInt32(Encoding.ASCII.GetString(_buffer, _pos + 11, 5).Trim());
 
-        if (obj == 0)
-        {
-            obj = Convert.ToInt64(Encoding.ASCII.GetString(_buffer, _pos, 10));
-            generation = Convert.ToInt32(Encoding.ASCII.GetString(_buffer, _pos + 11, 5));
-            inUse = _buffer[_pos + 17] == 'n';
-        }
+        var inUse = _buffer[_pos + 17] == 'n';
 
         _pos += 20;
 
@@ -842,14 +874,11 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
         if (!_lexer.TestByte((byte)'x'))
         {
             // Cross-reference stream (PDF Spec 7.5.8)
-
             ReadXRefStream();
-
             return;
         }
 
         // Cross-reference table (PDF Spec 7.5.4)
-
         var token = _lexer.NextToken();
 
         if (token.Type != PdfLexer.TokenType.Keyword || (string)token.Value != "xref")
@@ -875,18 +904,15 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
 
                 _lexer.ExpectNewline();
 
-                var generation = 0;
-
                 for (var obj = startObj; obj < startObj + numObj; ++obj)
                 {
-                    var offset = obj; // This gets modified by NextXRefEntry
-                    var inUse = _lexer.NextXRefEntry(ref offset, ref generation);
+                    var inUse = _lexer.NextXRefEntry(out var offset, out var generation);
 
                     if (inUse && offset > 0)
                     {
-                        _objectOffsets[obj] = offset; // Simply assign to dictionary
+                        _objectOffsets[obj] = offset ;
                     }
-                    // No need to explicitly set to 0 - missing keys implicitly mean offset 0
+                    // Free objects (inUse == false) are not stored in the dictionary
                 }
             }
             else if (token.Type == PdfLexer.TokenType.Keyword && (string)token.Value == "trailer")

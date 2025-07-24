@@ -424,7 +424,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Tower Of God S01 014 (CBT) (digital).cbz, Tower Of God T01 014 (CBT) (digital).cbz,
         new Regex(
-            @"(?<Series>.*)(\b|_|)((S|T)(?<Volume>\d+))",
+            @"(?<Series>.*)(\b|_)((S|T)(?<Volume>\d+))",
             MatchOptions, RegexTimeout),
         // vol_001-1.cbz for MangaPy default naming convention
         new Regex(
