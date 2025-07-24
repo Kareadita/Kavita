@@ -130,7 +130,11 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
   );
 }
 
-function preLoadOidcAndUser() {
+/**
+ * Loads OIDC info, and refreshen its token if applicable, otherwise sets the user from local storage.
+ * Then loads the users, or the default locale
+ */
+function bootstrapUser() {
   const oidc = inject(OidcService);
   const toastr = inject(ToastrService);
   const accountService = inject(AccountService);
@@ -203,7 +207,7 @@ bootstrapApplication(AppComponent, {
         },
         provideOAuthClient(),
         provideHttpClient(withInterceptorsFromDi()),
-        provideAppInitializer(() => preLoadOidcAndUser()),
+        provideAppInitializer(() => bootstrapUser()),
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));
