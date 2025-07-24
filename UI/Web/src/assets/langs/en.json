@@ -1144,7 +1144,8 @@
         "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files.",
         "exclude-patterns-label": "Exclude Patterns",
         "exclude-patterns-tooltip": "Configure a set of patterns (Glob syntax) that Kavita will match when scanning directories and exclude from Scanner results.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "files-at-root-warning": "One or more folders contains files at the root. Kavita does not support this."
     },
 
     "file-type-group-pipe": {

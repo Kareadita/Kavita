@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  model,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -126,6 +135,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
+  filesAtRoot = model<boolean>(false);
 
   tasks: ActionItem<Library>[] = this.getTasks();
 
@@ -143,6 +153,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
+    } else {
+      this.checkForFilesAtRoot();
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
@@ -408,6 +420,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
+          this.checkForFilesAtRoot();
           this.cdRef.markForCheck();
         }
       }
@@ -417,6 +430,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   removeFolder(folder: string) {
     this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
     this.madeChanges = true;
+    this.checkForFilesAtRoot();
     this.cdRef.markForCheck();
   }
 
@@ -458,5 +472,16 @@ export class LibrarySettingsModalComponent implements OnInit {
         });
         break;
     }
+  }
+
+  checkForFilesAtRoot() {
+    this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
+      Object.keys(results).forEach(key => {
+        if (results[key]) {
+          this.filesAtRoot.set(true);
+          return;
+        }
+      })
+    })
   }
 }
