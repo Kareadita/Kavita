@@ -2,10 +2,16 @@
 
     <div class="offcanvas-header {{titleClass()}}">
       <h5 class="offcanvas-title">
-        <span>{{t(isEditMode() ? 'edit-title' : 'view-title')}}</span>
+        <span>
+          @if (mode() === AnnotationMode.Create) {
+            {{t('create-title')}}
+          } @else {
+            {{t(isEditMode() ? 'edit-title' : 'view-title')}}
+          }
+        </span>
       </h5>
 
-      @if (isEditMode() && formGroup) {
+      @if (isEditOrCreateMode() && formGroup) {
         <form [formGroup]="formGroup" novalidate>
           <div class="form-check form-switch offcanvas-title-right">
             <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
@@ -21,20 +27,19 @@
     </div>
 
     <div class="offcanvas-body">
-      @let editMode = isEditMode();
-
-
       @if (annotation() && formGroup) {
         <form [formGroup]="formGroup" novalidate>
           <blockquote class="text-muted pb-2 small fw-lighter" style="margin-left: 30%; margin-right: 30%">
-            <p class="content-quote mb-0">{{annotation()?.selectedText}}
-            </p>
+            <div id="render-target" #renderTarget>
+              <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
+            </div>
             <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
           </blockquote>
+
           <div class="setting-section-break" aria-hidden="true"></div>
 
 
-          @if (editMode && this.annotation()) {
+          @if (isEditOrCreateMode() && this.annotation()) {
             <div class="row g-0 mt-2">
               <div class="col-3">
                 <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
@@ -43,13 +48,19 @@
           }
 
           <div class="row g-0 mt-2 mb-2 mx-auto">
-            @if (editMode) {
-              <h6>Notes</h6>
+            @if (isEditOrCreateMode()) {
               <quill-editor theme="snow" formControlName="note" format="object" (onContentChanged)="updateContent($event)"/>
             } @else {
               <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
             }
           </div>
+
+          @if (isEditOrCreateMode()) {
+            <div class="row g-0 mt-5">
+              <button class="btn btn-primary col-12" (click)="createAnnotation()">{{t('save')}}</button>
+            </div>
+          }
+
         </form>
       }
 

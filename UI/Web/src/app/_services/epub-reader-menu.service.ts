@@ -1,12 +1,8 @@
 import {inject, Injectable, signal} from '@angular/core';
-import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 import {NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {
   ViewAnnotationsDrawerComponent
 } from "../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component";
-import {
-  CreateAnnotationDrawerComponent
-} from "../book-reader/_components/_drawers/create-annotation-drawer/create-annotation-drawer.component";
 import {
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
@@ -22,6 +18,7 @@ import {ReadingProfile} from "../_models/preferences/reading-profiles";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {
+  AnnotationMode,
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
 import {AccountService} from "./account.service";
@@ -43,11 +40,12 @@ export class EpubReaderMenuService {
    */
   public readonly isDrawerOpen = signal<boolean>(false);
 
-  openCreateAnnotationDrawer(annotation: CreateAnnotationRequest, callbackFn: () => void) {
-    const ref = this.offcanvasService.open(CreateAnnotationDrawerComponent, {position: 'bottom'});
+  openCreateAnnotationDrawer(annotation: Annotation, callbackFn: () => void) {
+    const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom'});
     ref.closed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
     ref.dismissed.subscribe(() => {this.setDrawerClosed(); callbackFn();});
-    ref.componentInstance.createAnnotation.set(annotation);
+    (ref.componentInstance as ViewEditAnnotationDrawerComponent).annotation.set(annotation);
+    (ref.componentInstance as ViewEditAnnotationDrawerComponent).mode.set(AnnotationMode.Create);
 
     this.isDrawerOpen.set(true);
   }
@@ -130,8 +128,7 @@ export class EpubReaderMenuService {
 
     const ref = this.offcanvasService.open(ViewEditAnnotationDrawerComponent, {position: 'bottom'});
     ref.componentInstance.annotation.set(annotation);
-    //ref.componentInstance.slots.set(this.slots()); // Slots needs to be global to the user and also any changes need to reflect instantly
-    ref.componentInstance.isEditMode.set(editMode);
+    (ref.componentInstance as ViewEditAnnotationDrawerComponent).mode.set(editMode ? AnnotationMode.Edit : AnnotationMode.View);
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

@@ -21,7 +21,7 @@ import {ToastrService} from "ngx-toastr";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
-import {CreateAnnotationRequest} from "../../_models/create-annotation-request";
+import {Annotation} from "../../_models/annotations/annotation";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -141,20 +141,26 @@ export class BookLineOverlayComponent implements OnInit {
 
     if (this.mode === BookLineOverlayMode.Annotate) {
       const createAnnotation = {
+        id: 0,
+        xpath: this.xPath,
+        endingXPath: this.xPath, // TODO: Figure this out
+        selectedText: this.selectedText,
+        comment: '',
+        containsSpoiler: false,
+        pageNumber: this.pageNumber,
+        selectedSlotIndex: 0,
+        chapterTitle: '',
+        highlightCount: this.selectedText.length,
+        ownerUserId: 0,
+        ownerUsername: '',
+        createdUtc: '',
+        lastModifiedUtc: '',
+        context: this.allTextFromSelection,
         chapterId: this.chapterId,
         libraryId: this.libraryId,
         volumeId: this.volumeId,
         seriesId: this.seriesId,
-        comment: null,
-        selectedText: this.selectedText,
-        containsSpoiler: false,
-        pageNumber: this.pageNumber,
-        xpath: this.xPath,
-        endingXPath: this.xPath, // TODO: Figure this out
-        highlightCount: this.selectedText.length,
-        selectedSlotIndex: 0,
-        context: this.allTextFromSelection,
-      } as CreateAnnotationRequest;
+      } as Annotation;
 
       this.epubMenuService.openCreateAnnotationDrawer(createAnnotation, () => {
         this.reset();

@@ -37,7 +37,10 @@ public class AppUserAnnotation : IEntityDate
     /// Selected Highlight Slot Index [0-4]
     /// </summary>
     public int SelectedSlotIndex { get; set; }
-
+    /// <summary>
+    /// A calculated selection of the surrounding text. This does not update after creation.
+    /// </summary>
+    public string? Context { get; set; }
 
     public bool ContainsSpoiler { get; set; }
 

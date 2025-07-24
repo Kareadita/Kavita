@@ -821,6 +821,7 @@
     "view-edit-annotation-drawer": {
         "view-title": "View Annotation",
         "edit-title": "Edit Annotation",
+        "create-title": "Create Annotation",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
@@ -845,13 +846,6 @@
 
     "highlight-bar": {
       "add-new-color-alt": "Add Custom Color"
-    },
-
-    "create-annotation-drawer": {
-        "title": "Create Annotation",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "page-num": "{{book-reader.page-num}}"
     },
 
     "book-reader": {

@@ -56,6 +56,7 @@ namespace API.Data.Migrations
                     HighlightCount = table.Column<int>(type: "INTEGER", nullable: false),
                     PageNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     SelectedSlotIndex = table.Column<int>(type: "INTEGER", nullable: false),
+                    Context = table.Column<string>(type: "TEXT", nullable: true),
                     ContainsSpoiler = table.Column<bool>(type: "INTEGER", nullable: false),
                     ChapterTitle = table.Column<string>(type: "TEXT", nullable: true),
                     SeriesId = table.Column<int>(type: "INTEGER", nullable: false),

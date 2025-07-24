@@ -32,6 +32,10 @@ public sealed record AnnotationDto
     /// Title of the TOC Chapter within Epub (not Chapter Entity)
     /// </summary>
     public string? ChapterTitle { get; set; }
+    /// <summary>
+    /// A calculated selection of the surrounding text. This does not update after creation.
+    /// </summary>
+    public string? Context { get; set; }
 
     /// <summary>
     /// The number of characters selected
@@ -46,6 +50,8 @@ public sealed record AnnotationDto
     public int SelectedSlotIndex { get; set; }
 
     public required int ChapterId { get; set; }
+    public required int VolumeId { get; set; }
+    public required int SeriesId { get; set; }
 
     public required int OwnerUserId { get; set; }
     public string OwnerUsername { get; set; }

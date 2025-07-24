@@ -401,7 +401,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
   }
 
   updateCoverImageIndex(selectedIndex: number) {
@@ -410,7 +410,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe();
   }
 
   openDirectoryPicker() {

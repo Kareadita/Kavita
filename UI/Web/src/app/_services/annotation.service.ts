@@ -2,7 +2,6 @@ import {computed, inject, Injectable, signal} from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Annotation} from '../book-reader/_models/annotations/annotation';
-import {CreateAnnotationRequest} from "../book-reader/_models/create-annotation-request";
 import {TextResonse} from "../_types/text-response";
 import {map, of, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
@@ -65,7 +64,7 @@ export class AnnotationService {
   }
 
 
-  createAnnotation(data: CreateAnnotationRequest) {
+  createAnnotation(data: Annotation) {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/create', data).pipe(
       tap(newAnnotation => {
         this._events.set({

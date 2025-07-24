@@ -39,7 +39,7 @@ public class AnnotationController : BaseApiController
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<AnnotationDto>> CreateAnnotation(CreateAnnotationRequest dto)
+    public async Task<ActionResult<AnnotationDto>> CreateAnnotation(AnnotationDto dto)
     {
         try
         {
@@ -66,7 +66,8 @@ public class AnnotationController : BaseApiController
                 PageNumber = dto.PageNumber,
                 SelectedSlotIndex = dto.SelectedSlotIndex,
                 AppUserId = User.GetUserId(),
-                //ChapterTitle =
+                Context = dto.Context,
+                ChapterTitle = dto.ChapterTitle
             };
 
             _unitOfWork.AnnotationRepository.Attach(annotation);

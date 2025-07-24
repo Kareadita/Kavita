@@ -17,18 +17,19 @@ export interface Annotation {
   containsSpoiler: boolean;
   pageNumber: number;
   selectedSlotIndex: number;
-
-
-  chapterId: number;
-
   chapterTitle: string | null;
-  /**
-   * UI Only
-   */
-  surroundingText: string | null;
-
+  highlightCount: number;
   ownerUserId: number;
   ownerUsername: string;
   createdUtc: string;
   lastModifiedUtc: string;
+  /**
+   * A calculated selection of the surrounding text. This does not update after creation.
+   */
+  context: string | null;
+  chapterId: number;
+  libraryId: number;
+  volumeId: number;
+  seriesId: number;
+
 }

@@ -57,9 +57,9 @@ export class EpubHighlightComponent {
 
 
   viewAnnotation() {
-    this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {
 
-    });
+    // TODO: This shouldn't when edit annotation drawer already open (clicking highlight in the drawer)
+    this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {});
   }
 
 
