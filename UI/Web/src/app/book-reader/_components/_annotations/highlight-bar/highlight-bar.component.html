@@ -5,7 +5,7 @@
       @for(slot of slots(); track slot.color; let index = $index) {
         <button class="btn btn-icon color" (click)="selectSlot(index, slot)">
           <div class="dot" [ngClass]="{'active': slot.slotNumber === selectedSlotIndex()}" [ngStyle]="{'background-color': slot.color | slotColor}"></div>
-          <div>{{slot.title}}</div>
+<!--          <div>{{slot.title}}</div>-->
         </button>
       }
     }

@@ -26,7 +26,7 @@
 
       @if (annotation() && formGroup) {
         <form [formGroup]="formGroup" novalidate>
-          <blockquote class="text-muted pb-2 small fw-lighter">
+          <blockquote class="text-muted pb-2 small fw-lighter" style="margin-left: 30%; margin-right: 30%">
             <p class="content-quote mb-0">{{annotation()?.selectedText}}
             </p>
             <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
