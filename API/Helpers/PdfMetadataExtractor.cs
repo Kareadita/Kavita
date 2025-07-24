@@ -20,7 +20,7 @@ namespace API.Helpers;
 
 /**
  * Reference for PDF Metadata Format
-    %PDF-1.4                    ← Header
+    %PDF-1.4                   ← Header
 
     Object 1 0 obj             ← Objects containing content
     << /Type /Catalog ... >>
@@ -35,8 +35,8 @@ namespace API.Helpers;
     xref                       ← Cross-reference table
     0 6
     0000000000 65535 f
-    0000000015 00000 n        ← Object 1 is at byte offset 15
-    0000000109 00000 n        ← Object 2 is at byte offset 109
+    0000000015 00000 n         ← Object 1 is at byte offset 15
+    0000000109 00000 n         ← Object 2 is at byte offset 109
     ...
 
     trailer                    ← Trailer dictionary
@@ -393,9 +393,9 @@ internal class PdfLexer(Stream stream)
     ///
     /// </summary>
     /// <example>
-    ///     0000000015 00000 n    <- offset=15, generation=0, in-use
-    ///     0000000109 00000 n    <- offset=109, generation=0, in-use
-    ///     0000000000 65535 f    <- offset=0, generation=65535, free
+    ///     0000000015 00000 n    ← offset=15, generation=0, in-use
+    ///     0000000109 00000 n    ← offset=109, generation=0, in-use
+    ///     0000000000 65535 f    ← offset=0, generation=65535, free
     /// </example>
     /// <remarks>Cross-reference table entry as per PDF Spec 7.5.4</remarks>
     /// <exception cref="PdfMetadataExtractorException"></exception>
