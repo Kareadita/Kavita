@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-    <div class="offcanvas-header {{titleClass()}}">
+    <div class="offcanvas-header "  [ngStyle]="{'background-color': titleColor()}">
       <h5 class="offcanvas-title">
         <span>
           @if (mode() === AnnotationMode.Create) {

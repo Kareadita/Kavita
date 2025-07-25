@@ -42,7 +42,7 @@ export class EpubHighlightComponent {
   }
 
 
-  highlightClasses = computed(() => {
+  highlightStyle = computed(() => {
     const showHighlight = this.showHighlight();
     const annotation = this.annotation();
     const slots = this.annotationService.slots();

@@ -41,7 +41,7 @@ export class AnnotationCardComponent {
       if (!annotation) return '';
       // TODO: Safefty check
       return this.highlightSlotPipe.transform(this.annotationService.slots()[annotation.selectedSlotIndex].color);
-    })
+    });
   }
 
   editAnnotation() {

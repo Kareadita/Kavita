@@ -23,7 +23,7 @@ import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {User} from "../../../../_models/user";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {DOCUMENT} from "@angular/common";
+import {DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 
@@ -42,7 +42,8 @@ const INIT_HIGHLIGHT_DELAY = 200;
     ReactiveFormsModule,
     QuillViewComponent,
     TranslocoDirective,
-    HighlightBarComponent
+    HighlightBarComponent,
+    NgStyle
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -65,7 +66,7 @@ export class ViewEditAnnotationDrawerComponent {
   user = model<User | null>(null);
   isEditMode: Signal<boolean>
   isEditOrCreateMode: Signal<boolean>
-  titleClass: Signal<string>;
+  titleColor: Signal<string>;
   totalText!: Signal<SafeHtml>;
 
 
@@ -74,14 +75,11 @@ export class ViewEditAnnotationDrawerComponent {
   isSetup = false;
 
   constructor() {
-    this.titleClass = computed(() => {
+    this.titleColor = computed(() => {
       const annotation = this.annotation();
-      const slots = this.annotationService.slots() || [];
-
-      if (!annotation || slots.length === 0) return '';
-      const selectedSlot = slots[annotation.selectedSlotIndex];
-
-      return `${this.highlightSlotPipe.transform(selectedSlot.color)}-title`;
+      if (!annotation) return '';
+      // TODO: Safefty check
+      return this.highlightSlotPipe.transform(this.annotationService.slots()[annotation.selectedSlotIndex].color);
     });
 
     this.isEditMode = computed(() => {
@@ -94,12 +92,14 @@ export class ViewEditAnnotationDrawerComponent {
     });
 
     this.totalText = computed(() => {
-      const contextText = this.annotation()?.context;
-      const selectedText = this.annotation()?.selectedText!;
+      const highlightAnnotation = this.annotation();
+      const isCreateFlow =  this.mode() === AnnotationMode.Create;
+      if (highlightAnnotation == null || highlightAnnotation?.context === null) return '';
 
-      if (contextText == null) return '';
+      const contextText = highlightAnnotation.context;
+      const selectedText = highlightAnnotation.selectedText!;
 
-
+      const annotationId = isCreateFlow ? 0 : highlightAnnotation.id;
 
       if (!contextText.includes(selectedText)) {
         return selectedText;
@@ -132,7 +132,7 @@ export class ViewEditAnnotationDrawerComponent {
           this.initHighlights();
         }, INIT_HIGHLIGHT_DELAY);
 
-        return this.sanitizer.bypassSecurityTrustHtml(`<app-epub-highlight id="epub-highlight-0">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
+        return this.sanitizer.bypassSecurityTrustHtml(`<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
       }
 
       // Otherwise, use normal context distribution
@@ -166,7 +166,7 @@ export class ViewEditAnnotationDrawerComponent {
       setTimeout(() => {
         this.initHighlights();
       }, INIT_HIGHLIGHT_DELAY);
-      return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-0">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
+      return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
     });
 
 
@@ -211,6 +211,8 @@ export class ViewEditAnnotationDrawerComponent {
     // For create annotation, we have to have this hack
     highlightAnnotation.createdUtc = '0001-01-01T00:00:00Z';
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
+
+    console.log('saving highlight: ', highlightAnnotation);
 
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
