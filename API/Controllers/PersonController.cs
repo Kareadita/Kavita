@@ -149,6 +149,18 @@ public class PersonController : BaseApiController
     }
 
     /// <summary>
+    /// Validates if the ASIN (10/13) is valid
+    /// </summary>
+    /// <param name="asin"></param>
+    /// <returns></returns>
+    [HttpGet("valid-asin")]
+    public ActionResult<bool> ValidateAsin(string asin)
+    {
+        return Ok(!string.IsNullOrEmpty(asin) &&
+                  (ArticleNumberHelper.IsValidIsbn10(asin) || ArticleNumberHelper.IsValidIsbn13(asin)));
+    }
+
+    /// <summary>
     /// Attempts to download the cover from CoversDB (Note: Not yet release in Kavita)
     /// </summary>
     /// <param name="personId"></param>

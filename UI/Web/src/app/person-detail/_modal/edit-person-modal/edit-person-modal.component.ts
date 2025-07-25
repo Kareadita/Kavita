@@ -73,7 +73,7 @@ export class EditPersonModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
-    asin: new FormControl('', []),
+    asin: new FormControl('', [], [this.asinValidator()]),
     aniListId: new FormControl('', []),
     malId: new FormControl('', []),
     hardcoverId: new FormControl('', []),
@@ -190,6 +190,23 @@ export class EditPersonModalComponent implements OnInit {
         }
 
         return { 'invalidAlias': {'alias': name} } as ValidationErrors;
+      }));
+    }
+  }
+
+  asinValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      const asin = control.value;
+      if (!asin || asin.trim().length === 0) {
+        return of(null);
+      }
+      
+      return this.personService.isValidAsin(asin).pipe(map(valid => {
+        if (valid) {
+          return null;
+        }
+
+        return { 'invalidAsin': {'asin': asin} } as ValidationErrors;
       }));
     }
   }

@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
@@ -83,6 +84,7 @@ public class LibraryController : BaseApiController
             .WithManageReadingLists(dto.ManageReadingLists)
             .WithAllowScrobbling(dto.AllowScrobbling)
             .WithAllowMetadataMatching(dto.AllowMetadataMatching)
+            .WithEnableMetadata(dto.EnableMetadata)
             .Build();
 
         library.LibraryFileTypes = dto.FileGroupTypes
@@ -171,6 +173,26 @@ public class LibraryController : BaseApiController
         if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)!));
 
         return Ok(_directoryService.ListDirectory(path));
+    }
+
+    /// <summary>
+    /// For each root, checks if there are any supported files at root to warn the user during library creation about an invalid setup
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("has-files-at-root")]
+    public ActionResult<IDictionary<string, bool>> AnyFilesAtRoot(CheckForFilesInFolderRootsDto dto)
+    {
+        var results = new Dictionary<string, bool>();
+        foreach (var root in dto.Roots)
+        {
+            results.TryAdd(root,
+                _directoryService
+                    .GetFilesWithCertainExtensions(root, Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
+                    .Any());
+        }
+
+        return Ok(results);
     }
 
     /// <summary>

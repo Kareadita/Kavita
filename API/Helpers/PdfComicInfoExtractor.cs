@@ -130,7 +130,7 @@ public class PdfComicInfoExtractor : IPdfComicInfoExtractor
     {
         try
         {
-            var extractor = new PdfMetadataExtractor(_logger, filePath);
+            using var extractor = new PdfMetadataExtractor(_logger, filePath);
 
             return GetComicInfoFromMetadata(extractor.GetMetadata(), filePath);
         }
@@ -138,8 +138,11 @@ public class PdfComicInfoExtractor : IPdfComicInfoExtractor
         {
             _logger.LogWarning(ex, "[GetComicInfo] There was an exception parsing PDF metadata for {File}", filePath);
             _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
-                "There was an exception parsing PDF metadata", ex);
+                ex.Message == "Encryption not supported"
+                    ? "Encrypted PDFs are not supported"
+                    : "There was an exception parsing PDF metadata", ex);
         }
+
 
         return null;
     }

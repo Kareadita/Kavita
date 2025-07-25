@@ -118,83 +118,6 @@ public static partial class Parser
         MatchOptions, RegexTimeout);
 
 
-    private static readonly Regex[] MangaVolumeRegex =
-    [
-        // Thai Volume: เล่ม n -> Volume n
-        new Regex(
-            @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
-            MatchOptions, RegexTimeout),
-        // Dance in the Vampire Bund v16-17
-        new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
-            MatchOptions, RegexTimeout),
-        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
-        new Regex(
-            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+(Vol(ume)?\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
-            MatchOptions, RegexTimeout),
-        // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
-        new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
-            MatchOptions, RegexTimeout),
-        // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
-        new Regex(
-            @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
-        new Regex(
-            @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Tonikaku Cawaii [Volume 11].cbz
-        new Regex(
-            @"(volume )(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-        // Tower Of God S01 014 (CBT) (digital).cbz
-        new Regex(
-            @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
-            MatchOptions, RegexTimeout),
-        // vol_001-1.cbz for MangaPy default naming convention
-        new Regex(
-            @"(vol_)(?<Volume>\d+(\.\d)?)",
-            MatchOptions, RegexTimeout),
-
-        // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
-        new Regex(
-            @"第(?<Volume>\d+)(卷|册)",
-            MatchOptions, RegexTimeout),
-        // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
-        new Regex(
-            @"(卷|册)(?<Volume>\d+)",
-            MatchOptions, RegexTimeout),
-        // Korean Volume: 제n화|회|장 -> Volume n, n화|권|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
-        new Regex(
-            @"제?(?<Volume>\d+(\.\d+)?)(권|화|장)",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n,
-        new Regex(
-            @"시즌(?<Volume>\d+\-?\d+)",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n, n시즌 -> season n
-        new Regex(
-            @"(?<Volume>\d+(\-|~)?\d+?)시즌",
-            MatchOptions, RegexTimeout),
-        // Korean Season: 시즌n -> Season n, n시즌 -> season n
-        new Regex(
-            @"시즌(?<Volume>\d+(\-|~)?\d+?)",
-            MatchOptions, RegexTimeout),
-        // Japanese Volume: n巻 -> Volume n
-        new Regex(
-            @"(?<Volume>\d+(?:(\-)\d+)?)巻",
-            MatchOptions, RegexTimeout),
-        // Russian Volume: Том n -> Volume n, Тома n -> Volume
-        new Regex(
-            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
-            MatchOptions, RegexTimeout),
-        // Russian Volume: n Том -> Volume n
-        new Regex(
-            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
-            MatchOptions, RegexTimeout)
-    ];
-
     private static readonly Regex[] MangaSeriesRegex =
     [
         // Thai Volume: เล่ม n -> Volume n
@@ -239,7 +162,7 @@ public static partial class Parser
             RegexTimeout),
         // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
         new Regex(
-            @"(?<Series>.+?)( - )(?:v|vo|c|chapters)\d",
+            @"(?<Series>.+?)( - )(?:v|vo|c|chapters|tome|t|ch)\d",
             MatchOptions, RegexTimeout),
         // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
         new Regex(
@@ -251,14 +174,18 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
         new Regex(
-            @"(?<Series>.+?):? (\b|_|-)(vol)\.?(\s|-|_)?\d+",
+            @"(?<Series>.+?):? (\b|_|-)(vol|tome)\.?(\s|-|_)?\d+",
             MatchOptions, RegexTimeout),
         // [xPearse] Kyochuu Rettou Chapter 001 Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
             @"(?<Series>.+?):?(\s|\b|_|-)Chapter(\s|\b|_|-)\d+(\s|\b|_|-)(vol)(ume)",
             MatchOptions,
             RegexTimeout),
-
+        // Kyochuu Rettou T3, Kyochuu Rettou - Tome 3
+        new Regex(
+            @"(?<Series>.+?):? (\b|_|-)(t\d+|tome(\b|_)\d+)",
+            MatchOptions,
+            RegexTimeout),
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
             @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",
@@ -270,7 +197,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
         new Regex(
-            @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
+            @"(?<Series>.*)(?: _|-|\[|\()\s?(vol(ume)?|tome|t\d+)",
             MatchOptions, RegexTimeout),
         // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
         new Regex(
@@ -462,6 +389,83 @@ public static partial class Parser
         // MUST BE LAST: Batman & Daredevil - King of New York
         new Regex(
             @"^(?<Series>.*)",
+            MatchOptions, RegexTimeout)
+    ];
+
+    private static readonly Regex[] MangaVolumeRegex =
+    [
+        // Thai Volume: เล่ม n -> Volume n
+        new Regex(
+            @"(เล่ม|เล่มที่)(\s)?(\.?)(\s|_)?(?<Volume>\d+(\-\d+)?(\.\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Dance in the Vampire Bund v16-17, Dance in the Vampire Bund Tome 1
+        new Regex(
+            @"(?<Series>.*)(\b|_)(v|tome(\s|_)?|t)(?<Volume>\d+-?\d+)(\s|_)",
+            MatchOptions, RegexTimeout),
+        // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
+        new Regex(
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+((Vol(ume)?|tome)\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
+            MatchOptions, RegexTimeout),
+        // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
+        new Regex(
+            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
+            MatchOptions, RegexTimeout),
+        // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
+        new Regex(
+            @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
+        new Regex(
+            @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Tonikaku Cawaii [Volume 11].cbz
+        new Regex(
+            @"((volume|tome)\s)(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
+        // Tower Of God S01 014 (CBT) (digital).cbz, Tower Of God T01 014 (CBT) (digital).cbz,
+        new Regex(
+            @"(?<Series>.*)(\b|_)((S|T)(?<Volume>\d+))",
+            MatchOptions, RegexTimeout),
+        // vol_001-1.cbz for MangaPy default naming convention
+        new Regex(
+            @"(vol_)(?<Volume>\d+(\.\d)?)",
+            MatchOptions, RegexTimeout),
+
+        // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
+        new Regex(
+            @"第(?<Volume>\d+)(卷|册)",
+            MatchOptions, RegexTimeout),
+        // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
+        new Regex(
+            @"(卷|册)(?<Volume>\d+)",
+            MatchOptions, RegexTimeout),
+        // Korean Volume: 제n화|회|장 -> Volume n, n화|권|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
+        new Regex(
+            @"제?(?<Volume>\d+(\.\d+)?)(권|화|장)",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n,
+        new Regex(
+            @"시즌(?<Volume>\d+\-?\d+)",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n, n시즌 -> season n
+        new Regex(
+            @"(?<Volume>\d+(\-|~)?\d+?)시즌",
+            MatchOptions, RegexTimeout),
+        // Korean Season: 시즌n -> Season n, n시즌 -> season n
+        new Regex(
+            @"시즌(?<Volume>\d+(\-|~)?\d+?)",
+            MatchOptions, RegexTimeout),
+        // Japanese Volume: n巻 -> Volume n
+        new Regex(
+            @"(?<Volume>\d+(?:(\-)\d+)?)巻",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
             MatchOptions, RegexTimeout)
     ];
 
