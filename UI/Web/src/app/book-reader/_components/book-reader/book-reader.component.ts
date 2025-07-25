@@ -986,7 +986,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateImageSizes() {
     const isVerticalWritingStyle = this.writingStyle === WritingStyle.Vertical;
     const height = this.windowHeight - (this.topOffset * 2);
-    let maxHeight = 'unset';
+    let maxHeight = '90dvh';
     let maxWidth = '';
     switch (this.layoutMode) {
       case BookPageLayoutMode.Default:
