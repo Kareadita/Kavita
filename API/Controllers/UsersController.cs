@@ -5,8 +5,10 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.KavitaPlus.Account;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -23,14 +25,16 @@ public class UsersController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly ILicenseService _licenseService;
 
     public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _licenseService = licenseService;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -99,37 +103,20 @@ public class UsersController : BaseApiController
 
         var existingPreferences = user!.UserPreferences;
 
-        existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
-        existingPreferences.ScalingOption = preferencesDto.ScalingOption;
-        existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
-        existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
-        existingPreferences.ShowScreenHints = preferencesDto.ShowScreenHints;
-        existingPreferences.EmulateBook = preferencesDto.EmulateBook;
-        existingPreferences.ReaderMode = preferencesDto.ReaderMode;
-        existingPreferences.LayoutMode = preferencesDto.LayoutMode;
-        existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#000000" : preferencesDto.BackgroundColor;
-        existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
-        existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
-        existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
-        existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
-        existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
-        existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
-        existingPreferences.BookReaderWritingStyle = preferencesDto.BookReaderWritingStyle;
-        existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
-        existingPreferences.BookReaderLayoutMode = preferencesDto.BookReaderLayoutMode;
-        existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
         existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
         existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
-        existingPreferences.LayoutMode = preferencesDto.LayoutMode;
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
-        existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
 
-        existingPreferences.PdfTheme = preferencesDto.PdfTheme;
-        existingPreferences.PdfScrollMode = preferencesDto.PdfScrollMode;
-        existingPreferences.PdfSpreadMode = preferencesDto.PdfSpreadMode;
+        if (await _licenseService.HasActiveLicense())
+        {
+            existingPreferences.AniListScrobblingEnabled = preferencesDto.AniListScrobblingEnabled;
+            existingPreferences.WantToReadSync = preferencesDto.WantToReadSync;
+        }
+
+
 
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
@@ -138,10 +125,11 @@ public class UsersController : BaseApiController
         }
 
 
-        if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
+        if (_localizationService.GetLocales().Select(l => l.FileName).Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;
         }
+
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
@@ -172,5 +160,19 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<IEnumerable<string>>> GetUserNames()
     {
         return Ok((await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(u => u.UserName));
+    }
+
+    /// <summary>
+    /// Returns all users with tokens registered and their token information. Does not send the tokens.
+    /// </summary>
+    /// <remarks>Kavita+ only</remarks>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("tokens")]
+    public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
+    {
+        if (!await _licenseService.HasActiveLicense()) return BadRequest(_localizationService.Translate(User.GetUserId(), "kavitaplus-restricted"));
+
+        return Ok((await _unitOfWork.UserRepository.GetUserTokenInfo()));
     }
 }

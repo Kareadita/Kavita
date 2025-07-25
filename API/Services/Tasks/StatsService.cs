@@ -13,14 +13,17 @@ using API.DTOs.Stats;
 using API.DTOs.Stats.V3;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -45,12 +48,12 @@ public class StatsService : IStatsService
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
-    private const string ApiUrl = "https://stats.kavitareader.com";
+    private readonly string _apiUrl = "";
     private const string ApiKey = "MsnvA2DfQqxSK5jh"; // It's not important this is public, just a way to keep bots from hitting the API willy-nilly
 
     public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context,
         ILicenseService licenseService, UserManager<AppUser> userManager, IEmailService emailService,
-        ICacheService cacheService)
+        ICacheService cacheService, IHostEnvironment environment)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -60,8 +63,9 @@ public class StatsService : IStatsService
         _emailService = emailService;
         _cacheService = cacheService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(Configuration.StatsApiUrl);
+
+        _apiUrl = environment.IsDevelopment() ? "http://localhost:5001" : Configuration.StatsApiUrl;
     }
 
     /// <summary>
@@ -99,13 +103,8 @@ public class StatsService : IStatsService
 
         try
         {
-            var response = await (ApiUrl + "/api/v3/stats")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", ApiKey)
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+            var response = await (_apiUrl + "/api/v3/stats")
+                .WithBasicHeaders(ApiKey)
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -152,12 +151,8 @@ public class StatsService : IStatsService
 
         try
         {
-            var response = await (ApiUrl + "/api/v2/stats/opt-out?installId=" + installId)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", ApiKey)
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
+            var response = await (_apiUrl + "/api/v2/stats/opt-out?installId=" + installId)
+                .WithBasicHeaders(ApiKey)
                 .WithTimeout(TimeSpan.FromSeconds(30))
                 .PostAsync();
 
@@ -181,13 +176,8 @@ public class StatsService : IStatsService
         try
         {
             var sw = Stopwatch.StartNew();
-            var response = await (ApiUrl + "/api/health/")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", ApiKey)
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+            var response = await (Configuration.StatsApiUrl + "/api/health/")
+                .WithBasicHeaders(ApiKey)
                 .GetAsync();
 
             if (response.StatusCode == StatusCodes.Status200OK)
@@ -206,7 +196,7 @@ public class StatsService : IStatsService
 
     private async Task<int> MaxSeriesInAnyLibrary()
     {
-        // If first time flow, just return 0
+        // If first time flow, return 0
         if (!await _context.Series.AnyAsync()) return 0;
         return await _context.Series
             .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series!).Count())
@@ -245,6 +235,7 @@ public class StatsService : IStatsService
     private async Task<ServerInfoV3Dto> GetStatV3Payload()
     {
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var mediaSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         var dto = new ServerInfoV3Dto()
         {
             InstallId = serverSettings.InstallId,
@@ -257,6 +248,7 @@ public class StatsService : IStatsService
             DotnetVersion = Environment.Version.ToString(),
             OpdsEnabled = serverSettings.EnableOpds,
             EncodeMediaAs = serverSettings.EncodeMediaAs,
+            MatchedMetadataEnabled = mediaSettings.Enabled
         };
 
         dto.OsLocale = CultureInfo.CurrentCulture.EnglishName;

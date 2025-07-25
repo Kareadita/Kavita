@@ -2,7 +2,7 @@
 
 namespace API.DTOs.OPDS;
 
-public class FeedCategory
+public sealed record FeedCategory
 {
     [XmlAttribute("scheme")]
     public string Scheme { get; } = "http://www.bisg.org/standards/bisac_subject/index.html";

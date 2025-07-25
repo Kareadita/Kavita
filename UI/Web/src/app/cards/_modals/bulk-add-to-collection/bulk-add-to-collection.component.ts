@@ -22,13 +22,12 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 
 @Component({
-  selector: 'app-bulk-add-to-collection',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
-  templateUrl: './bulk-add-to-collection.component.html',
-  styleUrls: ['./bulk-add-to-collection.component.scss'],
-  encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-bulk-add-to-collection',
+    imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
+    templateUrl: './bulk-add-to-collection.component.html',
+    styleUrls: ['./bulk-add-to-collection.component.scss'],
+    encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Account;
+using API.DTOs.KavitaPlus.Account;
 using API.DTOs.Scrobbling;
 using API.Entities.Scrobble;
 using API.Extensions;
@@ -53,7 +54,7 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
-    /// Get the current user's MAL token & username
+    /// Get the current user's MAL token and username
     /// </summary>
     /// <returns></returns>
     [HttpGet("mal-token")]
@@ -73,9 +74,9 @@ public class ScrobblingController : BaseApiController
     /// Update the current user's AniList token
     /// </summary>
     /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <returns>True if the token was new or not</returns>
     [HttpPost("update-anilist-token")]
-    public async Task<ActionResult> UpdateAniListToken(AniListUpdateDto dto)
+    public async Task<ActionResult<bool>> UpdateAniListToken(AniListUpdateDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
@@ -85,30 +86,38 @@ public class ScrobblingController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        if (isNewToken)
-        {
-            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(user.Id));
-        }
-
-        return Ok();
+        return Ok(isNewToken);
     }
 
     /// <summary>
     /// Update the current user's MAL token (Client ID) and Username
     /// </summary>
     /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <returns>True if the token was new or not</returns>
     [HttpPost("update-mal-token")]
-    public async Task<ActionResult> UpdateMalToken(MalUserInfoDto dto)
+    public async Task<ActionResult<bool>> UpdateMalToken(MalUserInfoDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
+        var isNewToken = string.IsNullOrEmpty(user.MalAccessToken);
         user.MalAccessToken = dto.AccessToken;
         user.MalUserName = dto.Username;
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+
+        return Ok(isNewToken);
+    }
+
+    /// <summary>
+    /// When a user request to generate scrobble events from history. Should only be ran once per user.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("generate-scrobble-events")]
+    public ActionResult GenerateScrobbleEvents()
+    {
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(User.GetUserId()));
 
         return Ok();
     }
@@ -245,7 +254,7 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
-    /// Adds a hold against the Series for user's scrobbling
+    /// Remove a hold against the Series for user's scrobbling
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
@@ -258,6 +267,31 @@ public class ScrobblingController : BaseApiController
         user.ScrobbleHolds = user.ScrobbleHolds.Where(h => h.SeriesId != seriesId).ToList();
 
         _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    /// <summary>
+    /// Has the logged in user ran scrobble generation
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("has-ran-scrobble-gen")]
+    public async Task<ActionResult<bool>> HasRanScrobbleGen()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok(user is {HasRunScrobbleEventGeneration: true});
+    }
+
+    /// <summary>
+    /// Delete the given scrobble events if they belong to that user
+    /// </summary>
+    /// <param name="eventIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-remove-events")]
+    public async Task<ActionResult> BulkRemoveScrobbleEvents(IList<long> eventIds)
+    {
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), eventIds);
+        _unitOfWork.ScrobbleRepository.Remove(events);
         await _unitOfWork.CommitAsync();
         return Ok();
     }

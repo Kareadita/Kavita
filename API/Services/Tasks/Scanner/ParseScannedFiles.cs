@@ -32,6 +32,10 @@ public class ParsedSeries
     /// Format of the Series
     /// </summary>
     public required MangaFormat Format { get; init; }
+    /// <summary>
+    /// Has this Series changed or not aka do we need to process it or not.
+    /// </summary>
+    public bool HasChanged { get; set; }
 }
 
 public class ScanResult
@@ -162,8 +166,10 @@ public class ParseScannedFiles
             // Don't process any folders where we've already scanned everything below
             if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
+                var hasChanged = !HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck);
                 // Skip this directory as we've already processed a parent unless there are loose files at that directory
-                CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher);
+                // and they have changes
+                CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher, hasChanged);
                 continue;
             }
 
@@ -178,7 +184,7 @@ public class ParseScannedFiles
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated));
 
-            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, directory, forceCheck))
+            if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck))
             {
                 HandleUnchangedFolder(result, folderPath, directory);
             }
@@ -196,18 +202,34 @@ public class ParseScannedFiles
     /// <summary>
     /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second
     /// </summary>
+    /// <param name="library"></param>
     /// <param name="seriesPaths"></param>
     /// <param name="directory">This should be normalized</param>
     /// <param name="forceCheck"></param>
     /// <returns></returns>
-    private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
+    private bool HasSeriesFolderNotChangedSinceLastScan(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
+        // Reverting code from: https://github.com/Kareadita/Kavita/pull/3619/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
+        // This is to be able to release hotfix and tackle this in appropriate time
+
         // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
         // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
         if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
         {
             return false;
         }
+
+        // if (forceCheck)
+        // {
+        //     return false;
+        // }
+
+        // TryGetSeriesList falls back to parent folders to match to seriesList
+        // var seriesList = TryGetSeriesList(library, seriesPaths, directory);
+        // if (seriesList == null)
+        // {
+        //     return false;
+        // }
 
         foreach (var series in seriesList)
         {
@@ -220,6 +242,31 @@ public class ParseScannedFiles
         }
 
         return true;
+    }
+
+    private IList<SeriesModified>? TryGetSeriesList(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
+    {
+        if (seriesPaths.Count == 0)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(directory))
+        {
+            return null;
+        }
+
+        if (library.Folders.Any(fp => fp.Path.Equals(directory)))
+        {
+            return null;
+        }
+
+        if (seriesPaths.TryGetValue(directory, out var seriesList))
+        {
+            return seriesList;
+        }
+
+        return TryGetSeriesList(library, seriesPaths, _directoryService.GetParentDirectoryName(directory));
     }
 
     /// <summary>
@@ -255,13 +302,15 @@ public class ParseScannedFiles
     /// <summary>
     /// Performs a full scan of the directory and adds it to the result.
     /// </summary>
-    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
+    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher, bool hasChanged)
     {
         var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly);
         if (files.Count == 0)
         {
             return;
         }
+        // Revert of https://github.com/Kareadita/Kavita/pull/3629/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
+        // for Hotfix v0.8.5.x
         result.Add(CreateScanResult(directory, folderPath, true, files));
     }
 
@@ -280,7 +329,7 @@ public class ParseScannedFiles
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated));
 
-        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
+        if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, normalizedPath, forceCheck))
         {
             result.Add(CreateScanResult(folderPath, libraryRoot, false, ArraySegment<string>.Empty));
         }
@@ -674,6 +723,12 @@ public class ParseScannedFiles
 
     private static void RemapSeries(IList<ScanResult> scanResults, List<ParserInfo> allInfos, string localizedSeries, string nonLocalizedSeries)
     {
+        // If the series names are identical, no remapping is needed (rare but valid)
+        if (localizedSeries.ToNormalized().Equals(nonLocalizedSeries.ToNormalized()))
+        {
+            return;
+        }
+
         // Find all infos that need to be remapped from the localized series to the non-localized series
         var normalizedLocalizedSeries = localizedSeries.ToNormalized();
         var seriesToBeRemapped = allInfos.Where(i => i.Series.ToNormalized().Equals(normalizedLocalizedSeries)).ToList();
@@ -719,6 +774,11 @@ public class ParseScannedFiles
                 .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
                 .ToList();
 
+            // // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
+            // result.ParserInfos = TryGetSeriesList(library, seriesPaths, normalizedFolder)!
+            // .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
+            // .ToList();
+
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent($"Skipped {normalizedFolder}", library.Name, ProgressEventType.Updated));
@@ -744,7 +804,7 @@ public class ParseScannedFiles
         {
             // Process files sequentially
             result.ParserInfos = files
-                .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type))
+                .Select(file => _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata))
                 .Where(info => info != null)
                 .ToList()!;
         }
@@ -752,7 +812,7 @@ public class ParseScannedFiles
         {
             // Process files in parallel
             var tasks = files.Select(file => Task.Run(() =>
-                _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type)));
+                _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata)));
 
             var infos = await Task.WhenAll(tasks);
             result.ParserInfos = infos.Where(info => info != null).ToList()!;
@@ -811,7 +871,10 @@ public class ParseScannedFiles
             var prevIssue = string.Empty;
             foreach (var chapter in chapters)
             {
-                if (float.TryParse(chapter.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
+                // Use MinNumber in case there is a range, as otherwise sort order will cause it to be processed last
+                var chapterNum =
+                    $"{Parser.Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
+                if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
                 {
                     // Parsed successfully, use the numeric value
                     counter = parsedChapter;

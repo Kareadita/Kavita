@@ -252,8 +252,6 @@ public static class SeriesFilter
         if (!condition) return queryable;
 
         var subQuery = queryable
-            .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
             .Select(s => new
             {
                 SeriesId = s.Id,
@@ -372,7 +370,7 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,
@@ -435,7 +433,7 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
                 SeriesId = s.Id,
@@ -512,7 +510,7 @@ public static class SeriesFilter
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.IsEmpty:
-                return queryable.Where(s => s.Metadata.Tags == null || s.Metadata.Tags.Count == 0);
+                return queryable.Where(s => s.Metadata.Tags.Count == 0);
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -709,7 +707,7 @@ public static class SeriesFilter
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.IsEmpty:
-                return queryable.Where(s => collectionSeries.All(c => c != s.Id));
+                return queryable.Where(s => s.Collections.Count == 0);
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:

@@ -201,5 +201,13 @@
     "person-doesnt-exist": "Pessoa não existe",
     "person-name-required": "O nome da pessoa é obrigatório e não pode nulo",
     "person-name-unique": "O nome da pessoa tem de ser único",
-    "person-image-doesnt-exist": "A pessoa não existe na CoversDB"
+    "person-image-doesnt-exist": "A pessoa não existe na CoversDB",
+    "email-taken": "Email já em uso",
+    "kavitaplus-restricted": "Ação restrita ao Kavita+",
+    "sidenav-stream-only-delete-smart-filter": "Apenas os filtros inteligentes podem ser removidos da Navegação Lateral",
+    "dashboard-stream-only-delete-smart-filter": "Apenas os filtros inteligentes podem ser removidos do painel",
+    "smart-filter-system-name": "Não pode usar o nome de um fluxo disponibilizado pelo sistema",
+    "smart-filter-name-required": "Nome requerido para o filtro inteligente",
+    "aliases-have-overlap": "Um ou mais pseudónimos sobrepõem-se com outras pessoas, não vai ser possível atualizar",
+    "generated-reading-profile-name": "Gerado de {0}"
 }

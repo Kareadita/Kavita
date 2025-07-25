@@ -16,9 +16,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 #nullable enable
+
 public interface IAppUserProgressRepository
 {
     void Update(AppUserProgress userProgress);
+    void Remove(AppUserProgress userProgress);
     Task<int> CleanupAbandonedChapters();
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId);
@@ -40,7 +42,7 @@ public interface IAppUserProgressRepository
     Task UpdateAllProgressThatAreMoreThanChapterPages();
     Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0);
 }
-#nullable disable
+
 public class AppUserProgressRepository : IAppUserProgressRepository
 {
     private readonly DataContext _context;
@@ -55,6 +57,11 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     public void Update(AppUserProgress userProgress)
     {
         _context.Entry(userProgress).State = EntityState.Modified;
+    }
+
+    public void Remove(AppUserProgress userProgress)
+    {
+        _context.Remove(userProgress);
     }
 
     /// <summary>
@@ -186,6 +193,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Where(p => p.chapter.MaxNumber != Parser.SpecialVolumeNumber)
             .Select(p => p.chapter.Volume.MaxNumber)
             .ToListAsync();
+
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
 

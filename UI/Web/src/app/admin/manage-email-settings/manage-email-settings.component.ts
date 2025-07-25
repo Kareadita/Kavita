@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, filter, switchMap, take, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -10,14 +10,14 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 
 @Component({
-  selector: 'app-manage-email-settings',
-  templateUrl: './manage-email-settings.component.html',
-  styleUrls: ['./manage-email-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe]
+    selector: 'app-manage-email-settings',
+    templateUrl: './manage-email-settings.component.html',
+    styleUrls: ['./manage-email-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -30,7 +30,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
 
   ngOnInit(): void {
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
@@ -46,15 +46,21 @@ export class ManageEmailSettingsComponent implements OnInit {
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
-        debounceTime(300),
         distinctUntilChanged(),
+        debounceTime(300),
         filter(_ => this.settingsForm.valid),
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return;
+          }
           this.serverSettings = settings;
           this.cdRef.markForCheck();
         })
@@ -100,6 +106,8 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   packData() {
     const modelSettings = Object.assign({}, this.serverSettings);
+
+
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
 

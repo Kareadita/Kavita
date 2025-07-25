@@ -8,31 +8,25 @@ import {
 import { Device } from 'src/app/_models/device/device';
 import { DeviceService } from 'src/app/_services/device.service';
 import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
-import { SentenceCasePipe } from '../../_pipes/sentence-case.pipe';
-import {NgbCollapse, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
-import {SortableHeader} from "../../_single-module/table/_directives/sortable-header.directive";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {EditDeviceModalComponent} from "../_modals/edit-device-modal/edit-device-modal.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs";
 import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
     selector: 'app-manage-devices',
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgbCollapse, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, ScrobbleEventTypePipe, SortableHeader, UtcToLocalTimePipe]
+    imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -106,4 +100,5 @@ export class ManageDevicesComponent implements OnInit {
     });
   }
 
+    protected readonly ColumnMode = ColumnMode;
 }

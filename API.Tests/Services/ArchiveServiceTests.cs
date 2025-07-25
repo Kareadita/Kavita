@@ -7,7 +7,6 @@ using System.Linq;
 using API.Archive;
 using API.Entities.Enums;
 using API.Services;
-using EasyCaching.Core;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using NSubstitute;

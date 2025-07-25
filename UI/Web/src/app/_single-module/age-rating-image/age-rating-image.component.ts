@@ -20,17 +20,15 @@ import {FilterField} from "../../_models/metadata/v2/filter-field";
 const basePath = './assets/images/ratings/';
 
 @Component({
-  selector: 'app-age-rating-image',
-  standalone: true,
-  imports: [
-    ImageComponent,
-    NgbTooltip,
-    AgeRatingPipe,
-    AsyncPipe
-  ],
-  templateUrl: './age-rating-image.component.html',
-  styleUrl: './age-rating-image.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-age-rating-image',
+    imports: [
+        ImageComponent,
+        NgbTooltip,
+        AgeRatingPipe,
+    ],
+    templateUrl: './age-rating-image.component.html',
+    styleUrl: './age-rating-image.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeRatingImageComponent implements OnInit, OnChanges {
   private readonly cdRef = inject(ChangeDetectorRef);

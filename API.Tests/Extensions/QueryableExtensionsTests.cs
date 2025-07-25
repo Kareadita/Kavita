@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using API.Data;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
-using API.Extensions;
+using API.Entities.Person;
 using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using Xunit;
@@ -69,7 +67,7 @@ public class QueryableExtensionsTests
 
     [Theory]
     [InlineData(true, 2)]
-    [InlineData(false, 1)]
+    [InlineData(false, 2)]
     public void RestrictAgainstAgeRestriction_Genre_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
         var items = new List<Genre>()
@@ -96,7 +94,7 @@ public class QueryableExtensionsTests
 
     [Theory]
     [InlineData(true, 2)]
-    [InlineData(false, 1)]
+    [InlineData(false, 2)]
     public void RestrictAgainstAgeRestriction_Tag_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
         var items = new List<Tag>()

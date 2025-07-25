@@ -9,7 +9,7 @@
 
       <div class="progress-banner">
         @if (volume.pagesRead > 0 && volume.pagesRead < volume.pages && volume.pages > 0 && volume.pagesRead !== volume.pages) {
-          <p ngbTooltip="{{((volume.pagesRead / volume.pages) * 100) | number:'1.0-1'}}% Read">
+          <p ngbTooltip="{{((volume.pagesRead / volume.pages) * 100) | number:'1.0-1'}}% Read" container="body">
             <ngb-progressbar type="primary" height="5px" [value]="volume.pagesRead" [max]="volume.pages"></ngb-progressbar>
           </p>
         }
@@ -38,32 +38,36 @@
       }
       <div class="card-overlay"></div>
 
-      <div class="volume overlay-information" (click)="read($event)">
-        <div class="overlay-information--centered">
-              <span class="card-title library mx-auto" style="width: auto;">
-                <!-- Card Image -->
-                <div>
-                  <i class="fa-solid fa-book" aria-hidden="true"></i>
-                </div>
-              </span>
+      @if (!bulkSelectionService.hasSelections()) {
+        <div class="volume overlay-information" (click)="read($event)">
+          <div class="overlay-information--centered">
+                <span class="card-title library mx-auto" style="width: auto;">
+                  <!-- Card Image -->
+                  <div>
+                    <i class="fa-solid fa-book" aria-hidden="true"></i>
+                  </div>
+                </span>
+          </div>
         </div>
-      </div>
+      }
     </div>
 
-    @if (libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book) {
-      <div class="card-body meta-title">
-        <span class="card-format">
-        </span>
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-          {{volume.name}}
-        </div>
-
-        @if (actions && actions.length > 0) {
-          <span class="card-actions">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
-          </span>
+    @if (libraryType !== LibraryType.Images) {
+      @if ((libraryType === LibraryType.LightNovel || libraryType === LibraryType.Book)) {
+        @if (volume.name) {
+          <div class="card-body meta-title">
+            <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+              {{volume.name}}
+            </div>
+          </div>
         }
-      </div>
+      } @else if (volume.chapters[0].titleName) {
+        <div class="card-body meta-title">
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+            {{volume.chapters[0].titleName}}
+          </div>
+        </div>
+      }
     }
 
     <div class="card-title-container">
@@ -77,7 +81,7 @@
 
       @if (actions && actions.length > 0) {
         <span class="card-actions">
-          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="volume.name"></app-card-actionables>
+          <app-card-actionables [entity]="volume" [inputActions]="actions" [labelBy]="volume.name"></app-card-actionables>
         </span>
       }
     </div>

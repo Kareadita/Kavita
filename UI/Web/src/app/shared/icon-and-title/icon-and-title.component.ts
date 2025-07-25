@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgClass} from "@angular/common";
 
 @Component({
   selector: 'app-icon-and-title',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [
+    NgClass
+  ],
   templateUrl: './icon-and-title.component.html',
   styleUrls: ['./icon-and-title.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input, OnInit} from '@angular/core';
 import {ReadingList} from "../../_models/reading-list";
 import {CardItemComponent} from "../../cards/card-item/card-item.component";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -9,6 +9,7 @@ import {Router} from "@angular/router";
 import {SeriesCardComponent} from "../../cards/series-card/series-card.component";
 import {Series} from "../../_models/series";
 import {RelationKind} from "../../_models/series-detail/relation-kind";
+import {PageBookmark} from "../../_models/readers/page-bookmark";
 
 export interface RelatedSeriesPair {
   series: Series;
@@ -16,17 +17,16 @@ export interface RelatedSeriesPair {
 }
 
 @Component({
-  selector: 'app-related-tab',
-  standalone: true,
-  imports: [
-    CardItemComponent,
-    CarouselReelComponent,
-    TranslocoDirective,
-    SeriesCardComponent
-  ],
-  templateUrl: './related-tab.component.html',
-  styleUrl: './related-tab.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-related-tab',
+    imports: [
+        CardItemComponent,
+        CarouselReelComponent,
+        TranslocoDirective,
+        SeriesCardComponent
+    ],
+    templateUrl: './related-tab.component.html',
+    styleUrl: './related-tab.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RelatedTabComponent {
 
@@ -36,6 +36,8 @@ export class RelatedTabComponent {
   @Input() readingLists: Array<ReadingList> = [];
   @Input() collections: Array<UserCollection> = [];
   @Input() relations: Array<RelatedSeriesPair> = [];
+  @Input() bookmarks: Array<PageBookmark> = [];
+  @Input() libraryId!: number;
 
   openReadingList(readingList: ReadingList) {
     this.router.navigate(['lists', readingList.id]);
@@ -43,6 +45,10 @@ export class RelatedTabComponent {
 
   openCollection(collection: UserCollection) {
     this.router.navigate(['collections', collection.id]);
+  }
+
+  viewBookmark(bookmark: PageBookmark) {
+    this.router.navigate(['library', this.libraryId, 'series', bookmark.seriesId, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}});
   }
 
 }

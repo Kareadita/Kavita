@@ -1,56 +1,51 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
+  input,
   Input,
   OnInit,
   Output
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
-import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
+import {FilterV2} from 'src/app/_models/metadata/v2/filter-v2';
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
-import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {allFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ValidFilterEntity} from "../../filter-settings";
 
 @Component({
   selector: 'app-metadata-builder',
   templateUrl: './metadata-builder.component.html',
   styleUrls: ['./metadata-builder.component.scss'],
-  standalone: true,
   imports: [
-    NgIf,
-    MetadataFilterRowComponent,
-    NgForOf,
-    CardActionablesComponent,
-    FormsModule,
-    NgbTooltip,
-    UpperCasePipe,
-    ReactiveFormsModule,
-    TranslocoDirective
+      MetadataFilterRowComponent,
+      FormsModule,
+      NgbTooltip,
+      ReactiveFormsModule,
+      TranslocoDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataBuilderComponent implements OnInit {
+export class MetadataBuilderComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
 
-  @Input({required: true}) filter!: SeriesFilterV2;
+  @Input({required: true}) filter!: FilterV2<TFilter, TSort>;
   /**
    * The number of statements that can be. 0 means unlimited. -1 means none.
    */
   @Input() statementLimit = 0;
-  @Input() availableFilterFields = allFields;
-  @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
+  entityType = input.required<ValidFilterEntity>();
+  @Output() update: EventEmitter<FilterV2<TFilter, TSort>> = new EventEmitter<FilterV2<TFilter, TSort>>();
   @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -58,7 +53,6 @@ export class MetadataBuilderComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
   protected readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly  destroyRef = inject(DestroyRef);
-  protected readonly Breakpoint = Breakpoint;
 
   formGroup: FormGroup = new FormGroup({});
 
@@ -68,7 +62,9 @@ export class MetadataBuilderComponent implements OnInit {
   ];
 
   ngOnInit() {
+
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
+
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
       this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterCombination;
       this.update.emit(this.filter);
@@ -76,7 +72,8 @@ export class MetadataBuilderComponent implements OnInit {
   }
 
   addFilter() {
-    this.filter.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filter.statements];
+    const statement = this.metadataService.createFilterStatement<TFilter>(this.filterUtilityService.getDefaultFilterField(this.entityType()));
+    this.filter.statements = [statement, ...this.filter.statements];
     this.cdRef.markForCheck();
   }
 
@@ -85,9 +82,11 @@ export class MetadataBuilderComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateFilter(index: number, filterStmt: FilterStatement) {
+  updateFilter(index: number, filterStmt: FilterStatement<number>) {
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 
 }

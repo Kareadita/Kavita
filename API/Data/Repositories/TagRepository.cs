@@ -2,15 +2,18 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface ITagRepository
 {
@@ -22,6 +25,7 @@ public interface ITagRepository
     Task RemoveAllTagNoLongerAssociated();
     Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null);
     Task<List<string>> GetAllTagsNotInListAsync(ICollection<string> tags);
+    Task<PagedList<BrowseTagDto>> GetBrowseableTag(int userId, UserParams userParams);
 }
 
 public class TagRepository : ITagRepository
@@ -101,6 +105,40 @@ public class TagRepository : ITagRepository
 
         // Return the original non-normalized genres for the missing ones
         return missingTags.Select(normalizedName => normalizedToOriginalMap[normalizedName]).ToList();
+    }
+
+    public async Task<PagedList<BrowseTagDto>> GetBrowseableTag(int userId, UserParams userParams)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+
+        var allLibrariesCount = await _context.Library.CountAsync();
+        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+
+        var seriesIds = _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id);
+
+        var query = _context.Tag
+            .RestrictAgainstAgeRestriction(ageRating)
+            .WhereIf(userLibs.Count != allLibrariesCount,
+                tag => tag.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
+                       tag.SeriesMetadatas.Any(sm => seriesIds.Contains(sm.SeriesId)))
+            .Select(g => new BrowseTagDto
+            {
+                Id = g.Id,
+                Title = g.Title,
+                SeriesCount = g.SeriesMetadatas
+                    .Where(sm => allLibrariesCount == userLibs.Count || seriesIds.Contains(sm.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count(),
+                ChapterCount = g.Chapters
+                    .Where(ch => allLibrariesCount == userLibs.Count || seriesIds.Contains(ch.Volume.SeriesId))
+                    .RestrictAgainstAgeRestriction(ageRating)
+                    .Distinct()
+                    .Count()
+            })
+            .OrderBy(g => g.Title);
+
+        return await PagedList<BrowseTagDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IList<Tag>> GetAllTagsAsync()

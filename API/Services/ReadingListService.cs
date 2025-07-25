@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -49,6 +50,14 @@ public interface IReadingListService
 
     Task CreateReadingListsFromSeries(int libraryId, int seriesId);
     Task<string> GenerateReadingListCoverImage(int readingListId);
+    /// <summary>
+    /// Check, and update if needed, all reading lists' AgeRating who contain the passed series
+    /// </summary>
+    /// <param name="seriesId">The series whose age rating is being updated</param>
+    /// <param name="ageRating">The new (uncommited) age rating of the series</param>
+    /// <returns></returns>
+    /// <remarks>This method does not commit changes</remarks>
+    Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating);
 }
 
 /// <summary>
@@ -95,7 +104,13 @@ public class ReadingListService : IReadingListService
                 {
                     title = $"Volume {Parser.CleanSpecialTitle(item.VolumeNumber)}";
                 }
-            } else {
+            }
+            else if (item.VolumeNumber == Parser.SpecialVolume)
+            {
+                title = specialTitle;
+            }
+            else
+            {
                 title = $"Volume {specialTitle}";
             }
         }
@@ -458,6 +473,7 @@ public class ReadingListService : IReadingListService
         _logger.LogInformation("Processing Reading Lists for {SeriesName}", series.Name);
         var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         series.Metadata ??= new SeriesMetadataBuilder().Build();
+
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             var pairs = new List<Tuple<string, string>>();
@@ -538,13 +554,13 @@ public class ReadingListService : IReadingListService
         var maxPairs = Math.Max(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
-            var arcNumber = int.MaxValue.ToString();
+            var arcNumber = int.MaxValue.ToString(CultureInfo.InvariantCulture);
             if (arcNumbers.Length > i)
             {
                 arcNumber = arcNumbers[i];
             }
 
-            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, out _)) continue;
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, CultureInfo.InvariantCulture, out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumber));
         }
 
@@ -563,14 +579,14 @@ public class ReadingListService : IReadingListService
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
-            Results = new List<CblBookResult>(),
+            Results = [],
             SuccessfulInserts = new List<CblBookResult>()
         };
 
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        // Is there another reading list with the same name?
-        if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
+        // Is there another reading list with the same name on the user's account?
+        if (await _unitOfWork.ReadingListRepository.ReadingListExistsForUser(cblReading.Name, userId))
         {
             importSummary.Success = CblImportResult.Fail;
             importSummary.Results.Add(new CblBookResult
@@ -584,9 +600,6 @@ public class ReadingListService : IReadingListService
         var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-
-        // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
-
 
         if (userSeries.Count == 0)
         {
@@ -842,5 +855,23 @@ public class ReadingListService : IReadingListService
         // TODO: Refactor this so that reading lists have a dedicated cover image so we can calculate primary/secondary colors
 
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
+    }
+
+    public async Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating)
+    {
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListsBySeriesId(seriesId);
+        foreach (var readingList in readingLists)
+        {
+            var seriesIds = readingList.Items.Select(item => item.SeriesId).ToList();
+            seriesIds.Remove(seriesId); // Don't get AgeRating from database
+
+            var maxAgeRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+            if (ageRating > maxAgeRating)
+            {
+                maxAgeRating = ageRating;
+            }
+
+            readingList.AgeRating = maxAgeRating;
+        }
     }
 }

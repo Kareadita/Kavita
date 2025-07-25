@@ -12,6 +12,7 @@ using API.SignalR.Presence;
 using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,8 +24,6 @@ public static class ApplicationServiceExtensions
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
     {
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-
-        //services.AddScoped<DataContext>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITokenService, TokenService>();
@@ -52,8 +51,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
-        services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IStreamService, StreamService>();
+        services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IReadingProfileService, ReadingProfileService>();
+        services.AddScoped<IKoreaderService, KoreaderService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
@@ -71,12 +73,15 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICoverDbService, CoverDbService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();
+        services.AddScoped<ISettingsService, SettingsService>();
 
 
+        services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
+        services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
@@ -84,12 +89,16 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
-            options.UseInMemory(EasyCacheProfiles.License);
+            options.UseInMemory(EasyCacheProfiles.Publisher);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
+            options.UseInMemory(EasyCacheProfiles.LocaleOptions);
 
             // KavitaPlus stuff
             options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
+            options.UseInMemory(EasyCacheProfiles.License);
+            options.UseInMemory(EasyCacheProfiles.LicenseInfo);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusMatchSeries);
         });
 
         services.AddMemoryCache(options =>
@@ -114,6 +123,8 @@ public static class ApplicationServiceExtensions
             });
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging();
+            options.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
     }
 }

@@ -1,16 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  HostListener,
-  inject,
-  OnDestroy
-} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy} from '@angular/core';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {
   DraggableOrderedListComponent,
@@ -18,7 +8,6 @@ import {
 } from "../../../reading-list/_components/draggable-ordered-list/draggable-ordered-list.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {NavService} from "../../../_services/nav.service";
-import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SidenavStreamListItemComponent} from "../sidenav-stream-list-item/sidenav-stream-list-item.component";
 import {ExternalSourceService} from "../../../_services/external-source.service";
@@ -31,12 +20,12 @@ import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Breakpoint, KEY_CODES, UtilityService} from "../../../shared/_services/utility.service";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
-  standalone: true,
-  imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
+  imports: [DraggableOrderedListComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule,
+    FilterPipe, BulkOperationsComponent],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,6 +41,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   public readonly utilityService = inject(UtilityService);
 
   items: SideNavStream[] = [];
+  allSmartFilters: SmartFilter[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
   virtualizeAfter = 100;
@@ -159,13 +149,19 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
-      const existingSmartFilterStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
-      this.smartFilters = results[1].filter(d => !existingSmartFilterStreams.has(d.name));
+      this.allSmartFilters = results[1];
+      this.updateSmartFilters();
 
       const existingExternalSourceStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.ExternalSource).map(d => d.name));
       this.externalSources = results[2].filter(d => !existingExternalSourceStreams.has(d.name));
       this.cdRef.markForCheck();
     });
+  }
+
+  updateSmartFilters() {
+    const existingSmartFilterStreams = new Set(this.items.filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
+    this.smartFilters = this.allSmartFilters.filter(d => !existingSmartFilterStreams.has(d.name));
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -219,6 +215,19 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     stream.visible = !stream.visible;
     this.cdRef.markForCheck();
     this.sideNavService.updateSideNavStream(stream).subscribe();
+  }
+
+  delete(item: SideNavStream) {
+    this.sideNavService.deleteSideNavSmartFilter(item.id).subscribe({
+      next: () => {
+        this.items = this.items.filter(i => i.id !== item.id);
+        this.updateSmartFilters();
+        this.cdRef.markForCheck();
+      },
+      error: err => {
+        console.error(err);
+      }
+    })
   }
 
 }

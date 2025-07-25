@@ -1,3 +1,4 @@
+
 @if (link === undefined || link.length === 0) {
   <div class="side-nav-item" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}">
     <ng-container [ngTemplateOutlet]="inner"></ng-container>
@@ -26,7 +27,13 @@
 
 <ng-template #inner>
     <div class="active-highlight"></div>
-    @if (!noIcon) {
+    @if (editMode) {
+      <span class="phone-hidden" title="{{title}}">
+        <div>
+          <i class="fa fa-grip-vertical drag-handle" aria-hidden="true"></i>
+        </div>
+      </span>
+    } @else if (!noIcon) {
       <span class="phone-hidden" title="{{title}}">
         <div>
           @if (imageUrl !== null && imageUrl !== '') {

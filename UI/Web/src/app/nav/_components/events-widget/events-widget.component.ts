@@ -8,33 +8,33 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef, NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {BehaviorSubject, debounceTime, startWith} from 'rxjs';
-import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
-import { DownloadService } from 'src/app/shared/_services/download.service';
-import { ErrorEvent } from 'src/app/_models/events/error-event';
-import { InfoEvent } from 'src/app/_models/events/info-event';
-import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
-import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
-import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
+import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {
+  UpdateNotificationModalComponent
+} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
+import {DownloadService} from 'src/app/shared/_services/download.service';
+import {ErrorEvent} from 'src/app/_models/events/error-event';
+import {InfoEvent} from 'src/app/_models/events/info-event';
+import {NotificationProgressEvent} from 'src/app/_models/events/notification-progress-event';
+import {UpdateVersionEvent} from 'src/app/_models/events/update-version-event';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../../../_pipes/sentence-case.pipe';
-import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
-import { NgClass, NgStyle, AsyncPipe } from '@angular/common';
+import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
+import {AsyncPipe, NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 @Component({
-    selector: 'app-nav-events-toggle',
-    templateUrl: './events-widget.component.html',
-    styleUrls: ['./events-widget.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgClass, NgbPopover, NgStyle, CircularLoaderComponent, AsyncPipe, SentenceCasePipe, TranslocoDirective]
+  selector: 'app-nav-events-toggle',
+  templateUrl: './events-widget.component.html',
+  styleUrls: ['./events-widget.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgClass, NgbPopover, NgStyle, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   public readonly downloadService = inject(DownloadService);

@@ -14,18 +14,17 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 
 @Component({
-  selector: 'app-scrobble-provider-item',
-  standalone: true,
-  imports: [
-    NgOptimizedImage,
-    NgbTooltip,
-    TranslocoDirective,
-    ScrobbleProviderNamePipe,
-    NgTemplateOutlet
-  ],
-  templateUrl: './scrobble-provider-item.component.html',
-  styleUrl: './scrobble-provider-item.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-scrobble-provider-item',
+    imports: [
+        NgOptimizedImage,
+        NgbTooltip,
+        TranslocoDirective,
+        ScrobbleProviderNamePipe,
+        NgTemplateOutlet
+    ],
+    templateUrl: './scrobble-provider-item.component.html',
+    styleUrl: './scrobble-provider-item.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrobbleProviderItemComponent {
 

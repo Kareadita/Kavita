@@ -8,25 +8,24 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {WikiLink} from "../../_models/wiki";
+import {LicenseService} from "../../_services/license.service";
 
 @Component({
-  selector: 'app-manage-opds',
-  standalone: true,
-  imports: [
-    ApiKeyComponent,
-    TranslocoDirective,
-    SettingTitleComponent,
-    SettingItemComponent
-  ],
-  templateUrl: './manage-opds.component.html',
-  styleUrl: './manage-opds.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-opds',
+    imports: [
+        ApiKeyComponent,
+        TranslocoDirective,
+    ],
+    templateUrl: './manage-opds.component.html',
+    styleUrl: './manage-opds.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageOpdsComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly licenseService = inject(LicenseService);
 
 
   user: User | undefined = undefined;
@@ -48,7 +47,7 @@ export class ManageOpdsComponent {
       this.cdRef.markForCheck();
     });
 
-    this.accountService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.hasActiveLicense = res;
       this.cdRef.markForCheck();
     });

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Person;
 
 namespace API.Helpers.Builders;
 
@@ -39,15 +40,17 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
-    public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status)
+    public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status, bool lockState = false)
     {
         _seriesMetadata.PublicationStatus = status;
+        _seriesMetadata.PublicationStatusLocked = lockState;
         return this;
     }
 
-    public SeriesMetadataBuilder WithAgeRating(AgeRating rating)
+    public SeriesMetadataBuilder WithAgeRating(AgeRating rating, bool lockState = false)
     {
         _seriesMetadata.AgeRating = rating;
+        _seriesMetadata.AgeRatingLocked = lockState;
         return this;
     }
 
@@ -60,7 +63,6 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
             Person = person,
             SeriesMetadata = _seriesMetadata,
         });
-
         return this;
     }
 
@@ -70,15 +72,59 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
-    public SeriesMetadataBuilder WithReleaseYear(int year)
+    public SeriesMetadataBuilder WithReleaseYear(int year, bool lockStatus = false)
     {
         _seriesMetadata.ReleaseYear = year;
+        _seriesMetadata.ReleaseYearLocked = lockStatus;
         return this;
     }
 
-    public SeriesMetadataBuilder WithSummary(string summary)
+    public SeriesMetadataBuilder WithSummary(string summary, bool lockStatus = false)
     {
         _seriesMetadata.Summary = summary;
+        _seriesMetadata.SummaryLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithGenre(Genre genre, bool lockStatus = false)
+    {
+        _seriesMetadata.Genres ??= [];
+        _seriesMetadata.Genres.Add(genre);
+        _seriesMetadata.GenresLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithGenres(List<Genre> genres, bool lockStatus = false)
+    {
+        _seriesMetadata.Genres = genres;
+        _seriesMetadata.GenresLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithTag(Tag tag, bool lockStatus = false)
+    {
+        _seriesMetadata.Tags ??= [];
+        _seriesMetadata.Tags.Add(tag);
+        _seriesMetadata.TagsLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithTags(List<Tag> tags, bool lockStatus = false)
+    {
+        _seriesMetadata.Tags = tags;
+        _seriesMetadata.TagsLocked = lockStatus;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithMaxCount(int count)
+    {
+        _seriesMetadata.MaxCount = count;
+        return this;
+    }
+
+    public SeriesMetadataBuilder WithTotalCount(int count)
+    {
+        _seriesMetadata.TotalCount = count;
         return this;
     }
 }

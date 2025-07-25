@@ -17,8 +17,7 @@ import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective]
+    imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective]
 })
 export class UserLoginComponent implements OnInit {
 

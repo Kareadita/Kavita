@@ -1,25 +1,25 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ContentChild,
-  DestroyRef, EventEmitter,
+  Component,
+  ContentChild,
+  DestroyRef,
+  EventEmitter,
   HostListener,
   inject,
-  Input, Output, TemplateRef
+  Input,
+  Output,
+  TemplateRef
 } from '@angular/core';
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_services/action-factory.service";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {LibraryService} from "../../_services/library.service";
-import {DownloadService} from "../../shared/_services/download.service";
-import {UtilityService} from "../../shared/_services/utility.service";
 import {MessageHubService} from "../../_services/message-hub.service";
-import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {NgTemplateOutlet} from "@angular/common";
-import {BrowsePerson} from "../../_models/person/browse-person";
+import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {Person} from "../../_models/metadata/person";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -27,19 +27,18 @@ import {TranslocoDirective} from "@jsverse/transloco";
 
 
 @Component({
-  selector: 'app-person-card',
-  standalone: true,
-  imports: [
-    NgbTooltip,
-    CardActionablesComponent,
-    NgTemplateOutlet,
-    FormsModule,
-    ImageComponent,
-    TranslocoDirective
-  ],
-  templateUrl: './person-card.component.html',
-  styleUrl: './person-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-person-card',
+    imports: [
+        NgbTooltip,
+        CardActionablesComponent,
+        NgTemplateOutlet,
+        FormsModule,
+        ImageComponent,
+        TranslocoDirective
+    ],
+    templateUrl: './person-card.component.html',
+    styleUrl: './person-card.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonCardComponent {
 
@@ -140,11 +139,6 @@ export class PersonCardComponent {
     this.clicked.emit(this.title);
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.entity);
-    }
-  }
 
   handleSelection(event?: any) {
     if (event) {

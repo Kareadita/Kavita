@@ -222,18 +222,4 @@ public class StatsController : BaseApiController
         return Ok(_statService.GetWordsReadCountByYear(userId));
     }
 
-    /// <summary>
-    /// Returns for Kavita+ the number of Series that have been processed, errored, and not processed
-    /// </summary>
-    /// <returns></returns>
-    [Authorize("RequireAdminRole")]
-    [HttpGet("kavitaplus-metadata-breakdown")]
-    [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetKavitaPlusMetadataBreakdown()
-    {
-        if (!await _licenseService.HasActiveLicense())
-            return BadRequest("This data is not available for non-Kavita+ servers");
-        return Ok(await _statService.GetKavitaPlusMetadataBreakdown());
-    }
-
 }

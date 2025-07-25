@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums.Theme;
 using API.Extensions;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
 using HtmlAgilityPack;
@@ -32,6 +34,7 @@ internal class GitHubContent
     [JsonProperty("type")]
     public string Type { get; set; }
 
+    [JsonPropertyName("download_url")]
     [JsonProperty("download_url")]
     public string DownloadUrl { get; set; }
 
@@ -151,6 +154,7 @@ public class ThemeService : IThemeService
             // Fetch contents of the theme directory
             var themeContents = await GetDirectoryContent(themeDir.Path);
 
+
             // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
             var previewUrls = GetPreviewUrls(themeContents);
@@ -187,19 +191,22 @@ public class ThemeService : IThemeService
         return themeDtos;
     }
 
-    private static IList<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
+    private static List<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
     {
-        return themeContents.Where(c => c.Name.ToLower().EndsWith(".jpg") || c.Name.ToLower().EndsWith(".png") )
+        return themeContents
+            .Where(c => Parser.IsImage(c.Name) )
             .Select(p => p.DownloadUrl)
             .ToList();
     }
 
     private static async Task<IList<GitHubContent>> GetDirectoryContent(string path)
     {
-        return await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
+        var json = await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
             .WithHeader("Accept", "application/vnd.github+json")
             .WithHeader("User-Agent", "Kavita")
-            .GetJsonAsync<List<GitHubContent>>();
+            .GetStringAsync();
+
+        return string.IsNullOrEmpty(json) ? [] : JsonConvert.DeserializeObject<List<GitHubContent>>(json);
     }
 
     /// <summary>
@@ -295,7 +302,8 @@ public class ThemeService : IThemeService
         var existingThemes = _directoryService.ScanFiles(_directoryService.SiteThemeDirectory, string.Empty);
         if (existingThemes.Any(f => Path.GetFileName(f) == dto.CssFile))
         {
-            throw new KavitaException("Cannot download file, file already on disk");
+            // This can happen if you delete then immediately download (to refresh). We should just delete the old file and download. Users can always rollback their version with github directly
+            _directoryService.DeleteFiles(existingThemes.Where(f => Path.GetFileName(f) == dto.CssFile));
         }
 
         var finalLocation = await DownloadSiteTheme(dto);

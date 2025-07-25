@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'manage-settings'">
 
   <div class="position-relative">
-    <button type="button" class="btn btn-primary-outline position-absolute custom-position" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+    <button type="button" class="btn btn-outline-primary position-absolute custom-position" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
   </div>
 
 
@@ -17,13 +17,13 @@
         @if (settingsForm.get('hostName'); as formControl) {
           <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
             <ng-template #view>
-              {{formControl.value}}
+              {{formControl.value | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="hostname-validations" class="invalid-feedback">
                   @if (formControl.errors?.pattern) {
                     <div>{{t('host-name-validation')}}</div>
@@ -44,11 +44,11 @@
             <ng-template #edit>
               <div class="input-group">
                 <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
-                       [class.is-invalid]="formControl.invalid && formControl.touched">
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
                 <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
               </div>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="baseurl-validations" class="invalid-feedback">
                   @if (formControl.errors?.pattern) {
                     <div>{{t('base-url-validation')}}</div>
@@ -64,18 +64,18 @@
         @if (settingsForm.get('ipAddresses'); as formControl) {
           <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
             <ng-template #view>
-              {{formControl.value}}
+              {{formControl.value | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <div class="input-group">
                 <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
-                       [class.is-invalid]="formControl.invalid && formControl.touched">
+                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
                 <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
               </div>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="ipaddresses-validations" class="invalid-feedback">
-                  @if (formControl.errors?.pattern) {
+                  @if (formControl.errors?.emptyOrPattern) {
                     <div>{{t('ip-address-validation')}}</div>
                   }
                 </div>
@@ -94,7 +94,7 @@
             <ng-template #edit>
               <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
                      formControlName="port" type="number" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57" appEnterBlur>
             </ng-template>
           </app-setting-item>
         }
@@ -116,9 +116,9 @@
               <input id="settings-backup" aria-describedby="total-backups-validations" class="form-control"
                      formControlName="totalBackups" type="number" inputmode="numeric" step="1" min="1" max="30"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="total-backups-validations" class="invalid-feedback">
                   @if (formControl.errors?.required) {
                     <div>{{t('field-required')}}</div>
@@ -146,9 +146,9 @@
               <input id="settings-logs" aria-describedby="total-logs-validations" class="form-control"
                      formControlName="totalLogs" type="number" inputmode="numeric" step="1" min="1" max="30"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="total-logs-validations" class="invalid-feedback">
                   @if (formControl.errors?.required) {
                     <div>{{t('field-required')}}</div>
@@ -170,18 +170,18 @@
         @if (settingsForm.get('loggingLevel'); as formControl) {
           <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
             <ng-template #view>
-              {{formControl.value | titlecase}}
+              {{formControl.value | logLevel}}
             </ng-template>
             <ng-template #edit>
 
               <select id="logging-level" aria-describedby="logging-level-help" class="form-select"  formControlName="loggingLevel"
-                      [class.is-invalid]="formControl.invalid && formControl.touched">
+                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
                 @for(level of logLevels; track level) {
-                  <option [value]="level">{{level | titlecase}}</option>
+                  <option [value]="level">{{level | logLevel}}</option>
                 }
               </select>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="logging-level-validations" class="invalid-feedback">
                   @if (formControl.errors?.pattern) {
                     <div>{{t('host-name-validation')}}</div>
@@ -202,9 +202,9 @@
             <ng-template #edit>
               <input id="setting-cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
                      type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="cache-size-validations" class="invalid-feedback">
                   @if (formControl.errors?.required) {
                     <div>{{t('field-required')}}</div>
@@ -271,9 +271,9 @@
               <input id="setting-on-deck-progress-days" aria-describedby="on-deck-progress-days-validations" class="form-control" formControlName="onDeckProgressDays"
                      type="number" inputmode="numeric" step="1" min="1"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="on-deck-last-progress-validations" class="invalid-feedback">
                   @if (formControl.errors?.required) {
                     <div>{{t('field-required')}}</div>
@@ -298,9 +298,9 @@
               <input id="on-deck-last-chapter-add" aria-describedby="on-deck-last-chapter-add-validations" class="form-control" formControlName="onDeckUpdateDays"
                      type="number" inputmode="numeric" step="1" min="1"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && formControl.touched">
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
 
-              @if(settingsForm.dirty || settingsForm.touched) {
+              @if(settingsForm.dirty || !settingsForm.untouched) {
                 <div id="on-deck-last-chapter-add-validations" class="invalid-feedback">
                   @if (formControl.errors?.required) {
                     <div>{{t('field-required')}}</div>

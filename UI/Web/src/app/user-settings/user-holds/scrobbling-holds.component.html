@@ -1,20 +1,43 @@
 <ng-container *transloco="let t; read:'user-holds'">
-  <h5>{{t('title')}}</h5>
   <p>{{t('description')}}</p>
 
-  <div class="row g-0">
-    <ul class="list-group mb-2">
-      @for(hold of holds$ | async; track hold.seriesName) {
-        <li class="list-group-item list-group-item-light">
-          <a class="btn-link" href="/library/{{hold.libraryId}}/series/{{hold.seriesId}}" target="_blank">{{hold.seriesName}}</a>
-        </li>
-      } @empty {
-        <li class="list-group-item list-group-item-light" style="text-align: center;">
-          {{t('no-data')}}
-        </li>
-      }
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="data"
+    [columnMode]="ColumnMode.force"
+    rowHeight="auto"
+    [loadingIndicator]="true"
+    [limit]="15"
+    [footerHeight]="50"
+  >
 
-    </ul>
-  </div>
+    <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('series-name-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+        <a class="btn-link ms-2" href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+      </ng-template>
+    </ngx-datatable-column>
 
+
+    <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('created-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        {{item.createdUtc | utcToLocalTime}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <button class="btn btn-primary" (click)="removeHold(item)">{{t('delete-label')}}</button>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
 </ng-container>

@@ -201,5 +201,13 @@
     "person-doesnt-exist": "人员不存在",
     "person-name-required": "人员姓名为必填项，且不能为空",
     "person-name-unique": "人名必须是唯一的",
-    "person-image-doesnt-exist": "CoversDB 中不存在此人"
+    "person-image-doesnt-exist": "CoversDB 中不存在此人",
+    "email-taken": "电子邮件已被使用",
+    "kavitaplus-restricted": "仅限 Kavita+",
+    "dashboard-stream-only-delete-smart-filter": "只能从仪表板中删除智能筛选器流",
+    "smart-filter-name-required": "需要智能筛选器名称",
+    "smart-filter-system-name": "您不能使用系统提供的流名称",
+    "sidenav-stream-only-delete-smart-filter": "只能从侧边栏删除智能筛选器流",
+    "aliases-have-overlap": "一个或多个别名与其他人有重叠，无法更新",
+    "generated-reading-profile-name": "由 {0} 生成"
 }

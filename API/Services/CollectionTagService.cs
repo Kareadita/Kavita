@@ -58,7 +58,7 @@ public class CollectionTagService : ICollectionTagService
         if (!title.Equals(existingTag.Title) && await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, userId))
             throw new KavitaException("collection-tag-duplicate");
 
-        existingTag.Items ??= new List<Series>();
+        existingTag.Items ??= [];
         if (existingTag.Source == ScrobbleProvider.Kavita)
         {
             existingTag.Title = title;
@@ -74,7 +74,7 @@ public class CollectionTagService : ICollectionTagService
         _unitOfWork.CollectionTagRepository.Update(existingTag);
 
         // Check if Tag has updated (Summary)
-        var summary = dto.Summary.Trim();
+        var summary = (dto.Summary ?? string.Empty).Trim();
         if (existingTag.Summary == null || !existingTag.Summary.Equals(summary))
         {
             existingTag.Summary = summary;
@@ -105,7 +105,7 @@ public class CollectionTagService : ICollectionTagService
     {
         if (tag == null) return false;
 
-        tag.Items ??= new List<Series>();
+        tag.Items ??= [];
         tag.Items = tag.Items.Where(s => !seriesIds.Contains(s.Id)).ToList();
 
         if (tag.Items.Count == 0)

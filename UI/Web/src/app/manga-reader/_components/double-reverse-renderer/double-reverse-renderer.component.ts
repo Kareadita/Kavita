@@ -18,7 +18,7 @@ import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_service/managa-reader.service';
+import { MangaReaderService } from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
 
@@ -31,7 +31,6 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-reverse-renderer.component.html',
     styleUrls: ['./double-reverse-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
@@ -84,7 +83,7 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 
 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService,
+  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
     @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {

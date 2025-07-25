@@ -1,4 +1,4 @@
-import { EncodeFormat } from "./encode-format";
+import {EncodeFormat} from "./encode-format";
 import {CoverImageSize} from "./cover-image-size";
 import {SmtpConfig} from "./smtp-config";
 
@@ -25,4 +25,6 @@ export interface ServerSettings {
     onDeckUpdateDays: number;
     coverImageSize: CoverImageSize;
     smtpConfig: SmtpConfig;
+    installId: string;
+    installVersion: string;
 }

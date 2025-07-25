@@ -3,20 +3,19 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter, HostListener,
+  EventEmitter,
+  HostListener,
   inject,
-  Input, OnInit,
+  Input,
+  OnInit,
   Output
 } from '@angular/core';
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {DecimalPipe} from "@angular/common";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {Router, RouterLink} from "@angular/router";
-import {Select2Module} from "ng-select2-component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
@@ -24,7 +23,7 @@ import {DownloadEvent, DownloadService} from "../../shared/_services/download.se
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
 import {Observable} from "rxjs";
 import {User} from "../../_models/user";
@@ -34,26 +33,21 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
-import {RelationshipPipe} from "../../_pipes/relationship.pipe";
-import {Device} from "../../_models/device/device";
 import {ActionService} from "../../_services/action.service";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-volume-card',
-  standalone: true,
   imports: [
     CardActionablesComponent,
     DecimalPipe,
-    DefaultValuePipe,
     DownloadIndicatorComponent,
-    EntityTitleComponent,
     ImageComponent,
     NgbProgressbar,
     NgbTooltip,
     RouterLink,
-    Select2Module,
     TranslocoDirective,
-    RelationshipPipe
+    FormsModule,
   ],
   templateUrl: './volume-card.component.html',
   styleUrl: './volume-card.component.scss',
@@ -148,8 +142,6 @@ export class VolumeCardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.filterSendTo();
-
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
@@ -185,30 +177,6 @@ export class VolumeCardComponent implements OnInit {
     this.cdRef.detectChanges();
   }
 
-
-  filterSendTo() {
-    if (!this.actions || this.actions.length === 0) return;
-    // TODO: See if we can handle send to for volumes
-    //this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.volume);
-  }
-
-  performAction(action: ActionItem<Volume>) {
-    if (action.action == Action.Download) {
-      this.downloadService.download('volume', this.volume);
-      return; // Don't propagate the download from a card
-    }
-
-    if (action.action == Action.SendTo) {
-      const device = (action._extra!.data as Device);
-      this.actionService.sendToDevice(this.volume.chapters.map(c => c.id), device);
-      return;
-    }
-
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.volume);
-    }
-  }
-
   handleClick(event: any) {
     if (this.bulkSelectionService.hasSelections()) {
       this.handleSelection(event);
@@ -220,7 +188,6 @@ export class VolumeCardComponent implements OnInit {
   read(event: any) {
     event.stopPropagation();
     event.preventDefault();
-    console.log('reading volume');
     this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
   }
 

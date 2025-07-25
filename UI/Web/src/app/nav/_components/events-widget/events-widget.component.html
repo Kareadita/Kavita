@@ -60,8 +60,8 @@
                 }
                 <div class="progress-container row g-0 align-items-center">
                   @if(message.progress === 'indeterminate') {
-                    <div class="progress" style="height: 5px;">
-                      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress" role="progressbar" style="height: 5px;">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                   }
                 </div>
@@ -74,8 +74,8 @@
                 }
                 <div class="progress-container row g-0 align-items-center">
                   <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
-                  <div class="col-10 progress" style="height: 5px;">
-                    <div class="progress-bar" role="progressbar"
+                  <div class="col-10 progress" role="progressbar" style="height: 5px;">
+                    <div class="progress-bar"
                          [ngStyle]="{'width': message.body.progress * 100 + '%'}"
                          [attr.aria-valuenow]="message.body.progress * 100"
                          aria-valuemin="0" aria-valuemax="100"></div>
@@ -116,8 +116,8 @@
 
               <div class="progress-container row g-0 align-items-center">
                 <div class="col-2">{{download.progress}}%</div>
-                <div class="col-10 progress" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" [ngStyle]="{'width': download.progress + '%'}" [attr.aria-valuenow]="download.progress" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="col-10 progress" role="progressbar" style="height: 5px;">
+                  <div class="progress-bar" [ngStyle]="{'width': download.progress + '%'}" [attr.aria-valuenow]="download.progress" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
               </div>
             </li>

@@ -20,14 +20,13 @@ import {Router} from "@angular/router";
 const ANIMATION_TIME = 3000;
 
 @Component({
-  selector: 'app-publisher-flipper',
-  standalone: true,
-  imports: [
-    ImageComponent
-  ],
-  templateUrl: './publisher-flipper.component.html',
-  styleUrl: './publisher-flipper.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-publisher-flipper',
+    imports: [
+        ImageComponent
+    ],
+    templateUrl: './publisher-flipper.component.html',
+    styleUrl: './publisher-flipper.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PublisherFlipperComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
 

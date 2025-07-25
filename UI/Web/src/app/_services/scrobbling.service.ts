@@ -1,8 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import { map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { TextResonse } from '../_types/text-response';
+import {map} from 'rxjs/operators';
+import {environment} from 'src/environments/environment';
+import {TextResonse} from '../_types/text-response';
 import {ScrobbleError} from "../_models/scrobbling/scrobble-error";
 import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";
 import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
@@ -12,9 +12,10 @@ import {UtilityService} from "../shared/_services/utility.service";
 
 export enum ScrobbleProvider {
   Kavita = 0,
-  AniList= 1,
+  AniList = 1,
   Mal = 2,
-  GoogleBooks = 3
+  GoogleBooks = 3,
+  Cbr = 4
 }
 
 @Injectable({
@@ -32,12 +33,20 @@ export class ScrobblingService {
       .pipe(map(r => r === "true"));
   }
 
+  /**
+   * Returns if the token was new or not
+   */
   updateAniListToken(token: string) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
+    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-anilist-token', {token}, TextResonse)
+      .pipe(map(r => r + '' === 'true'));
   }
 
+  /**
+   * Returns if the token was new or not
+   */
   updateMalToken(username: string, accessToken: string) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken});
+    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken}, TextResonse)
+      .pipe(map(r => r + '' === 'true'));
   }
 
   getAniListToken() {
@@ -46,6 +55,11 @@ export class ScrobblingService {
 
   getMalToken() {
     return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
+  }
+
+
+  hasRunScrobbleGen() {
+    return this.httpClient.get(this.baseUrl + 'scrobbling/has-ran-scrobble-gen ', TextResonse).pipe(map(r => r === 'true'));
   }
 
   getScrobbleErrors() {
@@ -87,4 +101,13 @@ export class ScrobblingService {
   removeHold(seriesId: number) {
     return this.httpClient.delete(this.baseUrl + 'scrobbling/remove-hold?seriesId=' + seriesId, TextResonse);
   }
+
+  triggerScrobbleEventGeneration() {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/generate-scrobble-events', TextResonse);
+  }
+
+  bulkRemoveEvents(eventIds: number[]) {
+    return this.httpClient.post(this.baseUrl + "scrobbling/bulk-remove-events", eventIds)
+  }
+
 }

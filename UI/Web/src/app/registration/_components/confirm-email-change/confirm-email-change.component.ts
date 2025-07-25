@@ -15,8 +15,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './confirm-email-change.component.html',
     styleUrls: ['./confirm-email-change.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [SplashContainerComponent, TranslocoDirective]
+    imports: [SplashContainerComponent, TranslocoDirective]
 })
 export class ConfirmEmailChangeComponent implements OnInit {
 

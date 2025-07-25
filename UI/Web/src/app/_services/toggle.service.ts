@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
-import { filter, ReplaySubject, take } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {NavigationStart, Router} from '@angular/router';
+import {filter, ReplaySubject, take} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,7 @@ export class ToggleService {
       this.toggleState = !state;
       this.toggleStateSource.next(this.toggleState);
     });
-    
+
   }
 
   set(state: boolean) {

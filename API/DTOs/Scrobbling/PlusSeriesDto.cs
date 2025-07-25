@@ -1,14 +1,22 @@
 ﻿namespace API.DTOs.Scrobbling;
+#nullable enable
 
-public record PlusSeriesDto
+/// <summary>
+/// Represents information about a potential Series for Kavita+
+/// </summary>
+public sealed record PlusSeriesRequestDto
 {
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public string? GoogleBooksId { get; set; }
     public string? MangaDexId { get; set; }
+    /// <summary>
+    /// ComicBookRoundup Id
+    /// </summary>
+    public int? CbrId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
-    public MediaFormat MediaFormat { get; set; }
+    public PlusMediaFormat MediaFormat { get; set; }
     /// <summary>
     /// Optional but can help with matching
     /// </summary>

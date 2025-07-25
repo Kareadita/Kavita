@@ -1,25 +1,16 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef, inject,
-  Input,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject, Input, ViewChild} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
-import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
-import {NgbOffcanvas, NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbOffcanvas, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-external-series-card',
-  standalone: true,
-  imports: [ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, SafeHtmlPipe],
+  imports: [ImageComponent, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './external-series-card.component.html',
   styleUrls: ['./external-series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

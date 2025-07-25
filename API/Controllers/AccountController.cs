@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using API.Errors;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
@@ -136,6 +138,12 @@ public class AccountController : BaseApiController
                 return BadRequest(usernameValidation);
             }
 
+            // If Email is empty, default to the username
+            if (string.IsNullOrEmpty(registerDto.Email))
+            {
+                registerDto.Email = registerDto.Username;
+            }
+
             var user = new AppUserBuilder(registerDto.Username, registerDto.Email,
                 await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
@@ -144,6 +152,9 @@ public class AccountController : BaseApiController
 
             // Assign default streams
             AddDefaultStreamsToUser(user);
+
+            // Assign default reading profile
+            await AddDefaultReadingProfileToUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -350,10 +361,11 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
-    public async Task<ActionResult> UpdateEmail(UpdateEmailDto? dto)
+    public async Task<ActionResult<InviteUserResponse>> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole))
+            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
@@ -362,12 +374,13 @@ public class AccountController : BaseApiController
         // Validate this user's password
         if (! await _userManager.CheckPasswordAsync(user, dto.Password))
         {
-            _logger.LogCritical("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
+            _logger.LogWarning("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         }
 
         // Validate no other users exist with this email
-        if (user.Email!.Equals(dto.Email)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Email!.Equals(dto.Email))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
@@ -384,8 +397,10 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "generate-token"));
         }
 
+        var isValidEmailAddress = _emailService.IsValidEmail(user.Email);
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var shouldEmailUser = serverSettings.IsEmailSetup() || !_emailService.IsValidEmail(user.Email);
+        var shouldEmailUser = serverSettings.IsEmailSetup() || !isValidEmailAddress;
+
         user.EmailConfirmed = !shouldEmailUser;
         user.ConfirmationToken = token;
         await _userManager.UpdateAsync(user);
@@ -399,7 +414,8 @@ public class AccountController : BaseApiController
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = false
+                EmailSent = false,
+                InvalidEmail = !isValidEmailAddress
             });
         }
 
@@ -407,7 +423,7 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            if (!_emailService.IsValidEmail(user.Email))
+            if (!isValidEmailAddress)
             {
                 _logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email);
                 return Ok(new InviteUserResponse
@@ -439,7 +455,8 @@ public class AccountController : BaseApiController
             return Ok(new InviteUserResponse
             {
                 EmailLink = string.Empty,
-                EmailSent = true
+                EmailSent = true,
+                InvalidEmail = !isValidEmailAddress
             });
         }
         catch (Exception ex)
@@ -595,7 +612,7 @@ public class AccountController : BaseApiController
     }
 
     /// <summary>
-    /// Requests the Invite Url for the UserId. Will return error if user is already validated.
+    /// Requests the Invite Url for the AppUserId. Will return error if user is already validated.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
@@ -654,6 +671,9 @@ public class AccountController : BaseApiController
 
             // Assign default streams
             AddDefaultStreamsToUser(user);
+
+            // Assign default reading profile
+            await AddDefaultReadingProfileToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -763,6 +783,16 @@ public class AccountController : BaseApiController
         {
             user.SideNavStreams.Add(stream);
         }
+    }
+
+    private async Task AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
+            .Build();
+        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>

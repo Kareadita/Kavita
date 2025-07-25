@@ -6,14 +6,12 @@
           <ng-container title>
             @if (collectionTag) {
               <h4>
-                {{collectionTag.title}}
-                @if(collectionTag.promoted) {
-                  <span class="ms-1">(<i aria-hidden="true" class="fa fa-angle-double-up"></i>)</span>
-                }
-                <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
+                <app-promoted-icon [promoted]="collectionTag.promoted"></app-promoted-icon>
+                <span class="ms-2">{{collectionTag.title}}</span>
+                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [inputActions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
               </h4>
             }
-            <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
+            <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
           </ng-container>
         </app-side-nav-companion-bar>
       }
@@ -32,7 +30,7 @@
                 <div class="under-image">
                   <app-image [imageUrl]="collectionTag.source | providerImage"
                              width="16px" height="16px"
-                             [ngbTooltip]="collectionTag.source | providerName" tabindex="0"></app-image>
+                             [ngbTooltip]="collectionTag.source | scrobbleProviderName" tabindex="0"></app-image>
                   <span class="ms-2 me-2">{{t('sync-progress', {title: series.length + ' / ' + collectionTag.totalSourceCount})}}</span>
                   <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag.lastSyncUtc | date: 'short' | defaultDate })"></i>
                 </div>
@@ -46,7 +44,7 @@
 
                 @if (collectionTag.source !== ScrobbleProvider.Kavita) {
                   <div class="mt-2 mb-2">
-                    <button class="btn btn-primary-outline" (click)="openSyncDetailDrawer()">Sync Details</button>
+                    <button class="btn btn-outline-primary" (click)="openSyncDetailDrawer()">Sync Details</button>
                   </div>
                 }
               }

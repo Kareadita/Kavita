@@ -28,7 +28,7 @@ public class ScrobbleEvent : IEntityDate
     /// </summary>
     public string? ReviewBody { get; set; }
     public string? ReviewTitle { get; set; }
-    public required MediaFormat Format { get; set; }
+    public required PlusMediaFormat Format { get; set; }
     /// <summary>
     /// Depends on the ScrobbleEvent if filled in
     /// </summary>
@@ -68,4 +68,14 @@ public class ScrobbleEvent : IEntityDate
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+    /// <summary>
+    /// Sets the ErrorDetail and marks the event as <see cref="IsErrored"/>
+    /// </summary>
+    /// <param name="errorMessage"></param>
+    public void SetErrorMessage(string errorMessage)
+    {
+        ErrorDetails = errorMessage;
+        IsErrored = true;
+    }
 }

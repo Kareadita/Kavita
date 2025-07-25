@@ -6,3 +6,10 @@
     height: 35px;
     overflow: hidden;
 }
+
+::ng-deep .badge-expander .content {
+  a,
+  span {
+    font-size: 0.8rem;
+  }
+}

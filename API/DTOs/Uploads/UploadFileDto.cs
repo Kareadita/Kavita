@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Uploads;
 
-public class UploadFileDto
+public sealed record UploadFileDto
 {
     /// <summary>
     /// Id of the Entity

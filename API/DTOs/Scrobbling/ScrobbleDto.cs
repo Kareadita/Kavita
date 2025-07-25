@@ -22,7 +22,7 @@ public enum ScrobbleEventType
 /// <summary>
 /// Represents PlusMediaFormat
 /// </summary>
-public enum MediaFormat
+public enum PlusMediaFormat
 {
     [Description("Manga")]
     Manga = 1,
@@ -36,7 +36,7 @@ public enum MediaFormat
 }
 
 
-public class ScrobbleDto
+public sealed record ScrobbleDto
 {
     /// <summary>
     /// User's access token to allow us to talk on their behalf
@@ -44,7 +44,7 @@ public class ScrobbleDto
     public string AniListToken { get; set; }
     public string SeriesName { get; set; }
     public string LocalizedSeriesName { get; set; }
-    public MediaFormat Format { get; set; }
+    public PlusMediaFormat Format { get; set; }
     public int? Year { get; set; }
     /// <summary>
     /// Optional AniListId if present on Kavita's WebLinks

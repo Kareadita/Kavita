@@ -10,7 +10,7 @@ on:
 
 jobs:
   debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Debug Info
         run: |
@@ -20,13 +20,13 @@ jobs:
           echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
   if_merged:
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: |
           echo The PR was merged
   build:
     name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     steps:
       - name: Checkout Repo
@@ -43,7 +43,7 @@ jobs:
     name: Build Stable and Nightly Docker if Release
     needs: [ build ]
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
       contents: read
@@ -106,7 +106,7 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
 

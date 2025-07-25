@@ -5,7 +5,7 @@ namespace API.DTOs.Stats;
 /// <summary>
 /// Excel export for File Extension Report
 /// </summary>
-public class FileExtensionExportDto
+public sealed record FileExtensionExportDto
 {
     [Name("Path")]
     public string FilePath { get; set; }

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata
 {
     public int Id { get; set; }
     /// <summary>
@@ -124,6 +127,16 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public string WebLinks { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Tracks which metadata has been set by K+
+    /// </summary>
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
+
+    /// <summary>
+    /// (Kavita+) Average rating from Kavita+ metadata
+    /// </summary>
+    public float AverageExternalRating { get; set; } = 0f;
+
     #region Locks
 
     public bool AgeRatingLocked { get; set; }
@@ -159,6 +172,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+    public ICollection<AppUserChapterRating> Ratings { get; set; } = [];
 
     public ICollection<AppUserProgress> UserProgress { get; set; }
 
@@ -166,6 +180,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     // Relationships
     public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
+
+    public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
+    public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
 
     public void UpdateFrom(ParserInfo info)
     {
@@ -177,8 +194,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
             MinNumber = Parser.DefaultChapterNumber;
             MaxNumber = Parser.DefaultChapterNumber;
         }
-        // NOTE: This doesn't work well for all because Pdf usually should use into.Title or even filename
-        Title = (IsSpecial && info.Format == MangaFormat.Epub)
+        Title = (IsSpecial && info.Format is MangaFormat.Epub or MangaFormat.Pdf)
             ? info.Title
             : Parser.RemoveExtensionIfSupported(Range);
 
@@ -192,8 +208,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        // BUG: TODO: On non-english locales, for floats, the range will be 20,5 but the NumberTitle will return 20.5
-        // Have I fixed this with TryParse CultureInvariant
         try
         {
             if (MinNumber.Is(MaxNumber))
@@ -233,5 +247,26 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     {
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
+    }
+
+    public bool IsPersonRoleLocked(PersonRole role)
+    {
+        return role switch
+        {
+            PersonRole.Character => CharacterLocked,
+            PersonRole.Writer => WriterLocked,
+            PersonRole.Penciller => PencillerLocked,
+            PersonRole.Inker => InkerLocked,
+            PersonRole.Colorist => ColoristLocked,
+            PersonRole.Letterer => LettererLocked,
+            PersonRole.CoverArtist => CoverArtistLocked,
+            PersonRole.Editor => EditorLocked,
+            PersonRole.Publisher => PublisherLocked,
+            PersonRole.Translator => TranslatorLocked,
+            PersonRole.Imprint => ImprintLocked,
+            PersonRole.Team => TeamLocked,
+            PersonRole.Location => LocationLocked,
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+        };
     }
 }

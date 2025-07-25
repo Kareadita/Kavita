@@ -1,51 +1,57 @@
-<ng-container *transloco="let t; read: 'actionable'">
-  @if (actions.length > 0) {
-    @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
-      <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}"
-              (click)="openMobileActionableMenu($event)">
-        {{label}}
-        <i class="fa {{iconClass}}" aria-hidden="true"></i>
-      </button>
-    } @else {
-      <div ngbDropdown container="body" class="d-inline-block">
-        <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}" ngbDropdownToggle
-                (click)="preventEvent($event)">
+  <ng-container *transloco="let t; read: 'actionable'">
+    @if (actions.length > 0) {
+      @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
+        <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}"
+                (click)="openMobileActionableMenu($event)">
           {{label}}
           <i class="fa {{iconClass}}" aria-hidden="true"></i>
         </button>
-        <div ngbDropdownMenu attr.aria-labelledby="actions-{{labelBy}}">
-          <ng-container *ngTemplateOutlet="submenu; context: { list: actions }"></ng-container>
+      } @else {
+        <div ngbDropdown container="body" class="d-inline-block">
+          <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}" ngbDropdownToggle
+                  (click)="preventEvent($event)">
+            {{label}}
+            <i class="fa {{iconClass}}" aria-hidden="true"></i>
+          </button>
+          <div ngbDropdownMenu attr.aria-labelledby="actions-{{labelBy}}">
+            <ng-container *ngTemplateOutlet="submenu; context: { list: actions }"></ng-container>
+          </div>
         </div>
-      </div>
-      <ng-template #submenu let-list="list">
-        @for(action of list; track action.title) {
-          <!-- Non Submenu items -->
-          @if (action.children === undefined || action?.children?.length === 0 || action.dynamicList !== undefined) {
-            @if (action.dynamicList !== undefined && (action.dynamicList | async | dynamicList); as dList) {
-              @for(dynamicItem of dList; track dynamicItem.title) {
-                <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
-              }
-            } @else if (willRenderAction(action)) {
-              <button ngbDropdownItem (click)="performAction($event, action)" (mouseover)="closeAllSubmenus()">{{t(action.title)}}</button>
-            }
-          } @else {
-            @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async)) {
-              <!-- Submenu items -->
-              <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
-                   (click)="preventEvent($event); openSubmenu(action.title, subMenuHover)"
-                   (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)"
-                   (mouseleave)="preventEvent($event)">
-                @if (willRenderAction(action)) {
-                  <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{t(action.title)}} <i class="fa-solid fa-angle-right submenu-icon"></i></button>
+        <ng-template #submenu let-list="list">
+          @for(action of list; track action.title) {
+            <!-- Non Submenu items -->
+            @if (action.children === undefined || action?.children?.length === 0 || action.dynamicList !== undefined) {
+              @if (action.dynamicList !== undefined && (action.dynamicList | async | dynamicList); as dList) {
+                @for(dynamicItem of dList; track dynamicItem.title) {
+                  <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
                 }
-                <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
-                  <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
+              } @else if (willRenderAction(action, this.currentUser!)) {
+                <button ngbDropdownItem (click)="performAction($event, action)">{{t(action.title)}}</button>
+              }
+            } @else {
+              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser!)) {
+                <!-- Submenu items -->
+                <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
+                     (click)="openSubmenu(action.title, subMenuHover)"
+                     (mouseenter)="openSubmenu(action.title, subMenuHover)"
+                     (mouseover)="preventEvent($event)"
+                     class="submenu-wrapper">
+
+                  <!-- Check to ensure the submenu has items -->
+                  @if (willRenderAction(action, this.currentUser!)) {
+                    <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>
+                      {{t(action.title)}} <i class="fa-solid fa-angle-right submenu-icon"></i>
+                    </button>
+                  }
+
+                  <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
+                    <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
+                  </div>
                 </div>
-              </div>
+              }
             }
           }
-        }
-      </ng-template>
+        </ng-template>
+      }
     }
-  }
-</ng-container>
+  </ng-container>

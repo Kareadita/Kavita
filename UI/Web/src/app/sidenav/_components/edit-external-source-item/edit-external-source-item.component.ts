@@ -7,11 +7,10 @@ import {ExternalSourceService} from "../../../_services/external-source.service"
 import {ToastrService} from "ngx-toastr";
 
 @Component({
-  selector: 'app-edit-external-source-item',
-  standalone: true,
-  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './edit-external-source-item.component.html',
-  styleUrls: ['./edit-external-source-item.component.scss']
+    selector: 'app-edit-external-source-item',
+    imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
+    templateUrl: './edit-external-source-item.component.html',
+    styleUrls: ['./edit-external-source-item.component.scss']
 })
 export class EditExternalSourceItemComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

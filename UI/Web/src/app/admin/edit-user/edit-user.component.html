@@ -50,7 +50,11 @@
                           }
                         </div>
                       }
+
                     </div>
+                  }
+                  @if (isEmailInvalid$ | async) {
+                    <div class="invalid-feedback" style="display: block"><div>{{t('invalid-email-warning')}}</div></div>
                   }
                 </div>
               }

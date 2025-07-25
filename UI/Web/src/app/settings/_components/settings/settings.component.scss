@@ -1,4 +1,4 @@
-@import '../../../../theme/variables';
+@use '../../../../theme/variables' as theme;
 
 h2 {
   color: white;
@@ -7,6 +7,8 @@ h2 {
 
 .main-container {
   margin-top: 10px;
+  max-width: 1920px;
+  padding: 0 20px;
 }
 
 ::ng-deep .content-wrapper:not(.closed) {
@@ -18,7 +20,7 @@ h2 {
 }
 
 
-@media (max-width: $grid-breakpoints-lg) {
+@media (max-width: theme.$grid-breakpoints-lg) {
   ::ng-deep .content-wrapper:not(.closed) {
     .scale {
       width: 100% !important;

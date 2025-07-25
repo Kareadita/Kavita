@@ -2,7 +2,7 @@
 
 namespace API.DTOs.OPDS;
 
-public class FeedEntryContent
+public sealed record FeedEntryContent
 {
     [XmlAttribute("type")]
     public string Type = "text";

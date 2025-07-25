@@ -2,14 +2,15 @@
 using API.DTOs;
 using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Extensions;
 using API.Services.Plus;
 
 namespace API.Helpers.Builders;
 
-public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesDto>
+public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesRequestDto>
 {
-    private readonly PlusSeriesDto _seriesDto;
-    public PlusSeriesDto Build() => _seriesDto;
+    private readonly PlusSeriesRequestDto _seriesRequestDto;
+    public PlusSeriesRequestDto Build() => _seriesRequestDto;
 
     /// <summary>
     /// This must be a FULL Series
@@ -17,9 +18,9 @@ public class PlusSeriesDtoBuilder : IEntityBuilder<PlusSeriesDto>
     /// <param name="series"></param>
     public PlusSeriesDtoBuilder(Series series)
     {
-        _seriesDto = new PlusSeriesDto()
+        _seriesRequestDto = new PlusSeriesRequestDto()
         {
-            MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
+            MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesName = series.Name,
             AltSeriesName = series.LocalizedName,
             AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,

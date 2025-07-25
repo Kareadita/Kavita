@@ -16,11 +16,10 @@ export interface DirectoryPickerResult {
 }
 
 @Component({
-  selector: 'app-directory-picker',
-  templateUrl: './directory-picker.component.html',
-  styleUrls: ['./directory-picker.component.scss'],
-  standalone: true,
-  imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
+    selector: 'app-directory-picker',
+    templateUrl: './directory-picker.component.html',
+    styleUrls: ['./directory-picker.component.scss'],
+    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
 

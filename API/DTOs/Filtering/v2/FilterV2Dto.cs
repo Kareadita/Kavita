@@ -6,7 +6,7 @@ namespace API.DTOs.Filtering.v2;
 /// <summary>
 /// Metadata filtering for v2 API only
 /// </summary>
-public class FilterV2Dto
+public sealed record FilterV2Dto
 {
     /// <summary>
     /// Not used in the UI.
@@ -16,7 +16,7 @@ public class FilterV2Dto
     /// The name of the filter
     /// </summary>
     public string? Name { get; set; }
-    public ICollection<FilterStatementDto> Statements { get; set; } = new List<FilterStatementDto>();
+    public ICollection<FilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SortOptions? SortOptions { get; set; }
 

@@ -7,7 +7,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents the progress a single user has on a given Chapter.
 /// </summary>
-public class AppUserProgress
+public class AppUserProgress : IEntityDate
 {
     /// <summary>
     /// Id of Entity

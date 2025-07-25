@@ -8,10 +8,14 @@ using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
+using API.DTOs.Email;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.KavitaPlus.Manage;
+using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
@@ -26,12 +30,16 @@ using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
 using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
+using EmailHistory = API.Entities.EmailHistory;
+using ExternalSeriesMetadata = API.Entities.Metadata.ExternalSeriesMetadata;
 using MediaError = API.Entities.MediaError;
 using PublicationStatus = API.Entities.Enums.PublicationStatus;
 using SiteTheme = API.Entities.SiteTheme;
@@ -61,7 +69,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
-        CreateMap<Person, PersonDto>();
+        CreateMap<Person, PersonDto>()
+            .ForMember(dest => dest.Aliases, opt => opt.MapFrom(src => src.Aliases.Select(s => s.Alias)));
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();
@@ -81,6 +90,16 @@ public class AutoMapperProfiles : Profile
             opt =>
                 opt.MapFrom(src => src.Series.Name));
         CreateMap<AppUserRating, UserReviewDto>()
+            .ForMember(dest => dest.LibraryId,
+                opt =>
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Body,
+                opt =>
+                    opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.Username,
+                opt =>
+                    opt.MapFrom(src => src.AppUser.UserName));
+        CreateMap<AppUserChapterRating, UserReviewDto>()
             .ForMember(dest => dest.LibraryId,
                 opt =>
                     opt.MapFrom(src => src.Series.LibraryId))
@@ -116,8 +135,8 @@ public class AutoMapperProfiles : Profile
             // Map Characters
             .ForMember(dest => dest.Characters, opt => opt.MapFrom(src => src.People
                 .Where(cp => cp.Role == PersonRole.Character)
-                .Select(cp => cp.Person)
-                .OrderBy(p => p.NormalizedName)))
+                .OrderBy(cp => cp.OrderWeight)
+                .Select(cp => cp.Person)))
             // Map Pencillers
             .ForMember(dest => dest.Pencillers, opt => opt.MapFrom(src => src.People
                 .Where(cp => cp.Role == PersonRole.Penciller)
@@ -256,19 +275,19 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
                 opt =>
-                    opt.MapFrom(src => src.Theme))
+                    opt.MapFrom(src => src.Theme));
+
+        CreateMap<AppUserReadingProfile, UserReadingProfileDto>()
             .ForMember(dest => dest.BookReaderThemeName,
                 opt =>
-                    opt.MapFrom(src => src.BookThemeName))
-            .ForMember(dest => dest.BookReaderLayoutMode,
-                opt =>
-                    opt.MapFrom(src => src.BookReaderLayoutMode));
+                    opt.MapFrom(src => src.BookThemeName));
 
 
         CreateMap<AppUserBookmark, BookmarkDto>();
 
         CreateMap<ReadingList, ReadingListDto>()
-            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
+            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count))
+            .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName));
         CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
         CreateMap<ChapterDto, TachiyomiChapterDto>();
@@ -331,17 +350,43 @@ public class AutoMapperProfiles : Profile
         CreateMap<UserReviewDto, ExternalReview>()
             .ForMember(dest => dest.BodyJustText,
                 opt =>
-                    opt.MapFrom(src => ReviewService.GetCharacters(src.Body)));
+                    opt.MapFrom(src => ReviewHelper.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
+        CreateMap<Series, ManageMatchSeriesDto>()
+            .ForMember(dest => dest.Series,
+                opt =>
+                    opt.MapFrom(src => src))
+            .ForMember(dest => dest.IsMatched,
+                opt =>
+                    opt.MapFrom(src => src.ExternalSeriesMetadata != null && src.ExternalSeriesMetadata.AniListId != 0
+                                                                          && src.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue))
+            .ForMember(dest => dest.ValidUntilUtc,
+                opt => opt.MapFrom(src =>
+                    src.ExternalSeriesMetadata != null
+                        ? src.ExternalSeriesMetadata.ValidUntilUtc
+                        : DateTime.MinValue));
 
 
         CreateMap<MangaFile, FileExtensionExportDto>();
+        CreateMap<EmailHistory, EmailHistoryDto>()
+            .ForMember(dest => dest.ToUserName, opt => opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<Chapter, StandaloneChapterDto>()
             .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Volume.SeriesId))
             .ForMember(dest => dest.VolumeTitle, opt => opt.MapFrom(src => src.Volume.Name))
             .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
             .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
+
+        CreateMap<MetadataFieldMapping, MetadataFieldMappingDto>();
+
+        CreateMap<MetadataSettings, MetadataSettingsDto>()
+            .ForMember(dest => dest.Blacklist, opt => opt.MapFrom(src => src.Blacklist ?? new List<string>()))
+            .ForMember(dest => dest.Whitelist, opt => opt.MapFrom(src => src.Whitelist ?? new List<string>()))
+            .ForMember(dest => dest.Overrides, opt => opt.MapFrom(src => src.Overrides ?? new List<MetadataSettingField>()))
+            .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()));
+
+
+
     }
 }

@@ -3,12 +3,11 @@ import {NgClass, NgStyle} from "@angular/common";
 import {NgCircleProgressModule } from "ng-circle-progress";
 
 @Component({
-  selector: 'app-circular-loader',
-  standalone: true,
-  imports: [NgCircleProgressModule, NgStyle, NgClass],
-  templateUrl: './circular-loader.component.html',
-  styleUrls: ['./circular-loader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-circular-loader',
+    imports: [NgCircleProgressModule, NgStyle, NgClass],
+    templateUrl: './circular-loader.component.html',
+    styleUrls: ['./circular-loader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CircularLoaderComponent {
 

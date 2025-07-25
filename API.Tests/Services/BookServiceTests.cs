@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using API.Entities.Enums;
 using API.Services;
-using EasyCaching.Core;
+using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -81,4 +82,64 @@ public class BookServiceTests
         Assert.Equal("Accel World", comicInfo.Series);
     }
 
+    [Fact]
+    public void ShouldHaveComicInfoForPdf()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "test.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Variations Chromatiques de concert", comicInfo.Title);
+        Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
+    }
+
+    //[Fact]
+    public void ShouldUsePdfInfoDict()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Books/PDFs");
+        var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Rollo at Work", comicInfo.Title);
+        Assert.Equal("Jacob Abbott", comicInfo.Writer);
+        Assert.Equal(2008, comicInfo.Year);
+    }
+
+    [Fact]
+    public void ShouldHandleIndirectPdfObjects()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "indirect.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.NotNull(comicInfo);
+        Assert.Equal(2018, comicInfo.Year);
+        Assert.Equal(8, comicInfo.Month);
+    }
+
+    [Fact]
+    public void FailGracefullyWithEncryptedPdf()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var document = Path.Join(testDirectory, "encrypted.pdf");
+        var comicInfo = _bookService.GetComicInfo(document);
+        Assert.Null(comicInfo);
+    }
+
+    [Fact]
+    public void SeriesFallBackToMetadataTitle()
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+        var pdfParser = new PdfParser(ds);
+
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var filePath = Path.Join(testDirectory, "Bizet-Variations_Chromatiques_de_concert_Theme_A4.pdf");
+
+        var comicInfo = _bookService.GetComicInfo(filePath);
+        Assert.NotNull(comicInfo);
+
+        var parserInfo = pdfParser.Parse(filePath, testDirectory, ds.GetParentDirectoryName(testDirectory), LibraryType.Book, true, comicInfo);
+        Assert.NotNull(parserInfo);
+        Assert.Equal(parserInfo.Title, comicInfo.Title);
+        Assert.Equal(parserInfo.Series, comicInfo.Title);
+    }
 }

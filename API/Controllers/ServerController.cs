@@ -203,25 +203,27 @@ public class ServerController : BaseApiController
     /// <summary>
     /// Returns how many versions out of date this install is
     /// </summary>
+    /// <param name="stableOnly">Only count Stable releases</param>
     [HttpGet("check-out-of-date")]
-    public async Task<ActionResult<int>> CheckHowOutOfDate()
+    public async Task<ActionResult<int>> CheckHowOutOfDate(bool stableOnly = true)
     {
-        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind());
+        return Ok(await _versionUpdaterService.GetNumberOfReleasesBehind(stableOnly));
     }
 
 
     /// <summary>
     /// Pull the Changelog for Kavita from Github and display
     /// </summary>
+    /// <param name="count">How many releases from the latest to return</param>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("changelog")]
-    public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
+    public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog(int count = 0)
     {
         // Strange bug where [Authorize] doesn't work
         if (User.GetUserId() == 0) return Unauthorized();
 
-        return Ok(await _versionUpdaterService.GetAllReleases());
+        return Ok(await _versionUpdaterService.GetAllReleases(count));
     }
 
     /// <summary>

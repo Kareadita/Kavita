@@ -3,24 +3,35 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {shareReplay, take} from 'rxjs/operators';
-import {debounceTime, defer, distinctUntilChanged, filter, forkJoin, Observable, of, switchMap, tap} from 'rxjs';
+import {shareReplay} from 'rxjs/operators';
+import {
+  catchError,
+  debounceTime,
+  defer,
+  distinctUntilChanged,
+  filter,
+  forkJoin,
+  Observable,
+  of,
+  switchMap,
+  tap
+} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
-import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {UpdateNotificationModalComponent} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
-import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {ConfirmService} from "../../shared/confirm.service";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 interface AdhocTask {
   name: string;
@@ -31,19 +42,18 @@ interface AdhocTask {
 }
 
 @Component({
-  selector: 'app-manage-tasks-settings',
-  templateUrl: './manage-tasks-settings.component.html',
-  styleUrls: ['./manage-tasks-settings.component.scss'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe,
-    TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent, SettingButtonComponent]
+    selector: 'app-manage-tasks-settings',
+    templateUrl: './manage-tasks-settings.component.html',
+    styleUrls: ['./manage-tasks-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
+        TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent,
+        SettingButtonComponent, NgxDatatableModule]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmService = inject(ConfirmService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
@@ -106,13 +116,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
-    // TODO: Remove this in v0.9. Users should have all updated by then
-    {
-      name: 'analyze-files-task',
-      description: 'analyze-files-task-desc',
-      api: this.serverService.analyzeFiles(),
-      successMessage: 'analyze-files-task-success'
-    },
     {
       name: 'sync-themes-task',
       description: 'sync-themes-task-desc',
@@ -134,6 +137,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       }
     },
   ];
+
   customOption = 'custom';
 
 
@@ -180,9 +184,15 @@ export class ManageTasksSettingsComponent implements OnInit {
         // }),
         switchMap(_ => {
           const data = this.packData();
-          return this.settingsService.updateServerSettings(data);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
         }),
         tap(settings => {
+          if (!settings) {
+            return;
+          }
           this.serverSettings = settings;
 
           this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
@@ -305,7 +315,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       modelSettings.taskCleanup = this.settingsForm.get('taskCleanupCustom')?.value;
     }
 
-    console.log('modelSettings: ', modelSettings);
     return modelSettings;
   }
 
@@ -323,4 +332,5 @@ export class ManageTasksSettingsComponent implements OnInit {
   }
 
 
+    protected readonly ColumnMode = ColumnMode;
 }

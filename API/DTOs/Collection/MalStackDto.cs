@@ -1,4 +1,5 @@
 ﻿namespace API.DTOs.Collection;
+#nullable enable
 
 /// <summary>
 /// Represents an Interest Stack from MAL

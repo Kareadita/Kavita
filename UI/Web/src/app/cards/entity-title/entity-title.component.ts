@@ -10,15 +10,14 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
  * This is primarily used for list item
  */
 @Component({
-  selector: 'app-entity-title',
-  standalone: true,
-  imports: [
-    TranslocoModule,
-    DefaultValuePipe
-  ],
-  templateUrl: './entity-title.component.html',
-  styleUrls: ['./entity-title.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-entity-title',
+    imports: [
+        TranslocoModule,
+        DefaultValuePipe
+    ],
+    templateUrl: './entity-title.component.html',
+    styleUrls: ['./entity-title.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityTitleComponent implements OnInit {
 

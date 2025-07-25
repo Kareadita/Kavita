@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'related-tab'">
-  <div style="padding-bottom: 1rem;">
+  <div class="pb-2">
     @if (relations.length > 0) {
       <app-carousel-reel [items]="relations" [title]="t('relations-title')">
         <ng-template #carouselItem let-item>
@@ -27,6 +27,19 @@
                          [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
                          (clicked)="openReadingList(item)" [linkUrl]="'/lists/' + item.id" [showFormat]="false"></app-card-item>
+        </ng-template>
+      </app-carousel-reel>
+    }
+
+    @if (bookmarks.length > 0) {
+      <app-carousel-reel [items]="bookmarks" [title]="t('bookmarks-title')">
+        <ng-template #carouselItem let-item>
+          <app-card-item [entity]="item" [title]="t('bookmarks-title')" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
+                         [suppressArchiveWarning]="true"
+                         [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"
+                         (clicked)="viewBookmark(item)"
+                         [count]="bookmarks.length"
+                         [allowSelection]="false"></app-card-item>
         </ng-template>
       </app-carousel-reel>
     }

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library/library';
@@ -35,6 +35,7 @@ import {ToastrService} from "ngx-toastr";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
 import {QueryContext} from "../../_models/metadata/v2/query-context";
+import {LicenseService} from "../../_services/license.service";
 
 enum StreamId {
   OnDeck,
@@ -45,13 +46,12 @@ enum StreamId {
 
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent],
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
+        CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -71,6 +71,7 @@ export class DashboardComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
+  private readonly licenseService = inject(LicenseService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
@@ -121,7 +122,11 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+    this.licenseService.hasValidLicense()
+      .pipe(
+        filter((hasLic: boolean) => hasLic),
+        switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
+      ).subscribe((hasExpired: boolean) => {
       if (hasExpired) {
         this.toastr.error(translate('toasts.anilist-token-expired'));
       }
@@ -220,7 +225,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-updated-title');
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
@@ -231,7 +236,7 @@ export class DashboardComponent implements OnInit {
       params['page'] = 1;
       params['title'] = translate('dashboard.on-deck-title');
 
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
       if (filter.sortOptions) {
@@ -243,7 +248,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.recently-added-title');
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.Created;
         filter.sortOptions.isAscending = false;
@@ -253,7 +258,7 @@ export class DashboardComponent implements OnInit {
       const params: any = {};
       params['page'] = 1;
       params['title'] = translate('dashboard.more-in-genre-title', {genre: this.genre?.title});
-      const filter = this.filterUtilityService.createSeriesV2Filter();
+      const filter = this.metadataService.createDefaultFilterDto('series');
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }

@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Account;
 
-public class UpdateEmailDto
+public sealed record UpdateEmailDto
 {
     public string Email { get; set; } = default!;
     public string Password { get; set; } = default!;

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs;
 #nullable enable
 
-public class LibraryDto
+public sealed record LibraryDto
 {
     public int Id { get; init; }
     public string? Name { get; init; }
@@ -61,4 +60,18 @@ public class LibraryDto
     /// A set of globs that will exclude matching content from being scanned
     /// </summary>
     public ICollection<string> ExcludePatterns { get; set; }
+    /// <summary>
+    /// Allow any series within this Library to download metadata.
+    /// </summary>
+    /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
+    public bool AllowMetadataMatching { get; set; } = true;
+    /// <summary>
+    /// Allow Kavita to read metadata (ComicInfo.xml, Epub, PDF)
+    /// </summary>
+    public bool EnableMetadata { get; set; } = true;
+    /// <summary>
+    /// Should Kavita remove sort articles "The" for the sort name
+    /// </summary>
+    public bool RemovePrefixForSortName { get; set; } = false;
 }

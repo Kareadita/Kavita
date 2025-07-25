@@ -1,0 +1,57 @@
+<ng-container *transloco="let t; read:'email-history'">
+  <p>{{t('description')}}</p>
+
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="data"
+    [columnMode]="ColumnMode.force"
+    rowHeight="auto"
+    [footerHeight]="50"
+  >
+
+    <ngx-datatable-column prop="emailTemplate" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('template-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.emailTemplate}}
+      </ng-template>
+    </ngx-datatable-column>
+
+
+    <ngx-datatable-column prop="sendDate" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('date-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        {{item.sendDate | utcToLocalTime}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="toUserName" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('user-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.toUserName}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="sent" [sortable]="true" [draggable]="false" [resizeable]="false">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('sent-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        @if (item.sent) {
+          <i class="fa-solid fa-check-circle successful-validation ms-1">
+            <span class="visually-hidden">{{t('sent-tooltip')}}</span>
+          </i>
+        } @else {
+          <i class="error fa-solid fa-exclamation-circle ms-1">
+            <span class="visually-hidden">{{t('not-sent-tooltip')}}</span>
+          </i>
+        }
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+</ng-container>

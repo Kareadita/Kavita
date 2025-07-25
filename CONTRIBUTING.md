@@ -13,7 +13,7 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - HTML/Javascript editor of choice (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
-- .NET 8.0+
+- .NET 9.0+
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
 ### Getting started ###

@@ -1,22 +1,22 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
+import {AgeRating} from '../_models/metadata/age-rating';
+import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
 import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'ageRating',
-  standalone: true
+  standalone: true,
+  pure: true
 })
 export class AgeRatingPipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
 
-  transform(value: AgeRating | AgeRatingDto | undefined): Observable<string> {
-    if (value === undefined || value === null) return of(this.translocoService.translate('age-rating-pipe.unknown') as string);
+  transform(value: AgeRating | AgeRatingDto | undefined): string {
+    if (value === undefined || value === null) return this.translocoService.translate('age-rating-pipe.unknown');
 
     if (value.hasOwnProperty('title')) {
-      return of((value as AgeRatingDto).title);
+      return (value as AgeRatingDto).title;
     }
 
     switch (value) {
@@ -54,7 +54,7 @@ export class AgeRatingPipe implements PipeTransform {
         return this.translocoService.translate('age-rating-pipe.r18-plus');
     }
 
-    return of(this.translocoService.translate('age-rating-pipe.unknown') as string);
+    return this.translocoService.translate('age-rating-pipe.unknown');
   }
 
 }

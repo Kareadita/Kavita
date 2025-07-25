@@ -2,37 +2,38 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
+  inject,
   OnInit,
   Output,
   QueryList,
-  ViewChildren,
-  inject,
-  DestroyRef
+  ViewChildren
 } from '@angular/core';
-import { BehaviorSubject, Observable, filter, shareReplay } from 'rxjs';
-import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
-import { KavitaMediaError } from '../_models/media-error';
-import { ServerService } from 'src/app/_services/server.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {BehaviorSubject, filter, Observable, shareReplay} from 'rxjs';
+import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
+import {KavitaMediaError} from '../_models/media-error';
+import {ServerService} from 'src/app/_services/server.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { FilterPipe } from '../../_pipes/filter.pipe';
-import { LoadingComponent } from '../../shared/loading/loading.component';
+import {FilterPipe} from '../../_pipes/filter.pipe';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 
 @Component({
     selector: 'app-manage-media-issues',
     templateUrl: './manage-media-issues.component.html',
     styleUrls: ['./manage-media-issues.component.scss'],
+    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, LoadingComponent, FilterPipe, SortableHeader, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe]
 })
 export class ManageMediaIssuesComponent implements OnInit {
+
+  protected readonly ColumnMode = ColumnMode;
 
   @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
@@ -69,17 +70,6 @@ export class ManageMediaIssuesComponent implements OnInit {
     });
   }
 
-  onSort(evt: any) {
-    //SortEvent<KavitaMediaError>
-    this.currentSort.next(evt);
-
-    // Must clear out headers here
-    this.headers.forEach((header) => {
-      if (header.sortable !== evt.column) {
-        header.direction = '';
-      }
-    });
-  }
 
   loadData() {
     this.isLoading = true;
@@ -100,4 +90,5 @@ export class ManageMediaIssuesComponent implements OnInit {
     const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
+
 }

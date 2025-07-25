@@ -1,23 +1,28 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   inject,
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, NgStyle, NgClass, DatePipe, Location} from "@angular/common";
+import {AsyncPipe, DatePipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
-  NgbDropdownToggle, NgbModal,
-  NgbNav, NgbNavChangeEvent,
-  NgbNavContent, NgbNavItem,
-  NgbNavLink, NgbNavOutlet,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbNav,
+  NgbNavChangeEvent,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
@@ -65,46 +70,52 @@ import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {UserReview} from "../_single-module/review-card/user-review";
+import {User} from "../_models/user";
+import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
+import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
+import {Rating} from "../_models/rating";
 
 enum TabID {
   Related = 'related-tab',
-  Reviews = 'review-tab', // Only applicable for books
+  Reviews = 'review-tab',
   Details = 'details-tab'
 }
 
 @Component({
   selector: 'app-chapter-detail',
-  standalone: true,
-    imports: [
-        AsyncPipe,
-        CardActionablesComponent,
-        LoadingComponent,
-        NgbDropdown,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdownToggle,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLink,
-        NgbTooltip,
-        VirtualScrollerModule,
-        NgStyle,
-        NgClass,
-        TranslocoDirective,
-        ReadMoreComponent,
-        NgbNavItem,
-        NgbNavOutlet,
-        DetailsTabComponent,
-        RouterLink,
-        EntityTitleComponent,
-        RelatedTabComponent,
-        BadgeExpanderComponent,
-        MetadataDetailRowComponent,
-        DownloadButtonComponent,
-        DatePipe,
-        DefaultDatePipe,
-        CoverImageComponent
-    ],
+  imports: [
+    AsyncPipe,
+    CardActionablesComponent,
+    LoadingComponent,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    NgbTooltip,
+    VirtualScrollerModule,
+    NgStyle,
+    NgClass,
+    TranslocoDirective,
+    ReadMoreComponent,
+    NgbNavItem,
+    NgbNavOutlet,
+    DetailsTabComponent,
+    RouterLink,
+    EntityTitleComponent,
+    RelatedTabComponent,
+    BadgeExpanderComponent,
+    MetadataDetailRowComponent,
+    DownloadButtonComponent,
+    DatePipe,
+    DefaultDatePipe,
+    CoverImageComponent,
+    ReviewsComponent,
+    ExternalRatingComponent
+  ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -139,6 +150,8 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly LibraryType = LibraryType;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -152,6 +165,12 @@ export class ChapterDetailComponent implements OnInit {
   series: Series | null = null;
   libraryType: LibraryType | null = null;
   hasReadingProgress = false;
+  userReviews: Array<UserReview> = [];
+  plusReviews: Array<UserReview> = [];
+  rating: number = 0;
+  ratings: Array<Rating> = [];
+  hasBeenRated: boolean = false;
+
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
   /**
@@ -164,6 +183,7 @@ export class ChapterDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+  user: User | undefined;
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -178,6 +198,12 @@ export class ChapterDetailComponent implements OnInit {
 
 
   ngOnInit() {
+    this.accountService.currentUser$.subscribe(user => {
+      if (user) {
+        this.user = user;
+      }
+    });
+
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
@@ -212,7 +238,8 @@ export class ChapterDetailComponent implements OnInit {
     forkJoin({
       series: this.seriesService.getSeries(this.seriesId),
       chapter: this.chapterService.getChapterMetadata(this.chapterId),
-      libraryType: this.libraryService.getLibraryType(this.libraryId)
+      libraryType: this.libraryService.getLibraryType(this.libraryId),
+      chapterDetail: this.chapterService.chapterDetailPlus(this.seriesId, this.chapterId),
     }).subscribe(results => {
 
       if (results.chapter === null) {
@@ -224,6 +251,11 @@ export class ChapterDetailComponent implements OnInit {
       this.chapter = results.chapter;
       this.weblinks = this.chapter.webLinks.split(',');
       this.libraryType = results.libraryType;
+      this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);
+      this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
+      this.rating = results.chapterDetail.rating;
+      this.hasBeenRated = results.chapterDetail.hasBeenRated;
+      this.ratings = results.chapterDetail.ratings;
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
@@ -247,6 +279,11 @@ export class ChapterDetailComponent implements OnInit {
 
       this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 ||
         (this.chapter.tags || []).length > 0 || this.chapter.webLinks.length > 0;
+
+      if (!this.showDetailsTab && this.activeTabId === TabID.Details) {
+        this.activeTabId = TabID.Reviews;
+      }
+
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -302,10 +339,6 @@ export class ChapterDetailComponent implements OnInit {
     this.location.replaceState(newUrl)
   }
 
-  openPerson(field: FilterField, value: number) {
-    this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
-  }
-
   downloadChapter() {
     if (this.downloadInProgress) return;
     this.downloadService.download('chapter', this.chapter!, (d) => {
@@ -323,11 +356,6 @@ export class ChapterDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  performAction(action: ActionItem<Chapter>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.chapter!);
-    }
-  }
 
   handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
@@ -362,6 +390,4 @@ export class ChapterDetailComponent implements OnInit {
         break;
     }
   }
-
-  protected readonly LibraryType = LibraryType;
 }

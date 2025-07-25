@@ -1,23 +1,27 @@
 import {inject, Injectable} from '@angular/core';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
-import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
-import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
-import { ConfirmService } from '../shared/confirm.service';
-import { LibrarySettingsModalComponent } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
-import { Chapter } from '../_models/chapter';
-import { Device } from '../_models/device/device';
-import { Library } from '../_models/library/library';
-import { ReadingList } from '../_models/reading-list';
-import { Series } from '../_models/series';
-import { Volume } from '../_models/volume';
-import { DeviceService } from './device.service';
-import { LibraryService } from './library.service';
-import { MemberService } from './member.service';
-import { ReaderService } from './reader.service';
-import { SeriesService } from './series.service';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {BulkAddToCollectionComponent} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
+import {ADD_FLOW, AddToListModalComponent} from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
+import {
+  EditReadingListModalComponent
+} from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
+import {ConfirmService} from '../shared/confirm.service';
+import {
+  LibrarySettingsModalComponent
+} from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
+import {Chapter} from '../_models/chapter';
+import {Device} from '../_models/device/device';
+import {Library} from '../_models/library/library';
+import {ReadingList} from '../_models/reading-list';
+import {Series} from '../_models/series';
+import {Volume} from '../_models/volume';
+import {DeviceService} from './device.service';
+import {LibraryService} from './library.service';
+import {MemberService} from './member.service';
+import {ReaderService} from './reader.service';
+import {SeriesService} from './series.service';
 import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
@@ -26,6 +30,11 @@ import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
 import {DefaultModalOptions} from "../_models/default-modal-options";
+import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
+import {
+  BulkSetReadingProfileModalComponent
+} from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
+
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -466,8 +475,18 @@ export class ActionService {
     });
   }
 
+  async deleteMultipleVolumes(volumes: Array<Volume>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-volumes', {count: volumes.length}))) return;
+
+    this.volumeService.deleteMultipleVolumes(volumes.map(v => v.id)).subscribe((success) => {
+      if (callback) {
+        callback(success);
+      }
+    })
+  }
+
   async deleteMultipleChapters(seriesId: number, chapterIds: Array<Chapter>, callback?: BooleanActionCallback) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters'))) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters', {count: chapterIds.length}))) return;
 
     this.chapterService.deleteMultipleChapters(seriesId, chapterIds.map(c => c.id)).subscribe(() => {
       if (callback) {
@@ -519,7 +538,7 @@ export class ActionService {
 
   addMultipleSeriesToWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
     this.memberService.addSeriesToWantToRead(seriesIds).subscribe(() => {
-      this.toastr.success('Series added to Want to Read list');
+      this.toastr.success(translate('toasts.series-added-want-to-read'));
       if (callback) {
         callback();
       }
@@ -650,7 +669,7 @@ export class ActionService {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, DefaultModalOptions);
     readingListModalRef.componentInstance.readingList = readingList;
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {
@@ -770,6 +789,16 @@ export class ActionService {
     });
   }
 
+  matchSeries(series: Series, callback?: BooleanActionCallback) {
+   const ref = this.modalService.open(MatchSeriesModalComponent, DefaultModalOptions);
+   ref.componentInstance.series = series;
+   ref.closed.subscribe(saved => {
+     if (callback) {
+       callback(saved);
+     }
+   });
+  }
+
   async deleteFilter(filterId: number, callback?: BooleanActionCallback) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))) {
       if (callback) {
@@ -783,6 +812,58 @@ export class ActionService {
 
       if (callback) {
         callback(true);
+      }
+    });
+  }
+
+  /**
+   * Sets the reading profile for multiple series
+   * @param series
+   * @param callback
+   */
+  setReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
+    this.readingListModalRef.componentInstance.title = ""
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
+      }
+    });
+  }
+
+  /**
+   * Sets the reading profile for multiple series
+   * @param library
+   * @param callback
+   */
+  setReadingProfileForLibrary(library: Library, callback?: BooleanActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef.componentInstance.libraryId = library.id;
+    this.readingListModalRef.componentInstance.title = ""
+
+    this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(true);
+      }
+    });
+    this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.readingListModalRef = null;
+      if (callback) {
+        callback(false);
       }
     });
   }

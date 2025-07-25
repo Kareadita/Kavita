@@ -1,7 +1,7 @@
-﻿import { ThemeProvider } from "./site-theme";
+﻿import {ThemeProvider} from "./site-theme";
 
 /**
- * Theme for the the book reader contents
+ * Theme for the book reader contents
  */
  export interface BookTheme {
     name: string;

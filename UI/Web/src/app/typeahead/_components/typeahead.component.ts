@@ -1,10 +1,11 @@
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -19,10 +20,10 @@ import {
   ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import { Observable, ReplaySubject } from 'rxjs';
-import { auditTime, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from '../_models/typeahead-settings';
+import {Observable, ReplaySubject} from 'rxjs';
+import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
+import {KEY_CODES} from 'src/app/shared/_services/utility.service';
+import {TypeaheadSettings} from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -33,22 +34,21 @@ const ANIMATION_SPEED = 200;
 
 @Component({
   selector: 'app-typeahead',
-  standalone: true,
-  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoDirective],
+  imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
-    trigger('slideFromTop', [
-      state('in', style({ height: '0px'})),
-      transition('void => *', [
-        style({ height: '100%', overflow: 'auto' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ height: '0px' })),
+      trigger('slideFromTop', [
+          state('in', style({ height: '0px' })),
+          transition('void => *', [
+              style({ height: '100%', overflow: 'auto' }),
+              animate(ANIMATION_SPEED)
+          ]),
+          transition('* => void', [
+              animate(ANIMATION_SPEED, style({ height: '0px' })),
+          ])
       ])
-    ])
   ]
 })
 export class TypeaheadComponent implements OnInit {
@@ -72,12 +72,16 @@ export class TypeaheadComponent implements OnInit {
    * When triggered, will focus the input if the passed string matches the id
    */
   @Input() focus: EventEmitter<string> | undefined;
+  /**
+   * When triggered, will unfocus the input if the passed string matches the id
+   */
+  @Input() unFocus: EventEmitter<string> | undefined;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
-  private readonly destroyRef = inject(DestroyRef);
+
 
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
@@ -94,7 +98,11 @@ export class TypeaheadComponent implements OnInit {
   typeaheadControl!: FormControl;
   typeaheadForm!: FormGroup;
 
-  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer2 = inject(Renderer2);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  constructor(@Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit() {
     this.reset.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((resetToEmpty: boolean) => {
@@ -109,6 +117,13 @@ export class TypeaheadComponent implements OnInit {
       });
     }
 
+    if (this.unFocus) {
+      this.unFocus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
+        if (this.settings.id !== id) return;
+        this.hasFocus = false;
+      });
+    }
+
     this.init();
   }
 
@@ -119,7 +134,8 @@ export class TypeaheadComponent implements OnInit {
     }
 
     if (this.settings.trackByIdentityFn === undefined) {
-      this.settings.trackByIdentityFn = (index, value) => value;
+      console.warn('No trackby function provided, falling back to an expensive implementation')
+      this.settings.trackByIdentityFn = (_, value) => value;
     }
 
     if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
@@ -223,9 +239,9 @@ export class TypeaheadComponent implements OnInit {
       }
       case KEY_CODES.ENTER:
       {
-        this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
+        this.document.querySelectorAll('.list-group-item').forEach((item, _) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {
+            this.filteredOptions.pipe(take(1)).subscribe((_: any[]) => {
               // This isn't giving back the filtered array, but everything
               event.preventDefault();
               event.stopPropagation();
@@ -414,7 +430,7 @@ export class TypeaheadComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  toggleLock(event: any) {
+  toggleLock(_: any) {
     if (this.disabled) return;
     this.locked = !this.locked;
     this.lockedChange.emit(this.locked);

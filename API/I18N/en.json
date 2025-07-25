@@ -186,6 +186,10 @@
     "external-source-required": "ApiKey and Host required",
     "external-source-doesnt-exist": "External Source doesn't exist",
     "external-source-already-in-use": "There is an existing stream with this External Source",
+    "sidenav-stream-only-delete-smart-filter": "Only smart filter streams can be deleted from the SideNav",
+    "dashboard-stream-only-delete-smart-filter": "Only smart filter streams can be deleted from the dashboard",
+    "smart-filter-name-required": "Smart Filter name required",
+    "smart-filter-system-name": "You cannot use the name of a system provided stream",
 
     "not-authenticated": "User is not authenticated",
     "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",
@@ -207,6 +211,8 @@
     "reading-list-name-exists": "A reading list of this name already exists",
     "user-no-access-library-from-series": "User does not have access to the library this series belongs to",
     "series-restricted-age-restriction": "User is not allowed to view this series due to age restrictions",
+    "kavitaplus-restricted": "This is restricted to Kavita+ only",
+    "aliases-have-overlap": "One or more of the aliases have overlap with other people, cannot update",
 
     "volume-num": "Volume {0}",
     "book-num": "Book {0}",
@@ -224,6 +230,8 @@
     "scan-libraries": "Scan Libraries",
     "kavita+-data-refresh": "Kavita+ Data Refresh",
     "backup": "Backup",
-    "update-yearly-stats": "Update Yearly Stats"
+    "update-yearly-stats": "Update Yearly Stats",
+
+    "generated-reading-profile-name": "Generated from {0}"
 
 }

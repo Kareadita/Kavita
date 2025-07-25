@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 
 namespace API.DTOs.Statistics;
+#nullable enable
 
-public class UserReadStatistics
+public sealed record UserReadStatistics
 {
     /// <summary>
     /// Total number of pages read

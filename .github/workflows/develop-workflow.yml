@@ -7,7 +7,7 @@ on:
 
 jobs:
   debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Debug Info
         run: |
@@ -17,7 +17,7 @@ jobs:
           echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
   build:
     name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout Repo
@@ -33,7 +33,7 @@ jobs:
   version:
     name: Bump version
     needs: [ build ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-            dotnet-version: 8.0.x
+            dotnet-version: 9.0.x
 
       - name: Bump versions
         uses: majora2007/dotnet-bump-version@v0.0.10
@@ -55,7 +55,7 @@ jobs:
   develop:
     name: Build Nightly Docker
     needs: [ build, version ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/develop'
     permissions:
       packages: write
@@ -128,7 +128,7 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g Swashbuckle.AspNetCore.Cli

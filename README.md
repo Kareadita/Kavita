@@ -32,6 +32,7 @@ your reading collection with your friends and family!
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support
+- Ability to download metadata (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
 
 
 ## Support
@@ -40,7 +41,7 @@ your reading collection with your friends and family!
 
 ## Demo
 If you want to try out Kavita, a demo is available:
-[https://demo.kavitareader.com/](https://demo.kavitareader.com/)
+[https://demo.kavitareader.com/](https://demo.kavitareader.com/login?apiKey=9003cf99-9213-4206-a787-af2fe4cc5f1f)
 ```
 Username: demouser
 Password: Demouser64
@@ -49,7 +50,7 @@ Password: Demouser64
 ## Setup
 The easiest way to get started is to visit our Wiki which has up-to-date information on a variety of
 install methods and platforms.
-[https://wiki.kavitareader.com/installation/getting-started](https://wiki.kavitareader.com/installation/getting-started)
+[https://wiki.kavitareader.com/getting-started](https://wiki.kavitareader.com/getting-started)
 
 ## Feature Requests
 Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Many great features in Kavita are driven by our community. 
@@ -106,13 +107,10 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 ## Mega Sponsors
 <img src="https://opencollective.com/Kavita/tiers/mega-sponsor.svg?width=890"></a>
 
-## JetBrains
-Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http://www.jetbrains.com/) for providing us with free licenses to their great tools.
-
-* [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
+## Powered By
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSource)
 
 ### License
-
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2020-2024
 

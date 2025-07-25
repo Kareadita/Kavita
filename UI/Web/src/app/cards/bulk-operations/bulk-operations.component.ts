@@ -2,13 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, HostListener,
+  DestroyRef,
+  HostListener,
   inject,
   Input,
   OnInit
 } from '@angular/core';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { BulkSelectionService } from '../bulk-selection.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
 import {TranslocoModule} from "@jsverse/transloco";
@@ -18,7 +19,6 @@ import {KEY_CODES} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-bulk-operations',
-  standalone: true,
   imports: [
     AsyncPipe,
     CardActionablesComponent,

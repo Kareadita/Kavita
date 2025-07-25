@@ -1,5 +1,5 @@
-import { Observable } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import {Observable} from 'rxjs';
+import {FormControl} from '@angular/forms';
 
 export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
 
@@ -28,7 +28,7 @@ export class TypeaheadSettings<T> {
      */
     savedData!: T[] | T;
     /**
-     * Function to compare the elements. Should return all elements that fit the matching criteria. 
+     * Function to compare the elements. Should return all elements that fit the matching criteria.
      * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead.
      */
     compareFn!: ((optionList: T[], filter: string)  => T[]);
@@ -37,12 +37,12 @@ export class TypeaheadSettings<T> {
      */
     compareFnForAdd!: ((optionList: T[], filter: string)  => T[]);
     /**
-     * Function which is used for comparing objects when keeping track of state. 
+     * Function which is used for comparing objects when keeping track of state.
      * Useful over shallow equal when you have image urls that have random numbers on them.
-     */ 
+     */
     selectionCompareFn?: SelectionCompareFn<T>;
     /**
-     * Function to fetch the data from the server. If data is mainatined in memory, wrap in an observable.
+     * Function to fetch the data from the server. If data is maintained in memory, wrap in an observable.
      */
     fetchFn!: (filter: string) => Observable<T[]>;
     /**
@@ -50,7 +50,7 @@ export class TypeaheadSettings<T> {
      */
     minCharacters: number = 1;
     /**
-     * Optional form Control to tie model to. 
+     * Optional form Control to tie model to.
      */
     formControl?: FormControl;
     /**
@@ -68,5 +68,5 @@ export class TypeaheadSettings<T> {
     /**
      * An optional, but recommended trackby identity function to help Angular render the list better
      */
-    trackByIdentityFn!: (index: number, value: T) => T;
+    trackByIdentityFn!: (index: number, value: T) => string;
 }

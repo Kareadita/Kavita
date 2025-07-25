@@ -9,7 +9,7 @@
           <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()"></app-cover-image>
         </div>
 
-        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
+        <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
           <h4 class="title mb-2">
             <span>{{series.name}}
 
@@ -22,7 +22,7 @@
 
           </h4>
           <div class="subtitle mt-2 mb-2">
-            @if (series.localizedName !== series.name) {
+            @if (series.localizedName !== series.name && series.localizedName) {
               <span>{{series.localizedName | defaultValue}}</span>
             }
           </div>
@@ -36,7 +36,6 @@
                                    [mangaFormat]="series.format">
           </app-metadata-detail-row>
 
-          <!-- Rating goes here (after I implement support for rating individual issues -->
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="series.id"
                                  [ratings]="ratings"
@@ -51,14 +50,14 @@
             <div class="row g-0" style="align-items: center;">
               <div class="col-auto">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary-outline" (click)="read()">
+                  <button type="button" class="btn btn-outline-primary" (click)="read()">
                     <span>
                       <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                       <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
@@ -87,17 +86,17 @@
                 </div>
               }
 
-              @if ((accountService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
+              @if ((licenseService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip')">
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling ? t('on') : t('off')})">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
               }
 
-              <div class="col-auto ms-2 d-none d-md-block">
+              <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
                 </div>
               </div>
 
@@ -122,7 +121,7 @@
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a routerLink="/person/{{item.name}}/" class="dark-exempt btn-icon">{{item.name}}</a>
+                      <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -131,7 +130,7 @@
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
                   @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <a class="dark-exempt btn-icon" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
+                    <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata!.publicationStatus)"
                        href="javascript:void(0);"
                        [ngbTooltip]="t('publication-status-tooltip') + (seriesMetadata.totalCount === 0 ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')">
                       {{pubStatus}}
@@ -266,15 +265,19 @@
             </li>
           }
 
-          @if (hasRelations || readingLists.length > 0 || collections.length > 0) {
+          @if (hasRelations || readingLists.length > 0 || collections.length > 0 || bookmarks.length > 0) {
             <li [ngbNavItem]="TabID.Related">
               <a ngbNavLink>
                 {{t(TabID.Related)}}
-                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length + (bookmarks.length > 0 ? 1 : 0)}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                  <app-related-tab [readingLists]="readingLists" [collections]="collections" [relations]="relations"></app-related-tab>
+                  <app-related-tab [readingLists]="readingLists"
+                                   [collections]="collections"
+                                   [relations]="relations"
+                                   [libraryId]="libraryId"
+                                   [bookmarks]="bookmarks"></app-related-tab>
                 }
               </ng-template>
             </li>
@@ -311,25 +314,8 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-                <div class="mb-3">
-                  <app-carousel-reel [items]="reviews" [alwaysShow]="true" [title]="t('user-reviews-local')"
-                                     iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}"
-                                     [clickableTitle]="true" (sectionClick)="openReviewModal()">
-                    <ng-template #carouselItem let-item let-position="idx">
-                      <app-review-card [review]="item" (refresh)="updateOrDeleteReview($event)"></app-review-card>
-                    </ng-template>
-                  </app-carousel-reel>
-                </div>
-
-                <div class="mb-3">
-                  <app-carousel-reel [items]="plusReviews" [alwaysShow]="false" [title]="t('user-reviews-plus')">
-                    <ng-template #carouselItem let-item let-position="idx">
-                      <app-review-card [review]="item"></app-review-card>
-                    </ng-template>
-                  </app-carousel-reel>
-                </div>
+                <app-reviews [userReviews]="reviews" [plusReviews]="plusReviews" [series]="series" />
               }
-
             </ng-template>
           </li>
 

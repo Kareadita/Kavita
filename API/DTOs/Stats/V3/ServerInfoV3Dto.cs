@@ -7,7 +7,7 @@ namespace API.DTOs.Stats.V3;
 /// <summary>
 /// Represents information about a Kavita Installation for Kavita Stats v3 API
 /// </summary>
-public class ServerInfoV3Dto
+public sealed record ServerInfoV3Dto
 {
     /// <summary>
     /// Unique Id that represents a unique install
@@ -55,6 +55,11 @@ public class ServerInfoV3Dto
     /// </summary>
     /// <remarks>This pings a health check and does not capture any IP Information</remarks>
     public long TimeToPingKavitaStatsApi { get; set; }
+    /// <summary>
+    /// If using the downloading metadata feature
+    /// </summary>
+    /// <remarks>Kavita+ Only</remarks>
+    public bool MatchedMetadataEnabled { get; set; }
 
 
 

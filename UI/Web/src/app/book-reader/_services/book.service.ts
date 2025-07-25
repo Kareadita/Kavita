@@ -28,7 +28,7 @@ export class BookService {
   getFontFamilies(): Array<FontFamily> {
     return [{title: 'default', family: 'default'}, {title: 'EBGaramond', family: 'EBGaramond'}, {title: 'Fira Sans', family: 'Fira_Sans'},
     {title: 'Lato', family: 'Lato'}, {title: 'Libre Baskerville', family: 'Libre_Baskerville'}, {title: 'Merriweather', family: 'Merriweather'},
-    {title: 'Nanum Gothic', family: 'Nanum_Gothic'}, {title: 'RocknRoll One', family: 'RocknRoll_One'}, {title: 'Open Dyslexic', family: 'OpenDyslexic2'}];
+    {title: 'Nanum Gothic', family: 'Nanum_Gothic'}, {title: 'Open Dyslexic', family: 'OpenDyslexic2'}, {title: 'RocknRoll One', family: 'RocknRoll_One'}, {title: 'Fast Font Serif (Bionic)', family: 'FastFontSerif'}, {title: 'Fast Font Sans (Bionic)', family: 'FastFontSans'}];
   }
 
   getBookChapters(chapterId: number) {

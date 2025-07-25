@@ -1,4 +1,4 @@
-import {AsyncPipe, DatePipe, DOCUMENT, NgStyle} from '@angular/common';
+import {AsyncPipe, DatePipe, DOCUMENT} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -7,7 +7,6 @@ import {
   DestroyRef,
   ElementRef,
   EventEmitter,
-  HostListener,
   inject,
   Inject,
   OnInit,
@@ -20,15 +19,14 @@ import {ToastrService} from 'ngx-toastr';
 import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
@@ -50,32 +48,31 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
 import {User} from "../../../_models/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
-import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {
   SmartCollectionDrawerComponent
 } from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {MetadataService} from "../../../_services/metadata.service";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 @Component({
   selector: 'app-collection-detail',
   templateUrl: './collection-detail.component.html',
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
     BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    SafeHtmlPipe, TranslocoDatePipe, DatePipe, DefaultDatePipe, ProviderImagePipe, ProviderNamePipe, AsyncPipe,
-    PromotedIconComponent]
+    DatePipe, DefaultDatePipe, ProviderImagePipe, AsyncPipe, ScrobbleProviderNamePipe, PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -100,6 +97,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
+  private readonly metadataService = inject(MetadataService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly Breakpoint = Breakpoint;
@@ -114,13 +112,13 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<UserCollection>[] = [];
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   summary: string = '';
   user!: User;
 
   actionInProgress: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -193,18 +191,26 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-        if (this.filter.statements.filter(stmt => stmt.field === FilterField.CollectionTags).length === 0) {
-          this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+        const defaultStmt =  {field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(defaultStmt);
         }
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+
+        if (this.filter.statements.filter((stmt: FilterStatement<FilterField>) => stmt.field === FilterField.CollectionTags).length === 0) {
+          this.filter!.statements.push(defaultStmt);
+        }
+
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+        this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
-        this.cdRef.markForCheck();
 
         this.updateTag(tagId);
+        this.cdRef.markForCheck();
       });
   }
 
@@ -212,7 +218,8 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
       this.user = user;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
+        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
@@ -228,6 +235,17 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         this.loadPage();
       }
     });
+  }
+
+  shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
+    switch (action.action) {
+      case Action.Promote:
+        return !entity.promoted;
+      case Action.UnPromote:
+        return entity.promoted;
+      default:
+        return true;
+    }
   }
 
   ngAfterContentChecked(): void {
@@ -264,7 +282,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
@@ -310,12 +328,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.collectionTag);
-    }
-  }
-
   openEditCollectionTagModal(collectionTag: UserCollection) {
     const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
     modalRef.componentInstance.tag = this.collectionTag;
@@ -326,7 +338,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openSyncDetailDrawer() {
-
     const ref = this.offcanvasService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
     ref.componentInstance.collection = this.collectionTag;
     ref.componentInstance.series = this.series;

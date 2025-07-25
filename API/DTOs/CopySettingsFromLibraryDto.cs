@@ -2,7 +2,7 @@
 
 namespace API.DTOs;
 
-public class CopySettingsFromLibraryDto
+public sealed record CopySettingsFromLibraryDto
 {
     public int SourceLibraryId { get; set; }
     public List<int> TargetLibraryIds { get; set; }

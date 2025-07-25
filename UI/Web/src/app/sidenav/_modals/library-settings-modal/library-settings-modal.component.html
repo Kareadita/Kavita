@@ -20,8 +20,8 @@
             <div class="mb-3">
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
               @if (libraryForm.get('name'); as formControl) {
-                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
-                @if (libraryForm.dirty || libraryForm.touched) {
+                <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                @if (libraryForm.dirty || !libraryForm.untouched) {
                   <div id="inviteForm-validations" class="invalid-feedback">
                     @if (formControl.errors?.required) {
                       <div>{{t('required-field')}}</div>
@@ -52,8 +52,8 @@
                 <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                @for (opt of libraryTypes; track opt; let i = $index) {
-                  <option [value]="i">{{opt}}</option>
+                @for (opt of libraryTypes; track opt.value) {
+                  <option [value]="opt.value">{{opt.title}}</option>
                 }
 
               </select>
@@ -69,6 +69,11 @@
         <li [ngbNavItem]="TabID.Folder" [disabled]="isAddLibrary && setupStep < 1">
           <a ngbNavLink>{{t(TabID.Folder)}}</a>
           <ng-template ngbNavContent>
+
+            @if (filesAtRoot()) {
+              <p class="alert alert-warning">{{t('files-at-root-warning')}}</p>
+            }
+
             <p>{{t('folder-description')}}</p>
             <ul class="list-group list-group-flush" style="width: 100%">
               @for(folder of selectedFolders; track folder) {
@@ -77,7 +82,6 @@
                   <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
                 </li>
               }
-
             </ul>
             <div class="row mt-2">
               <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
@@ -128,6 +132,26 @@
             </div>
 
             <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('remove-prefix-for-sortname-label')" [subtitle]="t('remove-prefix-for-sortname-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="remove-prefix-for-sortname" role="switch" formControlName="removePrefixForSortName" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('enable-metadata-label')" [subtitle]="t('enable-metadata-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="enable-metadata" role="switch" formControlName="enableMetadata" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
               <app-setting-switch [title]="t('manage-collection-label')" [subtitle]="t('manage-collection-tooltip')">
                 <ng-template #switch>
                   <div class="form-check form-switch float-end">
@@ -152,6 +176,16 @@
                 <ng-template #switch>
                   <div class="form-check form-switch float-end">
                     <input type="checkbox" id="scrobbling" role="switch" formControlName="allowScrobbling" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('allow-metadata-matching-label')" [subtitle]="t('allow-metadata-matching-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="metadata-matching" role="switch" formControlName="allowMetadataMatching" class="form-check-input">
                   </div>
                 </ng-template>
               </app-setting-switch>

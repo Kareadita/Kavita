@@ -2,7 +2,7 @@
 
 namespace API.DTOs;
 
-public class DeleteChaptersDto
+public sealed record DeleteChaptersDto
 {
     public IList<int> ChapterIds { get; set; } = default!;
 }

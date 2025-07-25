@@ -201,5 +201,13 @@
     "person-doesnt-exist": "Níl duine ann",
     "person-name-required": "Tá ainm an duine ag teastáil agus ní féidir é a bheith ar neamhní",
     "person-name-unique": "Caithfidh ainm duine a bheith uathúil",
-    "person-image-doesnt-exist": "Níl an duine in CoversDB"
+    "person-image-doesnt-exist": "Níl an duine in CoversDB",
+    "email-taken": "Ríomhphost in úsáid cheana féin",
+    "kavitaplus-restricted": "Tá sé seo teoranta do Kavita+ amháin",
+    "smart-filter-system-name": "Ní féidir leat ainm srutha an chórais a sholáthair tú a úsáid",
+    "sidenav-stream-only-delete-smart-filter": "Ní féidir ach sruthanna cliste scagaire a scriosadh as an SideNav",
+    "dashboard-stream-only-delete-smart-filter": "Ní féidir ach sruthanna cliste scagaire a scriosadh ón deais",
+    "smart-filter-name-required": "Ainm Scagaire Cliste ag teastáil",
+    "aliases-have-overlap": "Tá forluí idir ceann amháin nó níos mó de na leasainmneacha agus daoine eile, ní féidir iad a nuashonrú",
+    "generated-reading-profile-name": "Gineadh ó {0}"
 }

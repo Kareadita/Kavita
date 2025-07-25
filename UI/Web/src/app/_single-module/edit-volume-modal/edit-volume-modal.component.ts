@@ -1,30 +1,17 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {
-  NgbActiveModal,
-  NgbInputDatepicker,
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {AsyncPipe, DatePipe, DecimalPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgClass} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
-import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
-import {ImageComponent} from "../../shared/image/image.component";
-import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {Volume} from "../../_models/volume";
@@ -37,11 +24,10 @@ import {DownloadService} from "../../shared/_services/download.service";
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
 import {forkJoin} from "rxjs";
-import { MangaFormat } from 'src/app/_models/manga-format';
+import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {VolumeService} from "../../_services/volume.service";
 import {User} from "../../_models/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   General = 'general-tab',
@@ -63,37 +49,25 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
   selector: 'app-edit-volume-modal',
-  standalone: true,
   imports: [
     FormsModule,
     NgbNav,
     NgbNavContent,
     NgbNavLink,
     TranslocoDirective,
-    AsyncPipe,
     NgbNavOutlet,
     ReactiveFormsModule,
     NgbNavItem,
     SettingItemComponent,
-    NgTemplateOutlet,
     NgClass,
-    TypeaheadComponent,
     EntityTitleComponent,
-    TitleCasePipe,
     SettingButtonComponent,
     CoverImageChooserComponent,
     EditChapterProgressComponent,
-    NgbInputDatepicker,
     CompactNumberPipe,
-    IconAndTitleComponent,
     DefaultDatePipe,
-    TranslocoDatePipe,
     UtcToLocalTimePipe,
     BytesPipe,
-    ImageComponent,
-    SafeHtmlPipe,
-    DecimalPipe,
-    DatePipe,
     ReadTimePipe
   ],
   templateUrl: './edit-volume-modal.component.html',

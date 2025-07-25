@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Data.Misc;
 using API.Entities;
 using API.Helpers;
 
@@ -43,5 +44,14 @@ public static class AppUserExtensions
 
         OrderableHelper.ReorderItems(user.SideNavStreams);
 
+    }
+
+    public static AgeRestriction GetAgeRestriction(this AppUser user)
+    {
+        return new AgeRestriction()
+        {
+            AgeRating = user.AgeRestriction,
+            IncludeUnknowns = user.AgeRestrictionIncludeUnknowns,
+        };
     }
 }

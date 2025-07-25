@@ -7,7 +7,6 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
-using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;

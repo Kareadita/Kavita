@@ -6,7 +6,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public class PdfParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo comicInfo = null)
+    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         var ret = new ParserInfo
@@ -68,12 +68,37 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ParseFromFallbackFolders(filePath, tempRootPath, type, ref ret);
         }
 
+        if (enableMetadata)
+        {
+            // Patch in other information from ComicInfo
+            UpdateFromComicInfo(ret);
+
+            if (comicInfo != null && !string.IsNullOrEmpty(comicInfo.Title))
+            {
+                ret.Title = comicInfo.Title.Trim();
+            }
+        }
+
+
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
             ret.Chapters = Parser.DefaultChapter;
             ret.Volumes = Parser.SpecialVolume;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+        }
+
+        if (type == LibraryType.Book && comicInfo != null)
+        {
+            // For books, fall back to the Title for Series.
+            if (!string.IsNullOrEmpty(comicInfo.Series))
+            {
+                ret.Series = comicInfo.Series.Trim();
+            }
+            else if (!string.IsNullOrEmpty(comicInfo.Title))
+            {
+                ret.Series = comicInfo.Title.Trim();
+            }
         }
 
         if (string.IsNullOrEmpty(ret.Series))

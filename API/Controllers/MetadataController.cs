@@ -9,10 +9,13 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Metadata.Browse;
+using API.DTOs.Person;
 using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Plus;
 using Kavita.Common.Extensions;
@@ -32,14 +35,33 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// Fetches genres from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all genres</param>
+    /// <param name="context">Context from which this API was invoked</param>
     /// <returns></returns>
     [HttpGet("genres")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["libraryIds", "context"])]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds, QueryContext context = QueryContext.None)
     {
-        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(int.Parse)
+            .ToList();
 
         return Ok(await unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(User.GetUserId(), ids, context));
+    }
+
+    /// <summary>
+    /// Returns a list of Genres with counts for counts when Genre is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("genres-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseGenreDto>>> GetBrowseGenres(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.GenreRepository.GetBrowseableGenre(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>
@@ -70,6 +92,7 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         {
             return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId(), ids));
         }
+
         return Ok(await unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(User.GetUserId()));
     }
 
@@ -88,6 +111,22 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId(), ids));
         }
         return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Returns a list of Tags with counts for counts when Tag is on Series/Chapter
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("tags-with-counts")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<PagedList<BrowseTagDto>>> GetBrowseTags(UserParams? userParams = null)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.TagRepository.GetBrowseableTag(User.GetUserId(), userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>
@@ -189,12 +228,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpPost("force-refresh")]
-    public async Task<ActionResult> ForceRefresh(int seriesId)
-    {
-        await metadataService.ForceKavitaPlusRefresh(seriesId);
-        return Ok();
-    }
+    // [HttpPost("force-refresh")]
+    // public async Task<ActionResult> ForceRefresh(int seriesId)
+    // {
+    //     await metadataService.ForceKavitaPlusRefresh(seriesId);
+    //     return Ok();
+    // }
 
     /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page
@@ -217,12 +256,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         return Ok(ret);
     }
 
-    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret)
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto? ret)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId())!;
 
-        userReviews.AddRange(ReviewService.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+        userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
         ret.Reviews = userReviews;
 
         if (!isAdmin && ret.Recommendations != null && user != null)
@@ -231,12 +270,12 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
             ret.Recommendations.OwnedSeries =
                 await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
                     ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
-            ret.Recommendations.ExternalSeries = new List<ExternalSeriesDto>();
+            ret.Recommendations.ExternalSeries = [];
         }
 
         if (ret.Recommendations != null && user != null)
         {
-            ret.Recommendations.OwnedSeries ??= new List<SeriesDto>();
+            ret.Recommendations.OwnedSeries ??= [];
             await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
         }
     }

@@ -6,15 +6,20 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
@@ -26,13 +31,16 @@ public class ChapterController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ChapterController> _logger;
+    private readonly IMapper _mapper;
 
-    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger)
+    public ChapterController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub, ILogger<ChapterController> logger,
+        IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _eventHub = eventHub;
         _logger = logger;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -61,7 +69,8 @@ public class ChapterController : BaseApiController
     {
         if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId,
+            ChapterIncludes.Files | ChapterIncludes.ExternalReviews | ChapterIncludes.ExternalRatings);
         if (chapter == null)
             return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
@@ -79,6 +88,15 @@ public class ChapterController : BaseApiController
             _unitOfWork.ChapterRepository.Remove(chapter);
         }
 
+        // If we removed the volume, do an additional check if we need to delete the actual series as well or not
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(vol.SeriesId, SeriesIncludes.ExternalData | SeriesIncludes.Volumes);
+        var needToRemoveSeries = needToRemoveVolume && series != null && series.Volumes.Count <= 1;
+        if (needToRemoveSeries)
+        {
+            _unitOfWork.SeriesRepository.Remove(series!);
+        }
+
+
 
         if (!await _unitOfWork.CommitAsync()) return Ok(false);
 
@@ -86,6 +104,12 @@ public class ChapterController : BaseApiController
         if (needToRemoveVolume)
         {
             await _eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(chapter.VolumeId, vol.SeriesId), false);
+        }
+
+        if (needToRemoveSeries)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                MessageFactory.SeriesRemovedEvent(series!.Id, series.Name, series.LibraryId), false);
         }
 
         return Ok(true);
@@ -185,6 +209,7 @@ public class ChapterController : BaseApiController
         if (chapter.AgeRating != dto.AgeRating)
         {
             chapter.AgeRating = dto.AgeRating;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
         }
 
         dto.Summary ??= string.Empty;
@@ -192,6 +217,7 @@ public class ChapterController : BaseApiController
         if (chapter.Summary != dto.Summary.Trim())
         {
             chapter.Summary = dto.Summary.Trim();
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterSummary);
         }
 
         if (chapter.Language != dto.Language)
@@ -207,11 +233,13 @@ public class ChapterController : BaseApiController
         if (chapter.TitleName != dto.TitleName)
         {
             chapter.TitleName = dto.TitleName;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterTitle);
         }
 
         if (chapter.ReleaseDate != dto.ReleaseDate)
         {
             chapter.ReleaseDate = dto.ReleaseDate;
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterReleaseDate);
         }
 
         if (!string.IsNullOrEmpty(dto.ISBN) && ArticleNumberHelper.IsValidIsbn10(dto.ISBN) ||
@@ -234,131 +262,123 @@ public class ChapterController : BaseApiController
 
 
         #region Genres
-        if (dto.Genres is {Count: > 0})
-        {
-            chapter.Genres ??= new List<Genre>();
-            await GenreHelper.UpdateChapterGenres(chapter, dto.Genres.Select(t => t.Title), _unitOfWork);
-        }
+        chapter.Genres ??= [];
+        await GenreHelper.UpdateChapterGenres(chapter, dto.Genres.Select(t => t.Title), _unitOfWork);
         #endregion
 
         #region Tags
-        if (dto.Tags is {Count: > 0})
-        {
-            chapter.Tags ??= new List<Tag>();
-            await TagHelper.UpdateChapterTags(chapter, dto.Tags.Select(t => t.Title), _unitOfWork);
-        }
+        chapter.Tags ??= [];
+        await TagHelper.UpdateChapterTags(chapter, dto.Tags.Select(t => t.Title), _unitOfWork);
         #endregion
 
         #region People
-        if (PersonHelper.HasAnyPeople(dto))
-        {
-            chapter.People ??= new List<ChapterPeople>();
+        chapter.People ??= [];
 
+        // Update writers
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Writers.Select(p => p.Name).ToList(),
+            PersonRole.Writer,
+            _unitOfWork
+        );
 
-            // Update writers
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Writers.Select(p => p.Name).ToList(),
-                PersonRole.Writer,
-                _unitOfWork
-            );
+        // Update characters
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Characters.Select(p => p.Name).ToList(),
+            PersonRole.Character,
+            _unitOfWork
+        );
 
-            // Update characters
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Characters.Select(p => p.Name).ToList(),
-                PersonRole.Character,
-                _unitOfWork
-            );
+        // Update pencillers
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Pencillers.Select(p => p.Name).ToList(),
+            PersonRole.Penciller,
+            _unitOfWork
+        );
 
-            // Update pencillers
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Pencillers.Select(p => p.Name).ToList(),
-                PersonRole.Penciller,
-                _unitOfWork
-            );
+        // Update inkers
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Inkers.Select(p => p.Name).ToList(),
+            PersonRole.Inker,
+            _unitOfWork
+        );
 
-            // Update inkers
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Inkers.Select(p => p.Name).ToList(),
-                PersonRole.Inker,
-                _unitOfWork
-            );
+        // Update colorists
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Colorists.Select(p => p.Name).ToList(),
+            PersonRole.Colorist,
+            _unitOfWork
+        );
 
-            // Update colorists
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Colorists.Select(p => p.Name).ToList(),
-                PersonRole.Colorist,
-                _unitOfWork
-            );
+        // Update letterers
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Letterers.Select(p => p.Name).ToList(),
+            PersonRole.Letterer,
+            _unitOfWork
+        );
 
-            // Update letterers
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Letterers.Select(p => p.Name).ToList(),
-                PersonRole.Letterer,
-                _unitOfWork
-            );
+        // Update cover artists
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.CoverArtists.Select(p => p.Name).ToList(),
+            PersonRole.CoverArtist,
+            _unitOfWork
+        );
 
-            // Update cover artists
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.CoverArtists.Select(p => p.Name).ToList(),
-                PersonRole.CoverArtist,
-                _unitOfWork
-            );
+        // Update editors
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Editors.Select(p => p.Name).ToList(),
+            PersonRole.Editor,
+            _unitOfWork
+        );
 
-            // Update editors
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Editors.Select(p => p.Name).ToList(),
-                PersonRole.Editor,
-                _unitOfWork
-            );
+        // TODO: Only remove field if changes were made
+        chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterPublisher);
+        // Update publishers
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Publishers.Select(p => p.Name).ToList(),
+            PersonRole.Publisher,
+            _unitOfWork
+        );
 
-            // Update publishers
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Publishers.Select(p => p.Name).ToList(),
-                PersonRole.Publisher,
-                _unitOfWork
-            );
+        // Update translators
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Translators.Select(p => p.Name).ToList(),
+            PersonRole.Translator,
+            _unitOfWork
+        );
 
-            // Update translators
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Translators.Select(p => p.Name).ToList(),
-                PersonRole.Translator,
-                _unitOfWork
-            );
+        // Update imprints
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Imprints.Select(p => p.Name).ToList(),
+            PersonRole.Imprint,
+            _unitOfWork
+        );
 
-            // Update imprints
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Imprints.Select(p => p.Name).ToList(),
-                PersonRole.Imprint,
-                _unitOfWork
-            );
+        // Update teams
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Teams.Select(p => p.Name).ToList(),
+            PersonRole.Team,
+            _unitOfWork
+        );
 
-            // Update teams
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Teams.Select(p => p.Name).ToList(),
-                PersonRole.Team,
-                _unitOfWork
-            );
-
-            // Update locations
-            await PersonHelper.UpdateChapterPeopleAsync(
-                chapter,
-                dto.Locations.Select(p => p.Name).ToList(),
-                PersonRole.Location,
-                _unitOfWork
-            );
-        }
+        // Update locations
+        await PersonHelper.UpdateChapterPeopleAsync(
+            chapter,
+            dto.Locations.Select(p => p.Name).ToList(),
+            PersonRole.Location,
+            _unitOfWork
+        );
         #endregion
 
         #region Locks
@@ -400,6 +420,39 @@ public class ChapterController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Returns Ratings and Reviews for an individual Chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("chapter-detail-plus")]
+    public async Task<ActionResult<ChapterDetailPlusDto>> ChapterDetailPlus([FromQuery] int chapterId)
+    {
+        var ret = new ChapterDetailPlusDto();
 
+        var userReviews = (await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId()))
+            .Where(r => !string.IsNullOrEmpty(r.Body))
+            .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
+            .ToList();
+
+        var ownRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(User.GetUserId(), chapterId);
+        if (ownRating != null)
+        {
+            ret.Rating = ownRating.Rating;
+            ret.HasBeenRated = ownRating.HasBeenRated;
+        }
+
+        var externalReviews = await _unitOfWork.ChapterRepository.GetExternalChapterReviewDtos(chapterId);
+        if (externalReviews.Count > 0)
+        {
+            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(externalReviews));
+        }
+
+        ret.Reviews = userReviews;
+
+        ret.Ratings = await _unitOfWork.ChapterRepository.GetExternalChapterRatingDtos(chapterId);
+
+        return Ok(ret);
+    }
 
 }

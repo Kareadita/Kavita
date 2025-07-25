@@ -803,7 +803,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("time-left")]
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = ["seriesId"])]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
     {
         var userId = User.GetUserId();

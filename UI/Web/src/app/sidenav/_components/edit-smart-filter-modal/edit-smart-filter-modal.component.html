@@ -1,0 +1,39 @@
+<ng-container *transloco="let t; read:'manage-smart-filters'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{t('edit-smart-filter', {name: smartFilter.name | sentenceCase})}}
+    </h4>
+
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <form [formGroup]="smartFilterForm">
+
+    <div class="m-3">
+      <label for="smart-filter-title" class="form-label">{{t('name-label')}}</label>
+      @if (smartFilterForm.get('name'); as nameControl) {
+        <input id="smart-filter-title" class="form-control" formControlName="name" type="text"
+               [class.is-invalid]="nameControl.invalid && !nameControl.untouched">
+        @if (smartFilterForm.dirty || !smartFilterForm.untouched) {
+          <div id="inviteForm-validations" class="invalid-feedback">
+            @if (nameControl.errors?.required) {
+              <div>{{t('required-field')}}</div>
+            }
+
+            @if (nameControl.errors?.duplicateName) {
+              <div>{{t('filter-name-unique')}}</div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+  </form>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="!smartFilterForm.valid" (click)="save()">{{t('save')}}</button>
+  </div>
+
+</ng-container>

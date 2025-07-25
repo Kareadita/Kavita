@@ -5,8 +5,15 @@
       <app-side-nav-companion-bar>
         <ng-container title>
           <h2 class="title text-break">
-            <app-card-actionables (actionHandler)="performAction($event)" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            <app-card-actionables [entity]="person" [inputActions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             <span>{{person.name}}</span>
+
+            @if (person.aniListId) {
+              <a class="ms-1" [href]="anilistUrl | safeUrl"  target="_blank" rel="noopener noreferrer">
+                <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(anilistUrl)"
+                           [errorImage]="imageService.errorWebLinkImage"></app-image>
+              </a>
+            }
           </h2>
         </ng-container>
       </app-side-nav-companion-bar>
@@ -19,6 +26,7 @@
             <div class="person-badge">
               <app-image
                       objectFit="cover"
+                      [styles]="{'object-position': 'top'}"
                       height="200px"
                       width="200px"
                       [imageUrl]="imageService.getPersonImage(person.id)"
@@ -35,16 +43,45 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            <app-read-more [text]="person.description || defaultSummaryText"></app-read-more>
+            <app-read-more [maxLength]="500" [text]="person.description || t('no-info')"></app-read-more>
 
-            @if (roles$ | async; as roles) {
-              <div class="mt-1">
-                <h5>{{t('all-roles')}}</h5>
-                @for(role of roles; track role) {
-                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>
-                }
+
+            @if (person.aliases.length > 0) {
+              <span class="fw-bold mt-2">{{t('aka-title')}}</span>
+              <div>
+                <app-badge-expander [items]="person.aliases"
+                                    [itemsTillExpander]="6">
+                  <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                    <span>{{item}}</span>
+                  </ng-template>
+                </app-badge-expander>
               </div>
             }
+
+
+            @if (roles$ | async; as roles) {
+              @if (roles.length > 0) {
+                <span class="fw-bold mt-2">{{t('all-roles')}}</span>
+                <div>
+                  <app-badge-expander [items]="roles"
+                                      [itemsTillExpander]="6">
+                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="loadFilterByRole(item)">{{item | personRole}}</a>
+                    </ng-template>
+                  </app-badge-expander>
+                </div>
+              }
+
+
+<!--              -->
+<!--              <div class="mt-1">-->
+<!--                <h5>{{t('all-roles')}}</h5>-->
+<!--                @for(role of roles; track role) {-->
+<!--                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>-->
+<!--                }-->
+<!--              </div>-->
+            }
+
           </div>
         </div>
       </div>
@@ -52,6 +89,7 @@
 
     @if (works$ | async; as works) {
       <div class="row mt-2">
+        <!-- TODO: If the person is JUST a character, then switch this title to: 'A character in` -->
         <app-carousel-reel [items]="works" [title]="t('known-for-title')" (sectionClick)="loadFilterByPerson()">
           <ng-template #carouselItem let-item>
             <app-card-item [entity]="item"
@@ -96,7 +134,7 @@
     </div>
 
     <!-- External Series including Author -->
-    @if (accountService.hasValidLicense$ | async) {
+    @if (licenseService.hasValidLicense$ | async) {
       <div class="row mt-2">
 
       </div>

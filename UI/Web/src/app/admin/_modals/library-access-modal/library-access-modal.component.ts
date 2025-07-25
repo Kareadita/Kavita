@@ -3,7 +3,6 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Library} from 'src/app/_models/library/library';
 import {Member} from 'src/app/_models/auth/member';
 import {LibraryService} from 'src/app/_services/library.service';
-import {NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../../../typeahead/_models/selection-model";
@@ -13,7 +12,7 @@ import {SelectionModel} from "../../../typeahead/_models/selection-model";
   templateUrl: './library-access-modal.component.html',
   styleUrls: ['./library-access-modal.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, TranslocoDirective],
+  imports: [ReactiveFormsModule, FormsModule, TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryAccessModalComponent implements OnInit {
@@ -23,6 +22,7 @@ export class LibraryAccessModalComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
 
   @Input() member: Member | undefined;
+
   allLibraries: Library[] = [];
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;

@@ -20,7 +20,13 @@ public static class TagHelper
     public static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, IUnitOfWork unitOfWork)
     {
         // Normalize tag names once and store them in a hash set for quick lookups
-        var normalizedTagsToAdd = new HashSet<string>(tagNames.Select(t => t.ToNormalized()));
+        // Create a dictionary: normalized => original
+        var normalizedToOriginal = tagNames
+            .Select(t => new { Original = t, Normalized = t.ToNormalized() })
+            .GroupBy(x => x.Normalized) // in case of duplicates
+            .ToDictionary(g => g.Key, g => g.First().Original);
+
+        var normalizedTagsToAdd = new HashSet<string>(normalizedToOriginal.Keys);
         var existingTagsSet = new HashSet<string>(chapter.Tags.Select(t => t.NormalizedTitle));
 
         var isModified = false;
@@ -30,7 +36,7 @@ public static class TagHelper
             .Where(t => !normalizedTagsToAdd.Contains(t.NormalizedTitle))
             .ToList();
 
-        if (tagsToRemove.Any())
+        if (tagsToRemove.Count != 0)
         {
             foreach (var tagToRemove in tagsToRemove)
             {
@@ -47,7 +53,7 @@ public static class TagHelper
         // Find missing tags that are not already in the database
         var missingTags = normalizedTagsToAdd
             .Where(nt => !existingTagTitles.ContainsKey(nt))
-            .Select(title => new TagBuilder(title).Build())
+            .Select(nt => new TagBuilder(normalizedToOriginal[nt]).Build())
             .ToList();
 
         // Add missing tags to the database if any
@@ -67,13 +73,11 @@ public static class TagHelper
         // Add the new or existing tags to the chapter
         foreach (var normalizedTitle in normalizedTagsToAdd)
         {
-            var tag = existingTagTitles[normalizedTitle];
+            if (existingTagsSet.Contains(normalizedTitle)) continue;
 
-            if (!existingTagsSet.Contains(normalizedTitle))
-            {
-                chapter.Tags.Add(tag);
-                isModified = true;
-            }
+            var tag = existingTagTitles[normalizedTitle];
+            chapter.Tags.Add(tag);
+            isModified = true;
         }
 
         // Commit changes if modifications were made to the chapter's tags
@@ -104,12 +108,17 @@ public static class TagHelper
 
     public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
     {
+        UpdateTagList((existingDbTags ?? []).Select(t => t.Title).ToList(), series, newTags, handleAdd, onModified);
+    }
+
+    public static void UpdateTagList(ICollection<string>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
+    {
         if (existingDbTags == null) return;
 
         var isModified = false;
 
         // Convert tags and existing genres to hash sets for quick lookups by normalized title
-        var existingTagSet = new HashSet<string>(existingDbTags.Select(t => t.Title.ToNormalized()));
+        var existingTagSet = new HashSet<string>(existingDbTags.Select(t => t.ToNormalized()));
         var dbTagSet = new HashSet<string>(series.Metadata.Tags.Select(g => g.NormalizedTitle));
 
         // Remove tags that are no longer present in the input tags
@@ -129,7 +138,7 @@ public static class TagHelper
         // Add new tags from the input list
         foreach (var tagDto in existingDbTags)
         {
-            var normalizedTitle = tagDto.Title.ToNormalized();
+            var normalizedTitle = tagDto.ToNormalized();
 
             if (dbTagSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
 
@@ -139,7 +148,7 @@ public static class TagHelper
             }
             else
             {
-                handleAdd(new TagBuilder(tagDto.Title).Build());  // Add new genre if not found
+                handleAdd(new TagBuilder(tagDto).Build());  // Add new genre if not found
             }
             isModified = true;
         }
@@ -150,5 +159,4 @@ public static class TagHelper
             onModified();
         }
     }
-
 }

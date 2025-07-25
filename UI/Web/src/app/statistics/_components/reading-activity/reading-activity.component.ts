@@ -1,7 +1,6 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
-import { MangaFormatPipe } from 'src/app/_pipes/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
 import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -10,18 +9,17 @@ import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
 
 @Component({
-  selector: 'app-reading-activity',
-  templateUrl: './reading-activity.component.html',
-  styleUrls: ['./reading-activity.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective, MangaFormatPipe]
+    selector: 'app-reading-activity',
+    templateUrl: './reading-activity.component.html',
+    styleUrls: ['./reading-activity.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective]
 })
 export class ReadingActivityComponent implements OnInit {
   /**

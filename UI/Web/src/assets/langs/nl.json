@@ -8,7 +8,7 @@
         "submit": "Inloggen"
     },
     "dashboard": {
-        "no-libraries": "Er zijn nog geen bibliotheken ingesteld. Configureer wat in",
+        "no-libraries": "Er zijn nog geen bibliotheken ingesteld. Creëer wat in",
         "server-settings-link": "Serverinstellingen",
         "not-granted": "U heeft geen toegang gekregen tot bibliotheken.",
         "on-deck-title": "Aan het lezen",
@@ -22,10 +22,11 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Opslaan…",
-        "update": "Update"
+        "update": "Update",
+        "invalid-email-warning": "Een ongeldig e-mailadres blokkeert bepaalde functionaliteiten van Kavita",
+        "account-detail-title": "Accountgegevens"
     },
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
@@ -43,7 +44,13 @@
         "not-applicable": "Niet toepasbaar",
         "processed": "Verwerkt",
         "not-processed": "Niet Verwerkt",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "scrobbling-disabled": "Scrobbelen is uitgeschakeld in uw Accountinstellingen.",
+        "volume-num": "Deel {{num}}",
+        "chapter-num": "Hoofdstuk {{num}}",
+        "not-read-warning": "Upstream-providers behouden altijd het hoogste aantal",
+        "generate-scrobble-events": "Genereer evenementen",
+        "token-expired": "Je AniList-token is verlopen! Scrobbling-evenementen zullen niet verwerkt worden totdat je deze verlengt op de Accounts-pagina."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leesvoortgang",
@@ -55,15 +62,6 @@
     "spoiler": {
         "click-to-show": "Spoiler, klik om te tonen"
     },
-    "review-series-modal": {
-        "title": "Beoordeling bewerken",
-        "review-label": "Beoordeling",
-        "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "min-length": "Review moet minimum {{count}} characters hebben",
-        "required": "{{validation.required-field}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}s Recensie",
@@ -73,7 +71,7 @@
     "review-card": {
         "your-review": "Dit is jouw recensie",
         "external-review": "Externe recensie",
-        "local-review": "Recensie",
+        "local-review": "Lokale recensie",
         "rating-percentage": "Beoordeling {{r}}%"
     },
     "want-to-read": {
@@ -108,47 +106,16 @@
         "collapse-series-relationships-tooltip": "Moet Kavita series laten zien die geen relaties hebben of die geen ouder / prequel is",
         "share-series-reviews-label": "Deel serierecensies",
         "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken",
-        "image-reader-settings-title": "Afbeeldingslezer",
-        "reading-direction-label": "Leesrichting",
-        "reading-direction-tooltip": "Richting om te klikken om naar de volgende pagina te gaan. Rechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
-        "scaling-option-label": "Schaal opties",
-        "scaling-option-tooltip": "Hoe de afbeelding naar uw scherm te schalen.",
-        "page-splitting-label": "Pagina splitsen",
-        "page-splitting-tooltip": "Een afbeelding over de volledige breedte splitsen (dwz zowel de linker- als de rechterafbeelding worden gecombineerd)",
-        "reading-mode-label": "Leesmodus",
-        "layout-mode-label": "Lay-out Modus",
-        "layout-mode-tooltip": "Geef een enkele afbeelding of twee afbeeldingen naast elkaar weer",
-        "background-color-label": "Achtergrondkleur",
-        "auto-close-menu-label": "Menu automatisch sluiten",
-        "show-screen-hints-label": "Toon schermhints",
-        "emulate-comic-book-label": "Emuleer Stripverhaal",
-        "swipe-to-paginate-label": "Veeg om te bladeren",
-        "book-reader-settings-title": "Boekenlezer",
-        "tap-to-paginate-label": "Tik om te bladeren",
-        "tap-to-paginate-tooltip": "Tikken op de zijden van de lezen toestaan om te bladeren naar vorige/volgende pagina",
-        "immersive-mode-label": "Immersie-modus",
-        "immersive-mode-tooltip": "Hierdoor wordt het menu verborgen achter een klik op het lezerdocument en wordt de tik om te pagineren ingeschakeld",
-        "reading-direction-book-label": "Leesrichting",
-        "reading-direction-book-tooltip": "Richting waarin u klikt om naar de volgende pagina te gaan. Van rechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
-        "font-family-label": "Lettertypefamilie",
-        "font-family-tooltip": "Lettertypefamilie om te laden. Standaard laadt het standaardlettertype van het boek",
-        "writing-style-label": "Schrijfstijl",
-        "writing-style-tooltip": "Verandert de richting van de tekst. Horizontaal is van links naar rechts, verticaal is van boven naar beneden.",
-        "layout-mode-book-label": "Lay-outmodus",
-        "layout-mode-book-tooltip": "Hoe de inhoud moet worden ingedeeld. Scroll is zoals het boek het verpakt. 1 of 2 kolommen passen bij de hoogte van het apparaat en er passen 1 of 2 kolommen tekst per pagina",
-        "color-theme-book-label": "Kleurenthema",
-        "color-theme-book-tooltip": "Welk kleurenthema moet worden toegepast op de inhoud en het menu van de boeklezer",
-        "font-size-book-label": "Lettertypegrootte",
-        "line-height-book-label": "Regelafstand",
-        "line-height-book-tooltip": "Hoeveel ruimte tussen de regels van het boek",
-        "margin-book-label": "Marge",
-        "margin-book-tooltip": "Hoeveel ruimte aan elke kant van het scherm. Dit overschrijft naar 0 op mobiele apparaten, ongeacht deze instelling.",
         "clients-opds-alert": "OPDS is niet ingeschakeld op deze server. Dit heeft geen invloed op Tachiyomi-gebruikers.",
         "clients-opds-description": "Alle externe clients gebruiken de API-sleutel of de onderstaande verbindings-URL. Dit zijn net wachtwoorden, houd het privé.",
         "clients-api-key-tooltip": "De API-sleutel is als een wachtwoord. Houd het geheim, houd het veilig.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "anilist-scrobbling-tooltip": "Laat Kavita om naar AniList uw leesvoortgang en recensies te Scrobblen (eenrichtingssynchronisatie)",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList scrobbelen",
+        "want-to-read-sync-label": "Willen Lezen Sync"
     },
     "user-holds": {
         "title": "Scrobble Holds",
@@ -500,10 +467,7 @@
     "changelog": {
         "installed": "Geïnstalleerd",
         "download": "Download",
-        "published-label": "Gepubliceerd: ",
-        "available": "Beschikbaar",
-        "description": "Als je geen {{installed}} ziet",
-        "description-continued": "tag, je bent op een nightly release. Alleen hoofdversies worden weergegeven als beschikbaar."
+        "available": "Beschikbaar"
     },
     "invite-user": {
         "title": "Gebruiker uitnodigen",
@@ -1058,9 +1022,6 @@
         "backup-database-task-success": "Een taak voor het maken van een back-up van de database is in de wachtrij geplaatst",
         "download-logs-task": "Logboeken downloaden",
         "download-logs-task-desc": "Compileert alle logbestanden in een zip en downloadt deze.",
-        "analyze-files-task": "Analyseer bestanden",
-        "analyze-files-task-desc": "Voert een langlopende taak uit die bestanden analyseert om extensie en grootte te genereren. Dit mag slechts één keer worden uitgevoerd voor de v0.7-release. Niet nodig als je post v0.7 hebt geïnstalleerd.",
-        "analyze-files-task-success": "Bestandsanalyse is in de wachtrij geplaatst",
         "check-for-updates-task": "Controleer op updates",
         "check-for-updates-task-desc": "Kijk of er stabiele releases zijn vóór uw versie."
     },
@@ -1291,7 +1252,6 @@
     },
     "manga-reader": {
         "back": "Terug",
-        "save-globally": "Globaal opslaan",
         "incognito-alt": "De incognitomodus staat aan. Schakel om uit te schakelen.",
         "incognito-title": "Incognito modus:",
         "shortcuts-menu-alt": "Sneltoetsen Modaal",
@@ -1323,7 +1283,6 @@
         "layout-mode-switched": "De lay-outmodus is overgeschakeld naar Enkel omdat er onvoldoende ruimte is om een dubbele lay-out weer te geven",
         "no-next-chapter": "Geen volgend hoofdstuk",
         "no-prev-chapter": "Geen vorig hoofdstuk",
-        "user-preferences-updated": "Gebruikersvoorkeuren bijgewerkt",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
     },
     "metadata-filter": {

@@ -1,17 +1,27 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { BookChapterItem } from '../../_models/book-chapter-item';
-import { NgIf, NgFor } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges
+} from '@angular/core';
+import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-    selector: 'app-table-of-contents',
-    templateUrl: './table-of-contents.component.html',
-    styleUrls: ['./table-of-contents.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Default,
-    standalone: true,
-  imports: [NgIf, NgFor, TranslocoDirective]
+  selector: 'app-table-of-contents',
+  templateUrl: './table-of-contents.component.html',
+  styleUrls: ['./table-of-contents.component.scss'],
+  imports: [TranslocoDirective],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class TableOfContentsComponent  {
+export class TableOfContentsComponent implements OnChanges {
+
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required: true}) chapterId!: number;
   @Input({required: true}) pageNum!: number;
@@ -20,7 +30,10 @@ export class TableOfContentsComponent  {
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
-  constructor() {}
+  ngOnChanges(changes: SimpleChanges) {
+    //console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
+    this.cdRef.markForCheck();
+  }
 
   cleanIdSelector(id: string) {
     const tokens = id.split('/');
@@ -33,4 +46,30 @@ export class TableOfContentsComponent  {
   loadChapterPage(pageNum: number, part: string) {
     this.loadChapter.emit({pageNum, part});
   }
+
+  isChapterSelected(chapterGroup: BookChapterItem) {
+    if (chapterGroup.page === this.pageNum) {
+      return true;
+    }
+
+    const idx = this.chapters.indexOf(chapterGroup);
+    if (idx < 0) {
+      return false; // should never happen
+    }
+
+    const nextIdx = idx + 1;
+    // Last chapter
+    if (nextIdx >= this.chapters.length) {
+      return chapterGroup.page < this.pageNum;
+    }
+
+    // Passed chapter, and next chapter has not been reached
+    const next = this.chapters[nextIdx];
+    return chapterGroup.page < this.pageNum && next.page > this.pageNum;
+  }
+
+  isAnchorSelected(chapter: BookChapterItem) {
+    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor
+  }
+
 }

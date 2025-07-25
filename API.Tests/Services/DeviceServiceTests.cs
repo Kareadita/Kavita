@@ -18,13 +18,13 @@ public class DeviceServiceDbTests : AbstractDbTest
 
     public DeviceServiceDbTests() : base()
     {
-        _deviceService = new DeviceService(_unitOfWork, _logger, Substitute.For<IEmailService>());
+        _deviceService = new DeviceService(UnitOfWork, _logger, Substitute.For<IEmailService>());
     }
 
     protected override async Task ResetDb()
     {
-        _context.Users.RemoveRange(_context.Users.ToList());
-        await _unitOfWork.CommitAsync();
+        Context.Users.RemoveRange(Context.Users.ToList());
+        await UnitOfWork.CommitAsync();
     }
 
 
@@ -39,8 +39,8 @@ public class DeviceServiceDbTests : AbstractDbTest
             Devices = new List<Device>()
         };
 
-        _context.Users.Add(user);
-        await _unitOfWork.CommitAsync();
+        Context.Users.Add(user);
+        await UnitOfWork.CommitAsync();
 
         var device = await _deviceService.Create(new CreateDeviceDto()
         {
@@ -62,8 +62,8 @@ public class DeviceServiceDbTests : AbstractDbTest
             Devices = new List<Device>()
         };
 
-        _context.Users.Add(user);
-        await _unitOfWork.CommitAsync();
+        Context.Users.Add(user);
+        await UnitOfWork.CommitAsync();
 
         var device = await _deviceService.Create(new CreateDeviceDto()
         {

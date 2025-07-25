@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -7,6 +6,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Person;
 using API.Extensions;
 using API.Helpers.Builders;
 
@@ -16,6 +16,20 @@ namespace API.Helpers;
 // This isn't needed in the new person architecture
 public static class PersonHelper
 {
+
+    public static Dictionary<string, Person> ConstructNameAndAliasDictionary(IList<Person> people)
+    {
+        var dict = new Dictionary<string, Person>();
+        foreach (var person in people)
+        {
+            dict.TryAdd(person.NormalizedName, person);
+            foreach (var alias in person.Aliases)
+            {
+                dict.TryAdd(alias.NormalizedAlias, person);
+            }
+        }
+        return dict;
+    }
 
     public static async Task UpdateSeriesMetadataPeopleAsync(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
         IEnumerable<ChapterPeople> chapterPeople, PersonRole role, IUnitOfWork unitOfWork)
@@ -38,7 +52,9 @@ public static class PersonHelper
 
         // Identify people to remove from metadataPeople
         var peopleToRemove = existingMetadataPeople
-            .Where(person => !peopleToAddSet.Contains(person.Person.NormalizedName))
+            .Where(person =>
+                !peopleToAddSet.Contains(person.Person.NormalizedName) &&
+                !person.Person.Aliases.Any(pa => peopleToAddSet.Contains(pa.NormalizedAlias)))
             .ToList();
 
         // Remove identified people from metadataPeople
@@ -53,11 +69,7 @@ public static class PersonHelper
             .GetPeopleByNames(peopleToAdd.Select(p => p.NormalizedName).ToList());
 
         // Prepare a dictionary for quick lookup of existing people by normalized name
-        var existingPeopleDict = new Dictionary<string, Person>();
-        foreach (var person in existingPeopleInDb)
-        {
-            existingPeopleDict.TryAdd(person.NormalizedName, person);
-        }
+        var existingPeopleDict = ConstructNameAndAliasDictionary(existingPeopleInDb);
 
         // Track the people to attach (newly created people)
         var peopleToAttach = new List<Person>();
@@ -80,7 +92,6 @@ public static class PersonHelper
                     // If not, create a new Person entity using the real name
                     dbPerson = new PersonBuilder(personName).Build();
                     peopleToAttach.Add(dbPerson); // Add new person to the list to be attached
-                    modification = true;
                 }
 
                 // Add the person to the SeriesMetadataPeople collection
@@ -130,15 +141,12 @@ public static class PersonHelper
         var existingPeople = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedPeople);
 
         // Prepare a dictionary for quick lookup by normalized name
-        var existingPeopleDict = new Dictionary<string, Person>();
-        foreach (var person in existingPeople)
-        {
-            existingPeopleDict.TryAdd(person.NormalizedName, person);
-        }
+        var existingPeopleDict = ConstructNameAndAliasDictionary(existingPeople);
 
         // Identify people to remove (those present in ChapterPeople but not in the new list)
-        foreach (var existingChapterPerson in existingChapterPeople
-                     .Where(existingChapterPerson => !normalizedPeople.Contains(existingChapterPerson.Person.NormalizedName)))
+        var toRemove = existingChapterPeople
+            .Where(existingChapterPerson => !normalizedPeople.Contains(existingChapterPerson.Person.NormalizedName));
+        foreach (var existingChapterPerson in toRemove)
         {
             chapter.People.Remove(existingChapterPerson);
             unitOfWork.PersonRepository.Remove(existingChapterPerson);

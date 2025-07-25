@@ -4,7 +4,7 @@
 /// <summary>
 /// A set of colors for the color scape system in the UI
 /// </summary>
-public class ColorScapeDto
+public sealed record ColorScapeDto
 {
     public string? Primary { get; set; }
     public string? Secondary { get; set; }

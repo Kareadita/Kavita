@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents an individual button in a Jump Bar
 /// </summary>
-public class JumpKeyDto
+public sealed record JumpKeyDto
 {
     /// <summary>
     /// Number of items in this Key

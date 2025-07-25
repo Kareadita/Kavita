@@ -1,21 +1,22 @@
-import { HttpClient } from '@angular/common/http';
-import {DestroyRef, inject, Injectable } from '@angular/core';
-import {catchError, Observable, of, ReplaySubject, shareReplay, throwError} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {DestroyRef, inject, Injectable} from '@angular/core';
+import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { Preferences } from '../_models/preferences/preferences';
-import { User } from '../_models/user';
-import { Router } from '@angular/router';
-import { EVENTS, MessageHubService } from './message-hub.service';
-import { ThemeService } from './theme.service';
-import { InviteUserResponse } from '../_models/auth/invite-user-response';
-import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRestriction } from '../_models/metadata/age-restriction';
-import { TextResonse } from '../_types/text-response';
+import {environment} from 'src/environments/environment';
+import {Preferences} from '../_models/preferences/preferences';
+import {User} from '../_models/user';
+import {Router} from '@angular/router';
+import {EVENTS, MessageHubService} from './message-hub.service';
+import {ThemeService} from './theme.service';
+import {InviteUserResponse} from '../_models/auth/invite-user-response';
+import {UserUpdateEvent} from '../_models/events/user-update-event';
+import {AgeRating} from '../_models/metadata/age-rating';
+import {AgeRestriction} from '../_models/metadata/age-restriction';
+import {TextResonse} from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
-import {CoverImageSize} from "../admin/_models/cover-image-size";
+import {LicenseService} from "./license.service";
+import {LocalizationService} from "./localization.service";
 
 export enum Role {
   Admin = 'Admin',
@@ -45,6 +46,8 @@ export const allRoles = [
 export class AccountService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly licenseService = inject(LicenseService);
+  private readonly localizationService = inject(LocalizationService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -54,17 +57,13 @@ export class AccountService {
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
-  public currentUser$ = this.currentUserSource.asObservable();
+  public currentUser$ = this.currentUserSource.asObservable().pipe(takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
   public isAdmin$: Observable<boolean> = this.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
     if (!u) return false;
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
 
-  private hasValidLicenseSource = new ReplaySubject<boolean>(1);
-  /**
-   * Does the user have an active license
-   */
-  public hasValidLicense$ = this.hasValidLicenseSource.asObservable();
+
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -103,9 +102,20 @@ export class AccountService {
     return true;
   }
 
+  /**
+   * If the user has any role in the restricted roles array or is an Admin
+   * @param user
+   * @param roles
+   * @param restrictedRoles
+   */
   hasAnyRole(user: User, roles: Array<Role>, restrictedRoles: Array<Role> = []) {
     if (!user || !user.roles) {
       return false;
+    }
+
+    // If the user is an admin, they have the role
+    if (this.hasAdminRole(user)) {
+      return true;
     }
 
     // If restricted roles are provided and the user has any of them, deny access
@@ -122,6 +132,33 @@ export class AccountService {
     return roles.some(role => user.roles.includes(role));
   }
 
+  /**
+   * If User or Admin, will return false
+   * @param user
+   * @param restrictedRoles
+   */
+  hasAnyRestrictedRole(user: User, restrictedRoles: Array<Role> = []) {
+    if (!user || !user.roles) {
+      return true;
+    }
+
+    if (restrictedRoles.length === 0) {
+      return false;
+    }
+
+    // If the user is an admin, they have the role
+    if (this.hasAdminRole(user)) {
+      return false;
+    }
+
+
+    if (restrictedRoles.length > 0 && restrictedRoles.some(role => user.roles.includes(role))) {
+      return true;
+    }
+
+    return false;
+  }
+
   hasAdminRole(user: User) {
     return user && user.roles.includes(Role.Admin);
   }
@@ -131,7 +168,7 @@ export class AccountService {
   }
 
   hasChangeAgeRestrictionRole(user: User) {
-    return user && user.roles.includes(Role.ChangeRestriction);
+    return user && !user.roles.includes(Role.Admin) && user.roles.includes(Role.ChangeRestriction);
   }
 
   hasDownloadRole(user: User) {
@@ -154,40 +191,7 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  deleteLicense() {
-    return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
-  }
 
-  resetLicense(license: string, email: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
-  }
-
-  hasValidLicense(forceCheck: boolean = false) {
-    console.log('hasValidLicense being called: ', forceCheck);
-    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
-      .pipe(
-        map(res => res === "true"),
-        tap(res => {
-          this.hasValidLicenseSource.next(res)
-        }),
-        catchError(error => {
-          this.hasValidLicenseSource.next(false);
-          return throwError(error); // Rethrow the error to propagate it further
-        })
-      );
-  }
-
-  hasAnyLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
-      .pipe(
-        map(res => res === "true"),
-      );
-  }
-
-  updateUserLicense(license: string, email: string, discordId?: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email, discordId}, TextResonse)
-    .pipe(map(res => res === "true"));
-  }
 
   login(model: {username: string, password: string, apiKey?: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
@@ -202,6 +206,8 @@ export class AccountService {
   }
 
   setCurrentUser(user?: User, refreshConnections = true) {
+
+    const isSameUser = this.currentUser === user;
     if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
@@ -229,9 +235,11 @@ export class AccountService {
     if (this.currentUser) {
       // BUG: StopHubConnection has a promise in it, this needs to be async
       // But that really messes everything up
-      this.messageHub.stopHubConnection();
-      this.messageHub.createHubConnection(this.currentUser);
-      this.hasValidLicense().subscribe();
+      if (!isSameUser) {
+        this.messageHub.stopHubConnection();
+        this.messageHub.createHubConnection(this.currentUser);
+        this.licenseService.hasValidLicense().subscribe();
+      }
       this.startRefreshTokenTimer();
     }
   }
@@ -350,6 +358,8 @@ export class AccountService {
 
         // Update the locale on disk (for logout and compact-number pipe)
         localStorage.setItem(AccountService.localeKey, this.currentUser.preferences.locale);
+        this.localizationService.refreshTranslations(this.currentUser.preferences.locale);
+
       }
       return settings;
     }), takeUntilDestroyed(this.destroyRef));

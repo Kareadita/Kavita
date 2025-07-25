@@ -22,11 +22,10 @@ import {tap} from "rxjs";
  * Content inside [main] selector should not have any padding top or bottom, they are included in this component.
  */
 @Component({
-  selector: 'app-side-nav-companion-bar',
-  standalone: true,
-  imports: [NgbTooltip, TranslocoDirective],
-  templateUrl: './side-nav-companion-bar.component.html',
-  styleUrls: ['./side-nav-companion-bar.component.scss']
+    selector: 'app-side-nav-companion-bar',
+    imports: [NgbTooltip, TranslocoDirective],
+    templateUrl: './side-nav-companion-bar.component.html',
+    styleUrls: ['./side-nav-companion-bar.component.scss']
 })
 export class SideNavCompanionBarComponent implements OnInit {
 

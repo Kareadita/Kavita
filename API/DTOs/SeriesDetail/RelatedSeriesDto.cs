@@ -2,7 +2,7 @@
 
 namespace API.DTOs.SeriesDetail;
 
-public class RelatedSeriesDto
+public sealed record RelatedSeriesDto
 {
     /// <summary>
     /// The parent relationship Series

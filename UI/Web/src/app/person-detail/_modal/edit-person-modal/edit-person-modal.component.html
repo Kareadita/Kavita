@@ -73,7 +73,13 @@
                         <ng-template #view>
                           <input id="asin" class="form-control" formControlName="asin" type="text"
                                  [class.is-invalid]="formControl.invalid && !formControl.untouched">
-
+                          @if (formControl.errors; as errors) {
+                            <div class="invalid-feedback">
+                              @if (errors.invalidAsin) {
+                                <div>{{t('invalid-asin')}}</div>
+                              }
+                            </div>
+                          }
 
                         </ng-template>
                       </app-setting-item>
@@ -96,16 +102,29 @@
               </ng-template>
             </li>
 
+            <li [ngbNavItem]="TabID.Aliases">
+              <a ngbNavLink>{{t(TabID.Aliases)}}</a>
+              <ng-template ngbNavContent>
+                <h5>{{t('aliases-label')}}</h5>
+                <div class="text-muted mb-2">{{t('aliases-tooltip')}}</div>
+                <app-edit-list [items]="person.aliases"
+                               [asyncValidators]="[aliasValidator()]"
+                               (updateItems)="person.aliases = $event"
+                               [errorMessage]="t('alias-overlap')"
+                               [label]="t('aliases-label')"/>
+              </ng-template>
+            </li>
+
 
             <li [ngbNavItem]="TabID.CoverImage">
               <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}
-<!--                  {{t('cover-image-description-extra')}}-->
+                  {{t('cover-image-description-extra')}}
                 </p>
 
-<!--                <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">{{t('download-coversdb')}}</button>-->
+                <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">{{t('download-coversdb')}}</button>
 
                 <app-cover-image-chooser [(imageUrls)]="imageUrls"
                                          (imageUrlsChange)="handleUploadByUrl($event)"

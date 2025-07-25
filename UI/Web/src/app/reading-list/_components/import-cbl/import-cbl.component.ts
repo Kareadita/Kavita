@@ -39,28 +39,27 @@ enum Step {
 }
 
 @Component({
-  selector: 'app-import-cbl',
-  standalone: true,
-  imports: [
-    CblConflictReasonPipe,
-    CblImportResultPipe,
-    FileUploadComponent,
-    FormsModule,
-    NgbAccordionBody,
-    NgbAccordionButton,
-    NgbAccordionCollapse,
-    NgbAccordionDirective,
-    NgbAccordionHeader,
-    NgbAccordionItem,
-    ReactiveFormsModule,
-    SafeHtmlPipe,
-    StepTrackerComponent,
-    TranslocoDirective,
-    NgTemplateOutlet
-  ],
-  templateUrl: './import-cbl.component.html',
-  styleUrl: './import-cbl.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-import-cbl',
+    imports: [
+        CblConflictReasonPipe,
+        CblImportResultPipe,
+        FileUploadComponent,
+        FormsModule,
+        NgbAccordionBody,
+        NgbAccordionButton,
+        NgbAccordionCollapse,
+        NgbAccordionDirective,
+        NgbAccordionHeader,
+        NgbAccordionItem,
+        ReactiveFormsModule,
+        SafeHtmlPipe,
+        StepTrackerComponent,
+        TranslocoDirective,
+        NgTemplateOutlet
+    ],
+    templateUrl: './import-cbl.component.html',
+    styleUrl: './import-cbl.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportCblComponent {
   private readonly readingListService = inject(ReadingListService);

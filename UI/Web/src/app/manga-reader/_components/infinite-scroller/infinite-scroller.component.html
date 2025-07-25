@@ -2,9 +2,9 @@
 
   @if (showDebugBar()) {
     <div class="fixed-top overlay">
-      <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
-      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
-      <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
+      <strong>Captures Scroll Events:</strong> {{!isScrolling && allImagesLoaded}}
+      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{isScrolling}}
+      <strong>All Images Loaded:</strong> {{allImagesLoaded}}
       <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
       <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
       <strong>At Top:</strong> {{atTop}}
@@ -33,8 +33,9 @@
 
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages | async; let index = $index; track item.src) {
-      <img src="{{item.src}}" style="display: block;" [ngStyle]="{'width': widthOverride$ | async}"
+      <img src="{{item.src}}" style="display: block;"
            [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
+           [style.width]="widthOverride()"
            class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
            rel="nofollow"
            alt="image"

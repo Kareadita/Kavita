@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ public class SecurityEventMiddleware(RequestDelegate next)
         }
         catch (KavitaUnauthenticatedUserException ex)
         {
-            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+            var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? context.Connection.RemoteIpAddress?.ToString();
             var requestMethod = context.Request.Method;
             var requestPath = context.Request.Path;
             var userAgent = context.Request.Headers.UserAgent;

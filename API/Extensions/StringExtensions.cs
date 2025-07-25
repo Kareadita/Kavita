@@ -18,9 +18,9 @@ public static class StringExtensions
 
         // Remove all newline and control characters
         var sanitized = input
-            .Replace(Environment.NewLine, "")
-            .Replace("\n", "")
-            .Replace("\r", "");
+            .Replace(Environment.NewLine, string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("\r", string.Empty);
 
         // Optionally remove other potentially unwanted characters
         sanitized = Regex.Replace(sanitized, @"[^\u0020-\u007E]", string.Empty); // Removes non-printable ASCII

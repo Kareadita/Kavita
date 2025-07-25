@@ -1,40 +1,44 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgTemplateOutlet} from "@angular/common";
-import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
-import {Person, PersonRole} from "../../../_models/metadata/person";
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from "@angular/forms";
+import {Person} from "../../../_models/metadata/person";
 import {
   NgbActiveModal,
   NgbNav,
   NgbNavContent,
-  NgbNavItem, NgbNavLink,
+  NgbNavItem,
+  NgbNavLink,
   NgbNavLinkBase,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {PersonService} from "../../../_services/person.service";
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {forkJoin} from "rxjs";
+import {forkJoin, map, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
-import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
-import {User} from "../../../_models/user";
 import {ToastrService} from "ngx-toastr";
+import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 
 enum TabID {
   General = 'general-tab',
+  Aliases = 'aliases-tab',
   CoverImage = 'cover-image-tab',
 }
 
 @Component({
   selector: 'app-edit-person-modal',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgTemplateOutlet,
-    PersonRolePipe,
     NgbNav,
     NgbNavItem,
     TranslocoDirective,
@@ -42,9 +46,9 @@ enum TabID {
     NgbNavContent,
     NgbNavOutlet,
     CoverImageChooserComponent,
-    CompactNumberPipe,
     SettingItemComponent,
-    NgbNavLink
+    NgbNavLink,
+    EditListComponent
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',
@@ -69,7 +73,7 @@ export class EditPersonModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
-    asin: new FormControl('', []),
+    asin: new FormControl('', [], [this.asinValidator()]),
     aniListId: new FormControl('', []),
     malId: new FormControl('', []),
     hardcoverId: new FormControl('', []),
@@ -124,6 +128,7 @@ export class EditPersonModalComponent implements OnInit {
       // @ts-ignore
       malId: this.editForm.get('malId')!.value === '' ? null : parseInt(this.editForm.get('malId').value, 10),
       hardcoverId: this.editForm.get('hardcoverId')!.value || '',
+      aliases: this.person.aliases,
     };
     apis.push(this.personService.updatePerson(person));
 
@@ -170,6 +175,40 @@ export class EditPersonModalComponent implements OnInit {
         this.cdRef.markForCheck();
       }
     });
+  }
+
+  aliasValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      const name = control.value;
+      if (!name || name.trim().length === 0) {
+        return of(null);
+      }
+
+      return this.personService.isValidAlias(this.person.id, name).pipe(map(valid => {
+        if (valid) {
+          return null;
+        }
+
+        return { 'invalidAlias': {'alias': name} } as ValidationErrors;
+      }));
+    }
+  }
+
+  asinValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      const asin = control.value;
+      if (!asin || asin.trim().length === 0) {
+        return of(null);
+      }
+      
+      return this.personService.isValidAsin(asin).pipe(map(valid => {
+        if (valid) {
+          return null;
+        }
+
+        return { 'invalidAsin': {'asin': asin} } as ValidationErrors;
+      }));
+    }
   }
 
 }

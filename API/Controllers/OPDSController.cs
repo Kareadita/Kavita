@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.Data;
@@ -14,6 +15,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
+using API.DTOs.Person;
 using API.DTOs.Progress;
 using API.DTOs.Search;
 using API.Entities;
@@ -26,6 +28,7 @@ using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MimeTypes;
 
 namespace API.Controllers;
@@ -35,6 +38,7 @@ namespace API.Controllers;
 [AllowAnonymous]
 public class OpdsController : BaseApiController
 {
+    private readonly ILogger<OpdsController> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDownloadService _downloadService;
     private readonly IDirectoryService _directoryService;
@@ -81,7 +85,7 @@ public class OpdsController : BaseApiController
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
         IAccountService accountService, ILocalizationService localizationService,
-        IMapper mapper)
+        IMapper mapper, ILogger<OpdsController> logger)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -92,6 +96,7 @@ public class OpdsController : BaseApiController
         _accountService = accountService;
         _localizationService = localizationService;
         _mapper = mapper;
+        _logger = logger;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -579,19 +584,25 @@ public class OpdsController : BaseApiController
     public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = await GetUser(apiKey);
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
-        if (userWithLists == null) return Unauthorized();
-        var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+        {
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        }
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var readingList = await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, user.Id);
         if (readingList == null)
         {
             return BadRequest(await _localizationService.Translate(userId, "reading-list-restricted"));
         }
 
+        var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
@@ -764,6 +775,12 @@ public class OpdsController : BaseApiController
         return CreateXmlResult(SerializeXml(feed));
     }
 
+    /// <summary>
+    /// OPDS Search endpoint
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="query"></param>
+    /// <returns></returns>
     [HttpGet("{apiKey}/series")]
     [Produces("application/xml")]
     public async Task<IActionResult> SearchSeries(string apiKey, [FromQuery] string query)
@@ -781,20 +798,21 @@ public class OpdsController : BaseApiController
         query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
-        if (!libraries.Any()) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
+        if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin, libraries.Select(l => l.Id).ToArray(), query);
+        var searchResults = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin,
+            libraries.Select(l => l.Id).ToArray(), query, includeChapterAndFiles: false);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);
         SetFeedId(feed, "search-series");
-        foreach (var seriesDto in series.Series)
+        foreach (var seriesDto in searchResults.Series)
         {
             feed.Entries.Add(CreateSeries(seriesDto, apiKey, prefix, baseUrl));
         }
 
-        foreach (var collection in series.Collections)
+        foreach (var collection in searchResults.Collections)
         {
             feed.Entries.Add(new FeedEntry()
             {
@@ -813,7 +831,7 @@ public class OpdsController : BaseApiController
             });
         }
 
-        foreach (var readingListDto in series.ReadingLists)
+        foreach (var readingListDto in searchResults.ReadingLists)
         {
             feed.Entries.Add(new FeedEntry()
             {
@@ -827,6 +845,7 @@ public class OpdsController : BaseApiController
             });
         }
 
+        // TODO: Search should allow Chapters/Files and more
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -1355,9 +1374,48 @@ public class OpdsController : BaseApiController
     {
         if (feed == null) return string.Empty;
 
+        // Remove invalid XML characters from the feed object
+        SanitizeFeed(feed);
+
         using var sm = new StringWriter();
         _xmlSerializer.Serialize(sm, feed);
 
-        return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
+        var ret = sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
+
+        return ret;
+    }
+
+    // Recursively sanitize all string properties in the object
+    private static void SanitizeFeed(object? obj)
+    {
+        if (obj == null) return;
+
+        var properties = obj.GetType().GetProperties();
+        foreach (var property in properties)
+        {
+            // Skip properties that require an index (e.g., indexed collections)
+            if (property.GetIndexParameters().Length > 0)
+                continue;
+
+            if (property.PropertyType == typeof(string) && property.CanWrite)
+            {
+                var value = (string?)property.GetValue(obj);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    property.SetValue(obj, RemoveInvalidXmlChars(value));
+                }
+            }
+            else if (property.PropertyType.IsClass) // Handle nested objects
+            {
+                var nestedObject = property.GetValue(obj);
+                if (nestedObject != null)
+                    SanitizeFeed(nestedObject);
+            }
+        }
+    }
+
+    private static string RemoveInvalidXmlChars(string input)
+    {
+        return new string(input.Where(XmlConvert.IsXmlChar).ToArray());
     }
 }

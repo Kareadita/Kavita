@@ -22,8 +22,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './publication-status-stats.component.html',
     styleUrls: ['./publication-status-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class PublicationStatusStatsComponent {
 

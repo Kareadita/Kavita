@@ -1,0 +1,68 @@
+<ng-container *transloco="let t; read:'match-series-modal'">
+  <div>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">
+        {{t('title', {seriesName: series.name})}}
+      </h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+    <div class="modal-body scrollable-modal">
+
+      <form [formGroup]="formGroup">
+        <p>{{t('description')}}</p>
+        <div class="row g-0">
+          <div class="mb-3" style="width: 100%">
+            <app-setting-item [title]="t('query-label')" [subtitle]="t('query-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                <div class="input-group">
+                  @if (formGroup.get('query'); as formControl) {
+                    <input id="query" class="form-control" formControlName="query" type="text"
+                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                    @if (formControl.errors) {
+                      @if (formControl.errors.required) {
+                        <div class="invalid-feedback">{{t('required-field')}}</div>
+                      }
+                    }
+                  }
+                </div>
+              </ng-template>
+            </app-setting-item>
+          </div>
+          <div class="row g-0">
+            <div class="mb-3" style="width: 100%">
+              <app-setting-switch [title]="t('dont-match-label')" [subtitle]="t('dont-match-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch">
+                    <input id="dont-match" type="checkbox" class="form-check-input" formControlName="dontMatch" role="switch">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+          </div>
+        </div>
+        <div class="row g-0">
+          <button class="btn btn-primary" [disabled]="formGroup.get('dontMatch')?.value" (click)="search()">{{t('search')}}</button>
+        </div>
+      </form>
+
+      <div class="setting-section-break"></div>
+
+      @if (!formGroup.get('dontMatch')?.value) {
+        <app-loading [loading]="isLoading"></app-loading>
+        @for(item of matches; track item.series.name) {
+          <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)"></app-match-series-result-item>
+        } @empty {
+          @if (!isLoading) {
+            <p>{{t('no-results')}}</p>
+          }
+        }
+      }
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+      <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+    </div>
+  </div>
+</ng-container>
+

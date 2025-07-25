@@ -1,11 +1,4 @@
-import {
-  AsyncPipe,
-  DOCUMENT,
-  Location,
-  NgClass,
-  NgStyle,
-  NgTemplateOutlet
-} from '@angular/common';
+import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -68,11 +61,6 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {
-  ReviewSeriesModalCloseAction,
-  ReviewSeriesModalCloseEvent,
-  ReviewSeriesModalComponent
-} from '../../../_single-module/review-series-modal/review-series-modal.component';
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
@@ -80,8 +68,6 @@ import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/e
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
-import {ReviewCardComponent} from '../../../_single-module/review-card/review-card.component';
-import {CarouselReelComponent} from '../../../carousel/_components/carousel-reel/carousel-reel.component';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
@@ -120,6 +106,11 @@ import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {LicenseService} from "../../../_services/license.service";
+import {PageBookmark} from "../../../_models/readers/page-bookmark";
+import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
+import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 
 enum TabID {
@@ -144,17 +135,26 @@ interface StoryLineItem {
     templateUrl: './series-detail.component.html',
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
   imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
-    NgbDropdownItem, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent,
+    NgbDropdownItem, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly FilterField = FilterField;
+  protected readonly AgeRating = AgeRating;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -164,6 +164,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly modalService = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
+  protected readonly licenseService = inject(LicenseService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);
@@ -175,6 +176,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
@@ -185,14 +187,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly location = inject(Location);
 
-  protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
-  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly FilterField = FilterField;
-  protected readonly AgeRating = AgeRating;
-  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -230,6 +224,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   reviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
+  bookmarks: Array<PageBookmark> = [];
   ratings: Array<Rating> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -355,11 +350,25 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
         break;
       case Action.Delete:
-        await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
-          // No need to update the page as the backend will spam volume/chapter deletions
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
+        if (chapters.length > 0) {
+          await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
+            // No need to update the page as the backend will spam volume/chapter deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+
+          // It's not possible to select both chapters and volumes
+          break;
+        }
+
+        if (selectedVolumeIds.length > 0) {
+          await this.actionService.deleteMultipleVolumes(selectedVolumeIds, () => {
+            // No need to update the page as the backend will spam volume deletions
+            this.bulkSelectionService.deselectAll();
+            this.cdRef.markForCheck();
+          });
+        }
+
         break;
     }
   }
@@ -477,7 +486,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesScanEvent = event.payload as ScanSeriesEvent;
         if (seriesScanEvent.seriesId === this.seriesId) {
-          //this.loadSeries(this.seriesId);
           this.loadPageSource.next(false);
         }
       } else if (event.event === EVENTS.CoverUpdate) {
@@ -488,8 +496,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
         if (removedEvent.seriesId !== this.seriesId) return;
-        //this.loadSeries(this.seriesId, false);
         this.loadPageSource.next(false);
+      } else if (event.event === EVENTS.VolumeRemoved) {
+        const volumeRemoveEvent = event.payload as VolumeRemovedEvent;
+        if (volumeRemoveEvent.seriesId === this.seriesId) {
+          this.loadPageSource.next(false);
+        }
       }
     });
 
@@ -541,7 +553,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.location.replaceState(newUrl)
   }
 
-  handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+  async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     this.cdRef.markForCheck();
     switch(action.action) {
       case(Action.MarkAsRead):
@@ -555,16 +567,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         break;
       case(Action.Scan):
-        this.actionService.scanSeries(series);
+        await this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshSeriesMetadata(series, undefined, true, false);
+        await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
         break;
       case(Action.GenerateColorScape):
-        this.actionService.refreshSeriesMetadata(series, undefined, false, true);
+        await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
         break;
       case(Action.Delete):
-        this.deleteSeries(series);
+        await this.deleteSeries(series);
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series);
@@ -585,6 +597,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         if (this.downloadInProgress) return;
         this.downloadSeries();
         break;
+      case Action.Match:
+        this.actionService.matchSeries(this.series, (refreshNeeded) => {
+          if (refreshNeeded) {
+            this.loadSeries(this.series.id, refreshNeeded);
+          }
+        });
+        break;
       case Action.SendTo:
         {
           const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
@@ -592,6 +611,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(chapterIds, device);
           break;
         }
+      case Action.SetReadingProfile:
+        this.actionService.setReadingProfileForMultiple([this.series]);
+        break;
+      case Action.ClearReadingProfile:
+        this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
+          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+        });
+        break;
       default:
         break;
     }
@@ -628,12 +655,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           this.actionService.sendToDevice(volume.chapters.map(c => c.id), device);
           break;
         }
+      case (Action.Download):
+        this.downloadService.download('volume', volume);
+        break;
       default:
         break;
     }
   }
 
-  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+  async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
     switch (action.action) {
       case(Action.MarkAsRead):
         this.markChapterAsRead(chapter);
@@ -653,6 +683,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.SendTo):
         const device = (action._extra!.data as Device);
         this.actionService.sendToDevice([chapter.id], device);
+        break;
+      case (Action.Delete):
+        await this.actionService.deleteChapter(chapter.id, (success) => {
+          if (!success) return;
+
+          this.chapters = this.chapters.filter(c => c.id != chapter.id);
+          this.cdRef.markForCheck();
+        });
+        break;
+      case (Action.Download):
+        this.downloadService.download('chapter', chapter);
         break;
       default:
         break;
@@ -704,7 +745,24 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
       this.collections = tags;
       this.cdRef.markForCheck();
-    })
+    });
+
+
+    this.readerService.getBookmarksForSeries(seriesId).subscribe(bookmarks => {
+      if (bookmarks.length > 0) {
+        this.bookmarks = Object.values(
+          bookmarks.reduce((acc, bookmark) => {
+            if (!acc[bookmark.seriesId]) {
+              acc[bookmark.seriesId] = bookmark; // Select the first one per seriesId
+            }
+            return acc;
+          }, {} as Record<number, PageBookmark>)
+        );
+      } else {
+        this.bookmarks = [];
+      }
+      this.cdRef.markForCheck();
+    });
 
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
       this.readingTimeLeft = timeLeft;
@@ -740,6 +798,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
               .filter(action => action.action !== Action.Edit);
+
+      this.licenseService.hasValidLicense$.subscribe(hasLic => {
+        if (!hasLic) {
+          this.seriesActions = this.seriesActions.filter(action => action.action !== Action.Match);
+          this.cdRef.markForCheck();
+        }
+      });
 
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
@@ -803,9 +868,32 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         if (!this.router.url.includes('#')) {
           this.updateSelectedTab();
+        } else if (this.activeTabId != TabID.Storyline) {
+          // Validate that the tab we are selected is still there (in case this comes from a messageHub)
+          switch (this.activeTabId) {
+            case TabID.Related:
+              if (!this.hasRelations) this.updateSelectedTab();
+              break;
+            case TabID.Specials:
+              if (!this.hasSpecials) this.updateSelectedTab();
+              break;
+            case TabID.Volumes:
+              if (this.volumes.length === 0) this.updateSelectedTab();
+              break;
+            case TabID.Chapters:
+              if (this.chapters.length === 0) this.updateSelectedTab();
+              break;
+            case TabID.Recommendations:
+              if (!this.hasRecommendations) this.updateSelectedTab();
+              break;
+            case TabID.Reviews:
+              if (this.reviews.length === 0) this.updateSelectedTab();
+              break;
+            case TabID.Details:
+              break;
+          }
+          this.cdRef.markForCheck();
         }
-
-
 
         this.isLoading = false;
         this.cdRef.markForCheck();
@@ -890,6 +978,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.activeTabId = TabID.Storyline;
       }
     }
+
+    // BUG: Related or other tab can be in history but no longer there, need to default
 
     this.updateUrl(this.activeTabId);
     this.cdRef.markForCheck();
@@ -998,19 +1088,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   }
 
-  openVolume(volume: Volume) {
-    if (this.bulkSelectionService.hasSelections()) return;
-    if (volume.chapters === undefined || volume.chapters?.length === 0) {
-      this.toastr.error(this.translocoService.translate('series-detail.no-chapters'));
-      return;
-    }
-
-    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', volume.id]);
-    return;
-
-
-    this.readerService.readVolume(this.libraryId, this.seriesId, volume, false);
-  }
 
   openEditChapter(chapter: Chapter) {
     const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
@@ -1051,63 +1128,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPageSource.next(closeResult.updateExternal);
       }
     });
-  }
-
-  getUserReview() {
-    return this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
-  }
-
-  openReviewModal() {
-    const userReview = this.getUserReview();
-
-    const modalRef = this.modalService.open(ReviewSeriesModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.series = this.series;
-    if (userReview.length > 0) {
-      modalRef.componentInstance.review = userReview[0];
-    } else {
-      modalRef.componentInstance.review = {
-        seriesId: this.series.id,
-        tagline: '',
-        body: ''
-      };
-    }
-
-    modalRef.closed.subscribe((closeResult) => {
-      this.updateOrDeleteReview(closeResult);
-    });
-
-  }
-
-  updateOrDeleteReview(closeResult: ReviewSeriesModalCloseEvent) {
-    if (closeResult.action === ReviewSeriesModalCloseAction.Close) return;
-
-    const index = this.reviews.findIndex(r => r.username === closeResult.review!.username);
-    if (closeResult.action === ReviewSeriesModalCloseAction.Edit) {
-      if (index === -1 ) {
-        // A new series was added:
-        this.reviews = [closeResult.review, ...this.reviews];
-        this.cdRef.markForCheck();
-        return;
-      }
-      // An edit occurred
-      this.reviews[index] = closeResult.review;
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (closeResult.action === ReviewSeriesModalCloseAction.Delete) {
-      // An edit occurred
-      this.reviews = [...this.reviews.filter(r => r.username !== closeResult.review!.username)];
-      this.cdRef.markForCheck();
-      return;
-    }
-  }
-
-
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.series);
-    }
   }
 
   downloadSeries() {

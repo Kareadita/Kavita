@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'manage-tasks-settings'">
-  <div class="container-fluid">
-    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
+  @if (serverSettings) {
+    <form [formGroup]="settingsForm">
 
       <h4>{{t('title')}}</h4>
       <ng-container>
@@ -150,29 +150,43 @@
       <div class="setting-section-break"></div>
 
       <h4>{{t('recurring-tasks-title')}}</h4>
-      <table class="table table-striped">
-        <thead>
-        <tr>
-          <th scope="col">{{t('job-title-header')}}</th>
-          <th scope="col">{{t('last-executed-header')}}</th>
-          <th scope="col">{{t('cron-header')}}</th>
-        </tr>
-        </thead>
-        <tbody>
-          @for(task of recurringTasks$ | async; track task; let idx = $index) {
-            <tr>
-              <td>
-                {{task.title | titlecase}}
-              </td>
-              <td>
-                {{task.lastExecutionUtc | utcToLocalTime | defaultValue }}
-              </td>
-              <td>{{task.cron}}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </form>
-  </div>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="recurringTasks$ | async"
+        [columnMode]="ColumnMode.flex"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
 
+        <ngx-datatable-column prop="title" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('job-title-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.title | titlecase}}
+          </ng-template>
+        </ngx-datatable-column>
+
+
+        <ngx-datatable-column prop="lastExecutionUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('last-executed-header')}}
+          </ng-template>
+          <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+            {{item.lastExecutionUtc | utcToLocalTime | defaultValue }}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="cron" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cron-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cron}}
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </form>
+  }
 </ng-container>

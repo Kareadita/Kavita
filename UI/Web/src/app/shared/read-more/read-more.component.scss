@@ -1,4 +1,4 @@
-@import "../../../theme/variables";
+@use "../../../theme/variables" as theme;
 
 .blur-text {
   color: transparent;
@@ -10,9 +10,9 @@
 
   div {
     word-break: break-word;
-    max-width: 75ch;
-    
-    @media (max-width: $grid-breakpoints-sm) {
+    max-width: 120ch;
+
+    @media (max-width: theme.$grid-breakpoints-sm) {
       max-width: 50ch;
     }
   }

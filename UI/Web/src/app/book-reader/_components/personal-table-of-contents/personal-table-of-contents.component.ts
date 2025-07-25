@@ -21,12 +21,11 @@ export interface PersonalToCEvent {
 }
 
 @Component({
-  selector: 'app-personal-table-of-contents',
-  standalone: true,
-  imports: [NgbTooltip, TranslocoDirective],
-  templateUrl: './personal-table-of-contents.component.html',
-  styleUrls: ['./personal-table-of-contents.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-personal-table-of-contents',
+    imports: [NgbTooltip, TranslocoDirective],
+    templateUrl: './personal-table-of-contents.component.html',
+    styleUrls: ['./personal-table-of-contents.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonalTableOfContentsComponent implements OnInit {
 

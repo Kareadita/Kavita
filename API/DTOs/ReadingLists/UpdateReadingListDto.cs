@@ -2,7 +2,7 @@
 
 namespace API.DTOs.ReadingLists;
 
-public class UpdateReadingListDto
+public sealed record UpdateReadingListDto
 {
     [Required]
     public int ReadingListId { get; set; }

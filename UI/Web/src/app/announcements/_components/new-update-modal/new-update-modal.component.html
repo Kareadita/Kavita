@@ -1,0 +1,14 @@
+<ng-container *transloco="let t; read:'new-version-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+  </div>
+  <div class="modal-body scrollable-modal">
+    @if (update) {
+      <app-changelog-update-item [update]="update" [showExtras]="false"></app-changelog-update-item>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="refresh()">{{t('refresh')}}</button>
+  </div>
+
+</ng-container>

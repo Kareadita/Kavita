@@ -10,30 +10,29 @@ import {
   Output
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule} from 'ngx-file-drop';
-import { fromEvent } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
-import { ToastrService } from 'ngx-toastr';
-import { ImageService } from 'src/app/_services/image.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { UploadService } from 'src/app/_services/upload.service';
+import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
+import {fromEvent} from 'rxjs';
+import {takeWhile} from 'rxjs/operators';
+import {ToastrService} from 'ngx-toastr';
+import {ImageService} from 'src/app/_services/image.service';
+import {KEY_CODES} from 'src/app/shared/_services/utility.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {DOCUMENT, NgClass} from '@angular/common';
 import {ImageComponent} from "../../shared/image/image.component";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-cover-image-chooser',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgxFileDropModule,
-    ImageComponent,
-    TranslocoModule,
-    NgClass
-  ],
-  templateUrl: './cover-image-chooser.component.html',
-  styleUrls: ['./cover-image-chooser.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-cover-image-chooser',
+    imports: [
+        ReactiveFormsModule,
+        NgxFileDropModule,
+        ImageComponent,
+        TranslocoModule,
+        NgClass
+    ],
+    templateUrl: './cover-image-chooser.component.html',
+    styleUrls: ['./cover-image-chooser.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CoverImageChooserComponent implements OnInit {
 
@@ -234,7 +233,8 @@ export class CoverImageChooserComponent implements OnInit {
     this.imageSelected.emit(this.selectedIndex); // Auto select newly uploaded image
     this.selectedBase64Url.emit(e.target.result);
     setTimeout(() => {
-      (this.document.querySelector('div.image-card[aria-label="Image ' + this.selectedIndex + '"]') as HTMLElement).focus();
+      // Add 1 since we are adding a new image
+      (this.document.querySelector('div.clickable[aria-label="Image ' + (this.selectedIndex + 1) + '"]') as HTMLElement).focus();
     })
     this.cdRef.markForCheck();
   }

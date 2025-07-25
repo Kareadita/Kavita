@@ -7,7 +7,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public class ImageParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, ComicInfo? comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
         if (!IsApplicable(filePath, type)) return null;
 

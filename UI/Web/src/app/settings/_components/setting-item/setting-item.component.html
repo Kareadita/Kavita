@@ -1,7 +1,7 @@
 <ng-container *transloco="let t;">
-  <div class="container-fluid">
+  <div>
     <div class="settings-row g-0 row">
-      <div class="col-10 setting-title">
+      <div class="col-auto {{fixedExtras ? 'setting-title no-anim edit' : 'setting-title edit'}}">
         <h6 class="section-title">
           @if (labelId) {
             <label class="reset-label" [for]="labelId">{{title}}</label>
@@ -13,9 +13,9 @@
           }
         </h6>
       </div>
-      <div class="col-2 text-end align-self-end justify-content-end">
+      <div class="col-auto text-end align-self-end justify-content-end">
         @if (showEdit) {
-        <button type="button" class="btn btn-text btn-sm" (click)="toggleEditMode()" [disabled]="!canEdit">
+        <button type="button" class="btn btn-icon edit-btn btn-sm btn-alignment" (click)="toggleEditMode()" [disabled]="!canEdit">
           {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
         </button>
         }
@@ -28,7 +28,7 @@
     @if (isEditMode) {
       <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
     } @else {
-      <span class="view-value" (click)="toggleEditMode()">
+      <span class="view-value" [ngClass]="{'non-selectable': (!canEdit || !showEdit)}" (click)="toggleEditMode()">
         <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
       </span>
     }

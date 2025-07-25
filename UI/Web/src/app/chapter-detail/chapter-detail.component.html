@@ -27,28 +27,29 @@
 
 
 
-          <!-- Rating goes here (after I implement support for rating individual issues -->
-<!--          <div class="mt-2 mb-2">-->
-<!--            <app-external-rating [seriesId]="series.id"-->
-<!--                                 [ratings]="[]"-->
-<!--                                 [userRating]="series.userRating"-->
-<!--                                 [hasUserRated]="series.hasUserRated"-->
-<!--                                 [libraryType]="libraryType!">-->
-<!--            </app-external-rating>-->
-<!--          </div>-->
+          <div class="mt-2 mb-2">
+            <app-external-rating [seriesId]="series.id"
+                                 [ratings]="ratings"
+                                 [userRating]="rating"
+                                 [hasUserRated]="hasBeenRated"
+                                 [libraryType]="libraryType!"
+                                 [chapterId]="chapterId"
+            >
+            </app-external-rating>
+          </div>
 
           <div class="mt-3 mb-3">
             <div class="row g-0">
               <div class="col-auto">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary-outline" (click)="read()">
+                  <button type="button" class="btn btn-outline-primary" (click)="read()">
                   <span>
                 <i class="fa {{chapter.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue') : t('read')}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-primary-outline dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
                       <span>
@@ -71,9 +72,9 @@
                 </div>
               }
 
-              <div class="col-auto ms-2 d-none d-md-block">
+              <div class="col-auto ms-2k">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables (actionHandler)="performAction($event)" [actions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
+                  <app-card-actionables [entity]="chapter"  [inputActions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
                 </div>
               </div>
 
@@ -95,7 +96,7 @@
                 <div>
                   <app-badge-expander [items]="chapter.writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.Writers, item.id)">{{item.name}}</a>
+                      <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
                   </app-badge-expander>
                 </div>
@@ -111,7 +112,7 @@
                   <div>
                     <app-badge-expander [items]="chapter.coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openPerson(FilterField.CoverArtist, item.id)">{{item.name}}</a>
+                        <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                       </ng-template>
                     </app-badge-expander>
                   </div>
@@ -174,6 +175,19 @@
             </ng-template>
           </li>
         }
+
+          <li [ngbNavItem]="TabID.Reviews">
+            <a ngbNavLink>
+              {{t('reviews-tab')}}
+              <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+            </a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+                <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
+                             [series]="series" [chapter]="chapter" [volumeId]="chapter.volumeId" />
+              }
+            </ng-template>
+          </li>
 
         @if(readingLists.length > 0) {
           <li [ngbNavItem]="TabID.Related">

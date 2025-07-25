@@ -1,10 +1,11 @@
 ﻿
+using System;
 using API.DTOs.Account;
 
 namespace API.DTOs;
 #nullable enable
 
-public class UserDto
+public sealed record UserDto
 {
     public string Username { get; init; } = null!;
     public string Email { get; init; } = null!;

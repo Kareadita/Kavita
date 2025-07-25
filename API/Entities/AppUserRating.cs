@@ -26,7 +26,6 @@ public class AppUserRating
     public int SeriesId { get; set; }
     public Series Series { get; set; } = null!;
 
-
     // Relationships
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;

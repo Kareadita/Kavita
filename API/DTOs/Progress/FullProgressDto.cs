@@ -5,7 +5,7 @@ namespace API.DTOs.Progress;
 /// <summary>
 /// A full progress Record from the DB (not all data, only what's needed for API)
 /// </summary>
-public class FullProgressDto
+public sealed record FullProgressDto
 {
     public int Id { get; set; }
     public int ChapterId { get; set; }
