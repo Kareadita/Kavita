@@ -1,9 +1,10 @@
-import {Component, computed, EventEmitter, inject, model, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, model, Output} from '@angular/core';
 import {NgClass, NgStyle} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {HighlightSlot} from "../../../_models/annotations/highlight-slot";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {AnnotationService} from "../../../../_services/annotation.service";
+import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-highlight-bar',
@@ -11,14 +12,18 @@ import {AnnotationService} from "../../../../_services/annotation.service";
     NgClass,
     NgStyle,
     TranslocoDirective,
-    SlotColorPipe
+    SlotColorPipe,
+    NgbCollapse
   ],
   templateUrl: './highlight-bar.component.html',
-  styleUrl: './highlight-bar.component.scss'
+  styleUrl: './highlight-bar.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HighlightBarComponent {
 
   private readonly annotationService = inject(AnnotationService);
+
+  isCollapsed = model<boolean>(true);
 
   selectedSlotIndex = model.required<number>();
   @Output() changeSlot = new EventEmitter<number>();
@@ -34,5 +39,9 @@ export class HighlightBarComponent {
   selectSlot(index: number, slot: HighlightSlot) {
     this.selectedSlotIndex.set(index);
     this.changeSlot.emit(index);
+  }
+
+  updateCollapse(val: boolean) {
+    this.isCollapsed.set(val);
   }
 }
