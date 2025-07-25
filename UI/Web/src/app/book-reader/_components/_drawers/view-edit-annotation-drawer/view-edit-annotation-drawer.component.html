@@ -1,51 +1,58 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-    <div class="offcanvas-header "  [ngStyle]="{'background-color': titleColor()}">
-      <h5 class="offcanvas-title">
-        <span>
-          @if (mode() === AnnotationMode.Create) {
-            {{t('create-title')}}
-          } @else {
+    <div class="offcanvas-header d-flex align-items-center"  [ngStyle]="{'background-color': titleColor()}">
+      <div class="flex-shrink-0">
+        <h5 class="offcanvas-title">
+          <span>
+            @if (mode() === AnnotationMode.Create) {
+              {{t('create-title')}}
+            } @else {
             {{t(isEditMode() ? 'edit-title' : 'view-title')}}
           }
-        </span>
-      </h5>
+          </span>
+        </h5>
+      </div>
 
-      @if (isEditOrCreateMode() && formGroup) {
-        <form [formGroup]="formGroup" novalidate>
-          <div class="form-check form-switch offcanvas-title-right">
-            <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
-            <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
-          </div>
-        </form>
-      } @else {
-        <div class="small offcanvas-title-right">
-            <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
-          {{t('contains-spoilers-label')}}
+      @if (isEditOrCreateMode() && this.annotation()) {
+        <div class="ms-3">
+          <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
         </div>
       }
+
+      <div class="flex-grow-1"></div>
+
+      <div class="flex-shrink-0">
+        @if (isEditOrCreateMode() && formGroup) {
+          <form [formGroup]="formGroup" novalidate>
+            <div class="form-check form-switch offcanvas-title-right">
+              <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
+              <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+            </div>
+          </form>
+        } @else {
+          <div class="small offcanvas-title-right">
+              <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
+            {{t('contains-spoilers-label')}}
+          </div>
+        }
+      </div>
     </div>
 
     <div class="offcanvas-body">
       @if (annotation() && formGroup) {
         <form [formGroup]="formGroup" novalidate>
-          <blockquote class="text-muted pb-2 small fw-lighter" style="margin-left: 30%; margin-right: 30%">
-            <div id="render-target" #renderTarget>
-              <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
-            </div>
-            <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
-          </blockquote>
+          <!--style="margin-left: 30%; margin-right: 30%"-->
+          <div class="d-flex justify-content-center">
+            <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 800px; width: 100%;">
+              <div id="render-target" #renderTarget>
+                <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
+              </div>
+              <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
+            </blockquote>
+          </div>
 
           <div class="setting-section-break" aria-hidden="true"></div>
 
-
-          @if (isEditOrCreateMode() && this.annotation()) {
-            <div class="row g-0 mt-2">
-              <div class="col-3">
-                <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
-              </div>
-            </div>
-          }
 
           <div class="row g-0 mt-2 mb-2 mx-auto">
             @if (isEditOrCreateMode()) {
