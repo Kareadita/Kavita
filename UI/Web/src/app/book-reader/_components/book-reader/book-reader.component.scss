@@ -334,13 +334,13 @@ $action-bar-height: 38px;
 
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width {
-    max-height: 100dvh;
     max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
     max-width: calc(var(--book-reader-content-max-width)) !important;
     object-fit: contain;
     object-position: top center;
     break-inside: avoid;
     break-before: column;
+    max-height: 100vh;
 }
 
 
