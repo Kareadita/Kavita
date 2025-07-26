@@ -60,6 +60,7 @@ export class AnnotationService {
   getAllAnnotations(chapterId: number) {
     return this.httpClient.get<Array<Annotation>>(this.baseUrl + 'annotation/all?chapterId=' + chapterId).pipe(map(annotations => {
       this._annotations.set(annotations);
+      return annotations;
     }));
   }
 

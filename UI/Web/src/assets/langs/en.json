@@ -813,7 +813,7 @@
     },
 
     "view-annotations-drawer": {
-        "title": "Annotations",
+        "title": "{{tabs.annotations-tab}}",
         "close": "{{common.close}}",
         "filter-label": "Filter Annotations"
     },
@@ -958,6 +958,7 @@
         "specials-tab": "{{tabs.specials-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "details-tab": "{{tabs.details-tab}}",
+        "annotations-tab": "{{tabs.annotations-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "File emailed to {{deviceName}}",
@@ -3069,7 +3070,8 @@
         "devices-tab": "Devices",
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
-        "smart-filters-tab": "Smart Filters"
+        "smart-filters-tab": "Smart Filters",
+        "annotations-tab": "Annotations"
     },
 
     "common": {

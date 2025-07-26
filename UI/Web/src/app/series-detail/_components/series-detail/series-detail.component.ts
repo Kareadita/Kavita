@@ -4,10 +4,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
-  Inject,
   inject,
+  model,
   OnInit,
   ViewChild
 } from '@angular/core';
@@ -186,6 +187,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly location = inject(Location);
+  private readonly document = inject(DOCUMENT);
 
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
@@ -198,7 +200,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesId!: number;
   series!: Series;
   volumes: Volume[] = [];
-  chapters: Chapter[] = [];
+  chapters = model<Chapter[]>([]);
   storyChapters: Chapter[] = [];
   storylineItems: StoryLineItem[] = [];
   libraryId = 0;
@@ -266,7 +268,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Related Series. Sorted by backend
    */
   relations: Array<RelatedSeriesPair> = [];
-  relationShips: RelatedSeries | null = null;
+  relationships: RelatedSeries | null = null;
   /**
    * Recommended Series
    */
@@ -287,7 +289,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   user: User | undefined;
   showVolumeTab = true;
   showStorylineTab = true;
-  showChapterTab = true;
+  showChapterTab = computed(() => this.chapters().length > 0);
   showDetailsTab = true;
 
   /**
@@ -307,7 +309,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     // NOTE: This needs to check current tab as chapter array will be different
     let chapterArray = this.storyChapters;
-    if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
+    if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters();
 
     // We must augment chapter indices as Bulk Selection assumes all on one page, but Storyline has mixed
     const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length : 0;
@@ -437,7 +439,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
 
@@ -519,7 +521,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryAllowsScrobbling = res;
       this.cdRef.markForCheck();
     });
-
 
 
     this.route.fragment.pipe(tap(frag => {
@@ -687,8 +688,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.Delete):
         await this.actionService.deleteChapter(chapter.id, (success) => {
           if (!success) return;
-
-          this.chapters = this.chapters.filter(c => c.id != chapter.id);
+          const chps = this.chapters();
+          this.chapters.set(chps.filter(c => c.id != chapter.id));
           this.cdRef.markForCheck();
         });
         break;
@@ -808,7 +809,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
-        this.relationShips = relations;
+        this.relationships = relations;
         this.relations = [
           ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
           ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
@@ -850,7 +851,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 
-        this.chapters = detail.chapters;
+        this.chapters.set(detail.chapters);
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
 
@@ -925,14 +926,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return this.volumes.length > 0;
   }
 
-  shouldShowChaptersTab() {
-    return this.chapters.length > 0;
-  }
 
   updateWhichTabsToShow() {
     this.showVolumeTab = this.shouldShowVolumeTab();
     this.showStorylineTab = this.shouldShowStorylineTab();
-    this.showChapterTab = this.shouldShowChaptersTab();
     this.showDetailsTab = hasAnyCast(this.seriesMetadata) || (this.seriesMetadata?.genres || []).length > 0
       || (this.seriesMetadata?.tags || []).length > 0 || (this.seriesMetadata?.webLinks || []).length > 0;
     this.cdRef.markForCheck();

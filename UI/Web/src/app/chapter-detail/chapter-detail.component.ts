@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  model,
   OnInit,
   ViewChild
 } from '@angular/core';
@@ -75,11 +76,14 @@ import {User} from "../_models/user";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {Rating} from "../_models/rating";
+import {AnnotationService} from "../_services/annotation.service";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
 
 enum TabID {
   Related = 'related-tab',
   Reviews = 'review-tab',
-  Details = 'details-tab'
+  Details = 'details-tab',
+  Annotations = 'annotations-tab'
 }
 
 @Component({
@@ -145,6 +149,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly location = inject(Location);
+  private readonly annotationService = inject(AnnotationService);
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
@@ -170,6 +175,7 @@ export class ChapterDetailComponent implements OnInit {
   rating: number = 0;
   ratings: Array<Rating> = [];
   hasBeenRated: boolean = false;
+  annotations = model<Annotation[]>([]);
 
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
@@ -212,12 +218,18 @@ export class ChapterDetailComponent implements OnInit {
       return;
     }
 
+
+
     this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
       .getPropertyValue('--mobile-series-img-background').trim();
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.coverImage = this.imageService.getChapterCoverImage(this.chapterId);
+
+    this.annotationService.getAllAnnotations(this.chapterId).subscribe(annotations => {
+      this.annotations.set(annotations);
+    });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.CoverUpdate) {

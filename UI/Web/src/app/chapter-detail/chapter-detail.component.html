@@ -176,18 +176,35 @@
           </li>
         }
 
-          <li [ngbNavItem]="TabID.Reviews">
+        @let highlights = annotations();
+        @if (highlights.length > 0) {
+          <li [ngbNavItem]="TabID.Annotations">
             <a ngbNavLink>
-              {{t('reviews-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+              {{t(TabID.Annotations)}}
+              <span class="badge rounded-pill text-bg-secondary">{{highlights.length}}</span>
             </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-                <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
-                             [series]="series" [chapter]="chapter" [volumeId]="chapter.volumeId" />
+              @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+                Annotations card here
+                  <!--                  <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"-->
+                  <!--                               [series]="series" [volumeId]="volumeId" [chapter]="volume.chapters[0]" />-->
               }
             </ng-template>
           </li>
+        }
+
+        <li [ngbNavItem]="TabID.Reviews">
+          <a ngbNavLink>
+            {{t('reviews-tab')}}
+            <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+          </a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+              <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
+                           [series]="series" [chapter]="chapter" [volumeId]="chapter.volumeId" />
+            }
+          </ng-template>
+        </li>
 
         @if(readingLists.length > 0) {
           <li [ngbNavItem]="TabID.Related">

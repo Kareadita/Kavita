@@ -224,15 +224,15 @@
             </li>
           }
 
-          @if (showChapterTab) {
+          @if (showChapterTab()) {
             <li [ngbNavItem]="TabID.Chapters">
               <a ngbNavLink>
                 {{utilityService.formatChapterName(libraryType)}}
-                <span class="badge rounded-pill text-bg-secondary">{{chapters.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{chapters().length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="chapters" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="chapters()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters.length}"></ng-container>
