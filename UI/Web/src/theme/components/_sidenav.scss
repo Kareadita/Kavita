@@ -45,6 +45,15 @@
       .side-nav-item {
         color: var(--side-nav-item-closed-color);
 
+        &.closed {
+          .side-nav-text {
+            @supports (-moz-appearance: none) {
+              visibility: hidden;
+              opacity: 0;
+            }
+          }
+        }
+
         &:hover {
           &.active {
             color: var(--side-nav-item-active-text-color);
