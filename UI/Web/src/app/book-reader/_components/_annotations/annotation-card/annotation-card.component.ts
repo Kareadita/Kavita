@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, model, Output, Signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  input,
+  model,
+  Output,
+  Signal
+} from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
@@ -31,6 +41,7 @@ export class AnnotationCardComponent {
   private readonly highlightSlotPipe = new SlotColorPipe();
 
   annotation = model.required<Annotation>();
+  allowEdit = input<boolean>(true);
   @Output() delete = new EventEmitter();
 
   titleColor: Signal<string>;

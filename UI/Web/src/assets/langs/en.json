@@ -813,6 +813,10 @@
         "contains-spoilers-label": "Spoilers"
     },
 
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+
     "view-annotations-drawer": {
         "title": "{{tabs.annotations-tab}}",
         "close": "{{common.close}}",

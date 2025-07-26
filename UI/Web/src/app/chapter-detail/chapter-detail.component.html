@@ -185,9 +185,7 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
-                Annotations card here
-                  <!--                  <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"-->
-                  <!--                               [series]="series" [volumeId]="volumeId" [chapter]="volume.chapters[0]" />-->
+                <app-annotations-tab [annotations]="annotations()" />
               }
             </ng-template>
           </li>

@@ -42,12 +42,14 @@
           </button>
         }
 
-        <button class="btn btn-sm btn-outline-secondary" (click)="editAnnotation()">
-          <i class="fa-solid fa-pen-alt" aria-hidden="true"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-danger" (click)="deleteAnnotation()">
-          <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-        </button>
+        @if(allowEdit()) {
+          <button class="btn btn-sm btn-outline-secondary" (click)="editAnnotation()">
+            <i class="fa-solid fa-pen-alt" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteAnnotation()">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+          </button>
+        }
       </div>
     </div>
   </div>
