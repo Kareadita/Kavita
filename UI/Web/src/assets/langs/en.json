@@ -121,6 +121,7 @@
         "success-toast": "User preferences updated",
 
         "global-settings-title": "Global Settings",
+        "social-settings-title": "Social Settings",
         "page-layout-mode-label": "Page Layout Mode",
         "page-layout-mode-tooltip": "Show items as cards or list view on Series Detail page.",
         "locale-label": "Locale",
