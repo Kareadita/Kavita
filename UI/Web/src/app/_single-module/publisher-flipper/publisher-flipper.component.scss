@@ -33,7 +33,7 @@
 }
 
 .publisher-flipper.is-flipped {
-  transform: rotateX(180deg) translateY(0%);
+  transform: rotateX(180deg);
 }
 
 .publisher-side {
@@ -43,7 +43,6 @@
 
   // Position: absolute on the second child
   &:not(:first-child) {
-    position: relative;
     bottom: 0;
   }
 
