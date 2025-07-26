@@ -213,12 +213,6 @@ export class ViewEditAnnotationDrawerComponent {
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
 
     console.log('saving highlight: ', highlightAnnotation);
-
-    this.bookService.getBookChapters(id).subscribe(bookChapters => {
-      this.chapters.set(bookChapters);
-      this.cdRef.markForCheck();
-    });
-
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });

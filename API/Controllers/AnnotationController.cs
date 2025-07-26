@@ -67,7 +67,7 @@ public class AnnotationController : BaseApiController
                     chapterTitle = pageTocs[0].Title;
                 }
             }
-            catch (KavitaException ex)
+            catch (KavitaException)
             {
                 /* Swallow */
             }

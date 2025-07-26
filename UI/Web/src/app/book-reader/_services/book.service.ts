@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {TextResonse} from 'src/app/_types/text-response';
 import {environment} from 'src/environments/environment';
 import {BookChapterItem} from '../_models/book-chapter-item';
@@ -21,9 +21,9 @@ export interface FontFamily {
 })
 export class BookService {
 
-  baseUrl = environment.apiUrl;
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
 
   getFontFamilies(): Array<FontFamily> {
     return [{title: 'default', family: 'default'}, {title: 'EBGaramond', family: 'EBGaramond'}, {title: 'Fira Sans', family: 'Fira_Sans'},

@@ -2,18 +2,37 @@
   padding: 0.25rem 0.5rem;
 }
 
+$dotSize: 30px;
+
+.highlight-bar {
+  background: var(--accordion-body-bg-color);
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.highlight-bar-toggle {
+  background: var(--accordion-body-bg-color);
+  border-color: transparent;
+  &.open {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
 .highlight-bar .btn.btn-icon {
   display: flex;
   width: 50%;
   justify-content: center;
   align-items: center;
+
+
   &.color {
     display: unset;
     width: auto;
 
     .dot {
-      height: 35px;
-      width: 35px;
+      height: $dotSize;
+      width: $dotSize;
       border-radius: 50%;
       margin: 0 auto;
     }

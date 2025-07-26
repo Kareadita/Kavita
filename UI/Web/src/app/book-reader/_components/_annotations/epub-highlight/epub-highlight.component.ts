@@ -35,7 +35,7 @@ export class EpubHighlightComponent {
       if (!updateEvent || !annotation || updateEvent.annotation.id !== annotation.id) return;
       if (updateEvent.type !== 'edit') return;
 
-      console.log('[highlight] annotation updated', annotation);
+      //console.log('[highlight] annotation updated', annotation);
 
       this.annotation.set(annotations.filter(a => a.id === annotation.id)[0]);
     });
@@ -57,6 +57,8 @@ export class EpubHighlightComponent {
 
 
   viewAnnotation() {
+    // Don't view annotation if a drawer is already open
+    if (this.epubMenuService.isDrawerOpen()) return;
 
     // TODO: This shouldn't when edit annotation drawer already open (clicking highlight in the drawer)
     this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {});

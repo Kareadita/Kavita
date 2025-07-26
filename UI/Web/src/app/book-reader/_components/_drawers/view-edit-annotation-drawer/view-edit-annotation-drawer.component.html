@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-    <div class="offcanvas-header d-flex align-items-center"  [ngStyle]="{'background-color': titleColor()}">
+    <div class="offcanvas-header d-flex align-items-center" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
       <div class="flex-shrink-0">
         <h5 class="offcanvas-title">
           <span>
@@ -62,7 +62,7 @@
             }
           </div>
 
-          @if (isEditOrCreateMode()) {
+          @if (mode() === AnnotationMode.Create) {
             <div class="row g-0 mt-5">
               <button class="btn btn-primary col-12" (click)="createAnnotation()">{{t('save')}}</button>
             </div>

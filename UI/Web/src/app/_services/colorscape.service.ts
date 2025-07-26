@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import {Inject, Injectable} from '@angular/core';
+import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
 
@@ -153,7 +153,7 @@ export class ColorscapeService {
     }
   }
 
-  private hexToRGBA(hex: string, opacity: number = 1): RGBAColor {
+  public hexToRGBA(hex: string, opacity: number = 1): RGBAColor {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
