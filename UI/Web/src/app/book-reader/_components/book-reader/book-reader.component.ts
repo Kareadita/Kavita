@@ -84,7 +84,7 @@ interface HistoryPoint {
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
-
+const IMAGE_MAX_HEIGHT = '100dvh'; //dvh allow space for bottom navigation bar
 const COLUMN_GAP = 20; // px
 /**
  * Styles that should be applied on the top level book-content tag
@@ -986,7 +986,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateImageSizes() {
     const isVerticalWritingStyle = this.writingStyle === WritingStyle.Vertical;
     const height = this.windowHeight - (this.topOffset * 2);
-    let maxHeight = 'unset';
+    let maxHeight = IMAGE_MAX_HEIGHT;
     let maxWidth = '';
     switch (this.layoutMode) {
       case BookPageLayoutMode.Default:
@@ -1023,10 +1023,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.document.documentElement.style.setProperty('--book-reader-content-left', '50%');
       this.document.documentElement.style.setProperty('--book-reader-content-transform', 'translate(-50%, -50%)');
     } else {
-        this.document.documentElement.style.setProperty('--book-reader-content-position', '');
-        this.document.documentElement.style.setProperty('--book-reader-content-top', '');
-        this.document.documentElement.style.setProperty('--book-reader-content-left', '');
-        this.document.documentElement.style.setProperty('--book-reader-content-transform', '');
+      this.document.documentElement.style.setProperty('--book-reader-content-position', 'absolute');
+      this.document.documentElement.style.setProperty('--book-reader-content-top', '50%');
+      this.document.documentElement.style.setProperty('--book-reader-content-left', '50%');
+      this.document.documentElement.style.setProperty('--book-reader-content-transform', 'translate(-50%, 0%)');
     }
   }
 
