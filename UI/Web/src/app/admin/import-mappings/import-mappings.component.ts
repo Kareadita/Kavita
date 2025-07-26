@@ -172,10 +172,8 @@ export class ImportMappingsComponent implements OnInit {
     }
 
     const settings = this.importSettingsForm.value as ImportSettings;
-    settings.resolution = parseInt(settings.resolution+'');
-    settings.importMode = parseInt(settings.importMode+'');
-    settings.ageRatingConflictResolutions = this.mapRecord(settings.ageRatingConflictResolutions, k => k, v => parseInt(v+''))
-    settings.fieldMappingsConflictResolutions = this.mapRecord(settings.fieldMappingsConflictResolutions, k => parseInt(k+''), v => parseInt(v+''))
+    // Ensure keys are numbers
+    settings.fieldMappingsConflictResolutions = this.mapRecord(settings.fieldMappingsConflictResolutions, k => parseInt(k+''), v => v)
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       tap((res) => this.importResult.set(res)),

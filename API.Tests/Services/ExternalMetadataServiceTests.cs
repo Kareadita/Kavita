@@ -1288,6 +1288,21 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
     }
 
+    [Fact]
+    public void AgeRating_NormalizedMapping()
+    {
+        var tags = new List<string> { "tAg$'1", "tag2" };
+        var mappings = new Dictionary<string, AgeRating>()
+        {
+            ["tag1"] = AgeRating.Teen,
+        };
+
+        Assert.Equal(AgeRating.Teen, ExternalMetadataService.DetermineAgeRating(tags, mappings));
+
+        mappings.Add("tag2", AgeRating.AdultsOnly);
+        Assert.Equal(AgeRating.AdultsOnly, ExternalMetadataService.DetermineAgeRating(tags, mappings));
+    }
+
     #endregion
 
     #region Genres
@@ -1599,6 +1614,71 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.NotNull(postSeries);
         Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
     }
+
+    #endregion
+
+    #region FieldMappings
+
+    [Fact]
+    public void GenerateGenreAndTagLists_Normalized_Mappings()
+    {
+        var settings = new MetadataSettingsDto
+        {
+            Whitelist = [],
+            Blacklist = [],
+            FieldMappings = [
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Tag-One",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Genre-One",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Genre,
+                    SourceValue = "Genre2",
+                    DestinationType = MetadataFieldType.Tag,
+                    DestinationValue = "Tag-Two",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Tag2",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Genre-Three",
+                    ExcludeFromSource = true,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Tag4",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Genre-Four",
+                    ExcludeFromSource = true,
+                }
+            ],
+        };
+
+        var tags = new List<string> { "Tag$$ One", "ta^g2", "Unrelated tag" };
+        var genres = new List<string> { " genr^e2 " };
+
+        var finalTags = new List<string>();
+        var finalGenres = new List<string>();
+
+        ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
+
+        Assert.Contains("Tag-One", finalTags);
+        Assert.Contains("Tag-Two", finalTags);
+        Assert.Contains("Unrelated tag", finalTags);
+
+        Assert.Contains("Genre-One", finalGenres);
+        Assert.Contains("Genre-Three", finalGenres);
+        Assert.DoesNotContain("Genre-Four", finalGenres);
+    }
+
 
     #endregion
 

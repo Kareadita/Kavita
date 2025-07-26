@@ -24,7 +24,7 @@
                   <ng-template #view>
                     <select formControlName="importMode" class="form-control">
                       @for (mode of ImportModes; track mode) {
-                        <option [value]="mode">{{mode | importMode}}</option>
+                        <option [ngValue]="mode">{{mode | importMode}}</option>
                       }
                     </select>
                   </ng-template>
@@ -38,7 +38,7 @@
                   <ng-template #view>
                     <select formControlName="resolution" class="form-control">
                       @for (resolution of ConflictResolutions; track resolution) {
-                        <option [value]="resolution">{{resolution | conflictResolution}}</option>
+                        <option [ngValue]="resolution">{{resolution | conflictResolution}}</option>
                       }
                     </select>
                   </ng-template>
@@ -56,7 +56,7 @@
                   <app-setting-switch [title]="t('whitelist-label')">
                     <ng-template #switch>
                       <div class="form-check form-switch">
-                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="whitelist">
+                        <input id="whitelist-enabled" type="checkbox" class="form-check-input" formControlName="whitelist">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -68,7 +68,7 @@
                   <app-setting-switch [title]="t('blacklist-label')">
                     <ng-template #switch>
                       <div class="form-check form-switch">
-                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="blacklist">
+                        <input id="blacklist-enabled" type="checkbox" class="form-check-input" formControlName="blacklist">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -80,7 +80,7 @@
                   <app-setting-switch [title]="t('age-ratings-label')">
                     <ng-template #switch>
                       <div class="form-check form-switch">
-                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="ageRatings">
+                        <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="ageRatings">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -92,7 +92,7 @@
                   <app-setting-switch [title]="t('field-mappings-label')">
                     <ng-template #switch>
                       <div class="form-check form-switch">
-                        <input id="enabled" type="checkbox" class="form-check-input" formControlName="fieldMappings">
+                        <input id="field-mappings-enabled" type="checkbox" class="form-check-input" formControlName="fieldMappings">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -121,7 +121,7 @@
                         <span class="conflict-title">{{arm}}</span>
                         <select [formControlName]="arm" class="form-control mt-2">
                           @for (resolution of ConflictResolutions; track resolution) {
-                            <option [value]="resolution">
+                            <option [ngValue]="resolution">
                               <ng-container [ngTemplateOutlet]="ageRatingConflict"
                                             [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
                               </ng-container>
@@ -153,7 +153,7 @@
                         </span>
                         <select [formControlName]="fmc.oldId+''" class="form-control mt-2">
                           @for (resolution of ConflictResolutions; track resolution) {
-                            <option [value]="resolution">
+                            <option [ngValue]="resolution">
                               <ng-container [ngTemplateOutlet]="fieldMappingConflict"
                                             [ngTemplateOutletContext]="{$implicit: fmc, resolution: resolution }" >
                               </ng-container>
@@ -206,11 +206,11 @@
                   <ng-template #view>
                     <div class="row reset-color">
                       @for (arm of res.resultingMetadataSettings.ageRatingMappings | keyvalue; track arm.key) {
-                        <div class="col-md-4 col-sm-12 pt-1">
-                          <div class="p-1 d-flex flex-column">
+                        <div class="col-md-6 col-sm-12 pt-1">
+                          <div class="p-1 d-flex justify-content-between align-items-center">
                             <div class="text-muted small">{{ arm.key }}</div>
+                            <i class="fa fa-arrow-right fa-sm me-1 text-muted"></i>
                             <div class="small">
-                              <i class="fa fa-arrow-right fa-sm me-1 text-muted"></i>
                               {{ arm.value | ageRating }}
                             </div>
                           </div>
