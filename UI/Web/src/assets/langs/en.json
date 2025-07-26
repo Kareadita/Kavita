@@ -135,15 +135,15 @@
         "collapse-series-relationships-label": "Collapse Series Relationships",
         "collapse-series-relationships-tooltip": "Should Kavita show Series that have no relationships or is the parent/prequel",
         "share-series-reviews-label": "Share Series Reviews",
-        "share-series-reviews-tooltip": "Should Kavita include your reviews of Series for other users",
+        "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
         "anilist-scrobbling-tooltip": "Allow Kavita to Scrobble (one-way sync) reading progress and ratings to AniList",
         "want-to-read-sync-label": "Want To Read Sync",
-        "want-to-read-sync-tooltip": "Allow Kavita to add items to your Want to Read list based on AniList and MAL series in Pending readlist",
+        "want-to-read-sync-tooltip": "Allow Kavita to add items to your Want to Read list based on AniList and MAL series in Pending read list",
 
-        "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Tachiyomi users.",
+        "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
         "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
         "clients-opds-url-label": "OPDS URL",
