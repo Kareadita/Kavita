@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -17,13 +20,16 @@ public class AnnotationController : BaseApiController
     private readonly ILogger<AnnotationController> _logger;
     private readonly ICacheService _cacheService;
     private readonly IBookService _bookService;
+    private readonly ILocalizationService _localizationService;
 
-    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger, ICacheService cacheService, IBookService bookService)
+    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger,
+        ICacheService cacheService, IBookService bookService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _cacheService = cacheService;
         _bookService = bookService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -48,9 +54,23 @@ public class AnnotationController : BaseApiController
                 return BadRequest("Invalid Payload");
             }
 
-            // TODO: Figure out how to get Chapter title
-            // await _cacheService.Ensure(dto.ChapterId);
-            // _bookService.GenerateTableOfContents();
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+            if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+
+            var chapterTitle = string.Empty;
+            try
+            {
+                var toc = await _bookService.GenerateTableOfContents(chapter);
+                var pageTocs = BookChapterItemHelper.GetTocForPage(toc, dto.PageNumber);
+                if (pageTocs.Count > 0)
+                {
+                    chapterTitle = pageTocs[0].Title;
+                }
+            }
+            catch (KavitaException ex)
+            {
+                /* Swallow */
+            }
 
             var annotation = new AppUserAnnotation()
             {
@@ -67,7 +87,7 @@ public class AnnotationController : BaseApiController
                 SelectedSlotIndex = dto.SelectedSlotIndex,
                 AppUserId = User.GetUserId(),
                 Context = dto.Context,
-                ChapterTitle = dto.ChapterTitle
+                ChapterTitle = chapterTitle
             };
 
             _unitOfWork.AnnotationRepository.Attach(annotation);

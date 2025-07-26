@@ -214,6 +214,11 @@ export class ViewEditAnnotationDrawerComponent {
 
     console.log('saving highlight: ', highlightAnnotation);
 
+    this.bookService.getBookChapters(id).subscribe(bookChapters => {
+      this.chapters.set(bookChapters);
+      this.cdRef.markForCheck();
+    });
+
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });

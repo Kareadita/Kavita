@@ -25,7 +25,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MimeTypes;
-using Quill.Delta;
 
 namespace API.Controllers;
 

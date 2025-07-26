@@ -1112,6 +1112,7 @@ public partial class BookService : IBookService
         throw new KavitaException($"Page {bookmarkDto.Page} not found in epub");
     }
 
+
     /// <summary>
     /// Parses out Title from book. Chapters and Volumes will always be "0". If there is any exception reading book (malformed books)
     /// then null is returned. This expects only an epub file

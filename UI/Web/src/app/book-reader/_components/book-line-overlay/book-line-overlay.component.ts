@@ -149,7 +149,7 @@ export class BookLineOverlayComponent implements OnInit {
         containsSpoiler: false,
         pageNumber: this.pageNumber,
         selectedSlotIndex: 0,
-        chapterTitle: '',
+        chapterTitle: '', // TODO: Can we get this from UI?
         highlightCount: this.selectedText.length,
         ownerUserId: 0,
         ownerUsername: '',
