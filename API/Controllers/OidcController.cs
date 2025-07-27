@@ -1,42 +1,31 @@
-﻿using System.Threading.Tasks;
-using API.Data;
-using API.DTOs.Settings;
-using API.Services;
-using AutoMapper;
+﻿using API.Extensions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
-public class OidcController(ILogger<OidcController> logger, IUnitOfWork unitOfWork,
-    IMapper mapper, ISettingsService settingsService): BaseApiController
+[Route("[controller]")]
+public class OidcController: ControllerBase
 {
 
-    /// <summary>
-    /// Retrieve publicly required configuration regarding Oidc
-    /// </summary>
-    /// <returns></returns>
     [AllowAnonymous]
-    [HttpGet("config")]
-    public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
+    [HttpGet("login")]
+    public IActionResult Login(string returnUrl = "/oidc/callback")
     {
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        return Ok(mapper.Map<OidcPublicConfigDto>(settings.OidcConfig));
+        var properties = new AuthenticationProperties { RedirectUri = returnUrl };
+        return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
 
-    /// <summary>
-    /// Validate if the given authority is reachable from the server
-    /// </summary>
-    /// <param name="authority"></param>
-    /// <returns></returns>
-    [Authorize("RequireAdminRole")]
-    [HttpPost("is-valid-authority")]
-    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
+    [Authorize]
+    [HttpPost("logout")]
+    public IActionResult Logout()
     {
-        return Ok(await settingsService.IsValidAuthority(authority.Authority));
+        return SignOut(
+            new AuthenticationProperties { RedirectUri = "/login" },
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            IdentityServiceExtensions.OpenIdConnect);
     }
-
-    public sealed record AuthorityValidationDto(string Authority);
 
 }

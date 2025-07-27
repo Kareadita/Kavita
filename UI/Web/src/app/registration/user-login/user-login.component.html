@@ -30,13 +30,14 @@
           </form>
         }
 
-        @if (oidcService.inUse()) {
-          <button
+        @if (settingsService.oidcInUse()) {
+          <a
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
-            (click)="oidcService.login()">
+            href="oidc/login"
+          >
             <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
-            {{oidcService.settings()?.providerName || t('oidc')}}
-          </button>
+            {{settingsService.oidcSettings()?.providerName || t('oidc')}}
+          </a>
         }
       }
     </ng-container>

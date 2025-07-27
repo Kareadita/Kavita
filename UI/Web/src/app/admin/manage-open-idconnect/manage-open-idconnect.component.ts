@@ -88,6 +88,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
 
         this.settingsForm.addControl('authority', new FormControl(this.serverSettings.oidcConfig.authority, [], [this.authorityValidator()]));
         this.settingsForm.addControl('clientId', new FormControl(this.serverSettings.oidcConfig.clientId, [this.requiredIf('authority')]));
+        this.settingsForm.addControl('secret', new FormControl(this.serverSettings.oidcConfig.secret, [this.requiredIf('authority')]));
         this.settingsForm.addControl('provisionAccounts', new FormControl(this.serverSettings.oidcConfig.provisionAccounts, []));
         this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.serverSettings.oidcConfig.requireVerifiedEmail, []));
         this.settingsForm.addControl('syncUserSettings', new FormControl(this.serverSettings.oidcConfig.syncUserSettings, []));

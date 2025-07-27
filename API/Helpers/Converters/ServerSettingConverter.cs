@@ -143,7 +143,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     var configuration = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     configuration.Authority = destination.OidcConfig.Authority;
                     configuration.ClientId = destination.OidcConfig.ClientId;
+                    configuration.Secret = destination.OidcConfig.Secret;
                     destination.OidcConfig = configuration;
+                    break;
+                case ServerSettingKey.OidcSecret:
+                    destination.OidcConfig ??= new OidcConfigDto();
+                    destination.OidcConfig.Secret = row.Value;
                     break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:

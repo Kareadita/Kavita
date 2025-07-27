@@ -12,6 +12,10 @@ namespace API.DTOs.Settings;
 public sealed record OidcConfigDto: OidcPublicConfigDto
 {
     /// <summary>
+    /// The OIDC secret
+    /// </summary>
+    public string Secret { get; set; }
+    /// <summary>
     /// If true, auto creates a new account when someone logs in via OpenID Connect
     /// </summary>
     public bool ProvisionAccounts { get; set; }

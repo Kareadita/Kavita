@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import {map, of} from 'rxjs';
+import {computed, Injectable, signal} from '@angular/core';
+import {map, of, tap} from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
 import {MetadataSettings} from "./_models/metadata-settings";
+import {OidcPublicConfig} from "./_models/oidc-config";
 
 /**
  * Used only for the Test Email Service call
@@ -19,13 +20,35 @@ export interface EmailTestResult {
   providedIn: 'root'
 })
 export class SettingsService {
+  /**
+   * Public OIDC settings
+   */
+  private readonly _oidcSettings = signal<OidcPublicConfig | undefined>(undefined);
+  public readonly oidcSettings = this._oidcSettings.asReadonly();
+
+  public readonly oidcInUse = computed(() => {
+    const settings = this.oidcSettings();
+    return settings && settings.authority.trim() !== '';
+  });
 
   baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
+  loadOidcInfo() {
+    return this.getPublicOidcConfig().pipe(
+      tap(config => {
+        this._oidcSettings.set(config);
+      })
+    )
+  }
+
   getServerSettings() {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
+  }
+
+  getPublicOidcConfig() {
+    return this.http.get<OidcPublicConfig>(this.baseUrl + "settings/oidc");
   }
 
   getMetadataSettings() {
@@ -83,6 +106,6 @@ export class SettingsService {
   ifValidAuthority(authority: string) {
     if (authority === '' || authority === undefined || authority === null) return of(false);
 
-    return this.http.post<boolean>(this.baseUrl + 'oidc/is-valid-authority', {authority}, TextResonse).pipe(map(r => r + '' == 'true'));
+    return this.http.post<boolean>(this.baseUrl + 'settings/is-valid-authority', {authority}, TextResonse).pipe(map(r => r + '' == 'true'));
   }
 }

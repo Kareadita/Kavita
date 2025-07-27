@@ -256,6 +256,7 @@ public static class Seed
             }, // Not used from DB, but DB is sync with appSettings.json
             new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority},
             new() { Key = ServerSettingKey.OidcClientId, Value = Configuration.OidcClientId},
+            new() { Key = ServerSettingKey.OidcSecret, Value = Configuration.OidcSecret},
             new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
@@ -297,6 +298,8 @@ public static class Seed
             Configuration.OidcAuthority + string.Empty;
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcClientId)).Value =
             Configuration.OidcClientId + string.Empty;
+        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcSecret)).Value =
+            Configuration.OidcSecret + string.Empty;
 
         await context.SaveChangesAsync();
     }

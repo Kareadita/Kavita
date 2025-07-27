@@ -10,6 +10,7 @@ export interface OidcPublicConfig {
 }
 
 export interface OidcConfig extends OidcPublicConfig {
+  secret: string;
   provisionAccounts: boolean;
   requireVerifiedEmail: boolean;
   syncUserSettings: boolean;

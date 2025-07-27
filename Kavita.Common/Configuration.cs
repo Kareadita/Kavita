@@ -64,7 +64,16 @@ public static class Configuration
         set => SetOidcClientId(GetAppSettingFilename(), value);
     }
 
-    public static bool OidcEnabled => !string.IsNullOrEmpty(GetOidcAuthority(GetAppSettingFilename()));
+    public static string OidcSecret
+    {
+        get => GetOidcSecret(GetAppSettingFilename());
+        set => SetOidcSecret(GetAppSettingFilename(), value);
+    }
+
+    public static bool OidcEnabled =>
+        !string.IsNullOrEmpty(GetOidcAuthority(GetAppSettingFilename())) &&
+        !string.IsNullOrEmpty(GetOidcSecret(GetAppSettingFilename())) &&
+        !string.IsNullOrEmpty(GetOidcClientId(GetAppSettingFilename()));
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
@@ -396,6 +405,39 @@ public static class Configuration
         }
     }
 
+    private static string GetOidcSecret(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
+            return jsonObj.OidcSecret;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return string.Empty;
+    }
+
+    private static void SetOidcSecret(string filePath, string secret)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.OidcSecret = secret;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+
     #endregion
 
     private sealed class AppSettings
@@ -414,6 +456,7 @@ public static class Configuration
         public bool AllowIFraming { get; init; } = false;
         public string OidcAuthority { get; set; } = DefaultOidcAuthority;
         public string OidcAudience { get; set; } = DefaultOidcClientId;
+        public string OidcSecret { get; set; } = string.Empty;
 #pragma warning restore S3218
     }
 }

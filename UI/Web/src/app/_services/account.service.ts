@@ -207,16 +207,11 @@ export class AccountService {
     );
   }
 
-  loginByToken(token: string) {
-    const headers = new HttpHeaders({
-      "Authorization": `Bearer ${token}`
-    });
-
-    return this.httpClient.get<User>(this.baseUrl + 'account', {headers}).pipe(
+  getAccount() {
+    return this.httpClient.get<User>(this.baseUrl + 'account').pipe(
       tap((response: User) => {
         const user = response;
         if (user) {
-          user.oidcToken = token;
           this.setCurrentUser(user);
         }
       }),
@@ -259,10 +254,10 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      // oidc handles refreshing itself
-      if (!this.currentUser.oidcToken) {
-        this.startRefreshTokenTimer();
-      }
+      // TODO: Runs when OIDC cookies are actually used for authentication
+      //    But that's fine I suppose. We're sending the JWT token as well anyway
+      //    Might be something to figure out...
+      this.startRefreshTokenTimer();
     }
   }
 

@@ -11,8 +11,8 @@ import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
 import {WikiLink} from "../_models/wiki";
-import {OidcService} from "./oidc.service";
 import {AuthGuard} from "../_guards/auth.guard";
+import {SettingsService} from "../admin/settings.service";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -36,7 +36,7 @@ interface NavItem {
 export class NavService {
 
   private readonly accountService = inject(AccountService);
-  private readonly oidcService = inject(OidcService);
+  private readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -176,11 +176,16 @@ export class NavService {
   }
 
   logout() {
-    this.oidcService.logout();
     this.accountService.logout();
     this.hideNavBar();
     this.hideSideNav();
-    this.router.navigateByUrl('/login');
+
+    // TODO: should be smarter about this. OIDC can be enabled with the user using it
+    if (this.settingsService.oidcInUse()) {
+      this.router.navigateByUrl('/oidc/logout');
+    } else {
+      this.router.navigateByUrl('/login');
+    }
   }
 
   handleLogin() {

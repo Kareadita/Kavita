@@ -439,6 +439,14 @@ public class SettingsService : ISettingsService
             return;
         }
 
+        if (setting.Key == ServerSettingKey.OidcSecret && setting.Value != updateSettingsDto.OidcConfig.Secret)
+        {
+            setting.Value = updateSettingsDto.OidcConfig.Secret;
+            Configuration.OidcSecret = updateSettingsDto.OidcConfig.Secret;
+            _unitOfWork.SettingsRepository.Update(setting);
+            return;
+        }
+
         if (setting.Key != ServerSettingKey.OidcConfiguration) return;
 
         if (updateSettingsDto.OidcConfig.RolesClaim.Trim() == string.Empty)

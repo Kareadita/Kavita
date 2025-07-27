@@ -11,27 +11,34 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
+using Hangfire.Storage.SQLite.Entities;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
-using TokenValidatedContext = Microsoft.AspNetCore.Authentication.JwtBearer.TokenValidatedContext;
+using MessageReceivedContextOidc = Microsoft.AspNetCore.Authentication.OpenIdConnect.MessageReceivedContext;
+using TokenValidatedContext = Microsoft.AspNetCore.Authentication.OpenIdConnect.TokenValidatedContext;
 
 namespace API.Extensions;
 #nullable enable
 
 public static class IdentityServiceExtensions
 {
-    private const string DynamicJwt = nameof(DynamicJwt);
-    private const string OpenIdConnect = nameof(OpenIdConnect);
+    private const string DynamicHybrid = nameof(DynamicHybrid);
+    public const string OpenIdConnect = nameof(OpenIdConnect);
     private const string LocalIdentity = nameof(LocalIdentity);
 
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment environment)
     {
         services.Configure<IdentityOptions>(options =>
         {
@@ -63,66 +70,83 @@ public static class IdentityServiceExtensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddEntityFrameworkStores<DataContext>();
 
-        var auth = services.AddAuthentication(DynamicJwt)
-            .AddPolicyScheme(DynamicJwt, JwtBearerDefaults.AuthenticationScheme, options =>
+        var auth = services.AddAuthentication(DynamicHybrid)
+            .AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                var iss = Configuration.OidcAuthority;
                 var enabled = Configuration.OidcEnabled;
-                options.ForwardDefaultSelector = context =>
+
+                options.ForwardDefaultSelector = ctx =>
                 {
                     if (!enabled) return LocalIdentity;
 
-                    var fullAuth =
-                        context.Request.Headers["Authorization"].FirstOrDefault() ??
-                        context.Request.Query["access_token"].FirstOrDefault();
-
-                    var token = fullAuth?.TrimPrefix("Bearer ");
-
-                    if (string.IsNullOrEmpty(token)) return LocalIdentity;
-
-                    var handler = new JwtSecurityTokenHandler();
-                    try
+                    if (ctx.Request.Path.StartsWithSegments("/signin-oidc") ||
+                        ctx.Request.Path.StartsWithSegments("/signout-callback-oidc"))
                     {
-                        var jwt = handler.ReadJwtToken(token);
-                        if (jwt.Issuer == iss) return OpenIdConnect;
+                        return OpenIdConnect;
                     }
-                    catch
+
+                    if (ctx.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
                     {
-                        /* Swallow */
+                        return OpenIdConnect;
                     }
 
                     return LocalIdentity;
                 };
+
             });
+
 
         if (Configuration.OidcEnabled)
         {
-            auth.AddJwtBearer(OpenIdConnect, options =>
-            {
-                options.Authority = Configuration.OidcAuthority;
-                options.Audience = Configuration.OidcClientId;
-                options.RequireHttpsMetadata = options.Authority.StartsWith("https://");
-
-                options.TokenValidationParameters = new TokenValidationParameters
+            auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    ValidAudience = Configuration.OidcClientId,
-                    ValidIssuer = Configuration.OidcAuthority,
+                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                    options.SlidingExpiration = true;
 
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.IsEssential = true;
+                    options.Cookie.MaxAge = TimeSpan.FromDays(7);
 
-                    ValidateIssuerSigningKey = true,
-                    RequireExpirationTime = true,
-                    ValidateLifetime = true,
-                    RequireSignedTokens = true
-                };
+                    if (environment.IsEnvironment(Environments.Development))
+                    {
+                        options.Cookie.Domain = null;
+                    }
 
-                options.Events = new JwtBearerEvents
+                })
+                .AddOpenIdConnect(OpenIdConnect, options =>
                 {
-                    OnMessageReceived = SetTokenFromQuery,
-                    OnTokenValidated = OidcClaimsPrincipalConverter,
-                };
-            });
+                    options.Authority = Configuration.OidcAuthority;
+                    options.ClientId = Configuration.OidcClientId;
+                    options.ClientSecret = Configuration.OidcSecret;
+                    options.RequireHttpsMetadata = options.Authority.StartsWith("https://");
+
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.ResponseType = OpenIdConnectResponseType.Code;
+                    options.CallbackPath = "/signin-oidc";
+                    options.SignedOutCallbackPath = "/signout-callback-oidc";
+
+                    options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("offline_access");
+                    options.Scope.Add("roles");
+                    options.Scope.Add("email");
+
+                    options.Events = new OpenIdConnectEvents
+                    {
+                        OnMessageReceived = SetTokenFromQueryOidc,
+                        OnTokenValidated = OidcClaimsPrincipalConverter,
+                        OnRemoteFailure = context =>
+                        {
+                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                            logger.LogError("OIDC Remote failure: {Error}", context.Failure?.Message);
+                            logger.LogError("OIDC Failure details: {Details}", context.Failure?.ToString());
+                            return Task.CompletedTask;
+                        },
+                    };
+                });
         }
 
         auth.AddJwtBearer(LocalIdentity, options =>
@@ -191,6 +215,20 @@ public static class IdentityServiceExtensions
         ctx.Principal = principal;
 
         ctx.Success();
+    }
+
+    private static Task SetTokenFromQueryOidc(MessageReceivedContextOidc context)
+    {
+        var accessToken = context.Request.Query["access_token"];
+        var path = context.HttpContext.Request.Path;
+
+        // Only use query string based token on SignalR hubs
+        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+        {
+            context.Token = accessToken;
+        }
+
+        return Task.CompletedTask;
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)

@@ -212,5 +212,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("OidcConfiguration")]
     OidcConfiguration = 42,
+    /// <summary>
+    /// Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("OidcSecret")]
+    OidcSecret = 43,
 
 }
