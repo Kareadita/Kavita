@@ -73,7 +73,13 @@
                         <ng-template #view>
                           <input id="asin" class="form-control" formControlName="asin" type="text"
                                  [class.is-invalid]="formControl.invalid && !formControl.untouched">
-
+                          @if (formControl.errors; as errors) {
+                            <div class="invalid-feedback">
+                              @if (errors.invalidAsin) {
+                                <div>{{t('invalid-asin')}}</div>
+                              }
+                            </div>
+                          }
 
                         </ng-template>
                       </app-setting-item>
