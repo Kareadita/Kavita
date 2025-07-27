@@ -84,6 +84,7 @@ import {ChapterService} from "../_services/chapter.service";
 import {User} from "../_models/user";
 import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
 
 enum TabID {
 
@@ -156,7 +157,8 @@ interface VolumeCast extends IHasCast {
     BulkOperationsComponent,
     CoverImageComponent,
     ReviewsComponent,
-    ExternalRatingComponent
+    ExternalRatingComponent,
+    AnnotationsTabComponent
   ],
     templateUrl: './volume-detail.component.html',
     styleUrl: './volume-detail.component.scss',
