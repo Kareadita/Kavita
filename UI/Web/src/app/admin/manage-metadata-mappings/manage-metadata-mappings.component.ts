@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -10,9 +10,10 @@ import {MetadataService} from "../../_services/metadata.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 
 export type MetadataMappingsExport = {
-  ageRatingMappings: Map<string, AgeRating>,
+  ageRatingMappings: Record<string, AgeRating>,
   fieldMappings: Array<MetadataFieldMapping>,
   blacklist: Array<string>,
   whitelist: Array<string>,
@@ -28,7 +29,8 @@ export type MetadataMappingsExport = {
     SettingItemComponent,
     TagBadgeComponent,
     TranslocoDirective,
-    NgbTooltip
+    NgbTooltip,
+    SettingSwitchComponent
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss'
@@ -110,7 +112,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const whitelist = (this.settingsForm().get('whitelist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
 
     return {
-      ageRatingMappings: ageRatingMappings as Map<string, AgeRating>,
+      ageRatingMappings: ageRatingMappings,
       fieldMappings: fieldMappings,
       blacklist: blacklist,
       whitelist: whitelist,

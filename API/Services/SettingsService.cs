@@ -30,10 +30,10 @@ public interface ISettingsService
     /// Update <see cref="MetadataSettings.Whitelist"/>, <see cref="MetadataSettings.Blacklist"/>, <see cref="MetadataSettings.AgeRatingMappings"/>, <see cref="MetadataSettings.FieldMappings"/>
     /// with data from the given dto.
     /// </summary>
-    /// <param name="dto">Only the above fields need to be present</param>
-    /// <param name="settings">What and how should the importing be handled</param>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
     /// <returns></returns>
-    Task<FieldMappingsImportResultDto> ImportFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings);
+    Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings);
     Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
 }
 
@@ -120,14 +120,14 @@ public class SettingsService : ISettingsService
         return await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
     }
 
-    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
     {
         if (dto.AgeRatingMappings.Keys.Distinct().Count() != dto.AgeRatingMappings.Count)
         {
             throw new KavitaException("errors.import-fields.non-unique-age-ratings");
         }
 
-        if (dto.FieldMappings.Select(f => f.Id).Distinct().Count() != dto.FieldMappings.Count)
+        if (dto.FieldMappings.DistinctBy(f => f.Id).Count() != dto.FieldMappings.Count)
         {
             throw new KavitaException("errors.import-fields.non-unique-fields");
         }
@@ -146,7 +146,7 @@ public class SettingsService : ISettingsService
     /// <param name="dto"></param>
     /// <param name="settings"></param>
     /// <returns></returns>
-    private async Task<FieldMappingsImportResultDto> ReplaceFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    private async Task<FieldMappingsImportResultDto> ReplaceFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
 
@@ -185,7 +185,7 @@ public class SettingsService : ISettingsService
     /// <param name="dto"></param>
     /// <param name="settings"></param>
     /// <returns></returns>
-    private async Task<FieldMappingsImportResultDto> MergeFieldMappings(MetadataSettingsDto dto, ImportSettingsDto settings)
+    private async Task<FieldMappingsImportResultDto> MergeFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
 

@@ -681,12 +681,19 @@ public class ExternalMetadataService : IExternalMetadataService
         return [.. staff];
     }
 
+    /// <summary>
+    /// Helper method, calls <see cref="ProcessGenreAndTagLists"/>
+    /// </summary>
+    /// <param name="externalMetadata"></param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
     private static void GenerateGenreAndTagLists(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings,
         ref List<string> processedTags, ref List<string> processedGenres)
     {
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
-        GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
+        ProcessGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
             settings, ref processedTags, ref processedGenres);
     }
 
@@ -699,6 +706,25 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="processedTags"></param>
     /// <param name="processedGenres"></param>
     public static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
+        ref List<string> processedTags, ref List<string> processedGenres)
+    {
+        ProcessGenreAndTagLists(genres, tags, settings, ref processedTags, ref processedGenres);
+
+        // Reset if not enabled
+        if (!settings.EnableGenres)
+        {
+            processedGenres.Clear();
+            processedGenres.AddRange(genres);
+        }
+
+        if (!settings.EnableTags)
+        {
+            processedTags.Clear();
+            processedTags.AddRange(tags);
+        }
+    }
+
+    public static void ProcessGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
         ref List<string> processedTags, ref List<string> processedGenres)
     {
         var mappings = ApplyFieldMappings(tags, MetadataFieldType.Tag, settings.FieldMappings);

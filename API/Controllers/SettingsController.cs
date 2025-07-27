@@ -261,11 +261,11 @@ public class SettingsController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("import-field-mappings")]
-    public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsBody body)
+    public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsDto dto)
     {
         try
         {
-            return Ok(await _settingsService.ImportFieldMappings(body.Data, body.Settings));
+            return Ok(await _settingsService.ImportFieldMappings(dto.Data, dto.Settings));
         }
         catch (Exception ex)
         {
@@ -273,7 +273,5 @@ public class SettingsController : BaseApiController
             return BadRequest(ex.Message);
         }
     }
-
-    public sealed record ImportFieldMappingsBody(MetadataSettingsDto Data, ImportSettingsDto Settings);
 
 }

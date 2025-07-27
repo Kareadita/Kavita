@@ -1,6 +1,39 @@
 <ng-container *transloco="let t; prefix: 'manage-metadata-settings'" [formGroup]="settingsForm()">
 
   <div class="row g-0 align-items-start mb-4">
+
+    <div class="row g-0 mt-4 mb-4">
+      <div class="col-md-5">
+        @if(settingsForm().get('enableGenres'); as formControl) {
+          <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+      <div class="col-md-5">
+        @if(settingsForm().get('enableTags'); as formControl) {
+          <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="col-auto ms-3">
+        <button class="btn btn-secondary" (click)="export()" [ngbTooltip]="t('export-tooltip')">
+          {{ t('export-settings') }}
+        </button>
+      </div>
+
+    </div>
+
     <div class="col">
       @if(settingsForm().get('blacklist'); as formControl) {
         <app-setting-item
@@ -22,12 +55,6 @@
 
         </app-setting-item>
       }
-    </div>
-
-    <div class="col-auto ms-3">
-      <button class="btn btn-secondary" (click)="export()" [ngbTooltip]="t('export-tooltip')">
-        {{ t('export-settings') }}
-      </button>
     </div>
   </div>
 

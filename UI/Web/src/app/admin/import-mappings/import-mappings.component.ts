@@ -3,7 +3,7 @@ import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
 import {
-  AbstractControl,
+  AbstractControl, FormArray,
   FormControl,
   FormGroup,
   FormsModule,
@@ -173,7 +173,8 @@ export class ImportMappingsComponent implements OnInit {
 
     const settings = this.importSettingsForm.value as ImportSettings;
     // Ensure keys are numbers
-    settings.fieldMappingsConflictResolutions = this.mapRecord(settings.fieldMappingsConflictResolutions, k => parseInt(k+''), v => v)
+    settings.fieldMappingsConflictResolutions = Object.fromEntries(Object.entries(settings.fieldMappingsConflictResolutions)
+        .map(([key, value]) => [parseInt(key+''), value]));
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       tap((res) => this.importResult.set(res)),
@@ -258,6 +259,14 @@ export class ImportMappingsComponent implements OnInit {
     }
 
     this.currentStepIndex.update(x => x-1);
+
+    // Reset when returning to the first step
+    if (this.currentStepIndex() === Step.Import) {
+      this.fileUploadControl.reset();
+      (this.importSettingsForm.get('ageRatingConflictResolutions') as FormArray).clear();
+      (this.importSettingsForm.get('fieldMappingsConflictResolutions') as FormArray).clear();
+    }
+
   }
 
   canMoveToNextStep() {
@@ -288,29 +297,8 @@ export class ImportMappingsComponent implements OnInit {
     }
   }
 
-  /**
-   * Get an entry from a map, that's actually an object
-   * @param m
-   * @param key
-   */
-  getMapEntry<K, V>(m: Map<K, V>, key: K): V {
-    return (m as any)[key] as V;
-  }
-
   getFieldMapping(mappings: MetadataFieldMapping[], id: number) {
     return mappings.find(mapping => mapping.id === id)!;
-  }
-
-  private mapRecord<T extends string | number | symbol, V, T2 extends string | number | symbol, V2>(
-    input: Record<T, V>,
-    keyTransform: (key: T) => T2,
-    valueTransform: (value: V) => V2
-  ): Record<T2, V2> {
-    return Object.fromEntries(
-      Object.entries(input)
-        .map(([key, value]) =>
-          [keyTransform(key as T), valueTransform(value as V)])
-    ) as Record<T2, V2>;
   }
 
   protected readonly Step = Step;

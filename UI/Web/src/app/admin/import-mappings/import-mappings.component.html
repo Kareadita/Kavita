@@ -272,8 +272,8 @@
 </ng-container>
 
 <ng-template #ageRatingConflict let-arm let-resolution='resolution'>
-  @let oldValue = getMapEntry(settings()!.ageRatingMappings, arm);
-  @let newValue = getMapEntry(importedMappings()!.ageRatingMappings, arm);
+  @let oldValue = settings()!.ageRatingMappings[arm];
+  @let newValue = importedMappings()!.ageRatingMappings[arm];
 
   @switch (resolution) {
     @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }

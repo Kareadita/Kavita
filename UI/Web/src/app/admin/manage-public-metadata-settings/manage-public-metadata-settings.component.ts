@@ -8,7 +8,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {SettingsService} from "../settings.service";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {
   ManageMetadataMappingsComponent,
   MetadataMappingsExport
@@ -17,9 +17,9 @@ import {MetadataSettings} from "../_models/metadata-settings";
 import {debounceTime, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
-import {AgeRating} from "../../_models/metadata/age-rating";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LicenseService} from "../../_services/license.service";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 
 /**
  * Metadata settings for which a K+ license is not required
@@ -28,7 +28,9 @@ import {LicenseService} from "../../_services/license.service";
   selector: 'app-manage-public-metadata-settings',
   imports: [
     ManageMetadataMappingsComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    ReactiveFormsModule,
+    SettingSwitchComponent
   ],
   templateUrl: './manage-public-metadata-settings.component.html',
   styleUrl: './manage-public-metadata-settings.component.scss',
@@ -36,7 +38,7 @@ import {LicenseService} from "../../_services/license.service";
 })
 export class ManagePublicMetadataSettingsComponent implements OnInit {
 
-  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent?: ManageMetadataMappingsComponent;
+  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
 
   private readonly settingService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -50,6 +52,10 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     this.settingService.getMetadataSettings().subscribe(settings => {
       this.settings = settings;
       this.cdRef.markForCheck();
+
+      this.settingsForm.addControl('enabled', new FormControl<boolean>(this.settings.enabled, []));
+      this.settingsForm.addControl('enableGenres', new FormControl<boolean>(this.settings.enableGenres, []));
+      this.settingsForm.addControl('enableTags', new FormControl<boolean>(this.settings.enableTags, []));
     });
 
     this.settingsForm.valueChanges.pipe(
@@ -62,14 +68,13 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
 
   packData() {
     const model = Object.assign({}, this.settings);
+    const formValue = this.settingsForm.value;
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent ? this.manageMetadataMappingsComponent.packData() : {
-      ageRatingMappings: {} as Map<string, AgeRating>,
-      blacklist: [],
-      fieldMappings: [],
-      whitelist: [],
-    };
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
 
+    model.enabled = formValue.enabled;
+    model.enableTags = formValue.enableTags;
+    model.enableGenres = formValue.enableGenres;
     model.ageRatingMappings = exp.ageRatingMappings;
     model.fieldMappings = exp.fieldMappings;
     model.whitelist = exp.whitelist;

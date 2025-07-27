@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -77,8 +78,8 @@ public class SettingsServiceTests
 
         Assert.Equal(existingSettings.Whitelist, newSettings.Whitelist);
         Assert.Equal(existingSettings.Blacklist, newSettings.Blacklist);
-        Assert.Equal(existingSettings.AgeRatingMappings.Count, newSettings.AgeRatingMappings.Count);
-        Assert.Equal(existingSettings.FieldMappings.Count, newSettings.FieldMappings.Count);
+        Assert.Equal(existingSettings.AgeRatingMappings, newSettings.AgeRatingMappings);
+        Assert.Equal(existingSettings.FieldMappings, newSettings.FieldMappings);
     }
 
     [Fact]
@@ -130,10 +131,10 @@ public class SettingsServiceTests
     }
 
     [Theory]
-    [InlineData(ConflictResolution.Manual, false, true, "default_dest", MetadataFieldType.Tag)]
-    [InlineData(ConflictResolution.Replace, true, false, "different_dest", MetadataFieldType.Genre)]
-    [InlineData(ConflictResolution.Keep, true, false, "default_dest", MetadataFieldType.Tag)]
-    public async Task ImportFieldMappings_MergeMode_DefaultResolutionHandling(ConflictResolution resolution, bool expectedSuccess, bool expectConflict, string expectedDestinationValue, MetadataFieldType expectedDestinationType)
+    [InlineData(ConflictResolution.Manual, false, "default_dest", MetadataFieldType.Tag)]
+    [InlineData(ConflictResolution.Replace, true, "different_dest", MetadataFieldType.Genre)]
+    [InlineData(ConflictResolution.Keep, true, "default_dest", MetadataFieldType.Tag)]
+    public async Task ImportFieldMappings_MergeMode_DefaultResolutionHandling(ConflictResolution resolution, bool success, string expectedDestinationValue, MetadataFieldType expectedDestinationType)
     {
 
         var existingSettingsDto = CreateDefaultMetadataSettingsDto();
@@ -179,9 +180,9 @@ public class SettingsServiceTests
 
         var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
 
-        Assert.Equal(expectedSuccess, result.Success);
+        Assert.Equal(success, result.Success);
 
-        if (expectConflict)
+        if (!success)
         {
             Assert.Single(result.AgeRatingConflicts);
             Assert.Contains(DefaultAgeKey, result.AgeRatingConflicts);

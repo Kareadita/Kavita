@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.MetadataMatching;
@@ -7,7 +8,7 @@ using NotImplementedException = System.NotImplementedException;
 namespace API.DTOs.KavitaPlus.Metadata;
 
 
-public sealed record MetadataSettingsDto
+public sealed record MetadataSettingsDto: FieldMappingsDto
 {
     /// <summary>
     /// If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed
@@ -76,27 +77,10 @@ public sealed record MetadataSettingsDto
     public bool FirstLastPeopleNaming { get; set; }
 
     /// <summary>
-    /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
-    /// </summary>
-    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }
-
-    /// <summary>
-    /// A list of rules that allow mapping a genre/tag to another genre/tag
-    /// </summary>
-    public List<MetadataFieldMappingDto> FieldMappings { get; set; }
-    /// <summary>
     /// A list of overrides that will enable writing to locked fields
     /// </summary>
     public List<MetadataSettingField> Overrides { get; set; }
 
-    /// <summary>
-    /// Do not allow any Genre/Tag in this list to be written to Kavita
-    /// </summary>
-    public List<string> Blacklist { get; set; }
-    /// <summary>
-    /// Only allow these Tags to be written to Kavita
-    /// </summary>
-    public List<string> Whitelist { get; set; }
     /// <summary>
     /// Which Roles to allow metadata downloading for
     /// </summary>
@@ -122,4 +106,31 @@ public sealed record MetadataSettingsDto
     {
         return PersonRoles.Contains(character);
     }
+}
+
+/// <summary>
+/// Decoupled from <see cref="MetadataSettingsDto"/> to allow reuse without requiring the full metadata settings in
+/// <see cref="ImportFieldMappingsDto"/>
+/// </summary>
+public record FieldMappingsDto
+{
+    /// <summary>
+    /// Do not allow any Genre/Tag in this list to be written to Kavita
+    /// </summary>
+    public List<string> Blacklist { get; set; }
+
+    /// <summary>
+    /// Only allow these Tags to be written to Kavita
+    /// </summary>
+    public List<string> Whitelist { get; set; }
+
+    /// <summary>
+    /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
+    /// </summary>
+    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }
+
+    /// <summary>
+    /// A list of rules that allow mapping a genre/tag to another genre/tag
+    /// </summary>
+    public List<MetadataFieldMappingDto> FieldMappings { get; set; }
 }

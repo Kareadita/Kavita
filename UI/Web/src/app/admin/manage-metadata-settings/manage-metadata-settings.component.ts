@@ -43,7 +43,7 @@ import {AgeRating} from "../../_models/metadata/age-rating";
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 
-  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent?: ManageMetadataMappingsComponent;
+  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
 
   private readonly settingService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -138,12 +138,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   packData(withFieldMappings: boolean = true) {
     const model = this.settingsForm.value;
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent ? this.manageMetadataMappingsComponent.packData() : {
-      ageRatingMappings: {} as Map<string, AgeRating>,
-      blacklist: [],
-      fieldMappings: [],
-      whitelist: [],
-    };
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
 
     return {
       ...model,

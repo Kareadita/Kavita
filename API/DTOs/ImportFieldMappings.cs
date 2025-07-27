@@ -16,19 +16,37 @@ public enum ImportMode
     Merge = 1,
 }
 
+/// <summary>
+/// How Kavita should resolve conflicts
+/// </summary>
 public enum ConflictResolution
 {
+    /// <summary>
+    /// Require the user to override the default
+    /// </summary>
     [Description("Manual")]
     Manual = 0,
+    /// <summary>
+    /// Keep current value
+    /// </summary>
     [Description("Keep")]
     Keep = 1,
+    /// <summary>
+    /// Replace with imported value
+    /// </summary>
     [Description("Replace")]
     Replace = 2,
 }
 
 public sealed record ImportSettingsDto
 {
+    /// <summary>
+    /// How Kavita should import the new settings
+    /// </summary>
     public ImportMode ImportMode { get; init; }
+    /// <summary>
+    /// Default conflict resolution, override with <see cref="AgeRatingConflictResolutions"/> and <see cref="FieldMappingsConflictResolutions"/>
+    /// </summary>
     public ConflictResolution Resolution { get; init; }
     /// <summary>
     /// Import <see cref="MetadataSettingsDto.Whitelist"/>
@@ -66,7 +84,7 @@ public sealed record ImportConflict
     /// </summary>
     public int OldId { get; init; }
     /// <summary>
-    /// The id of the enity form the imported json
+    /// The id of the entity form the imported json
     /// </summary>
     public int NewId { get; init; }
 }
@@ -78,6 +96,12 @@ public sealed record FieldMappingsImportResultDto
     /// Only present if <see cref="Success"/> is true
     /// </summary>
     public MetadataSettingsDto ResultingMetadataSettings { get; init; }
+    /// <summary>
+    /// Keys of the conflicting age ratings mappings
+    /// </summary>
     public List<string> AgeRatingConflicts { get; init; }
+    /// <summary>
+    /// Ids of conflicting field mappings
+    /// </summary>
     public List<ImportConflict> FieldMappingConflicts { get; init; }
 }

@@ -36,7 +36,7 @@ export interface MetadataSettings {
   enableGenres: boolean;
   enableTags: boolean;
   firstLastPeopleNaming: boolean;
-  ageRatingMappings: Map<string, AgeRating>;
+  ageRatingMappings: Record<string, AgeRating>;
   fieldMappings: Array<MetadataFieldMapping>;
   blacklist: Array<string>;
   whitelist: Array<string>;
