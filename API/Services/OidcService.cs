@@ -474,7 +474,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
         if (errors.Any())
         {
-            logger.LogError("failed to sync roles {Errors}", errors.Select(x => x.Description).ToList());
+            logger.LogError("Failed to sync roles {Errors}", errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.syncing-user");
         }
     }
