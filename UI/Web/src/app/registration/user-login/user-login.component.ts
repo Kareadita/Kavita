@@ -104,7 +104,7 @@ export class UserLoginComponent implements OnInit {
 
     this.settingsService.getPublicOidcConfig().subscribe(config => {
       this.oidcConfig.set(config);
-    })
+    });
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       if (!adminExists) {

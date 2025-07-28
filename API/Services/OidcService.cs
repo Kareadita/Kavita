@@ -561,7 +561,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             client_secret = dto.Secret,
         };
 
-        var json= await tokenEndpoint
+        var json = await tokenEndpoint
             .AllowAnyHttpStatus()
             .PostUrlEncodedAsync(msg)
             .ReceiveString();
