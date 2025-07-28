@@ -164,7 +164,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 {
                     throw new KavitaException("errors.oidc.missing-external-id");
                 }
-                var user = await unitOfWork.UserRepository.GetByOidcId(oidcId) ?? throw new UnauthorizedAccessException();
+                var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
 
                 await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
 
