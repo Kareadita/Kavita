@@ -126,7 +126,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = "export.json";
+    a.download = "Kavita Metadata Settings Export.json";
     a.click();
     URL.revokeObjectURL(url);
   }
