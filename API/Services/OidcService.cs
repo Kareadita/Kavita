@@ -233,7 +233,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (user == null) return null;
 
         var roles = await userManager.GetRolesAsync(user);
-        if (roles.Count == 0 || !roles.Contains(PolicyConstants.LoginRole))
+        if (roles.Count == 0 || (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)))
         {
             throw new KavitaException("errors.oidc.disabled-account");
         }

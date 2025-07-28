@@ -99,7 +99,7 @@ public class AccountController : BaseApiController
         if (user == null) throw new UnauthorizedAccessException();
 
         var roles = await _userManager.GetRolesAsync(user);
-        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+        if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
         try
         {
