@@ -66,6 +66,7 @@ public class SettingsService : ISettingsService
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         existingMetadataSetting.Enabled = dto.Enabled;
+        existingMetadataSetting.EnableExtendedMetadataProcessing = dto.EnableExtendedMetadataProcessing;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;
         existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;

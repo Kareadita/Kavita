@@ -18,6 +18,7 @@ export interface MetadataFieldMapping {
 
 export interface MetadataSettings {
   enabled: boolean;
+  enableExtendedMetadataProcessing: boolean;
   enableSummary: boolean;
   enablePublicationStatus: boolean;
   enableRelationships: boolean;

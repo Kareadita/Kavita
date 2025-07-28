@@ -9,7 +9,6 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataService} from "../../_services/metadata.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 
 export type MetadataMappingsExport = {
@@ -29,7 +28,6 @@ export type MetadataMappingsExport = {
     SettingItemComponent,
     TagBadgeComponent,
     TranslocoDirective,
-    NgbTooltip,
     SettingSwitchComponent
   ],
   templateUrl: './manage-metadata-mappings.component.html',
@@ -56,6 +54,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const settings = this.settings();
     const settingsForm = this.settingsForm();
 
+    settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
     settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
     settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
     settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);

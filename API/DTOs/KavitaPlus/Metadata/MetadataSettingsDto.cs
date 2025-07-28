@@ -16,6 +16,11 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     public bool Enabled { get; set; }
 
     /// <summary>
+    /// Enable processing of metadata outside K+; e.g. disk and API
+    /// </summary>
+    public bool EnableExtendedMetadataProcessing { get; set; }
+
+    /// <summary>
     /// Allow the Summary to be written
     /// </summary>
     public bool EnableSummary { get; set; }

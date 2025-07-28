@@ -30,7 +30,6 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
     ManageMetadataMappingsComponent,
     TranslocoDirective,
     ReactiveFormsModule,
-    SettingSwitchComponent
   ],
   templateUrl: './manage-public-metadata-settings.component.html',
   styleUrl: './manage-public-metadata-settings.component.scss',
@@ -52,10 +51,6 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     this.settingService.getMetadataSettings().subscribe(settings => {
       this.settings = settings;
       this.cdRef.markForCheck();
-
-      this.settingsForm.addControl('enabled', new FormControl<boolean>(this.settings.enabled, []));
-      this.settingsForm.addControl('enableGenres', new FormControl<boolean>(this.settings.enableGenres, []));
-      this.settingsForm.addControl('enableTags', new FormControl<boolean>(this.settings.enableTags, []));
     });
 
     this.settingsForm.valueChanges.pipe(
@@ -72,9 +67,7 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
 
     const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
 
-    model.enabled = formValue.enabled;
-    model.enableTags = formValue.enableTags;
-    model.enableGenres = formValue.enableGenres;
+    model.enableExtendedMetadataProcessing = formValue.enableExtendedMetadataProcessing;
     model.ageRatingMappings = exp.ageRatingMappings;
     model.fieldMappings = exp.fieldMappings;
     model.whitelist = exp.whitelist;

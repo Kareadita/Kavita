@@ -197,6 +197,31 @@
 
       <div class="setting-section-break"></div>
 
+      <div class="row">
+        <div class="col-md-6">
+          @if(settingsForm.get('enableGenres'); as formControl) {
+            <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+        <div class="col-md-6">
+          @if(settingsForm.get('enableTags'); as formControl) {
+            <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+      </div>
+
       @if (settings) {
         <app-manage-metadata-mappings [settings]="settings" [settingsForm]="settingsForm" />
       }

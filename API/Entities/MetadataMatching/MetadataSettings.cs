@@ -14,6 +14,11 @@ public class MetadataSettings
     /// </summary>
     public bool Enabled { get; set; }
 
+    /// <summary>
+    /// Enable processing of metadata outside K+; e.g. disk and API
+    /// </summary>
+    public bool EnableExtendedMetadataProcessing { get; set; }
+
     #region Series Metadata
 
     /// <summary>

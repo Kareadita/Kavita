@@ -660,7 +660,7 @@ public class ScannerService : IScannerService
             var processedGenres = new List<string>();
             var processedTags = new List<string>();
 
-            if (settings.Enabled)
+            if (settings.EnableExtendedMetadataProcessing)
             {
                 ExternalMetadataService.GenerateGenreAndTagLists(allGenres, allTags, settings, ref processedTags, ref processedGenres);
             }

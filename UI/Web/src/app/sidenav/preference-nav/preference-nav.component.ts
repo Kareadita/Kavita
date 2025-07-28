@@ -126,11 +126,11 @@ export class PreferenceNavComponent implements AfterViewInit {
       title: 'server-section-title',
       children: [
         new SideNavItem(SettingsTabId.General, [Role.Admin]),
+        new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
         new SideNavItem(SettingsTabId.Media, [Role.Admin]),
         new SideNavItem(SettingsTabId.Email, [Role.Admin]),
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
         new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
-        new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
         new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
       ]
     },

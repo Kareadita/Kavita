@@ -312,13 +312,16 @@ public class ProcessSeries : IProcessSeries
         {
             series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
-            // Get the MetadataSettings and apply Age Rating Mappings here
-            var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
-            var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
-            if (updatedRating > series.Metadata.AgeRating)
+            if (settings.EnableExtendedMetadataProcessing)
             {
-                series.Metadata.AgeRating = updatedRating;
+                var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
+                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
+                if (updatedRating > series.Metadata.AgeRating)
+                {
+                    series.Metadata.AgeRating = updatedRating;
+                }
             }
+
         }
 
         DeterminePublicationStatus(series, chapters);
@@ -1077,7 +1080,7 @@ public class ProcessSeries : IProcessSeries
             var finalTags = new List<string>();
             var finalGenres = new List<string>();
 
-            if (settings.Enabled)
+            if (settings.EnableExtendedMetadataProcessing)
             {
                 ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
             }
