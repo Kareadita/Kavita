@@ -162,6 +162,11 @@ public static class IdentityServiceExtensions
 
                     return Task.CompletedTask;
                 },
+                OnRedirectToIdentityProvider = ctx =>
+                {
+                    ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
+                    return Task.CompletedTask;
+                },
             };
         });
     }
