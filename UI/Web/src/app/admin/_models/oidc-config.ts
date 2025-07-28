@@ -1,21 +1,22 @@
 import {AgeRating} from "../../_models/metadata/age-rating";
 
 export interface OidcPublicConfig {
-  authority: string;
-  clientId: string;
   autoLogin: boolean;
   disablePasswordAuthentication: boolean;
   providerName: string;
-  customScopes: string[];
+  enabled: boolean;
 }
 
 export interface OidcConfig extends OidcPublicConfig {
+  authority: string;
+  clientId: string;
   secret: string;
   provisionAccounts: boolean;
   requireVerifiedEmail: boolean;
   syncUserSettings: boolean;
   rolesPrefix: string;
   rolesClaim: string;
+  customScopes: string[];
   defaultRoles: string[];
   defaultLibraries: number[];
   defaultAgeRestriction: AgeRating;

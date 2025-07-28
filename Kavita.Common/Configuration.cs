@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Kavita.Common.EnvironmentInfo;
@@ -52,28 +53,12 @@ public static class Configuration
         set => SetCacheSize(GetAppSettingFilename(), value);
     }
 
-    public static string OidcAuthority
+    /// <remarks>You must set this object to update the settings, setting one if it's fields will not save to disk</remarks>
+    public static OpenIdConnectSettings OidcSettings
     {
-        get => GetOidcAuthority(GetAppSettingFilename());
-        set => SetOidcAuthority(GetAppSettingFilename(), value);
+        get => GetOpenIdConnectSettings(GetAppSettingFilename());
+        set => SetOpenIdConnectSettings(GetAppSettingFilename(), value);
     }
-
-    public static string OidcClientId
-    {
-        get => GetOidcClientId(GetAppSettingFilename());
-        set => SetOidcClientId(GetAppSettingFilename(), value);
-    }
-
-    public static string OidcSecret
-    {
-        get => GetOidcSecret(GetAppSettingFilename());
-        set => SetOidcSecret(GetAppSettingFilename(), value);
-    }
-
-    public static bool OidcEnabled =>
-        !string.IsNullOrEmpty(GetOidcAuthority(GetAppSettingFilename())) &&
-        !string.IsNullOrEmpty(GetOidcSecret(GetAppSettingFilename())) &&
-        !string.IsNullOrEmpty(GetOidcClientId(GetAppSettingFilename()));
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
@@ -339,96 +324,30 @@ public static class Configuration
 
     #region OIDC
 
-    private static string GetOidcAuthority(string filePath)
+    private static OpenIdConnectSettings GetOpenIdConnectSettings(string filePath)
     {
         try
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
 
-            return jsonObj.OidcAuthority;
+            return jsonObj.OpenIdConnectSettings ?? new OpenIdConnectSettings();
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error reading app settings: " + ex.Message);
         }
 
-        return string.Empty;
+        return new OpenIdConnectSettings();
     }
 
-    private static void SetOidcAuthority(string filePath, string authority)
+    private static void SetOpenIdConnectSettings(string filePath, OpenIdConnectSettings value)
     {
         try
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-            jsonObj.OidcAuthority = authority;
-            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception)
-        {
-            /* Swallow exception */
-        }
-    }
-
-    private static string GetOidcClientId(string filePath)
-    {
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-
-            return jsonObj.OidcAudience;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error reading app settings: " + ex.Message);
-        }
-
-        return string.Empty;
-    }
-
-    private static void SetOidcClientId(string filePath, string audience)
-    {
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-            jsonObj.OidcAudience = audience;
-            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception)
-        {
-            /* Swallow exception */
-        }
-    }
-
-    private static string GetOidcSecret(string filePath)
-    {
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-
-            return jsonObj.OidcSecret;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error reading app settings: " + ex.Message);
-        }
-
-        return string.Empty;
-    }
-
-    private static void SetOidcSecret(string filePath, string secret)
-    {
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-            jsonObj.OidcSecret = secret;
+            jsonObj.OpenIdConnectSettings = value;
             json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
@@ -454,9 +373,20 @@ public static class Configuration
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public bool AllowIFraming { get; init; } = false;
-        public string OidcAuthority { get; set; } = DefaultOidcAuthority;
-        public string OidcAudience { get; set; } = DefaultOidcClientId;
-        public string OidcSecret { get; set; } = string.Empty;
+        public OpenIdConnectSettings OpenIdConnectSettings { get; set; } = new();
 #pragma warning restore S3218
+    }
+
+    public class OpenIdConnectSettings
+    {
+        public string Authority { get; set; } = DefaultOidcAuthority;
+        public string ClientId { get; set; } = DefaultOidcClientId;
+        public string Secret { get; set; } = string.Empty;
+        public List<string> CustomScopes { get; set; } = [];
+
+        public bool Enabled =>
+            !string.IsNullOrEmpty(Authority) &&
+            !string.IsNullOrEmpty(ClientId) &&
+            !string.IsNullOrEmpty(Secret);
     }
 }

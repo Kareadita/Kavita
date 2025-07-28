@@ -75,7 +75,7 @@ export class UserLoginComponent implements OnInit {
   });
   showOidcButton = computed(() => {
     const config = this.oidcConfig();
-    return config && config.authority.trim() !== '';
+    return config && config.enabled;
   });
 
   constructor() {

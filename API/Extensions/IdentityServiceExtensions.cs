@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
-using API.Entities.Enums;
-using API.Helpers;
 using API.Services;
-using Hangfire.Storage.SQLite.Entities;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -22,12 +17,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Extensions.Hosting;using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
-using MessageReceivedContextOidc = Microsoft.AspNetCore.Authentication.OpenIdConnect.MessageReceivedContext;
 using TokenValidatedContext = Microsoft.AspNetCore.Authentication.OpenIdConnect.TokenValidatedContext;
 
 namespace API.Extensions;
@@ -71,10 +63,12 @@ public static class IdentityServiceExtensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddEntityFrameworkStores<DataContext>();
 
+        var oidcSettings = Configuration.OidcSettings;
+
         var auth = services.AddAuthentication(DynamicHybrid)
             .AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                var enabled = Configuration.OidcEnabled;
+                var enabled = oidcSettings.Enabled;
 
                 options.ForwardDefaultSelector = ctx =>
                 {
@@ -97,74 +91,10 @@ public static class IdentityServiceExtensions
             });
 
 
-        if (Configuration.OidcEnabled)
+        if (oidcSettings.Enabled)
         {
-            auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-                {
-                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-                    options.SlidingExpiration = true;
-
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.IsEssential = true;
-                    options.Cookie.MaxAge = TimeSpan.FromDays(7);
-
-                    if (environment.IsEnvironment(Environments.Development))
-                    {
-                        options.Cookie.Domain = null;
-                    }
-
-                    options.Events = new CookieAuthenticationEvents
-                    {
-                        OnValidatePrincipal = async ctx =>
-                        {
-                            var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-                            await oidcService.RefreshCookieToken(ctx);
-                        },
-                        OnRedirectToAccessDenied = ctx =>
-                        {
-                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            return Task.CompletedTask;
-                        },
-                        OnRedirectToLogin = ctx =>
-                        {
-                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            return Task.CompletedTask;
-                        },
-                    };
-
-                })
-                .AddOpenIdConnect(OpenIdConnect, options =>
-                {
-                    options.Authority = Configuration.OidcAuthority;
-                    options.ClientId = Configuration.OidcClientId;
-                    options.ClientSecret = Configuration.OidcSecret;
-                    options.RequireHttpsMetadata = options.Authority.StartsWith("https://");
-
-                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.ResponseType = OpenIdConnectResponseType.Code;
-                    options.CallbackPath = "/signin-oidc";
-                    options.SignedOutCallbackPath = "/signout-callback-oidc";
-
-                    options.SaveTokens = true;
-                    options.GetClaimsFromUserInfoEndpoint = true;
-                    options.Scope.Clear();
-                    options.Scope.Add("openid");
-                    options.Scope.Add("profile");
-                    options.Scope.Add("offline_access");
-                    options.Scope.Add("roles");
-                    options.Scope.Add("email");
-
-                    options.Events = new OpenIdConnectEvents
-                    {
-                        OnTokenValidated = OidcClaimsPrincipalConverter,
-                        OnAuthenticationFailed = ctx =>
-                        {
-                            ctx.Response.Redirect("/login?skipAutoLogin=true&error="+Uri.EscapeDataString(ctx.Exception.Message));
-                            ctx.HandleResponse();
-                            return Task.CompletedTask;
-                        },
-                    };
-                });
+            auth.AddOpenIdConnectCookie(environment)
+                .AddOpenIdConnectScheme(oidcSettings);
         }
 
         auth.AddJwtBearer(LocalIdentity, options =>
@@ -191,6 +121,83 @@ public static class IdentityServiceExtensions
             .AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
 
         return services;
+    }
+
+    private static AuthenticationBuilder AddOpenIdConnectScheme(this AuthenticationBuilder builder, Configuration.OpenIdConnectSettings settings)
+    {
+        return builder.AddOpenIdConnect(OpenIdConnect, options =>
+        {
+            options.Authority = settings.Authority;
+            options.ClientId = settings.ClientId;
+            options.ClientSecret = settings.Secret;
+            options.RequireHttpsMetadata = options.Authority.StartsWith("https://");
+
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.ResponseType = OpenIdConnectResponseType.Code;
+            options.CallbackPath = "/signin-oidc";
+            options.SignedOutCallbackPath = "/signout-callback-oidc";
+
+            options.SaveTokens = true;
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("offline_access");
+            options.Scope.Add("roles");
+            options.Scope.Add("email");
+            foreach (var customScope in settings.CustomScopes)
+            {
+                options.Scope.Add(customScope);
+            }
+
+            options.Events = new OpenIdConnectEvents
+            {
+                OnTokenValidated = OidcClaimsPrincipalConverter,
+                OnAuthenticationFailed = ctx =>
+                {
+                    ctx.Response.Redirect("/login?skipAutoLogin=true&error="+Uri.EscapeDataString(ctx.Exception.Message));
+                    ctx.HandleResponse();
+                    return Task.CompletedTask;
+                },
+            };
+        });
+    }
+
+    private static AuthenticationBuilder AddOpenIdConnectCookie(this AuthenticationBuilder builder, IWebHostEnvironment environment)
+    {
+        return builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.SlidingExpiration = true;
+
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.Cookie.MaxAge = TimeSpan.FromDays(7);
+
+            if (environment.IsEnvironment(Environments.Development))
+            {
+                options.Cookie.Domain = null;
+            }
+
+            options.Events = new CookieAuthenticationEvents
+            {
+                OnValidatePrincipal = async ctx =>
+                {
+                    var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+                    await oidcService.RefreshCookieToken(ctx);
+                },
+                OnRedirectToAccessDenied = ctx =>
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                },
+                OnRedirectToLogin = ctx =>
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                },
+            };
+        });
     }
 
     /// <summary>

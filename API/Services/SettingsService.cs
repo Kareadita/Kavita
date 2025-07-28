@@ -146,6 +146,7 @@ public class SettingsService : ISettingsService
         }
 
         var updateTask = false;
+        var updatedOidcSettings = false;
         foreach (var setting in currentSettings)
         {
             if (setting.Key == ServerSettingKey.OnDeckProgressDays &&
@@ -183,7 +184,7 @@ public class SettingsService : ISettingsService
             updateTask = updateTask || UpdateSchedulingSettings(setting, updateSettingsDto);
 
             UpdateEmailSettings(setting, updateSettingsDto);
-            await UpdateOidcSettings(setting, updateSettingsDto);
+            updatedOidcSettings = await UpdateOidcSettings(setting, updateSettingsDto) || updatedOidcSettings;
 
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
@@ -335,6 +336,17 @@ public class SettingsService : ISettingsService
                 BackgroundJob.Enqueue(() => _taskScheduler.ScheduleTasks());
             }
 
+            if (updatedOidcSettings)
+            {
+                Configuration.OidcSettings = new Configuration.OpenIdConnectSettings
+                {
+                    Authority = updateSettingsDto.OidcConfig.Authority,
+                    ClientId = updateSettingsDto.OidcConfig.ClientId,
+                    Secret = updateSettingsDto.OidcConfig.Secret,
+                    CustomScopes = updateSettingsDto.OidcConfig.CustomScopes,
+                };
+            }
+
             if (updateSettingsDto.EnableFolderWatching)
             {
                 BackgroundJob.Enqueue(() => _libraryWatcher.StartWatching());
@@ -375,7 +387,7 @@ public class SettingsService : ISettingsService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "OpenIdConfiguration failed: {Reason}", e.Message);
+            _logger.LogDebug(e, "OpenIdConfiguration failed: {Reason}", e.Message);
             return false;
         }
     }
@@ -413,42 +425,17 @@ public class SettingsService : ISettingsService
         return false;
     }
 
+    /// <summary>
+    /// Updates oidc settings and return true if a change was made
+    /// </summary>
+    /// <param name="setting"></param>
+    /// <param name="updateSettingsDto"></param>
+    /// <returns></returns>
     /// <remarks>Does not commit any changes</remarks>
-    private async Task UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
+    /// <exception cref="KavitaException">If the authority is invalid</exception>
+    private async Task<bool> UpdateOidcSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)
     {
-        if (setting.Key == ServerSettingKey.OidcAuthority && setting.Value != updateSettingsDto.OidcConfig.Authority)
-        {
-            if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
-            {
-                throw new KavitaException("oidc-invalid-authority");
-            }
-
-            setting.Value = updateSettingsDto.OidcConfig.Authority;
-            Configuration.OidcAuthority = updateSettingsDto.OidcConfig.Authority;
-            _unitOfWork.SettingsRepository.Update(setting);
-
-            _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
-            await _oidcService.ClearOidcIds();
-            return;
-        }
-
-        if (setting.Key == ServerSettingKey.OidcClientId && setting.Value != updateSettingsDto.OidcConfig.ClientId)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.ClientId;
-            Configuration.OidcClientId = updateSettingsDto.OidcConfig.ClientId;
-            _unitOfWork.SettingsRepository.Update(setting);
-            return;
-        }
-
-        if (setting.Key == ServerSettingKey.OidcSecret && setting.Value != updateSettingsDto.OidcConfig.Secret)
-        {
-            setting.Value = updateSettingsDto.OidcConfig.Secret;
-            Configuration.OidcSecret = updateSettingsDto.OidcConfig.Secret;
-            _unitOfWork.SettingsRepository.Update(setting);
-            return;
-        }
-
-        if (setting.Key != ServerSettingKey.OidcConfiguration) return;
+        if (setting.Key != ServerSettingKey.OidcConfiguration) return false;
 
         if (updateSettingsDto.OidcConfig.RolesClaim.Trim() == string.Empty)
         {
@@ -456,10 +443,25 @@ public class SettingsService : ISettingsService
         }
 
         var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
-        if (setting.Value == newValue) return;
+        if (setting.Value == newValue) return false;
+
+        var currentConfig = JsonSerializer.Deserialize<OidcConfigDto>(setting.Value)!;
+
+        if (currentConfig.Authority != updateSettingsDto.OidcConfig.Authority)
+        {
+            if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
+            {
+                throw new KavitaException("oidc-invalid-authority");
+            }
+
+            _logger.LogWarning("OIDC Authority is changing, clearing all external ids");
+            await _oidcService.ClearOidcIds();
+        }
 
         setting.Value = newValue;
         _unitOfWork.SettingsRepository.Update(setting);
+
+        return true;
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

@@ -262,8 +262,12 @@ public class SettingsController : BaseApiController
     [HttpGet("oidc")]
     public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
     {
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        return Ok(_mapper.Map<OidcPublicConfigDto>(settings.OidcConfig));
+        var settings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var publicConfig = _mapper.Map<OidcPublicConfigDto>(settings);
+        publicConfig.Enabled = !string.IsNullOrEmpty(settings.Authority) &&
+                               !string.IsNullOrEmpty(settings.ClientId) &&
+                               !string.IsNullOrEmpty(settings.Secret);
+        return Ok(publicConfig);
     }
 
     /// <summary>

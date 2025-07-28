@@ -90,6 +90,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <remarks>Does not return tokens for the user</remarks>
     /// <remarks>Updates the last active date for the user</remarks>
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
@@ -100,7 +101,6 @@ public class AccountController : BaseApiController
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
-        // Update LastActive on account
         try
         {
             user.UpdateLastActive();

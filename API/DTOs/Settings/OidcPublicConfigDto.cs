@@ -1,6 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
-using API.Entities.Enums;
 
 namespace API.DTOs.Settings;
 
@@ -9,10 +7,6 @@ namespace API.DTOs.Settings;
  */
 public record OidcPublicConfigDto
 {
-    /// <inheritdoc cref="ServerSettingKey.OidcAuthority"/>
-    public string? Authority { get; set; }
-    /// <inheritdoc cref="ServerSettingKey.OidcClientId"/>
-    public string? ClientId { get; set; }
     /// <summary>
     /// Automatically redirect to the Oidc login screen
     /// </summary>
@@ -26,9 +20,5 @@ public record OidcPublicConfigDto
     /// </summary>
     /// <remarks>Default to OpenID Connect</remarks>
     public string ProviderName { get; set; } = "OpenID Connect";
-    /// <summary>
-    /// Custom scopes Kavita should request from your OIDC provider
-    /// </summary>
-    /// <remarks>Advanced setting</remarks>
-    public IList<string> CustomScopes { get; set; } = [];
+    public bool Enabled { get; set; } = false;
 }
