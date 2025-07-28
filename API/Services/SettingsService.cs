@@ -364,12 +364,9 @@ public class SettingsService : ISettingsService
             return false;
         }
 
-        var hasTrailingSlash = authority.EndsWith('/');
-        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
         try
         {
-            var json = await url.GetStringAsync();
-            var config = OpenIdConnectConfiguration.Create(json);
+            var config = await authority.GetDiscoveryDocument();
             return config.Issuer == authority;
         }
         catch (Exception e)

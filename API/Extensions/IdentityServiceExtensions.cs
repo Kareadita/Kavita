@@ -112,6 +112,15 @@ public static class IdentityServiceExtensions
                         options.Cookie.Domain = null;
                     }
 
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnValidatePrincipal = async ctx =>
+                        {
+                            var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+                            await oidcService.RefreshCookieToken(ctx);
+                        }
+                    };
+
                 })
                 .AddOpenIdConnect(OpenIdConnect, options =>
                 {
@@ -188,7 +197,24 @@ public static class IdentityServiceExtensions
             return;
         }
 
-        // Add the following claims like Kavita expects them
+
+        var claims = await ConstructNewClaimsList(ctx, user);
+        var tokens = CopyAuthenticationTokens(ctx);
+
+        var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+
+        ctx.Properties ??= new AuthenticationProperties();
+        ctx.Properties.StoreTokens(tokens);
+
+        ctx.HttpContext.User = principal;
+        ctx.Principal = principal;
+
+        ctx.Success();
+    }
+
+    private static async Task<List<Claim>> ConstructNewClaimsList(TokenValidatedContext ctx, AppUser user)
+    {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -206,15 +232,41 @@ public static class IdentityServiceExtensions
         }
         else
         {
-            claims.AddRange(ctx.Principal.Claims);
+            claims.AddRange(ctx.Principal?.Claims ?? []);
         }
 
-        var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
-        var principal = new ClaimsPrincipal(identity);
-        ctx.HttpContext.User = principal;
-        ctx.Principal = principal;
+        return claims;
+    }
 
-        ctx.Success();
+    private static List<AuthenticationToken> CopyAuthenticationTokens(TokenValidatedContext ctx)
+    {
+        var tokens = new List<AuthenticationToken>
+        {
+            new() {Name = OidcService.IdToken, Value = ctx.SecurityToken.RawData},
+        };
+
+        if (ctx.TokenEndpointResponse == null)
+        {
+            return tokens;
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.AccessToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.AccessToken, Value = ctx.TokenEndpointResponse.AccessToken });
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
+        {
+            var expiresAt = DateTime.UtcNow.AddSeconds(double.Parse(ctx.TokenEndpointResponse.ExpiresIn));
+            tokens.Add(new AuthenticationToken { Name = OidcService.ExpiresAt, Value = expiresAt.ToString("o") });
+        }
+
+        return tokens;
     }
 
     private static Task SetTokenFromQueryOidc(MessageReceivedContextOidc context)

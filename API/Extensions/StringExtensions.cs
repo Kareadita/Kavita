@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Flurl.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace API.Extensions;
 #nullable enable
@@ -60,5 +63,14 @@ public static class StringExtensions
         if (!value.StartsWith(prefix)) return value;
 
         return value.Substring(prefix.Length);
+    }
+
+    public static async Task<OpenIdConnectConfiguration> GetDiscoveryDocument(this string authority)
+    {
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+        var json = await url.GetStringAsync();
+        return OpenIdConnectConfiguration.Create(json);
     }
 }

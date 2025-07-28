@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -15,11 +16,15 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
 using Hangfire;
+using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace API.Services;
 
@@ -39,6 +44,7 @@ public interface IOidcService
     /// <param name="claimsPrincipal"></param>
     /// <param name="user"></param>
     Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user);
+    Task RefreshCookieToken(CookieValidatePrincipalContext ctx);
     /// <summary>
     /// Remove <see cref="AppUser.OidcId"/> from all users
     /// </summary>
@@ -52,6 +58,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string LibraryAccessPrefix = "library-";
     public const string AgeRestrictionPrefix = "age-restriction-";
     public const string IncludeUnknowns = "include-unknowns";
+    public const string IdToken = "id_token";
+    public const string AccessToken = "access_token";
+    public const string RefreshToken = "refresh_token";
+    public const string ExpiresAt = "expires_at";
+
+    private OpenIdConnectConfiguration? _discoveryDocument = null;
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -128,6 +140,51 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         return user;
     }
 
+    public async Task RefreshCookieToken(CookieValidatePrincipalContext ctx)
+    {
+        if (ctx.Principal == null) return;
+
+        var refreshToken = ctx.Properties.GetTokenValue(RefreshToken);
+        if (string.IsNullOrEmpty(refreshToken)) return;
+
+        var expiresAt = ctx.Properties.GetTokenValue(ExpiresAt);
+        if (string.IsNullOrEmpty(expiresAt)) return;
+
+        var tokenExpiry = DateTime.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+        if (tokenExpiry >= DateTime.Now.AddSeconds(30)) return;
+
+        var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+
+        OpenIdConnectMessage? tokenResponse;
+        try
+        {
+            tokenResponse = await RefreshTokenAsync(settings, refreshToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occured automatically refreshing the token for user {User}", ctx.Principal?.GetUsername());
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(tokenResponse.Error))
+        {
+            logger.LogError("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+            return;
+        }
+
+        var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(tokenResponse.ExpiresIn));
+        ctx.Properties.UpdateTokenValue(ExpiresAt, newExpiresAt.ToString("o"));
+        ctx.Properties.UpdateTokenValue(AccessToken, tokenResponse.AccessToken);
+        ctx.Properties.UpdateTokenValue(RefreshToken, tokenResponse.RefreshToken);
+        ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
+
+        ctx.ShouldRenew = true;
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal.GetUserId()) ?? throw new UnauthorizedAccessException();
+        await SyncUserSettings(ctx.HttpContext.Request, settings, ctx.Principal, user);
+
+        logger.LogTrace("Automatically refreshed token for user {User}", ctx.Principal?.GetUsername());
+    }
     public async Task ClearOidcIds()
     {
         var users = await unitOfWork.UserRepository.GetAllUsersAsync();
@@ -419,6 +476,32 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         logger.LogDebug("Synced age restriction for user {UserName}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
             user.UserName, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);
+    }
+
+    private async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
+    {
+        if (dto.Authority == null || dto.ClientId == null)
+        {
+            throw new InvalidOperationException("Cannot refresh tokens without authority and client");
+        }
+
+        _discoveryDocument ??= await dto.Authority.GetDiscoveryDocument();
+        var tokenEndpoint = _discoveryDocument.TokenEndpoint ?? throw new InvalidOperationException("Failed to load the token endpoint from the discovery document");
+
+        var msg = new
+        {
+            grant_type = RefreshToken,
+            refresh_token = refreshToken,
+            client_id = dto.ClientId,
+            client_secret = dto.Secret,
+        };
+
+        var json= await tokenEndpoint
+            .AllowAnyHttpStatus()
+            .PostUrlEncodedAsync(msg)
+            .ReceiveString();
+
+        return new OpenIdConnectMessage(json);
     }
 
 }
