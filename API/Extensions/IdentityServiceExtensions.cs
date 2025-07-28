@@ -242,19 +242,11 @@ public static class IdentityServiceExtensions
 
     private static List<AuthenticationToken> CopyAuthenticationTokens(TokenValidatedContext ctx)
     {
-        var tokens = new List<AuthenticationToken>
-        {
-            new() {Name = OidcService.IdToken, Value = ctx.SecurityToken.RawData},
-        };
+        var tokens = new List<AuthenticationToken>();
 
         if (ctx.TokenEndpointResponse == null)
         {
             return tokens;
-        }
-
-        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.AccessToken))
-        {
-            tokens.Add(new AuthenticationToken { Name = OidcService.AccessToken, Value = ctx.TokenEndpointResponse.AccessToken });
         }
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
