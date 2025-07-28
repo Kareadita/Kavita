@@ -131,7 +131,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
 
     if (error.error && error.error !== 'Unauthorized') {
-      this.toast(error.error);
+      this.toast(translate(error.error));
     }
 
     // NOTE: Signin has error.error or error.statusText available.

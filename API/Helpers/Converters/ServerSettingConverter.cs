@@ -130,20 +130,8 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
                     break;
-                case ServerSettingKey.OidcAuthority:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.Authority = row.Value;
-                    break;
-                case ServerSettingKey.OidcClientId:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    destination.OidcConfig.ClientId = row.Value;
-                    break;
                 case ServerSettingKey.OidcConfiguration:
-                    destination.OidcConfig ??= new OidcConfigDto();
-                    var configuration = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
-                    configuration.Authority = destination.OidcConfig.Authority;
-                    configuration.ClientId = destination.OidcConfig.ClientId;
-                    destination.OidcConfig = configuration;
+                    destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:

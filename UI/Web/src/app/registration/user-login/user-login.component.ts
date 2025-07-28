@@ -14,10 +14,11 @@ import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
-import {OidcService} from "../../_services/oidc.service";
 import {ImageComponent} from "../../shared/image/image.component";
+import { SettingsService } from 'src/app/admin/settings.service';
+import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 
 
 @Component({
@@ -36,7 +37,7 @@ export class UserLoginComponent implements OnInit {
   private readonly navService = inject(NavService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
-  protected readonly oidcService = inject(OidcService);
+  protected readonly settingsService = inject(SettingsService);
 
   baseUrl = environment.apiUrl;
 
@@ -45,10 +46,6 @@ export class UserLoginComponent implements OnInit {
       password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")])
   });
 
-  /**
-   * If there are no admins on the server, this will enable the registration to kick in.
-   */
-  firstTimeFlow = signal(true);
   /**
    * Used for first time the page loads to ensure no flashing
    */
@@ -63,16 +60,22 @@ export class UserLoginComponent implements OnInit {
    * Set from query
    */
   forceShowPasswordLogin = signal(false);
+  oidcConfig = signal<OidcPublicConfig | undefined>(undefined);
+
   /**
    * Display the login form
    */
   showPasswordLogin = computed(() => {
     const loaded = this.isLoaded();
-    const config = this.oidcService.settings();
+    const config = this.oidcConfig();
     const force = this.forceShowPasswordLogin();
     if (force) return true;
 
     return loaded && config && !config.disablePasswordAuthentication;
+  });
+  showOidcButton = computed(() => {
+    const config = this.oidcConfig();
+    return config && config.enabled;
   });
 
   constructor() {
@@ -81,13 +84,12 @@ export class UserLoginComponent implements OnInit {
 
     effect(() => {
       const skipAutoLogin = this.skipAutoLogin();
-      const oidcConfig = this.oidcService.settings();
-      const isLoggingOut = this.oidcService.isLoggingOut();
+      const oidcConfig = this.oidcConfig();
 
-      if (!oidcConfig || skipAutoLogin === undefined || isLoggingOut) return;
+      if (!oidcConfig || skipAutoLogin === undefined) return;
 
       if (oidcConfig.autoLogin && !skipAutoLogin) {
-        this.oidcService.login()
+        this.router.navigateByUrl('/oidc/login');
       }
     });
   }
@@ -95,18 +97,17 @@ export class UserLoginComponent implements OnInit {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
-        this.navService.showNavBar();
-        this.navService.showSideNav();
-        this.router.navigateByUrl('/home');
+        this.navService.handleLogin()
         this.cdRef.markForCheck();
       }
     });
 
+    this.settingsService.getPublicOidcConfig().subscribe(config => {
+      this.oidcConfig.set(config);
+    });
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
-      this.firstTimeFlow.set(!adminExists);
-
-      if (this.firstTimeFlow()) {
+      if (!adminExists) {
         this.router.navigateByUrl('registration/register');
         return;
       }
@@ -123,9 +124,17 @@ export class UserLoginComponent implements OnInit {
 
       this.skipAutoLogin.set(params.get('skipAutoLogin') === 'true')
       this.forceShowPasswordLogin.set(params.get('forceShowPassword') === 'true');
+
+      const error = params.get('error');
+      if (!error) return;
+
+      if (error.startsWith('errors.')) {
+        this.toastr.error(translate(error));
+      } else {
+        this.toastr.error(error);
+      }
     });
   }
-
 
 
   login(apiKey: string = '') {

@@ -61,4 +61,5 @@ public static class StringExtensions
 
         return value.Substring(prefix.Length);
     }
+
 }

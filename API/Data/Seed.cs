@@ -254,8 +254,6 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
-            new() { Key = ServerSettingKey.OidcAuthority, Value = Configuration.OidcAuthority},
-            new() { Key = ServerSettingKey.OidcClientId, Value = Configuration.OidcClientId},
             new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
@@ -293,12 +291,28 @@ public static class Seed
             DirectoryService.BackupDirectory + string.Empty;
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
-        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcAuthority)).Value =
-            Configuration.OidcAuthority + string.Empty;
-        (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.OidcClientId)).Value =
-            Configuration.OidcClientId + string.Empty;
+
+        await SetOidcSettingsFromDisk(context);
+
 
         await context.SaveChangesAsync();
+    }
+
+    public static async Task SetOidcSettingsFromDisk(DataContext context)
+    {
+        var oidcSettingEntry = await context.ServerSetting
+            .FirstOrDefaultAsync(setting => setting.Key == ServerSettingKey.OidcConfiguration);
+
+        var storedOidcSettings = JsonSerializer.Deserialize<OidcConfigDto>(oidcSettingEntry!.Value)!;
+
+        var diskOidcSettings = Configuration.OidcSettings;
+
+        storedOidcSettings.Authority = diskOidcSettings.Authority;
+        storedOidcSettings.ClientId = diskOidcSettings.ClientId;
+        storedOidcSettings.Secret = diskOidcSettings.Secret;
+        storedOidcSettings.CustomScopes = diskOidcSettings.CustomScopes;
+
+        oidcSettingEntry.Value = JsonSerializer.Serialize(storedOidcSettings);
     }
 
     public static async Task SeedMetadataSettings(DataContext context)

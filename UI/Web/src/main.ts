@@ -16,15 +16,10 @@ import {catchError, filter, firstValueFrom, Observable, of, switchMap, take, tap
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
-import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
-import {provideOAuthClient} from "angular-oauth2-oidc";
-import {OidcEvents, OidcService} from "./app/_services/oidc.service";
-import {NavService} from "./app/_services/nav.service";
-import {User} from "./app/_models/user";
-
+import {SettingsService} from "./app/admin/settings.service";
 const disableAnimations = !('animate' in document.documentElement);
 
 function transformLanguageCodes(arr: Array<string>) {
@@ -88,97 +83,34 @@ const translocoOptions = {
   } as TranslocoConfig
 };
 
-function getOidcTimeOut(): number {
-  const timeOut = localStorage.getItem(OidcService.OidcTimeOutKey);
-  if (!timeOut) {
-    return OidcService.DefaultOidcTimeOut;
-  }
-
-  try {
-    return parseInt(timeOut)
-  } catch (e) {
-    return OidcService.DefaultOidcTimeOut;
-  }
-}
-
 function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
 }
 
-function setupOidcListener(oidcService: OidcService, accountService: AccountService, navService: NavService) {
-  return oidcService.events$.pipe(
-    filter(event => event.type === OidcEvents.TokenRefreshed),
-    switchMap(() => syncOidcUser(oidcService, accountService, navService))
-  ).subscribe();
-}
-
-function syncOidcUser(oidcService: OidcService, accountService: AccountService, navService: NavService) {
-  const currentUser = accountService.currentUserSignal();
-
-  return accountService.loginByToken(oidcService.token()).pipe(
-    tap(() => {
-      // Only trigger navigation if we weren't already logged in
-      if (!currentUser) {
-        navService.handleLogin();
-      }
-    }),
-    catchError(err => {
-      console.error("Failed to sync OIDC user:", err);
-      throw err;
-    })
-  );
-}
 
 function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
-  return accountService.currentUser$.pipe(
-    take(1), // Only need current value
-    switchMap(user => {
-      const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
+  const user = accountService.currentUserSignal();
+  const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
 
-      transloco.setActiveLang(locale);
-      return transloco.load(locale);
-    })
-  );
+  transloco.setActiveLang(locale);
+  return transloco.load(locale);
 }
 
 /**
- * Loads OIDC info, and refreshen its token if applicable, otherwise sets the user from local storage.
- * Then loads the users, or the default locale
+ * Setup user from localstorage
  */
 function bootstrapUser() {
-  const oidc = inject(OidcService);
-  const toastr = inject(ToastrService);
   const accountService = inject(AccountService);
   const transloco = inject(TranslocoService);
-  const navService = inject(NavService);
 
-  return firstValueFrom(oidc.setupOidc().pipe(
-    switchMap((isConfigured) => {
-      if (!isConfigured) return of(null);
-
-      return oidc.refreshTokenIfAvailable().pipe(
-        switchMap(tokenRefreshed => {
-          if (!tokenRefreshed) return of(null);
-
-          return accountService.loginByToken(oidc.token());
-        })
-      );
-    }),
-    timeout(getOidcTimeOut()),
-    catchError(err => {
-      console.error("OIDC setup failed:", err);
-      if (err.name === 'TimeoutError') {
-        toastr.error(translate('errors.oidc.timeout'));
-      } else {
-        toastr.error(err.message ?? '', translate('errors.generic'));
-      }
-
-      return of(null);
-    }),
+  return firstValueFrom(accountService.isOidcAuthenticated().pipe(
+    switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
+    catchError(() => of(null)),
     tap(user => {
-      if (!user) accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+      if (!user) {
+        accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+      }
     }),
-    tap(() => setupOidcListener(oidc, accountService, navService)),
     switchMap(() => loadUserLocale(transloco, accountService)),
   ));
 }
@@ -216,7 +148,6 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
-        provideOAuthClient(),
         provideHttpClient(withInterceptorsFromDi()),
         provideAppInitializer(() => bootstrapUser()),
     ]

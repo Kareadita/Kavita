@@ -65,8 +65,6 @@ export class AccountService {
 
   public readonly currentUserSignal = toSignal(this.currentUserSource);
 
-
-
   /**
    * SetTimeout handler for keeping track of refresh token call
    */
@@ -207,16 +205,11 @@ export class AccountService {
     );
   }
 
-  loginByToken(token: string) {
-    const headers = new HttpHeaders({
-      "Authorization": `Bearer ${token}`
-    });
-
-    return this.httpClient.get<User>(this.baseUrl + 'account', {headers}).pipe(
+  getAccount() {
+    return this.httpClient.get<User>(this.baseUrl + 'account').pipe(
       tap((response: User) => {
         const user = response;
         if (user) {
-          user.oidcToken = token;
           this.setCurrentUser(user);
         }
       }),
@@ -228,10 +221,6 @@ export class AccountService {
 
     const isSameUser = this.currentUser === user;
     if (user) {
-      user.roles = [];
-      const roles = this.getDecodedToken(user.token).role;
-      Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
-
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
 
@@ -259,23 +248,29 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      // oidc handles refreshing itself
-      if (!this.currentUser.oidcToken) {
+      if (this.currentUser.token) {
         this.startRefreshTokenTimer();
       }
     }
   }
 
   logout(skipAutoLogin: boolean = false) {
+    const user = this.currentUserSignal();
+    const oidcAuth = user && !user.token;
+
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
-    // Upon logout, perform redirection
-    this.router.navigate(['/login'], {
-      queryParams: {skipAutoLogin: skipAutoLogin}
-    });
+
+    if (!oidcAuth) {
+      this.router.navigate(['/login'], {
+        queryParams: {skipAutoLogin: skipAutoLogin}
+      });
+    } else {
+      this.router.navigateByUrl('/oidc/logout');
+    }
   }
 
 
@@ -291,6 +286,11 @@ export class AccountService {
       }),
       takeUntilDestroyed(this.destroyRef)
     );
+  }
+
+  isOidcAuthenticated() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/oidc-authenticated', TextResonse)
+      .pipe(map(res => res == "true"));
   }
 
   isEmailConfirmed() {

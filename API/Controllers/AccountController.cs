@@ -79,11 +79,23 @@ public class AccountController : BaseApiController
     }
 
     /// <summary>
+    /// Returns true if OIDC authentication cookies are present
+    /// </summary>
+    /// <remarks>Makes not guarantee about their validity</remarks>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("oidc-authenticated")]
+    public ActionResult<bool> OidcAuthenticated()
+    {
+        return HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName);
+    }
+
+    /// <summary>
     /// Returns the current user, as it would from login
     /// </summary>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
-    /// <remarks>If <see cref="OidcConfigDto.SyncUserSettings"/> is enabled, and the user </remarks>
+    /// <remarks>Does not return tokens for the user</remarks>
     /// <remarks>Updates the last active date for the user</remarks>
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
@@ -91,25 +103,9 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (user.IdentityProvider == IdentityProvider.OpenIdConnect)
-        {
-            var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
-
-            try
-            {
-                await _oidcService.SyncUserSettings(HttpContext.Request, oidcSettings, User, user);
-            }
-            catch (KavitaException ex)
-            {
-                // Log the user out if syncing fails
-                return Unauthorized(ex.Message);
-            }
-        }
-
         var roles = await _userManager.GetRolesAsync(user);
-        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+        if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
-        // Update LastActive on account
         try
         {
             user.UpdateLastActive();
@@ -122,7 +118,7 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        return Ok(await ConstructUserDto(user));
+        return Ok(await ConstructUserDto(user, roles, false));
     }
 
     /// <summary>
@@ -325,16 +321,22 @@ public class AccountController : BaseApiController
 
         _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
-        return Ok(await ConstructUserDto(user));
+        return Ok(await ConstructUserDto(user, roles));
     }
 
-    private async Task<UserDto> ConstructUserDto(AppUser user)
+    private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true)
     {
         var dto = _mapper.Map<UserDto>(user);
-        dto.Token = await _tokenService.CreateToken(user);
-        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
-            .Value;
+
+        if (includeTokens)
+        {
+            dto.Token = await _tokenService.CreateToken(user);
+            dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        }
+
+        dto.Roles = roles;
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
+
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
         if (pref == null) return dto;
 

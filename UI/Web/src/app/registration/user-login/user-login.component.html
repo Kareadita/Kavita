@@ -4,7 +4,7 @@
     <ng-container body>
 
       @if (isLoaded()) {
-        @if (showPasswordLogin() && !firstTimeFlow()) {
+        @if (showPasswordLogin()) {
           <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation">
             <div class="card-text">
               <div class="mb-3">
@@ -30,13 +30,14 @@
           </form>
         }
 
-        @if (oidcService.inUse()) {
-          <button
+        @if (showOidcButton()) {
+          <a
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
-            (click)="oidcService.login()">
+            href="oidc/login"
+          >
             <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
-            {{oidcService.settings()?.providerName || t('oidc')}}
-          </button>
+            {{oidcConfig()?.providerName || t('oidc')}}
+          </a>
         }
       }
     </ng-container>

@@ -1,0 +1,37 @@
+{
+  "/api": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/hubs": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "ws": true
+  },
+  "/oidc/login": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/oidc/logout": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/signin-oidc": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/signout-callback-oidc": {
+    "target": "http://localhost:5000",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

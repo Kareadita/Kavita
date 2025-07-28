@@ -165,7 +165,7 @@ export class MessageHubService {
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
-        accessTokenFactory: () => user.oidcToken ?? user.token
+        accessTokenFactory: () => user.token
       })
       .withAutomaticReconnect()
       //.withStatefulReconnect() // Requires signalr@8.0
