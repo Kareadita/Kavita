@@ -43,14 +43,6 @@ public interface IOidcService
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal);
     /// <summary>
-    /// Updates roles, library access and age rating restriction. Will not modify the default admin
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="settings"></param>
-    /// <param name="claimsPrincipal"></param>
-    /// <param name="user"></param>
-    Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user);
-    /// <summary>
     /// Refresh the token inside the cookie when it's close to expirering. And sync the user
     /// </summary>
     /// <param name="ctx"></param>
@@ -76,6 +68,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private OpenIdConnectConfiguration? _discoveryDocument;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
+
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
         var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
@@ -118,37 +111,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             return user;
         }
 
-        // Cannot match on native account, try and create new one
-        var accessRoles = principal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
-            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
-        if (settings.SyncUserSettings && accessRoles.Count == 0)
-        {
-            throw new KavitaException("errors.oidc.role-not-assigned");
-        }
-
-        try
-        {
-            user = await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
-        }
-        catch (KavitaException e)
-        {
-            throw;
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "An error occured creating a new user");
-            throw new KavitaException("errors.oidc.creating-user");
-        }
-
-        if (user == null) return null;
-
-        var roles = await userManager.GetRolesAsync(user);
-        if (roles.Count == 0 || !roles.Contains(PolicyConstants.LoginRole))
-        {
-            throw new KavitaException("errors.oidc.disabled-account");
-        }
-
-        return user;
+        return await CreateNewAccount(request, principal, settings, oidcId);
     }
 
     public async Task RefreshCookieToken(CookieValidatePrincipalContext ctx)
@@ -175,7 +138,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var tokenResponse = await RefreshTokenAsync(settings, refreshToken);
             if (!string.IsNullOrEmpty(tokenResponse.Error))
             {
-                logger.LogDebug("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
                 return;
             }
 
@@ -235,6 +198,50 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     }
 
     /// <summary>
+    /// Tries to construct a new account from the OIDC Principal, may fail if required conditions aren't met
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="principal"></param>
+    /// <param name="settings"></param>
+    /// <param name="oidcId"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
+    private async Task<AppUser?> CreateNewAccount(HttpRequest request, ClaimsPrincipal principal, OidcConfigDto settings, string oidcId)
+    {
+        var accessRoles = principal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
+            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
+        if (settings.SyncUserSettings && accessRoles.Count == 0)
+        {
+            throw new KavitaException("errors.oidc.role-not-assigned");
+        }
+
+        AppUser? user;
+        try
+        {
+            user = await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
+        }
+        catch (KavitaException e)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occured creating a new user");
+            throw new KavitaException("errors.oidc.creating-user");
+        }
+
+        if (user == null) return null;
+
+        var roles = await userManager.GetRolesAsync(user);
+        if (roles.Count == 0 || !roles.Contains(PolicyConstants.LoginRole))
+        {
+            throw new KavitaException("errors.oidc.disabled-account");
+        }
+
+        return user;
+    }
+
+    /// <summary>
     /// Find the best available name from claims
     /// </summary>
     /// <param name="claimsPrincipal"></param>
@@ -242,17 +249,19 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <returns></returns>
     public async Task<string?> FindBestAvailableName(ClaimsPrincipal claimsPrincipal, string? orEqualTo = null)
     {
-        var name = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername);
-        if (orEqualTo == name || await IsNameAvailable(name)) return name;
+        var nameCandidates = new[]
+        {
+            claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.PreferredUsername),
+            claimsPrincipal.FindFirstValue(ClaimTypes.Name),
+            claimsPrincipal.FindFirstValue(ClaimTypes.GivenName),
+            claimsPrincipal.FindFirstValue(ClaimTypes.Surname)
+        };
 
-        name = claimsPrincipal.FindFirstValue(ClaimTypes.Name);
-        if (orEqualTo == name || await IsNameAvailable(name)) return name;
-
-        name = claimsPrincipal.FindFirstValue(ClaimTypes.GivenName);
-        if (orEqualTo == name || await IsNameAvailable(name)) return name;
-
-        name = claimsPrincipal.FindFirstValue(ClaimTypes.Surname);
-        if (orEqualTo == name || await IsNameAvailable(name)) return name;
+        foreach (var name in nameCandidates.Where(n => !string.IsNullOrEmpty(n)))
+        {
+            if (name == orEqualTo || await IsNameAvailable(name))
+                return name;
+        }
 
         return null;
     }
@@ -327,6 +336,13 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Updates roles, library access and age rating restriction. Will not modify the default admin
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="settings"></param>
+    /// <param name="claimsPrincipal"></param>
+    /// <param name="user"></param>
     public async Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         if (!settings.SyncUserSettings) return;
