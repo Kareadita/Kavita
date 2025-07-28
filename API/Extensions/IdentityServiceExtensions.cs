@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -118,7 +119,17 @@ public static class IdentityServiceExtensions
                         {
                             var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
                             await oidcService.RefreshCookieToken(ctx);
-                        }
+                        },
+                        OnRedirectToAccessDenied = ctx =>
+                        {
+                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return Task.CompletedTask;
+                        },
+                        OnRedirectToLogin = ctx =>
+                        {
+                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return Task.CompletedTask;
+                        },
                     };
 
                 })
@@ -145,15 +156,7 @@ public static class IdentityServiceExtensions
 
                     options.Events = new OpenIdConnectEvents
                     {
-                        OnMessageReceived = SetTokenFromQueryOidc,
                         OnTokenValidated = OidcClaimsPrincipalConverter,
-                        OnRemoteFailure = context =>
-                        {
-                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
-                            logger.LogError("OIDC Remote failure: {Error}", context.Failure?.Message);
-                            logger.LogError("OIDC Failure details: {Details}", context.Failure?.ToString());
-                            return Task.CompletedTask;
-                        },
                     };
                 });
         }
@@ -166,7 +169,7 @@ public static class IdentityServiceExtensions
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]!)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidIssuer = "Kavita"
+                ValidIssuer = "Kavita",
             };
 
             options.Events = new JwtBearerEvents
@@ -184,6 +187,10 @@ public static class IdentityServiceExtensions
         return services;
     }
 
+    /// <summary>
+    /// Called after the OIDC token has been validated, only called on login. Used to find the user we'll be authenticating against
+    /// </summary>
+    /// <param name="ctx"></param>
     private static async Task OidcClaimsPrincipalConverter(TokenValidatedContext ctx)
     {
         if (ctx.Principal == null) return;
@@ -198,7 +205,7 @@ public static class IdentityServiceExtensions
         }
 
 
-        var claims = await ConstructNewClaimsList(ctx, user);
+        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
         var tokens = CopyAuthenticationTokens(ctx);
 
         var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
@@ -211,31 +218,6 @@ public static class IdentityServiceExtensions
         ctx.Principal = principal;
 
         ctx.Success();
-    }
-
-    private static async Task<List<Claim>> ConstructNewClaimsList(TokenValidatedContext ctx, AppUser user)
-    {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty),
-        };
-
-        var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (user.IdentityProvider != IdentityProvider.OpenIdConnect || !settings.OidcConfig.SyncUserSettings)
-        {
-            var userManager = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
-            var roles = await userManager.GetRolesAsync(user);
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        }
-        else
-        {
-            claims.AddRange(ctx.Principal?.Claims ?? []);
-        }
-
-        return claims;
     }
 
     private static List<AuthenticationToken> CopyAuthenticationTokens(TokenValidatedContext ctx)
@@ -267,20 +249,6 @@ public static class IdentityServiceExtensions
         }
 
         return tokens;
-    }
-
-    private static Task SetTokenFromQueryOidc(MessageReceivedContextOidc context)
-    {
-        var accessToken = context.Request.Query["access_token"];
-        var path = context.HttpContext.Request.Path;
-
-        // Only use query string based token on SignalR hubs
-        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
-        {
-            context.Token = accessToken;
-        }
-
-        return Task.CompletedTask;
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)

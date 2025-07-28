@@ -1,10 +1,12 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -23,8 +25,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
@@ -33,6 +39,7 @@ public interface IOidcService
     /// <summary>
     /// Returns the user authenticated with OpenID Connect
     /// </summary>
+    /// <param name="request"></param>
     /// <param name="principal"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
@@ -40,10 +47,16 @@ public interface IOidcService
     /// <summary>
     /// Updates roles, library access and age rating restriction. Will not modify the default admin
     /// </summary>
+    /// <param name="request"></param>
     /// <param name="settings"></param>
     /// <param name="claimsPrincipal"></param>
     /// <param name="user"></param>
     Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user);
+    /// <summary>
+    /// Refresh the token inside the cookie when it's close to expirering. And sync the user
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <returns></returns>
     Task RefreshCookieToken(CookieValidatePrincipalContext ctx);
     /// <summary>
     /// Remove <see cref="AppUser.OidcId"/> from all users
@@ -63,8 +76,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string RefreshToken = "refresh_token";
     public const string ExpiresAt = "expires_at";
 
-    private OpenIdConnectConfiguration? _discoveryDocument = null;
-
+    private OpenIdConnectConfiguration? _discoveryDocument;
+    private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
         var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
@@ -153,38 +166,59 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var tokenExpiry = DateTime.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         if (tokenExpiry >= DateTime.Now.AddSeconds(30)) return;
 
-        var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        // Ensure we're not refreshing twice
+        var key = ctx.Principal.GetUsername();
+        if (!RefreshInProgress.TryAdd(key, true)) return;
 
-        OpenIdConnectMessage? tokenResponse;
         try
         {
-            tokenResponse = await RefreshTokenAsync(settings, refreshToken);
+            var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+
+            var tokenResponse = await RefreshTokenAsync(settings, refreshToken);
+            if (!string.IsNullOrEmpty(tokenResponse.Error))
+            {
+                logger.LogError("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                return;
+            }
+
+            var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(tokenResponse.ExpiresIn));
+            ctx.Properties.UpdateTokenValue(ExpiresAt, newExpiresAt.ToString("o"));
+            ctx.Properties.UpdateTokenValue(AccessToken, tokenResponse.AccessToken);
+            ctx.Properties.UpdateTokenValue(RefreshToken, tokenResponse.RefreshToken);
+            ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
+            ctx.ShouldRenew = true;
+
+            try
+            {
+                var newPrincipal = await ParseIdToken(settings, tokenResponse.IdToken);
+
+                var oidcId = newPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(oidcId))
+                {
+                    throw new KavitaException("errors.oidc.missing-external-id");
+                }
+                var user = await unitOfWork.UserRepository.GetByOidcId(oidcId) ?? throw new UnauthorizedAccessException();
+
+                await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
+
+                var claims = await ConstructNewClaimsList(ctx.HttpContext.RequestServices, newPrincipal, user, false);
+                ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
+            }
+            catch (KavitaException ex)
+            {
+                logger.LogError(ex, "failed to sync user after token refresh");
+                throw new UnauthorizedAccessException(ex.Message);
+            }
+
+            logger.LogTrace("Automatically refreshed token for user {User}", ctx.Principal?.GetUsername());
         }
-        catch (Exception e)
+        finally
         {
-            logger.LogError(e, "An error occured automatically refreshing the token for user {User}", ctx.Principal?.GetUsername());
-            return;
+            RefreshInProgress.TryRemove(key, out _);
         }
 
-        if (!string.IsNullOrEmpty(tokenResponse.Error))
-        {
-            logger.LogError("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
-            return;
-        }
-
-        var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(tokenResponse.ExpiresIn));
-        ctx.Properties.UpdateTokenValue(ExpiresAt, newExpiresAt.ToString("o"));
-        ctx.Properties.UpdateTokenValue(AccessToken, tokenResponse.AccessToken);
-        ctx.Properties.UpdateTokenValue(RefreshToken, tokenResponse.RefreshToken);
-        ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
-
-        ctx.ShouldRenew = true;
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal.GetUserId()) ?? throw new UnauthorizedAccessException();
-        await SyncUserSettings(ctx.HttpContext.Request, settings, ctx.Principal, user);
-
-        logger.LogTrace("Automatically refreshed token for user {User}", ctx.Principal?.GetUsername());
     }
+
     public async Task ClearOidcIds()
     {
         var users = await unitOfWork.UserRepository.GetAllUsersAsync();
@@ -413,8 +447,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
         logger.LogDebug("Syncing access roles for user {UserName}, found roles {Roles}", user.UserName, roles);
 
-        var errors = await accountService.UpdateRolesForUser(user, roles);
-        if (errors.Any()) throw new KavitaException("errors.oidc.syncing-user");
+        var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
+        if (errors.Any())
+        {
+            logger.LogError("failed to sync roles {Errors}", errors.Select(x => x.Description).ToList());
+            throw new KavitaException("errors.oidc.syncing-user");
+        }
     }
 
     private async Task SyncLibraries(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
@@ -478,6 +516,13 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             user.UserName, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);
     }
 
+    /// <summary>
+    /// Loads the discovery document if not already loaded, then refreshed the tokens for the user
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="refreshToken"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     private async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
         if (dto.Authority == null || dto.ClientId == null)
@@ -485,7 +530,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new InvalidOperationException("Cannot refresh tokens without authority and client");
         }
 
-        _discoveryDocument ??= await dto.Authority.GetDiscoveryDocument();
+        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
         var tokenEndpoint = _discoveryDocument.TokenEndpoint ?? throw new InvalidOperationException("Failed to load the token endpoint from the discovery document");
 
         var msg = new
@@ -502,6 +547,84 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .ReceiveString();
 
         return new OpenIdConnectMessage(json);
+    }
+
+    /// <summary>
+    /// Loads the discovery document if not already loaded, then parses the given id token securely
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="idToken"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
+    {
+        if (dto.Authority == null || dto.ClientId == null)
+        {
+            throw new InvalidOperationException("Cannot decode tokens without authority and client");
+        }
+
+        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = _discoveryDocument.Issuer,
+            ValidAudience = dto.ClientId,
+            IssuerSigningKeys = _discoveryDocument.SigningKeys,
+            ValidateIssuerSigningKey = true,
+        };
+
+        var handler = new JwtSecurityTokenHandler();
+        var principal = handler.ValidateToken(idToken, tokenValidationParameters, out _);
+        return principal;
+
+    }
+
+    /// <summary>
+    /// Loads OpenIdConnectConfiguration, includes <see cref="OpenIdConnectConfiguration.SigningKeys"/>
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
+    private static async Task<OpenIdConnectConfiguration> LoadOidcConfiguration(string authority)
+    {
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+        var manager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            url,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
+        );
+
+        var config = await manager.GetConfigurationAsync();
+        return config;
+    }
+
+    /// <summary>
+    /// Claims list how Kavita expectes them to be present
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="principal"></param>
+    /// <param name="user"></param>
+    /// <param name="includeOriginalClaims"></param>
+    /// <returns></returns>
+    public static async Task<List<Claim>> ConstructNewClaimsList(IServiceProvider services, ClaimsPrincipal? principal, AppUser user, bool includeOriginalClaims = true)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+        };
+
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        var roles = await userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        if (includeOriginalClaims)
+        {
+            claims.AddRange(principal?.Claims ?? []);
+        }
+
+        return claims;
     }
 
 }

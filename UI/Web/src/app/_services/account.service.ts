@@ -223,10 +223,6 @@ export class AccountService {
 
     const isSameUser = this.currentUser === user;
     if (user) {
-      user.roles = [];
-      const roles = this.getDecodedToken(user.token).role;
-      Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
-
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
 
@@ -254,10 +250,9 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      // TODO: Runs when OIDC cookies are actually used for authentication
-      //    But that's fine I suppose. We're sending the JWT token as well anyway
-      //    Might be something to figure out...
-      this.startRefreshTokenTimer();
+      if (this.currentUser.token) {
+        this.startRefreshTokenTimer();
+      }
     }
   }
 
@@ -286,6 +281,11 @@ export class AccountService {
       }),
       takeUntilDestroyed(this.destroyRef)
     );
+  }
+
+  isOidcAuthenticated() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/oidc-authenticated', TextResonse)
+      .pipe(map(res => res == "true"));
   }
 
   isEmailConfirmed() {

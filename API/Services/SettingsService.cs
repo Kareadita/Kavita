@@ -366,12 +366,16 @@ public class SettingsService : ISettingsService
 
         try
         {
-            var config = await authority.GetDiscoveryDocument();
+            var hasTrailingSlash = authority.EndsWith('/');
+            var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+            var json = await url.GetStringAsync();
+            var config = OpenIdConnectConfiguration.Create(json);
             return config.Issuer == authority;
         }
         catch (Exception e)
         {
-            _logger.LogTrace(e, "OpenIdConfiguration failed: {Reason}", e.Message);
+            _logger.LogError(e, "OpenIdConfiguration failed: {Reason}", e.Message);
             return false;
         }
     }

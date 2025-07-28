@@ -12,14 +12,14 @@ public class OidcController: ControllerBase
 
     [AllowAnonymous]
     [HttpGet("login")]
-    public IActionResult Login(string returnUrl = "/oidc/callback")
+    public IActionResult Login(string returnUrl = "/")
     {
         var properties = new AuthenticationProperties { RedirectUri = returnUrl };
         return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
 
     [Authorize]
-    [HttpPost("logout")]
+    [HttpGet("logout")]
     public IActionResult Logout()
     {
         return SignOut(

@@ -105,12 +105,16 @@ function bootstrapUser() {
   const settings = inject(SettingsService);
 
 
-  accountService.setCurrentUser(accountService.getUserFromLocalStorage());
   return firstValueFrom(settings.loadOidcInfo().pipe(
-    // TODO: Only request this if cookie is there. This will need an api request. The browser cannot see the cookie HttpOnly
-    switchMap(() => accountService.getAccount()),
+    switchMap(() => accountService.isOidcAuthenticated()),
+    switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
     catchError(() => of(null)),
-    switchMap(() => loadUserLocale(transloco, accountService))
+    tap(user => {
+      if (!user) {
+        accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+      }
+    }),
+    switchMap(() => loadUserLocale(transloco, accountService)),
   ));
 }
 

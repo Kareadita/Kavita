@@ -162,7 +162,6 @@ export class MessageHubService {
     return event.event === eventType;
   }
 
-  // TODO: How to authenticate with OIDC cookies here?
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
