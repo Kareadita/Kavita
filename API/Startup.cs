@@ -296,6 +296,9 @@ public class Startup
                     // v0.8.7
                     await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
 
+                    // v0.8.8
+                    await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
+
                     #endregion
 
                     //  Update the version in the DB after all migrations are run

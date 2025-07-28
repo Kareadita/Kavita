@@ -780,7 +780,7 @@
         "enable-tags-label": "Tags",
         "enable-tags-tooltip": "Allow Series Tags to be written.",
         "enable-extended-metadata-processing-label": "Extended metadata processing",
-        "enable-extended-metadata-processing-tooltip": "Should genres and tags are sourced from ComicInfo or added via the UI be processed using the blacklist, whitelist, age rating mappings, and field mappings.",
+        "enable-extended-metadata-processing-tooltip": "Should genres and tags sourced from ComicInfo or added via the UI be processed using the blacklist, whitelist, age rating mappings, and field mappings.",
         "blacklist-label": "Blacklist Genres/Tags",
         "blacklist-tooltip": "Anything in this list will be removed from both Genre and Tag processing. This is a place to add genres/tags you <b>do not</b> want written. Ensure they are comma-separated.",
         "whitelist-label": "Whitelist Tags",
