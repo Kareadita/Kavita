@@ -36,7 +36,6 @@ interface NavItem {
 export class NavService {
 
   private readonly accountService = inject(AccountService);
-  private readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -176,16 +175,9 @@ export class NavService {
   }
 
   logout() {
-    this.accountService.logout();
     this.hideNavBar();
     this.hideSideNav();
-
-    // TODO: should be smarter about this. OIDC can be enabled with the user using it
-    if (this.settingsService.oidcInUse()) {
-      this.router.navigateByUrl('/oidc/logout');
-    } else {
-      this.router.navigateByUrl('/login');
-    }
+    this.accountService.logout();
   }
 
   handleLogin() {

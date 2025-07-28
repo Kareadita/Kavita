@@ -65,8 +65,6 @@ export class AccountService {
 
   public readonly currentUserSignal = toSignal(this.currentUserSource);
 
-
-
   /**
    * SetTimeout handler for keeping track of refresh token call
    */
@@ -257,15 +255,22 @@ export class AccountService {
   }
 
   logout(skipAutoLogin: boolean = false) {
+    const user = this.currentUserSignal();
+    const oidcAuth = user && !user.token;
+
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
-    // Upon logout, perform redirection
-    this.router.navigate(['/login'], {
-      queryParams: {skipAutoLogin: skipAutoLogin}
-    });
+
+    if (!oidcAuth) {
+      this.router.navigate(['/login'], {
+        queryParams: {skipAutoLogin: skipAutoLogin}
+      });
+    } else {
+      this.router.navigateByUrl('/oidc/logout');
+    }
   }
 
 

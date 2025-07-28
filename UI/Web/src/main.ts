@@ -102,11 +102,8 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
 function bootstrapUser() {
   const accountService = inject(AccountService);
   const transloco = inject(TranslocoService);
-  const settings = inject(SettingsService);
 
-
-  return firstValueFrom(settings.loadOidcInfo().pipe(
-    switchMap(() => accountService.isOidcAuthenticated()),
+  return firstValueFrom(accountService.isOidcAuthenticated().pipe(
     switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
     catchError(() => of(null)),
     tap(user => {

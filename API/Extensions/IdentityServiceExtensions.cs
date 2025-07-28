@@ -157,6 +157,12 @@ public static class IdentityServiceExtensions
                     options.Events = new OpenIdConnectEvents
                     {
                         OnTokenValidated = OidcClaimsPrincipalConverter,
+                        OnAuthenticationFailed = ctx =>
+                        {
+                            ctx.Response.Redirect("/login?skipAutoLogin=true&error="+Uri.EscapeDataString(ctx.Exception.Message));
+                            ctx.HandleResponse();
+                            return Task.CompletedTask;
+                        },
                     };
                 });
         }
@@ -199,11 +205,8 @@ public static class IdentityServiceExtensions
         var user = await oidcService.LoginOrCreate(ctx.Request, ctx.Principal);
         if (user == null)
         {
-            ctx.Principal = null;
-            ctx.HttpContext.User = new ClaimsPrincipal();
-            return;
+            throw new KavitaException("errors.oidc.no-account");
         }
-
 
         var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
         var tokens = CopyAuthenticationTokens(ctx);

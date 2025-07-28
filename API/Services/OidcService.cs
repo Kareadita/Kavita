@@ -177,7 +177,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var tokenResponse = await RefreshTokenAsync(settings, refreshToken);
             if (!string.IsNullOrEmpty(tokenResponse.Error))
             {
-                logger.LogError("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                logger.LogDebug("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
                 return;
             }
 
@@ -187,6 +187,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             ctx.Properties.UpdateTokenValue(RefreshToken, tokenResponse.RefreshToken);
             ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
             ctx.ShouldRenew = true;
+
+            if (string.IsNullOrEmpty(tokenResponse.IdToken))
+            {
+                logger.LogTrace("The OIDC provider did not return an id token in the refresh response, continuous sync is not supported");
+                return;
+            }
 
             try
             {
