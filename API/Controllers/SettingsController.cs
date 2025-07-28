@@ -267,6 +267,7 @@ public class SettingsController : BaseApiController
         publicConfig.Enabled = !string.IsNullOrEmpty(settings.Authority) &&
                                !string.IsNullOrEmpty(settings.ClientId) &&
                                !string.IsNullOrEmpty(settings.Secret);
+
         return Ok(publicConfig);
     }
 
@@ -282,5 +283,5 @@ public class SettingsController : BaseApiController
         return Ok(await _settingsService.IsValidAuthority(authority.Authority));
     }
 
-    public sealed record AuthorityValidationDto(string Authority);
+
 }

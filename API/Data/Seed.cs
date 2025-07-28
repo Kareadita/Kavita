@@ -292,13 +292,13 @@ public static class Seed
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
 
-        await UpdateOidcSettingsFromDisk(context);
+        await SetOidcSettingsFromDisk(context);
 
 
         await context.SaveChangesAsync();
     }
 
-    public static async Task UpdateOidcSettingsFromDisk(DataContext context)
+    public static async Task SetOidcSettingsFromDisk(DataContext context)
     {
         var oidcSettingEntry = await context.ServerSetting
             .FirstOrDefaultAsync(setting => setting.Key == ServerSettingKey.OidcConfiguration);

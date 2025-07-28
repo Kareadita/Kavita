@@ -81,7 +81,7 @@ public static class IdentityServiceExtensions
                         return OpenIdConnect;
                     }
 
-                    if (ctx.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
+                    if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
                     {
                         return OpenIdConnect;
                     }
@@ -146,6 +146,7 @@ public static class IdentityServiceExtensions
             options.Scope.Add("offline_access");
             options.Scope.Add("roles");
             options.Scope.Add("email");
+
             foreach (var customScope in settings.CustomScopes)
             {
                 options.Scope.Add(customScope);
@@ -156,8 +157,9 @@ public static class IdentityServiceExtensions
                 OnTokenValidated = OidcClaimsPrincipalConverter,
                 OnAuthenticationFailed = ctx =>
                 {
-                    ctx.Response.Redirect("/login?skipAutoLogin=true&error="+Uri.EscapeDataString(ctx.Exception.Message));
+                    ctx.Response.Redirect("/login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
                     ctx.HandleResponse();
+
                     return Task.CompletedTask;
                 },
             };
@@ -202,7 +204,9 @@ public static class IdentityServiceExtensions
     }
 
     /// <summary>
-    /// Called after the OIDC token has been validated, only called on login. Used to find the user we'll be authenticating against
+    /// Called after the redirect from the OIDC provider, tries matching the user and update the principal
+    /// to have the correct claims and properties. This is required to later auto refresh; and ensure .NET knows which
+    /// Kavita roles the user has
     /// </summary>
     /// <param name="ctx"></param>
     private static async Task OidcClaimsPrincipalConverter(TokenValidatedContext ctx)

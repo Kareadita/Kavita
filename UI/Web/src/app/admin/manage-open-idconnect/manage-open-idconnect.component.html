@@ -71,7 +71,7 @@
             </ng-template>
             <ng-template #edit>
               <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
-                     formControlName="secret" type="text"
+                     formControlName="secret" type="password"
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
               @if (settingsForm.dirty || !settingsForm.untouched) {

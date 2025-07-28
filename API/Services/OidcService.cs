@@ -65,6 +65,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string AccessToken = "access_token";
     public const string RefreshToken = "refresh_token";
     public const string ExpiresAt = "expires_at";
+    /// The name of the Auth Cookie set by .NET
+    public const string CookieName = ".AspNetCore.Cookies";
 
     private OpenIdConnectConfiguration? _discoveryDocument;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
@@ -173,7 +175,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             }
             catch (KavitaException ex)
             {
-                logger.LogError(ex, "failed to sync user after token refresh");
+                logger.LogError(ex, "Failed to sync user after token refresh");
                 throw new UnauthorizedAccessException(ex.Message);
             }
 
@@ -260,7 +262,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         foreach (var name in nameCandidates.Where(n => !string.IsNullOrEmpty(n)))
         {
             if (name == orEqualTo || await IsNameAvailable(name))
+            {
                 return name;
+            }
         }
 
         return null;
@@ -545,13 +549,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <exception cref="InvalidOperationException"></exception>
     private async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
-        if (dto.Authority == null || dto.ClientId == null)
-        {
-            throw new InvalidOperationException("Cannot refresh tokens without authority and client");
-        }
 
         _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
-        var tokenEndpoint = _discoveryDocument.TokenEndpoint ?? throw new InvalidOperationException("Failed to load the token endpoint from the discovery document");
 
         var msg = new
         {
@@ -561,7 +560,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             client_secret = dto.Secret,
         };
 
-        var json = await tokenEndpoint
+        var json = await _discoveryDocument.TokenEndpoint
             .AllowAnyHttpStatus()
             .PostUrlEncodedAsync(msg)
             .ReceiveString();
@@ -578,11 +577,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <exception cref="InvalidOperationException"></exception>
     private async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
     {
-        if (dto.Authority == null || dto.ClientId == null)
-        {
-            throw new InvalidOperationException("Cannot decode tokens without authority and client");
-        }
-
         _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -594,8 +588,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         var handler = new JwtSecurityTokenHandler();
         var principal = handler.ValidateToken(idToken, tokenValidationParameters, out _);
-        return principal;
 
+        return principal;
     }
 
     /// <summary>
@@ -614,12 +608,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
         );
 
-        var config = await manager.GetConfigurationAsync();
-        return config;
+        return await manager.GetConfigurationAsync();
     }
 
     /// <summary>
-    /// Claims list how Kavita expectes them to be present
+    /// Return a list of claims in the same way the NativeJWT token would map them.
+    /// Optionally include original claims if the claims are needed later in the pipeline
     /// </summary>
     /// <param name="services"></param>
     /// <param name="principal"></param>

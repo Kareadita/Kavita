@@ -78,11 +78,16 @@ public class AccountController : BaseApiController
         _oidcService = oidcService;
     }
 
+    /// <summary>
+    /// Returns true if OIDC authentication cookies are present
+    /// </summary>
+    /// <remarks>Makes not guarantee about their validity</remarks>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("oidc-authenticated")]
     public ActionResult<bool> OidcAuthenticated()
     {
-        return HttpContext.Request.Cookies.ContainsKey(".AspNetCore.Cookies");
+        return HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName);
     }
 
     /// <summary>
