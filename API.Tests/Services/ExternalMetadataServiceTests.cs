@@ -1630,53 +1630,84 @@ public class ExternalMetadataServiceTests : AbstractDbTest
                 new MetadataFieldMappingDto
                 {
                     SourceType = MetadataFieldType.Tag,
-                    SourceValue = "Tag-One",
+                    SourceValue = "Girls love",
                     DestinationType = MetadataFieldType.Genre,
-                    DestinationValue = "Genre-One",
+                    DestinationValue = "Yuri",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Romance",
                     ExcludeFromSource = false,
                 },
                 new MetadataFieldMappingDto
                 {
                     SourceType = MetadataFieldType.Genre,
-                    SourceValue = "Genre2",
-                    DestinationType = MetadataFieldType.Tag,
-                    DestinationValue = "Tag-Two",
-                    ExcludeFromSource = false,
-                },
-                new MetadataFieldMappingDto
-                {
-                    SourceType = MetadataFieldType.Tag,
-                    SourceValue = "Tag2",
+                    SourceValue = "WW2",
                     DestinationType = MetadataFieldType.Genre,
-                    DestinationValue = "Genre-Three",
+                    DestinationValue = "War",
                     ExcludeFromSource = true,
                 },
-                new MetadataFieldMappingDto
-                {
-                    SourceType = MetadataFieldType.Tag,
-                    SourceValue = "Tag4",
-                    DestinationType = MetadataFieldType.Genre,
-                    DestinationValue = "Genre-Four",
-                    ExcludeFromSource = true,
-                }
             ],
         };
 
-        var tags = new List<string> { "Tag$$ One", "ta^g2", "Unrelated tag" };
-        var genres = new List<string> { " genr^e2 " };
+        var tags = new List<string> { "Girl's Love", "Unrelated tag" };
+        var genres = new List<string> { "Ww2", "Unrelated genre" };
 
         var finalTags = new List<string>();
         var finalGenres = new List<string>();
 
         ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
 
-        Assert.Contains("Tag-One", finalTags);
-        Assert.Contains("Tag-Two", finalTags);
         Assert.Contains("Unrelated tag", finalTags);
 
-        Assert.Contains("Genre-One", finalGenres);
-        Assert.Contains("Genre-Three", finalGenres);
-        Assert.DoesNotContain("Genre-Four", finalGenres);
+        Assert.Contains("Yuri", finalGenres);
+        Assert.Contains("Romance", finalGenres);
+        Assert.Contains("Unrelated genre", finalGenres);
+        Assert.DoesNotContain("Ww2", finalGenres);
+    }
+
+    [Fact]
+    public void GenerateGenreAndTagLists_RemoveIfAnyRemoves()
+    {
+        var settings = new MetadataSettingsDto
+        {
+            Whitelist = [],
+            Blacklist = [],
+            FieldMappings = [
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Yuri",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Romance",
+                    ExcludeFromSource = true,
+                },
+            ],
+        };
+
+        var tags = new List<string> { "Girl's Love"};
+        var genres = new List<string>();
+
+        var finalTags = new List<string>();
+        var finalGenres = new List<string>();
+
+        ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
+
+        Assert.Contains("Yuri", finalGenres);
+        Assert.Contains("Romance", finalGenres);
+        Assert.DoesNotContain("Girls Love", finalGenres);
     }
 
 

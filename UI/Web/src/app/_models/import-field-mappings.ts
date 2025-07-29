@@ -23,7 +23,6 @@ export interface ImportSettings {
   ageRatings: boolean;
   fieldMappings: boolean;
   ageRatingConflictResolutions: Record<string, ConflictResolution>;
-  fieldMappingsConflictResolutions: Record<number, ConflictResolution>;
 }
 
 export interface FieldMappingsImportResult {

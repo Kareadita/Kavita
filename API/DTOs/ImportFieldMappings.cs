@@ -70,11 +70,6 @@ public sealed record ImportSettingsDto
     /// </summary>
     /// <remarks>Key is the tag</remarks>
     public Dictionary<string, ConflictResolution> AgeRatingConflictResolutions { get; init; }
-    /// <summary>
-    /// Override the <see cref="Resolution"/> for specific field mappings
-    /// </summary>
-    /// <remarks>Key is the id in the database</remarks>
-    public Dictionary<int, ConflictResolution> FieldMappingsConflictResolutions  { get; init; }
 }
 
 public sealed record FieldMappingsImportResultDto

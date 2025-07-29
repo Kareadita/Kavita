@@ -24,8 +24,8 @@ public class SettingsServiceTests
 
     private const string DefaultAgeKey = "default_age";
     private const string DefaultFieldSource = "default_source";
-    private static AgeRating DefaultAgeRating = AgeRating.Everyone;
-    private static MetadataFieldType DefaultSourceField = MetadataFieldType.Genre;
+    private readonly static AgeRating DefaultAgeRating = AgeRating.Everyone;
+    private readonly static MetadataFieldType DefaultSourceField = MetadataFieldType.Genre;
 
     public SettingsServiceTests()
     {
@@ -63,7 +63,6 @@ public class SettingsServiceTests
             FieldMappings = true,
             Resolution = ConflictResolution.Manual,
             AgeRatingConflictResolutions = [],
-            FieldMappingsConflictResolutions = [],
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -74,7 +73,6 @@ public class SettingsServiceTests
 
         Assert.True(result.Success);
         Assert.Empty(result.AgeRatingConflicts);
-        Assert.Empty(result.FieldMappingConflicts);
 
         Assert.Equal(existingSettings.Whitelist, newSettings.Whitelist);
         Assert.Equal(existingSettings.Blacklist, newSettings.Blacklist);
@@ -108,7 +106,6 @@ public class SettingsServiceTests
             FieldMappings = true,
             Resolution = ConflictResolution.Manual,
             AgeRatingConflictResolutions = [],
-            FieldMappingsConflictResolutions = [],
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -120,7 +117,6 @@ public class SettingsServiceTests
 
         Assert.True(result.Success);
         Assert.Empty(result.AgeRatingConflicts);
-        Assert.Empty(result.FieldMappingConflicts);
 
         Assert.Contains("default_white", existingSettingsDto.Whitelist);
         Assert.Contains("new_whitelist_item", existingSettingsDto.Whitelist);
@@ -128,81 +124,6 @@ public class SettingsServiceTests
         Assert.Contains("new_blacklist_item", existingSettingsDto.Blacklist);
         Assert.Equal(2, existingSettingsDto.AgeRatingMappings.Count);
         Assert.Equal(2, existingSettingsDto.FieldMappings.Count);
-    }
-
-    [Theory]
-    [InlineData(ConflictResolution.Manual, false, "default_dest", MetadataFieldType.Tag)]
-    [InlineData(ConflictResolution.Replace, true, "different_dest", MetadataFieldType.Genre)]
-    [InlineData(ConflictResolution.Keep, true, "default_dest", MetadataFieldType.Tag)]
-    public async Task ImportFieldMappings_MergeMode_DefaultResolutionHandling(ConflictResolution resolution, bool success, string expectedDestinationValue, MetadataFieldType expectedDestinationType)
-    {
-
-        var existingSettingsDto = CreateDefaultMetadataSettingsDto();
-        var existingSettings = CreateDefaultMetadataSettings();
-
-        var newSettings = new MetadataSettingsDto
-        {
-            Whitelist = [],
-            Blacklist = [],
-            AgeRatingMappings = new Dictionary<string, AgeRating>
-            {
-                [DefaultAgeKey] = AgeRating.R18Plus,
-            },
-            FieldMappings =
-            [
-                new MetadataFieldMappingDto
-                {
-                    Id = 20,
-                    SourceValue = DefaultFieldSource,
-                    SourceType = DefaultSourceField,
-                    DestinationValue = "different_dest",
-                    DestinationType = MetadataFieldType.Genre,
-                }
-            ],
-        };
-
-        var importSettings = new ImportSettingsDto
-        {
-            ImportMode = ImportMode.Merge,
-            Whitelist = false,
-            Blacklist = false,
-            AgeRatings = true,
-            FieldMappings = true,
-            Resolution = resolution,
-            AgeRatingConflictResolutions = [],
-            FieldMappingsConflictResolutions = [],
-        };
-
-        var settingsRepo = Substitute.For<ISettingsRepository>();
-        settingsRepo.GetMetadataSettingDto().Returns(existingSettingsDto);
-        settingsRepo.GetMetadataSettings().Returns(existingSettings);
-        _mockUnitOfWork.SettingsRepository.Returns(settingsRepo);
-
-        var result = await _settingsService.ImportFieldMappings(newSettings, importSettings);
-
-        Assert.Equal(success, result.Success);
-
-        if (!success)
-        {
-            Assert.Single(result.AgeRatingConflicts);
-            Assert.Contains(DefaultAgeKey, result.AgeRatingConflicts);
-            Assert.Single(result.FieldMappingConflicts);
-            Assert.Equal(1, result.FieldMappingConflicts[0].OldId);
-            Assert.Equal(20, result.FieldMappingConflicts[0].NewId);
-        }
-        else
-        {
-            Assert.Empty(result.AgeRatingConflicts);
-            Assert.Empty(result.FieldMappingConflicts);
-
-            var expectedAgeRating = resolution == ConflictResolution.Replace ? AgeRating.R18Plus : DefaultAgeRating;
-            Assert.Equal(expectedAgeRating, existingSettingsDto.AgeRatingMappings[DefaultAgeKey]);
-
-            Assert.Single(existingSettingsDto.FieldMappings);
-            var mapping = existingSettingsDto.FieldMappings[0];
-            Assert.Equal(expectedDestinationValue, mapping.DestinationValue);
-            Assert.Equal(expectedDestinationType, mapping.DestinationType);
-        }
     }
 
     [Fact]
@@ -238,7 +159,6 @@ public class SettingsServiceTests
             FieldMappings = true,
             Resolution = ConflictResolution.Manual,
             AgeRatingConflictResolutions = new Dictionary<string, ConflictResolution> { [DefaultAgeKey] = ConflictResolution.Replace },
-            FieldMappingsConflictResolutions = new Dictionary<int, ConflictResolution> { [1] = ConflictResolution.Keep },
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -250,13 +170,8 @@ public class SettingsServiceTests
 
         Assert.True(result.Success);
         Assert.Empty(result.AgeRatingConflicts);
-        Assert.Empty(result.FieldMappingConflicts);
 
         Assert.Equal(AgeRating.R18Plus, existingSettingsDto.AgeRatingMappings[DefaultAgeKey]);
-
-        var mapping = existingSettingsDto.FieldMappings[0];
-        Assert.Equal("default_dest", mapping.DestinationValue);
-        Assert.Equal(MetadataFieldType.Tag, mapping.DestinationType);
     }
 
     [Fact]
@@ -292,7 +207,6 @@ public class SettingsServiceTests
             FieldMappings = true,
             Resolution = ConflictResolution.Manual,
             AgeRatingConflictResolutions = [],
-            FieldMappingsConflictResolutions = [],
         };
 
         var settingsRepo = Substitute.For<ISettingsRepository>();
@@ -304,7 +218,6 @@ public class SettingsServiceTests
 
         Assert.True(result.Success);
         Assert.Empty(result.AgeRatingConflicts);
-        Assert.Empty(result.FieldMappingConflicts);
     }
 
 
