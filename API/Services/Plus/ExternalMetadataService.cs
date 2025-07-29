@@ -1743,24 +1743,22 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var value in values)
         {
-            var mapping = mappings.FirstOrDefault(m =>
+            var matchingMappings = mappings.Where(m =>
                 m.SourceType == sourceType &&
                 m.SourceValue.ToNormalized().Equals(value.ToNormalized()));
 
-            if (mapping != null && !string.IsNullOrWhiteSpace(mapping.DestinationValue))
+            var keepOriginal = true;
+
+            foreach (var mapping in matchingMappings.Where(mapping => !string.IsNullOrWhiteSpace(mapping.DestinationValue)))
             {
-                var targetType = mapping.DestinationType;
+                result[mapping.DestinationType].Add(mapping.DestinationValue);
 
-                if (!mapping.ExcludeFromSource)
-                {
-                    result[sourceType].Add(mapping.SourceValue);
-                }
-
-                result[targetType].Add(mapping.DestinationValue);
+                // Only keep the original tags if none of the matches want to remove it
+                keepOriginal = keepOriginal && !mapping.ExcludeFromSource;
             }
-            else
+
+            if (keepOriginal)
             {
-                // If no mapping, keep the original value
                 result[sourceType].Add(value);
             }
         }
