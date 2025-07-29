@@ -62,6 +62,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string AgeRestrictionPrefix = "age-restriction-";
     public const string IncludeUnknowns = "include-unknowns";
     public const string RefreshToken = "refresh_token";
+    public const string IdToken = "id_token";
     public const string ExpiresAt = "expires_at";
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
@@ -145,6 +146,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(tokenResponse.ExpiresIn));
             ctx.Properties.UpdateTokenValue(ExpiresAt, newExpiresAt.ToString("o"));
             ctx.Properties.UpdateTokenValue(RefreshToken, tokenResponse.RefreshToken);
+            ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
             ctx.ShouldRenew = true;
 
             if (string.IsNullOrEmpty(tokenResponse.IdToken))

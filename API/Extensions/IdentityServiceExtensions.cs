@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -94,8 +95,44 @@ public static class IdentityServiceExtensions
 
         if (oidcSettings.Enabled)
         {
-            auth.AddOpenIdConnectCookie(environment)
-                .AddOpenIdConnectScheme(oidcSettings);
+            auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Configure<ITicketStore>((options, store) =>
+                {
+                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                    options.SlidingExpiration = true;
+
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.IsEssential = true;
+                    options.Cookie.MaxAge = TimeSpan.FromDays(7);
+                    options.SessionStore = store;
+
+                    if (environment.IsEnvironment(Environments.Development))
+                    {
+                        options.Cookie.Domain = null;
+                    }
+
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnValidatePrincipal = async ctx =>
+                        {
+                            var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+                            await oidcService.RefreshCookieToken(ctx);
+                        },
+                        OnRedirectToAccessDenied = ctx =>
+                        {
+                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return Task.CompletedTask;
+                        },
+                        OnRedirectToLogin = ctx =>
+                        {
+                            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return Task.CompletedTask;
+                        },
+                    };
+                });
+
+            auth.AddOpenIdConnectScheme(oidcSettings);
         }
 
         auth.AddJwtBearer(LocalIdentity, options =>
@@ -126,6 +163,11 @@ public static class IdentityServiceExtensions
 
     private static AuthenticationBuilder AddOpenIdConnectScheme(this AuthenticationBuilder builder, Configuration.OpenIdConnectSettings settings)
     {
+        var baseUrl = Configuration.BaseUrl;
+        var apiPrefix = baseUrl + "api";
+        var hubsPrefix = baseUrl + "hubs";
+
+
         return builder.AddOpenIdConnect(OpenIdConnect, options =>
         {
             options.Authority = settings.Authority;
@@ -157,51 +199,26 @@ public static class IdentityServiceExtensions
                 OnTokenValidated = OidcClaimsPrincipalConverter,
                 OnAuthenticationFailed = ctx =>
                 {
-                    ctx.Response.Redirect("/login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
+                    ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
                     ctx.HandleResponse();
 
                     return Task.CompletedTask;
                 },
                 OnRedirectToIdentityProvider = ctx =>
                 {
-                    ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
-                    return Task.CompletedTask;
-                },
-            };
-        });
-    }
+                    // Intercept redirects on API requests and instead return 401
+                    // These redirects are auto login with .NET finds a cookie that it can't match inside the cookie store
+                    if (ctx.Request.Path.StartsWithSegments(apiPrefix) || ctx.Request.Path.StartsWithSegments(hubsPrefix))
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        ctx.HandleResponse();
+                        return Task.CompletedTask;
+                    }
 
-    private static AuthenticationBuilder AddOpenIdConnectCookie(this AuthenticationBuilder builder, IWebHostEnvironment environment)
-    {
-        return builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-        {
-            options.ExpireTimeSpan = TimeSpan.FromDays(7);
-            options.SlidingExpiration = true;
-
-            options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
-            options.Cookie.MaxAge = TimeSpan.FromDays(7);
-
-            if (environment.IsEnvironment(Environments.Development))
-            {
-                options.Cookie.Domain = null;
-            }
-
-            options.Events = new CookieAuthenticationEvents
-            {
-                OnValidatePrincipal = async ctx =>
-                {
-                    var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-                    await oidcService.RefreshCookieToken(ctx);
-                },
-                OnRedirectToAccessDenied = ctx =>
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return Task.CompletedTask;
-                },
-                OnRedirectToLogin = ctx =>
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    if (ctx.Request.IsHttps)
+                    {
+                        ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
+                    }
                     return Task.CompletedTask;
                 },
             };
@@ -252,6 +269,11 @@ public static class IdentityServiceExtensions
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
         {
             tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.IdToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.IdToken, Value = ctx.TokenEndpointResponse.IdToken });
         }
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
