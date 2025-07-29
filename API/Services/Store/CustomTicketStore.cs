@@ -12,6 +12,7 @@ public class CustomTicketStore(IMemoryCache cache): ITicketStore
 
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
     {
+        // Note: It might not be needed to make this cryptographic random, but better safe than sorry
         var bytes = new byte[32];
         RandomNumberGenerator.Fill(bytes);
         var key = Convert.ToBase64String(bytes);
