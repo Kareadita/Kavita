@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs.KavitaPlus.Manage;
 using API.Entities.History;
-using API.Entities.Metadata;
-using API.Extensions.QueryExtensions;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,7 +22,6 @@ public static class ManualMigrateEnableMetadataMatchingDefault
 
         logger.LogCritical("Running ManualMigrateEnableMetadataMatchingDefault migration - Please be patient, this may take some time. This is not an error");
 
-        // Get all series in the Blacklist table and set their IsBlacklist = true
         var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto();
 
 

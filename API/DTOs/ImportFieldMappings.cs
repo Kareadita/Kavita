@@ -77,18 +77,6 @@ public sealed record ImportSettingsDto
     public Dictionary<int, ConflictResolution> FieldMappingsConflictResolutions  { get; init; }
 }
 
-public sealed record ImportConflict
-{
-    /// <summary>
-    /// The id of the entity in DB
-    /// </summary>
-    public int OldId { get; init; }
-    /// <summary>
-    /// The id of the entity form the imported json
-    /// </summary>
-    public int NewId { get; init; }
-}
-
 public sealed record FieldMappingsImportResultDto
 {
     public bool Success { get; init; }
@@ -100,8 +88,4 @@ public sealed record FieldMappingsImportResultDto
     /// Keys of the conflicting age ratings mappings
     /// </summary>
     public List<string> AgeRatingConflicts { get; init; }
-    /// <summary>
-    /// Ids of conflicting field mappings
-    /// </summary>
-    public List<ImportConflict> FieldMappingConflicts { get; init; }
 }

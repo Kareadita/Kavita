@@ -107,65 +107,29 @@
           @if (res) {
             <form class="row" [formGroup]="importSettingsForm">
 
-              <div class="col-md-12 col-sm-12 row">
+              @if (res.ageRatingConflicts.length > 0) {
+                <div class="conflict-group-title">{{t('age-ratings-label')}}</div>
+                <div class="text-muted">{{t('age-ratings-conflicts-tooltip')}}</div>
+              }
 
-                @if (res.ageRatingConflicts.length > 0) {
-                  <div class="conflict-group-title">{{t('age-ratings-label')}}</div>
-                  <div class="text-muted">{{t('age-ratings-conflicts-tooltip')}}</div>
-                }
-
-                @for (arm of res.ageRatingConflicts; track arm) {
-                  <div class="col-md-6 col-sm-12 pt-4">
-                    @if (importSettingsForm.get('ageRatingConflictResolutions.'+arm); as control) {
-                      <div formGroupName="ageRatingConflictResolutions">
-                        <span class="conflict-title">{{arm}}</span>
-                        <select [formControlName]="arm" class="form-control mt-2">
-                          @for (resolution of ConflictResolutions; track resolution) {
-                            <option [ngValue]="resolution">
-                              <ng-container [ngTemplateOutlet]="ageRatingConflict"
-                                            [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
-                              </ng-container>
-                            </option>
-                          }
-                        </select>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <div class="col-md-12 col-sm-12 row">
-
-                @if (res.fieldMappingConflicts.length > 0) {
-                  <div class="setting-section-break"></div>
-                  <div class="conflict-group-title">{{t('field-mappings-label')}}</div>
-                  <div class="text-muted">{{t('field-mappings-conflicts-tooltip')}}</div>
-                }
-
-                @for (fmc of res.fieldMappingConflicts; track fmc) {
-                  @let origin = getFieldMapping(settings()!.fieldMappings, fmc.oldId);
-
-                  <div class="col-md-6 col-sm-12 pt-4">
-                    @if (importSettingsForm.get('fieldMappingsConflictResolutions.'+fmc.oldId); as control) {
-                      <div formGroupName="fieldMappingsConflictResolutions">
-                        <span class="conflict-title">
-                          {{ origin.sourceType | metadataFieldType }} - {{ origin.sourceValue }}
-                        </span>
-                        <select [formControlName]="fmc.oldId+''" class="form-control mt-2">
-                          @for (resolution of ConflictResolutions; track resolution) {
-                            <option [ngValue]="resolution">
-                              <ng-container [ngTemplateOutlet]="fieldMappingConflict"
-                                            [ngTemplateOutletContext]="{$implicit: fmc, resolution: resolution }" >
-                              </ng-container>
-                            </option>
-                          }
-                        </select>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
+              @for (arm of res.ageRatingConflicts; track arm) {
+                <div class="col-md-6 col-sm-12 pt-4">
+                  @if (importSettingsForm.get('ageRatingConflictResolutions.'+arm); as control) {
+                    <div formGroupName="ageRatingConflictResolutions">
+                      <span class="conflict-title">{{arm}}</span>
+                      <select [formControlName]="arm" class="form-control mt-2">
+                        @for (resolution of ConflictResolutions; track resolution) {
+                          <option [ngValue]="resolution">
+                            <ng-container [ngTemplateOutlet]="ageRatingConflict"
+                                          [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
+                            </ng-container>
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  }
+                </div>
+              }
 
             </form>
           }
@@ -173,87 +137,11 @@
         @case (Step.Finalize) {
           @let res = importResult();
           @if (res) {
-            <div class="conflict-group-title" [style.color]="'var(--primary-color)'">{{t('finalize-title')}}</div>
-
-            <div class="row">
-
-              <div class="col-md-6 col-sm-12 pt-4">
-                <app-setting-item [title]="t('whitelist-label')" [canEdit]="false" [showEdit]="false">
-                  <ng-template #view>
-                    @for(opt of res.resultingMetadataSettings.whitelist; track opt) {
-                      <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-                    } @empty {
-                      {{null | defaultValue}}
-                    }
-                  </ng-template>
-                </app-setting-item>
-              </div>
-
-              <div class="col-md-6 col-sm-12 pt-4">
-                <app-setting-item [title]="t('blacklist-label')" [canEdit]="false" [showEdit]="false">
-                  <ng-template #view>
-                    @for(opt of res.resultingMetadataSettings.blacklist; track opt) {
-                      <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-                    } @empty {
-                      {{null | defaultValue}}
-                    }
-                  </ng-template>
-                </app-setting-item>
-              </div>
-
-              <div class="col-md-6 col-sm-12 pt-4">
-                <app-setting-item [title]="t('age-ratings-label')" [showEdit]="false" [canEdit]="false">
-                  <ng-template #view>
-                    <div class="row reset-color">
-                      @for (arm of res.resultingMetadataSettings.ageRatingMappings | keyvalue; track arm.key) {
-                        <div class="col-md-6 col-sm-12 pt-1">
-                          <div class="p-1 d-flex justify-content-between align-items-center">
-                            <div class="text-muted small">{{ arm.key }}</div>
-                            <i class="fa fa-arrow-right fa-sm me-1 text-muted"></i>
-                            <div class="small">
-                              {{ arm.value | ageRating }}
-                            </div>
-                          </div>
-                          <div class="break"></div>
-                        </div>
-                      }
-                    </div>
-                  </ng-template>
-                </app-setting-item>
-              </div>
-
-
-              <div class="col-md-6 col-sm-12 pt-4">
-                <app-setting-item [title]="t('field-mappings-label')" [showEdit]="false" [canEdit]="false">
-                  <ng-template #view>
-                    <div class="row reset-color">
-                      @for (fm of res.resultingMetadataSettings.fieldMappings; track fm.id) {
-                        <div class="col-md-12 col-sm-12">
-                          <div class="row p-1 align-items-center">
-                            <div class="col-md-4">
-                              <div class="text-muted small">{{ fm.sourceType | metadataFieldType }}</div>
-                              <div class="small">{{ fm.sourceValue }}</div>
-                            </div>
-
-                            <div class="col-md-1 text-center text-muted">
-                              <i class="fa fa-arrow-right fa-sm"></i>
-                            </div>
-
-                            <div class="col-md-7">
-                              <div class="text-muted small">{{ fm.destinationType | metadataFieldType }}</div>
-                              <div class="small">{{ fm.destinationValue }}</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="break"></div>
-                      }
-                    </div>
-                  </ng-template>
-                </app-setting-item>
-              </div>
-
-
-            </div>
+            <app-manage-metadata-mappings
+              [settings]="res.resultingMetadataSettings"
+              [settingsForm]="mappingsForm"
+              [showHeader]="false">
+            </app-manage-metadata-mappings>
           }
         }
       }
@@ -279,16 +167,5 @@
     @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }
     @case (ConflictResolution.Keep) { {{ oldValue | ageRating }} }
     @case (ConflictResolution.Replace) { {{ newValue | ageRating }} }
-  }
-</ng-template>
-
-<ng-template #fieldMappingConflict let-fmc let-resolution='resolution'>
-  @let oldValue = getFieldMapping(settings()!.fieldMappings, fmc.oldId);
-  @let newValue = getFieldMapping(importedMappings()!.fieldMappings, fmc.newId);
-
-  @switch (resolution) {
-    @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }
-    @case (ConflictResolution.Keep) { {{ oldValue.destinationType | metadataFieldType }} - {{ oldValue.destinationValue }} }
-    @case (ConflictResolution.Replace) { {{ newValue.destinationType | metadataFieldType }} - {{ newValue.destinationValue }} }
   }
 </ng-template>

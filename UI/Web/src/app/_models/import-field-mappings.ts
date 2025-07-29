@@ -26,16 +26,8 @@ export interface ImportSettings {
   fieldMappingsConflictResolutions: Record<number, ConflictResolution>;
 }
 
-export interface ImportConflict {
-  /** The ID of the entity in the DB */
-  oldId: number;
-  /** The ID of the entity from the imported JSON */
-  newId: number;
-}
-
 export interface FieldMappingsImportResult {
   success: boolean;
   resultingMetadataSettings: MetadataSettings;
   ageRatingConflicts: string[];
-  fieldMappingConflicts: ImportConflict[];
 }

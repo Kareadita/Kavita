@@ -39,8 +39,16 @@ export class ManageMetadataMappingsComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
 
+
+  /**
+   * The FormGroup to use, this component will add its own controls
+   */
   settingsForm = input.required<FormGroup>();
   settings = input.required<MetadataSettings>()
+  /**
+   * If we should display the extended metadata processing toggle and export button
+   */
+  showHeader = input(true);
 
   ageRatings = signal<Array<AgeRatingDto>>([]);
   ageRatingMappings = this.fb.array([]);

@@ -1,9 +1,10 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
 import {
-  AbstractControl, FormArray,
+  AbstractControl,
+  FormArray,
   FormControl,
   FormGroup,
   FormsModule,
@@ -12,9 +13,12 @@ import {
   Validators
 } from "@angular/forms";
 import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
-import {MetadataFieldMapping, MetadataSettings} from "../_models/metadata-settings";
+import {MetadataSettings} from "../_models/metadata-settings";
 import {SettingsService} from "../settings.service";
-import {MetadataMappingsExport} from "../manage-metadata-mappings/manage-metadata-mappings.component";
+import {
+  ManageMetadataMappingsComponent,
+  MetadataMappingsExport
+} from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {ToastrService} from "ngx-toastr";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
@@ -29,15 +33,13 @@ import {
   ImportModes,
   ImportSettings
 } from "../../_models/import-field-mappings";
-import {firstValueFrom, of, switchAll, switchMap} from "rxjs";
-import {take, tap} from "rxjs/operators";
+import {firstValueFrom, switchMap} from "rxjs";
+import {tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {KeyValuePipe, NgTemplateOutlet} from "@angular/common";
-import {MetadataFieldTypePipe} from "../../_pipes/metadata-field-type.pipe";
+import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 enum Step {
   Import = 0,
@@ -62,10 +64,7 @@ enum Step {
     AgeRatingPipe,
     NgTemplateOutlet,
     TranslocoPipe,
-    MetadataFieldTypePipe,
-    DefaultValuePipe,
-    TagBadgeComponent,
-    KeyValuePipe,
+    ManageMetadataMappingsComponent,
   ],
   templateUrl: './import-mappings.component.html',
   styleUrl: './import-mappings.component.scss'
@@ -76,6 +75,8 @@ export class ImportMappingsComponent implements OnInit {
   private readonly licenseService = inject(LicenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
+
+  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
 
   steps: TimelineStep[] = [
     {title: translate('import-mappings.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
@@ -100,8 +101,11 @@ export class ImportMappingsComponent implements OnInit {
     ageRatings: new FormControl(true),
     fieldMappings: new FormControl(true),
     ageRatingConflictResolutions: new FormGroup({}),
-    fieldMappingsConflictResolutions: new FormGroup({}),
   });
+  /**
+   * This is that contains the data in the finalize step
+   */
+  mappingsForm = new FormGroup({});
 
   isLoading = signal(false);
   settings = signal<MetadataSettings | undefined>(undefined)
@@ -154,10 +158,19 @@ export class ImportMappingsComponent implements OnInit {
     const res = this.importResult();
     if (!res) return;
 
-    this.settingsService.updateMetadataSettings(res.resultingMetadataSettings).subscribe({
+    const newSettings = res.resultingMetadataSettings;
+    const data = this.manageMetadataMappingsComponent.packData();
+
+    // Update settings with data from the final step
+    newSettings.whitelist = data.whitelist;
+    newSettings.blacklist = data.blacklist;
+    newSettings.ageRatingMappings = data.ageRatingMappings;
+    newSettings.fieldMappings = data.fieldMappings;
+
+    this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
         const fragment = this.licenseService.hasValidLicenseSignal()
-          ? 'admin-metadata' : 'admin-public-metadata';
+          ? SettingsTabId.Metadata : SettingsTabId.ManageMetadata;
 
         this.router.navigate(['settings'], { fragment: fragment });
       }
@@ -172,22 +185,19 @@ export class ImportMappingsComponent implements OnInit {
     }
 
     const settings = this.importSettingsForm.value as ImportSettings;
-    // Ensure keys are numbers
-    settings.fieldMappingsConflictResolutions = Object.fromEntries(Object.entries(settings.fieldMappingsConflictResolutions)
-        .map(([key, value]) => [parseInt(key+''), value]));
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       tap((res) => this.importResult.set(res)),
       switchMap((res) => {
         return this.settingsService.getMetadataSettings().pipe(
           tap(dto => this.settings.set(dto)),
-          tap(dto => {
+          tap(() => {
             if (res.success) {
               this.currentStepIndex.set(Step.Finalize);
               return;
             }
 
-            this.setupSettingConflicts(res, dto);
+            this.setupSettingConflicts(res);
             this.currentStepIndex.set(Step.Conflicts);
           }),
         )}),
@@ -218,18 +228,12 @@ export class ImportMappingsComponent implements OnInit {
     this.currentStepIndex.update(x=>x+1);
   }
 
-  private setupSettingConflicts(res: FieldMappingsImportResult, settings: MetadataSettings) {
+  private setupSettingConflicts(res: FieldMappingsImportResult) {
     const ageRatingGroup = this.importSettingsForm.get('ageRatingConflictResolutions')! as FormGroup;
-    const fieldMappingsGroup = this.importSettingsForm.get('fieldMappingsConflictResolutions')! as FormGroup;
 
     for (let key of res.ageRatingConflicts) {
       if (!ageRatingGroup.get(key)) {
         ageRatingGroup.addControl(key, new FormControl(ConflictResolution.Manual, [this.notManualValidator()]))
-      }
-    }
-    for (let key of res.fieldMappingConflicts) {
-      if (!fieldMappingsGroup.get(`${key.oldId}`)) {
-        fieldMappingsGroup.addControl(`${key.oldId}`, new FormControl(ConflictResolution.Manual, [this.notManualValidator()]))
       }
     }
   }
@@ -250,7 +254,7 @@ export class ImportMappingsComponent implements OnInit {
     if (this.currentStepIndex() === Step.Import) return;
 
     if (this.currentStepIndex() === Step.Finalize) {
-      if (this.importResult()!.ageRatingConflicts.length === 0 && this.importResult()!.fieldMappingConflicts.length === 0) {
+      if (this.importResult()!.ageRatingConflicts.length === 0) {
         this.currentStepIndex.set(Step.Configure);
       } else {
         this.currentStepIndex.set(Step.Conflicts);
@@ -264,7 +268,6 @@ export class ImportMappingsComponent implements OnInit {
     if (this.currentStepIndex() === Step.Import) {
       this.fileUploadControl.reset();
       (this.importSettingsForm.get('ageRatingConflictResolutions') as FormArray).clear();
-      (this.importSettingsForm.get('fieldMappingsConflictResolutions') as FormArray).clear();
     }
 
   }
@@ -295,10 +298,6 @@ export class ImportMappingsComponent implements OnInit {
       default:
         return true;
     }
-  }
-
-  getFieldMapping(mappings: MetadataFieldMapping[], id: number) {
-    return mappings.find(mapping => mapping.id === id)!;
   }
 
   protected readonly Step = Step;

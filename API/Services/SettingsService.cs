@@ -176,7 +176,6 @@ public class SettingsService : ISettingsService
             Success = true,
             ResultingMetadataSettings = existingMetadataSetting,
             AgeRatingConflicts = [],
-            FieldMappingConflicts = [],
         };
     }
 
@@ -234,57 +233,27 @@ public class SettingsService : ISettingsService
             }
         }
 
-        List<ImportConflict>  fieldMappingConflicts = [];
-        Dictionary<(string,MetadataFieldType), MetadataFieldMappingDto> fieldMappings = existingMetadataSetting.FieldMappings
-            .ToDictionary(d => (d.SourceValue, d.SourceType));
 
         if (settings.FieldMappings)
         {
-            foreach (var mfm in dto.FieldMappings)
-            {
-                var key = (mfm.SourceValue, mfm.SourceType);
-
-                if (!fieldMappings.TryGetValue(key, out var existingMapping))
+            existingMetadataSetting.FieldMappings = existingMetadataSetting.FieldMappings
+                .Union(dto.FieldMappings)
+                .DistinctBy(fm => new
                 {
-                    existingMetadataSetting.FieldMappings.Add(mfm);
-                    continue;
-                }
-
-                if (mfm.DestinationValue == existingMapping.DestinationValue && mfm.DestinationType == existingMapping.DestinationType)
-                {
-                    continue;
-                }
-
-                var resolution = settings.FieldMappingsConflictResolutions.GetValueOrDefault(existingMapping.Id, settings.Resolution);
-
-                switch (resolution)
-                {
-                    case ConflictResolution.Keep: continue;
-                    case ConflictResolution.Replace:
-                        existingMetadataSetting.FieldMappings.Remove(existingMapping);
-                        existingMetadataSetting.FieldMappings.Add(mfm);
-                        break;
-                    case ConflictResolution.Manual:
-                        fieldMappingConflicts.Add(new ImportConflict
-                        {
-                            OldId = existingMapping.Id,
-                            NewId = mfm.Id,
-                        });
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid conflict resolution {nameof(ConflictResolution)}.");
-                }
-            }
+                    fm.SourceType,
+                    SourceValue = fm.SourceValue.ToNormalized(),
+                    fm.DestinationType,
+                    DestinationValue = fm.DestinationValue.ToNormalized(),
+                })
+                .ToList();
         }
 
-
-        if (ageRatingConflicts.Count > 0 || fieldMappingConflicts.Count > 0)
+        if (ageRatingConflicts.Count > 0)
         {
             return new FieldMappingsImportResultDto
             {
                 Success = false,
                 AgeRatingConflicts = ageRatingConflicts,
-                FieldMappingConflicts = fieldMappingConflicts,
             };
         }
 
@@ -293,7 +262,6 @@ public class SettingsService : ISettingsService
             Success = true,
             ResultingMetadataSettings = existingMetadataSetting,
             AgeRatingConflicts = [],
-            FieldMappingConflicts = [],
         };
     }
 
