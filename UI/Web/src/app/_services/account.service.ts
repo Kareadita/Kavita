@@ -269,7 +269,7 @@ export class AccountService {
         queryParams: {skipAutoLogin: skipAutoLogin}
       });
     } else {
-      this.router.navigateByUrl('/oidc/logout');
+      window.location.href = '/oidc/logout';
     }
   }
 
