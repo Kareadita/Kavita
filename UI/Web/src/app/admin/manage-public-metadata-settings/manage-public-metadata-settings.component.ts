@@ -20,6 +20,8 @@ import {map} from "rxjs/operators";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LicenseService} from "../../_services/license.service";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {RouterLink} from "@angular/router";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 /**
  * Metadata settings for which a K+ license is not required
@@ -30,6 +32,8 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
     ManageMetadataMappingsComponent,
     TranslocoDirective,
     ReactiveFormsModule,
+    RouterLink,
+    SettingSwitchComponent,
   ],
   templateUrl: './manage-public-metadata-settings.component.html',
   styleUrl: './manage-public-metadata-settings.component.scss',
@@ -50,6 +54,8 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.settingService.getMetadataSettings().subscribe(settings => {
       this.settings = settings;
+
+      this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(this.settings.enableExtendedMetadataProcessing, []));
       this.cdRef.markForCheck();
     });
 
@@ -76,4 +82,5 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     return model;
   }
 
+  protected readonly SettingsTabId = SettingsTabId;
 }

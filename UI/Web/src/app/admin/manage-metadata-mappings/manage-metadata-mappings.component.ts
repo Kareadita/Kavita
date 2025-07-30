@@ -62,7 +62,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const settings = this.settings();
     const settingsForm = this.settingsForm();
 
-    settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
     settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
     settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
     settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);

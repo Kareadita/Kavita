@@ -24,6 +24,8 @@ import {
   MetadataMappingsExport
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {AgeRating} from "../../_models/metadata/age-rating";
+import {RouterLink} from "@angular/router";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 
 @Component({
@@ -35,6 +37,7 @@ import {AgeRating} from "../../_models/metadata/age-rating";
     PersonRolePipe,
     MetadataSettingFiledPipe,
     ManageMetadataMappingsComponent,
+    RouterLink,
 
   ],
   templateUrl: './manage-metadata-settings.component.html',
@@ -62,6 +65,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.cdRef.markForCheck();
 
       this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
+      this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
       this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
@@ -156,4 +160,5 @@ export class ManageMetadataSettingsComponent implements OnInit {
   }
 
 
+  protected readonly SettingsTabId = SettingsTabId;
 }

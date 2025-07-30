@@ -6,17 +6,50 @@
     <form [formGroup]="settingsForm">
 
       <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('enabled'); as formControl) {
-          <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
+        <div class="col-md-6 col-sm-12">
+          @if(settingsForm.get('enabled'); as formControl) {
+            <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
+            <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-extended-metadata-processing" type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
       </div>
 
+      <div class="row g-0 mt-4 mb-4">
+        <div class="col-md-6 col-sm-12">
+          <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent.export()">
+            {{ t('export-settings') }}
+          </button>
+          <div class="text-muted mt-2">{{t('export-tooltip')}}</div>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          <button class="btn btn-secondary" routerLink="/settings" [fragment]="SettingsTabId.MappingsImport">
+            {{ t('import-settings') }}
+          </button>
+          <div class="text-muted mt-2">{{t('import-tooltip')}}</div>
+        </div>
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <h4>{{t('series-header')}}</h4>
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableSummary'); as formControl) {
           <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
@@ -91,8 +124,7 @@
 
       <div class="setting-section-break"></div>
 
-      <!-- Chapter-based fields -->
-      <h5>{{t('chapter-header')}}</h5>
+      <h4>{{t('chapter-header')}}</h4>
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableChapterTitle'); as formControl) {
           <app-setting-switch [title]="t('enable-chapter-title-label')" [subtitle]="t('enable-chapter-title-tooltip')">
@@ -155,6 +187,7 @@
 
       @if(settingsForm.get('enablePeople'); as formControl) {
         <div class="setting-section-break"></div>
+        <h4>{{t('people-header')}}</h4>
 
         <div class="row g-0 mt-4 mb-4">
 
@@ -197,7 +230,8 @@
 
       <div class="setting-section-break"></div>
 
-      <div class="row">
+      <h4>{{t('tags-header')}}</h4>
+      <div class="row mt-4 mb-4">
         <div class="col-md-6">
           @if(settingsForm.get('enableGenres'); as formControl) {
             <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
