@@ -89,7 +89,7 @@ export class UserLoginComponent implements OnInit {
       if (!oidcConfig || skipAutoLogin === undefined) return;
 
       if (oidcConfig.autoLogin && !skipAutoLogin) {
-        this.router.navigateByUrl('/oidc/login');
+        window.location.href = '/oidc/login';
       }
     });
   }

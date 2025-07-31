@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ public static class IdentityServiceExtensions
     private const string DynamicHybrid = nameof(DynamicHybrid);
     public const string OpenIdConnect = nameof(OpenIdConnect);
     private const string LocalIdentity = nameof(LocalIdentity);
+
+    private const string OidcCallback = "/signin-oidc";
+    private const string OidcLogoutCallback = "/signout-callback-oidc";
 
     public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment environment)
     {
@@ -75,8 +79,8 @@ public static class IdentityServiceExtensions
                 {
                     if (!enabled) return LocalIdentity;
 
-                    if (ctx.Request.Path.StartsWithSegments("/signin-oidc") ||
-                        ctx.Request.Path.StartsWithSegments("/signout-callback-oidc"))
+                    if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
+                        ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
                     {
                         return OpenIdConnect;
                     }
@@ -94,8 +98,7 @@ public static class IdentityServiceExtensions
 
         if (oidcSettings.Enabled)
         {
-            auth.AddOpenIdConnectCookie(environment)
-                .AddOpenIdConnectScheme(oidcSettings);
+            services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
         }
 
         auth.AddJwtBearer(LocalIdentity, options =>
@@ -124,9 +127,47 @@ public static class IdentityServiceExtensions
         return services;
     }
 
-    private static AuthenticationBuilder AddOpenIdConnectScheme(this AuthenticationBuilder builder, Configuration.OpenIdConnectSettings settings)
+    private static void SetupOpenIdConnectAuthentication(this IServiceCollection services, AuthenticationBuilder auth,
+        Configuration.OpenIdConnectSettings settings, IWebHostEnvironment environment)
     {
-        return builder.AddOpenIdConnect(OpenIdConnect, options =>
+        var isDevelopment = environment.IsEnvironment(Environments.Development);
+        var baseUrl = Configuration.BaseUrl;
+
+        var apiPrefix = baseUrl + "api";
+        var hubsPrefix = baseUrl + "hubs";
+
+        services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme).Configure<ITicketStore>((options, store) =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.SlidingExpiration = true;
+
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.Cookie.MaxAge = TimeSpan.FromDays(7);
+            options.SessionStore = store;
+
+            if (isDevelopment)
+            {
+                options.Cookie.Domain = null;
+            }
+
+            options.Events = new CookieAuthenticationEvents
+            {
+                OnValidatePrincipal = async ctx =>
+                {
+                    var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+                    await oidcService.RefreshCookieToken(ctx);
+                },
+                OnRedirectToAccessDenied = ctx =>
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                },
+            };
+        });
+
+        auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+        auth.AddOpenIdConnect(OpenIdConnect, options =>
         {
             options.Authority = settings.Authority;
             options.ClientId = settings.ClientId;
@@ -135,8 +176,8 @@ public static class IdentityServiceExtensions
 
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.ResponseType = OpenIdConnectResponseType.Code;
-            options.CallbackPath = "/signin-oidc";
-            options.SignedOutCallbackPath = "/signout-callback-oidc";
+            options.CallbackPath = OidcCallback;
+            options.SignedOutCallbackPath = OidcLogoutCallback;
 
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
@@ -157,51 +198,28 @@ public static class IdentityServiceExtensions
                 OnTokenValidated = OidcClaimsPrincipalConverter,
                 OnAuthenticationFailed = ctx =>
                 {
-                    ctx.Response.Redirect("/login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
+                    ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
                     ctx.HandleResponse();
 
                     return Task.CompletedTask;
                 },
                 OnRedirectToIdentityProvider = ctx =>
                 {
-                    ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
-                    return Task.CompletedTask;
-                },
-            };
-        });
-    }
+                    // Intercept redirects on API requests and instead return 401
+                    // These redirects are auto login when .NET finds a cookie that it can't match inside the cookie store. I.e. after a restart
+                    if (ctx.Request.Path.StartsWithSegments(apiPrefix) || ctx.Request.Path.StartsWithSegments(hubsPrefix))
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        ctx.HandleResponse();
+                        return Task.CompletedTask;
+                    }
 
-    private static AuthenticationBuilder AddOpenIdConnectCookie(this AuthenticationBuilder builder, IWebHostEnvironment environment)
-    {
-        return builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-        {
-            options.ExpireTimeSpan = TimeSpan.FromDays(7);
-            options.SlidingExpiration = true;
+                    if (!isDevelopment)
+                    {
+                        ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
+                        ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
+                    }
 
-            options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
-            options.Cookie.MaxAge = TimeSpan.FromDays(7);
-
-            if (environment.IsEnvironment(Environments.Development))
-            {
-                options.Cookie.Domain = null;
-            }
-
-            options.Events = new CookieAuthenticationEvents
-            {
-                OnValidatePrincipal = async ctx =>
-                {
-                    var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-                    await oidcService.RefreshCookieToken(ctx);
-                },
-                OnRedirectToAccessDenied = ctx =>
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return Task.CompletedTask;
-                },
-                OnRedirectToLogin = ctx =>
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return Task.CompletedTask;
                 },
             };
@@ -226,7 +244,7 @@ public static class IdentityServiceExtensions
         }
 
         var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
-        var tokens = CopyAuthenticationTokens(ctx);
+        var tokens = CopyOidcTokens(ctx);
 
         var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
@@ -240,18 +258,28 @@ public static class IdentityServiceExtensions
         ctx.Success();
     }
 
-    private static List<AuthenticationToken> CopyAuthenticationTokens(TokenValidatedContext ctx)
+    /// <summary>
+    /// Copy tokens returned by the OIDC provider that we require later
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <returns></returns>
+    private static List<AuthenticationToken> CopyOidcTokens(TokenValidatedContext ctx)
     {
-        var tokens = new List<AuthenticationToken>();
-
         if (ctx.TokenEndpointResponse == null)
         {
-            return tokens;
+            return [];
         }
+
+        var tokens = new List<AuthenticationToken>();
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
         {
             tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.IdToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.IdToken, Value = ctx.TokenEndpointResponse.IdToken });
         }
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
