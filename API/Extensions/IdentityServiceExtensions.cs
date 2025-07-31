@@ -217,7 +217,7 @@ public static class IdentityServiceExtensions
                     if (!isDevelopment)
                     {
                         ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
-                        ctx.ProtocolMessage.PostLogoutRedirectUri  = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
+                        ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
                     }
 
                     return Task.CompletedTask;
