@@ -8,6 +8,7 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,18 +19,18 @@ public class AnnotationController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AnnotationController> _logger;
-    private readonly ICacheService _cacheService;
     private readonly IBookService _bookService;
     private readonly ILocalizationService _localizationService;
+    private readonly IEventHub _eventHub;
 
     public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger,
-        ICacheService cacheService, IBookService bookService, ILocalizationService localizationService)
+        IBookService bookService, ILocalizationService localizationService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _cacheService = cacheService;
         _bookService = bookService;
         _localizationService = localizationService;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -115,7 +116,12 @@ public class AnnotationController : BaseApiController
             annotation.Comment = dto.Comment;
             _unitOfWork.AnnotationRepository.Update(annotation);
 
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync()) return Ok(dto);
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+            {
+                await _eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate, MessageFactory.AnnotationUpdateEvent(dto),
+                    User.GetUserId());
+                return Ok(dto);
+            }
         }
         catch (Exception ex)
         {

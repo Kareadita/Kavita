@@ -1,9 +1,12 @@
-import {Component, computed, effect, ElementRef, inject, input, model, ViewChild} from '@angular/core';
+import {Component, computed, DestroyRef, effect, ElementRef, inject, input, model, ViewChild} from '@angular/core';
 import {Annotation, HighlightColor} from "../../../_models/annotations/annotation";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {NgStyle} from "@angular/common";
+import {EVENTS, MessageHubService} from "../../../../_services/message-hub.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
 
 @Component({
   selector: 'app-epub-highlight',
@@ -14,8 +17,10 @@ import {NgStyle} from "@angular/common";
   styleUrl: './epub-highlight.component.scss'
 })
 export class EpubHighlightComponent {
-  private epubMenuService = inject(EpubReaderMenuService);
-  private annotationService = inject(AnnotationService);
+  private readonly epubMenuService = inject(EpubReaderMenuService);
+  private readonly annotationService = inject(AnnotationService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly destroyRef = inject(DestroyRef);
 
   showHighlight = model<boolean>(true);
   color = input<HighlightColor>(HighlightColor.Blue);
@@ -27,6 +32,17 @@ export class EpubHighlightComponent {
   private readonly highlightSlotPipe = new SlotColorPipe();
 
   constructor() {
+
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
+      if (message.payload !== EVENTS.AnnotationUpdate) return;
+      const updatedAnnotation = message.payload as AnnotationUpdateEvent;
+      if (this.annotation()?.id !== updatedAnnotation.annotation.id) return;
+
+      console.log('Refreshing annotation')
+      this.annotation.set(updatedAnnotation.annotation);
+    });
+
+
     effect(() => {
       const updateEvent = this.annotationService.events();
       const annotation = this.annotation();
@@ -51,7 +67,7 @@ export class EpubHighlightComponent {
       return '';
     }
 
-    console.log('[highlight] slot updated', annotation);
+    //console.log('[highlight] slot updated', annotation);
     return this.highlightSlotPipe.transform(slots[annotation.selectedSlotIndex].color);
   });
 
@@ -60,7 +76,6 @@ export class EpubHighlightComponent {
     // Don't view annotation if a drawer is already open
     if (this.epubMenuService.isDrawerOpen()) return;
 
-    // TODO: This shouldn't when edit annotation drawer already open (clicking highlight in the drawer)
     this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {});
   }
 

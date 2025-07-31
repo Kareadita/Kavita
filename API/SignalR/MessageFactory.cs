@@ -1,4 +1,5 @@
 ﻿using System;
+using API.DTOs.Reader;
 using API.DTOs.Update;
 using API.Entities.Person;
 using API.Extensions;
@@ -156,6 +157,12 @@ public static class MessageFactory
     /// A Rate limit error was hit when matching a series with Kavita+
     /// </summary>
     public const string ExternalMatchRateLimitError = "ExternalMatchRateLimitError";
+    /// <summary>
+    /// Annotation is updated within the reader
+    /// </summary>
+    public const string AnnotationUpdate = "AnnotationUpdate";
+
+
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
     {
@@ -683,6 +690,7 @@ public static class MessageFactory
             },
         };
     }
+
     public static SignalRMessage ExternalMatchRateLimitErrorEvent(int seriesId, string seriesName)
     {
         return new SignalRMessage()
@@ -690,8 +698,20 @@ public static class MessageFactory
             Name = ExternalMatchRateLimitError,
             Body = new
             {
-                seriesId = seriesId,
-                seriesName = seriesName,
+                seriesId,
+                seriesName,
+            },
+        };
+    }
+
+    public static SignalRMessage AnnotationUpdateEvent(AnnotationDto dto)
+    {
+        return new SignalRMessage()
+        {
+            Name = AnnotationUpdate,
+            Body = new
+            {
+                Annotation = dto
             },
         };
     }

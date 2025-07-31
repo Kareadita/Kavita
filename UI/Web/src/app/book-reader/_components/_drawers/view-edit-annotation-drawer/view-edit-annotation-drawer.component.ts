@@ -77,15 +77,18 @@ export class ViewEditAnnotationDrawerComponent {
   constructor() {
     this.titleColor = computed(() => {
       const annotation = this.annotation();
-      if (!annotation) return '';
-      // TODO: Safefty check
-      return this.highlightSlotPipe.transform(this.annotationService.slots()[annotation.selectedSlotIndex].color);
+      const slots = this.annotationService.slots();
+
+      if (!annotation || annotation.selectedSlotIndex >= slots.length) return '';
+
+      return this.highlightSlotPipe.transform(slots[annotation.selectedSlotIndex].color);
     });
 
     this.isEditMode = computed(() => {
       const mode = this.mode();
       return mode === AnnotationMode.Edit;
     });
+
     this.isEditOrCreateMode = computed(() => {
       const mode = this.mode();
       return mode === AnnotationMode.Edit || mode === AnnotationMode.Create;
@@ -184,15 +187,17 @@ export class ViewEditAnnotationDrawerComponent {
       });
 
       if (isEditMode && !this.isSetup) {
+        console.log('Setting up auto-save');
         this.formGroup.valueChanges.pipe(
           debounceTime(350),
           switchMap(_ => {
-            if (!annotation) return of();
+            const updatedAnnotation = this.annotation();
+            if (!updatedAnnotation) return of();
 
-            annotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-            annotation.comment = JSON.stringify(this.annotationNote);
+            updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+            updatedAnnotation.comment = JSON.stringify(this.annotationNote);
 
-            return this.annotationService.updateAnnotation(annotation);
+            return this.annotationService.updateAnnotation(updatedAnnotation);
           }),
           takeUntilDestroyed(this.destroyRef)
         ).subscribe();
@@ -229,6 +234,7 @@ export class ViewEditAnnotationDrawerComponent {
     const annotation = this.annotation();
 
     if (annotation) {
+      console.log('view-edit drawer, slot index changed: ', slotIndex);
       this.annotation.set({...annotation, selectedSlotIndex: slotIndex});
       this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
     }

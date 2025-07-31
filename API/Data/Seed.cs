@@ -33,37 +33,37 @@ public static class Seed
         new()
         {
             Id = 1,
-            Title = "Blue",
+            Title = "Cyan",
             SlotNumber = 0,
-            Color = new RgbaColor { R = 0, G = 123, B = 255, A = 255 }
+            Color = new RgbaColor { R = 0, G = 255, B = 255, A = 0.4f }
         },
         new()
         {
             Id = 2,
             Title = "Green",
             SlotNumber = 1,
-            Color = new RgbaColor { R = 34, G = 197, B = 94, A = 255 }
+            Color = new RgbaColor { R = 0, G = 255, B = 0, A = 0.4f }
         },
         new()
         {
             Id = 3,
             Title = "Yellow",
             SlotNumber = 2,
-            Color = new RgbaColor { R = 255, G = 235, B = 59, A = 255 }
+            Color = new RgbaColor { R = 255, G = 255, B = 0, A = 0.4f }
         },
         new()
         {
             Id = 4,
             Title = "Orange",
             SlotNumber = 3,
-            Color = new RgbaColor { R = 255, G = 149, B = 0, A = 255 }
+            Color = new RgbaColor { R = 255, G = 165, B = 0, A = 0.4f }
         },
         new()
         {
             Id = 5,
             Title = "Purple",
             SlotNumber = 4,
-            Color = new RgbaColor { R = 175, G = 82, B = 222, A = 255 }
+            Color = new RgbaColor { R = 255, G = 0, B = 255, A = 0.4f }
         }
     ];
 
