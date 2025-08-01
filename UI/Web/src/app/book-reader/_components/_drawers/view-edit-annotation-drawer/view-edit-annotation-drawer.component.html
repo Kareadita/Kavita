@@ -29,7 +29,7 @@
               <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
             </div>
           </form>
-        } @else {
+        } @else if (annotation()?.containsSpoiler) {
           <div class="small offcanvas-title-right">
               <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
             {{t('contains-spoilers-label')}}
