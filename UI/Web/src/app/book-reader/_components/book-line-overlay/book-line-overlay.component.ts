@@ -47,6 +47,8 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
   xPath: string = '';
+  startXPath: string = '';
+  endXPath: string = '';
   allTextFromSelection: string = '';
   selectedText: string = '';
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
@@ -98,7 +100,8 @@ export class BookLineOverlayComponent implements OnInit {
     // NOTE: This doesn't account for a partial occlusion with an annotation
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
-    if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText) || this.hasSelectedAnnotation()) {
+    if ((selection === null || selection === undefined || selection.toString().trim() === ''
+      || selection.toString().trim() === this.selectedText) || this.hasSelectedAnnotation()) {
       if (this.selectedText !== '') {
         event.preventDefault();
         event.stopPropagation();
@@ -116,12 +119,32 @@ export class BookLineOverlayComponent implements OnInit {
 
 
     if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
-      this.xPath = this.readerService.getXPathTo(event.target);
-      if (this.xPath !== '') {
-        this.xPath = '//' + this.xPath;
+
+      // Get the range from the selection
+      const range = selection.getRangeAt(0);
+
+      // Get start and end containers
+      const startContainer = this.getElementContainer(range.startContainer);
+      const endContainer = this.getElementContainer(range.endContainer);
+
+      // Generate XPaths for both start and end
+      this.startXPath = this.readerService.getXPathTo(startContainer);
+      this.endXPath = this.readerService.getXPathTo(endContainer);
+
+
+      if (this.startXPath !== '') {
+        this.startXPath = '//' + this.startXPath;
       }
 
-      this.allTextFromSelection = (event.target as Element).textContent || '';
+      if (this.endXPath !== '') {
+        this.endXPath = '//' + this.endXPath;
+      }
+
+      // For backward compatibility, keep the original xPath as startXPath
+      this.xPath = this.startXPath;
+
+      // Get all text from the selection range
+      this.allTextFromSelection = this.selectedText;
 
       this.isOpen.emit(true);
       event.preventDefault();
@@ -142,14 +165,14 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.mode === BookLineOverlayMode.Annotate) {
       const createAnnotation = {
         id: 0,
-        xpath: this.xPath,
-        endingXPath: this.xPath, // TODO: Figure this out
+        xpath: this.startXPath,
+        endingXPath: this.endXPath,
         selectedText: this.selectedText,
         comment: '',
         containsSpoiler: false,
         pageNumber: this.pageNumber,
         selectedSlotIndex: 0,
-        chapterTitle: '', // TODO: Can we get this from UI?
+        chapterTitle: '',
         highlightCount: this.selectedText.length,
         ownerUserId: 0,
         ownerUsername: '',
@@ -206,6 +229,12 @@ export class BookLineOverlayComponent implements OnInit {
       this.toastr.info(translate('toasts.copied-to-clipboard'));
     }
     this.reset();
+  }
+
+  private getElementContainer(node: Node): Element {
+    // If the node is a text node, get its parent element
+    // If it's already an element, return it
+    return node.nodeType === Node.TEXT_NODE ? node.parentElement! : node as Element;
   }
 
 
