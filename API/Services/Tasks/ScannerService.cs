@@ -642,33 +642,23 @@ public class ScannerService : IScannerService
             var allGenres = toProcess
                 .SelectMany(s => s.Value
                     .SelectMany(p => p.ComicInfo?.Genre?
-                                         .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
-                                         .Select(g => g.Trim()) // Trim each genre
-                                         .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
-                                     ?? []))  // Handle null Genre or ComicInfo safely
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(g => g.Trim())
+                                         .Where(g => !string.IsNullOrWhiteSpace(g))
+                                     ?? []))
                 .Distinct().ToList();
 
             var allTags = toProcess
                 .SelectMany(s => s.Value
                     .SelectMany(p => p.ComicInfo?.Tags?
-                                         .Split(",", StringSplitOptions.RemoveEmptyEntries) // Split on comma and remove empty entries
-                                         .Select(g => g.Trim()) // Trim each genre
-                                         .Where(g => !string.IsNullOrWhiteSpace(g)) // Ensure no null/empty genres
-                                     ?? []))  // Handle null Tag or ComicInfo safely
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(g => g.Trim())
+                                         .Where(g => !string.IsNullOrWhiteSpace(g))
+                                     ?? []))
                 .Distinct().ToList();
 
-            var processedGenres = new List<string>();
-            var processedTags = new List<string>();
-
-            if (settings.EnableExtendedMetadataProcessing)
-            {
-                ExternalMetadataService.GenerateGenreAndTagLists(allGenres, allTags, settings, ref processedTags, ref processedGenres);
-            }
-            else
-            {
-                processedTags = allTags;
-                processedGenres = allGenres;
-            }
+            ExternalMetadataService.GenerateExternalGenreAndTagsList(allGenres, allTags, settings,
+                out var processedTags, out var processedGenres);
 
             await CreateAllGenresAsync(processedGenres);
             await CreateAllTagsAsync(processedTags);

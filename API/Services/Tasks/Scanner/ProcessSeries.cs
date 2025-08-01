@@ -1077,24 +1077,18 @@ public class ProcessSeries : IProcessSeries
             var genres = TagHelper.GetTagValues(comicInfo.Genre);
             var tags = TagHelper.GetTagValues(comicInfo.Tags);
 
-            var finalTags = new List<string>();
-            var finalGenres = new List<string>();
-
-            if (settings.EnableExtendedMetadataProcessing)
-            {
-                ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
-            }
-            else
-            {
-                finalGenres.AddRange(genres);
-                finalTags.AddRange(tags);
-            }
+            ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, settings,
+                out var finalTags, out var finalGenres);
 
             if (!chapter.GenresLocked)
+            {
                 await UpdateChapterGenres(chapter, finalGenres);
+            }
 
             if (!chapter.TagsLocked)
+            {
                 await UpdateChapterTags(chapter, finalTags);
+            }
 
 
         }

@@ -747,6 +747,7 @@
         "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
         "export-settings": "Export",
         "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings",
+        "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "Import",
         "import-tooltip": "Import your or someone else's settings",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
@@ -794,6 +795,8 @@
         "remove-source-tag-label": "Remove Source Tag",
         "add-field-mapping-label": "Add Field Mapping",
         "add-age-rating-mapping-label": "Add Age Rating Mapping",
+        "remove-age-rating-mapping-label": "Remove age rating mapping",
+        "remove-field-mapping-label": "Remove field mapping",
         "field-mapping-title": "Field Mapping",
         "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Matching is normalized and case-insensitive, the first matching value is used. Only applicable when Genre/Tag are enabled to be written.",
         "first-last-name-label": "First Last Naming",
@@ -804,7 +807,9 @@
         "chapter-header": "Chapter Fields",
         "series-header": "Series Fields",
         "people-header": "People",
-        "tags-header": "Tags"
+        "tags-header": "Tags",
+        "source-genre-tags-placeholder": "Source genre/tag",
+        "dest-genre-tags-placeholder": "Destination genre/tag"
     },
 
     "book-line-overlay": {

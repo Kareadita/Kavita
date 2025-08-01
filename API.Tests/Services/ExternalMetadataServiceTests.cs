@@ -1657,10 +1657,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         var tags = new List<string> { "Girl's Love", "Unrelated tag" };
         var genres = new List<string> { "Ww2", "Unrelated genre" };
 
-        var finalTags = new List<string>();
-        var finalGenres = new List<string>();
-
-        ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
+        ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, settings,
+            out var finalTags, out var finalGenres);
 
         Assert.Contains("Unrelated tag", finalTags);
 
@@ -1700,10 +1698,8 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         var tags = new List<string> { "Girl's Love"};
         var genres = new List<string>();
 
-        var finalTags = new List<string>();
-        var finalGenres = new List<string>();
-
-        ExternalMetadataService.GenerateGenreAndTagLists(genres, tags, settings, ref finalTags, ref finalGenres);
+        ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, settings,
+            out var finalTags, out var finalGenres);
 
         Assert.Contains("Yuri", finalGenres);
         Assert.Contains("Romance", finalGenres);

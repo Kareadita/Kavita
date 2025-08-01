@@ -697,7 +697,6 @@ public class ExternalMetadataService : IExternalMetadataService
             settings, ref processedTags, ref processedGenres);
     }
 
-
     /// <summary>
     /// Run all genres and tags through the Metadata settings
     /// </summary>
@@ -706,7 +705,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="settings"></param>
     /// <param name="processedTags"></param>
     /// <param name="processedGenres"></param>
-    public static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
+    private static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
         ref List<string> processedTags, ref List<string> processedGenres)
     {
         var mappings = ApplyFieldMappings(tags, MetadataFieldType.Tag, settings.FieldMappings);
@@ -731,6 +730,30 @@ public class ExternalMetadataService : IExternalMetadataService
 
         processedTags = ApplyBlackWhiteList(settings, MetadataFieldType.Tag, processedTags);
         processedGenres = ApplyBlackWhiteList(settings, MetadataFieldType.Genre, processedGenres);
+    }
+
+    /// <summary>
+    /// Processes the given tags and genres only if <see cref="MetadataSettingsDto.EnableExtendedMetadataProcessing"/>
+    /// is true, else return without change
+    /// </summary>
+    /// <param name="genres"></param>
+    /// <param name="tags"></param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
+    public static void GenerateExternalGenreAndTagsList(IList<string> genres, IList<string> tags,
+        MetadataSettingsDto settings, out List<string> processedTags, out List<string> processedGenres)
+    {
+        if (!settings.EnableExtendedMetadataProcessing)
+        {
+            processedTags = [..tags];
+            processedGenres = [..genres];
+            return;
+        }
+
+        processedTags = [];
+        processedGenres = [];
+        GenerateGenreAndTagLists(genres, tags, settings, ref processedTags, ref processedGenres);
     }
 
     private async Task<bool> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)

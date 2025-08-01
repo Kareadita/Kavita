@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -7,9 +7,9 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {MetadataFieldMapping, MetadataFieldType, MetadataSettings} from "../_models/metadata-settings";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataService} from "../../_services/metadata.service";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
-import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {DownloadService} from "../../shared/_services/download.service";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -28,13 +28,14 @@ export type MetadataMappingsExport = {
     SettingItemComponent,
     TagBadgeComponent,
     TranslocoDirective,
-    SettingSwitchComponent
   ],
   templateUrl: './manage-metadata-mappings.component.html',
-  styleUrl: './manage-metadata-mappings.component.scss'
+  styleUrl: './manage-metadata-mappings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMetadataMappingsComponent implements OnInit {
 
+  private readonly downloadService = inject(DownloadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
@@ -51,8 +52,19 @@ export class ManageMetadataMappingsComponent implements OnInit {
   showHeader = input(true);
 
   ageRatings = signal<Array<AgeRatingDto>>([]);
-  ageRatingMappings = this.fb.array([]);
-  fieldMappings = this.fb.array([]);
+
+  ageRatingMappings = this.fb.array<FormGroup<{
+    str: FormControl<string | null>,
+    rating: FormControl<AgeRating | null>
+  }>>([]);
+  fieldMappings = this.fb.array<FormGroup<{
+    id: FormControl<number | null>
+    sourceType: FormControl<MetadataFieldType | null>,
+    destinationType: FormControl<MetadataFieldType | null>,
+    sourceValue: FormControl<string | null>,
+    destinationValue: FormControl<string | null>,
+    excludeFromSource: FormControl<boolean | null>,
+  }>>([]);
 
   ngOnInit(): void {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -91,28 +103,17 @@ export class ManageMetadataMappingsComponent implements OnInit {
   }
 
   public packData(): MetadataMappingsExport {
-    const ageRatingMappings = this.ageRatingMappings.controls.reduce((acc, control) => {
-      // @ts-ignore
+    const ageRatingMappings = this.ageRatingMappings.controls.reduce((acc: Record<string, AgeRating>, control) => {
       const { str, rating } = control.value;
       if (str && rating) {
-        // @ts-ignore
-        acc[str] = parseInt(rating + '', 10) as AgeRating;
+        acc[str] = rating;
       }
       return acc;
     }, {});
 
-    const fieldMappings = this.fieldMappings.controls.map((control) => {
-      const value = control.value as MetadataFieldMapping;
-
-      return {
-        id: value.id,
-        sourceType: parseInt(value.sourceType + '', 10),
-        destinationType: parseInt(value.destinationType + '', 10),
-        sourceValue: value.sourceValue,
-        destinationValue: value.destinationValue,
-        excludeFromSource: value.excludeFromSource
-      }
-    }).filter(m => m.sourceValue.length > 0 && m.destinationValue.length > 0);
+    const fieldMappings = this.fieldMappings.controls
+      .map((control) => control.value as MetadataFieldMapping)
+      .filter(m => m.sourceValue.length > 0 && m.destinationValue.length > 0);
 
     const blacklist = (this.settingsForm().get('blacklist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
     const whitelist = (this.settingsForm().get('whitelist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
@@ -127,15 +128,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
 
   export() {
     const data = this.packData();
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "Kavita Metadata Settings Export.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    this.downloadService.downloadObjectAsJson(data, translate('manage-metadata-settings.export-file-name'))
   }
 
   addAgeRatingMapping(str: string = '', rating: AgeRating = AgeRating.Unknown) {
@@ -143,7 +136,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
       str: [str, Validators.required],
       rating: [rating, Validators.required]
     });
-    // @ts-ignore
+
     this.ageRatingMappings.push(mappingGroup);
   }
 
@@ -161,7 +154,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
       excludeFromSource: [mapping?.excludeFromSource || false]
     });
 
-    //@ts-ignore
     this.fieldMappings.push(mappingGroup);
   }
 

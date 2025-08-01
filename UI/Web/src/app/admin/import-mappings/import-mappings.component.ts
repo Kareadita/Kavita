@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
@@ -112,14 +112,7 @@ export class ImportMappingsComponent implements OnInit {
   importedMappings = signal<MetadataMappingsExport | undefined>(undefined);
   importResult = signal<FieldMappingsImportResult | undefined>(undefined);
 
-  ngOnInit(): void {
-    this.settingsService.getMetadataSettings().subscribe((settings) => {
-      this.settings.set(settings);
-    });
-  }
-
-
-  get NextButtonLabel() {
+  nextButtonLabel = computed(() => {
     switch(this.currentStepIndex()) {
       case Step.Configure:
       case Step.Conflicts:
@@ -129,6 +122,35 @@ export class ImportMappingsComponent implements OnInit {
       default:
         return 'next';
     }
+  });
+
+  canMoveToNextStep = computed(() => {
+    switch (this.currentStepIndex()) {
+      case Step.Import:
+        return this.isFileSelected();
+      case Step.Finalize:
+      case Step.Configure:
+        return true;
+      case Step.Conflicts:
+        return this.importSettingsForm.valid;
+      default:
+        return false;
+    }
+  });
+
+  canMoveToPrevStep = computed(() => {
+    switch (this.currentStepIndex()) {
+      case Step.Import:
+        return false;
+      default:
+        return true;
+    }
+  });
+
+  ngOnInit(): void {
+    this.settingsService.getMetadataSettings().subscribe((settings) => {
+      this.settings.set(settings);
+    });
   }
 
   async nextStep() {
@@ -225,7 +247,7 @@ export class ImportMappingsComponent implements OnInit {
     }
 
     this.importedMappings.set(newImport);
-    this.currentStepIndex.update(x=>x+1);
+    this.currentStepIndex.update(x=>x + 1);
   }
 
   private setupSettingConflicts(res: FieldMappingsImportResult) {
@@ -262,7 +284,7 @@ export class ImportMappingsComponent implements OnInit {
       return;
     }
 
-    this.currentStepIndex.update(x => x-1);
+    this.currentStepIndex.update(x => x - 1);
 
     // Reset when returning to the first step
     if (this.currentStepIndex() === Step.Import) {
@@ -272,32 +294,9 @@ export class ImportMappingsComponent implements OnInit {
 
   }
 
-  canMoveToNextStep() {
-    switch (this.currentStepIndex()) {
-      case Step.Import:
-        return this.isFileSelected();
-      case Step.Finalize:
-      case Step.Configure:
-        return true;
-      case Step.Conflicts:
-        return this.importSettingsForm.valid;
-      default:
-          return false;
-    }
-  }
-
   isFileSelected() {
     const files = this.uploadForm.get('files')?.value;
     return files && files.length === 1;
-  }
-
-  canMoveToPrevStep() {
-    switch (this.currentStepIndex()) {
-      case Step.Import:
-        return false;
-      default:
-        return true;
-    }
   }
 
   protected readonly Step = Step;

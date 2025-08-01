@@ -114,7 +114,7 @@
 
               @for (arm of res.ageRatingConflicts; track arm) {
                 <div class="col-md-6 col-sm-12 pt-4">
-                  @if (importSettingsForm.get('ageRatingConflictResolutions.'+arm); as control) {
+                  @if (importSettingsForm.get('ageRatingConflictResolutions.' + arm); as control) {
                     <div formGroupName="ageRatingConflictResolutions">
                       <span class="conflict-title">{{arm}}</span>
                       <select [formControlName]="arm" class="form-control mt-2">
@@ -153,7 +153,7 @@
       <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
     </div>
     <div class="col-auto ms-1">
-      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(NextButtonLabel)}}</button>
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(nextButtonLabel())}}</button>
     </div>
   </div>
 
