@@ -2,6 +2,13 @@
 
 :root, :root .default {
 
+    /* Login screen gradient colors */
+    --gradient-color-1: #49c593;  /* First gradient orb (top-left) */
+    --gradient-color-2: #8a2be2;  /* Second gradient orb (top-right) */
+    --gradient-color-3: #ffd700;  /* Third gradient orb (bottom-center) */
+    --gradient-color-4: #ff1493;  /* Fourth gradient orb (left-center) */
+    --gradient-darkness: 0; // Adjust from 0 (no overlay) to 1 (completely dark)
+
     /* System styles (https://m2.material.io/design/color/dark-theme.html#properties)*/
     --elevation-layer0: rgba(255,255,255,0);
     --elevation-layer1: rgba(255,255,255,0.05);
@@ -413,15 +420,17 @@
     --badge-text-color: var(--bs-badge-color);
 
     /** Login **/
-    --login-card-bg-color: #212121;
     --login-logo-image: url("/assets/images/logo.png");
     --login-logo-height: 55px;
     --login-logo-width: 55px;
     --login-logo-bg-size: contain;
     --login-logo-bg-repeat: no-repeat;
-    --login-card-border-width: 3px 0px 0px 0px;
+    --login-card-bg: rgba(255, 255, 255, 0.1);
+    --login-card-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    --login-card-backdrop-filter: blur(6.7px);
+    --login-card-border-width: 1px;
     --login-card-border-style: solid;
-    --login-card-border-color: var(--primary-color);
+    --login-card-border-color: rgba(255, 255, 255, 0.03);
     --login-input-border-color: transparent;
     --login-input-border-color-focus: transparent;
     --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
@@ -432,9 +441,12 @@
     --login-background-size: cover;
     --login-background-opacity: 0.3;
     --login-background-color: #000;
-    --login-input-font-family: 'League Spartan', sans-serif;
+    --login-input-font-family: 'League Spartan', Arial, sans-serif;
     --login-input-placeholder-opacity: 0.5;
     --login-input-placeholder-color: #fff;
+    --login-input-bg: rgba(0,0,0,.3);
+    --login-input-font-size: 1rem;
+    --login-forgot-password-font-size: 0.9rem;
 
     /** Series Detail **/
     --detail-subtitle-color: lightgrey;

@@ -11,10 +11,11 @@ a {
 }
 
 .custom-input {
-    background-color: #343A40 !important;
-    color: #fff !important;
+    background-color: var(--login-input-bg) !important;
+    color: var(--login-input-color) !important;
     border-color: var(--login-input-border-color);
     font-family: var(--login-input-font-family);
+    font-size: var(--login-input-font-size) !important;
 
     &:focus {
         border-color: var(--login-input-border-color-focus);
@@ -38,6 +39,7 @@ a {
     a {
         color: var(--login-forgot-password-color);
         font-family: var(--login-input-font-family);
+        font-size: var(--login-forgot-password-font-size);
     }
 }
 

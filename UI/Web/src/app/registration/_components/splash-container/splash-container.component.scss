@@ -2,6 +2,26 @@
     scrollbar-gutter: stable;
 }
 
+.gradient-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.gradient-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, var(--gradient-darkness));
+    z-index: 1;
+    pointer-events: none;
+}
+
 .login {
     display: flex;
     align-items: center;
@@ -12,19 +32,6 @@
     position: relative;
     width: 100vw;
     max-width: 100vw;
-    background: var(--login-background-color);
-
-    &::before {
-        content: "";
-        background-image: var(--login-background-url);
-        background-size: var(--login-background-size);
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        opacity: var(--login-background-opacity);
-        width: 100%;
-    }
 
     h2 {
         font-family: "Spartan", sans-serif;
@@ -38,6 +45,9 @@
 
     .logo-container {
         width: 100%;
+        position: relative;
+        z-index: 2;
+
         .logo {
             width: var(--login-logo-width);
             height: var(--login-logo-height);
@@ -51,15 +61,43 @@
 
     .login-container {
         width: 100%;
+        position: relative;
+        z-index: 2;
     }
 
     .card {
-        background-color: var(--login-card-bg-color);
         color: #fff;
         max-width: 300px;
         border-width: var(--login-card-border-width);
         border-style: var(--login-card-border-style);
         border-color: var(--login-card-border-color);
+        background: var(--login-card-bg);
+        box-shadow: var(--login-card-box-shadow);
+        backdrop-filter: var(--login-card-backdrop-filter);
+        -webkit-backdrop-filter: var(--login-card-backdrop-filter);
+        transform-style: preserve-3d; /* Ensures child elements also participate in 3D */
+        transition: transform 0.1s ease-out;
+        transform-origin: center center;
+        position: relative;
+        overflow: hidden;
+
+        .shine {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                            circle at var(--shine-pos-x, 50%) var(--shine-pos-y, 50%),
+                            rgba(255, 255, 255, 0.1) 0%,
+                            rgba(255, 255, 255, 0.08) 20%,
+                            rgba(255, 255, 255, 0.03) 40%,
+                            rgba(255, 255, 255, 0) 60%
+            );
+            pointer-events: none;
+            transition: background 0.1s ease-out;
+            transform: translate(-50%, -50%);
+        }
 
         &:focus {
             border: 2px solid white;
