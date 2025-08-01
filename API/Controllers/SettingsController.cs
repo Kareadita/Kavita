@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.Email;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Settings;
@@ -253,4 +254,24 @@ public class SettingsController : BaseApiController
             return BadRequest(ex.Message);
         }
     }
+
+    /// <summary>
+    /// Import field mappings
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("import-field-mappings")]
+    public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsDto dto)
+    {
+        try
+        {
+            return Ok(await _settingsService.ImportFieldMappings(dto.Data, dto.Settings));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue importing field mappings");
+            return BadRequest(ex.Message);
+        }
+    }
+
 }

@@ -377,4 +377,21 @@ export class DownloadService {
 
     return null;
   }
+
+  /**
+   * Download the given data as a json file
+   * @param data
+   * @param title may include the json file extension
+   */
+  downloadObjectAsJson(data: any, title: string) {
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = title.endsWith('.json') ? title : title + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 }

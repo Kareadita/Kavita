@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
 import {MetadataSettings} from "./_models/metadata-settings";
+import {MetadataMappingsExport} from "./manage-metadata-mappings/manage-metadata-mappings.component";
+import {FieldMappingsImportResult, ImportSettings} from "../_models/import-field-mappings";
 
 /**
  * Used only for the Test Email Service call
@@ -33,6 +35,14 @@ export class SettingsService {
   }
   updateMetadataSettings(model: MetadataSettings) {
     return this.http.post<MetadataSettings>(this.baseUrl + 'settings/metadata-settings', model);
+  }
+
+  importFieldMappings(data: MetadataMappingsExport, settings: ImportSettings) {
+    const body = {
+      data: data,
+      settings: settings,
+    }
+    return this.http.post<FieldMappingsImportResult>(this.baseUrl + 'settings/import-field-mappings', body);
   }
 
   updateServerSettings(model: ServerSettings) {

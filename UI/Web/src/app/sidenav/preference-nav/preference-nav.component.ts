@@ -30,10 +30,12 @@ export enum SettingsTabId {
   Statistics = 'admin-statistics',
   MediaIssues = 'admin-media-issues',
   EmailHistory = 'admin-email-history',
+  ManageMetadata = 'admin-public-metadata',
 
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
   MALStackImport = 'mal-stack-import',
+  MappingsImport = 'admin-mappings-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
   Metadata = 'admin-metadata',
@@ -124,6 +126,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       title: 'server-section-title',
       children: [
         new SideNavItem(SettingsTabId.General, [Role.Admin]),
+        new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
         new SideNavItem(SettingsTabId.Media, [Role.Admin]),
         new SideNavItem(SettingsTabId.Email, [Role.Admin]),
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),
@@ -135,6 +138,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       title: 'import-section-title',
       children: [
         new SideNavItem(SettingsTabId.CBLImport, [], undefined, [Role.ReadOnly]),
+        new SideNavItem(SettingsTabId.MappingsImport, [Role.Admin]),
       ]
     },
     {

@@ -49,6 +49,14 @@
             }
           }
 
+          @defer (when fragment === SettingsTabId.ManageMetadata; prefetch on idle) {
+            @if (fragment === SettingsTabId.ManageMetadata) {
+              <div class="scale col-md-12">
+                <app-manage-public-metadata-settings></app-manage-public-metadata-settings>
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.MediaIssues; prefetch on idle) {
             @if (fragment === SettingsTabId.MediaIssues) {
               <div class="scale col-md-12">
@@ -205,6 +213,14 @@
           @if (fragment === SettingsTabId.CBLImport) {
             <div class="scale col-md-12">
               <app-import-cbl></app-import-cbl>
+            </div>
+          }
+        }
+
+        @defer (when fragment === SettingsTabId.MappingsImport; prefetch on idle) {
+          @if (fragment === SettingsTabId.MappingsImport) {
+            <div class="scale col-md-12">
+              <app-import-mappings></app-import-mappings>
             </div>
           }
         }

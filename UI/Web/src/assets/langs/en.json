@@ -745,6 +745,12 @@
     },
 
     "manage-metadata-settings": {
+        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
+        "export-settings": "Export",
+        "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings",
+        "export-file-name": "Kavita Metadata Settings Export.json",
+        "import-settings": "Import",
+        "import-tooltip": "Import your or someone else's settings",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
@@ -777,25 +783,34 @@
         "enable-genres-tooltip": "Allow Series Genres to be written.",
         "enable-tags-label": "Tags",
         "enable-tags-tooltip": "Allow Series Tags to be written.",
+        "enable-extended-metadata-processing-label": "Extended metadata processing",
+        "enable-extended-metadata-processing-tooltip": "Should genres and tags sourced from ComicInfo or added via the UI be processed using the blacklist, whitelist, age rating mappings, and field mappings.",
         "blacklist-label": "Blacklist Genres/Tags",
         "blacklist-tooltip": "Anything in this list will be removed from both Genre and Tag processing. This is a place to add genres/tags you <b>do not</b> want written. Ensure they are comma-separated.",
         "whitelist-label": "Whitelist Tags",
         "whitelist-tooltip": "Only allow a string in this list from being written for <b>Tags</b>. Ensure they are comma-separated.",
         "age-rating-mapping-title": "Age Rating Mapping",
-        "age-rating-mapping-description": "Any strings on the left if found in either Genre or Tags will set the Age Rating on the Series.",
+        "age-rating-mapping-description": "Any strings on the left, if found in either Genre or Tags, will set the Age Rating on the Series. Matching is normalized and case-insensitive, the highest age rating is used.",
         "genre": "Genre",
         "tag": "Tag",
         "remove-source-tag-label": "Remove Source Tag",
         "add-field-mapping-label": "Add Field Mapping",
         "add-age-rating-mapping-label": "Add Age Rating Mapping",
+        "remove-age-rating-mapping-label": "Remove age rating mapping",
+        "remove-field-mapping-label": "Remove field mapping",
         "field-mapping-title": "Field Mapping",
-        "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Only applicable when Genre/Tag are enabled to be written.",
+        "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Matching is normalized and case-insensitive, the first matching value is used. Only applicable when Genre/Tag are enabled to be written.",
         "first-last-name-label": "First Last Naming",
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
         "person-roles-label": "Roles",
         "overrides-label": "Overrides",
         "overrides-description": "Allow Kavita to write over locked fields.",
-        "chapter-header": "Chapter Fields"
+        "chapter-header": "Chapter Fields",
+        "series-header": "Series Fields",
+        "people-header": "People",
+        "tags-header": "Tags",
+        "source-genre-tags-placeholder": "Source genre/tag",
+        "dest-genre-tags-placeholder": "Destination genre/tag"
     },
 
     "book-line-overlay": {
@@ -1766,6 +1781,7 @@
         "admin-matched-metadata": "Matched Metadata",
         "admin-manage-tokens": "Manage User Tokens",
         "admin-metadata": "Manage Metadata",
+        "admin-mappings-import": "Metadata settings",
         "scrobble-holds": "Scrobble Holds",
         "account": "Account",
         "preferences": "Preferences",
@@ -1777,7 +1793,8 @@
         "theme": "Theme",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
-        "mal-stack-import": "MAL Stack"
+        "mal-stack-import": "MAL Stack",
+        "admin-public-metadata": "Manage Metadata"
     },
 
     "collection-detail": {
@@ -1981,6 +1998,45 @@
         "action-header": "{{common.edit}}",
         "edit-alt": "{{common.edit}}",
         "no-data": "{{user-scrobble-history.no-data}}"
+    },
+
+    "import-mappings": {
+        "import-step": "Import",
+        "configure-step": "Configure",
+        "conflicts-step": "Resolve collisions",
+        "finalize-step": "Finalize",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+
+        "import-description": "Upload a file you, or someone else has exported to replace or merge with your current settings.",
+        "select-files-warning": "You must upload a json file to continue",
+        "invalid-file": "Failed to parse your file, check your input",
+        "file-no-valid-content": "Your import did not contain any meaningful data to continue with",
+
+        "fields-to-import": "Settings",
+        "fields-to-import-tooltip": "Disable to skip a setting fully",
+        "whitelist-label": "Tags whitelist",
+        "blacklist-label": "Tags blacklist",
+        "age-ratings-label": "Age rating mappings",
+        "field-mappings-label": "Field mappings",
+
+        "age-ratings-conflicts-tooltip": "Decide which age rating to use",
+        "field-mappings-conflicts-tooltip": "Decide which destination result to use",
+
+        "import-mode-label": "Import mode",
+        "import-mode-tooltip": "Replace disregards your current settings, merge will try and resolve conflcits in the way you've configured",
+        "merge": "Merge",
+        "replace": "Replace",
+
+        "resolution-label": "Conflict resolution",
+        "resolution-tooltip": "Decide how Kavita should handle conflicts",
+        "manual": "Manual",
+        "keep": "Keep",
+        "to-pick": "Choose resolution",
+
+        "finalize-title": "Preview of your settings, press save to finish your import"
     },
 
     "import-cbl-modal": {
@@ -2476,7 +2532,11 @@
         "invalid-password-reset-url": "Invalid reset password url",
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
-        "theme-already-in-use": "Theme already exists by that name"
+        "theme-already-in-use": "Theme already exists by that name",
+        "import-fields": {
+            "non-unique-age-ratings": "Age rating mapping keys aren't unique, please correct your import file",
+            "non-unique-fields": "Field mappings do not have a unique id, please correct your import file"
+        }
     },
 
     "metadata-builder": {
@@ -3097,6 +3157,7 @@
         "submit": "Submit",
         "email": "Email",
         "read": "Read",
+        "unknown": "Unknown",
         "loading": "Loading…",
         "username": "Username",
         "password": "Password",

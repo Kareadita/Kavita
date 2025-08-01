@@ -681,13 +681,34 @@ public class ExternalMetadataService : IExternalMetadataService
         return [.. staff];
     }
 
+    /// <summary>
+    /// Helper method, calls <see cref="ProcessGenreAndTagLists"/>
+    /// </summary>
+    /// <param name="externalMetadata"></param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
     private static void GenerateGenreAndTagLists(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings,
         ref List<string> processedTags, ref List<string> processedGenres)
     {
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
+        GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
+            settings, ref processedTags, ref processedGenres);
+    }
 
-        var mappings = ApplyFieldMappings(externalMetadata.Tags.Select(t => t.Name), MetadataFieldType.Tag, settings.FieldMappings);
+    /// <summary>
+    /// Run all genres and tags through the Metadata settings
+    /// </summary>
+    /// <param name="genres">Genres to process</param>
+    /// <param name="tags">Tags to process</param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
+    private static void GenerateGenreAndTagLists(IList<string> genres, IList<string> tags, MetadataSettingsDto settings,
+        ref List<string> processedTags, ref List<string> processedGenres)
+    {
+        var mappings = ApplyFieldMappings(tags, MetadataFieldType.Tag, settings.FieldMappings);
         if (mappings.TryGetValue(MetadataFieldType.Tag, out var tagsToTags))
         {
             processedTags.AddRange(tagsToTags);
@@ -697,7 +718,7 @@ public class ExternalMetadataService : IExternalMetadataService
             processedGenres.AddRange(tagsToGenres);
         }
 
-        mappings = ApplyFieldMappings(externalMetadata.Genres, MetadataFieldType.Genre, settings.FieldMappings);
+        mappings = ApplyFieldMappings(genres, MetadataFieldType.Genre, settings.FieldMappings);
         if (mappings.TryGetValue(MetadataFieldType.Tag, out var genresToTags))
         {
             processedTags.AddRange(genresToTags);
@@ -709,6 +730,30 @@ public class ExternalMetadataService : IExternalMetadataService
 
         processedTags = ApplyBlackWhiteList(settings, MetadataFieldType.Tag, processedTags);
         processedGenres = ApplyBlackWhiteList(settings, MetadataFieldType.Genre, processedGenres);
+    }
+
+    /// <summary>
+    /// Processes the given tags and genres only if <see cref="MetadataSettingsDto.EnableExtendedMetadataProcessing"/>
+    /// is true, else return without change
+    /// </summary>
+    /// <param name="genres"></param>
+    /// <param name="tags"></param>
+    /// <param name="settings"></param>
+    /// <param name="processedTags"></param>
+    /// <param name="processedGenres"></param>
+    public static void GenerateExternalGenreAndTagsList(IList<string> genres, IList<string> tags,
+        MetadataSettingsDto settings, out List<string> processedTags, out List<string> processedGenres)
+    {
+        if (!settings.EnableExtendedMetadataProcessing)
+        {
+            processedTags = [..tags];
+            processedGenres = [..genres];
+            return;
+        }
+
+        processedTags = [];
+        processedGenres = [];
+        GenerateGenreAndTagLists(genres, tags, settings, ref processedTags, ref processedGenres);
     }
 
     private async Task<bool> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
@@ -1003,16 +1048,19 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private static List<string> ApplyBlackWhiteList(MetadataSettingsDto settings, MetadataFieldType fieldType, List<string> processedStrings)
     {
+        var whiteList = settings.Whitelist.Select(t => t.ToNormalized()).ToList();
+        var blackList = settings.Blacklist.Select(t => t.ToNormalized()).ToList();
+
         return fieldType switch
         {
             MetadataFieldType.Genre => processedStrings.Distinct()
-                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
+                .Where(g => blackList.Count == 0 || !blackList.Contains(g.ToNormalized()))
                 .ToList(),
             MetadataFieldType.Tag => processedStrings.Distinct()
-                .Where(g => settings.Blacklist.Count == 0 || !settings.Blacklist.Contains(g))
-                .Where(g => settings.Whitelist.Count == 0 || settings.Whitelist.Contains(g))
+                .Where(g => blackList.Count == 0 || !blackList.Contains(g.ToNormalized()))
+                .Where(g => whiteList.Count == 0 || whiteList.Contains(g.ToNormalized()))
                 .ToList(),
-            _ => throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, null),
         };
     }
 
@@ -1718,24 +1766,22 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var value in values)
         {
-            var mapping = mappings.FirstOrDefault(m =>
+            var matchingMappings = mappings.Where(m =>
                 m.SourceType == sourceType &&
-                m.SourceValue.Equals(value, StringComparison.OrdinalIgnoreCase));
+                m.SourceValue.ToNormalized().Equals(value.ToNormalized()));
 
-            if (mapping != null && !string.IsNullOrWhiteSpace(mapping.DestinationValue))
+            var keepOriginal = true;
+
+            foreach (var mapping in matchingMappings.Where(mapping => !string.IsNullOrWhiteSpace(mapping.DestinationValue)))
             {
-                var targetType = mapping.DestinationType;
+                result[mapping.DestinationType].Add(mapping.DestinationValue);
 
-                if (!mapping.ExcludeFromSource)
-                {
-                    result[sourceType].Add(mapping.SourceValue);
-                }
-
-                result[targetType].Add(mapping.DestinationValue);
+                // Only keep the original tags if none of the matches want to remove it
+                keepOriginal = keepOriginal && !mapping.ExcludeFromSource;
             }
-            else
+
+            if (keepOriginal)
             {
-                // If no mapping, keep the original value
                 result[sourceType].Add(value);
             }
         }
@@ -1760,9 +1806,10 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // Find highest age rating from mappings
         mappings ??= new Dictionary<string, AgeRating>();
+        mappings = mappings.ToDictionary(k => k.Key.ToNormalized(), k => k.Value);
 
         return values
-            .Select(v => mappings.TryGetValue(v, out var mapping) ? mapping : AgeRating.Unknown)
+            .Select(v => mappings.TryGetValue(v.ToNormalized(), out var mapping) ? mapping : AgeRating.Unknown)
             .DefaultIfEmpty(AgeRating.Unknown)
             .Max();
     }

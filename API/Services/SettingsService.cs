@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Logging;
 using API.Services.Tasks.Scanner;
@@ -16,12 +19,21 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SharpCompress.Common;
 
 namespace API.Services;
 
 public interface ISettingsService
 {
     Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto);
+    /// <summary>
+    /// Update <see cref="MetadataSettings.Whitelist"/>, <see cref="MetadataSettings.Blacklist"/>, <see cref="MetadataSettings.AgeRatingMappings"/>, <see cref="MetadataSettings.FieldMappings"/>
+    /// with data from the given dto.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
+    Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings);
     Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto);
 }
 
@@ -54,6 +66,7 @@ public class SettingsService : ISettingsService
     {
         var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettings();
         existingMetadataSetting.Enabled = dto.Enabled;
+        existingMetadataSetting.EnableExtendedMetadataProcessing = dto.EnableExtendedMetadataProcessing;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;
         existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;
@@ -106,6 +119,150 @@ public class SettingsService : ISettingsService
 
         // Return updated settings
         return await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+    }
+
+    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
+    {
+        if (dto.AgeRatingMappings.Keys.Distinct().Count() != dto.AgeRatingMappings.Count)
+        {
+            throw new KavitaException("errors.import-fields.non-unique-age-ratings");
+        }
+
+        if (dto.FieldMappings.DistinctBy(f => f.Id).Count() != dto.FieldMappings.Count)
+        {
+            throw new KavitaException("errors.import-fields.non-unique-fields");
+        }
+
+        return settings.ImportMode switch
+        {
+            ImportMode.Merge => await MergeFieldMappings(dto, settings),
+            ImportMode.Replace => await ReplaceFieldMappings(dto, settings),
+            _ => throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid import mode {nameof(settings.ImportMode)}")
+        };
+    }
+
+    /// <summary>
+    /// Will fully replace any enabled fields, always successful
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
+    private async Task<FieldMappingsImportResultDto> ReplaceFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
+    {
+        var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
+        if (settings.Whitelist)
+        {
+            existingMetadataSetting.Whitelist = dto.Whitelist;
+        }
+
+        if (settings.Blacklist)
+        {
+            existingMetadataSetting.Blacklist = dto.Blacklist;
+        }
+
+        if (settings.AgeRatings)
+        {
+            existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings;
+        }
+
+        if (settings.FieldMappings)
+        {
+            existingMetadataSetting.FieldMappings = dto.FieldMappings;
+        }
+
+        return new FieldMappingsImportResultDto
+        {
+            Success = true,
+            ResultingMetadataSettings = existingMetadataSetting,
+            AgeRatingConflicts = [],
+        };
+    }
+
+    /// <summary>
+    /// Tries to merge all enabled fields, fails if any merge was marked as manual. Always goes through all items
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
+    private async Task<FieldMappingsImportResultDto> MergeFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
+    {
+        var existingMetadataSetting = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+
+        if (settings.Whitelist)
+        {
+            existingMetadataSetting.Whitelist = existingMetadataSetting.Whitelist.Union(dto.Whitelist).DistinctBy(d => d.ToNormalized()).ToList();
+        }
+
+        if (settings.Blacklist)
+        {
+            existingMetadataSetting.Blacklist = existingMetadataSetting.Blacklist.Union(dto.Blacklist).DistinctBy(d => d.ToNormalized()).ToList();
+        }
+
+        List<string> ageRatingConflicts = [];
+
+        if (settings.AgeRatings)
+        {
+            foreach (var arm in dto.AgeRatingMappings)
+            {
+                if (!existingMetadataSetting.AgeRatingMappings.TryGetValue(arm.Key, out var mapping))
+                {
+                    existingMetadataSetting.AgeRatingMappings.Add(arm.Key, arm.Value);
+                    continue;
+                }
+
+                if (arm.Value == mapping)
+                {
+                    continue;
+                }
+
+                var resolution = settings.AgeRatingConflictResolutions.GetValueOrDefault(arm.Key, settings.Resolution);
+
+                switch (resolution)
+                {
+                    case ConflictResolution.Keep: continue;
+                    case ConflictResolution.Replace:
+                        existingMetadataSetting.AgeRatingMappings[arm.Key] = arm.Value;
+                        break;
+                    case ConflictResolution.Manual:
+                        ageRatingConflicts.Add(arm.Key);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(settings), $"Invalid conflict resolution {nameof(ConflictResolution)}.");
+                }
+            }
+        }
+
+
+        if (settings.FieldMappings)
+        {
+            existingMetadataSetting.FieldMappings = existingMetadataSetting.FieldMappings
+                .Union(dto.FieldMappings)
+                .DistinctBy(fm => new
+                {
+                    fm.SourceType,
+                    SourceValue = fm.SourceValue.ToNormalized(),
+                    fm.DestinationType,
+                    DestinationValue = fm.DestinationValue.ToNormalized(),
+                })
+                .ToList();
+        }
+
+        if (ageRatingConflicts.Count > 0)
+        {
+            return new FieldMappingsImportResultDto
+            {
+                Success = false,
+                AgeRatingConflicts = ageRatingConflicts,
+            };
+        }
+
+        return new FieldMappingsImportResultDto
+        {
+            Success = true,
+            ResultingMetadataSettings = existingMetadataSetting,
+            AgeRatingConflicts = [],
+        };
     }
 
     /// <summary>

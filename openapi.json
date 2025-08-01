@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.4",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.5",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.4"
+    "version": "0.8.7.5"
   },
   "servers": [
     {
@@ -13480,6 +13480,55 @@
         }
       }
     },
+    "/api/Settings/import-field-mappings": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Import field mappings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/{userId}/read": {
       "get": {
         "tags": [
@@ -20627,6 +20676,85 @@
         },
         "additionalProperties": false
       },
+      "FieldMappingsDto": {
+        "type": "object",
+        "properties": {
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
+            "nullable": true
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only allow these Tags to be written to Kavita",
+            "nullable": true
+          },
+          "ageRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
+            },
+            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
+            "nullable": true
+          },
+          "fieldMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldMappingDto"
+            },
+            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Decoupled from API.DTOs.KavitaPlus.Metadata.MetadataSettingsDto to allow reuse without requiring the full metadata settings in\nAPI.DTOs.Settings.ImportFieldMappingsDto"
+      },
+      "FieldMappingsImportResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "resultingMetadataSettings": {
+            "$ref": "#/components/schemas/MetadataSettingsDto"
+          },
+          "ageRatingConflicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of the conflicting age ratings mappings",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FileDimensionDto": {
         "type": "object",
         "properties": {
@@ -21181,6 +21309,74 @@
         },
         "additionalProperties": false,
         "description": "A range of time to read a selection (series, chapter, etc)"
+      },
+      "ImportFieldMappingsDto": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "$ref": "#/components/schemas/ImportSettingsDto"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FieldMappingsDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportSettingsDto": {
+        "type": "object",
+        "properties": {
+          "importMode": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "How Kavita should import the new settings",
+            "format": "int32"
+          },
+          "resolution": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Default conflict resolution, override with API.DTOs.ImportSettingsDto.AgeRatingConflictResolutions and !:FieldMappingsConflictResolutions",
+            "format": "int32"
+          },
+          "whitelist": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.Whitelist"
+          },
+          "blacklist": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.Blacklist"
+          },
+          "ageRatings": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.AgeRatingMappings"
+          },
+          "fieldMappings": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.FieldMappings"
+          },
+          "ageRatingConflictResolutions": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2
+              ],
+              "type": "integer",
+              "description": "How Kavita should resolve conflicts",
+              "format": "int32"
+            },
+            "description": "Override the API.DTOs.ImportSettingsDto.Resolution for specific age ratings",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "Int32Range": {
         "type": "object",
@@ -22259,9 +22455,65 @@
       "MetadataSettingsDto": {
         "type": "object",
         "properties": {
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
+            "nullable": true
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only allow these Tags to be written to Kavita",
+            "nullable": true
+          },
+          "ageRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
+            },
+            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
+            "nullable": true
+          },
+          "fieldMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldMappingDto"
+            },
+            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          },
           "enabled": {
             "type": "boolean",
             "description": "If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed"
+          },
+          "enableExtendedMetadataProcessing": {
+            "type": "boolean",
+            "description": "Enable processing of metadata outside K+; e.g. disk and API"
           },
           "enableSummary": {
             "type": "boolean",
@@ -22321,42 +22573,6 @@
             "type": "boolean",
             "description": "For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names."
           },
-          "ageRatingMappings": {
-            "type": "object",
-            "additionalProperties": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                -1
-              ],
-              "type": "integer",
-              "description": "Represents Age Rating for content.",
-              "format": "int32"
-            },
-            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
-            "nullable": true
-          },
-          "fieldMappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MetadataFieldMappingDto"
-            },
-            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
-            "nullable": true
-          },
           "overrides": {
             "type": "array",
             "items": {
@@ -22381,22 +22597,6 @@
               "format": "int32"
             },
             "description": "A list of overrides that will enable writing to locked fields",
-            "nullable": true
-          },
-          "blacklist": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
-            "nullable": true
-          },
-          "whitelist": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Only allow these Tags to be written to Kavita",
             "nullable": true
           },
           "personRoles": {
