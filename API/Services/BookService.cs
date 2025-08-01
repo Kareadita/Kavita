@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.XPath;
 using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
@@ -354,45 +355,66 @@ public partial class BookService : IBookService
 
         foreach (var (xpath, elementAnnotations) in annotationsByElement)
         {
-            var elem = doc.DocumentNode.SelectSingleNode(xpath);
-            if (elem == null) continue;
-
-            var originalText = elem.InnerText;
-
-            // Calculate positions and sort by start position
-            var sortedAnnotations = elementAnnotations
-                .Select(a => new {
-                    Annotation = a,
-                    StartPos = originalText.IndexOf(a.SelectedText, StringComparison.Ordinal)
-                })
-                .Where(a => a.StartPos >= 0)
-                .OrderBy(a => a.StartPos)
-                .ToList();
-
-            elem.RemoveAllChildren();
-
-            var currentPos = 0;
-
-            foreach (var item in sortedAnnotations)
+            try
             {
-                // Add text before highlight
-                if (item.StartPos > currentPos)
+                HtmlNode? elem = null;
+                if (xpath.StartsWith("//id"))
                 {
-                    var beforeText = originalText.Substring(currentPos, item.StartPos - currentPos);
-                    elem.AppendChild(HtmlNode.CreateNode(beforeText));
+                    var id = xpath.Replace("//id(\"", string.Empty).Replace("\")", string.Empty);
+                    if (string.IsNullOrWhiteSpace(id)) continue;
+                    elem = doc.GetElementbyId(id);
+                }
+                else
+                {
+                    elem = doc.DocumentNode.SelectSingleNode(xpath);
                 }
 
-                // Add highlight
-                var highlightNode = HtmlNode.CreateNode($"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
-                elem.AppendChild(highlightNode);
+                if (elem == null) continue;
 
-                currentPos = item.StartPos + item.Annotation.SelectedText.Length;
+                var originalText = elem.InnerText;
+
+                // Calculate positions and sort by start position
+                var sortedAnnotations = elementAnnotations
+                    .Select(a => new
+                    {
+                        Annotation = a,
+                        StartPos = originalText.IndexOf(a.SelectedText, StringComparison.Ordinal)
+                    })
+                    .Where(a => a.StartPos >= 0)
+                    .OrderBy(a => a.StartPos)
+                    .ToList();
+
+                elem.RemoveAllChildren();
+
+                var currentPos = 0;
+
+                foreach (var item in sortedAnnotations)
+                {
+                    // Add text before highlight
+                    if (item.StartPos > currentPos)
+                    {
+                        var beforeText = originalText.Substring(currentPos, item.StartPos - currentPos);
+                        elem.AppendChild(HtmlNode.CreateNode(beforeText));
+                    }
+
+                    // Add highlight
+                    var highlightNode =
+                        HtmlNode.CreateNode(
+                            $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
+                    elem.AppendChild(highlightNode);
+
+                    currentPos = item.StartPos + item.Annotation.SelectedText.Length;
+                }
+
+                // Add remaining text
+                if (currentPos < originalText.Length)
+                {
+                    elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
+                }
             }
-
-            // Add remaining text
-            if (currentPos < originalText.Length)
+            catch (XPathException ex)
             {
-                elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
+                continue;
             }
         }
     }
