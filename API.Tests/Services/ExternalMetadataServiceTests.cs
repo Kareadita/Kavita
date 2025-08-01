@@ -1624,6 +1624,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     {
         var settings = new MetadataSettingsDto
         {
+            EnableExtendedMetadataProcessing = true,
             Whitelist = [],
             Blacklist = [],
             FieldMappings = [
@@ -1673,6 +1674,7 @@ public class ExternalMetadataServiceTests : AbstractDbTest
     {
         var settings = new MetadataSettingsDto
         {
+            EnableExtendedMetadataProcessing = true,
             Whitelist = [],
             Blacklist = [],
             FieldMappings = [
