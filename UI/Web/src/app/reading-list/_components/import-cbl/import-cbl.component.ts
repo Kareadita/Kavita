@@ -76,7 +76,7 @@ export class ImportCblComponent {
 
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
-    FileUploadValidators.accept(['.cbl']), FileUploadValidators.filesLimit(1)
+    FileUploadValidators.accept(['.cbl'])
   ]);
 
   uploadForm = new FormGroup({
