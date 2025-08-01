@@ -143,8 +143,8 @@ export class BookLineOverlayComponent implements OnInit {
       // For backward compatibility, keep the original xPath as startXPath
       this.xPath = this.startXPath;
 
-      // Get all text from the selection range
-      this.allTextFromSelection = this.selectedText;
+      // Get the context window for generating a blurb in annotation flow
+      this.allTextFromSelection = (event.target as Element).textContent || '';
 
       this.isOpen.emit(true);
       event.preventDefault();
