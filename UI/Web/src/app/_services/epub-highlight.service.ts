@@ -43,10 +43,10 @@ export class EpubHighlightService {
         highlight.parentNode.replaceChild(componentRef.location.nativeElement, highlight);
       }
 
-      componentRef.instance.annotation.set(annotationsMap[annotationId]);
+      componentRef.setInput('annotation', annotationsMap[annotationId]);
 
       if (configOptions != null) {
-        componentRef.instance.showHighlight.set(configOptions.showHighlight);
+        componentRef.setInput('showHighlight', configOptions.showHighlight);
       }
     }
   }
