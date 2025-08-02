@@ -9,12 +9,18 @@
     --gradient-color-4: #ff1493;  /* Fourth gradient orb (left-center) */
     --gradient-darkness: 0;       /* Adjust from 0 (no overlay) to 1 (completely dark) */
 
-    // Dynamic shadow variables for tilt effects
+    // Dynamic shadow system
     --dynamic-shadow-x: 0px;
     --dynamic-shadow-y: 0px;
     --dynamic-shadow-blur: 8px;
     --dynamic-shadow-spread: 0px;
-    --shadow-intensity: 0.5; // Controls shadow opacity based on distance from light
+    --shadow-intensity: 0.5;
+
+    // Shine effect positioning
+    --shine-pos-x: 50%;
+    --shine-pos-y: 50%;
+
+    // Calculated shadow colors with intensity
     --dynamic-shadow-color: rgba(0, 0, 0, calc(0.3 * var(--shadow-intensity)));
     --dynamic-shadow-color-intense: rgba(0, 0, 0, calc(0.5 * var(--shadow-intensity)));
     --dynamic-shadow-color-button: rgba(0, 0, 0, calc(0.15 * var(--shadow-intensity)));
