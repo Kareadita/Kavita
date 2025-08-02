@@ -1,8 +1,8 @@
-<div class="mx-auto container login text-center"
-     [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - var(--nav-offset))' : 'calc(var(--vh, 1vh) * 100)'}">
-    <canvas #gradientCanvas id="gradient-canvas" class="gradient-background" aria-hidden="true"></canvas>
-    <div class="gradient-overlay" aria-hidden="true"></div>
 
+<div class="mx-auto container login text-center"
+    [ngStyle]="{'height': (navService.navbarVisible$ | async) ? 'calc(var(--vh, 1vh) * 100 - var(--nav-offset))' : 'calc(var(--vh, 1vh) * 100)'}">
+    <canvas id="gradient-canvas" class="gradient-background"></canvas>
+    <div class="gradient-overlay"></div>
     <div class="row align-items-center row-cols-1 logo-container mb-3 justify-content-center">
         <div class="col col-md-4 col-sm-12 col-xs-12 align-self-center p-0">
             <div class="row align-items-center row-cols-1 justify-content-center">
@@ -14,13 +14,11 @@
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
     <div class="row align-items-center row-cols-1 login-container justify-content-center">
-        <div #tiltCard class="col col-xl-2 col-lg-3 col-md-3 col-sm-10 col-xs-10 align-self-center card tilt p-3"
-             role="main"
-             aria-label="Login form">
-            <div class="shine" aria-hidden="true"></div>
+        <div class="col col-xl-2 col-lg-3 col-md-3 col-sm-10 col-xs-10 align-self-center card tilt p-3">
+            <div class="shine"></div>
             <span>
                 <div class="logo-container">
                     <div class="card-title text-center">
@@ -33,5 +31,7 @@
                 <ng-content select="[body]"></ng-content>
             </div>
         </div>
+
     </div>
+
 </div>

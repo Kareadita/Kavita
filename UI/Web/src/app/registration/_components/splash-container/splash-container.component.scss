@@ -2,7 +2,6 @@
     scrollbar-gutter: stable;
 }
 
-// Background and overlay layers
 .gradient-background {
     position: absolute;
     top: 0;
@@ -10,10 +9,6 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-
-    // Performance optimizations
-    will-change: auto; // Let browser decide
-    contain: layout style paint; // CSS containment for better performance
 }
 
 .gradient-overlay {
@@ -22,13 +17,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, var(--gradient-darkness, 0));
+    background-color: rgba(0, 0, 0, var(--gradient-darkness));
     z-index: 1;
     pointer-events: none;
-    contain: layout style; // Lighter containment for overlay
 }
 
-// Main login container
 .login {
     display: flex;
     align-items: center;
@@ -40,7 +33,6 @@
     width: 100vw;
     max-width: 100vw;
 
-    // Typography
     h2 {
         font-family: "Spartan", sans-serif;
         font-size: 1.5rem;
@@ -51,140 +43,65 @@
         vertical-align: middle;
     }
 
-    // Logo container
     .logo-container {
         width: 100%;
         position: relative;
         z-index: 2;
 
         .logo {
-            width: var(--login-logo-width, 55px);
-            height: var(--login-logo-height, 55px);
-            background-image: var(--login-logo-image, url("/assets/images/logo.png"));
-            background-size: var(--login-logo-bg-size, contain);
-            background-repeat: var(--login-logo-bg-repeat, no-repeat);
+            width: var(--login-logo-width);
+            height: var(--login-logo-height);
+            background-image: var(--login-logo-image);
+            background-size: var(--login-logo-bg-size);
+            background-repeat: var(--login-logo-bg-repeat);
             display: inline-block;
             vertical-align: middle;
         }
     }
 
-    // Login container
     .login-container {
         width: 100%;
         position: relative;
         z-index: 2;
     }
 
-    // Enhanced card with performance optimizations
     .card {
         color: #fff;
         max-width: 300px;
-        border-width: var(--login-card-border-width, 1px);
-        border-style: var(--login-card-border-style, solid);
-        border-color: var(--login-card-border-color, rgba(255, 255, 255, 0.03));
-        background: var(--login-card-bg, rgba(255, 255, 255, 0.1));
-        backdrop-filter: var(--login-card-backdrop-filter, blur(6.7px));
-        -webkit-backdrop-filter: var(--login-card-backdrop-filter, blur(6.7px));
-
-        // Enhanced shadows with dynamic system
-        box-shadow:
-                var(--login-card-box-shadow, 0 4px 30px rgba(0, 0, 0, 0.1)),
-                var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color-intense);
-
-        // 3D transform setup
-        transform-style: preserve-3d;
+        border-width: var(--login-card-border-width);
+        border-style: var(--login-card-border-style);
+        border-color: var(--login-card-border-color);
+        background: var(--login-card-bg);
+        box-shadow: var(--login-card-box-shadow);
+        backdrop-filter: var(--login-card-backdrop-filter);
+        -webkit-backdrop-filter: var(--login-card-backdrop-filter);
+        transform-style: preserve-3d; /* Ensures child elements also participate in 3D */
+        transition: transform 0.1s ease-out;
         transform-origin: center center;
         position: relative;
         overflow: hidden;
 
-        // Optimized transitions
-        transition:
-                transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-
-        // Performance hints
-        will-change: transform, box-shadow;
-        contain: layout style;
-
-        // Enhanced shine effect
-        .shine {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(
-                            circle at var(--shine-pos-x) var(--shine-pos-y),
-                            rgba(255, 255, 255, 0.1) 0%,
-                            rgba(255, 255, 255, 0.08) 20%,
-                            rgba(255, 255, 255, 0.03) 40%,
-                            rgba(255, 255, 255, 0) 60%
-            );
-            pointer-events: none;
-            transition: background 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translate(-50%, -50%);
-            contain: layout style paint;
-        }
-
-        // Focus states
-        &:focus-visible {
-            outline: 2px solid var(--primary-color, #4ac694);
-            outline-offset: 2px;
-        }
-
-        // Card title styling
-        ::ng-deep .card-title {
-            h2 {
-                font-family: 'Poppins', sans-serif;
-                display: inline-block;
-                vertical-align: middle;
-                width: 100%;
-                font-size: 1rem;
-            }
-        }
-
-        // Card text styling
-        .card-text {
-            font-family: "EBGaramond", "Helvetica Neue", sans-serif;
-        }
-
-        // Enhanced input styling with dynamic shadows
+        // Input fields with dynamic shadows
         ::ng-deep input,
         ::ng-deep .form-control {
             box-shadow:
                     0 2px 4px rgba(0, 0, 0, 0.1),
                     var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
-
-            transition:
-                    box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-                    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-
-            contain: layout style;
+            transition: box-shadow 0.1s ease-out, border-color 0.15s ease-in-out;
 
             &:focus {
                 box-shadow:
-                        var(--login-input-box-shadow-focus, 0 0 0 1px rgba(74, 198, 148, 0.8)),
+                        var(--login-input-box-shadow-focus),
                         var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
-            }
-
-            // Accessibility improvements
-            &:focus-visible {
-                outline: 2px solid var(--primary-color, #4ac694);
-                outline-offset: 1px;
             }
         }
 
-        // Enhanced button styling with micro-interactions
+        // Button styles with dynamic shadows
         ::ng-deep .btn {
             box-shadow:
                     0 2px 4px var(--dynamic-shadow-color-button),
                     var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
-
-            transition:
-                    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-                    box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-
-            contain: layout style;
+            transition: transform 0.15s ease, box-shadow 0.1s ease-out;
 
             &:hover {
                 transform: translateY(-1px);
@@ -198,12 +115,6 @@
                 box-shadow:
                         0 2px 4px var(--dynamic-shadow-color-button),
                         var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
-            }
-
-            // Focus states for accessibility
-            &:focus-visible {
-                outline: 2px solid var(--primary-color, #4ac694);
-                outline-offset: 2px;
             }
         }
 
@@ -229,70 +140,43 @@
                         var(--dynamic-shadow-x) var(--dynamic-shadow-y) calc(var(--dynamic-shadow-blur) + 2px) var(--dynamic-shadow-spread) var(--dynamic-shadow-color-intense);
             }
         }
-    }
-}
-
-// Responsive design improvements
-@media (max-width: 768px) {
-    .login {
-        .card {
-            max-width: 90%;
-            margin: 0 auto;
-
-            // Reduce effects intensity on mobile for better performance
-            ::ng-deep .btn {
-                &:hover {
-                    transform: none; // Disable hover lift on touch devices
-                }
-            }
-        }
-    }
-}
-
-// Reduced motion preferences
-@media (prefers-reduced-motion: reduce) {
-    .login .card {
-        transition: none;
-        will-change: auto;
 
         .shine {
-            transition: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                            circle at var(--shine-pos-x, 50%) var(--shine-pos-y, 50%),
+                            rgba(255, 255, 255, 0.1) 0%,
+                            rgba(255, 255, 255, 0.08) 20%,
+                            rgba(255, 255, 255, 0.03) 40%,
+                            rgba(255, 255, 255, 0) 60%
+            );
+            pointer-events: none;
+            transition: background 0.1s ease-out;
+            transform: translate(-50%, -50%);
         }
 
-        ::ng-deep input,
-        ::ng-deep .form-control,
-        ::ng-deep .btn {
-            transition: none;
+        &:focus {
+            border: 2px solid white;
+
         }
-    }
 
-    .gradient-background {
-        will-change: auto;
-    }
-}
 
-// High contrast mode support
-@media (prefers-contrast: high) {
-    .login .card {
-        border: 2px solid var(--primary-color, #4ac694);
-        background: var(--bs-body-bg, #1f2020);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-}
+        ::ng-deep.card-title {
+            h2 {
+                font-family: 'Poppins', sans-serif;
+                display: inline-block;
+                vertical-align: middle;
+                width: 100%;
+                font-size: 1rem;
+            }
+        }
 
-// Print styles
-@media print {
-    .gradient-background,
-    .gradient-overlay,
-    .shine {
-        display: none;
-    }
-
-    .login .card {
-        box-shadow: none;
-        border: 1px solid #000;
-        background: #fff;
-        color: #000;
+        .card-text {
+            font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+        }
     }
 }

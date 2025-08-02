@@ -1,472 +1,291 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChild, DestroyRef, signal, computed, AfterViewInit } from '@angular/core';
-import { AsyncPipe, NgStyle } from "@angular/common";
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavService } from "../../../_services/nav.service";
-
-// Types for better type safety
-interface GradientPoint {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    color: { r: number; g: number; b: number };
-}
-
-interface MousePosition {
-    x: number;
-    y: number;
-}
-
-interface TiltEffect {
-    rotateX: number;
-    rotateY: number;
-    shadowX: number;
-    shadowY: number;
-    intensity: number;
-}
+import {ChangeDetectionStrategy, Component, HostListener, inject, OnInit, OnDestroy} from '@angular/core';
+import {AsyncPipe, NgStyle} from "@angular/common";
+import {NavService} from "../../../_services/nav.service";
 
 @Component({
     selector: 'app-splash-container',
     templateUrl: './splash-container.component.html',
     styleUrls: ['./splash-container.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgStyle, AsyncPipe],
-    standalone: true
+    imports: [
+        NgStyle,
+        AsyncPipe
+    ]
 })
-export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewInit {
-
-    // Dependency injection
+export class SplashContainerComponent implements OnInit, OnDestroy {
     protected readonly navService = inject(NavService);
-    private readonly destroyRef = inject(DestroyRef);
-    private readonly elementRef = inject(ElementRef<HTMLElement>);
+    private maxTilt = 5; // Maximum tilt angle in degrees
+    private animationId?: number;
+    private resizeHandler?: () => void;
+    private tiltElement?: HTMLElement;
+    private mouseMoveThrottleId?: number;
+    private lastMouseEvent?: MouseEvent;
 
-    // ViewChild for safer DOM access
-    @ViewChild('gradientCanvas', { static: true })
-    private canvasRef?: ElementRef<HTMLCanvasElement>;
+    ngOnInit() {
+        this.initGradientAnimationWithCssVars();
+        this.cacheTiltElement();
+    }
 
-    @ViewChild('tiltCard', { static: true })
-    private tiltCardRef?: ElementRef<HTMLElement>;
-
-    // Configuration constants
-    private readonly MAX_TILT = 5;
-    private readonly SHADOW_MULTIPLIER = 2;
-    private readonly MIN_INTENSITY = 0.1;
-    private readonly GRADIENT_RADIUS = 0.5;
-
-    // State management with signals (Angular 16+)
-    private readonly mousePosition = signal<MousePosition>({ x: 0, y: 0 });
-    private readonly isMouseOverCard = signal(false);
-
-    // Computed values for reactive updates
-    private readonly tiltEffect = computed<TiltEffect>(() => {
-        const mouse = this.mousePosition();
-        const isOver = this.isMouseOverCard();
-
-        if (isOver || !this.tiltCardRef?.nativeElement) {
-            return { rotateX: 0, rotateY: 0, shadowX: 0, shadowY: 0, intensity: 0.5 };
+    ngOnDestroy() {
+        if (this.animationId !== undefined) {
+            cancelAnimationFrame(this.animationId);
         }
 
-        return this.calculateTiltEffect(mouse);
-    });
-
-    // Resource tracking
-    private gradientAnimationId?: number;
-    private mouseMoveThrottleId?: number;
-    private resizeObserver?: ResizeObserver;
-    private gradientPoints: GradientPoint[] = [];
-    private canvasContext?: CanvasRenderingContext2D;
-
-    ngOnInit(): void {
-        this.initializeGradientColors();
-    }
-
-    ngAfterViewInit(): void {
-        // Safer initialization after view is ready
-        this.initializeCanvas();
-        this.initializeResizeObserver();
-        this.startGradientAnimation();
-    }
-
-    ngOnDestroy(): void {
-        this.cleanup();
-    }
-
-    @HostListener('document:mousemove', ['$event'])
-    onMouseMove(event: MouseEvent): void {
-        // Cancel previous throttled update
-        if (this.mouseMoveThrottleId) {
+        if (this.mouseMoveThrottleId !== undefined) {
             cancelAnimationFrame(this.mouseMoveThrottleId);
         }
 
-        // Throttle updates to animation frame rate
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
+        }
+    }
+
+    private cacheTiltElement() {
+        // Cache the tilt element reference to avoid repeated DOM queries
+        this.tiltElement = document.querySelector('.tilt') as HTMLElement;
+    }
+
+    @HostListener('document:mousemove', ['$event'])
+    onMouseMove(event: MouseEvent) {
+        // Store the latest mouse event
+        this.lastMouseEvent = event;
+
+        // Cancel any pending throttled update
+        if (this.mouseMoveThrottleId !== undefined) {
+            return; // Already scheduled, skip this event
+        }
+
+        // Schedule the actual update for the next animation frame
         this.mouseMoveThrottleId = requestAnimationFrame(() => {
-            this.updateMousePosition(event);
-            this.updateTiltEffects();
+            if (this.lastMouseEvent) {
+                this.handleMouseMove(this.lastMouseEvent);
+            }
             this.mouseMoveThrottleId = undefined;
         });
     }
 
-    /**
-     * Initialize gradient colors from CSS variables with proper fallbacks
-     */
-    private initializeGradientColors(): void {
-        const defaultColors = [
-            { r: 73, g: 197, b: 147 },   // --gradient-color-1
-            { r: 138, g: 43, b: 226 },   // --gradient-color-2
-            { r: 255, g: 215, b: 0 },    // --gradient-color-3
-            { r: 255, g: 20, b: 147 }    // --gradient-color-4
-        ];
+    private handleMouseMove(event: MouseEvent) {
+        if (!this.tiltElement) return;
 
-        this.gradientPoints = [
-            { x: 0.2, y: 0.2, vx: 0.001, vy: 0.0015, color: this.getCssColorOrDefault('--gradient-color-1', defaultColors[0]) },
-            { x: 0.8, y: 0.3, vx: -0.0015, vy: 0.001, color: this.getCssColorOrDefault('--gradient-color-2', defaultColors[1]) },
-            { x: 0.5, y: 0.8, vx: 0.0012, vy: -0.0018, color: this.getCssColorOrDefault('--gradient-color-3', defaultColors[2]) },
-            { x: 0.3, y: 0.6, vx: -0.0018, vy: -0.0012, color: this.getCssColorOrDefault('--gradient-color-4', defaultColors[3]) }
-        ];
+        const elementBounds = this.tiltElement.getBoundingClientRect();
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        // Check if mouse is over the element
+        const isMouseOverElement =
+            mouseX >= elementBounds.left &&
+            mouseX <= elementBounds.right &&
+            mouseY >= elementBounds.top &&
+            mouseY <= elementBounds.bottom;
+
+        // Always calculate shine position relative to the element
+        const relativeX = mouseX - elementBounds.left;
+        const relativeY = mouseY - elementBounds.top;
+
+        // Convert to percentage and clamp to keep shine within element bounds (0-100%)
+        const shineX = Math.max(0, Math.min(100, (relativeX / elementBounds.width) * 100));
+        const shineY = Math.max(0, Math.min(100, (relativeY / elementBounds.height) * 100));
+
+        // Apply clamped shine position to keep it within element
+        document.documentElement.style.setProperty('--shine-pos-x', `${Math.round(shineX)}%`);
+        document.documentElement.style.setProperty('--shine-pos-y', `${Math.round(shineY)}%`);
+
+        // Calculate tilt values for shadow effects
+        const centerX = elementBounds.left + elementBounds.width / 2;
+        const centerY = elementBounds.top + elementBounds.height / 2;
+        const tiltX = ((mouseY - centerY) / window.innerHeight) * this.maxTilt;
+        const tiltY = ((mouseX - centerX) / window.innerWidth) * this.maxTilt;
+
+        // Calculate shadow offset based on tilt (same direction as mouse for closer-darker effect)
+        const shadowOffsetX = tiltY * 2; // Same direction as tilt for light-source effect
+        const shadowOffsetY = tiltX * 2;
+
+        // Calculate distance from mouse to element center for shadow intensity
+        const distanceFromMouse = Math.sqrt(
+            Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+        );
+        const maxDistance = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
+        const normalizedDistance = Math.min(distanceFromMouse / maxDistance, 1);
+
+        // Calculate shadow intensity (stronger when closer, weaker when farther)
+        const shadowIntensity = Math.max(0.1, 1 - normalizedDistance); // Min 10%, Max 100%
+
+        // Set CSS variables for dynamic shadows with intensity
+        document.documentElement.style.setProperty('--dynamic-shadow-x', `${shadowOffsetX}px`);
+        document.documentElement.style.setProperty('--dynamic-shadow-y', `${shadowOffsetY}px`);
+        document.documentElement.style.setProperty('--shadow-intensity', shadowIntensity.toString());
+
+        // Apply tilt effect based on hover state
+        if (isMouseOverElement) {
+            // Reset tilt to zero when hovering over element
+            this.tiltElement.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
+            // Reset shadows when hovering
+            document.documentElement.style.setProperty('--dynamic-shadow-x', '0px');
+            document.documentElement.style.setProperty('--dynamic-shadow-y', '0px');
+            document.documentElement.style.setProperty('--shadow-intensity', '0.5');
+        } else {
+            // Apply tilt effect based on distance from element center when not hovering
+            this.tiltElement.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        }
     }
 
-    /**
-     * Safely initialize canvas with proper error handling
-     */
-    private initializeCanvas(): void {
-        const canvas = this.canvasRef?.nativeElement;
+    private getCssVariable(variableName: string, element?: HTMLElement): string | null {
+        const targetElement = element || document.documentElement;
+        const value = getComputedStyle(targetElement).getPropertyValue(variableName).trim();
+
+        return value || null;
+    }
+
+    private getCssVariableAsRgb(variableName: string, element?: HTMLElement): { r: number; g: number; b: number } | null {
+        const hexValue = this.getCssVariable(variableName, element);
+
+        if (!hexValue) {
+            return null;
+        }
+
+        return this.hexToRgb(hexValue);
+    }
+
+    // Updated gradient initialization using CSS variables
+    private initGradientAnimationWithCssVars() {
+        const canvas = document.getElementById('gradient-canvas') as HTMLCanvasElement;
+
         if (!canvas) {
-            console.warn('Canvas element not found, gradient animation disabled');
-            return;
+            return; // Exit gracefully if canvas element doesn't exist
         }
 
-        const context = canvas.getContext('2d', {
-            alpha: false,
-            desynchronized: true // Better performance for animations
-        });
+        const ctx = canvas.getContext('2d');
 
-        if (!context) {
-            console.warn('Unable to get 2D context, gradient animation disabled');
-            return;
+        if (!ctx) {
+            return; // Exit gracefully if context cannot be obtained
         }
 
-        this.canvasContext = context;
-        this.setupCanvasOptimizations();
-        this.resizeCanvas();
-    }
+        // Firefox-specific optimizations for smoother gradients
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
-    /**
-     * Apply performance optimizations to canvas context
-     */
-    private setupCanvasOptimizations(): void {
-        if (!this.canvasContext) return;
+        // Set canvas size
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
 
-        // Firefox-specific optimizations
-        this.canvasContext.imageSmoothingEnabled = true;
-        this.canvasContext.imageSmoothingQuality = 'high';
+        this.resizeHandler = resizeCanvas;
+        resizeCanvas();
+        window.addEventListener('resize', this.resizeHandler);
 
-        const canvas = this.canvasRef!.nativeElement;
+        // Apply Firefox-specific CSS smoothing
         canvas.style.imageRendering = 'auto';
         canvas.style.backfaceVisibility = 'hidden';
+        canvas.style.perspective = '1000px';
         canvas.style.transform = 'translateZ(0)';
         canvas.style.willChange = 'transform';
-    }
 
-    /**
-     * Initialize ResizeObserver for better performance than window resize events
-     */
-    private initializeResizeObserver(): void {
-        if (!('ResizeObserver' in window) || !this.canvasRef?.nativeElement) {
-            // Fallback to window resize for older browsers
-            this.initializeFallbackResize();
-            return;
-        }
+        // Get colors from CSS variables
+        const gradientColor1 = this.getCssVariableAsRgb('--gradient-color-1') || { r: 73, g: 197, b: 147 };
+        const gradientColor2 = this.getCssVariableAsRgb('--gradient-color-2') || { r: 138, g: 43, b: 226 };
+        const gradientColor3 = this.getCssVariableAsRgb('--gradient-color-3') || { r: 255, g: 215, b: 0 };
+        const gradientColor4 = this.getCssVariableAsRgb('--gradient-color-4') || { r: 255, g: 20, b: 147 };
 
-        this.resizeObserver = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-                if (entry.target === this.canvasRef!.nativeElement) {
-                    this.resizeCanvas();
-                    break;
-                }
+        // Gradient points configuration with CSS variable colors
+        const gradientPoints = [
+            {
+                x: 0.2,
+                y: 0.2,
+                vx: 0.001,
+                vy: 0.0015,
+                color: gradientColor1
+            },
+            {
+                x: 0.8,
+                y: 0.3,
+                vx: -0.0015,
+                vy: 0.001,
+                color: gradientColor2
+            },
+            {
+                x: 0.5,
+                y: 0.8,
+                vx: 0.0012,
+                vy: -0.0018,
+                color: gradientColor3
+            },
+            {
+                x: 0.3,
+                y: 0.6,
+                vx: -0.0018,
+                vy: -0.0012,
+                color: gradientColor4
             }
-        });
+        ];
 
-        this.resizeObserver.observe(this.canvasRef.nativeElement);
-    }
+        const animate = () => {
+            // Clear canvas with background color from CSS variable
+            const canvasBackgroundColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#1f2020';
+            ctx.fillStyle = canvasBackgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    /**
-     * Fallback resize handling for older browsers
-     */
-    private initializeFallbackResize(): void {
-        const resizeHandler = () => this.resizeCanvas();
-        window.addEventListener('resize', resizeHandler);
+            // Update point positions
+            gradientPoints.forEach(point => {
+                point.x += point.vx;
+                point.y += point.vy;
 
-        // Cleanup using takeUntilDestroyed
-        this.destroyRef.onDestroy(() => {
-            window.removeEventListener('resize', resizeHandler);
-        });
-    }
+                // Bounce off edges
+                if (point.x <= 0.1 || point.x >= 0.9) point.vx *= -1;
+                if (point.y <= 0.1 || point.y >= 0.9) point.vy *= -1;
 
-    /**
-     * Resize canvas with device pixel ratio consideration
-     */
-    private resizeCanvas(): void {
-        const canvas = this.canvasRef?.nativeElement;
-        if (!canvas || !this.canvasContext) return;
+                // Keep within bounds
+                point.x = Math.max(0.1, Math.min(0.9, point.x));
+                point.y = Math.max(0.1, Math.min(0.9, point.y));
+            });
 
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
+            // Create gradients for each point with more color stops for smoother transitions
+            gradientPoints.forEach((point, index) => {
+                const gradient = ctx.createRadialGradient(
+                    point.x * canvas.width,
+                    point.y * canvas.height,
+                    0,
+                    point.x * canvas.width,
+                    point.y * canvas.height,
+                    canvas.width * 0.5
+                );
 
-        // Set actual size in memory (scaled for device pixel ratio)
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+                gradient.addColorStop(0, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.15)`);
+                gradient.addColorStop(0.2, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.12)`);
+                gradient.addColorStop(0.4, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.08)`);
+                gradient.addColorStop(0.7, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.03)`);
+                gradient.addColorStop(1, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0)`);
 
-        // Scale the canvas back down using CSS
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
 
-        // Scale the drawing context so everything draws at the correct size
-        this.canvasContext.scale(dpr, dpr);
-    }
-
-    /**
-     * Start the gradient animation loop
-     */
-    private startGradientAnimation(): void {
-        if (!this.canvasContext || this.gradientAnimationId) return;
-
-        const animate = (): void => {
-            this.renderGradientFrame();
-            this.gradientAnimationId = requestAnimationFrame(animate);
+            this.animationId = requestAnimationFrame(animate);
         };
 
         animate();
     }
 
-    /**
-     * Render a single gradient animation frame
-     */
-    private renderGradientFrame(): void {
-        if (!this.canvasContext || !this.canvasRef?.nativeElement) return;
-
-        const canvas = this.canvasRef.nativeElement;
-        const ctx = this.canvasContext;
-
-        // Clear with theme background
-        const bgColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#212121';
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Update and render gradient points
-        this.updateGradientPoints();
-        this.renderGradientPoints(ctx, canvas);
-    }
-
-    /**
-     * Update gradient point positions with boundary checking
-     */
-    private updateGradientPoints(): void {
-        for (const point of this.gradientPoints) {
-            point.x += point.vx;
-            point.y += point.vy;
-
-            // Bounce off edges
-            if (point.x <= 0.1 || point.x >= 0.9) point.vx *= -1;
-            if (point.y <= 0.1 || point.y >= 0.9) point.vy *= -1;
-
-            // Clamp to bounds
-            point.x = Math.max(0.1, Math.min(0.9, point.x));
-            point.y = Math.max(0.1, Math.min(0.9, point.y));
-        }
-    }
-
-    /**
-     * Render gradient points with optimized radial gradients
-     */
-    private renderGradientPoints(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void {
-        for (const point of this.gradientPoints) {
-            const gradient = ctx.createRadialGradient(
-                point.x * canvas.width,
-                point.y * canvas.height,
-                0,
-                point.x * canvas.width,
-                point.y * canvas.height,
-                canvas.width * this.GRADIENT_RADIUS
-            );
-
-            // Optimized gradient stops
-            const { r, g, b } = point.color;
-            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.15)`);
-            gradient.addColorStop(0.2, `rgba(${r}, ${g}, ${b}, 0.12)`);
-            gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.08)`);
-            gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 0.03)`);
-            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-
-    /**
-     * Update mouse position with boundary checks
-     */
-    private updateMousePosition(event: MouseEvent): void {
-        const cardElement = this.tiltCardRef?.nativeElement;
-        if (!cardElement) return;
-
-        const rect = cardElement.getBoundingClientRect();
-        const isOver = event.clientX >= rect.left &&
-            event.clientX <= rect.right &&
-            event.clientY >= rect.top &&
-            event.clientY <= rect.bottom;
-
-        this.mousePosition.set({ x: event.clientX, y: event.clientY });
-        this.isMouseOverCard.set(isOver);
-    }
-
-    /**
-     * Calculate tilt effect based on mouse position
-     */
-    private calculateTiltEffect(mouse: MousePosition): TiltEffect {
-        const cardElement = this.tiltCardRef?.nativeElement;
-        if (!cardElement) {
-            return { rotateX: 0, rotateY: 0, shadowX: 0, shadowY: 0, intensity: 0.5 };
-        }
-
-        const rect = cardElement.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const tiltX = ((mouse.y - centerY) / window.innerHeight) * this.MAX_TILT;
-        const tiltY = ((mouse.x - centerX) / window.innerWidth) * this.MAX_TILT;
-
-        const shadowX = tiltY * this.SHADOW_MULTIPLIER;
-        const shadowY = tiltX * this.SHADOW_MULTIPLIER;
-
-        // Calculate distance-based intensity
-        const distance = Math.sqrt(
-            Math.pow(mouse.x - centerX, 2) + Math.pow(mouse.y - centerY, 2)
-        );
-        const maxDistance = Math.sqrt(
-            Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2)
-        );
-        const intensity = Math.max(this.MIN_INTENSITY, 1 - (distance / maxDistance));
-
-        return {
-            rotateX: tiltX,
-            rotateY: tiltY,
-            shadowX,
-            shadowY,
-            intensity
-        };
-    }
-
-    /**
-     * Apply tilt effects to DOM using CSS custom properties
-     */
-    private updateTiltEffects(): void {
-        const effect = this.tiltEffect();
-        const cardElement = this.tiltCardRef?.nativeElement;
-
-        if (!cardElement) return;
-
-        // Apply transform
-        const transform = `perspective(500px) rotateX(${effect.rotateX}deg) rotateY(${effect.rotateY}deg)`;
-        cardElement.style.transform = transform;
-
-        // Update CSS custom properties for shadows
-        const root = document.documentElement;
-        root.style.setProperty('--dynamic-shadow-x', `${effect.shadowX}px`);
-        root.style.setProperty('--dynamic-shadow-y', `${effect.shadowY}px`);
-        root.style.setProperty('--shadow-intensity', effect.intensity.toString());
-
-        // Update shine position
-        if (!this.isMouseOverCard()) {
-            const mouse = this.mousePosition();
-            const rect = cardElement.getBoundingClientRect();
-            const relativeX = Math.max(0, Math.min(100, ((mouse.x - rect.left) / rect.width) * 100));
-            const relativeY = Math.max(0, Math.min(100, ((mouse.y - rect.top) / rect.height) * 100));
-
-            root.style.setProperty('--shine-pos-x', `${Math.round(relativeX)}%`);
-            root.style.setProperty('--shine-pos-y', `${Math.round(relativeY)}%`);
-        }
-    }
-
-    /**
-     * Get CSS variable with proper error handling
-     */
-    private getCssVariable(variableName: string, element: HTMLElement = document.documentElement): string | null {
-        try {
-            const value = getComputedStyle(element).getPropertyValue(variableName).trim();
-            return value || null;
-        } catch (error) {
-            console.warn(`Failed to get CSS variable ${variableName}:`, error);
-            return null;
-        }
-    }
-
-    /**
-     * Get CSS color as RGB object with fallback
-     */
-    private getCssColorOrDefault(variableName: string, defaultColor: { r: number; g: number; b: number }): { r: number; g: number; b: number } {
-        const cssValue = this.getCssVariable(variableName);
-        if (!cssValue) return defaultColor;
-
-        const rgbColor = this.hexToRgb(cssValue);
-        return rgbColor || defaultColor;
-    }
-
-    /**
-     * Convert hex color to RGB with improved validation
-     */
     private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-        // Remove hash and whitespace
-        hex = hex.replace(/^#/, '').trim();
+        // Remove the hash if present
+        hex = hex.replace('#', '');
 
-        // Handle 3-digit hex
+        // Handle 3-digit hex codes (e.g., #fff -> #ffffff)
         if (hex.length === 3) {
             hex = hex.split('').map(char => char + char).join('');
         }
 
-        // Validate format
+        // Validate hex format - return null for invalid formats
         if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) {
             return null;
         }
 
         // Convert to RGB
-        return {
-            r: parseInt(hex.substring(0, 2), 16),
-            g: parseInt(hex.substring(2, 4), 16),
-            b: parseInt(hex.substring(4, 6), 16)
-        };
-    }
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
 
-    /**
-     * Comprehensive cleanup of all resources
-     */
-    private cleanup(): void {
-        // Cancel animation frames
-        if (this.gradientAnimationId !== undefined) {
-            cancelAnimationFrame(this.gradientAnimationId);
-            this.gradientAnimationId = undefined;
-        }
-
-        if (this.mouseMoveThrottleId !== undefined) {
-            cancelAnimationFrame(this.mouseMoveThrottleId);
-            this.mouseMoveThrottleId = undefined;
-        }
-
-        // Cleanup ResizeObserver
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-            this.resizeObserver = undefined;
-        }
-
-        // Reset CSS custom properties
-        const root = document.documentElement;
-        root.style.removeProperty('--dynamic-shadow-x');
-        root.style.removeProperty('--dynamic-shadow-y');
-        root.style.removeProperty('--shadow-intensity');
-        root.style.removeProperty('--shine-pos-x');
-        root.style.removeProperty('--shine-pos-y');
-
-        // Clear references
-        this.canvasContext = undefined;
-        this.gradientPoints = [];
+        return { r, g, b };
     }
 }
