@@ -435,7 +435,8 @@ export class AccountService {
 
 
   private refreshToken() {
-    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline) return of();
+    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline || !this.currentUser.token) return of();
+
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
