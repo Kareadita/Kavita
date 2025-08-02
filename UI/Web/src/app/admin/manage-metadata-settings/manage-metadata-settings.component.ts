@@ -1,23 +1,31 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {SettingsService} from "../settings.service";
 import {debounceTime, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter, map} from "rxjs/operators";
-import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {AgeRating} from "../../_models/metadata/age-rating";
-import {MetadataService} from "../../_services/metadata.service";
-import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {MetadataFieldMapping, MetadataFieldType} from "../_models/metadata-settings";
+import {map} from "rxjs/operators";
+import {MetadataSettings} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
 import {allMetadataSettingField, MetadataSettingField} from "../_models/metadata-setting-field";
 import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe";
+import {
+  ManageMetadataMappingsComponent,
+  MetadataMappingsExport
+} from "../manage-metadata-mappings/manage-metadata-mappings.component";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {RouterLink} from "@angular/router";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 
 @Component({
@@ -26,12 +34,10 @@ import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe
     TranslocoDirective,
     ReactiveFormsModule,
     SettingSwitchComponent,
-    SettingItemComponent,
-    DefaultValuePipe,
-    TagBadgeComponent,
-    AgeRatingPipe,
     PersonRolePipe,
     MetadataSettingFiledPipe,
+    ManageMetadataMappingsComponent,
+    RouterLink,
 
   ],
   templateUrl: './manage-metadata-settings.component.html',
@@ -40,34 +46,26 @@ import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 
-  protected readonly MetadataFieldType = MetadataFieldType;
+  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
 
   private readonly settingService = inject(SettingsService);
-  private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
 
   settingsForm: FormGroup = new FormGroup({});
-  ageRatings: Array<AgeRatingDto> = [];
-  ageRatingMappings = this.fb.array([]);
-  fieldMappings = this.fb.array([]);
+  settings: MetadataSettings | undefined = undefined;
   personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
   isLoaded = false;
   allMetadataSettingFields = allMetadataSettingField;
 
   ngOnInit(): void {
-    this.metadataService.getAllAgeRatings().subscribe(ratings => {
-      this.ageRatings = ratings;
-      this.cdRef.markForCheck();
-    });
-
-
-    this.settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);
-    this.settingsForm.addControl('fieldMappings', this.fieldMappings);
-
     this.settingService.getMetadataSettings().subscribe(settings => {
+      this.settings = settings;
+      this.cdRef.markForCheck();
+
       this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
+      this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
       this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
@@ -86,8 +84,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
       this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
 
-      this.settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
-      this.settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
@@ -106,19 +102,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
           ])
         )
       ));
-
-
-      if (settings.ageRatingMappings) {
-        Object.entries(settings.ageRatingMappings).forEach(([str, rating]) => {
-          this.addAgeRatingMapping(str, rating);
-        });
-      }
-
-      if (settings.fieldMappings) {
-        settings.fieldMappings.forEach(mapping => {
-          this.addFieldMapping(mapping);
-        });
-      }
 
       this.settingsForm.get('enablePeople')?.valueChanges.subscribe(enabled => {
         const firstLastControl = this.settingsForm.get('firstLastPeopleNaming');
@@ -156,49 +139,17 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
   }
 
-  breakTags(csString: string) {
-    if (csString) {
-      return csString.split(',');
-    }
-
-    return [];
-  }
-
-
   packData(withFieldMappings: boolean = true) {
     const model = this.settingsForm.value;
 
-    // Convert FormArray to dictionary
-    const ageRatingMappings = this.ageRatingMappings.controls.reduce((acc, control) => {
-      // @ts-ignore
-      const { str, rating } = control.value;
-      if (str && rating) {
-        // @ts-ignore
-        acc[str] = parseInt(rating + '', 10) as AgeRating;
-      }
-      return acc;
-    }, {});
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
 
-    const fieldMappings = this.fieldMappings.controls.map((control) => {
-      const value = control.value as MetadataFieldMapping;
-
-      return {
-        id: value.id,
-        sourceType: parseInt(value.sourceType + '', 10),
-        destinationType: parseInt(value.destinationType + '', 10),
-        sourceValue: value.sourceValue,
-        destinationValue: value.destinationValue,
-        excludeFromSource: value.excludeFromSource
-      }
-    }).filter(m => m.sourceValue.length > 0 && m.destinationValue.length > 0);
-
-    // Translate blacklist string -> Array<string>
     return {
       ...model,
-      ageRatingMappings,
-      fieldMappings: withFieldMappings ? fieldMappings : [],
-      blacklist: (model.blacklist || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0),
-      whitelist: (model.whitelist || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0),
+      ageRatingMappings: exp.ageRatingMappings,
+      fieldMappings: withFieldMappings ? exp.fieldMappings : [],
+      blacklist: exp.blacklist,
+      whitelist: exp.whitelist,
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
         .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)]),
@@ -208,36 +159,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
     }
   }
 
-  addAgeRatingMapping(str: string = '', rating: AgeRating = AgeRating.Unknown) {
-    const mappingGroup = this.fb.group({
-      str: [str, Validators.required],
-      rating: [rating, Validators.required]
-    });
-    // @ts-ignore
-    this.ageRatingMappings.push(mappingGroup);
-  }
 
-  removeAgeRatingMappingRow(index: number) {
-    this.ageRatingMappings.removeAt(index);
-  }
-
-  addFieldMapping(mapping: MetadataFieldMapping | null = null) {
-    const mappingGroup = this.fb.group({
-      id: [mapping?.id || 0],
-      sourceType: [mapping?.sourceType || MetadataFieldType.Genre, Validators.required],
-      destinationType: [mapping?.destinationType || MetadataFieldType.Genre, Validators.required],
-      sourceValue: [mapping?.sourceValue || '', Validators.required],
-      destinationValue: [mapping?.destinationValue || ''],
-      excludeFromSource: [mapping?.excludeFromSource || false]
-    });
-
-    //@ts-ignore
-    this.fieldMappings.push(mappingGroup);
-  }
-
-  removeFieldMappingRow(index: number) {
-    this.fieldMappings.removeAt(index);
-  }
-
-
+  protected readonly SettingsTabId = SettingsTabId;
 }

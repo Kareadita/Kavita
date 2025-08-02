@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -1859,6 +1859,9 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("EnableExtendedMetadataProcessing")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("EnableGenres")
                         .HasColumnType("INTEGER");

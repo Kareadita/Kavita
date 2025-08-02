@@ -1,4 +1,5 @@
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Parsing;
@@ -17,7 +18,7 @@ public class MangaParsingTests
     [InlineData("v001", "1")]
     [InlineData("Vol 1", "1")]
     [InlineData("vol_356-1", "356")] // Mangapy syntax
-    [InlineData("No Volume", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("No Volume", Parser.LooseLeafVolume)]
     [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
     [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1.1")]
     [InlineData("Tonikaku Cawaii [Volume 11].cbz", "11")]
@@ -32,18 +33,18 @@ public class MangaParsingTests
     [InlineData("Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", "1")]
     [InlineData("Dorohedoro v11 (2013) (Digital) (LostNerevarine-Empire).cbz", "11")]
     [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
-    [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", Parser.LooseLeafVolume)]
     [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
-    [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", Parser.LooseLeafVolume)]
     [InlineData("VanDread-v01-c001[MD].zip", "1")]
     [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch27_[VISCANS].zip", "4")]
     [InlineData("Mob Psycho 100 v02 (2019) (Digital) (Shizu).cbz", "2")]
     [InlineData("Kodomo no Jikan vol. 1.cbz", "1")]
     [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
-    [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", Parser.LooseLeafVolume)]
     [InlineData("Vagabond_v03", "3")]
     [InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
-    [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", Parser.LooseLeafVolume)]
     [InlineData("Volume 12 - Janken Boy is Coming!.cbz", "12")]
     [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
     [InlineData("Gantz.V26.cbz", "26")]
@@ -52,7 +53,7 @@ public class MangaParsingTests
     [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
     [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "1")]
     [InlineData("Sword Art Online Vol 10 - Alicization Running [Yen Press] [LuCaZ] {r2}.epub", "10")]
-    [InlineData("Noblesse - Episode 406 (52 Pages).7z", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Noblesse - Episode 406 (52 Pages).7z", Parser.LooseLeafVolume)]
     [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
     [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
     [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
@@ -64,7 +65,7 @@ public class MangaParsingTests
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "3.5")]
     [InlineData("Kebab Том 1 Глава 3", "1")]
-    [InlineData("Манга Глава 2", API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)]
+    [InlineData("Манга Глава 2", Parser.LooseLeafVolume)]
     [InlineData("Манга Тома 1-4", "1-4")]
     [InlineData("Манга Том 1-4", "1-4")]
     [InlineData("조선왕조실톡 106화", "106")]
@@ -76,9 +77,19 @@ public class MangaParsingTests
     [InlineData("Accel World Volume 2", "2")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake", "30")]
     [InlineData("Zom 100 - Bucket List of the Dead v01",  "1")]
+    // Tome Tests
+    [InlineData("Daredevil - t6 - 10 - (2019)", "6")]
+    [InlineData("Batgirl T2000 #57", "2000")]
+    [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+    [InlineData("Conquistador_Tome_2", "2")]
+    [InlineData("Max_l_explorateur-_Tome_0", "0")]
+    [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
+    [InlineData("Adventure Time (2012)/Adventure Time  Ch 1 (2012)", Parser.LooseLeafVolume)]
+    [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename, LibraryType.Manga));
+        Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
     }
 
     [Theory]
@@ -206,21 +217,26 @@ public class MangaParsingTests
     [InlineData("[218565]-(C92) [BRIO (Puyocha)] Mika-nee no Tanryoku Shidou - Mika s Guide to Self-Confidence (THE IDOLM@STE", "")]
     [InlineData("Monster #8 Ch. 001", "Monster #8")]
     [InlineData("Zom 100 - Bucket List of the Dead v01",  "Zom 100 - Bucket List of the Dead")]
+    [InlineData("Zom 100 - Tome 2", "Zom 100")]
+    [InlineData("Max_l_explorateur Tome 0", "Max l explorateur")]
+    [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
+    [InlineData("Bd Fr-Aldebaran-Antares-t6", "Bd Fr-Aldebaran-Antares")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "Monster")]
     public void ParseSeriesTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename, LibraryType.Manga));
+        Assert.Equal(expected, Parser.ParseSeries(filename, LibraryType.Manga));
     }
 
     [Theory]
     [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
     [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "9")]
     [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98.zip", "90-98")]
-    [InlineData("B_Gata_H_Kei_v01[SlowManga&OverloadScans]", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
-    [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("B_Gata_H_Kei_v01[SlowManga&OverloadScans]", Parser.DefaultChapter)]
+    [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", Parser.DefaultChapter)]
     [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1-8")]
-    [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", Parser.DefaultChapter)]
     [InlineData("c001", "1")]
-    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", Parser.DefaultChapter)]
     [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
     [InlineData("Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz", "18")]
     [InlineData("Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", "0-6")]
@@ -243,7 +259,7 @@ public class MangaParsingTests
     [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1-6")]
     [InlineData("APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", "40")]
     [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "12")]
-    [InlineData("Vol 1", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Vol 1", Parser.DefaultChapter)]
     [InlineData("VanDread-v01-c001[MD].zip", "1")]
     [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
     [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
@@ -255,10 +271,10 @@ public class MangaParsingTests
     [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "101-108")]
     [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "2")]
     [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "71-79")]
-    [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", Parser.DefaultChapter)]
     [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
     [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
-    [InlineData("Transferred to another world magical swordsman v1.1", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Transferred to another world magical swordsman v1.1", Parser.DefaultChapter)]
     [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
     [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
     [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
@@ -277,21 +293,21 @@ public class MangaParsingTests
     [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "1-10")]
     [InlineData("Deku_&_Bakugo_-_Rising_v1_c1.1.cbz", "1.1")]
     [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
-    [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", Parser.DefaultChapter)]
     [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
-    [InlineData("Samurai Jack Vol. 01 - The threads of Time", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Samurai Jack Vol. 01 - The threads of Time", Parser.DefaultChapter)]
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
     [InlineData("자유록 13회#2", "13")]
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
-    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", Parser.DefaultChapter)]
     [InlineData("Kebab Том 1 Глава 3", "3")]
     [InlineData("Манга Глава 2", "2")]
     [InlineData("Манга 2 Глава", "2")]
     [InlineData("Манга Том 1 2 Глава", "2")]
     [InlineData("Accel World Chapter 001 Volume 002", "1")]
     [InlineData("Bleach 001-003", "1-3")]
-    [InlineData("Accel World Volume 2", API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)]
+    [InlineData("Accel World Volume 2", Parser.DefaultChapter)]
     [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98", "90-98")]
     [InlineData("Historys Strongest Disciple Kenichi c01-c04", "1-4")]
     [InlineData("Adabana c00-02", "0-2")]
@@ -299,9 +315,10 @@ public class MangaParsingTests
     [InlineData("Max Level Returner ตอนที่ 5", "5")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     [InlineData("Monster #8 Ch. 001", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename, LibraryType.Manga));
+        Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
     }
 
 
@@ -318,8 +335,9 @@ public class MangaParsingTests
     [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
     public void ParseEditionTest(string input, string expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseEdition(input));
+        Assert.Equal(expected, Parser.ParseEdition(input));
     }
+
     [Theory]
     [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", false)]
     [InlineData("Beelzebub_Omake_June_2012_RHS", false)]
@@ -339,7 +357,7 @@ public class MangaParsingTests
     [InlineData("Hajime no Ippo - Artbook", false)]
     public void IsMangaSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsSpecial(input, LibraryType.Manga));
+        Assert.Equal(expected, Parser.IsSpecial(input, LibraryType.Manga));
     }
 
     [Theory]
@@ -348,7 +366,7 @@ public class MangaParsingTests
     [InlineData("image.txt", MangaFormat.Unknown)]
     public void ParseFormatTest(string inputFile, MangaFormat expected)
     {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseFormat(inputFile));
+        Assert.Equal(expected, Parser.ParseFormat(inputFile));
     }
 
 
