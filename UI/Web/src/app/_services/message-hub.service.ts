@@ -12,6 +12,7 @@ import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {ExternalMatchRateLimitErrorEvent} from "../_models/events/external-match-rate-limit-error-event";
 import {AnnotationUpdateEvent} from "../_models/events/annotation-update-event";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -145,11 +146,13 @@ export class MessageHubService {
   /**
    * Any events that come from the backend
    */
-  public messages$ = this.messagesSource.asObservable();
+  public readonly messages$ = this.messagesSource.asObservable();
+  public readonly messageSignal = toSignal(this.messages$);
   /**
    * Users that are online
    */
   public onlineUsers$ = this.onlineUsersSource.asObservable();
+  public readonly onlineUsersSignal = toSignal(this.onlineUsers$);
 
   constructor() {}
 

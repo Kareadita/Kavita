@@ -5,7 +5,6 @@ import {Annotation} from '../book-reader/_models/annotations/annotation';
 import {TextResonse} from "../_types/text-response";
 import {map, of, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
-import {toObservable} from "@angular/core/rxjs-interop";
 import {AccountService} from "./account.service";
 import {User} from "../_models/user";
 import {MessageHubService} from "./message-hub.service";
@@ -35,11 +34,9 @@ export class AnnotationService {
    * Annotations for a given book
    */
   public readonly annotations = this._annotations.asReadonly();
-  public readonly annotations$ = toObservable(this.annotations);
 
   private _events = signal<AnnotationEvent | null>(null);
   public readonly events = this._events.asReadonly();
-  public readonly events$ = toObservable(this.events);
 
   private readonly user = signal<User | null>(null);
   public readonly slots = computed(() => {
@@ -51,10 +48,7 @@ export class AnnotationService {
   constructor() {
     this.accountService.currentUser$.subscribe(user => {
       this.user.set(user!);
-      console.log('[AnnotationService] setting user', user)
     });
-
-
   }
 
   getAllAnnotations(chapterId: number) {

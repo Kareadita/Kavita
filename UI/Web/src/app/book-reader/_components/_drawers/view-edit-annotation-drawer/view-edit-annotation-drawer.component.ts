@@ -115,7 +115,11 @@ export class ViewEditAnnotationDrawerComponent {
 
       // If selected text alone is too long, just show it
       if (selectedText.length >= estimatedCapacity) {
-        return `<span class="fw-bold">${this.safeHtml.transform(selectedText)}</span>`;
+        setTimeout(() => {
+          this.initHighlights();
+        }, INIT_HIGHLIGHT_DELAY);
+
+        return this.sanitizer.bypassSecurityTrustHtml(`<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>`);
       }
 
       // Find the position of selected text in context
