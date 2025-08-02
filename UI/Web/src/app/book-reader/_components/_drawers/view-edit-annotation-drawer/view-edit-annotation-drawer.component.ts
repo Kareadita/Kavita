@@ -26,6 +26,7 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 import {DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
+import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 
 export enum AnnotationMode {
   View = 0,
@@ -43,7 +44,8 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillViewComponent,
     TranslocoDirective,
     HighlightBarComponent,
-    NgStyle
+    NgStyle,
+    PageChapterLabelPipe
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -169,6 +171,7 @@ export class ViewEditAnnotationDrawerComponent {
       setTimeout(() => {
         this.initHighlights();
       }, INIT_HIGHLIGHT_DELAY);
+
       return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
     });
 

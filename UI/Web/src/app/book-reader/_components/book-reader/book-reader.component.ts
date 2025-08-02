@@ -503,6 +503,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (annotationEvent == null || annotationEvent.pageNumber !== pageNum) return;
       if (this.firstLoad) return;
 
+      if (annotationEvent.type === 'edit') return; // Let signalR propagate state (or component can)
+
       this.firstLoad = true;
       console.log('refreshing page')
       // TODO: Figure out how to restore exact position
@@ -645,12 +647,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-        if (!hasProgress) {
-          this.toggleDrawer(); // TODO: Remove toggling drawer on first load
-          this.toastr.info(translate('toasts.book-settings-info'));
-        }
-      });
+      // this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
+      //   if (!hasProgress) {
+      //     this.toggleDrawer(); // TODO: Remove toggling drawer on first load
+      //     this.toastr.info(translate('toasts.book-settings-info'));
+      //   }
+      // });
 
       await this.init();
     });

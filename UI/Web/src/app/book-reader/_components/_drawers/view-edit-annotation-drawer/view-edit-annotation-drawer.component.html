@@ -47,7 +47,7 @@
               <div id="render-target" #renderTarget>
                 <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
               </div>
-              <cite class="float-end mb-1">— Page {{annotation()?.pageNumber}}, Chapter "{{annotation()?.chapterTitle ?? ''}}"</cite>
+              <cite class="float-end mb-1">{{annotation()! | pageChapterLabel}}</cite>
             </blockquote>
           </div>
 
@@ -64,7 +64,7 @@
 
           @if (mode() === AnnotationMode.Create) {
             <div class="row g-0 mt-5">
-              <button class="btn btn-primary col-12" (click)="createAnnotation()">{{t('save')}}</button>
+              <button class="btn btn-primary col-12" (click)="createAnnotation()">{{t('create')}}</button>
             </div>
           }
 
