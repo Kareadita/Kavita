@@ -81,6 +81,66 @@
         position: relative;
         overflow: hidden;
 
+        // Input fields with dynamic shadows
+        ::ng-deep input,
+        ::ng-deep .form-control {
+            box-shadow:
+                    0 2px 4px rgba(0, 0, 0, 0.1),
+                    var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            transition: box-shadow 0.1s ease-out, border-color 0.15s ease-in-out;
+
+            &:focus {
+                box-shadow:
+                        var(--login-input-box-shadow-focus),
+                        var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            }
+        }
+
+        // Button styles with dynamic shadows
+        ::ng-deep .btn {
+            box-shadow:
+                    0 2px 4px var(--dynamic-shadow-color-button),
+                    var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            transition: transform 0.15s ease, box-shadow 0.1s ease-out;
+
+            &:hover {
+                transform: translateY(-1px);
+                box-shadow:
+                        0 4px 8px rgba(0, 0, 0, calc(0.2 * var(--shadow-intensity))),
+                        var(--dynamic-shadow-x) var(--dynamic-shadow-y) calc(var(--dynamic-shadow-blur) + 2px) var(--dynamic-shadow-spread) var(--dynamic-shadow-color-intense);
+            }
+
+            &:active {
+                transform: translateY(0px);
+                box-shadow:
+                        0 2px 4px var(--dynamic-shadow-color-button),
+                        var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            }
+        }
+
+        // Primary button enhanced styling
+        ::ng-deep .btn-primary {
+            box-shadow:
+                    0 3px 6px var(--dynamic-shadow-color-primary),
+                    var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+
+            &:hover {
+                box-shadow:
+                        0 5px 10px rgba(74, 198, 148, calc(0.3 * var(--shadow-intensity))),
+                        var(--dynamic-shadow-x) var(--dynamic-shadow-y) calc(var(--dynamic-shadow-blur) + 2px) var(--dynamic-shadow-spread) var(--dynamic-shadow-color-intense);
+            }
+        }
+
+        // Secondary and outline button styles
+        ::ng-deep .btn-secondary,
+        ::ng-deep .btn-outline-primary {
+            &:hover {
+                box-shadow:
+                        0 4px 8px rgba(0, 0, 0, calc(0.25 * var(--shadow-intensity))),
+                        var(--dynamic-shadow-x) var(--dynamic-shadow-y) calc(var(--dynamic-shadow-blur) + 2px) var(--dynamic-shadow-spread) var(--dynamic-shadow-color-intense);
+            }
+        }
+
         .shine {
             position: absolute;
             top: 50%;

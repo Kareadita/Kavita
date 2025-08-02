@@ -9,6 +9,17 @@
     --gradient-color-4: #ff1493;  /* Fourth gradient orb (left-center) */
     --gradient-darkness: 0;       /* Adjust from 0 (no overlay) to 1 (completely dark) */
 
+    // Dynamic shadow variables for tilt effects
+    --dynamic-shadow-x: 0px;
+    --dynamic-shadow-y: 0px;
+    --dynamic-shadow-blur: 8px;
+    --dynamic-shadow-spread: 0px;
+    --shadow-intensity: 0.5; // Controls shadow opacity based on distance from light
+    --dynamic-shadow-color: rgba(0, 0, 0, calc(0.3 * var(--shadow-intensity)));
+    --dynamic-shadow-color-intense: rgba(0, 0, 0, calc(0.5 * var(--shadow-intensity)));
+    --dynamic-shadow-color-button: rgba(0, 0, 0, calc(0.15 * var(--shadow-intensity)));
+    --dynamic-shadow-color-primary: rgba(74, 198, 148, calc(0.2 * var(--shadow-intensity)));
+
     /* System styles (https://m2.material.io/design/color/dark-theme.html#properties)*/
     --elevation-layer0: rgba(255,255,255,0);
     --elevation-layer1: rgba(255,255,255,0.05);

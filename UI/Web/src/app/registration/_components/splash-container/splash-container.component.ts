@@ -61,18 +61,41 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
         document.documentElement.style.setProperty('--shine-pos-x', `${Math.round(shineX)}%`);
         document.documentElement.style.setProperty('--shine-pos-y', `${Math.round(shineY)}%`);
 
+        // Calculate tilt values for shadow effects
+        const centerX = elementBounds.left + elementBounds.width / 2;
+        const centerY = elementBounds.top + elementBounds.height / 2;
+        const tiltX = ((mouseY - centerY) / window.innerHeight) * this.maxTilt;
+        const tiltY = ((mouseX - centerX) / window.innerWidth) * this.maxTilt;
+
+        // Calculate shadow offset based on tilt (same direction as mouse for closer-darker effect)
+        const shadowOffsetX = tiltY * 2; // Same direction as tilt for light-source effect
+        const shadowOffsetY = tiltX * 2;
+
+        // Calculate distance from mouse to element center for shadow intensity
+        const distanceFromMouse = Math.sqrt(
+            Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+        );
+        const maxDistance = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
+        const normalizedDistance = Math.min(distanceFromMouse / maxDistance, 1);
+
+        // Calculate shadow intensity (stronger when closer, weaker when farther)
+        const shadowIntensity = Math.max(0.1, 1 - normalizedDistance); // Min 10%, Max 100%
+
+        // Set CSS variables for dynamic shadows with intensity
+        document.documentElement.style.setProperty('--dynamic-shadow-x', `${shadowOffsetX}px`);
+        document.documentElement.style.setProperty('--dynamic-shadow-y', `${shadowOffsetY}px`);
+        document.documentElement.style.setProperty('--shadow-intensity', shadowIntensity.toString());
+
         // Apply tilt effect based on hover state
         if (isMouseOverElement) {
             // Reset tilt to zero when hovering over element
             tiltElement.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
+            // Reset shadows when hovering
+            document.documentElement.style.setProperty('--dynamic-shadow-x', '0px');
+            document.documentElement.style.setProperty('--dynamic-shadow-y', '0px');
+            document.documentElement.style.setProperty('--shadow-intensity', '0.5');
         } else {
             // Apply tilt effect based on distance from element center when not hovering
-            const centerX = elementBounds.left + elementBounds.width / 2;
-            const centerY = elementBounds.top + elementBounds.height / 2;
-
-            const tiltX = ((mouseY - centerY) / window.innerHeight) * this.maxTilt;
-            const tiltY = ((mouseX - centerX) / window.innerWidth) * this.maxTilt;
-
             tiltElement.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
         }
     }
