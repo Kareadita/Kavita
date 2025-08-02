@@ -17,14 +17,22 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
     private maxTilt = 5; // Maximum tilt angle in degrees
     private animationId?: number;
     private resizeHandler?: () => void;
+    private tiltElement?: HTMLElement;
+    private mouseMoveThrottleId?: number;
+    private lastMouseEvent?: MouseEvent;
 
     ngOnInit() {
         this.initGradientAnimationWithCssVars();
+        this.cacheTiltElement();
     }
 
     ngOnDestroy() {
-        if (this.animationId) {
+        if (this.animationId !== undefined) {
             cancelAnimationFrame(this.animationId);
+        }
+
+        if (this.mouseMoveThrottleId !== undefined) {
+            cancelAnimationFrame(this.mouseMoveThrottleId);
         }
 
         if (this.resizeHandler) {
@@ -32,13 +40,34 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
         }
     }
 
+    private cacheTiltElement() {
+        // Cache the tilt element reference to avoid repeated DOM queries
+        this.tiltElement = document.querySelector('.tilt') as HTMLElement;
+    }
+
     @HostListener('document:mousemove', ['$event'])
     onMouseMove(event: MouseEvent) {
-        const tiltElement = document.querySelector('.tilt') as HTMLElement;
+        // Store the latest mouse event
+        this.lastMouseEvent = event;
 
-        if (!tiltElement) return;
+        // Cancel any pending throttled update
+        if (this.mouseMoveThrottleId !== undefined) {
+            return; // Already scheduled, skip this event
+        }
 
-        const elementBounds = tiltElement.getBoundingClientRect();
+        // Schedule the actual update for the next animation frame
+        this.mouseMoveThrottleId = requestAnimationFrame(() => {
+            if (this.lastMouseEvent) {
+                this.handleMouseMove(this.lastMouseEvent);
+            }
+            this.mouseMoveThrottleId = undefined;
+        });
+    }
+
+    private handleMouseMove(event: MouseEvent) {
+        if (!this.tiltElement) return;
+
+        const elementBounds = this.tiltElement.getBoundingClientRect();
         const mouseX = event.clientX;
         const mouseY = event.clientY;
 
@@ -89,14 +118,14 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
         // Apply tilt effect based on hover state
         if (isMouseOverElement) {
             // Reset tilt to zero when hovering over element
-            tiltElement.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
+            this.tiltElement.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
             // Reset shadows when hovering
             document.documentElement.style.setProperty('--dynamic-shadow-x', '0px');
             document.documentElement.style.setProperty('--dynamic-shadow-y', '0px');
             document.documentElement.style.setProperty('--shadow-intensity', '0.5');
         } else {
             // Apply tilt effect based on distance from element center when not hovering
-            tiltElement.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            this.tiltElement.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
         }
     }
 
@@ -120,9 +149,16 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
     // Updated gradient initialization using CSS variables
     private initGradientAnimationWithCssVars() {
         const canvas = document.getElementById('gradient-canvas') as HTMLCanvasElement;
+
+        if (!canvas) {
+            return; // Exit gracefully if canvas element doesn't exist
+        }
+
         const ctx = canvas.getContext('2d');
 
-        if (!ctx) return;
+        if (!ctx) {
+            return; // Exit gracefully if context cannot be obtained
+        }
 
         // Firefox-specific optimizations for smoother gradients
         ctx.imageSmoothingEnabled = true;
@@ -185,7 +221,7 @@ export class SplashContainerComponent implements OnInit, OnDestroy {
 
         const animate = () => {
             // Clear canvas with background color from CSS variable
-            const canvasBackgroundColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#212121';
+            const canvasBackgroundColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#1f2020';
             ctx.fillStyle = canvasBackgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
