@@ -97,8 +97,7 @@ import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect
     ScrobblingHoldsComponent,
     ManageMetadataSettingsComponent,
     ManageReadingProfilesComponent,
-    ManageOpenIDConnectComponent
-    ManageReadingProfilesComponent,
+    ManageOpenIDConnectComponent,
     ManagePublicMetadataSettingsComponent,
     ImportMappingsComponent
   ],

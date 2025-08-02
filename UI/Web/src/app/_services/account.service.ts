@@ -258,8 +258,6 @@ export class AccountService {
     const user = this.currentUserSignal();
     if (!user) return;
 
-    const oidcAuth = user && !user.token;
-
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
