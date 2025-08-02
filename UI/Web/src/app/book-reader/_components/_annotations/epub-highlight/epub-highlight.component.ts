@@ -4,9 +4,7 @@ import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.serv
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {NgStyle} from "@angular/common";
-import {EVENTS, MessageHubService} from "../../../../_services/message-hub.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
+import {MessageHubService} from "../../../../_services/message-hub.service";
 
 @Component({
   selector: 'app-epub-highlight',
@@ -33,16 +31,6 @@ export class EpubHighlightComponent {
 
   constructor() {
 
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
-      if (message.payload !== EVENTS.AnnotationUpdate) return;
-      const updatedAnnotation = message.payload as AnnotationUpdateEvent;
-      if (this.annotation()?.id !== updatedAnnotation.annotation.id) return;
-
-      console.log('Refreshing annotation from backend: ', updatedAnnotation.annotation);
-      this.annotation.set(updatedAnnotation.annotation);
-    });
-
-
     effect(() => {
       const updateEvent = this.annotationService.events();
       const annotation = this.annotation();
@@ -51,7 +39,7 @@ export class EpubHighlightComponent {
       if (!updateEvent || !annotation || updateEvent.annotation.id !== annotation.id) return;
       if (updateEvent.type !== 'edit') return;
 
-      //console.log('[highlight] annotation updated', annotation);
+      console.log('[highlight] annotation updated', annotation);
 
       this.annotation.set(annotations.filter(a => a.id === annotation.id)[0]);
     });

@@ -34,7 +34,10 @@
       </div>
 
       <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-secondary">{{t('page-num', {page: annotation().pageNumber})}}</span>
+        @if(showPageLink()) {
+          <span class="badge bg-secondary clickable" (click)="loadAnnotation()">{{t('page-num', {page: annotation().pageNumber})}}</span>
+        }
+
 
         @if (false) {
           <button class="btn btn-sm btn-outline-primary">

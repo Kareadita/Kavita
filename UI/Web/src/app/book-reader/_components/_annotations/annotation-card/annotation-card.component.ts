@@ -42,17 +42,35 @@ export class AnnotationCardComponent {
 
   annotation = model.required<Annotation>();
   allowEdit = input<boolean>(true);
+  showPageLink = input<boolean>(true);
   @Output() delete = new EventEmitter();
 
   titleColor: Signal<string>;
 
   constructor() {
+
+    // TODO: Validate if I want this -- aka update content on a detail page when receiving update from backend
+    // this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
+    //   if (message.payload !== EVENTS.AnnotationUpdate) return;
+    //   const updatedAnnotation = message.payload as AnnotationUpdateEvent;
+    //   if (this.annotation()?.id !== updatedAnnotation.annotation.id) return;
+    //
+    //   console.log('Refreshing annotation from backend: ', updatedAnnotation.annotation);
+    //   this.annotation.set(updatedAnnotation.annotation);
+    // });
+
+
     this.titleColor = computed(() => {
       const annotation = this.annotation();
-      if (!annotation) return '';
-      // TODO: Safefty check
-      return this.highlightSlotPipe.transform(this.annotationService.slots()[annotation.selectedSlotIndex].color);
+      const slots = this.annotationService.slots();
+      if (!annotation || annotation.selectedSlotIndex < 0 || annotation.selectedSlotIndex >= slots.length) return '';
+
+      return this.highlightSlotPipe.transform(slots[annotation.selectedSlotIndex].color);
     });
+  }
+
+  loadAnnotation() {
+    // TODO: How do I do this?
   }
 
   editAnnotation() {

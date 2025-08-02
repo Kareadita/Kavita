@@ -508,8 +508,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.firstLoad = true;
       console.log('refreshing page')
       // TODO: Figure out how to restore exact position
-      const scrollProgress = window.scrollY;
-      this.loadPage(this.lastSeenScrollPartPath);
+      const scrollProgress = this.reader.nativeElement?.scrollTop || this.scrollService.scrollPosition;
+      console.log('update page with scroll: ', scrollProgress);
+
+      if (scrollProgress > 0) {
+        this.loadPage(undefined, scrollProgress); // This will force loading exactly on the scroll
+      } else {
+        this.loadPage(this.lastSeenScrollPartPath);
+      }
+
+
 
       //this.setupAnnotationElements();
     })
