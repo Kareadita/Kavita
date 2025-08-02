@@ -16,7 +16,7 @@ import {CssVariableService} from "../../../_services/css-variable.service";
     ],
     host: {
         'role': 'main',
-        'aria-label': 'Login splash screen'
+        'aria-label': 'Login page with animated background'
     }
 })
 export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewInit {
