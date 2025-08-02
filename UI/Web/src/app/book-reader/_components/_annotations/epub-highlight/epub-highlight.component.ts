@@ -38,7 +38,7 @@ export class EpubHighlightComponent {
       const updatedAnnotation = message.payload as AnnotationUpdateEvent;
       if (this.annotation()?.id !== updatedAnnotation.annotation.id) return;
 
-      console.log('Refreshing annotation')
+      console.log('Refreshing annotation from backend: ', updatedAnnotation.annotation);
       this.annotation.set(updatedAnnotation.annotation);
     });
 
