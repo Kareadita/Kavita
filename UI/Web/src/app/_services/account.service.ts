@@ -256,6 +256,8 @@ export class AccountService {
 
   logout(skipAutoLogin: boolean = false) {
     const user = this.currentUserSignal();
+    if (!user) return;
+
     const oidcAuth = user && !user.token;
 
     localStorage.removeItem(this.userKey);
@@ -264,13 +266,14 @@ export class AccountService {
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
 
-    if (!oidcAuth) {
-      this.router.navigate(['/login'], {
-        queryParams: {skipAutoLogin: skipAutoLogin}
-      });
-    } else {
+    if (!user.token) {
       window.location.href = '/oidc/logout';
+      return;
     }
+
+    this.router.navigate(['/login'], {
+      queryParams: {skipAutoLogin: skipAutoLogin}
+    });
   }
 
 

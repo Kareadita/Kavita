@@ -1,4 +1,5 @@
 ﻿using API.Extensions;
+using API.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -18,10 +19,15 @@ public class OidcController: ControllerBase
         return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
 
-    [Authorize]
     [HttpGet("logout")]
     public IActionResult Logout()
     {
+
+        if (!Request.Cookies.ContainsKey(OidcService.CookieName))
+        {
+            return Redirect("/");
+        }
+
         return SignOut(
             new AuthenticationProperties { RedirectUri = "/login" },
             CookieAuthenticationDefaults.AuthenticationScheme,

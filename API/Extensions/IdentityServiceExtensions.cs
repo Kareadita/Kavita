@@ -85,6 +85,11 @@ public static class IdentityServiceExtensions
                         return OpenIdConnect;
                     }
 
+                    if (ctx.Request.Headers.Authorization.Count != 0)
+                    {
+                        return LocalIdentity;
+                    }
+
                     if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
                     {
                         return OpenIdConnect;
@@ -203,6 +208,15 @@ public static class IdentityServiceExtensions
 
                     return Task.CompletedTask;
                 },
+                OnRedirectToIdentityProviderForSignOut = ctx =>
+                {
+                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.PostLogoutRedirectUri))
+                    {
+                        ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
+                    }
+
+                    return Task.CompletedTask;
+                },
                 OnRedirectToIdentityProvider = ctx =>
                 {
                     // Intercept redirects on API requests and instead return 401
@@ -214,16 +228,9 @@ public static class IdentityServiceExtensions
                         return Task.CompletedTask;
                     }
 
-                    if (!isDevelopment)
+                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.RedirectUri))
                     {
-                        if (!string.IsNullOrEmpty(ctx.ProtocolMessage.RedirectUri))
-                        {
-                            ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
-                        }
-                        if (!string.IsNullOrEmpty(ctx.ProtocolMessage.PostLogoutRedirectUri))
-                        {
-                            ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
-                        }
+                        ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
                     }
 
                     return Task.CompletedTask;
