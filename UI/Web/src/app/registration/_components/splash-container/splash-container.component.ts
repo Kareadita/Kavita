@@ -15,7 +15,7 @@ import {NavService} from "../../../_services/nav.service";
 export class SplashContainerComponent implements OnInit, OnDestroy {
     protected readonly navService = inject(NavService);
     private maxTilt = 5; // Maximum tilt angle in degrees
-    private animationId: any;
+    private animationId?: number;
     private resizeHandler?: () => void;
 
     ngOnInit() {
