@@ -201,6 +201,6 @@ public enum ServerSettingKey
     /// A Json object of type <see cref="API.DTOs.Settings.OidcConfigDto"/>
     /// </summary>
     [Description("OidcConfiguration")]
-    OidcConfiguration = 42,
+    OidcConfiguration = 40,
 
 }
