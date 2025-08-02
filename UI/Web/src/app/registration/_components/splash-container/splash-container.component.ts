@@ -1,6 +1,9 @@
-import {ChangeDetectionStrategy, Component, HostListener, inject, OnInit, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, OnDestroy, ViewChild, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import {AsyncPipe, NgStyle} from "@angular/common";
 import {NavService} from "../../../_services/nav.service";
+import {GradientAnimationService} from "../../../_services/gradient-animation.service";
+import {TiltService} from "../../../_services/tilt.service";
+import {CssVariableService} from "../../../_services/css-variable.service";
 
 @Component({
     selector: 'app-splash-container',
@@ -10,282 +13,125 @@ import {NavService} from "../../../_services/nav.service";
     imports: [
         NgStyle,
         AsyncPipe
-    ]
+    ],
+    host: {
+        'role': 'main',
+        'aria-label': 'Login splash screen'
+    }
 })
-export class SplashContainerComponent implements OnInit, OnDestroy {
+export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewInit {
     protected readonly navService = inject(NavService);
-    private maxTilt = 5; // Maximum tilt angle in degrees
-    private animationId?: number;
-    private resizeHandler?: () => void;
-    private tiltElement?: HTMLElement;
-    private mouseMoveThrottleId?: number;
-    private lastMouseEvent?: MouseEvent;
+    private readonly gradientService = inject(GradientAnimationService);
+    private readonly tiltService = inject(TiltService);
+    private readonly cssVariableService = inject(CssVariableService);
+    private readonly cdr = inject(ChangeDetectorRef);
+    
+    @ViewChild('gradientCanvas') 
+    gradientCanvas!: ElementRef<HTMLCanvasElement>;
+    
+    @ViewChild('tiltElement') 
+    tiltElement!: ElementRef<HTMLElement>;
 
     ngOnInit() {
-        this.initGradientAnimationWithCssVars();
-        this.cacheTiltElement();
+        // Initialize CSS variables with default values
+        this.initializeCssVariables();
+    }
+    
+    private initializeCssVariables(): void {
+        // Batch CSS variable initialization for better performance
+        const defaultVariables = {
+            '--shine-pos-x': '50%',
+            '--shine-pos-y': '50%',
+            '--dynamic-shadow-x': '0px',
+            '--dynamic-shadow-y': '0px',
+            '--dynamic-shadow-blur': '4px',
+            '--dynamic-shadow-spread': '0px',
+            '--dynamic-shadow-color': 'rgba(0, 0, 0, 0.1)',
+            '--dynamic-shadow-color-intense': 'rgba(0, 0, 0, 0.2)',
+            '--dynamic-shadow-color-button': 'rgba(0, 0, 0, 0.1)',
+            '--dynamic-shadow-color-primary': 'rgba(74, 198, 148, 0.3)',
+            '--shadow-intensity': '0.5'
+        };
+        
+        // Batch set all variables at once to minimize DOM operations
+        this.cssVariableService.setVariablesBatch(defaultVariables);
     }
 
-    ngOnDestroy() {
-        if (this.animationId !== undefined) {
-            cancelAnimationFrame(this.animationId);
-        }
-
-        if (this.mouseMoveThrottleId !== undefined) {
-            cancelAnimationFrame(this.mouseMoveThrottleId);
-        }
-
-        if (this.resizeHandler) {
-            window.removeEventListener('resize', this.resizeHandler);
-        }
-    }
-
-    private cacheTiltElement() {
-        // Cache the tilt element reference to avoid repeated DOM queries
-        this.tiltElement = document.querySelector('.tilt') as HTMLElement;
-    }
-
-    @HostListener('document:mousemove', ['$event'])
-    onMouseMove(event: MouseEvent) {
-        // Store the latest mouse event
-        this.lastMouseEvent = event;
-
-        // Cancel any pending throttled update
-        if (this.mouseMoveThrottleId !== undefined) {
-            return; // Already scheduled, skip this event
-        }
-
-        // Schedule the actual update for the next animation frame
-        this.mouseMoveThrottleId = requestAnimationFrame(() => {
-            if (this.lastMouseEvent) {
-                this.handleMouseMove(this.lastMouseEvent);
-            }
-            this.mouseMoveThrottleId = undefined;
+    ngAfterViewInit() {
+        // Use requestAnimationFrame for better performance and Zone.js integration
+        requestAnimationFrame(() => {
+            this.initializeAnimations();
         });
     }
 
-    private handleMouseMove(event: MouseEvent) {
-        if (!this.tiltElement) return;
-
-        const elementBounds = this.tiltElement.getBoundingClientRect();
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-
-        // Check if mouse is over the element
-        const isMouseOverElement =
-            mouseX >= elementBounds.left &&
-            mouseX <= elementBounds.right &&
-            mouseY >= elementBounds.top &&
-            mouseY <= elementBounds.bottom;
-
-        // Always calculate shine position relative to the element
-        const relativeX = mouseX - elementBounds.left;
-        const relativeY = mouseY - elementBounds.top;
-
-        // Convert to percentage and clamp to keep shine within element bounds (0-100%)
-        const shineX = Math.max(0, Math.min(100, (relativeX / elementBounds.width) * 100));
-        const shineY = Math.max(0, Math.min(100, (relativeY / elementBounds.height) * 100));
-
-        // Apply clamped shine position to keep it within element
-        document.documentElement.style.setProperty('--shine-pos-x', `${Math.round(shineX)}%`);
-        document.documentElement.style.setProperty('--shine-pos-y', `${Math.round(shineY)}%`);
-
-        // Calculate tilt values for shadow effects
-        const centerX = elementBounds.left + elementBounds.width / 2;
-        const centerY = elementBounds.top + elementBounds.height / 2;
-        const tiltX = ((mouseY - centerY) / window.innerHeight) * this.maxTilt;
-        const tiltY = ((mouseX - centerX) / window.innerWidth) * this.maxTilt;
-
-        // Calculate shadow offset based on tilt (same direction as mouse for closer-darker effect)
-        const shadowOffsetX = tiltY * 2; // Same direction as tilt for light-source effect
-        const shadowOffsetY = tiltX * 2;
-
-        // Calculate distance from mouse to element center for shadow intensity
-        const distanceFromMouse = Math.sqrt(
-            Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
-        );
-        const maxDistance = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
-        const normalizedDistance = Math.min(distanceFromMouse / maxDistance, 1);
-
-        // Calculate shadow intensity (stronger when closer, weaker when farther)
-        const shadowIntensity = Math.max(0.1, 1 - normalizedDistance); // Min 10%, Max 100%
-
-        // Set CSS variables for dynamic shadows with intensity
-        document.documentElement.style.setProperty('--dynamic-shadow-x', `${shadowOffsetX}px`);
-        document.documentElement.style.setProperty('--dynamic-shadow-y', `${shadowOffsetY}px`);
-        document.documentElement.style.setProperty('--shadow-intensity', shadowIntensity.toString());
-
-        // Apply tilt effect based on hover state
-        if (isMouseOverElement) {
-            // Reset tilt to zero when hovering over element
-            this.tiltElement.style.transform = 'perspective(500px) rotateX(0deg) rotateY(0deg)';
-            // Reset shadows when hovering
-            document.documentElement.style.setProperty('--dynamic-shadow-x', '0px');
-            document.documentElement.style.setProperty('--dynamic-shadow-y', '0px');
-            document.documentElement.style.setProperty('--shadow-intensity', '0.5');
-        } else {
-            // Apply tilt effect based on distance from element center when not hovering
-            this.tiltElement.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-        }
+    ngOnDestroy() {
+        this.gradientService.stopAnimation();
+        this.tiltService.cleanup();
     }
 
-    private getCssVariable(variableName: string, element?: HTMLElement): string | null {
-        const targetElement = element || document.documentElement;
-        const value = getComputedStyle(targetElement).getPropertyValue(variableName).trim();
+    private initializeAnimations(): void {
+        try {
+            console.log('Initializing animations...');
+            console.log('Canvas element:', this.gradientCanvas?.nativeElement);
+            console.log('Tilt element:', this.tiltElement?.nativeElement);
+            
+            const isReducedMotion = this.tiltService.shouldReduceMotion();
+            console.log('Reduced motion detected:', isReducedMotion);
 
-        return value || null;
-    }
-
-    private getCssVariableAsRgb(variableName: string, element?: HTMLElement): { r: number; g: number; b: number } | null {
-        const hexValue = this.getCssVariable(variableName, element);
-
-        if (!hexValue) {
-            return null;
-        }
-
-        return this.hexToRgb(hexValue);
-    }
-
-    // Updated gradient initialization using CSS variables
-    private initGradientAnimationWithCssVars() {
-        const canvas = document.getElementById('gradient-canvas') as HTMLCanvasElement;
-
-        if (!canvas) {
-            return; // Exit gracefully if canvas element doesn't exist
-        }
-
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-            return; // Exit gracefully if context cannot be obtained
-        }
-
-        // Firefox-specific optimizations for smoother gradients
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        // Set canvas size
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-
-        this.resizeHandler = resizeCanvas;
-        resizeCanvas();
-        window.addEventListener('resize', this.resizeHandler);
-
-        // Apply Firefox-specific CSS smoothing
-        canvas.style.imageRendering = 'auto';
-        canvas.style.backfaceVisibility = 'hidden';
-        canvas.style.perspective = '1000px';
-        canvas.style.transform = 'translateZ(0)';
-        canvas.style.willChange = 'transform';
-
-        // Get colors from CSS variables
-        const gradientColor1 = this.getCssVariableAsRgb('--gradient-color-1') || { r: 73, g: 197, b: 147 };
-        const gradientColor2 = this.getCssVariableAsRgb('--gradient-color-2') || { r: 138, g: 43, b: 226 };
-        const gradientColor3 = this.getCssVariableAsRgb('--gradient-color-3') || { r: 255, g: 215, b: 0 };
-        const gradientColor4 = this.getCssVariableAsRgb('--gradient-color-4') || { r: 255, g: 20, b: 147 };
-
-        // Gradient points configuration with CSS variable colors
-        const gradientPoints = [
-            {
-                x: 0.2,
-                y: 0.2,
-                vx: 0.001,
-                vy: 0.0015,
-                color: gradientColor1
-            },
-            {
-                x: 0.8,
-                y: 0.3,
-                vx: -0.0015,
-                vy: 0.001,
-                color: gradientColor2
-            },
-            {
-                x: 0.5,
-                y: 0.8,
-                vx: 0.0012,
-                vy: -0.0018,
-                color: gradientColor3
-            },
-            {
-                x: 0.3,
-                y: 0.6,
-                vx: -0.0018,
-                vy: -0.0012,
-                color: gradientColor4
+            // Always initialize gradient animation (but slower for reduced motion)
+            if (this.gradientCanvas?.nativeElement) {
+                console.log('Starting gradient animation');
+                this.gradientService.startAnimation(this.gradientCanvas.nativeElement, isReducedMotion);
+            } else {
+                console.warn('Gradient canvas element not found');
             }
-        ];
 
-        const animate = () => {
-            // Clear canvas with background color from CSS variable
-            const canvasBackgroundColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#1f2020';
-            ctx.fillStyle = canvasBackgroundColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Update point positions
-            gradientPoints.forEach(point => {
-                point.x += point.vx;
-                point.y += point.vy;
-
-                // Bounce off edges
-                if (point.x <= 0.1 || point.x >= 0.9) point.vx *= -1;
-                if (point.y <= 0.1 || point.y >= 0.9) point.vy *= -1;
-
-                // Keep within bounds
-                point.x = Math.max(0.1, Math.min(0.9, point.x));
-                point.y = Math.max(0.1, Math.min(0.9, point.y));
-            });
-
-            // Create gradients for each point with more color stops for smoother transitions
-            gradientPoints.forEach((point, index) => {
-                const gradient = ctx.createRadialGradient(
-                    point.x * canvas.width,
-                    point.y * canvas.height,
-                    0,
-                    point.x * canvas.width,
-                    point.y * canvas.height,
-                    canvas.width * 0.5
-                );
-
-                gradient.addColorStop(0, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.15)`);
-                gradient.addColorStop(0.2, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.12)`);
-                gradient.addColorStop(0.4, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.08)`);
-                gradient.addColorStop(0.7, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0.03)`);
-                gradient.addColorStop(1, `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, 0)`);
-
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            });
-
-            this.animationId = requestAnimationFrame(animate);
-        };
-
-        animate();
+            // Only initialize tilt tracking if reduced motion is not enabled
+            if (!isReducedMotion && this.tiltElement?.nativeElement) {
+                console.log('Starting tilt tracking');
+                this.tiltService.initializeMouseTracking(this.tiltElement.nativeElement);
+            } else if (isReducedMotion) {
+                console.log('Skipping tilt tracking due to reduced motion preference');
+            } else {
+                console.warn('Tilt element not found');
+            }
+        } catch (error) {
+            console.error('Error initializing animations:', error);
+            // Clean up any partially initialized services
+            this.cleanupServices();
+            // Fallback: try to initialize with a delay
+            setTimeout(() => {
+                this.initializeAnimationsFallback();
+            }, 500);
+        }
+    }
+    
+    private cleanupServices(): void {
+        try {
+            this.gradientService.stopAnimation();
+            this.tiltService.cleanup();
+        } catch (error) {
+            console.error('Error during service cleanup:', error);
+        }
     }
 
-    private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-        // Remove the hash if present
-        hex = hex.replace('#', '');
-
-        // Handle 3-digit hex codes (e.g., #fff -> #ffffff)
-        if (hex.length === 3) {
-            hex = hex.split('').map(char => char + char).join('');
+    private initializeAnimationsFallback(): void {
+        console.log('Trying fallback initialization...');
+        
+        const isReducedMotion = this.tiltService.shouldReduceMotion();
+        
+        // Try to find elements by ID as fallback
+        const canvas = document.getElementById('gradient-canvas') as HTMLCanvasElement;
+        const tiltElement = document.querySelector('.tilt') as HTMLElement;
+        
+        if (canvas && !this.gradientService.isAnimating()) {
+            console.log('Fallback: Starting gradient animation');
+            this.gradientService.startAnimation(canvas, isReducedMotion);
         }
-
-        // Validate hex format - return null for invalid formats
-        if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) {
-            return null;
+        
+        if (tiltElement && !isReducedMotion) {
+            console.log('Fallback: Starting tilt tracking');
+            this.tiltService.initializeMouseTracking(tiltElement);
         }
-
-        // Convert to RGB
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-
-        return { r, g, b };
     }
 }

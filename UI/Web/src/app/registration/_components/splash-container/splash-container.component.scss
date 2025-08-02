@@ -80,6 +80,12 @@
         transform-origin: center center;
         position: relative;
         overflow: hidden;
+        
+        // Disable tilt effects when reduced motion is preferred
+        @media (prefers-reduced-motion: reduce) {
+            transform: none !important;
+            transition: none;
+        }
 
         // Input fields with dynamic shadows
         ::ng-deep input,
@@ -93,6 +99,16 @@
                 box-shadow:
                         var(--login-input-box-shadow-focus),
                         var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            }
+            
+            // Disable dynamic shadows when reduced motion is preferred
+            @media (prefers-reduced-motion: reduce) {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: border-color 0.15s ease-in-out;
+                
+                &:focus {
+                    box-shadow: var(--login-input-box-shadow-focus);
+                }
             }
         }
 
@@ -115,6 +131,22 @@
                 box-shadow:
                         0 2px 4px var(--dynamic-shadow-color-button),
                         var(--dynamic-shadow-x) var(--dynamic-shadow-y) var(--dynamic-shadow-blur) var(--dynamic-shadow-spread) var(--dynamic-shadow-color);
+            }
+            
+            // Disable dynamic shadows when reduced motion is preferred
+            @media (prefers-reduced-motion: reduce) {
+                box-shadow: 0 2px 4px var(--dynamic-shadow-color-button);
+                transition: transform 0.15s ease;
+                
+                &:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+                
+                &:active {
+                    transform: translateY(0px);
+                    box-shadow: 0 2px 4px var(--dynamic-shadow-color-button);
+                }
             }
         }
 
@@ -157,6 +189,11 @@
             pointer-events: none;
             transition: background 0.1s ease-out;
             transform: translate(-50%, -50%);
+            
+            // Disable shine effect when reduced motion is preferred
+            @media (prefers-reduced-motion: reduce) {
+                display: none;
+            }
         }
 
         &:focus {
