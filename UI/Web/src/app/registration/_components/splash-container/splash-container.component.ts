@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, HostListener, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostListener, inject, OnInit, OnDestroy} from '@angular/core';
 import {AsyncPipe, NgStyle} from "@angular/common";
 import {NavService} from "../../../_services/nav.service";
 
@@ -12,10 +12,11 @@ import {NavService} from "../../../_services/nav.service";
         AsyncPipe
     ]
 })
-export class SplashContainerComponent {
+export class SplashContainerComponent implements OnInit, OnDestroy {
     protected readonly navService = inject(NavService);
     private maxTilt = 5; // Maximum tilt angle in degrees
     private animationId: any;
+    private resizeHandler?: () => void;
 
     ngOnInit() {
         this.initGradientAnimationWithCssVars();
@@ -24,6 +25,10 @@ export class SplashContainerComponent {
     ngOnDestroy() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
+        }
+
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
         }
     }
 
@@ -76,12 +81,7 @@ export class SplashContainerComponent {
         const targetElement = element || document.documentElement;
         const value = getComputedStyle(targetElement).getPropertyValue(variableName).trim();
 
-        if (!value) {
-            console.warn(`CSS variable ${variableName} not found`);
-            return null;
-        }
-
-        return value;
+        return value || null;
     }
 
     private getCssVariableAsRgb(variableName: string, element?: HTMLElement): { r: number; g: number; b: number } | null {
@@ -111,8 +111,9 @@ export class SplashContainerComponent {
             canvas.height = window.innerHeight;
         };
 
+        this.resizeHandler = resizeCanvas;
         resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', this.resizeHandler);
 
         // Apply Firefox-specific CSS smoothing
         canvas.style.imageRendering = 'auto';
@@ -160,8 +161,9 @@ export class SplashContainerComponent {
         ];
 
         const animate = () => {
-            // Clear canvas with #212121 background
-            ctx.fillStyle = '#212121';
+            // Clear canvas with background color from CSS variable
+            const canvasBackgroundColor = this.getCssVariable('--elevation-layer2-dark-solid') || '#212121';
+            ctx.fillStyle = canvasBackgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Update point positions
@@ -206,7 +208,6 @@ export class SplashContainerComponent {
         animate();
     }
 
-    // Don't forget to include the hexToRgb function from the previous artifact
     private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
         // Remove the hash if present
         hex = hex.replace('#', '');
@@ -216,9 +217,8 @@ export class SplashContainerComponent {
             hex = hex.split('').map(char => char + char).join('');
         }
 
-        // Validate hex format
+        // Validate hex format - return null for invalid formats
         if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) {
-            console.error('Invalid hex color format');
             return null;
         }
 
