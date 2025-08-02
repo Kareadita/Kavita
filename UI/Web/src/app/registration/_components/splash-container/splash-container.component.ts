@@ -33,7 +33,6 @@ export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewIni
     tiltElement!: ElementRef<HTMLElement>;
 
     ngOnInit() {
-        // Initialize CSS variables with default values
         this.initializeCssVariables();
     }
     
@@ -53,12 +52,10 @@ export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewIni
             '--shadow-intensity': '0.5'
         };
         
-        // Batch set all variables at once to minimize DOM operations
         this.cssVariableService.setVariablesBatch(defaultVariables);
     }
 
     ngAfterViewInit() {
-        // Use requestAnimationFrame for better performance and Zone.js integration
         requestAnimationFrame(() => {
             this.initializeAnimations();
         });
@@ -71,32 +68,26 @@ export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewIni
 
     private initializeAnimations(): void {
         try {
-            console.log('Initializing animations...');
-            console.log('Canvas element:', this.gradientCanvas?.nativeElement);
-            console.log('Tilt element:', this.tiltElement?.nativeElement);
-            
             const isReducedMotion = this.tiltService.shouldReduceMotion();
-            console.log('Reduced motion detected:', isReducedMotion);
+            
+            // For maximum accessibility, offer completely static gradients for reduced motion
+            // You can change this to `false` if you want very slow animation instead
+            const useStaticGradients = isReducedMotion; 
 
-            // Always initialize gradient animation (but slower for reduced motion)
+            // Initialize gradient animation
             if (this.gradientCanvas?.nativeElement) {
-                console.log('Starting gradient animation');
-                this.gradientService.startAnimation(this.gradientCanvas.nativeElement, isReducedMotion);
-            } else {
-                console.warn('Gradient canvas element not found');
+                this.gradientService.startAnimation(
+                    this.gradientCanvas.nativeElement, 
+                    isReducedMotion, 
+                    useStaticGradients
+                );
             }
 
-            // Only initialize tilt tracking if reduced motion is not enabled
+            // Initialize tilt tracking only if reduced motion is not enabled
             if (!isReducedMotion && this.tiltElement?.nativeElement) {
-                console.log('Starting tilt tracking');
                 this.tiltService.initializeMouseTracking(this.tiltElement.nativeElement);
-            } else if (isReducedMotion) {
-                console.log('Skipping tilt tracking due to reduced motion preference');
-            } else {
-                console.warn('Tilt element not found');
             }
         } catch (error) {
-            console.error('Error initializing animations:', error);
             // Clean up any partially initialized services
             this.cleanupServices();
             // Fallback: try to initialize with a delay
@@ -111,26 +102,23 @@ export class SplashContainerComponent implements OnInit, OnDestroy, AfterViewIni
             this.gradientService.stopAnimation();
             this.tiltService.cleanup();
         } catch (error) {
-            console.error('Error during service cleanup:', error);
+            // Silent cleanup - errors here are not critical
         }
     }
 
     private initializeAnimationsFallback(): void {
-        console.log('Trying fallback initialization...');
-        
         const isReducedMotion = this.tiltService.shouldReduceMotion();
+        const useStaticGradients = isReducedMotion;
         
         // Try to find elements by ID as fallback
         const canvas = document.getElementById('gradient-canvas') as HTMLCanvasElement;
         const tiltElement = document.querySelector('.tilt') as HTMLElement;
         
         if (canvas && !this.gradientService.isAnimating()) {
-            console.log('Fallback: Starting gradient animation');
-            this.gradientService.startAnimation(canvas, isReducedMotion);
+            this.gradientService.startAnimation(canvas, isReducedMotion, useStaticGradients);
         }
         
         if (tiltElement && !isReducedMotion) {
-            console.log('Fallback: Starting tilt tracking');
             this.tiltService.initializeMouseTracking(tiltElement);
         }
     }

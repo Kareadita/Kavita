@@ -29,7 +29,7 @@ export class GradientAnimationService {
     
     constructor(private cssVariableService: CssVariableService) {}
     
-    startAnimation(canvas: HTMLCanvasElement, isReducedMotion: boolean = false): void {
+    startAnimation(canvas: HTMLCanvasElement, isReducedMotion: boolean = false, isStaticMode: boolean = false): void {
         if (!canvas) return;
         
         // Stop any existing animation
@@ -48,11 +48,22 @@ export class GradientAnimationService {
             this.canvasHeight = window.innerHeight;
             canvas.width = this.canvasWidth;
             canvas.height = this.canvasHeight;
+            
+            // If static mode, render once and stop
+            if (isStaticMode) {
+                this.renderStaticGradients(ctx);
+                return;
+            }
         };
         
         this.resizeHandler = resizeCanvas;
         resizeCanvas();
         window.addEventListener('resize', this.resizeHandler, { passive: true });
+        
+        // If static mode requested, don't start animation loop
+        if (isStaticMode) {
+            return;
+        }
         
         // Handle window focus/blur
         this.blurHandler = () => { this.isWindowFocused = false; };
@@ -69,9 +80,9 @@ export class GradientAnimationService {
         const gradientColor3 = this.cssVariableService.getVariableAsRgb('--gradient-color-3') || { r: 255, g: 215, b: 0 };
         const gradientColor4 = this.cssVariableService.getVariableAsRgb('--gradient-color-4') || { r: 255, g: 20, b: 147 };
         
-        // Slightly faster but still very subtle movement
-        const baseSpeed = isReducedMotion ? 0.00015 : 0.001; // Slightly increased from ultra-slow
-        const speedVariation = 0.0001; // Small increase in variation
+        // Respect accessibility preferences - much slower or static for reduced motion
+        const baseSpeed = isReducedMotion ? 0.00001 : 0.0003; // Nearly static for reduced motion
+        const speedVariation = isReducedMotion ? 0.000005 : 0.0001; // Minimal variation for reduced motion
         
         const gradientPoints: GradientPoint[] = [
             {
@@ -80,7 +91,7 @@ export class GradientAnimationService {
                 vx: baseSpeed + speedVariation * 0.5,
                 vy: (baseSpeed + speedVariation) * 1.2,
                 color: gradientColor1,
-                size: 1 // Reduced but still large
+                size: 1.4 // Reduced but still large
             },
             {
                 x: 0.95, // Moved closer to edge
@@ -88,7 +99,7 @@ export class GradientAnimationService {
                 vx: -(baseSpeed + speedVariation * 0.8),
                 vy: baseSpeed + speedVariation * 0.6,
                 color: gradientColor2,
-                size: 1.2 // Reduced but still large
+                size: 1.5 // Reduced but still large
             },
             {
                 x: 0.5, // Center position
@@ -183,13 +194,66 @@ export class GradientAnimationService {
                 
                 this.animationId = requestAnimationFrame(animate);
             } catch (error) {
-                console.error('Animation error:', error);
+                // Silently handle animation errors and stop animation
                 this.stopAnimation();
             }
         };
         
         // Start animation
         this.animationId = requestAnimationFrame(animate);
+    }
+    
+    private renderStaticGradients(ctx: CanvasRenderingContext2D): void {
+        // Get colors from CSS variables with fallbacks
+        const gradientColor1 = this.cssVariableService.getVariableAsRgb('--gradient-color-1') || { r: 73, g: 197, b: 147 };
+        const gradientColor2 = this.cssVariableService.getVariableAsRgb('--gradient-color-2') || { r: 138, g: 43, b: 226 };
+        const gradientColor3 = this.cssVariableService.getVariableAsRgb('--gradient-color-3') || { r: 255, g: 215, b: 0 };
+        const gradientColor4 = this.cssVariableService.getVariableAsRgb('--gradient-color-4') || { r: 255, g: 20, b: 147 };
+        
+        // Static gradient positions (no animation)
+        const staticGradientPoints = [
+            { x: 0.2, y: 0.2, color: gradientColor1, size: 1.4 },
+            { x: 0.8, y: 0.3, color: gradientColor2, size: 1.5 },
+            { x: 0.5, y: 0.8, color: gradientColor3, size: 1.3 },
+            { x: 0.3, y: 0.6, color: gradientColor4, size: 1.4 },
+            { x: 0.7, y: 0.7, color: gradientColor1, size: 1.2 }
+        ];
+        
+        // Pre-calculate background color
+        const backgroundColor = this.cssVariableService.getVariable('--elevation-layer2-dark-solid') || '#1f2020';
+        
+        // Clear canvas with background color
+        ctx.fillStyle = backgroundColor;
+        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        
+        // Set blend mode for smoother gradients
+        ctx.globalCompositeOperation = 'screen';
+        
+        // Render static gradients
+        staticGradientPoints.forEach(point => {
+            const pointX = point.x * this.canvasWidth;
+            const pointY = point.y * this.canvasHeight;
+            const radius = Math.min(this.canvasWidth, this.canvasHeight) * 0.9 * point.size;
+            
+            const gradient = ctx.createRadialGradient(
+                pointX, pointY, 0,
+                pointX, pointY, radius
+            );
+            
+            const { r, g, b } = point.color;
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.25)`);
+            gradient.addColorStop(0.15, `rgba(${r}, ${g}, ${b}, 0.18)`);
+            gradient.addColorStop(0.35, `rgba(${r}, ${g}, ${b}, 0.12)`);
+            gradient.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, 0.06)`);
+            gradient.addColorStop(0.8, `rgba(${r}, ${g}, ${b}, 0.03)`);
+            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        });
+        
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
     }
     
     stopAnimation(): void {
