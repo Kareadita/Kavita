@@ -232,8 +232,7 @@ $action-bar-height: 38px;
 .book-content {
   position: relative;
   margin: 0 0;
-    display: flex;
-    align-self: flex-start;
+  padding: 20px 0px;
 
   &.column-layout-1 {
       height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
@@ -267,15 +266,6 @@ $action-bar-height: 38px;
     }
 
     background-color: var(--brtheme-bg-color);
-}
-
-.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
-    display: flex;
-    justify-content: center;
-}
-
-.book-content *:not(code), .book-content *:not(a) {
-
 }
 
 .pagination-cont {
@@ -333,7 +323,7 @@ $action-bar-height: 38px;
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width-container {
     width: auto;
-    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height + $action-bar-height)) !important;
+    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
     max-width: calc(var(--book-reader-content-max-width)) !important;
     position: var(--book-reader-content-position) !important;
     top: var(--book-reader-content-top) !important;
@@ -344,13 +334,12 @@ $action-bar-height: 38px;
 
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width {
-    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height + $action-bar-height)) !important;
+    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
     max-width: calc(var(--book-reader-content-max-width)) !important;
     object-fit: contain;
     object-position: top center;
     break-inside: avoid;
     break-before: column;
-    padding: 20px 0;
 }
 
 
