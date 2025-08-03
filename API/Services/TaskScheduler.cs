@@ -487,9 +487,13 @@ public class TaskScheduler : ITaskScheduler
     // ReSharper disable once MemberCanBePrivate.Global
     public async Task CheckForUpdate()
     {
-        var update = await _versionUpdaterService.CheckForUpdate();
-        if (update == null) return;
-        await _versionUpdaterService.PushUpdate(update);
+        await TaskHelper.WithRetry(_logger, async () =>
+        {
+            var update = await _versionUpdaterService.CheckForUpdate();
+
+            if (update == null) return;
+            await _versionUpdaterService.PushUpdate(update);
+        }, 3, 60_000); // 1-minute base delay
     }
 
     public async Task SyncThemes()
