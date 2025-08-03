@@ -19,6 +19,7 @@ import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
 import {register as registerSwiperElements} from 'swiper/element/bundle';
+import {ColorPickerModule} from "@iplab/ngx-color-picker";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -131,6 +132,7 @@ bootstrapApplication(AppComponent, {
             autoDismiss: true
           }),
           NgCircleProgressModule.forRoot(),
+          ColorPickerModule,
         ),
         provideTransloco(translocoOptions),
         provideTranslocoLocale({

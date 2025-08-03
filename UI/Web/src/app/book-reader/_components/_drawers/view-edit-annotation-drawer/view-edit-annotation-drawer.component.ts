@@ -27,6 +27,7 @@ import {DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
+import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 
 export enum AnnotationMode {
   View = 0,
@@ -60,6 +61,7 @@ export class ViewEditAnnotationDrawerComponent {
   private readonly safeHtml = new SafeHtmlPipe();
   private readonly sanitizer = inject(DomSanitizer);
   private readonly epubHighlightService = inject(EpubHighlightService);
+  protected readonly utilityService = inject(UtilityService);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
 
@@ -321,4 +323,5 @@ export class ViewEditAnnotationDrawerComponent {
   }
 
   protected readonly AnnotationMode = AnnotationMode;
+  protected readonly UserBreakpoint = UserBreakpoint;
 }

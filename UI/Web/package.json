@@ -29,6 +29,7 @@
     "@angular/router": "^20.1.4",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@iharbeck/ngx-virtual-scroller": "^19.0.1",
+    "@iplab/ngx-color-picker": "^20.0.0",
     "@iplab/ngx-file-upload": "^20.0.0",
     "@jsverse/transloco": "^7.6.1",
     "@jsverse/transloco-locale": "^7.0.1",

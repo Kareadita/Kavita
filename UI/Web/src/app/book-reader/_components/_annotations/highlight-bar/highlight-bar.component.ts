@@ -8,28 +8,25 @@ import {
   model,
   Output
 } from '@angular/core';
-import {NgClass, NgStyle} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {HighlightSlot} from "../../../_models/annotations/highlight-slot";
-import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
-import {ColorPickerDirective} from "ngx-color-picker";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, tap} from "rxjs/operators";
-import {Breakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {
+  SettingColourPickerComponent
+} from "../../../../settings/_components/setting-colour-picker/setting-colour-picker.component";
 
 @Component({
   selector: 'app-highlight-bar',
   imports: [
-    NgClass,
-    NgStyle,
     TranslocoDirective,
-    SlotColorPipe,
     NgbCollapse,
-    ColorPickerDirective
+    SettingColourPickerComponent
   ],
   templateUrl: './highlight-bar.component.html',
   styleUrl: './highlight-bar.component.scss',
@@ -94,4 +91,5 @@ export class HighlightBarComponent {
   }
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
 }

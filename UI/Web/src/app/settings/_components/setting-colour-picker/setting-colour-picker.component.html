@@ -1,0 +1,22 @@
+@if(editMode()) {
+  <div class="color-picker-container">
+    <button class="btn btn-icon color">
+      @if (showPicker()) {
+        <chrome-picker class="floating-picker" [control]="chromeControl"></chrome-picker>
+      }
+
+      <input class="dot" appLongClick
+             (longClick)="editMode.set(false)"
+             [style.background]="color() | slotColor"
+             (click)="togglePicker()"
+      />
+    </button>
+  </div>
+} @else {
+  <button class="btn btn-icon color" (click)="onSelect()">
+    <div class="dot" appLongClick (longClick)="longClick()"
+         [ngClass]="{'active': selected()}"
+         [ngStyle]="{'background-color': color() | slotColor}">
+    </div>
+  </button>
+}
