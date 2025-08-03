@@ -141,7 +141,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return allKavitaPlusScrobbleEligibleTypes.includes(libType);
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
   }
 
   get IsMetadataDownloadEligible() {
