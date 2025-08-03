@@ -9,18 +9,55 @@
             <div class="card-text">
               <div class="mb-3">
                 <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
-                <input class="form-control custom-input" formControlName="username" id="username" autocomplete="username"
-                       type="text" autofocus [placeholder]="t('username')">
+                <input class="form-control custom-input" 
+                       formControlName="username" 
+                       id="username" 
+                       autocomplete="username"
+                       type="text" 
+                       autofocus 
+                       [placeholder]="t('username')"
+                       [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+                @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+                  <div class="invalid-feedback">
+                    {{t('username-required')}}
+                  </div>
+                }
               </div>
 
             <div class="mb-2">
               <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
-              <input class="form-control custom-input" formControlName="password" name="password" autocomplete="current-password"
-                       id="password" type="password" [placeholder]="t('password')">
+              <input class="form-control custom-input" 
+                     formControlName="password" 
+                     name="password" 
+                     autocomplete="current-password"
+                     id="password" 
+                     type="password" 
+                     [placeholder]="t('password')"
+                     [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                <div class="invalid-feedback">
+                  @if (loginForm.get('password')?.errors?.['required']) {
+                    <span>{{t('password-required')}}</span>
+                  }
+                  @if (loginForm.get('password')?.errors?.['minlength']) {
+                    <span>{{t('password-min-length')}}</span>
+                  }
+                  @if (loginForm.get('password')?.errors?.['maxlength']) {
+                    <span>{{t('password-max-length')}}</span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="sign-in">
-              <button class="btn btn-outline-primary" type="submit" [disabled]="isSubmitting">{{t('submit')}}</button>
+              <button class="btn btn-outline-primary" 
+                      type="submit" 
+                      [disabled]="isSubmitting() || loginForm.invalid">
+                @if (isSubmitting()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                {{t('submit')}}
+              </button>
             </div>
 
             <div class="mt-3 forgot-password">
@@ -31,11 +68,12 @@
       }
 
         @if (showOidcButton()) {
+          <hr/>
           <a
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
             href="oidc/login"
           >
-            <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
+            <app-image height="25px" width="25px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
             {{oidcConfig()?.providerName || t('oidc')}}
           </a>
         }

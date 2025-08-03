@@ -43,7 +43,7 @@ export class UserLoginComponent implements OnInit {
 
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")])
+      password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6)])
   });
 
   /**
@@ -95,6 +95,9 @@ export class UserLoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Ensure isSubmitting is false on component initialization
+    this.isSubmitting.set(false);
+
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.navService.handleLogin()
@@ -113,6 +116,7 @@ export class UserLoginComponent implements OnInit {
       }
 
       this.isLoaded.set(true);
+      this.cdRef.markForCheck();
     });
 
     this.route.queryParamMap.subscribe(params => {
@@ -138,19 +142,27 @@ export class UserLoginComponent implements OnInit {
 
 
   login(apiKey: string = '') {
+    // Don't proceed if form is invalid (for regular form submission)
+    if (!apiKey && this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
     const model = this.loginForm.getRawValue();
     model.apiKey = apiKey;
     this.isSubmitting.set(true);
+    
     this.accountService.login(model).subscribe({
       next: () => {
           this.loginForm.reset();
           this.navService.handleLogin()
-
           this.isSubmitting.set(false);
+          this.cdRef.markForCheck();
       },
       error: (err) => {
         this.toastr.error(err.error);
         this.isSubmitting.set(false);
+        this.cdRef.markForCheck();
       }
     });
   }
