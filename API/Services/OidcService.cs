@@ -164,6 +164,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 {
                     throw new KavitaException("errors.oidc.missing-external-id");
                 }
+
                 var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
 
                 await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
@@ -177,7 +178,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 throw new UnauthorizedAccessException(ex.Message);
             }
 
-            logger.LogTrace("Automatically refreshed token for user {User}", ctx.Principal?.GetUsername());
+            logger.LogTrace("Automatically refreshed token for user {UserId}", ctx.Principal?.GetUserId());
         }
         finally
         {
@@ -281,7 +282,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (string.IsNullOrWhiteSpace(emailClaim?.Value)) return null;
 
         var name = await FindBestAvailableName(claimsPrincipal) ?? emailClaim.Value;
-        logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name, externalId);
+        logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name.Censor(), externalId);
 
         var user = new AppUserBuilder(name, emailClaim.Value,
             await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
@@ -353,7 +354,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
         if (defaultAdminUser.Id == user.Id) return;
 
-        logger.LogDebug("Syncing user {UserName} from OIDC", user.UserName);
+        logger.LogDebug("Syncing user {UserId} from OIDC", user.Id);
         try
         {
 
@@ -370,7 +371,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to sync user {UserName} from OIDC", user.UserName);
+            logger.LogError(ex, "Failed to sync user {UserId} from OIDC", user.Id);
             await unitOfWork.RollbackAsync();
             throw new KavitaException("errors.oidc.syncing-user", ex);
         }
@@ -399,7 +400,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var res = await userManager.SetEmailAsync(user, email);
             if (!res.Succeeded)
             {
-                logger.LogError("Failed to update email for user {UserName} from OIDC {Errors}", user.UserName, res.Errors.Select(x => x.Description).ToList());
+                logger.LogError("Failed to update email for user {UserId} from OIDC {Errors}", user.Id, res.Errors.Select(x => x.Description).ToList());
                 throw new KavitaException("errors.oidc.failed-to-update-email");
             }
 
@@ -418,7 +419,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await userManager.UpdateAsync(user);
 
         var emailLink = await emailService.GenerateEmailLink(request, user.ConfirmationToken, "confirm-email-update", email);
-        logger.LogCritical("[Update Email]: Automatic email update after OIDC sync, email Link for {UserName}: {Link}", user.UserName, emailLink);
+        logger.LogCritical("[Update Email]: Automatic email update after OIDC sync, email Link for {UserId}: {Link}", user.Id, emailLink);
 
         if (!shouldEmailUser)
         {
@@ -428,7 +429,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         if (!isValidEmailAddress)
         {
-            logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email);
+            logger.LogCritical("[Update Email]: User is trying to update their email, but their existing email ({Email}) isn't valid. No email will be send", user.Email.Censor());
             return;
         }
 
@@ -458,7 +459,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var res = await userManager.SetUserNameAsync(user, bestName);
         if (!res.Succeeded)
         {
-            logger.LogError("Failed to update username for user {UserName} to {NewUserName} from OIDC {Errors}", user.UserName, bestName,  res.Errors.Select(x => x.Description).ToList());
+            logger.LogError("Failed to update username for user {UserId} to {NewUserName} from OIDC {Errors}", user.Id,
+                bestName.Censor(),  res.Errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.failed-to-update-username");
         }
     }
@@ -467,7 +469,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         var roles = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
             .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
-        logger.LogDebug("Syncing access roles for user {UserName}, found roles {Roles}", user.UserName, roles);
+        logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
 
         var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
         if (errors.Any())
@@ -482,7 +484,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var libraryAccessPrefix = settings.RolesPrefix + LibraryAccessPrefix;
         var libraryAccess = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, libraryAccessPrefix);
 
-        logger.LogDebug("Syncing libraries for user {UserName}, found library roles {Roles}", user.UserName, libraryAccess);
+        logger.LogDebug("Syncing libraries for user {UserId}, found library roles {Roles}", user.Id, libraryAccess);
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         // Distinct to ensure each library (id) is only present once
@@ -496,7 +498,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
         {
-            logger.LogDebug("User {UserName} is admin, granting access to all age ratings", user.UserName);
+            logger.LogDebug("User {UserId} is admin, granting access to all age ratings", user.Id);
             user.AgeRestriction = AgeRating.NotApplicable;
             user.AgeRestrictionIncludeUnknowns = true;
             return;
@@ -504,14 +506,14 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         var ageRatingPrefix = settings.RolesPrefix + AgeRestrictionPrefix;
         var ageRatings = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, ageRatingPrefix);
-        logger.LogDebug("Syncing age restriction for user {UserName}, found restrictions {Restrictions}", user.UserName, ageRatings);
+        logger.LogDebug("Syncing age restriction for user {UserId}, found restrictions {Restrictions}", user.Id, ageRatings);
 
         if (ageRatings.Count == 0 || (ageRatings.Count == 1 && ageRatings.Contains(IncludeUnknowns)))
         {
-            logger.LogDebug("No age restriction found in roles, setting to RatingPending");
+            logger.LogDebug("No age restriction found in roles, setting to NotApplicable and Include Unknowns: {IncludeUnknowns}", settings.DefaultIncludeUnknowns);
 
             user.AgeRestriction = AgeRating.NotApplicable;
-            user.AgeRestrictionIncludeUnknowns = true;
+            user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
             return;
         }
 
@@ -521,7 +523,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             if (!EnumExtensions.TryParse(ar, out AgeRating ageRating))
             {
-                logger.LogDebug("Age Restriction role configured that failed to map to a known age rating: {RoleName}", OidcService.AgeRestrictionPrefix+ar);
+                logger.LogDebug("Age Restriction role configured that failed to map to a known age rating: {RoleName}", AgeRestrictionPrefix+ar);
                 continue;
             }
 
@@ -534,8 +536,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user.AgeRestriction = highestAgeRestriction;
         user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
 
-        logger.LogDebug("Synced age restriction for user {UserName}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
-            user.UserName, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);
+        logger.LogDebug("Synced age restriction for user {UserId}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
+            user.Id, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);
     }
 
     /// <summary>

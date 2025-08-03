@@ -219,7 +219,7 @@ public partial class AccountService : IAccountService
         List<Library> libraries;
         if (hasAdminRole)
         {
-            _logger.LogDebug("{UserName} is admin. Granting access to all libraries", user.UserName);
+            _logger.LogDebug("{UserId} is admin. Granting access to all libraries", user.Id);
             libraries = allLibraries;
         }
         else

@@ -62,4 +62,24 @@ public static class StringExtensions
         return value.Substring(prefix.Length);
     }
 
+    /// <summary>
+    /// Censor the input string by removing all but the first and last char.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    /// <remarks>If the input is an email (contains @), the domain will remain untouched</remarks>
+    public static string Censor(this string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return input ?? string.Empty;
+
+        var atIdx = input.IndexOf('@');
+        if (atIdx == -1)
+        {
+            return $"{input[0]}{new string('*', input.Length - 1)}";
+        }
+
+        return input[0] + new string('*', atIdx - 1) + input[atIdx..];
+    }
+
 }
