@@ -370,7 +370,7 @@ public class CoverDbService : ICoverDbService
 
     private async Task<string> FallbackToKavitaReaderFavicon(string baseUrl)
     {
-        const string urlsFileName = "publishers.txt";
+        const string urlsFileName = "urls.txt";
         var correctSizeLink = string.Empty;
         var allOverrides = await GetCachedData(urlsFileName) ??
                            await $"{NewHost}favicons/{urlsFileName}".GetStringAsync();
@@ -384,6 +384,7 @@ public class CoverDbService : ICoverDbService
         var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
         var externalFile = allOverrides
             .Split("\n")
+            .Select(url => url.Trim('\n', '\r')) // Ensure windows line terminators don't mess anything up
             .FirstOrDefault(url =>
                 cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
                 cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
@@ -410,6 +411,7 @@ public class CoverDbService : ICoverDbService
 
         var externalFile = allOverrides
             .Split("\n")
+            .Select(url => url.Trim('\n', '\r')) // Ensure windows line terminators don't mess anything up
             .Select(publisherLine =>
             {
                 var tokens = publisherLine.Split("|");
