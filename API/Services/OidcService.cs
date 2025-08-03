@@ -341,9 +341,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
 
             await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
-
-            var claims = await ConstructNewClaimsList(ctx.HttpContext.RequestServices, newPrincipal, user, false);
-            ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
         }
         catch (KavitaException ex)
         {

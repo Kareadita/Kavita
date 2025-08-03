@@ -355,13 +355,9 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        var dto = _mapper.Map<UserDto>(user);
-        dto.Token = await _tokenService.CreateToken(user);
-        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
-            .Value;
-        dto.Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences);
-        return Ok(dto);
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return Ok(await ConstructUserDto(user, roles, !HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName)));
     }
 
     /// <summary>
