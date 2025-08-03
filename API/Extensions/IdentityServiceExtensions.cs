@@ -303,7 +303,7 @@ public static class IdentityServiceExtensions
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
         {
-            var expiresAt = DateTime.UtcNow.AddSeconds(double.Parse(ctx.TokenEndpointResponse.ExpiresIn));
+            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(ctx.TokenEndpointResponse.ExpiresIn));
             tokens.Add(new AuthenticationToken { Name = OidcService.ExpiresAt, Value = expiresAt.ToString("o") });
         }
 

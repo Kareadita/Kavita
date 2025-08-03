@@ -69,7 +69,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private OpenIdConnectConfiguration? _discoveryDocument;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
-    private static readonly ConcurrentDictionary<string, DateTime> LastFailedRefresh = new();
+    private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -129,10 +129,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (string.IsNullOrEmpty(expiresAt)) return;
 
         // Do not spam refresh if it failed
-        if (LastFailedRefresh.TryGetValue(key, out var time) && time.AddMinutes(30) < DateTime.UtcNow) return;
+        if (LastFailedRefresh.TryGetValue(key, out var time) && time.AddMinutes(30) < DateTimeOffset.UtcNow) return;
 
-        var tokenExpiry = DateTime.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-        if (tokenExpiry >= DateTime.UtcNow.AddSeconds(30)) return;
+        var tokenExpiry = DateTimeOffset.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+        if (tokenExpiry >= DateTimeOffset.UtcNow.AddSeconds(30)) return;
 
         // Ensure we're not refreshing twice
         if (!RefreshInProgress.TryAdd(key, true)) return;
@@ -145,7 +145,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             if (!string.IsNullOrEmpty(tokenResponse.Error))
             {
                 logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
-                LastFailedRefresh.TryAdd(key, DateTime.UtcNow);
+                LastFailedRefresh.TryAdd(key, DateTimeOffset.UtcNow);
                 return;
             }
 
@@ -161,29 +161,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 return;
             }
 
-            try
-            {
-                var newPrincipal = await ParseIdToken(settings, tokenResponse.IdToken);
-
-                var oidcId = newPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(oidcId))
-                {
-                    throw new KavitaException("errors.oidc.missing-external-id");
-                }
-
-                var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
-
-                await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
-
-                var claims = await ConstructNewClaimsList(ctx.HttpContext.RequestServices, newPrincipal, user, false);
-                ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
-            }
-            catch (KavitaException ex)
-            {
-                logger.LogError(ex, "Failed to sync user after token refresh");
-                throw new UnauthorizedAccessException(ex.Message);
-            }
-
+            await SyncUserSettings(ctx, settings, tokenResponse.IdToken);
             logger.LogTrace("Automatically refreshed token for user {UserId}", ctx.Principal?.GetUserId());
         }
         finally
@@ -344,6 +322,34 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
 
         await unitOfWork.CommitAsync();
+    }
+
+    private async Task SyncUserSettings(CookieValidatePrincipalContext ctx, OidcConfigDto settings, string idToken)
+    {
+        if (!settings.SyncUserSettings) return;
+
+        try
+        {
+            var newPrincipal = await ParseIdToken(settings, idToken);
+
+            var oidcId = newPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(oidcId))
+            {
+                throw new KavitaException("errors.oidc.missing-external-id");
+            }
+
+            var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
+
+            await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
+
+            var claims = await ConstructNewClaimsList(ctx.HttpContext.RequestServices, newPrincipal, user, false);
+            ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
+        }
+        catch (KavitaException ex)
+        {
+            logger.LogError(ex, "Failed to sync user after token refresh");
+            throw new UnauthorizedAccessException(ex.Message);
+        }
     }
 
     /// <summary>
