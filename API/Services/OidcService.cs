@@ -69,6 +69,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private OpenIdConnectConfiguration? _discoveryDocument;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
+    private static readonly ConcurrentDictionary<string, DateTime> LastFailedRefresh = new();
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -119,17 +120,21 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (ctx.Principal == null) return;
 
+        var key = ctx.Principal.GetUsername();
+
         var refreshToken = ctx.Properties.GetTokenValue(RefreshToken);
         if (string.IsNullOrEmpty(refreshToken)) return;
 
         var expiresAt = ctx.Properties.GetTokenValue(ExpiresAt);
         if (string.IsNullOrEmpty(expiresAt)) return;
 
+        // Do not spam refresh if it failed
+        if (LastFailedRefresh.TryGetValue(key, out var time) && time.AddMinutes(30) < DateTime.UtcNow) return;
+
         var tokenExpiry = DateTime.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-        if (tokenExpiry >= DateTime.Now.AddSeconds(30)) return;
+        if (tokenExpiry >= DateTime.UtcNow.AddSeconds(30)) return;
 
         // Ensure we're not refreshing twice
-        var key = ctx.Principal.GetUsername();
         if (!RefreshInProgress.TryAdd(key, true)) return;
 
         try
@@ -140,6 +145,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             if (!string.IsNullOrEmpty(tokenResponse.Error))
             {
                 logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                LastFailedRefresh.TryAdd(key, DateTime.UtcNow);
                 return;
             }
 
@@ -183,6 +189,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         finally
         {
             RefreshInProgress.TryRemove(key, out _);
+            LastFailedRefresh.TryRemove(key, out _);
         }
 
     }

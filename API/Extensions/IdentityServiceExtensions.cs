@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
@@ -288,6 +289,11 @@ public static class IdentityServiceExtensions
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
         {
             tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
+        }
+        else
+        {
+            var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<OidcService>>();
+            logger.LogWarning("OIDC login without refresh token, automatic sync will not work for this user");
         }
 
         if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.IdToken))
