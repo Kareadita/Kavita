@@ -68,7 +68,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
 
-    private OpenIdConnectConfiguration? _discoveryDocument;
+    private static OpenIdConnectConfiguration? DiscoveryDocument;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
 
@@ -565,10 +565,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="refreshToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
+    private static async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
 
-        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+        DiscoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
 
         var msg = new
         {
@@ -578,7 +578,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             client_secret = dto.Secret,
         };
 
-        var json = await _discoveryDocument.TokenEndpoint
+        var json = await DiscoveryDocument.TokenEndpoint
             .AllowAnyHttpStatus()
             .PostUrlEncodedAsync(msg)
             .ReceiveString();
@@ -593,14 +593,15 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="idToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
+    private static async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
     {
-        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+        DiscoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+
         var tokenValidationParameters = new TokenValidationParameters
         {
-            ValidIssuer = _discoveryDocument.Issuer,
+            ValidIssuer = DiscoveryDocument.Issuer,
             ValidAudience = dto.ClientId,
-            IssuerSigningKeys = _discoveryDocument.SigningKeys,
+            IssuerSigningKeys = DiscoveryDocument.SigningKeys,
             ValidateIssuerSigningKey = true,
         };
 
