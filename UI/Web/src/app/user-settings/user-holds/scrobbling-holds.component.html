@@ -17,7 +17,7 @@
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
         <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
-        <a class="btn-link ms-2" href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+        <a class="btn-link ms-2" href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
       </ng-template>
     </ngx-datatable-column>
 
