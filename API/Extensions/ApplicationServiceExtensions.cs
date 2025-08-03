@@ -4,12 +4,14 @@ using API.Data;
 using API.Helpers;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Store;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using API.SignalR.Presence;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -83,6 +85,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
+        services.AddScoped<IOidcService, OidcService>();
+
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
@@ -106,6 +110,7 @@ public static class ApplicationServiceExtensions
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
+        services.AddSingleton<ITicketStore, CustomTicketStore>();
 
         services.AddSwaggerGen(g =>
         {

@@ -1,51 +1,26 @@
 /// <reference types="@angular/localize" />
-import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom,} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer,} from '@angular/core';
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
-import {ToastrModule} from 'ngx-toastr';
+import {ToastrModule, ToastrService} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
 import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
-import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
+import {provideTransloco, translate, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {switchMap} from "rxjs";
+import {catchError, filter, firstValueFrom, Observable, of, switchMap, take, tap, timeout} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
-import {distinctUntilChanged} from "rxjs/operators";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
-
+import {SettingsService} from "./app/admin/settings.service";
 const disableAnimations = !('animate' in document.documentElement);
-
-export function preloadUser(userService: AccountService, transloco: TranslocoService) {
-  return function() {
-    return userService.currentUser$.pipe(distinctUntilChanged(), switchMap((user) => {
-      if (user && user.preferences.locale) {
-        transloco.setActiveLang(user.preferences.locale);
-        return transloco.load(user.preferences.locale)
-      }
-
-      // If no user or locale is available, fallback to the default language ('en')
-      const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
-      transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale);
-    })).subscribe();
-  };
-}
-
-
-export const preLoad = {
-  provide: APP_INITIALIZER,
-  multi: true,
-  useFactory: preloadUser,
-  deps: [AccountService, TranslocoService]
-};
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -112,6 +87,34 @@ function getBaseHref(platformLocation: PlatformLocation): string {
   return platformLocation.getBaseHrefFromDOM();
 }
 
+
+function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
+  const user = accountService.currentUserSignal();
+  const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
+
+  transloco.setActiveLang(locale);
+  return transloco.load(locale);
+}
+
+/**
+ * Setup user from localstorage
+ */
+function bootstrapUser() {
+  const accountService = inject(AccountService);
+  const transloco = inject(TranslocoService);
+
+  return firstValueFrom(accountService.isOidcAuthenticated().pipe(
+    switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
+    catchError(() => of(null)),
+    tap(user => {
+      if (!user) {
+        accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+      }
+    }),
+    switchMap(() => loadUserLocale(transloco, accountService)),
+  ));
+}
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
@@ -138,7 +141,6 @@ bootstrapApplication(AppComponent, {
         }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
         {
@@ -146,7 +148,8 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        provideAppInitializer(() => bootstrapUser()),
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

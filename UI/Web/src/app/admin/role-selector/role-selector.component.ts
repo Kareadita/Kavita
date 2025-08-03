@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  inject,
+  inject, input,
   Input,
   OnInit,
   Output
@@ -33,6 +33,7 @@ export class RoleSelectorComponent implements OnInit {
    * This must have roles
    */
   @Input() member: Member | undefined | User;
+  preSelectedRoles = input<string[]>([]);
   /**
    * Allows the selection of Admin role
    */
@@ -72,6 +73,13 @@ export class RoleSelectorComponent implements OnInit {
   preselect() {
     if (this.member !== undefined) {
       this.member.roles.forEach(role => {
+        const foundRole = this.selectedRoles.filter(item => item.data === role);
+        if (foundRole.length > 0) {
+          foundRole[0].selected = true;
+        }
+      });
+    } else if (this.preSelectedRoles().length > 0) {
+      this.preSelectedRoles().forEach((role) => {
         const foundRole = this.selectedRoles.filter(item => item.data === role);
         if (foundRole.length > 0) {
           foundRole[0].selected = true;

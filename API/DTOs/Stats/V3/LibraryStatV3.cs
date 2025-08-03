@@ -22,6 +22,10 @@ public sealed record LibraryStatV3
     /// </summary>
     public bool CreateReadingListsFromMetadata { get; set; }
     /// <summary>
+    /// If the library has metadata turned on
+    /// </summary>
+    public bool EnabledMetadata { get; set; }
+    /// <summary>
     /// Type of the Library
     /// </summary>
     public LibraryType LibraryType { get; set; }

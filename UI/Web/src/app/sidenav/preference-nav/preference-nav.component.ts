@@ -21,6 +21,7 @@ export enum SettingsTabId {
 
   // Admin
   General = 'admin-general',
+  OpenIDConnect = 'admin-oidc',
   Email = 'admin-email',
   Media = 'admin-media',
   Users = 'admin-users',
@@ -127,6 +128,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       children: [
         new SideNavItem(SettingsTabId.General, [Role.Admin]),
         new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
+        new SideNavItem(SettingsTabId.OpenIDConnect, [Role.Admin]),
         new SideNavItem(SettingsTabId.Media, [Role.Admin]),
         new SideNavItem(SettingsTabId.Email, [Role.Admin]),
         new SideNavItem(SettingsTabId.Users, [Role.Admin]),

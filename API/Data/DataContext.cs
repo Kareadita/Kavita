@@ -300,6 +300,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ?? new List<MetadataSettingField>())
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
+
+        builder.Entity<AppUser>()
+            .Property(user => user.IdentityProvider)
+            .HasDefaultValue(IdentityProvider.Kavita);
     }
 
     #nullable enable

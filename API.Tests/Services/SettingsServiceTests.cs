@@ -34,7 +34,7 @@ public class SettingsServiceTests
         _mockUnitOfWork = Substitute.For<IUnitOfWork>();
         _settingsService = new SettingsService(_mockUnitOfWork, ds,
             Substitute.For<ILibraryWatcher>(), Substitute.For<ITaskScheduler>(),
-            Substitute.For<ILogger<SettingsService>>());
+            Substitute.For<ILogger<SettingsService>>(), Substitute.For<IOidcService>());
     }
 
     #region ImportMetadataSettings

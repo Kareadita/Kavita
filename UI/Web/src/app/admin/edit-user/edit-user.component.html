@@ -1,17 +1,41 @@
-<ng-container *transloco="let t; read: 'edit-user'">
+<ng-container *transloco="let t; prefix: 'edit-user'">
   <div class="modal-container">
     <div class="modal-header">
-      <h5 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h5>
+      <h5 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member().username | sentenceCase}}</h5>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
       </button>
     </div>
 
     <div class="modal-body scrollable-modal">
+
+      @if (!isLocked() && member().identityProvider === IdentityProvider.OpenIdConnect) {
+        <div class="alert alert-warning" role="alert">
+          <strong>{{t('notice')}}</strong> {{t('out-of-sync')}}
+        </div>
+      }
+
+      @if (isLocked()) {
+        <div class="alert alert-warning" role="alert">
+          <strong>{{t('notice')}}</strong> {{t('oidc-managed')}}
+        </div>
+      }
+
       <form [formGroup]="userForm">
         <h4>{{t('account-detail-title')}}</h4>
         <div class="row g-0 mb-2">
-            <div class="col-md-6 col-sm-12 pe-4">
+          <div class="col-md-4 col-sm-12 pe-4">
+            @if (userForm.get('identityProvider'); as formControl) {
+              <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
+              <select class="form-select" id="identityProvider" formControlName="identityProvider">
+                @for (idp of IdentityProviders; track idp) {
+                  <option [value]="idp">{{idp | identityProviderPipe}}</option>
+                }
+              </select>
+              <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
+            }
+          </div>
+          <div class="col-md-4 col-sm-12 pe-4">
               @if(userForm.get('username'); as formControl) {
                 <div class="mb-3">
                   <label for="username" class="form-label">{{t('username')}}</label>
@@ -33,7 +57,7 @@
                 </div>
               }
             </div>
-            <div class="col-md-6 col-sm-12">
+          <div class="col-md-4 col-sm-12">
               @if(userForm.get('email'); as formControl) {
                 <div class="mb-3" style="width:100%">
                   <label for="email" class="form-label">{{t('email')}}</label>
@@ -63,17 +87,17 @@
 
         <div class="row g-0 mb-3">
           <div class="col-md-12">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member()"></app-restriction-selector>
           </div>
         </div>
 
           <div class="row g-0 mb-3">
             <div class="col-md-6 pe-4">
-              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
+              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member()"></app-role-selector>
             </div>
 
             <div class="col-md-6">
-              <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
+              <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member()"></app-library-selector>
             </div>
           </div>
       </form>
@@ -83,7 +107,7 @@
       <button type="button" class="btn btn-secondary" (click)="close()">
         {{t('cancel')}}
       </button>
-      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving || !userForm.valid">
+      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLocked() || isSaving || !userForm.valid">
         @if (isSaving) {
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         }

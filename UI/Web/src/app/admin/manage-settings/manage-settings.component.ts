@@ -145,6 +145,7 @@ export class ManageSettingsComponent implements OnInit {
     modelSettings.smtpConfig = this.serverSettings.smtpConfig;
     modelSettings.installId = this.serverSettings.installId;
     modelSettings.installVersion = this.serverSettings.installVersion;
+    modelSettings.oidcConfig = this.serverSettings.oidcConfig;
 
     // Disabled FormControls are not added to the value
     if (this.isDocker) {

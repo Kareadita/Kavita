@@ -90,6 +90,11 @@ namespace API.Data.Migrations
                     b.Property<bool>("HasRunScrobbleEventGeneration")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IdentityProvider")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("TEXT");
 
@@ -114,6 +119,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OidcId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
@@ -3640,7 +3648,8 @@ namespace API.Data.Migrations
 
                     b.Navigation("TableOfContents");
 
-                    b.Navigation("UserPreferences");
+                    b.Navigation("UserPreferences")
+                        .IsRequired();
 
                     b.Navigation("UserRoles");
 
