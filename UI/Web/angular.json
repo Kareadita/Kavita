@@ -14,7 +14,8 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss",
-          "changeDetection": "OnPush"
+          "changeDetection": "OnPush",
+          "skipTests": true
         },
         "@schematics/angular:application": {
           "strict": true
@@ -99,8 +100,7 @@
             "sslKey": "./ssl/server.key",
             "sslCert": "./ssl/server.crt",
             "ssl": false,
-            "buildTarget": "kavita-webui:build",
-            "proxyConfig": "proxy.conf.json"
+            "buildTarget": "kavita-webui:build"
           },
           "configurations": {
             "production": {
