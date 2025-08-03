@@ -341,9 +341,17 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Syncs the given user to the principal found in the id token
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="settings"></param>
+    /// <param name="idToken"></param>
+    /// <param name="user"></param>
+    /// <exception cref="UnauthorizedAccessException">If syncing fails</exception>
     private async Task SyncUserSettings(CookieValidatePrincipalContext ctx, OidcConfigDto settings, string idToken, AppUser user)
     {
-        if (!settings.SyncUserSettings) return;
+        if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
         try
         {
