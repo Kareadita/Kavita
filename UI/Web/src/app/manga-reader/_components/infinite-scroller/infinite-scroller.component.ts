@@ -644,6 +644,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    * Move to the next chapter and set the page
    */
   moveToNextChapter() {
+    if (!this.allImagesLoaded) return;
+
     this.setPageNum(this.totalPages);
     this.loadNextChapter.emit();
   }
