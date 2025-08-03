@@ -520,7 +520,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             logger.LogDebug("No age restriction found in roles, setting to NotApplicable and Include Unknowns: {IncludeUnknowns}", settings.DefaultIncludeUnknowns);
 
             user.AgeRestriction = AgeRating.NotApplicable;
-            user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
+            user.AgeRestrictionIncludeUnknowns = true;
             return;
         }
 
