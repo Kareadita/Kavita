@@ -1,22 +1,54 @@
 <ng-container *transloco="let t; read:'manage-metadata-settings'">
 
-
   <p>{{t('description')}}</p>
   @if (isLoaded) {
     <form [formGroup]="settingsForm">
 
       <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('enabled'); as formControl) {
-          <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        }
+        <div class="col-md-6 col-sm-12">
+          @if(settingsForm.get('enabled'); as formControl) {
+            <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
+            <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="enable-extended-metadata-processing" type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
       </div>
 
+      <div class="row g-0 mt-4 mb-4">
+        <div class="col-md-6 col-sm-12">
+          <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent.export()">
+            {{t('export-settings')}}
+          </button>
+          <div class="text-muted mt-2">{{t('export-tooltip')}}</div>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          <button class="btn btn-secondary" routerLink="/settings" [fragment]="SettingsTabId.MappingsImport">
+            {{t('import-settings')}}
+          </button>
+          <div class="text-muted mt-2">{{t('import-tooltip')}}</div>
+        </div>
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <h4>{{t('series-header')}}</h4>
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableSummary'); as formControl) {
           <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
@@ -91,8 +123,7 @@
 
       <div class="setting-section-break"></div>
 
-      <!-- Chapter-based fields -->
-      <h5>{{t('chapter-header')}}</h5>
+      <h4>{{t('chapter-header')}}</h4>
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableChapterTitle'); as formControl) {
           <app-setting-switch [title]="t('enable-chapter-title-label')" [subtitle]="t('enable-chapter-title-tooltip')">
@@ -155,6 +186,7 @@
 
       @if(settingsForm.get('enablePeople'); as formControl) {
         <div class="setting-section-break"></div>
+        <h4>{{t('people-header')}}</h4>
 
         <div class="row g-0 mt-4 mb-4">
 
@@ -195,13 +227,10 @@
         }
       }
 
-
-
-
       <div class="setting-section-break"></div>
 
-
-      <div class="row g-0 mt-4 mb-4">
+      <h4>{{t('tags-header')}}</h4>
+      <div class="row mt-4 mb-4">
         <div class="col-md-6">
           @if(settingsForm.get('enableGenres'); as formControl) {
             <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
@@ -226,144 +255,9 @@
         </div>
       </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('blacklist'); as formControl) {
-          <app-setting-item [title]="t('blacklist-label')" [subtitle]="t('blacklist-tooltip')">
-            <ng-template #view>
-              @let val = breakTags(formControl.value);
-
-              @for(opt of val; track opt) {
-                <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-              } @empty {
-                {{null | defaultValue}}
-              }
-            </ng-template>s
-            <ng-template #edit>
-              <textarea rows="3" id="blacklist" class="form-control"  formControlName="blacklist"></textarea>
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if(settingsForm.get('whitelist'); as formControl) {
-          <app-setting-item [title]="t('whitelist-label')" [subtitle]="t('whitelist-tooltip')">
-            <ng-template #view>
-              @let val = breakTags(formControl.value);
-
-              @for(opt of val; track opt) {
-                <app-tag-badge>{{opt.trim()}}</app-tag-badge>
-              } @empty {
-                {{null | defaultValue}}
-              }
-            </ng-template>s
-            <ng-template #edit>
-              <textarea rows="3" id="whitelist" class="form-control"  formControlName="whitelist"></textarea>
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="setting-section-break"></div>
-
-      <h4>{{t('age-rating-mapping-title')}}</h4>
-      <p>{{t('age-rating-mapping-description')}}</p>
-
-      <div formArrayName="ageRatingMappings">
-        @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
-          <div [formGroupName]="i" class="row mb-2">
-            <div class="col-md-4 d-flex align-items-center justify-content-center">
-              <input type="text" class="form-control" formControlName="str" autocomplete="off" />
-            </div>
-            <div class="col-md-2 d-flex align-items-center justify-content-center">
-              <i class="fa fa-arrow-right" aria-hidden="true"></i>
-            </div>
-            <div class="col-md-4 d-flex align-items-center justify-content-center">
-              <select class="form-select" formControlName="rating">
-                @for (ageRating of ageRatings; track ageRating.value) {
-                  <option [value]="ageRating.value">
-                    {{ageRating.value | ageRating}}
-                  </option>
-                }
-              </select>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
-                <i class="fa fa-trash-alt" aria-hidden="true"></i>
-              </button>
-
-              @if($last) {
-                <button class="btn btn-icon" (click)="addAgeRatingMapping()">
-                  <i class="fa fa-plus" aria-hidden="true"></i>
-                </button>
-              }
-            </div>
-          </div>
-        } @empty {
-          <button class="btn btn-secondary" (click)="addAgeRatingMapping()">
-            <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-age-rating-mapping-label')}}
-          </button>
-        }
-
-
-      </div>
-
-      <div class="setting-section-break"></div>
-
-      <!-- Field Mapping Table -->
-      <h4>{{t('field-mapping-title')}}</h4>
-      <p>{{t('field-mapping-description')}}</p>
-      <div formArrayName="fieldMappings">
-        @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
-          <div [formGroupName]="i" class="row mb-2">
-            <div class="col-md-2">
-              <select class="form-select" formControlName="sourceType">
-                <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
-                <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <input type="text" class="form-control" formControlName="sourceValue"
-                     placeholder="Source genre/tag" />
-            </div>
-            <div class="col-md-2">
-              <select class="form-select" formControlName="destinationType">
-                <option [value]="MetadataFieldType.Genre">{{t('genre')}}</option>
-                <option [value]="MetadataFieldType.Tag">{{t('tag')}}</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <input type="text" class="form-control" formControlName="destinationValue"
-                     placeholder="Destination genre/tag" />
-            </div>
-            <div class="col-md-2">
-              <div class="form-check">
-                <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
-                       formControlName="excludeFromSource">
-                <label [for]="'remove-source-tag-' + i" class="form-check-label">
-                  {{t('remove-source-tag-label')}}
-                </label>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-icon" (click)="removeFieldMappingRow(i)">
-                <i class="fa fa-trash-alt" aria-hidden="true"></i>
-              </button>
-
-              @if ($last) {
-                <button class="btn btn-icon" (click)="addFieldMapping()">
-                  <i class="fa fa-plus" aria-hidden="true"></i>
-                </button>
-              }
-            </div>
-          </div>
-        } @empty {
-          <button class="btn btn-secondary" (click)="addFieldMapping()">
-            <i class="fa fa-plus" aria-hidden="true"></i> {{t('add-field-mapping-label')}}
-          </button>
-        }
-
-      </div>
+      @if (settings) {
+        <app-manage-metadata-mappings [settings]="settings" [settingsForm]="settingsForm" />
+      }
 
       <div class="setting-section-break"></div>
 

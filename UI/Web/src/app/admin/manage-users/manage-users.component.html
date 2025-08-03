@@ -10,6 +10,7 @@
   <table class="table table-striped">
     <thead>
     <tr>
+      <th scope="col"></th>
       <th scope="col">{{t('name-header')}}</th>
       <th scope="col">{{t('last-active-header')}}</th>
       <th scope="col">{{t('sharing-header')}}</th>
@@ -20,6 +21,18 @@
     <tbody>
       @for(member of members; track member.username + member.lastActiveUtc + member.roles.length; let idx = $index) {
         <tr>
+          <td>
+            <div class="d-flex flex-row justify-content-center align-items-center">
+              @switch (member.identityProvider) {
+                @case (IdentityProvider.OpenIdConnect) {
+                  <app-image imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px"></app-image>
+                }
+                @case (IdentityProvider.Kavita) {
+                  <app-image imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px"></app-image>
+                }
+              }
+            </div>
+          </td>
           <td id="username--{{idx}}">
             <span class="member-name" id="member-name--{{idx}}" [ngClass]="{'highlight': member.username === loggedInUsername}">{{member.username | titlecase}}</span>
             @if (member.isPending) {

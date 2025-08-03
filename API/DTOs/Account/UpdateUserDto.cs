@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Entities.Enums;
 
 namespace API.DTOs.Account;
 #nullable enable
@@ -25,4 +26,5 @@ public sealed record UpdateUserDto
     public AgeRestrictionDto AgeRestriction { get; init; } = default!;
     /// <inheritdoc cref="API.Entities.AppUser.Email"/>
     public string? Email { get; set; } = default!;
+    public IdentityProvider IdentityProvider { get; init; } = IdentityProvider.Kavita;
 }

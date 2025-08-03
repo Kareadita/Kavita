@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -13,7 +13,7 @@ import {UserUpdateEvent} from '../_models/events/user-update-event';
 import {AgeRating} from '../_models/metadata/age-rating';
 import {AgeRestriction} from '../_models/metadata/age-restriction';
 import {TextResonse} from '../_types/text-response';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
@@ -63,7 +63,7 @@ export class AccountService {
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
 
-
+  public readonly currentUserSignal = toSignal(this.currentUserSource);
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -205,14 +205,22 @@ export class AccountService {
     );
   }
 
+  getAccount() {
+    return this.httpClient.get<User>(this.baseUrl + 'account').pipe(
+      tap((response: User) => {
+        const user = response;
+        if (user) {
+          this.setCurrentUser(user);
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
   setCurrentUser(user?: User, refreshConnections = true) {
 
     const isSameUser = this.currentUser === user;
     if (user) {
-      user.roles = [];
-      const roles = this.getDecodedToken(user.token).role;
-      Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
-
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
 
@@ -240,18 +248,30 @@ export class AccountService {
         this.messageHub.createHubConnection(this.currentUser);
         this.licenseService.hasValidLicense().subscribe();
       }
-      this.startRefreshTokenTimer();
+      if (this.currentUser.token) {
+        this.startRefreshTokenTimer();
+      }
     }
   }
 
-  logout() {
+  logout(skipAutoLogin: boolean = false) {
+    const user = this.currentUserSignal();
+    if (!user) return;
+
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
-    // Upon logout, perform redirection
-    this.router.navigateByUrl('/login');
+
+    if (!user.token) {
+      window.location.href = '/oidc/logout';
+      return;
+    }
+
+    this.router.navigate(['/login'], {
+      queryParams: {skipAutoLogin: skipAutoLogin}
+    });
   }
 
 
@@ -267,6 +287,11 @@ export class AccountService {
       }),
       takeUntilDestroyed(this.destroyRef)
     );
+  }
+
+  isOidcAuthenticated() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/oidc-authenticated', TextResonse)
+      .pipe(map(res => res == "true"));
   }
 
   isEmailConfirmed() {
@@ -410,7 +435,8 @@ export class AccountService {
 
 
   private refreshToken() {
-    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline) return of();
+    if (this.currentUser === null || this.currentUser === undefined || !this.isOnline || !this.currentUser.token) return of();
+
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {

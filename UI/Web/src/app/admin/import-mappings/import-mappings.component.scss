@@ -1,0 +1,50 @@
+.file-input {
+  display: none;
+}
+
+.heading-badge  {
+  color: var(--bs-badge-color);
+}
+
+::ng-deep .file-info {
+  width: 83%;
+  float: left;
+}
+
+::ng-deep .file-buttons {
+  float: right;
+}
+
+file-upload {
+  background: none;
+  height: auto;
+}
+
+::ng-deep .upload-input {
+  color: var(--input-text-color) !important;
+}
+
+::ng-deep file-upload-list-item {
+  color: var(--input-text-color) !important;
+}
+
+.conflict-group-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-text-color);
+}
+
+.conflict-title {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.reset-color {
+  color: var(--accent-text-color);
+}
+
+.break {
+  height: 1px;
+  background-color: var(--setting-break-color);
+  margin: 10px 0;
+}

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.Email;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Settings;
@@ -253,4 +254,55 @@ public class SettingsController : BaseApiController
             return BadRequest(ex.Message);
         }
     }
+
+    /// <summary>
+    /// Import field mappings
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("import-field-mappings")]
+    public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsDto dto)
+    {
+        try
+        {
+            return Ok(await _settingsService.ImportFieldMappings(dto.Data, dto.Settings));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue importing field mappings");
+            return BadRequest(ex.Message);
+        }
+    }
+
+
+    /// <summary>
+    /// Retrieve publicly required configuration regarding Oidc
+    /// </summary>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("oidc")]
+    public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
+    {
+        var settings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var publicConfig = _mapper.Map<OidcPublicConfigDto>(settings);
+        publicConfig.Enabled = !string.IsNullOrEmpty(settings.Authority) &&
+                               !string.IsNullOrEmpty(settings.ClientId) &&
+                               !string.IsNullOrEmpty(settings.Secret);
+
+        return Ok(publicConfig);
+    }
+
+    /// <summary>
+    /// Validate if the given authority is reachable from the server
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("is-valid-authority")]
+    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
+    {
+        return Ok(await _settingsService.IsValidAuthority(authority.Authority));
+    }
+
+
 }

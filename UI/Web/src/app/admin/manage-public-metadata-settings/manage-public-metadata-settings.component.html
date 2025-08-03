@@ -1,0 +1,44 @@
+<ng-container *transloco="let t; prefix: 'manage-metadata-settings'">
+
+  @if (licenseService.hasValidLicenseSignal()) {
+    <p class="alert alert-warning" role="alert">{{t('k+-warning')}}</p>
+  }
+
+  <form class="row g-0 mt-4 mb-4" [formGroup]="settingsForm">
+    <div class="col-md-6 col-sm-12">
+      @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
+        <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input id="enable-extended-metadata-processing" type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      }
+    </div>
+  </form>
+
+  <div class="row g-0 mt-4 mb-4">
+    <div class="col-md-6 col-sm-12">
+      <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent.export()">
+        {{ t('export-settings') }}
+      </button>
+      <div class="text-muted mt-2">{{t('export-tooltip')}}</div>
+    </div>
+
+    <div class="col-md-6 col-sm-12">
+      <button class="btn btn-secondary" routerLink="/settings" [fragment]="SettingsTabId.MappingsImport">
+        {{ t('import-settings') }}
+      </button>
+      <div class="text-muted mt-2">{{t('import-tooltip')}}</div>
+    </div>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4 class="mb-4">{{t('tags-header')}}</h4>
+
+  @if (settings) {
+    <app-manage-metadata-mappings [settingsForm]="settingsForm" [settings]="settings"></app-manage-metadata-mappings>
+  }
+</ng-container>
