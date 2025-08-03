@@ -259,20 +259,20 @@ export class ManageReadingProfilesComponent implements OnInit {
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
-    data.readingDirection = parseInt(data.readingDirection as unknown as string);
-    data.scalingOption = parseInt(data.scalingOption as unknown as string);
-    data.pageSplitOption = parseInt(data.pageSplitOption as unknown as string);
-    data.readerMode = parseInt(data.readerMode as unknown as string);
-    data.layoutMode = parseInt(data.layoutMode as unknown as string);
-    data.disableWidthOverride = parseInt(data.disableWidthOverride as unknown as string);
+    data.readingDirection = parseInt(data.readingDirection + '');
+    data.scalingOption = parseInt(data.scalingOption + '');
+    data.pageSplitOption = parseInt(data.pageSplitOption + '');
+    data.readerMode = parseInt(data.readerMode + '');
+    data.layoutMode = parseInt(data.layoutMode + '');
+    data.disableWidthOverride = parseInt(data.disableWidthOverride + '');
 
-    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection as unknown as string);
-    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle as unknown as string);
-    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode as unknown as string);
+    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection + '');
+    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle + '');
+    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode + '');
 
-    data.pdfTheme = parseInt(data.pdfTheme as unknown as string);
-    data.pdfScrollMode = parseInt(data.pdfScrollMode as unknown as string);
-    data.pdfSpreadMode = parseInt(data.pdfSpreadMode as unknown as string);
+    data.pdfTheme = parseInt(data.pdfTheme + '');
+    data.pdfScrollMode = parseInt(data.pdfScrollMode + '');
+    data.pdfSpreadMode = parseInt(data.pdfSpreadMode + '');
 
     return data;
   }

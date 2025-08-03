@@ -197,4 +197,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("FirstInstallVersion")]
     FirstInstallVersion = 39,
+    /// <summary>
+    /// A Json object of type <see cref="API.DTOs.Settings.OidcConfigDto"/>
+    /// </summary>
+    [Description("OidcConfiguration")]
+    OidcConfiguration = 40,
+
 }

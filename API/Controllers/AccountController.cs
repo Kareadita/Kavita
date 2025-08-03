@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Email;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
@@ -52,6 +53,7 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly IOidcService _oidcService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -60,7 +62,8 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IOidcService oidcService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -72,6 +75,50 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _oidcService = oidcService;
+    }
+
+    /// <summary>
+    /// Returns true if OIDC authentication cookies are present
+    /// </summary>
+    /// <remarks>Makes not guarantee about their validity</remarks>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("oidc-authenticated")]
+    public ActionResult<bool> OidcAuthenticated()
+    {
+        return HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName);
+    }
+
+    /// <summary>
+    /// Returns the current user, as it would from login
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    /// <remarks>Does not return tokens for the user</remarks>
+    /// <remarks>Updates the last active date for the user</remarks>
+    [HttpGet]
+    public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        if (user == null) throw new UnauthorizedAccessException();
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
+
+        try
+        {
+            user.UpdateLastActive();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
+        }
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        return Ok(await ConstructUserDto(user, roles, false));
     }
 
     /// <summary>
@@ -151,10 +198,10 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            AddDefaultStreamsToUser(user);
+            _accountService.AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            await AddDefaultReadingProfileToUser(user);
+            await _accountService.AddDefaultReadingProfileToUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -224,6 +271,11 @@ public class AccountController : BaseApiController
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        // Setting only takes effect if OIDC is functional, and if we're not logging in via ApiKey
+        var disablePasswordAuthentication = oidcConfig is {Enabled: true, DisablePasswordAuthentication: true} && string.IsNullOrEmpty(loginDto.ApiKey);
+        if (disablePasswordAuthentication && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "password-authentication-disabled"));
+
         if (string.IsNullOrEmpty(loginDto.ApiKey))
         {
             var result = await _signInManager
@@ -249,7 +301,14 @@ public class AccountController : BaseApiController
         }
 
         // Update LastActive on account
-        user.UpdateLastActive();
+        try
+        {
+            user.UpdateLastActive();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
+        }
 
         // NOTE: This can likely be removed
         user.UserPreferences ??= new AppUserPreferences
@@ -262,18 +321,28 @@ public class AccountController : BaseApiController
 
         _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
+        return Ok(await ConstructUserDto(user, roles));
+    }
+
+    private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true)
+    {
         var dto = _mapper.Map<UserDto>(user);
-        dto.Token = await _tokenService.CreateToken(user);
-        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
-            .Value;
+
+        if (includeTokens)
+        {
+            dto.Token = await _tokenService.CreateToken(user);
+            dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        }
+
+        dto.Roles = roles;
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
+
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
-        if (pref == null) return Ok(dto);
+        if (pref == null) return dto;
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
-
-        return Ok(dto);
+        return dto;
     }
 
     /// <summary>
@@ -286,13 +355,9 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        var dto = _mapper.Map<UserDto>(user);
-        dto.Token = await _tokenService.CreateToken(user);
-        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
-            .Value;
-        dto.Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences);
-        return Ok(dto);
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return Ok(await ConstructUserDto(user, roles, !HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName)));
     }
 
     /// <summary>
@@ -505,6 +570,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
+    /// <remarks>Users who's <see cref="AppUser.IdentityProvider"/> is not <see cref="IdentityProvider.Kavita"/> cannot be edited if <see cref="OidcConfigDto.SyncUserSettings"/> is true</remarks>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
@@ -516,6 +582,16 @@ public class AccountController : BaseApiController
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
+
+
+        try
+        {
+            if (await _accountService.ChangeIdentityProvider(User.GetUserId(), user, dto.IdentityProvider)) return Ok();
+        }
+        catch (KavitaException exception)
+        {
+            return BadRequest(exception.Message);
+        }
 
         // Check if username is changing
         if (!user.UserName!.Equals(dto.Username))
@@ -670,10 +746,10 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             // Assign default streams
-            AddDefaultStreamsToUser(user);
+            _accountService.AddDefaultStreamsToUser(user);
 
             // Assign default reading profile
-            await AddDefaultReadingProfileToUser(user);
+            await _accountService.AddDefaultReadingProfileToUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
@@ -770,29 +846,6 @@ public class AccountController : BaseApiController
         }
 
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
-    }
-
-    private void AddDefaultStreamsToUser(AppUser user)
-    {
-        foreach (var newStream in Seed.DefaultStreams.Select(stream => _mapper.Map<AppUserDashboardStream, AppUserDashboardStream>(stream)))
-        {
-            user.DashboardStreams.Add(newStream);
-        }
-
-        foreach (var stream in Seed.DefaultSideNavStreams.Select(stream => _mapper.Map<AppUserSideNavStream, AppUserSideNavStream>(stream)))
-        {
-            user.SideNavStreams.Add(stream);
-        }
-    }
-
-    private async Task AddDefaultReadingProfileToUser(AppUser user)
-    {
-        var profile = new AppUserReadingProfileBuilder(user.Id)
-            .WithName("Default Profile")
-            .WithKind(ReadingProfileKind.Default)
-            .Build();
-        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
-        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>

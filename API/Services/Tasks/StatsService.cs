@@ -248,7 +248,8 @@ public class StatsService : IStatsService
             DotnetVersion = Environment.Version.ToString(),
             OpdsEnabled = serverSettings.EnableOpds,
             EncodeMediaAs = serverSettings.EncodeMediaAs,
-            MatchedMetadataEnabled = mediaSettings.Enabled
+            MatchedMetadataEnabled = mediaSettings.Enabled,
+            OidcEnabled = !string.IsNullOrEmpty(serverSettings.OidcConfig.Authority),
         };
 
         dto.OsLocale = CultureInfo.CurrentCulture.EnglishName;
@@ -308,6 +309,7 @@ public class StatsService : IStatsService
             libDto.UsingFolderWatching = library.FolderWatching;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
+            libDto.EnabledMetadata = library.EnableMetadata;
             libDto.LibraryType = library.Type;
 
             dto.Libraries.Add(libDto);
@@ -353,7 +355,9 @@ public class StatsService : IStatsService
             userDto.DevicePlatforms = user.Devices.Select(d => d.Platform).ToList();
             userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
             userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
+            userDto.IsSharingReviews = user.UserPreferences.ShareReviews;
             userDto.WantToReadSeriesCount = user.WantToRead.Count;
+            userDto.IdentityProvider = user.IdentityProvider;
 
             if (allLibraries.Count > 0 && userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraries))
             {

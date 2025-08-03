@@ -13,4 +13,12 @@ export interface User {
   ageRestriction: AgeRestriction;
   hasRunScrobbleEventGeneration: boolean;
   scrobbleEventGenerationRan: string; // datetime
+  identityProvider: IdentityProvider,
 }
+
+export enum IdentityProvider {
+  Kavita = 0,
+  OpenIdConnect = 1,
+}
+
+export const IdentityProviders: IdentityProvider[] = [IdentityProvider.Kavita, IdentityProvider.OpenIdConnect];

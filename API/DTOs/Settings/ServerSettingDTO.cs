@@ -93,6 +93,11 @@ public sealed record ServerSettingDto
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }
     /// <summary>
+    /// OIDC Configuration
+    /// </summary>
+    public OidcConfigDto OidcConfig { get; set; }
+
+    /// <summary>
     /// The Date Kavita was first installed
     /// </summary>
     public DateTime? FirstInstallDate { get; set; }

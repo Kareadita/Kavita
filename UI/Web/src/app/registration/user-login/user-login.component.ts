@@ -1,15 +1,24 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, computed,
+  effect, inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
-import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {environment} from "../../../environments/environment";
+import {ImageComponent} from "../../shared/image/image.component";
+import { SettingsService } from 'src/app/admin/settings.service';
+import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 
 
 @Component({
@@ -17,9 +26,20 @@ import {TRANSLOCO_SCOPE, TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent]
 })
 export class UserLoginComponent implements OnInit {
+
+  private readonly accountService = inject(AccountService);
+  private readonly router = inject(Router);
+  private readonly memberService = inject(MemberService);
+  private readonly toastr = inject(ToastrService);
+  private readonly navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  protected readonly settingsService = inject(SettingsService);
+
+  baseUrl = environment.apiUrl;
 
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
@@ -27,80 +47,111 @@ export class UserLoginComponent implements OnInit {
   });
 
   /**
-   * If there are no admins on the server, this will enable the registration to kick in.
-   */
-  firstTimeFlow: boolean = true;
-  /**
    * Used for first time the page loads to ensure no flashing
    */
-  isLoaded: boolean = false;
-  isSubmitting = false;
+  isLoaded = signal(false);
+  isSubmitting = signal(false);
+  /**
+   * undefined until query params are read
+   */
+  skipAutoLogin = signal<boolean | undefined>(undefined);
+  /**
+   * Display the login form, regardless if the password authentication is disabled (admins can still log in)
+   * Set from query
+   */
+  forceShowPasswordLogin = signal(false);
+  oidcConfig = signal<OidcPublicConfig | undefined>(undefined);
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService,
-    private readonly cdRef: ChangeDetectorRef, private route: ActivatedRoute) {
-      this.navService.hideNavBar();
-      this.navService.hideSideNav();
-    }
+  /**
+   * Display the login form
+   */
+  showPasswordLogin = computed(() => {
+    const loaded = this.isLoaded();
+    const config = this.oidcConfig();
+    const force = this.forceShowPasswordLogin();
+    if (force) return true;
+
+    return loaded && config && !config.disablePasswordAuthentication;
+  });
+  showOidcButton = computed(() => {
+    const config = this.oidcConfig();
+    return config && config.enabled;
+  });
+
+  constructor() {
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
+
+    effect(() => {
+      const skipAutoLogin = this.skipAutoLogin();
+      const oidcConfig = this.oidcConfig();
+
+      if (!oidcConfig || skipAutoLogin === undefined) return;
+
+      if (oidcConfig.autoLogin && !skipAutoLogin) {
+        window.location.href = '/oidc/login';
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
-        this.navService.showNavBar();
-        this.navService.showSideNav();
-        this.router.navigateByUrl('/home');
+        this.navService.handleLogin()
         this.cdRef.markForCheck();
       }
     });
 
+    this.settingsService.getPublicOidcConfig().subscribe(config => {
+      this.oidcConfig.set(config);
+    });
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
-      this.firstTimeFlow = !adminExists;
-
-      if (this.firstTimeFlow) {
+      if (!adminExists) {
         this.router.navigateByUrl('registration/register');
         return;
       }
 
-      this.isLoaded = true;
-      this.cdRef.markForCheck();
+      this.isLoaded.set(true);
     });
 
     this.route.queryParamMap.subscribe(params => {
       const val = params.get('apiKey');
       if (val != null && val.length > 0) {
         this.login(val);
+        return;
+      }
+
+      this.skipAutoLogin.set(params.get('skipAutoLogin') === 'true')
+      this.forceShowPasswordLogin.set(params.get('forceShowPassword') === 'true');
+
+      const error = params.get('error');
+      if (!error) return;
+
+      if (error.startsWith('errors.')) {
+        this.toastr.error(translate(error));
+      } else {
+        this.toastr.error(error);
       }
     });
   }
 
 
-
   login(apiKey: string = '') {
     const model = this.loginForm.getRawValue();
     model.apiKey = apiKey;
-    this.isSubmitting = true;
-    this.cdRef.markForCheck();
-    this.accountService.login(model).subscribe(() => {
-      this.loginForm.reset();
-      this.navService.showNavBar();
-      this.navService.showSideNav();
+    this.isSubmitting.set(true);
+    this.accountService.login(model).subscribe({
+      next: () => {
+          this.loginForm.reset();
+          this.navService.handleLogin()
 
-      // Check if user came here from another url, else send to library route
-      const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      if (pageResume && pageResume !== '/login') {
-        localStorage.setItem('kavita--auth-intersection-url', '');
-        this.router.navigateByUrl(pageResume);
-      } else {
-        localStorage.setItem('kavita--auth-intersection-url', '');
-        this.router.navigateByUrl('/home');
+          this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        this.toastr.error(err.error);
+        this.isSubmitting.set(false);
       }
-      this.isSubmitting = false;
-      this.cdRef.markForCheck();
-    }, err => {
-      this.toastr.error(err.error);
-      this.isSubmitting = false;
-      this.cdRef.markForCheck();
     });
   }
 }
