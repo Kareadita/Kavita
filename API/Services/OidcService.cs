@@ -83,7 +83,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences);
-        if (user != null) return user;
+        if (user != null)
+        {
+            await SyncUserSettings(request, settings, principal, user);
+
+            return user;
+        }
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
@@ -110,6 +115,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             logger.LogDebug("User {UserName} has matched on email to {OidcId}", user.Id, oidcId);
             user.OidcId = oidcId;
             await unitOfWork.CommitAsync();
+
+            await SyncUserSettings(request, settings, principal, user);
 
             return user;
         }
@@ -374,7 +381,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="user"></param>
     public async Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        if (!settings.SyncUserSettings) return;
+        if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
         // Never sync the default user
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
