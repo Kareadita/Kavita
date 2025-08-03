@@ -70,8 +70,7 @@ public static class StringExtensions
     /// <remarks>If the input is an email (contains @), the domain will remain untouched</remarks>
     public static string Censor(this string? input)
     {
-        if (string.IsNullOrWhiteSpace(input))
-            return input ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(input)) return input ?? string.Empty;
 
         var atIdx = input.IndexOf('@');
         if (atIdx == -1)

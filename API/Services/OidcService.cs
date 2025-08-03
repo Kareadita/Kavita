@@ -43,11 +43,12 @@ public interface IOidcService
     /// <exception cref="KavitaException">if any requirements aren't met</exception>
     Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal);
     /// <summary>
-    /// Refresh the token inside the cookie when it's close to expirering. And sync the user
+    /// Refresh the token inside the cookie when it's close to expiring. And sync the user
     /// </summary>
     /// <param name="ctx"></param>
     /// <returns></returns>
-    Task RefreshCookieToken(CookieValidatePrincipalContext ctx);
+    /// <remarks>If the token is refreshed successfully, updates the last active time of the suer</remarks>
+    Task<AppUser?> RefreshCookieToken(CookieValidatePrincipalContext ctx);
     /// <summary>
     /// Remove <see cref="AppUser.OidcId"/> from all users
     /// </summary>
@@ -116,26 +117,27 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         return await CreateNewAccount(request, principal, settings, oidcId);
     }
 
-    public async Task RefreshCookieToken(CookieValidatePrincipalContext ctx)
+    public async Task<AppUser?> RefreshCookieToken(CookieValidatePrincipalContext ctx)
     {
-        if (ctx.Principal == null) return;
+        if (ctx.Principal == null) return null;
 
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal.GetUserId()) ?? throw new UnauthorizedAccessException();
         var key = ctx.Principal.GetUsername();
 
         var refreshToken = ctx.Properties.GetTokenValue(RefreshToken);
-        if (string.IsNullOrEmpty(refreshToken)) return;
+        if (string.IsNullOrEmpty(refreshToken)) return user;
 
         var expiresAt = ctx.Properties.GetTokenValue(ExpiresAt);
-        if (string.IsNullOrEmpty(expiresAt)) return;
+        if (string.IsNullOrEmpty(expiresAt)) return user;
 
         // Do not spam refresh if it failed
-        if (LastFailedRefresh.TryGetValue(key, out var time) && time.AddMinutes(30) < DateTimeOffset.UtcNow) return;
+        if (LastFailedRefresh.TryGetValue(key, out var time) && time.AddMinutes(30) < DateTimeOffset.UtcNow) return user;
 
         var tokenExpiry = DateTimeOffset.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-        if (tokenExpiry >= DateTimeOffset.UtcNow.AddSeconds(30)) return;
+        if (tokenExpiry >= DateTimeOffset.UtcNow.AddSeconds(30)) return user;
 
         // Ensure we're not refreshing twice
-        if (!RefreshInProgress.TryAdd(key, true)) return;
+        if (!RefreshInProgress.TryAdd(key, true)) return user;
 
         try
         {
@@ -146,7 +148,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             {
                 logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
                 LastFailedRefresh.TryAdd(key, DateTimeOffset.UtcNow);
-                return;
+                return user;
             }
 
             var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(tokenResponse.ExpiresIn));
@@ -155,13 +157,27 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
             ctx.ShouldRenew = true;
 
+            try
+            {
+                user.UpdateLastActive();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
+            }
+
+            if (unitOfWork.HasChanges())
+            {
+                await unitOfWork.CommitAsync();
+            }
+
             if (string.IsNullOrEmpty(tokenResponse.IdToken))
             {
                 logger.LogTrace("The OIDC provider did not return an id token in the refresh response, continuous sync is not supported");
-                return;
+                return user;
             }
 
-            await SyncUserSettings(ctx, settings, tokenResponse.IdToken);
+            await SyncUserSettings(ctx, settings, tokenResponse.IdToken, user);
             logger.LogTrace("Automatically refreshed token for user {UserId}", ctx.Principal?.GetUserId());
         }
         finally
@@ -170,6 +186,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             LastFailedRefresh.TryRemove(key, out _);
         }
 
+        return user;
     }
 
     public async Task ClearOidcIds()
@@ -324,22 +341,13 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
-    private async Task SyncUserSettings(CookieValidatePrincipalContext ctx, OidcConfigDto settings, string idToken)
+    private async Task SyncUserSettings(CookieValidatePrincipalContext ctx, OidcConfigDto settings, string idToken, AppUser user)
     {
         if (!settings.SyncUserSettings) return;
 
         try
         {
             var newPrincipal = await ParseIdToken(settings, idToken);
-
-            var oidcId = newPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(oidcId))
-            {
-                throw new KavitaException("errors.oidc.missing-external-id");
-            }
-
-            var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.SideNavStreams) ?? throw new UnauthorizedAccessException();
-
             await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
         }
         catch (KavitaException ex)

@@ -162,13 +162,13 @@ public static class IdentityServiceExtensions
                 OnValidatePrincipal = async ctx =>
                 {
                     var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-                    await oidcService.RefreshCookieToken(ctx);
+                    var user = await oidcService.RefreshCookieToken(ctx);
 
-                    var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
-                    var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal!.GetUserId());
-
-                    var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user!, false);
-                    ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
+                    if (user != null)
+                    {
+                        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user!, false);
+                        ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
+                    }
                 },
                 OnRedirectToAccessDenied = ctx =>
                 {
