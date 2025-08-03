@@ -274,4 +274,35 @@ public class SettingsController : BaseApiController
         }
     }
 
+
+    /// <summary>
+    /// Retrieve publicly required configuration regarding Oidc
+    /// </summary>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("oidc")]
+    public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
+    {
+        var settings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var publicConfig = _mapper.Map<OidcPublicConfigDto>(settings);
+        publicConfig.Enabled = !string.IsNullOrEmpty(settings.Authority) &&
+                               !string.IsNullOrEmpty(settings.ClientId) &&
+                               !string.IsNullOrEmpty(settings.Secret);
+
+        return Ok(publicConfig);
+    }
+
+    /// <summary>
+    /// Validate if the given authority is reachable from the server
+    /// </summary>
+    /// <param name="authority"></param>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("is-valid-authority")]
+    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
+    {
+        return Ok(await _settingsService.IsValidAuthority(authority.Authority));
+    }
+
+
 }

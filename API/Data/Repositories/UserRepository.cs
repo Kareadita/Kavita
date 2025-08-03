@@ -108,6 +108,13 @@ public interface IUserRepository
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
     Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId);
+    /// <summary>
+    /// Try getting a user by the id provided by OIDC
+    /// </summary>
+    /// <param name="oidcId"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
 }
 
 public class UserRepository : IUserRepository
@@ -574,6 +581,16 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    public async Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None)
+    {
+        if (string.IsNullOrEmpty(oidcId)) return null;
+
+        return await _context.AppUser
+            .Where(u => u.OidcId == oidcId)
+            .Includes(includes)
+            .FirstOrDefaultAsync();
+    }
+
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
@@ -806,6 +823,7 @@ public class UserRepository : IUserRepository
                 LastActiveUtc = u.LastActiveUtc,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
                 IsPending = !u.EmailConfirmed,
+                IdentityProvider = u.IdentityProvider,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,
@@ -817,7 +835,7 @@ public class UserRepository : IUserRepository
                     Type = l.Type,
                     LastScanned = l.LastScanned,
                     Folders = l.Folders.Select(x => x.Path).ToList()
-                }).ToList()
+                }).ToList(),
             })
             .AsSplitQuery()
             .AsNoTracking()

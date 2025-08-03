@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -128,6 +129,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
+                    break;
+                case ServerSettingKey.OidcConfiguration:
+                    destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     break;
                 case ServerSettingKey.LicenseKey:
                 case ServerSettingKey.EnableAuthentication:

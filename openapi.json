@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.5",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.6",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.5"
+    "version": "0.8.7.6"
   },
   "servers": [
     {
@@ -27,6 +27,68 @@
     }
   ],
   "paths": {
+    "/api/Account/oidc-authenticated": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns true if OIDC authentication cookies are present",
+        "description": "Makes not guarantee about their validity",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns the current user, as it would from login",
+        "description": "Does not return tokens for the user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Account/reset-password": {
       "post": {
         "tags": [
@@ -397,6 +459,7 @@
           "Account"
         ],
         "summary": "Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.",
+        "description": "Users who's API.Entities.AppUser.IdentityProvider is not API.Entities.Enums.IdentityProvider.Kavita cannot be edited if API.DTOs.Settings.OidcConfigDto.SyncUserSettings is true",
         "requestBody": {
           "description": "",
           "content": {
@@ -4820,6 +4883,40 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/Oidc/login": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "/"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Oidc/logout": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -13529,6 +13626,86 @@
         }
       }
     },
+    "/api/Settings/oidc": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Retrieve publicly required configuration regarding Oidc",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-valid-authority": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Validate if the given authority is reachable from the server",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/{userId}/read": {
       "get": {
         "tags": [
@@ -16588,6 +16765,20 @@
             "description": "The timestamp of when Scrobble Event Generation ran (Utc)",
             "format": "date-time"
           },
+          "oidcId": {
+            "type": "string",
+            "description": "The sub returned the by OIDC provider",
+            "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "The IdentityProvider for the user, default to API.Entities.Enums.IdentityProvider.Kavita",
+            "format": "int32"
+          },
           "scrobbleHolds": {
             "type": "array",
             "items": {
@@ -17849,6 +18040,16 @@
             "type": "integer",
             "description": "User this table of content belongs to",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthorityValidationDto": {
+        "type": "object",
+        "properties": {
+          "authority": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22407,6 +22608,15 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false,
@@ -22681,6 +22891,139 @@
             "type": "string",
             "description": "The localized title to render on the card",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OidcConfigDto": {
+        "type": "object",
+        "properties": {
+          "autoLogin": {
+            "type": "boolean",
+            "description": "Automatically redirect to the Oidc login screen"
+          },
+          "disablePasswordAuthentication": {
+            "type": "boolean",
+            "description": "Disables password authentication for non-admin users"
+          },
+          "providerName": {
+            "type": "string",
+            "description": "Name of your provider, used to display on the login screen",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "description": "Optional OpenID Connect Authority URL. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Optional OpenID Connect ClientId, defaults to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "secret": {
+            "type": "string",
+            "description": "Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "provisionAccounts": {
+            "type": "boolean",
+            "description": "If true, auto creates a new account when someone logs in via OpenID Connect"
+          },
+          "requireVerifiedEmail": {
+            "type": "boolean",
+            "description": "Require emails to be verified by the OpenID Connect provider when creating accounts on login"
+          },
+          "syncUserSettings": {
+            "type": "boolean",
+            "description": "Overwrite Kavita roles, libraries and age rating with OpenIDConnect provided roles on log in."
+          },
+          "rolesPrefix": {
+            "type": "string",
+            "description": "A prefix that all roles Kavita checks for during sync must have",
+            "nullable": true
+          },
+          "rolesClaim": {
+            "type": "string",
+            "description": "The JWT claim roles are mapped under, defaults to System.Security.Claims.ClaimTypes.Role",
+            "nullable": true
+          },
+          "customScopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Custom scopes Kavita should request from your OIDC provider",
+            "nullable": true
+          },
+          "defaultRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "defaultLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "defaultAgeRestriction": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
+          },
+          "defaultIncludeUnknowns": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Returns true if the !:OidcPublicConfigDto.Authority has been set",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "All configuration regarding OIDC"
+      },
+      "OidcPublicConfigDto": {
+        "type": "object",
+        "properties": {
+          "autoLogin": {
+            "type": "boolean",
+            "description": "Automatically redirect to the Oidc login screen"
+          },
+          "disablePasswordAuthentication": {
+            "type": "boolean",
+            "description": "Disables password authentication for non-admin users"
+          },
+          "providerName": {
+            "type": "string",
+            "description": "Name of your provider, used to display on the login screen",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -25516,6 +25859,9 @@
           "smtpConfig": {
             "$ref": "#/components/schemas/SmtpConfigDto"
           },
+          "oidcConfig": {
+            "$ref": "#/components/schemas/OidcConfigDto"
+          },
           "firstInstallDate": {
             "type": "string",
             "description": "The Date Kavita was first installed",
@@ -27481,6 +27827,15 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27569,6 +27924,13 @@
             "type": "string",
             "nullable": true
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "token": {
             "type": "string",
             "nullable": true
@@ -27590,6 +27952,15 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false

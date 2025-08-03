@@ -6,6 +6,7 @@ using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Extensions;
 #nullable enable

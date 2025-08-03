@@ -309,6 +309,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 v => JsonSerializer.Deserialize<List<HighlightSlot>>(v, JsonSerializerOptions.Default) ?? new List<HighlightSlot>())
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<HighlightSlot>());
+
+        builder.Entity<AppUser>()
+            .Property(user => user.IdentityProvider)
+            .HasDefaultValue(IdentityProvider.Kavita);
     }
 
     #nullable enable

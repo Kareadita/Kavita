@@ -390,5 +390,6 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId));
 
+        CreateMap<OidcConfigDto, OidcPublicConfigDto>();
     }
 }
