@@ -230,10 +230,6 @@ export class ManageReadingProfilesComponent implements OnInit {
     ).subscribe();
   }
 
-  /**
-   * Autosave will not error
-   * @private
-   */
   private autoSave() {
     if (this.selectedProfile!.id == 0) {
       return this.readingProfileService.createProfile(this.packData()).pipe(
