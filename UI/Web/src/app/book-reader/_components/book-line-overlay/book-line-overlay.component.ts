@@ -140,7 +140,7 @@ export class BookLineOverlayComponent implements OnInit {
         this.endXPath = '//' + this.endXPath;
       }
 
-      // For backward compatibility, keep the original xPath as startXPath
+      // For backward compatibility, keep the original xPath as startXPath (TODO: Refactor the code)
       this.xPath = this.startXPath;
 
       // Get the context window for generating a blurb in annotation flow
