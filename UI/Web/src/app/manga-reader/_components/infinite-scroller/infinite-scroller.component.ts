@@ -37,6 +37,14 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
  */
 const SPACER_SCROLL_INTO_PX = 200;
+/**
+ * Default debounce time from scroll and scrollend event listeners
+ */
+const DEFAULT_SCROLL_DEBOUNCE = 20;
+/**
+ * Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
+ */
+const EMULATE_SCROLL_END_DEBOUNCE = 100;
 
 /**
  * Bitwise enums for configuring how much debug information we want
@@ -179,15 +187,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
-  /**
-   * Default debounce time from scroll and scrollend event listeners
-   */
-  defaultScrollDebounce = 20;
-  /**
-   * Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
-   */
-  emulateScrollEndDebounce = 100;
-
   readerSettings!: Signal<ReaderSetting>;
   widthOverride!: Signal<string>;
 
@@ -233,7 +232,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     fromEvent(element, 'scroll')
       .pipe(
-        debounceTime(this.defaultScrollDebounce),
+        debounceTime(DEFAULT_SCROLL_DEBOUNCE),
         takeUntilDestroyed(this.destroyRef),
         tap((event) => this.handleScrollEvent(event))
       )
@@ -241,13 +240,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     const isScrollEndSupported = 'onscrollend' in document;
     const scrollEndEvent = isScrollEndSupported ? 'scrollend' : 'scroll';
-    const scrollEndDebounce = isScrollEndSupported ? this.defaultScrollDebounce : this.emulateScrollEndDebounce;
+    const scrollEndDebounce = isScrollEndSupported ? DEFAULT_SCROLL_DEBOUNCE : EMULATE_SCROLL_END_DEBOUNCE;
 
     fromEvent(element, scrollEndEvent)
       .pipe(
         debounceTime(scrollEndDebounce),
         takeUntilDestroyed(this.destroyRef),
-        tap((event) => this.handleScrollEvent(event))
+        tap((event) => this.handleScrollEndEvent(event))
       )
       .subscribe();
   }

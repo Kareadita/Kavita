@@ -659,7 +659,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
             );
 
-            return await manager.GetConfigurationAsync();
+            _discoveryDocument = await manager.GetConfigurationAsync();
+            return _discoveryDocument;
         }
         finally
         {

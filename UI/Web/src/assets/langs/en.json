@@ -1725,8 +1725,8 @@
         "loading": "{{common.loading}}",
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email",
-        "oidc": "OIDC",
-        "native": "Native"
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Native"
     },
 
     "role-localized-pipe": {
