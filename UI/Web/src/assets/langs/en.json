@@ -1724,7 +1724,9 @@
         "no-data": "There are no other users.",
         "loading": "{{common.loading}}",
         "actions-header": "Actions",
-        "pending-tooltip": "This user has not validated their email"
+        "pending-tooltip": "This user has not validated their email",
+        "oidc": "OIDC",
+        "native": "Native"
     },
 
     "role-localized-pipe": {
