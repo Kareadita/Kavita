@@ -10,7 +10,7 @@ namespace API.Helpers;
 
 public static partial class AnnotationHelper
 {
-    private const string UiXPathScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
+    private const string UiXPathScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[3]/DIV[1]/DIV[1]";
 
     [GeneratedRegex("""^//id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
@@ -18,14 +18,15 @@ public static partial class AnnotationHelper
     public static void InjectSingleElementAnnotations(HtmlDocument doc, List<AnnotationDto> annotations)
     {
         var annotationsByElement = annotations
-            .GroupBy(a => a.XPath.Replace(UiXPathScope, "//BODY").ToLowerInvariant())
+            .GroupBy(a => a.XPath)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         foreach (var (xpath, elementAnnotations) in annotationsByElement)
         {
             try
             {
-                var elem = FindElementByXPath(doc, xpath);
+                var scopedXPath = xpath.Replace(UiXPathScope, "//BODY").ToLowerInvariant();
+                var elem = FindElementByXPath(doc, scopedXPath);
                 if (elem == null) continue;
 
                 var originalText = elem.InnerText;
