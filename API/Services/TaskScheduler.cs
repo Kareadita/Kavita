@@ -490,8 +490,8 @@ public class TaskScheduler : ITaskScheduler
         await TaskHelper.WithRetry(_logger, async () =>
         {
             var update = await _versionUpdaterService.CheckForUpdate();
-
             if (update == null) return;
+
             await _versionUpdaterService.PushUpdate(update);
         }, 3, 60_000); // 1-minute base delay
     }
