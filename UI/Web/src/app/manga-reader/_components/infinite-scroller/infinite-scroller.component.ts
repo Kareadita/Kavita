@@ -18,7 +18,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
+import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {ReaderService} from '../../../_services/reader.service';
@@ -179,6 +179,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
+  /**
+   * Default debounce time from scroll and scrollend event listeners
+   */
+  defaultScrollDebounce = 20;
+  /**
+   * Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
+   */
+  emulateScrollEndDebounce = 100;
+
   readerSettings!: Signal<ReaderSetting>;
   widthOverride!: Signal<string>;
 
@@ -223,26 +232,24 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     const element = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
     fromEvent(element, 'scroll')
-      .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-      .subscribe((event) => {
-        this.handleScrollEvent(event)
-      });
+      .pipe(
+        debounceTime(this.defaultScrollDebounce),
+        takeUntilDestroyed(this.destroyRef),
+        tap((event) => this.handleScrollEvent(event))
+      )
+      .subscribe();
 
     const isScrollEndSupported = 'onscrollend' in document;
-    if (isScrollEndSupported) {
-      fromEvent(element, 'scrollend')
-        .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-        .subscribe((event) => {
-          this.handleScrollEndEvent(event)
-        });
-    } else {
-      // Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
-      fromEvent(element, 'scroll')
-        .pipe(debounceTime(100), takeUntilDestroyed(this.destroyRef))
-        .subscribe((event) => {
-          this.handleScrollEndEvent(event)
-        });
-    }
+    const scrollEndEvent = isScrollEndSupported ? 'scrollend' : 'scroll';
+    const scrollEndDebounce = isScrollEndSupported ? this.defaultScrollDebounce : this.emulateScrollEndDebounce;
+
+    fromEvent(element, scrollEndEvent)
+      .pipe(
+        debounceTime(scrollEndDebounce),
+        takeUntilDestroyed(this.destroyRef),
+        tap((event) => this.handleScrollEvent(event))
+      )
+      .subscribe();
   }
 
   ngOnInit(): void {

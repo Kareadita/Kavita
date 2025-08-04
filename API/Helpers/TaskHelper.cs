@@ -9,7 +9,7 @@ public static class TaskHelper
 
 
     /// <summary>
-    /// Wrap a simple action in a retry mechanism. Allowing up to <see cref="maxAttempts"/> attamps, with at least
+    /// Wrap a simple action in a retry mechanism. Allowing up to <see cref="maxAttempts"/> attempts, with at least
     /// <see cref="baseDelay"/> between each attempt
     /// </summary>
     /// <param name="logger"></param>
@@ -27,7 +27,7 @@ public static class TaskHelper
             }
             catch (Exception e)
             {
-                logger.LogWarning(e, "An exception occured running task {Attempt}/{MaxAttemps}", attempt+1,maxAttempts);
+                logger.LogWarning(e, "An exception occurred running task {Attempt}/{MaxAttempts}", attempt + 1,maxAttempts);
 
                 var delay = baseDelay * 2 * attempt;
                 var jitter = Random.Shared.Next(0, delay / 4);
@@ -35,7 +35,7 @@ public static class TaskHelper
             }
         }
 
-        logger.LogError("Task failed to execute after {Attemps} attemps", maxAttempts);
+        logger.LogError("Task failed to execute after {Attempts} attempts", maxAttempts);
     }
 
 }

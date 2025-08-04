@@ -14,4 +14,6 @@ _imageService.Resize(...);
 
 return;
 ```
-
+- Operation (+,-,*, etc) should always have spaces around it; I.e. `a + b` not `a+b`.
+- Comma's `,` should always be followed by a space
+- When setting href directectly (not using Angulars routing) it should always be prefixed with baseURL
