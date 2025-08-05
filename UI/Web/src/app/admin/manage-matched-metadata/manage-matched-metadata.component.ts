@@ -18,7 +18,7 @@ import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
-import {AsyncPipe} from "@angular/common";
+import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
@@ -59,6 +59,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   protected readonly imageService = inject(ImageService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
 
   isLoading: boolean = true;

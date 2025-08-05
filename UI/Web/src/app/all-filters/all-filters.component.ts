@@ -12,7 +12,7 @@ import {JumpbarService} from "../_services/jumpbar.service";
 import {ActionFactoryService} from "../_services/action-factory.service";
 import {ActionService} from "../_services/action.service";
 import {ManageSmartFiltersComponent} from "../sidenav/_components/manage-smart-filters/manage-smart-filters.component";
-import {DecimalPipe} from "@angular/common";
+import {APP_BASE_HREF, DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-all-filters',
@@ -28,6 +28,7 @@ export class AllFiltersComponent implements OnInit {
   private readonly filterService = inject(FilterService);
   private readonly actionFactory = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
 
   jumpbarKeys: Array<JumpKey> = [];

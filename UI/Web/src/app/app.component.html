@@ -10,22 +10,25 @@
     }
     <app-nav-header></app-nav-header>
 
-    <div [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'content-wrapper': navService.sideNavVisibility$ | async}">
+    @let sideNavVisible = navService.sideNavVisibility$ | async;
+    @let sideNavCollapsed = navService.sideNavCollapsed$ | async;
+    @let usePreferenceSideNav = navService.usePreferenceSideNav$ | async;
 
-      @if (navService.sideNavVisibility$ | async) {
-        @if(navService.usePreferenceSideNav$ | async) {
+    <div [ngClass]="{'closed' : sideNavCollapsed, 'content-wrapper': sideNavVisible}">
+      @if (sideNavVisible) {
+        @if(usePreferenceSideNav) {
           <app-preference-nav></app-preference-nav>
         } @else {
           <app-side-nav></app-side-nav>
         }
       }
 
-      <div class="" [ngClass]="{'g-0': (navService.sideNavVisibility$ | async) === false}">
+      <div class="" [ngClass]="{'g-0': sideNavVisible === false}">
         <a id="content"></a>
-        @if (navService.sideNavVisibility$ | async) {
+        @if (sideNavVisible) {
           <div>
-            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService.sideNavCollapsed$ | async) === false || (navService.usePreferenceSideNav$ | async),
-                  'companion-bar-collapsed': ((navService.sideNavCollapsed$ | async) && (navService.usePreferenceSideNav$ | async))}">
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': sideNavCollapsed === false || usePreferenceSideNav,
+                  'companion-bar-collapsed': (sideNavCollapsed && usePreferenceSideNav)}">
               <router-outlet></router-outlet>
             </div>
           </div>

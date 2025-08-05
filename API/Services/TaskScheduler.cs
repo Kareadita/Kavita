@@ -16,6 +16,8 @@ using API.SignalR;
 using Hangfire;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 
 namespace API.Services;
 
@@ -84,6 +86,8 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
     public const string KavitaPlusWantToReadSyncId = "kavita+-want-to-read-sync";
 
+    private const int BaseRetryDelay = 60; // 1-minute
+
     public static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
     private static readonly ImmutableArray<string> NonCronOptions = ["disabled", "daily", "weekly"];
@@ -94,6 +98,10 @@ public class TaskScheduler : ITaskScheduler
     {
         TimeZone = TimeZoneInfo.Local
     };
+    /// <summary>
+    /// Retry policy, with 3 tries, and a 1-minute base delay
+    /// </summary>
+    private readonly AsyncRetryPolicy _defaultRetryPolicy;
 
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
@@ -123,6 +131,24 @@ public class TaskScheduler : ITaskScheduler
         _smartCollectionSyncService = smartCollectionSyncService;
         _wantToReadSyncService = wantToReadSyncService;
         _eventHub = eventHub;
+
+        _defaultRetryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(
+                retryCount: 3,
+                sleepDurationProvider: attempt =>
+                {
+                    var delay = BaseRetryDelay * 2 * attempt;
+                    var jitter = Random.Shared.Next(0, delay / 4);
+
+                    return TimeSpan.FromSeconds(delay + jitter);
+                },
+                onRetry: (ex, timeSpan, attempt) =>
+                {
+                    _logger.LogWarning(ex, "Attempt {Attempt} failed, retrying in {Delay}ms",
+                        attempt, timeSpan.TotalMilliseconds);
+                }
+            );
     }
 
     public async Task ScheduleTasks()
@@ -487,9 +513,13 @@ public class TaskScheduler : ITaskScheduler
     // ReSharper disable once MemberCanBePrivate.Global
     public async Task CheckForUpdate()
     {
-        var update = await _versionUpdaterService.CheckForUpdate();
-        if (update == null) return;
-        await _versionUpdaterService.PushUpdate(update);
+        await _defaultRetryPolicy.ExecuteAsync(async () =>
+        {
+            var update = await _versionUpdaterService.CheckForUpdate();
+            if (update == null) return;
+
+            await _versionUpdaterService.PushUpdate(update);
+        });
     }
 
     public async Task SyncThemes()

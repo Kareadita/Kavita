@@ -4,7 +4,7 @@ import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingListItem} from 'src/app/_models/reading-list';
 import {ImageService} from 'src/app/_services/image.service';
 import {NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
-import {DatePipe} from '@angular/common';
+import {APP_BASE_HREF, DatePipe} from '@angular/common';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
@@ -22,6 +22,7 @@ export class ReadingListItemComponent {
 
   protected readonly imageService = inject(ImageService);
   protected readonly MangaFormat = MangaFormat;
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
   @Input({required: true}) item!: ReadingListItem;
   @Input() position: number = 0;

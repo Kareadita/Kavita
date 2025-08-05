@@ -68,9 +68,29 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
 
-    private OpenIdConnectConfiguration? _discoveryDocument;
+    /// <summary>
+    /// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date
+    /// We can store the same one indefinitely as the authority does not change unless Kavita is restarted
+    /// </summary>
+    /// <remarks>The ConfigurationManager has its own lock, it loads data thread safe</remarks>
+    private static readonly ConfigurationManager<OpenIdConnectConfiguration> OidcConfigurationManager;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
+
+#pragma warning disable S3963
+    static OidcService()
+    {
+        var authority = Configuration.OidcSettings.Authority;
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+        OidcConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            url,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
+        );
+    }
+#pragma warning restore S3963
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -83,7 +103,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences);
-        if (user != null) return user;
+        if (user != null)
+        {
+            await SyncUserSettings(request, settings, principal, user);
+
+            return user;
+        }
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
@@ -110,6 +135,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             logger.LogDebug("User {UserName} has matched on email to {OidcId}", user.Id, oidcId);
             user.OidcId = oidcId;
             await unitOfWork.CommitAsync();
+
+            await SyncUserSettings(request, settings, principal, user);
 
             return user;
         }
@@ -160,15 +187,15 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             try
             {
                 user.UpdateLastActive();
+
+                if (unitOfWork.HasChanges())
+                {
+                    await unitOfWork.CommitAsync();
+                }
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-            }
-
-            if (unitOfWork.HasChanges())
-            {
-                await unitOfWork.CommitAsync();
             }
 
             if (string.IsNullOrEmpty(tokenResponse.IdToken))
@@ -341,9 +368,17 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         await unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Syncs the given user to the principal found in the id token
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="settings"></param>
+    /// <param name="idToken"></param>
+    /// <param name="user"></param>
+    /// <exception cref="UnauthorizedAccessException">If syncing fails</exception>
     private async Task SyncUserSettings(CookieValidatePrincipalContext ctx, OidcConfigDto settings, string idToken, AppUser user)
     {
-        if (!settings.SyncUserSettings) return;
+        if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
         try
         {
@@ -366,7 +401,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="user"></param>
     public async Task SyncUserSettings(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        if (!settings.SyncUserSettings) return;
+        if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
         // Never sync the default user
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
@@ -565,10 +600,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="refreshToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
+    private static async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
 
-        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
 
         var msg = new
         {
@@ -578,7 +613,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             client_secret = dto.Secret,
         };
 
-        var json = await _discoveryDocument.TokenEndpoint
+        var json = await discoveryDocument.TokenEndpoint
             .AllowAnyHttpStatus()
             .PostUrlEncodedAsync(msg)
             .ReceiveString();
@@ -593,14 +628,15 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="idToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
+    private static async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
     {
-        _discoveryDocument ??= await LoadOidcConfiguration(dto.Authority);
+        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
+
         var tokenValidationParameters = new TokenValidationParameters
         {
-            ValidIssuer = _discoveryDocument.Issuer,
+            ValidIssuer = discoveryDocument.Issuer,
             ValidAudience = dto.ClientId,
-            IssuerSigningKeys = _discoveryDocument.SigningKeys,
+            IssuerSigningKeys = discoveryDocument.SigningKeys,
             ValidateIssuerSigningKey = true,
         };
 
@@ -608,25 +644,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var principal = handler.ValidateToken(idToken, tokenValidationParameters, out _);
 
         return principal;
-    }
-
-    /// <summary>
-    /// Loads OpenIdConnectConfiguration, includes <see cref="OpenIdConnectConfiguration.SigningKeys"/>
-    /// </summary>
-    /// <param name="authority"></param>
-    /// <returns></returns>
-    private static async Task<OpenIdConnectConfiguration> LoadOidcConfiguration(string authority)
-    {
-        var hasTrailingSlash = authority.EndsWith('/');
-        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
-
-        var manager = new ConfigurationManager<OpenIdConnectConfiguration>(
-            url,
-            new OpenIdConnectConfigurationRetriever(),
-            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
-        );
-
-        return await manager.GetConfigurationAsync();
     }
 
     /// <summary>
