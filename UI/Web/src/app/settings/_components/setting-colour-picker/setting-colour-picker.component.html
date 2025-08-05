@@ -2,7 +2,9 @@
   <div class="color-picker-container">
     <button class="btn btn-icon color">
       @if (showPicker()) {
-        <chrome-picker class="floating-picker" [control]="chromeControl"></chrome-picker>
+        <div #colourPopup>
+          <chrome-picker class="floating-picker" [control]="chromeControl" (colorChange)="onColorChange($event)"></chrome-picker>
+        </div>
       }
 
       <input class="dot" appLongClick
