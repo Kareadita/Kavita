@@ -1806,10 +1806,15 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // Find highest age rating from mappings
         mappings ??= new Dictionary<string, AgeRating>();
-        mappings = mappings.ToDictionary(k => k.Key.ToNormalized(), k => k.Value);
+        mappings = mappings
+            .GroupBy(m => m.Key.ToNormalized())
+            .ToDictionary(
+                g => g.Key,
+                g => g.Max(m => m.Value)
+            );
 
         return values
-            .Select(v => mappings.TryGetValue(v.ToNormalized(), out var mapping) ? mapping : AgeRating.Unknown)
+            .Select(v => mappings.GetValueOrDefault(v.ToNormalized(), AgeRating.Unknown))
             .DefaultIfEmpty(AgeRating.Unknown)
             .Max();
     }

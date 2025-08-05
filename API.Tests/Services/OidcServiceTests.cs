@@ -28,7 +28,9 @@ public class OidcServiceTests: AbstractDbTest
         await ResetDb();
         var (oidcService, _, _, userManager) = await Setup();
 
-        var user = new AppUserBuilder("holo", "holo@localhost").Build();
+        var user = new AppUserBuilder("holo", "holo@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
         var res = await userManager.CreateAsync(user);
         Assert.Empty(res.Errors);
         Assert.True(res.Succeeded);
@@ -426,7 +428,9 @@ public class OidcServiceTests: AbstractDbTest
         Assert.NotNull(userFromDb);
         Assert.NotEqual(AgeRating.Teen, userFromDb.AgeRestriction);
 
-        var newUser = new AppUserBuilder("NotAnAdmin", "NotAnAdmin@localhost").Build();
+        var newUser = new AppUserBuilder("NotAnAdmin", "NotAnAdmin@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
         var res = await userManager.CreateAsync(newUser);
         Assert.Empty(res.Errors);
         Assert.True(res.Succeeded);
@@ -515,7 +519,9 @@ public class OidcServiceTests: AbstractDbTest
         var defaultAdmin = new AppUserBuilder("defaultAdmin", "defaultAdmin@localhost")
             .WithRole(PolicyConstants.AdminRole)
             .Build();
-        var user = new AppUserBuilder("amelia", "amelia@localhost").Build();
+        var user = new AppUserBuilder("amelia", "amelia@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
 
         var roleStore = new RoleStore<
             AppRole,

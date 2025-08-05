@@ -24,7 +24,7 @@ import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {AsyncPipe} from "@angular/common";
+import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
@@ -56,6 +56,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
   tokenExpired = false;
   formGroup: FormGroup = new FormGroup({
