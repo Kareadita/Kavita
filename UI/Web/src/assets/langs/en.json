@@ -29,7 +29,7 @@
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",
-        "authority-tooltip": "The URL to your OIDC provider",
+        "authority-tooltip": "The URL to your OIDC provider, do not include the .well-known/openid-configuration path",
         "client-id-label": "Client ID",
         "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything",
         "secret-label": "Client secret",
@@ -1186,7 +1186,7 @@
         "type-label": "Type",
         "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Check the wiki for more details on the differences between the library types.",
         "kavitaplus-eligible-label": "Kavita+ Eligible",
-        "kavitaplus-eligible-tooltip": "Supports Kavita+ metadata features or Scrobbling",
+        "kavitaplus-eligible-tooltip": "Supports Kavita+ metadata features and/or Scrobbling",
         "folder-description": "Add folders to your library",
         "browse": "Browse for Media Folders",
         "help-us-part-1": "Help us out by following ",
@@ -1724,7 +1724,9 @@
         "no-data": "There are no other users.",
         "loading": "{{common.loading}}",
         "actions-header": "Actions",
-        "pending-tooltip": "This user has not validated their email"
+        "pending-tooltip": "This user has not validated their email",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Native"
     },
 
     "role-localized-pipe": {
