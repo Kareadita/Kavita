@@ -51,7 +51,7 @@ export class EpubHighlightComponent {
     const annotation = this.annotation();
     const slots = this.annotationService.slots();
 
-    if (!showHighlight || !annotation) {
+    if (!showHighlight || !annotation || slots.length === 0 || slots.length < annotation.selectedSlotIndex) {
       return '';
     }
 
