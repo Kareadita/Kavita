@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -69,11 +68,29 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
 
-    private static OpenIdConnectConfiguration? _discoveryDocument;
-    private static readonly SemaphoreSlim _discoveryDocumentSemaphore = new(1, 1);
-
+    /// <summary>
+    /// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date
+    /// We can store the same one indefinitely as the authority does not change unless Kavita is restarted
+    /// </summary>
+    /// <remarks>The ConfigurationManager has its own lock, it loads data thread safe</remarks>
+    private static readonly ConfigurationManager<OpenIdConnectConfiguration> OidcConfigurationManager;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
+
+#pragma warning disable S3963
+    static OidcService()
+    {
+        var authority = Configuration.OidcSettings.Authority;
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+        OidcConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            url,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
+        );
+    }
+#pragma warning restore S3963
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -586,7 +603,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private static async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
 
-        var discoveryDocument = await GetOrLoadOidcConfiguration(dto.Authority);
+        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
 
         var msg = new
         {
@@ -613,7 +630,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <exception cref="InvalidOperationException"></exception>
     private static async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
     {
-        var discoveryDocument = await GetOrLoadOidcConfiguration(dto.Authority);
+        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
 
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -627,45 +644,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var principal = handler.ValidateToken(idToken, tokenValidationParameters, out _);
 
         return principal;
-    }
-
-    /// <summary>
-    /// Loads OpenIdConnectConfiguration, includes <see cref="OpenIdConnectConfiguration.SigningKeys"/>
-    /// </summary>
-    /// <param name="authority"></param>
-    /// <returns></returns>
-    private static async Task<OpenIdConnectConfiguration> GetOrLoadOidcConfiguration(string authority)
-    {
-        if (_discoveryDocument != null)
-        {
-            return _discoveryDocument;
-        }
-
-        await _discoveryDocumentSemaphore.WaitAsync();
-        try
-        {
-            // Double check that the document hasn't become available
-            if (_discoveryDocument != null)
-            {
-                return _discoveryDocument;
-            }
-
-            var hasTrailingSlash = authority.EndsWith('/');
-            var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
-
-            var manager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                url,
-                new OpenIdConnectConfigurationRetriever(),
-                new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
-            );
-
-            _discoveryDocument = await manager.GetConfigurationAsync();
-            return _discoveryDocument;
-        }
-        finally
-        {
-            _discoveryDocumentSemaphore.Release();
-        }
     }
 
     /// <summary>

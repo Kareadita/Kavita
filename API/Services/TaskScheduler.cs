@@ -140,6 +140,7 @@ public class TaskScheduler : ITaskScheduler
                 {
                     var delay = BaseRetryDelay * 2 * attempt;
                     var jitter = Random.Shared.Next(0, delay / 4);
+
                     return TimeSpan.FromSeconds(delay + jitter);
                 },
                 onRetry: (ex, timeSpan, attempt) =>

@@ -241,6 +241,7 @@ export class ManageReadingProfilesComponent implements OnInit {
         catchError(err => {
           console.log(err);
           this.toastr.error(err.message);
+
           return of(null);
         })
       );
@@ -251,6 +252,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       tap(newProfile => {
         this.readingProfiles = this.readingProfiles.map(p => {
           if (p.id !== profile.id) return p;
+
           return newProfile;
         });
         this.cdRef.markForCheck();
@@ -258,6 +260,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       catchError(err => {
         console.log(err);
         this.toastr.error(err.message);
+
         return of(null);
       })
     );

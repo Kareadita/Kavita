@@ -29,7 +29,7 @@
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",
-        "authority-tooltip": "The URL to your OIDC provider",
+        "authority-tooltip": "The URL to your OIDC provider, do not include the .well-known/openid-configuration path",
         "client-id-label": "Client ID",
         "client-id-tooltip": "The ClientID set in your OIDC provider, can be anything",
         "secret-label": "Client secret",
