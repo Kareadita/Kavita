@@ -8,7 +8,7 @@
       }
 
       <input class="dot" appLongClick
-             (longClick)="editMode.set(false)"
+             (longClick)="longClick()"
              [style.background]="color() | slotColor"
              (click)="togglePicker()"
       />

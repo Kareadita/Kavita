@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
@@ -40,7 +40,6 @@ import {ScalingOptionPipe} from "../../_pipes/scaling-option.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
-import {ColorPickerDirective} from "ngx-color-picker";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {filter} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -49,6 +48,11 @@ import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
 import {WikiLink} from "../../_models/wiki";
 import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
+import {
+  SettingColourPickerComponent
+} from "../../settings/_components/setting-colour-picker/setting-colour-picker.component";
+import {ColorscapeService} from "../../_services/colorscape.service";
+import {Color} from "@iplab/ngx-color-picker";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -79,7 +83,6 @@ enum TabId {
     TitleCasePipe,
     WritingStylePipe,
     NgStyle,
-    ColorPickerDirective,
     NgbNav,
     NgbNavItem,
     NgbNavLinkBase,
@@ -88,12 +91,23 @@ enum TabId {
     LoadingComponent,
     NgbTooltip,
     BreakpointPipe,
+    SettingColourPickerComponent,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageReadingProfilesComponent implements OnInit {
+
+  private readonly readingProfileService = inject(ReadingProfileService);
+  protected readonly colorscapeService = inject(ColorscapeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly bookService = inject(BookService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly transLoco = inject(TranslocoService);
 
   virtualScrollerBreakPoint = 20;
 
@@ -111,16 +125,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     return d;
   });
 
-  constructor(
-    private readingProfileService: ReadingProfileService,
-    private cdRef: ChangeDetectorRef,
-    private accountService: AccountService,
-    private bookService: BookService,
-    private destroyRef: DestroyRef,
-    private toastr: ToastrService,
-    private confirmService: ConfirmService,
-    private transLoco: TranslocoService,
-  ) {
+  constructor() {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
   }
@@ -259,31 +264,16 @@ export class ManageReadingProfilesComponent implements OnInit {
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
-    data.readingDirection = parseInt(data.readingDirection + '');
-    data.scalingOption = parseInt(data.scalingOption + '');
-    data.pageSplitOption = parseInt(data.pageSplitOption + '');
-    data.readerMode = parseInt(data.readerMode + '');
-    data.layoutMode = parseInt(data.layoutMode + '');
-    data.disableWidthOverride = parseInt(data.disableWidthOverride + '');
-
-    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection + '');
-    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle + '');
-    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode + '');
-
-    data.pdfTheme = parseInt(data.pdfTheme + '');
-    data.pdfScrollMode = parseInt(data.pdfScrollMode + '');
-    data.pdfSpreadMode = parseInt(data.pdfSpreadMode + '');
-
     return data;
   }
 
-  handleBackgroundColorChange(color: string) {
+  handleBackgroundColorChange(color: Color) {
     if (!this.readingProfileForm || !this.selectedProfile) return;
 
     this.readingProfileForm.markAsDirty();
     this.readingProfileForm.markAsTouched();
-    this.selectedProfile.backgroundColor = color;
-    this.readingProfileForm.get('backgroundColor')?.setValue(color);
+    this.selectedProfile.backgroundColor = color.toHexString();
+    this.readingProfileForm.get('backgroundColor')?.setValue(color.toHexString());
     this.cdRef.markForCheck();
   }
 

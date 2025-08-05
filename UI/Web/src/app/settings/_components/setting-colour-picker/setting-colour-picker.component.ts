@@ -39,11 +39,19 @@ export class SettingColourPickerComponent implements OnInit {
 
   editMode = model(false);
   color = model.required<RgbaColor>();
+  /**
+   * If the edit mode can be changed due to user input
+   */
+  canChangeEditMode = input(true);
   selected = input.required<boolean>();
 
   showPicker = signal(false);
 
   @Output() selectPicker = new EventEmitter<void>();
+  /**
+   * Emits the raw color from the color picker rather than our RgbaColor
+   */
+  @Output() rawColorChange = new EventEmitter<Color>();
 
   chromeControl!: ColorPickerControl;
 
@@ -65,6 +73,8 @@ export class SettingColourPickerComponent implements OnInit {
   }
 
   longClick() {
+    if (!this.canChangeEditMode()) return;
+
     this.editMode.update(b => !b);
 
     if (this.utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop) {
@@ -96,6 +106,7 @@ export class SettingColourPickerComponent implements OnInit {
           };
 
           this.color.set(rgba);
+          this.rawColorChange.emit(color);
         }),
       )
       .subscribe()
