@@ -9,7 +9,7 @@ import {
   Output
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {HighlightSlot} from "../../../_models/annotations/highlight-slot";
+import {HighlightSlot, RgbaColor} from "../../../_models/annotations/highlight-slot";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
@@ -20,6 +20,8 @@ import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_se
 import {
   SettingColourPickerComponent
 } from "../../../../settings/_components/setting-colour-picker/setting-colour-picker.component";
+import {Color} from "@iplab/ngx-color-picker";
+import {AccountService} from "../../../../_services/account.service";
 
 @Component({
   selector: 'app-highlight-bar',
@@ -39,15 +41,11 @@ export class HighlightBarComponent {
   protected readonly utilityService = inject(UtilityService);
   private readonly destroyRef = inject(DestroyRef);
 
+  selectedSlotIndex = model.required<number>();
   isCollapsed = model<boolean>(true);
   isEditMode = model<boolean>(false);
 
-  selectedSlotIndex = model.required<number>();
-  @Output() changeSlot = new EventEmitter<number>();
-  @Output() changeSlotColor = new EventEmitter<{slot: number, color: string}>();
   slots = this.annotationService.slots;
-
-  slotColor = new ReplaySubject<{slot: number, color: string}>(1);
 
   selectedSlot = computed(() => {
     const index = this.selectedSlotIndex();
@@ -56,19 +54,9 @@ export class HighlightBarComponent {
     return slots[index];
   })
 
-  constructor() {
-    this.slotColor.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      debounceTime(1000),
-      tap(val => console.log('Color change: ', val)),
-      tap(val => this.changeSlotColor.emit(val))
-    ).subscribe();
-  }
-
 
   selectSlot(index: number, slot: HighlightSlot) {
     this.selectedSlotIndex.set(index);
-    this.changeSlot.emit(index);
   }
 
   updateCollapse(val: boolean) {
@@ -80,14 +68,8 @@ export class HighlightBarComponent {
     this.isEditMode.set(!existingEdit);
   }
 
-  handleBackgroundColorChange(color: string) {
-    let rgba = color;
-    if (color.startsWith('#')) {
-      let structrgba = this.colorscapeService.hexToRGBA(color);
-      rgba = `rgba(${structrgba.r}, ${structrgba.g}, ${structrgba.b}, ${structrgba.a})`;
-    }
-
-    this.slotColor.next({slot: this.selectedSlotIndex(), color: rgba});
+  handleSlotColourChange(index: number, color: RgbaColor) {
+    this.annotationService.updateSlotColor(index, color).subscribe();
   }
 
   protected readonly Breakpoint = Breakpoint;

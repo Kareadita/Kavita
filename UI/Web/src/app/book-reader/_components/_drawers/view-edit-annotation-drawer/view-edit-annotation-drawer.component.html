@@ -18,7 +18,10 @@
         @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop) {
           @if (isEditOrCreateMode() && this.annotation()) {
             <div class="ms-2 d-flex w-100">
-              <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
+              <app-highlight-bar
+                [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0"
+                (selectedSlotIndexChange)="changeSlotIndex($event)"
+              />
             </div>
           }
         }
@@ -44,7 +47,11 @@
     @if (utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop) {
       @if (isEditOrCreateMode() && this.annotation()) {
         <div class="d-flex align-content-center justify-content-center w-100">
-          <app-highlight-bar [isCollapsed]="false" (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
+          <app-highlight-bar
+            [isCollapsed]="false"
+            (selectedSlotIndexChange)="changeSlotIndex($event)"
+            [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0"
+          />
         </div>
       }
     }

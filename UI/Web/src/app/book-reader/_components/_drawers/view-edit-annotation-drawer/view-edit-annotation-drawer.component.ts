@@ -232,13 +232,6 @@ export class ViewEditAnnotationDrawerComponent {
     });
   }
 
-  updateSlotColor() {
-    // TODO: This will emit slotUpdate and update the user preferences
-
-  }
-
-
-
   changeSlotIndex(slotIndex: number) {
     const annotation = this.annotation();
 
@@ -248,7 +241,6 @@ export class ViewEditAnnotationDrawerComponent {
       this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
     }
   }
-
 
   close() {
     this.activeOffcanvas.close();

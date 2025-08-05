@@ -26,13 +26,12 @@
             @for(slot of slots(); track slot.color; let index = $index) {
               <app-setting-colour-picker
                 [color]="slot.color"
+                (colorChange)="handleSlotColourChange(index, $event)"
                 [selected]="slot.slotNumber === selectedSlotIndex()"
+                (selectPicker)="selectSlot(index, slot)"
                 [editMode]="isEditMode()"
                 (editModeChange)="isEditMode.set($event)"
-                (colorChange)="handleBackgroundColorChange($event)"
-                (selectPicker)="selectSlot(index, slot)"
-              >
-              </app-setting-colour-picker>
+              />
             }
           </div>
         }

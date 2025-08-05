@@ -8,6 +8,7 @@ import {switchMap} from "rxjs/operators";
 import {AccountService} from "./account.service";
 import {User} from "../_models/user";
 import {MessageHubService} from "./message-hub.service";
+import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 
 /**
  * Represents any modification (create/delete/edit) that occurs to annotations
@@ -49,6 +50,18 @@ export class AnnotationService {
     this.accountService.currentUser$.subscribe(user => {
       this.user.set(user!);
     });
+  }
+
+  updateSlotColor(index: number, color: RgbaColor) {
+    const user = this.accountService.currentUserSignal();
+    if (!user) return of([]);
+
+    const preferences = user.preferences;
+    preferences.bookReaderHighlightSlots[index].color = color;
+
+    return this.accountService.updatePreferences(preferences).pipe(
+      map((p) => p.bookReaderHighlightSlots)
+    );
   }
 
   getAllAnnotations(chapterId: number) {
