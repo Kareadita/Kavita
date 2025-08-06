@@ -223,8 +223,7 @@ export class ViewEditAnnotationDrawerComponent {
     // For create annotation, we have to have this hack
     highlightAnnotation.createdUtc = '0001-01-01T00:00:00Z';
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
-
-    console.log('saving highlight: ', highlightAnnotation);
+    
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });

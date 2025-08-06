@@ -22,6 +22,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {Annotation} from "../../_models/annotations/annotation";
+import {DOCUMENT} from "@angular/common";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -63,8 +64,7 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly elementRef = inject(ElementRef);
   private readonly epubMenuService = inject(EpubReaderMenuService);
-
-  protected readonly BookLineOverlayMode = BookLineOverlayMode;
+  private readonly document = inject(DOCUMENT);
 
 
   @HostListener('window:keydown', ['$event'])
@@ -131,17 +131,13 @@ export class BookLineOverlayComponent implements OnInit {
       this.startXPath = this.readerService.getXPathTo(startContainer);
       this.endXPath = this.readerService.getXPathTo(endContainer);
 
+      // Protect from DOM Shift by removing the UI part and making this scoped to true epub html
+      this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
+      this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
 
-      if (this.startXPath !== '') {
-        this.startXPath = '//' + this.startXPath;
-      }
-
-      if (this.endXPath !== '') {
-        this.endXPath = '//' + this.endXPath;
-      }
 
       // For backward compatibility, keep the original xPath as startXPath (TODO: Refactor the code)
-      this.xPath = this.startXPath;
+      this.xPath = this.readerService.descopeBookReaderXpath(this.startXPath); // TODO: We need to clean cases of this as well
 
       // Get the context window for generating a blurb in annotation flow
       this.allTextFromSelection = (event.target as Element).textContent || '';
@@ -237,5 +233,6 @@ export class BookLineOverlayComponent implements OnInit {
     return node.nodeType === Node.TEXT_NODE ? node.parentElement! : node as Element;
   }
 
+  protected readonly BookLineOverlayMode = BookLineOverlayMode;
 
 }

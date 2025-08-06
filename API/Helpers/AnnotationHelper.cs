@@ -10,7 +10,7 @@ namespace API.Helpers;
 
 public static partial class AnnotationHelper
 {
-    private const string UiXPathScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[3]/DIV[1]/DIV[1]";
+    private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
 
     [GeneratedRegex("""^//id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
@@ -179,7 +179,7 @@ public static partial class AnnotationHelper
     private static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
     {
         var idMatch = IdXPathRegex().Match(xpath);
-        if (!idMatch.Success) return doc.DocumentNode.SelectSingleNode(xpath);
+        if (!idMatch.Success) return doc.DocumentNode.SelectSingleNode(xpath.ToLowerInvariant());
 
         var id = idMatch.Groups[1].Value;
         return string.IsNullOrWhiteSpace(id) ? null : doc.GetElementbyId(id);

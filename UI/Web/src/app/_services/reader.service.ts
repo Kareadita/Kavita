@@ -347,11 +347,33 @@ export class ReaderService {
   }
 
   /**
+   * Removes the Kavita UI aspect of the xpath from a given xpath variable
+   * Used for Annotations and Bookmarks within epub reader
+   * @param xpath
+   */
+  descopeBookReaderXpath(xpath: string) {
+    const bookContentElement = this.document.querySelector('.book-content');
+    const bookContentXPath = this.getXPathTo(bookContentElement?.children[0]);
+
+    return xpath.replace(bookContentXPath, '//BODY');
+  }
+
+  /**
    *
    * @param element
    * @param pureXPath Will ignore shortcuts like id('')
    */
   getXPathTo(element: any, pureXPath = false): string {
+    let xpath = this.getXPath(element, pureXPath);
+
+    if (xpath != '' && xpath.toLowerCase().startsWith('body')) {
+      xpath = `//${xpath}`;
+    }
+
+    return xpath;
+  }
+
+  private getXPath(element: any, pureXPath = false): string {
     if (element === null) return '';
     if (!pureXPath) {
       if (element.id !== '') { return 'id("' + element.id + '")'; }
@@ -363,7 +385,7 @@ export class ReaderService {
     const siblings = element.parentNode?.childNodes || [];
     for (let sibling of siblings) {
       if (sibling === element) {
-        return this.getXPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
+        return this.getXPath(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
       }
       if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
         ix++;
