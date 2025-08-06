@@ -1,19 +1,12 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef, effect,
-  HostListener,
-  inject,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, OnInit} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
-import {map, shareReplay, take, tap} from 'rxjs/operators';
+import {map, shareReplay, take} from 'rxjs/operators';
 import {AccountService} from './_services/account.service';
 import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
 import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {filter, interval, Observable, switchMap} from 'rxjs';
+import {filter, Observable} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
@@ -120,11 +113,15 @@ export class AppComponent implements OnInit {
     const user = this.accountService.currentUserSignal();
     if (!user) return;
 
+    // Refresh the user data
+    this.accountService.refreshAccount().subscribe(account => {
+      if (this.accountService.hasAdminRole(user)) {
+        this.licenseService.licenseInfo().subscribe();
+      }
+    });
+
     // Bootstrap anything that's needed
     this.themeService.getThemes().subscribe();
     this.libraryService.getLibraryNames().pipe(take(1), shareReplay({refCount: true, bufferSize: 1})).subscribe();
-    if (this.accountService.hasAdminRole(user)) {
-      this.licenseService.licenseInfo().subscribe();
-    }
   }
 }
