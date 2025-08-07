@@ -937,8 +937,8 @@
     },
 
     "highlight-bar": {
-      "add-new-color-alt": "Add Custom Color",
-        "slot-label": "Slot {{slot}}"
+        "add-new-color-alt": "Add Custom Color",
+        "slot-label": "Highlight slot {{slot}}"
     },
 
     "book-reader": {
