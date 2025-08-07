@@ -42,7 +42,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {ColorPickerDirective} from "ngx-color-picker";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {catchError, filter, finalize, of, switchMap} from "rxjs";
+import {catchError, filter, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
@@ -226,7 +226,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       tap(_ => this.savingProfile.set(true)),
       switchMap(_ => this.autoSave()),
-      finalize(() => this.savingProfile.set(false))
+      tap(() => this.savingProfile.set(false))
     ).subscribe();
   }
 
