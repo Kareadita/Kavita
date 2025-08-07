@@ -1,5 +1,5 @@
 import {Directive, ElementRef, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
-import {fromEvent, merge, Subscription, switchMap, timer} from "rxjs";
+import {fromEvent, merge, Subscription, switchMap, tap, timer} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 
 @Directive({
@@ -32,8 +32,10 @@ export class LongClickDirective implements OnDestroy {
     );
 
     this.eventSubscribe = start$
-      .pipe(switchMap(() => timer(this.threshold()).pipe(takeUntil(end$))))
-      .subscribe(() => this.longClick.emit());
+      .pipe(
+        switchMap(() => timer(this.threshold()).pipe(takeUntil(end$))),
+        tap(() => this.longClick.emit())
+      ).subscribe();
   }
 
   ngOnDestroy(): void {
