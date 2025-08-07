@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@angular/core';
+import {ElementRef, Inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
@@ -44,6 +44,26 @@ export class ColorscapeService {
       tap(() => this.checkAndResetColorscapeAfterDelay())
     ).subscribe();
 
+  }
+
+  /**
+   * Returns a fitting text color depending on the background color of the element
+   * style.backgroundColor **must** be set on the passed element for this to work
+   * @param el
+   */
+  getContrastingTextColor(el: HTMLElement): string {
+    const style = window.getComputedStyle(el);
+    const bgColor = style.backgroundColor;
+
+    if (bgColor === '') {
+      return 'black';
+    }
+
+    const rgb = this.rgbStringToRGBA(bgColor);
+
+    // https://www.w3.org/WAI/GL/wiki/Relative_luminance
+    const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+    return luminance < 0.5 ? 'white' : 'black';
   }
 
   /**

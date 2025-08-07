@@ -10,6 +10,7 @@
 }
 
 .content-quote {
+  color: var(--drawer-text-color);
   max-height: 320px;
   overflow: hidden;
   display: -webkit-box;
@@ -17,6 +18,11 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
+
+.annotation-meta {
+  color: var(--drawer-text-color);
+}
+
 .setting-section-break {
   margin: 10px 0 !important;
 }
