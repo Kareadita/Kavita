@@ -1,53 +1,53 @@
+<!-- Updated highlight-bar template -->
 <ng-container *transloco="let t; prefix:'highlight-bar'">
   <div class="d-flex align-items-center" style="max-height: 47px; height: 47px;">
     @let collapsed = isCollapsed();
-    <button
-      type="button"
-      style="max-height: 47px"
-      class="btn btn-outline-primary highlight-bar-toggle {{!collapsed ? 'open': 'collapsed'}}"
-      (click)="collapse.toggle()"
-      [attr.aria-expanded]="!collapsed"
-      aria-controls="highlight-bar"
-    >
-      <i class="fa-solid fa-palette" aria-hidden="true"></i>
-      <i class="fa-solid fa-angles-right" aria-hidden="true"></i>
-    </button>
+
+    @if (desktopLayout() && canCollapse()) {
+      <button
+        type="button"
+        style="max-height: 47px"
+        class="btn btn-outline-primary highlight-bar-toggle {{!collapsed ? 'open': 'collapsed'}}"
+        (click)="collapse.toggle()"
+        [attr.aria-expanded]="!collapsed"
+        aria-controls="highlight-bar"
+      >
+        <i class="fa-solid fa-palette" aria-hidden="true"></i>
+        <i class="fa-solid fa-angles-right" aria-hidden="true"></i>
+      </button>
+    }
 
     <div #collapse="ngbCollapse" [ngbCollapse]="collapsed" (ngbCollapseChange)="updateCollapse($event)"
          [horizontal]="true" style="max-width: 500px" id="highlight-bar">
       <div class="highlight-bar" style="max-height: 47px">
         @let activeSlot = selectedSlot();
         @if (activeSlot) {
-          @for(slot of slots(); track slot.color; let index = $index) {
-
-            @if(isEditMode()) {
-              <button class="btn btn-icon color">'
-                <input class="dot"
-                       (colorPickerChange)="handleBackgroundColorChange($event)"
-                       [style.background]="slot.color | slotColor" [cpAlphaChannel]="'enabled'"
-                       [colorPicker]="slot.color | slotColor" />
-              </button>
-            } @else {
-              <button class="btn btn-icon color" (click)="selectSlot(index, slot)">
-                <div class="dot" [ngClass]="{'active': slot.slotNumber === selectedSlotIndex()}" [ngStyle]="{'background-color': slot.color | slotColor}"></div>
-              </button>
+          <div class="color-picker-container">
+            @for(slot of slots(); track slot.color; let index = $index) {
+              <app-setting-colour-picker
+                [id]="'slot-' + (index + 1)"
+                [label]="t('slot-label', {slot: index + 1})"
+                [color]="slot.color"
+                (colorChange)="handleSlotColourChange(index, $event)"
+                [selected]="slot.slotNumber === selectedSlotIndex()"
+                (selectPicker)="selectSlot(index, slot)"
+                [editMode]="isEditMode()"
+                (editModeChange)="isEditMode.set($event)"
+              />
             }
-          }
+          </div>
         }
 
-        @if (utilityService.activeUserBreakpoint() >= Breakpoint.Tablet) {
+        @if (desktopLayout()) {
           <button class="btn btn-icon ms-2 color" (click)="toggleEditMode()">
             @if (!isEditMode()) {
               <i class="fa-solid fa-pencil-alt" aria-hidden="true"></i>
             } @else {
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-          }
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            }
           </button>
         }
       </div>
     </div>
   </div>
-
-
-
 </ng-container>

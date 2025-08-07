@@ -8,28 +8,27 @@ import {
   model,
   Output
 } from '@angular/core';
-import {NgClass, NgStyle} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {HighlightSlot} from "../../../_models/annotations/highlight-slot";
-import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
+import {HighlightSlot, RgbaColor} from "../../../_models/annotations/highlight-slot";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
-import {ColorPickerDirective} from "ngx-color-picker";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
 import {ReplaySubject} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, tap} from "rxjs/operators";
-import {Breakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {
+  SettingColorPickerComponent
+} from "../../../../settings/_components/setting-colour-picker/setting-color-picker.component";
+import {Color} from "@iplab/ngx-color-picker";
+import {AccountService} from "../../../../_services/account.service";
 
 @Component({
   selector: 'app-highlight-bar',
   imports: [
-    NgClass,
-    NgStyle,
     TranslocoDirective,
-    SlotColorPipe,
     NgbCollapse,
-    ColorPickerDirective
+    SettingColorPickerComponent
   ],
   templateUrl: './highlight-bar.component.html',
   styleUrl: './highlight-bar.component.scss',
@@ -42,36 +41,25 @@ export class HighlightBarComponent {
   protected readonly utilityService = inject(UtilityService);
   private readonly destroyRef = inject(DestroyRef);
 
+  selectedSlotIndex = model.required<number>();
   isCollapsed = model<boolean>(true);
+  canCollapse = model<boolean>(true);
   isEditMode = model<boolean>(false);
 
-  selectedSlotIndex = model.required<number>();
-  @Output() changeSlot = new EventEmitter<number>();
-  @Output() changeSlotColor = new EventEmitter<{slot: number, color: string}>();
   slots = this.annotationService.slots;
-
-  slotColor = new ReplaySubject<{slot: number, color: string}>(1);
 
   selectedSlot = computed(() => {
     const index = this.selectedSlotIndex();
     const slots = this.annotationService.slots();
     if (slots.length === 0 || index >= slots.length) return null;
     return slots[index];
-  })
+  });
 
-  constructor() {
-    this.slotColor.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      debounceTime(1000),
-      tap(val => console.log('Color change: ', val)),
-      tap(val => this.changeSlotColor.emit(val))
-    ).subscribe();
-  }
+  desktopLayout = computed(() => this.utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop);
 
 
   selectSlot(index: number, slot: HighlightSlot) {
     this.selectedSlotIndex.set(index);
-    this.changeSlot.emit(index);
   }
 
   updateCollapse(val: boolean) {
@@ -83,15 +71,10 @@ export class HighlightBarComponent {
     this.isEditMode.set(!existingEdit);
   }
 
-  handleBackgroundColorChange(color: string) {
-    let rgba = color;
-    if (color.startsWith('#')) {
-      let structrgba = this.colorscapeService.hexToRGBA(color);
-      rgba = `rgba(${structrgba.r}, ${structrgba.g}, ${structrgba.b}, ${structrgba.a})`;
-    }
-
-    this.slotColor.next({slot: this.selectedSlotIndex(), color: rgba});
+  handleSlotColourChange(index: number, color: RgbaColor) {
+    this.annotationService.updateSlotColor(index, color).subscribe();
   }
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
 }

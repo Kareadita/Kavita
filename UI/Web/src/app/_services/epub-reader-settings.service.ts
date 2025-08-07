@@ -15,6 +15,7 @@ import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
@@ -30,6 +31,7 @@ export class EpubReaderSettingsService {
   private readonly bookService = inject(BookService);
   private readonly themeService = inject(ThemeService);
   private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly utilityService = inject(UtilityService);
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
 
@@ -68,11 +70,21 @@ export class EpubReaderSettingsService {
   public readonly writingStyle = this._writingStyle.asReadonly();
   public readonly activeTheme = this._activeTheme.asReadonly();
   public readonly clickToPaginate = this._clickToPaginate.asReadonly();
-  public readonly layoutMode = this._layoutMode.asReadonly();
   public readonly immersiveMode = this._immersiveMode.asReadonly();
   public readonly isFullscreen = this._isFullscreen.asReadonly();
 
   // Computed signals for derived state
+  public readonly layoutMode = computed(() => {
+    const layout = this._layoutMode();
+    const mobileDevice = this.utilityService.activeUserBreakpoint() < UserBreakpoint.Tablet;
+
+    if (layout !== BookPageLayoutMode.Column2 || !mobileDevice) return layout;
+
+    // Do not use 2 column mode on small screens
+    this.toastr.info(translate('book-reader.force-selected-one-column'));
+    return BookPageLayoutMode.Column1;
+  });
+
   public readonly canPromoteProfile = computed(() => {
     const profile = this._currentReadingProfile();
     return profile !== null && profile.kind === ReadingProfileKind.Implicit;

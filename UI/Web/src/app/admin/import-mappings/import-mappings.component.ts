@@ -34,12 +34,13 @@ import {
   ImportSettings
 } from "../../_models/import-field-mappings";
 import {firstValueFrom, switchMap} from "rxjs";
-import {tap} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {toObservable, toSignal} from "@angular/core/rxjs-interop";
 
 enum Step {
   Import = 0,
@@ -111,6 +112,9 @@ export class ImportMappingsComponent implements OnInit {
   settings = signal<MetadataSettings | undefined>(undefined)
   importedMappings = signal<MetadataMappingsExport | undefined>(undefined);
   importResult = signal<FieldMappingsImportResult | undefined>(undefined);
+
+  isFileSelected = toSignal(this.uploadForm.get('files')!.valueChanges
+    .pipe(map((files) => !!files && files.length == 1)), {initialValue: false});
 
   nextButtonLabel = computed(() => {
     switch(this.currentStepIndex()) {
@@ -247,7 +251,7 @@ export class ImportMappingsComponent implements OnInit {
     }
 
     this.importedMappings.set(newImport);
-    this.currentStepIndex.update(x=>x + 1);
+    this.currentStepIndex.update(x => x + 1);
   }
 
   private setupSettingConflicts(res: FieldMappingsImportResult) {
@@ -292,11 +296,6 @@ export class ImportMappingsComponent implements OnInit {
       (this.importSettingsForm.get('ageRatingConflictResolutions') as FormArray).clear();
     }
 
-  }
-
-  isFileSelected() {
-    const files = this.uploadForm.get('files')?.value;
-    return files && files.length === 1;
   }
 
   protected readonly Step = Step;

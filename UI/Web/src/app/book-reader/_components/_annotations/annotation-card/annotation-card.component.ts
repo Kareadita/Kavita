@@ -19,6 +19,7 @@ import {AnnotationService} from "../../../../_services/annotation.service";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
+import {ColorscapeService} from "../../../../_services/colorscape.service";
 
 @Component({
   selector: 'app-annotation-card',
@@ -35,6 +36,8 @@ import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnnotationCardComponent {
+
+  protected readonly colorscapeService = inject(ColorscapeService);
   private readonly confirmService = inject(ConfirmService);
   private readonly annotationService = inject(AnnotationService);
   private readonly epubMenuService = inject(EpubReaderMenuService);

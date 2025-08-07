@@ -918,7 +918,7 @@
         "title": "Image Bookmarks",
         "close": "{{common.close}}"
     },
-    
+
     "page-chapter-label-pipe": {
         "page-only": "— Page {{pageNumber}}",
         "full": "— Page {{pageNumber}}, Chapter \"{{chapterTitle}}\""
@@ -937,7 +937,8 @@
     },
 
     "highlight-bar": {
-      "add-new-color-alt": "Add Custom Color"
+        "add-new-color-alt": "Add Custom Color",
+        "slot-label": "Highlight slot {{slot}}"
     },
 
     "book-reader": {
@@ -974,7 +975,9 @@
         "go-to-section-prompt": "There are {{totalSections}} sections. What section do you want to go to?",
 
         "page-num-label": "Page {{page}}",
-        "completion-label": "{{percent}} complete"
+        "completion-label": "{{percent}} complete",
+
+        "force-selected-one-column": "Layout mode switched to One Column due to insufficient space to render Two Columns"
     },
 
     "personal-table-of-contents": {

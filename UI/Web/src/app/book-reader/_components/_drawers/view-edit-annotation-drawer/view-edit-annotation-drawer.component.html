@@ -1,42 +1,61 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-    <div class="offcanvas-header d-flex align-items-center" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
+  <div class="offcanvas-header d-flex flex-column p-2 p-sm-3" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
+    <div class="d-flex flex-row align-items-center w-100 mb-2 mb-sm-0">
       <div class="flex-shrink-0">
-        <h5 class="offcanvas-title">
-          <span>
-            @if (mode() === AnnotationMode.Create) {
-              {{t('create-title')}}
-            } @else {
+        <h5 class="offcanvas-title mb-0">
+        <span>
+          @if (mode() === AnnotationMode.Create) {
+            {{t('create-title')}}
+          } @else {
             {{t(isEditMode() ? 'edit-title' : 'view-title')}}
           }
-          </span>
+        </span>
         </h5>
       </div>
 
-      @if (isEditOrCreateMode() && this.annotation()) {
-        <div class="ms-3">
-          <app-highlight-bar (changeSlot)="changeSlotIndex($event)" [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0" />
-        </div>
-      }
-
-      <div class="flex-grow-1"></div>
+      <div class="flex-grow-1">
+        @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop) {
+          @if (isEditOrCreateMode() && this.annotation()) {
+            <div class="ms-2 d-flex w-100">
+              <app-highlight-bar
+                [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0"
+                (selectedSlotIndexChange)="changeSlotIndex($event)"
+              />
+            </div>
+          }
+        }
+      </div>
 
       <div class="flex-shrink-0">
         @if (isEditOrCreateMode() && formGroup) {
           <form [formGroup]="formGroup" novalidate>
-            <div class="form-check form-switch offcanvas-title-right">
+            <div class="form-check form-switch">
               <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
-              <label class="form-check-label" for="contains-spoiler">Contains Spoiler</label>
+              <label class="form-check-label" for="contains-spoiler">{{t('contains-spoilers-label')}}</label>
             </div>
           </form>
         } @else if (annotation()?.containsSpoiler) {
-          <div class="small offcanvas-title-right">
-              <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
+          <div class="small">
+            <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
             {{t('contains-spoilers-label')}}
           </div>
         }
       </div>
     </div>
+
+    @if (utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop) {
+      @if (isEditOrCreateMode() && this.annotation()) {
+        <div class="d-flex align-content-center justify-content-center w-100">
+          <app-highlight-bar
+            [isCollapsed]="false"
+            (selectedSlotIndexChange)="changeSlotIndex($event)"
+            [selectedSlotIndex]="annotation()?.selectedSlotIndex ?? 0"
+          />
+        </div>
+      }
+    }
+  </div>
 
     <div class="offcanvas-body">
       @if (annotation() && formGroup) {
@@ -47,7 +66,7 @@
               <div id="render-target" #renderTarget>
                 <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
               </div>
-              <cite class="float-end mb-1">{{annotation()! | pageChapterLabel}}</cite>
+              <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
             </blockquote>
           </div>
 

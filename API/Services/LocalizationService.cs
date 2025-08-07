@@ -23,6 +23,8 @@ public interface ILocalizationService
 
 public class LocalizationService : ILocalizationService
 {
+    private const string LocaleCacheKey = "locales";
+
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
     private readonly IUnitOfWork _unitOfWork;
@@ -33,6 +35,7 @@ public class LocalizationService : ILocalizationService
     private readonly string _localizationDirectoryUi;
 
     private readonly MemoryCacheEntryOptions _cacheOptions;
+    private readonly MemoryCacheEntryOptions _localsCacheOptions;
 
 
     public LocalizationService(IDirectoryService directoryService,
@@ -62,6 +65,10 @@ public class LocalizationService : ILocalizationService
         _cacheOptions = new MemoryCacheEntryOptions()
             .SetSize(1)
             .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));
+
+        _localsCacheOptions = new MemoryCacheEntryOptions()
+            .SetSize(1)
+            .SetAbsoluteExpiration(TimeSpan.FromHours(24));
     }
 
     /// <summary>
@@ -139,6 +146,11 @@ public class LocalizationService : ILocalizationService
     /// <returns></returns>
     public IEnumerable<KavitaLocale> GetLocales()
     {
+        if (_cache.TryGetValue(LocaleCacheKey, out List<KavitaLocale>? cachedLocales) && cachedLocales != null)
+        {
+            return cachedLocales;
+        }
+
         var uiLanguages = _directoryService
         .GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json");
         var backendLanguages = _directoryService
@@ -246,7 +258,10 @@ public class LocalizationService : ILocalizationService
             }
         }
 
-        return locales.Values;
+        var kavitaLocales = locales.Values.ToList();
+        _cache.Set(LocaleCacheKey, kavitaLocales, _localsCacheOptions);
+
+        return kavitaLocales;
     }
 
     // Helper methods that would need to be implemented
