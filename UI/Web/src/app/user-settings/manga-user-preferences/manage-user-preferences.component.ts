@@ -16,6 +16,7 @@ import {AsyncPipe, DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
+import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -26,7 +27,8 @@ import {LicenseService} from "../../_services/license.service";
     SettingItemComponent,
     SettingSwitchComponent,
     AsyncPipe,
-    DecimalPipe
+    DecimalPipe,
+    HighlightBarComponent
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',

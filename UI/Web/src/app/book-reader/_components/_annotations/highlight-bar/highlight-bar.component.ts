@@ -43,6 +43,7 @@ export class HighlightBarComponent {
 
   selectedSlotIndex = model.required<number>();
   isCollapsed = model<boolean>(true);
+  canCollapse = model<boolean>(true);
   isEditMode = model<boolean>(false);
 
   slots = this.annotationService.slots;

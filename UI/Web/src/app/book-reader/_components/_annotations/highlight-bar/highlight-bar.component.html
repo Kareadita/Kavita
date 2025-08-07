@@ -3,7 +3,7 @@
   <div class="d-flex align-items-center" style="max-height: 47px; height: 47px;">
     @let collapsed = isCollapsed();
 
-    @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop) {
+    @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop && canCollapse()) {
       <button
         type="button"
         style="max-height: 47px"
