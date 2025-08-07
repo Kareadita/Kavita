@@ -23,7 +23,7 @@ public interface ILocalizationService
 
 public class LocalizationService : ILocalizationService
 {
-    private const string LocalCacheKey = "locales";
+    private const string LocaleCacheKey = "locales";
 
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
@@ -146,7 +146,7 @@ public class LocalizationService : ILocalizationService
     /// <returns></returns>
     public IEnumerable<KavitaLocale> GetLocales()
     {
-        if (_cache.TryGetValue(LocalCacheKey, out List<KavitaLocale>? cachedLocales) && cachedLocales != null)
+        if (_cache.TryGetValue(LocaleCacheKey, out List<KavitaLocale>? cachedLocales) && cachedLocales != null)
         {
             return cachedLocales;
         }
@@ -259,7 +259,7 @@ public class LocalizationService : ILocalizationService
         }
 
         var kavitaLocales = locales.Values.ToList();
-        _cache.Set(LocalCacheKey, kavitaLocales, _localsCacheOptions);
+        _cache.Set(LocaleCacheKey, kavitaLocales, _localsCacheOptions);
 
         return kavitaLocales;
     }

@@ -76,12 +76,13 @@ export class EpubReaderSettingsService {
   // Computed signals for derived state
   public readonly layoutMode = computed(() => {
     const layout = this._layoutMode();
-    const nonDesktop = this.utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop;
+    const mobileDevice = this.utilityService.activeUserBreakpoint() < UserBreakpoint.Tablet;
 
-    if (layout !== BookPageLayoutMode.Column2) return layout;
+    if (layout !== BookPageLayoutMode.Column2 || !mobileDevice) return layout;
 
     // Do not use 2 column mode on small screens
-    return nonDesktop ? BookPageLayoutMode.Column1 : layout;
+    this.toastr.info(translate('book-reader.force-selected-one-column'));
+    return BookPageLayoutMode.Column1;
   });
 
   public readonly canPromoteProfile = computed(() => {

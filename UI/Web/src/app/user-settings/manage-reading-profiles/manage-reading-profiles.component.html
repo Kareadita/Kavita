@@ -164,6 +164,8 @@
                               </ng-template>
                               <ng-template #edit>
                                 <app-setting-colour-picker
+                                  [id]="'background-color'"
+                                  [label]="t('background-color-label')"
                                   [color]="colorscapeService.hexToRGBA(selectedProfile!.backgroundColor)"
                                   (rawColorChange)="handleBackgroundColorChange($event)"
                                   [selected]="false"

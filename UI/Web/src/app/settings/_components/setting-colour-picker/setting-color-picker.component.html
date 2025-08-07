@@ -2,23 +2,25 @@
   <div class="color-picker-container">
     <button class="btn btn-icon color">
       @if (showPicker()) {
-        <div #colourPopup>
+        <div #colorPopup>
           <chrome-picker class="floating-picker" [control]="chromeControl"></chrome-picker>
         </div>
       }
 
-      <input class="dot" appLongClick
+      <input [id]="id()" class="dot" appLongClick
              (longClick)="longClick()"
              [style.background]="color() | slotColor"
              (click)="togglePicker()"
       />
+      <label [for]="id()" class="visually-hidden">{{label()}}</label>
     </button>
   </div>
 } @else {
-  <button class="btn btn-icon color" (click)="onSelect()">
+  <button [id]="id()" class="btn btn-icon color" (click)="onSelect()">
     <div class="dot" appLongClick (longClick)="longClick()"
          [ngClass]="{'active': selected()}"
          [ngStyle]="{'background-color': color() | slotColor}">
     </div>
   </button>
+  <label [for]="id()" class="visually-hidden">{{label()}}</label>
 }

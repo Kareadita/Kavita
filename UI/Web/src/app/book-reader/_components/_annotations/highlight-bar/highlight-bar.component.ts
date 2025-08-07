@@ -18,8 +18,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, tap} from "rxjs/operators";
 import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 import {
-  SettingColourPickerComponent
-} from "../../../../settings/_components/setting-colour-picker/setting-colour-picker.component";
+  SettingColorPickerComponent
+} from "../../../../settings/_components/setting-colour-picker/setting-color-picker.component";
 import {Color} from "@iplab/ngx-color-picker";
 import {AccountService} from "../../../../_services/account.service";
 
@@ -28,7 +28,7 @@ import {AccountService} from "../../../../_services/account.service";
   imports: [
     TranslocoDirective,
     NgbCollapse,
-    SettingColourPickerComponent
+    SettingColorPickerComponent
   ],
   templateUrl: './highlight-bar.component.html',
   styleUrl: './highlight-bar.component.scss',
@@ -53,7 +53,9 @@ export class HighlightBarComponent {
     const slots = this.annotationService.slots();
     if (slots.length === 0 || index >= slots.length) return null;
     return slots[index];
-  })
+  });
+
+  desktopLayout = computed(() => this.utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop);
 
 
   selectSlot(index: number, slot: HighlightSlot) {

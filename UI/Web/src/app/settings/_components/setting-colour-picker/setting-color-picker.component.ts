@@ -25,17 +25,20 @@ import {tap} from "rxjs";
   selector: 'app-setting-colour-picker',
   standalone: true,
   imports: [CommonModule, SlotColorPipe, LongClickDirective, ChromePickerComponent],
-  templateUrl: './setting-colour-picker.component.html',
-  styleUrl: './setting-colour-picker.component.scss'
+  templateUrl: './setting-color-picker.component.html',
+  styleUrl: './setting-color-picker.component.scss'
 })
-export class SettingColourPickerComponent implements OnInit {
+export class SettingColorPickerComponent implements OnInit {
 
   private readonly elementRef = inject(ElementRef);
   private readonly slotColorPipe = inject(SlotColorPipe);
   private readonly destroyRef = inject(DestroyRef);
   private readonly utilityService: UtilityService = inject(UtilityService);
 
-  @ViewChild('colourPopup') colourPopup?: ElementRef;
+  @ViewChild('colorPopup') colorPopup?: ElementRef;
+
+  id = input.required<string>();
+  label = input.required<string>()
 
   editMode = model(false);
   color = model.required<RgbaColor>();
@@ -56,19 +59,19 @@ export class SettingColourPickerComponent implements OnInit {
   chromeControl!: ColorPickerControl;
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
+  onDocumentClick(event: Event) {
     if (!this.showPicker()) return;
 
-    if (!this.colourPopup) return;
+    if (!this.colorPopup) return;
 
     const clickedElement = event.target as Node;
 
-    if (!this.elementRef.nativeElement.contains(clickedElement) && !this.colourPopup.nativeElement.contains(clickedElement)) {
+    if (!this.elementRef.nativeElement.contains(clickedElement) && !this.colorPopup.nativeElement.contains(clickedElement)) {
       this.showPicker.set(false);
     }
   }
 
-  onSelect(): void {
+  onSelect() {
     this.selectPicker.emit();
   }
 
@@ -82,11 +85,11 @@ export class SettingColourPickerComponent implements OnInit {
     }
   }
 
-  togglePicker(): void {
+  togglePicker() {
     this.showPicker.update(b => !b);
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.chromeControl = new ColorPickerControl()
       .setValueFrom(this.slotColorPipe.transform(this.color()))
       .showAlphaChannel()

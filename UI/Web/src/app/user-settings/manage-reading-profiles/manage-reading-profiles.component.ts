@@ -49,8 +49,8 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {WikiLink} from "../../_models/wiki";
 import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
 import {
-  SettingColourPickerComponent
-} from "../../settings/_components/setting-colour-picker/setting-colour-picker.component";
+  SettingColorPickerComponent
+} from "../../settings/_components/setting-colour-picker/setting-color-picker.component";
 import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
 
@@ -91,7 +91,7 @@ enum TabId {
     LoadingComponent,
     NgbTooltip,
     BreakpointPipe,
-    SettingColourPickerComponent,
+    SettingColorPickerComponent,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',

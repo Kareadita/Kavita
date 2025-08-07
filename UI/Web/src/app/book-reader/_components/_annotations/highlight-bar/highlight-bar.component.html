@@ -3,7 +3,7 @@
   <div class="d-flex align-items-center" style="max-height: 47px; height: 47px;">
     @let collapsed = isCollapsed();
 
-    @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop && canCollapse()) {
+    @if (desktopLayout() && canCollapse()) {
       <button
         type="button"
         style="max-height: 47px"
@@ -25,6 +25,8 @@
           <div class="color-picker-container">
             @for(slot of slots(); track slot.color; let index = $index) {
               <app-setting-colour-picker
+                [id]="'slot-' + (index + 1)"
+                [label]="t('slot-label', {slot: index + 1})"
                 [color]="slot.color"
                 (colorChange)="handleSlotColourChange(index, $event)"
                 [selected]="slot.slotNumber === selectedSlotIndex()"
@@ -36,7 +38,7 @@
           </div>
         }
 
-        @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Tablet) {
+        @if (desktopLayout()) {
           <button class="btn btn-icon ms-2 color" (click)="toggleEditMode()">
             @if (!isEditMode()) {
               <i class="fa-solid fa-pencil-alt" aria-hidden="true"></i>
