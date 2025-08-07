@@ -187,6 +187,12 @@ public class DirectoryServiceTests: AbstractFsTest
     [Fact]
     public void GetFiles_All_MixedPathSeparators()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _testOutputHelper.WriteLine("Skipping test on non Windows platform");
+            return;
+        }
+
         const string testDirectory = "/manga/";
         var fileSystem = new MockFileSystem();
         for (var i = 0; i < 10; i++)
@@ -810,6 +816,12 @@ public class DirectoryServiceTests: AbstractFsTest
     [InlineData(@"M:\", @"M:\Toukyou Akazukin\Vol. 01 Ch. 005.cbz", @"Toukyou Akazukin")]
     public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _testOutputHelper.WriteLine("Skipping test on non Windows platform");
+            return;
+        }
+
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory(rootPath);
         fileSystem.AddFile(fullpath, new MockFileData(""));
