@@ -14,7 +14,7 @@ $dotSize: 30px;
   margin-bottom: 4px;
   padding: 1px;
 
-  background: var(--elevation-layer6-dark-solid);
+  background: var(--drawer-bg-color);
   border: 2px solid var(--primary-color);
   border-radius: var(--card-border-radius);
   box-shadow:
@@ -28,33 +28,33 @@ $dotSize: 30px;
   rgba-input-component {
 
     span.ng-star-inserted {
-      color: var(--input-text-color);
+      color: var(--drawer-text-color);
     }
 
   }
 
   input {
-    background: var(--input-bg-color);
-    color: var(--input-text-color);
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
     border-radius: 4px;
     border: 1px solid var(--input-border-color);
   }
 
   span.type-btn {
-    background: var(--elevation-layer6-dark-solid);
-    color: var(--input-text-color);
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
   }
 
   span.type-btn:hover {
-    background: var(--elevation-layer6-dark-solid);
-    color: var(--input-text-color);
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
   }
 
   span.type-btn::after {
     content: '\f2f1'; /* FA Cycle */
     font-family: "Font Awesome 5 Free", serif;
     font-weight: 900;
-    color: var(--input-text-color);
+    color: var(--drawer-text-color);
 
     display: inline-block;
     position: relative;
