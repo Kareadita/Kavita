@@ -830,6 +830,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadImageBookmarks() {
     this.readerService.getBookmarks(this.chapterId).subscribe(res => {
       this.imageBookmarks.set(res);
+      this.injectImageBookmarkIndicators(true);
     });
   }
 
@@ -1019,16 +1020,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Injects the new DOM needed to provide the bookmark functionality.
    * We can't use a wrapper due to potential for styling issues.
    */
-  injectImageBookmarkIndicators() {
+  injectImageBookmarkIndicators(forceRefresh = false) {
     const imgs = Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img') ?? []);
 
-
     const bookmarksForPage = (this.imageBookmarks() ?? []).filter(b => b.page === this.pageNum());
+
+    if (forceRefresh) {
+      // Remove all existing bookmark overlays
+      const existingOverlays = this.readingSectionElemRef.nativeElement.querySelectorAll('.bookmark-overlay');
+      existingOverlays.forEach(overlay => overlay.remove());
+    }
 
     imgs.forEach((img, index) => {
       if (img.nextElementSibling?.classList.contains('bookmark-overlay')) return;
 
-      const xpath = this.readerService.getXPathTo(img);
+      const xpath = this.readerService.descopeBookReaderXpath(this.readerService.getXPathTo(img));
       const matchingBookmarks = bookmarksForPage.filter(b => b.imageOffset == index);
 
       let hasBookmark = false;
@@ -1166,31 +1172,35 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupPageAnchors();
 
 
-    if (part !== undefined && part !== '') {
-      this.scrollTo(part);
-    } else if (scrollTop !== undefined && scrollTop !== 0) {
-      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
-    } else if ((this.writingStyle() === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
-       setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
-    } else {
+    try {
+      if (part !== undefined && part !== '') {
+        this.scrollTo(part);
+      } else if (scrollTop !== undefined && scrollTop !== 0) {
+        setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      } else if ((this.writingStyle() === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
+        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+      } else {
 
-      if (this.layoutMode() === BookPageLayoutMode.Default) {
-        setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
-      } else if (this.writingStyle() === WritingStyle.Vertical) {
-        if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+        if (this.layoutMode() === BookPageLayoutMode.Default) {
+          setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
+        } else if (this.writingStyle() === WritingStyle.Vertical) {
+          if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
             setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
-        } else {
+          } else {
             setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
+          }
+        }
+        else {
+          // We need to check if we are paging back, because we need to adjust the scroll
+          if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+            setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
+          } else {
+            setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
+          }
         }
       }
-      else {
-        // We need to check if we are paging back, because we need to adjust the scroll
-        if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-          setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
-        } else {
-          setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
-        }
-      }
+    } catch (ex) {
+      console.error(ex); // TODO: Fix loading bug with xpath
     }
 
     // we need to click the document before arrow keys will scroll down.
@@ -1839,13 +1849,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   viewBookmarkImages() {
-    this.epubMenuService.openViewBookmarksDrawer(this.chapterId, (res: PageBookmark | null) => {
+    this.epubMenuService.openViewBookmarksDrawer(this.chapterId, (res: PageBookmark | null, action) => {
       if (res === null) return;
 
-      this.setPageNum(res.page);
-      if (res.xPath != null) {
-        this.loadPage(res.xPath);
+      if (action === 'loadPage') {
+        this.setPageNum(res.page);
+        if (res.xPath != null) {
+          this.loadPage(res.xPath);
+        }
+        return;
+      } else if (action === 'removeBookmark') {
+        this.loadImageBookmarks();
+
       }
+
+
     });
   }
 

@@ -13,11 +13,15 @@
     @for(item of items; track item) {
       <div class="mx-auto">
         <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [styles]="{width: '50%', height: '50%'}" />
-        <a href="javascript:void(0);" (click)="goToBookmark(item)">Page {{item.page}}</a>
+        <br />
+        <a href="javascript:void(0);" (click)="goToBookmark(item)">{{t('page-num-label', {page: item.page})}}</a>
+        <button class="btn btn-danger" (click)="deleteBookmark(item)">
+          <i class="fa fa-trash-alt" aria-hidden="true"></i>
+        </button>
       </div>
     }
     @empty {
-      <p>No bookmarks yet</p>
+      <p>{{t('no-data')}}</p>
     }
 
   </div>

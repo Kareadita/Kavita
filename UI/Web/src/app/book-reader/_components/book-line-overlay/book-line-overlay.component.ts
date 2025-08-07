@@ -22,7 +22,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {Annotation} from "../../_models/annotations/annotation";
-import {DOCUMENT} from "@angular/common";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -47,7 +46,7 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() refreshToC: EventEmitter<void> = new EventEmitter();
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
-  xPath: string = '';
+  //xPath: string = '';
   startXPath: string = '';
   endXPath: string = '';
   allTextFromSelection: string = '';
@@ -58,13 +57,13 @@ export class BookLineOverlayComponent implements OnInit {
   });
   hasSelectedAnnotation = model<boolean>(false);
 
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
   private readonly toastr = inject(ToastrService);
   private readonly elementRef = inject(ElementRef);
   private readonly epubMenuService = inject(EpubReaderMenuService);
-  private readonly document = inject(DOCUMENT);
 
 
   @HostListener('window:keydown', ['$event'])
@@ -137,7 +136,7 @@ export class BookLineOverlayComponent implements OnInit {
 
 
       // For backward compatibility, keep the original xPath as startXPath (TODO: Refactor the code)
-      this.xPath = this.readerService.descopeBookReaderXpath(this.startXPath); // TODO: We need to clean cases of this as well
+      //this.xPath = this.readerService.descopeBookReaderXpath(this.startXPath); // TODO: We need to clean cases of this as well
 
       // Get the context window for generating a blurb in annotation flow
       this.allTextFromSelection = (event.target as Element).textContent || '';
@@ -188,8 +187,11 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   createPTOC() {
+
+    const xpath = this.readerService.descopeBookReaderXpath(this.startXPath);
+
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
-      this.bookmarkForm.get('name')?.value, this.xPath, this.selectedText).pipe(catchError(err => {
+      this.bookmarkForm.get('name')?.value, xpath, this.selectedText).pipe(catchError(err => {
         this.focusOnBookmarkInput();
         return of();
     })).subscribe(() => {
@@ -207,7 +209,10 @@ export class BookLineOverlayComponent implements OnInit {
   reset() {
     this.bookmarkForm.reset();
     this.mode = BookLineOverlayMode.None;
-    this.xPath = '';
+    //this.xPath = '';
+    this.startXPath = '';
+    this.endXPath = '';
+
     this.selectedText = '';
     this.allTextFromSelection = '';
     const selection = window.getSelection();

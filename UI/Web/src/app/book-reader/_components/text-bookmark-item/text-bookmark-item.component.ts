@@ -1,7 +1,8 @@
-import {Component, EventEmitter, input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, input, Output} from '@angular/core';
 import {PersonalToC} from "../../../_models/readers/personal-toc";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ReaderService} from "../../../_services/reader.service";
 
 @Component({
   selector: 'app-text-bookmark-item',
@@ -18,6 +19,8 @@ export class TextBookmarkItemComponent {
   @Output() loadBookmark =  new EventEmitter<PersonalToC>();
   @Output() removeBookmark =  new EventEmitter<PersonalToC>();
 
+  private readonly readerService = inject(ReaderService);
+
 
   remove(evt: Event) {
     evt.stopPropagation();
@@ -30,7 +33,10 @@ export class TextBookmarkItemComponent {
     evt.stopPropagation();
     evt.preventDefault();
 
-    this.loadBookmark.emit(this.bookmark());
+    const bookmark = {...this.bookmark()};
+    bookmark.bookScrollId = this.readerService.scopeBookReaderXpath(bookmark.bookScrollId ?? '');
+
+    this.loadBookmark.emit(bookmark);
   }
 
 }

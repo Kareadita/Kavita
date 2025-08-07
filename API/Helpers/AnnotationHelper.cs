@@ -15,6 +15,17 @@ public static partial class AnnotationHelper
     [GeneratedRegex("""^//id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
 
+
+    /// <summary>
+    /// Given an xpath that is scoped to the epub reader, transform it into a page-level xpath
+    /// </summary>
+    /// <param name="xpath"></param>
+    /// <returns></returns>
+    public static string DescopeXpath(string xpath)
+    {
+        return xpath.Replace(UiXPathScope, "//BODY").ToLowerInvariant();
+    }
+
     public static void InjectSingleElementAnnotations(HtmlDocument doc, List<AnnotationDto> annotations)
     {
         var annotationsByElement = annotations
@@ -25,7 +36,7 @@ public static partial class AnnotationHelper
         {
             try
             {
-                var scopedXPath = xpath.Replace(UiXPathScope, "//BODY").ToLowerInvariant();
+                var scopedXPath = DescopeXpath(xpath);
                 var elem = FindElementByXPath(doc, scopedXPath);
                 if (elem == null) continue;
 
@@ -81,8 +92,8 @@ public static partial class AnnotationHelper
         {
             try
             {
-                var startXPath = annotation.XPath.Replace(UiXPathScope, "//BODY").ToLowerInvariant();
-                var endXPath = annotation.EndingXPath.Replace(UiXPathScope, "//BODY").ToLowerInvariant();
+                var startXPath = DescopeXpath(annotation.XPath);
+                var endXPath = DescopeXpath(annotation.EndingXPath);
 
                 var startElement = FindElementByXPath(doc, startXPath);
                 var endElement = FindElementByXPath(doc, endXPath);

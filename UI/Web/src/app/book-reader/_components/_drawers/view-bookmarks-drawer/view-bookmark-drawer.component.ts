@@ -35,6 +35,10 @@ export class ViewBookmarkDrawerComponent {
   chapterId = model<number>();
   bookmarks = model<PageBookmark[]>();
   loadPage: EventEmitter<PageBookmark | null> = new EventEmitter<PageBookmark | null>();
+  /**
+   * Emitted when a bookmark is removed
+   */
+  removeBookmark: EventEmitter<PageBookmark> = new EventEmitter<PageBookmark>();
 
 
 
@@ -48,14 +52,24 @@ export class ViewBookmarkDrawerComponent {
 
       this.readerService.getBookmarks(id).subscribe(bookmarks => {
         this.bookmarks.set(bookmarks.sort((a, b) => a.page - b.page));
-        new Set(this.bookmarks());
-        this.cdRef.markForCheck();
       });
     });
   }
 
   goToBookmark(bookmark: PageBookmark) {
-    this.loadPage.emit(bookmark);
+    const bookmarkCopy = {...bookmark};
+    bookmarkCopy.xPath = this.readerService.scopeBookReaderXpath(bookmarkCopy.xPath ?? '');
+
+    this.loadPage.emit(bookmarkCopy);
+  }
+
+  deleteBookmark(bookmark: PageBookmark) {
+    this.readerService.unbookmark(bookmark.seriesId, bookmark.volumeId, bookmark.chapterId, bookmark.page, bookmark.imageOffset).subscribe(_ => {
+      const bmarks = this.bookmarks() ?? [];
+      this.bookmarks.set(bmarks.filter(b => b.id !== bookmark.id));
+      // Inform UI to inject/refresh image bookmark icons
+      this.removeBookmark.emit(bookmark);
+    });
   }
 
 

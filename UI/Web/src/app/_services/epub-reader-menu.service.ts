@@ -81,7 +81,7 @@ export class EpubReaderMenuService {
     this.isDrawerOpen.set(true);
   }
 
-  openViewBookmarksDrawer(chapterId: number, callbackFn: (evt: PageBookmark | null) => void) {
+  openViewBookmarksDrawer(chapterId: number, callbackFn: (evt: PageBookmark | null, action: 'loadPage' | 'removeBookmark') => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
@@ -92,7 +92,11 @@ export class EpubReaderMenuService {
       if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
         this.closeAll();
       }
-      callbackFn(res);
+      callbackFn(res, 'loadPage');
+    });
+    ref.componentInstance.removeBookmark.subscribe((res: PageBookmark) => {
+      // Check if we are on mobile to collapse the menu
+      callbackFn(res, 'removeBookmark');
     });
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());

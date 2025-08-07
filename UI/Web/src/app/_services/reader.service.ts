@@ -359,6 +359,19 @@ export class ReaderService {
   }
 
   /**
+   * Adds the Kavita UI aspect to the xpath so loading from xpath in the reader works
+   * @param xpath
+   */
+  scopeBookReaderXpath(xpath: string) {
+    const bookContentElement = this.document.querySelector('.book-content');
+    const bookContentXPath = this.getXPathTo(bookContentElement?.children[0]);
+
+    if (xpath.startsWith(bookContentXPath)) return xpath;
+
+    return xpath.replace('//BODY', bookContentXPath);
+  }
+
+  /**
    *
    * @param element
    * @param pureXPath Will ignore shortcuts like id('')

@@ -916,7 +916,9 @@
 
     "view-bookmark-drawer": {
         "title": "Image Bookmarks",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num": "{{book-reader.page-num-label}}"
     },
 
     "page-chapter-label-pipe": {
