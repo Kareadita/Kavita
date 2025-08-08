@@ -12,11 +12,15 @@ export class AgeRatingPipe implements PipeTransform {
 
   private readonly translocoService = inject(TranslocoService);
 
-  transform(value: AgeRating | AgeRatingDto | undefined): string {
+  transform(value: AgeRating | AgeRatingDto | undefined | string): string {
     if (value === undefined || value === null) return this.translocoService.translate('age-rating-pipe.unknown');
 
     if (value.hasOwnProperty('title')) {
       return (value as AgeRatingDto).title;
+    }
+
+    if (typeof value === 'string') {
+      value = parseInt(value, 10) as AgeRating;
     }
 
     switch (value) {

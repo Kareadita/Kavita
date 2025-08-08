@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
@@ -6,9 +6,14 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
 import {translate, TranslocoService} from "@jsverse/transloco";
+import {AuthGuard} from "../_guards/auth.guard";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+
+  baseURL = inject(APP_BASE_HREF);
+
   constructor(private router: Router, private toastr: ToastrService,
               private accountService: AccountService,
               private translocoService: TranslocoService) {}
@@ -26,7 +31,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.handleValidationError(error);
             break;
           case 401:
-            this.handleAuthError(error);
+            this.handleAuthError(request, error);
             break;
           case 404:
             this.handleNotFound(error);
@@ -114,19 +119,31 @@ export class ErrorInterceptor implements HttpInterceptor {
     console.error('500 error:', error);
   }
 
-  private handleAuthError(error: any) {
+  private handleAuthError(req: HttpRequest<unknown>, error: any) {
     // Special hack for register url, to not care about auth
     if (location.href.includes('/registration/confirm-email?token=')) {
       return;
     }
+
+    const path = window.location.pathname;
+    if (path !== '/login' && !path.startsWith(this.baseURL+"registration") && path !== '') {
+      localStorage.setItem(AuthGuard.urlKey, path);
+    }
+
+    if (error.error && error.error !== 'Unauthorized') {
+      this.toast(translate(error.error));
+    }
+
     // NOTE: Signin has error.error or error.statusText available.
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
-    this.accountService.logout();
+
+    // Ensure AutoLogin is skipped when the OIDC endpoint is called
+    this.accountService.logout(req.method === 'GET' && req.url.endsWith('/api/account'));
   }
 
   // Assume the title is already translated
   private toast(message: string, title?: string) {
-    if (message.startsWith('errors.')) {
+    if ((message+'').startsWith('errors.')) {
       this.toastr.error(this.translocoService.translate(message), title);
     } else {
       this.toastr.error(message, title);

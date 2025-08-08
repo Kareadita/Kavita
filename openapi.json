@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.4",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.7",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.4"
+    "version": "0.8.7.7"
   },
   "servers": [
     {
@@ -27,6 +27,68 @@
     }
   ],
   "paths": {
+    "/api/Account/oidc-authenticated": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns true if OIDC authentication cookies are present",
+        "description": "Makes not guarantee about their validity",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns the current user, as it would from login",
+        "description": "Does not return tokens for the user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Account/reset-password": {
       "post": {
         "tags": [
@@ -397,6 +459,7 @@
           "Account"
         ],
         "summary": "Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.",
+        "description": "Users who's API.Entities.AppUser.IdentityProvider is not API.Entities.Enums.IdentityProvider.Kavita cannot be edited if API.DTOs.Settings.OidcConfigDto.SyncUserSettings is true",
         "requestBody": {
           "description": "",
           "content": {
@@ -4820,6 +4883,40 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/Oidc/login": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "/"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Oidc/logout": {
+      "get": {
+        "tags": [
+          "Oidc"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -13480,6 +13577,135 @@
         }
       }
     },
+    "/api/Settings/import-field-mappings": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Import field mappings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportFieldMappingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldMappingsImportResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/oidc": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Retrieve publicly required configuration regarding Oidc",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OidcPublicConfigDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/is-valid-authority": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Validate if the given authority is reachable from the server",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorityValidationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/{userId}/read": {
       "get": {
         "tags": [
@@ -16539,6 +16765,20 @@
             "description": "The timestamp of when Scrobble Event Generation ran (Utc)",
             "format": "date-time"
           },
+          "oidcId": {
+            "type": "string",
+            "description": "The sub returned the by OIDC provider",
+            "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "The IdentityProvider for the user, default to API.Entities.Enums.IdentityProvider.Kavita",
+            "format": "int32"
+          },
           "scrobbleHolds": {
             "type": "array",
             "items": {
@@ -17800,6 +18040,16 @@
             "type": "integer",
             "description": "User this table of content belongs to",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthorityValidationDto": {
+        "type": "object",
+        "properties": {
+          "authority": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20627,6 +20877,85 @@
         },
         "additionalProperties": false
       },
+      "FieldMappingsDto": {
+        "type": "object",
+        "properties": {
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
+            "nullable": true
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only allow these Tags to be written to Kavita",
+            "nullable": true
+          },
+          "ageRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
+            },
+            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
+            "nullable": true
+          },
+          "fieldMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldMappingDto"
+            },
+            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Decoupled from API.DTOs.KavitaPlus.Metadata.MetadataSettingsDto to allow reuse without requiring the full metadata settings in\nAPI.DTOs.Settings.ImportFieldMappingsDto"
+      },
+      "FieldMappingsImportResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "resultingMetadataSettings": {
+            "$ref": "#/components/schemas/MetadataSettingsDto"
+          },
+          "ageRatingConflicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of the conflicting age ratings mappings",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FileDimensionDto": {
         "type": "object",
         "properties": {
@@ -21181,6 +21510,74 @@
         },
         "additionalProperties": false,
         "description": "A range of time to read a selection (series, chapter, etc)"
+      },
+      "ImportFieldMappingsDto": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "$ref": "#/components/schemas/ImportSettingsDto"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FieldMappingsDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportSettingsDto": {
+        "type": "object",
+        "properties": {
+          "importMode": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "How Kavita should import the new settings",
+            "format": "int32"
+          },
+          "resolution": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Default conflict resolution, override with API.DTOs.ImportSettingsDto.AgeRatingConflictResolutions and !:FieldMappingsConflictResolutions",
+            "format": "int32"
+          },
+          "whitelist": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.Whitelist"
+          },
+          "blacklist": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.Blacklist"
+          },
+          "ageRatings": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.AgeRatingMappings"
+          },
+          "fieldMappings": {
+            "type": "boolean",
+            "description": "Import !:MetadataSettingsDto.FieldMappings"
+          },
+          "ageRatingConflictResolutions": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2
+              ],
+              "type": "integer",
+              "description": "How Kavita should resolve conflicts",
+              "format": "int32"
+            },
+            "description": "Override the API.DTOs.ImportSettingsDto.Resolution for specific age ratings",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "Int32Range": {
         "type": "object",
@@ -22211,6 +22608,15 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false,
@@ -22259,9 +22665,65 @@
       "MetadataSettingsDto": {
         "type": "object",
         "properties": {
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
+            "nullable": true
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only allow these Tags to be written to Kavita",
+            "nullable": true
+          },
+          "ageRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
+            },
+            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
+            "nullable": true
+          },
+          "fieldMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldMappingDto"
+            },
+            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
+            "nullable": true
+          },
           "enabled": {
             "type": "boolean",
             "description": "If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed"
+          },
+          "enableExtendedMetadataProcessing": {
+            "type": "boolean",
+            "description": "Enable processing of metadata outside K+; e.g. disk and API"
           },
           "enableSummary": {
             "type": "boolean",
@@ -22321,42 +22783,6 @@
             "type": "boolean",
             "description": "For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names."
           },
-          "ageRatingMappings": {
-            "type": "object",
-            "additionalProperties": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                -1
-              ],
-              "type": "integer",
-              "description": "Represents Age Rating for content.",
-              "format": "int32"
-            },
-            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
-            "nullable": true
-          },
-          "fieldMappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MetadataFieldMappingDto"
-            },
-            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
-            "nullable": true
-          },
           "overrides": {
             "type": "array",
             "items": {
@@ -22381,22 +22807,6 @@
               "format": "int32"
             },
             "description": "A list of overrides that will enable writing to locked fields",
-            "nullable": true
-          },
-          "blacklist": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
-            "nullable": true
-          },
-          "whitelist": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Only allow these Tags to be written to Kavita",
             "nullable": true
           },
           "personRoles": {
@@ -22481,6 +22891,139 @@
             "type": "string",
             "description": "The localized title to render on the card",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OidcConfigDto": {
+        "type": "object",
+        "properties": {
+          "autoLogin": {
+            "type": "boolean",
+            "description": "Automatically redirect to the Oidc login screen"
+          },
+          "disablePasswordAuthentication": {
+            "type": "boolean",
+            "description": "Disables password authentication for non-admin users"
+          },
+          "providerName": {
+            "type": "string",
+            "description": "Name of your provider, used to display on the login screen",
+            "nullable": true
+          },
+          "authority": {
+            "type": "string",
+            "description": "Optional OpenID Connect Authority URL. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Optional OpenID Connect ClientId, defaults to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "secret": {
+            "type": "string",
+            "description": "Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.",
+            "nullable": true
+          },
+          "provisionAccounts": {
+            "type": "boolean",
+            "description": "If true, auto creates a new account when someone logs in via OpenID Connect"
+          },
+          "requireVerifiedEmail": {
+            "type": "boolean",
+            "description": "Require emails to be verified by the OpenID Connect provider when creating accounts on login"
+          },
+          "syncUserSettings": {
+            "type": "boolean",
+            "description": "Overwrite Kavita roles, libraries and age rating with OpenIDConnect provided roles on log in."
+          },
+          "rolesPrefix": {
+            "type": "string",
+            "description": "A prefix that all roles Kavita checks for during sync must have",
+            "nullable": true
+          },
+          "rolesClaim": {
+            "type": "string",
+            "description": "The JWT claim roles are mapped under, defaults to System.Security.Claims.ClaimTypes.Role",
+            "nullable": true
+          },
+          "customScopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Custom scopes Kavita should request from your OIDC provider",
+            "nullable": true
+          },
+          "defaultRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "defaultLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "defaultAgeRestriction": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
+          },
+          "defaultIncludeUnknowns": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Returns true if the !:OidcPublicConfigDto.Authority has been set",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "All configuration regarding OIDC"
+      },
+      "OidcPublicConfigDto": {
+        "type": "object",
+        "properties": {
+          "autoLogin": {
+            "type": "boolean",
+            "description": "Automatically redirect to the Oidc login screen"
+          },
+          "disablePasswordAuthentication": {
+            "type": "boolean",
+            "description": "Disables password authentication for non-admin users"
+          },
+          "providerName": {
+            "type": "string",
+            "description": "Name of your provider, used to display on the login screen",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -25316,6 +25859,9 @@
           "smtpConfig": {
             "$ref": "#/components/schemas/SmtpConfigDto"
           },
+          "oidcConfig": {
+            "$ref": "#/components/schemas/OidcConfigDto"
+          },
           "firstInstallDate": {
             "type": "string",
             "description": "The Date Kavita was first installed",
@@ -27281,6 +27827,15 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27369,6 +27924,13 @@
             "type": "string",
             "nullable": true
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "token": {
             "type": "string",
             "nullable": true
@@ -27390,6 +27952,15 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
+          },
+          "identityProvider": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Who provides the identity of the user",
+            "format": "int32"
           }
         },
         "additionalProperties": false

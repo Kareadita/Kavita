@@ -131,6 +131,10 @@ public sealed record ServerInfoV3Dto
     /// Is this server using Kavita+
     /// </summary>
     public bool ActiveKavitaPlusSubscription { get; set; }
+    /// <summary>
+    ///  Is OIDC enabled
+    /// </summary>
+    public bool OidcEnabled { get; set; }
     #endregion
 
     #region Users

@@ -136,7 +136,7 @@ public class Startup
             }
         });
         services.AddCors();
-        services.AddIdentityServices(_config);
+        services.AddIdentityServices(_config, _env);
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo
@@ -295,6 +295,9 @@ public class Startup
 
                     // v0.8.7
                     await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
+
+                    // v0.8.8
+                    await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
 
                     #endregion
 

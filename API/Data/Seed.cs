@@ -5,9 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data.Repositories;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
@@ -252,6 +254,7 @@ public static class Seed
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
+            new() { Key = ServerSettingKey.OidcConfiguration, Value = JsonSerializer.Serialize(new OidcConfigDto())},
 
             new() {Key = ServerSettingKey.EmailHost, Value = string.Empty},
             new() {Key = ServerSettingKey.EmailPort, Value = string.Empty},
@@ -289,7 +292,27 @@ public static class Seed
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
 
+        await SetOidcSettingsFromDisk(context);
+
+
         await context.SaveChangesAsync();
+    }
+
+    public static async Task SetOidcSettingsFromDisk(DataContext context)
+    {
+        var oidcSettingEntry = await context.ServerSetting
+            .FirstOrDefaultAsync(setting => setting.Key == ServerSettingKey.OidcConfiguration);
+
+        var storedOidcSettings = JsonSerializer.Deserialize<OidcConfigDto>(oidcSettingEntry!.Value)!;
+
+        var diskOidcSettings = Configuration.OidcSettings;
+
+        storedOidcSettings.Authority = diskOidcSettings.Authority;
+        storedOidcSettings.ClientId = diskOidcSettings.ClientId;
+        storedOidcSettings.Secret = diskOidcSettings.Secret;
+        storedOidcSettings.CustomScopes = diskOidcSettings.CustomScopes;
+
+        oidcSettingEntry.Value = JsonSerializer.Serialize(storedOidcSettings);
     }
 
     public static async Task SeedMetadataSettings(DataContext context)

@@ -1,6 +1,8 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Scrobble;
@@ -88,6 +90,15 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     /// <remarks>Kavita+ only</remarks>
     public DateTime ScrobbleEventGenerationRan { get; set; }
+
+    /// <summary>
+    /// The sub returned the by OIDC provider
+    /// </summary>
+    public string? OidcId { get; set; }
+    /// <summary>
+    /// The IdentityProvider for the user, default to <see cref="Enums.IdentityProvider.Kavita"/>
+    /// </summary>
+    public IdentityProvider IdentityProvider { get; set; } = IdentityProvider.Kavita;
 
 
     /// <summary>

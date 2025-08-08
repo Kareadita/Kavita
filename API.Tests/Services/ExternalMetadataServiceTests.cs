@@ -1288,6 +1288,21 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
     }
 
+    [Fact]
+    public void AgeRating_NormalizedMapping()
+    {
+        var tags = new List<string> { "tAg$'1", "tag2" };
+        var mappings = new Dictionary<string, AgeRating>()
+        {
+            ["tag1"] = AgeRating.Teen,
+        };
+
+        Assert.Equal(AgeRating.Teen, ExternalMetadataService.DetermineAgeRating(tags, mappings));
+
+        mappings.Add("tag2", AgeRating.AdultsOnly);
+        Assert.Equal(AgeRating.AdultsOnly, ExternalMetadataService.DetermineAgeRating(tags, mappings));
+    }
+
     #endregion
 
     #region Genres
@@ -1599,6 +1614,100 @@ public class ExternalMetadataServiceTests : AbstractDbTest
         Assert.NotNull(postSeries);
         Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
     }
+
+    #endregion
+
+    #region FieldMappings
+
+    [Fact]
+    public void GenerateGenreAndTagLists_Normalized_Mappings()
+    {
+        var settings = new MetadataSettingsDto
+        {
+            EnableExtendedMetadataProcessing = true,
+            Whitelist = [],
+            Blacklist = [],
+            FieldMappings = [
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Yuri",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Romance",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Genre,
+                    SourceValue = "WW2",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "War",
+                    ExcludeFromSource = true,
+                },
+            ],
+        };
+
+        var tags = new List<string> { "Girl's Love", "Unrelated tag" };
+        var genres = new List<string> { "Ww2", "Unrelated genre" };
+
+        ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, settings,
+            out var finalTags, out var finalGenres);
+
+        Assert.Contains("Unrelated tag", finalTags);
+
+        Assert.Contains("Yuri", finalGenres);
+        Assert.Contains("Romance", finalGenres);
+        Assert.Contains("Unrelated genre", finalGenres);
+        Assert.DoesNotContain("Ww2", finalGenres);
+    }
+
+    [Fact]
+    public void GenerateGenreAndTagLists_RemoveIfAnyRemoves()
+    {
+        var settings = new MetadataSettingsDto
+        {
+            EnableExtendedMetadataProcessing = true,
+            Whitelist = [],
+            Blacklist = [],
+            FieldMappings = [
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Yuri",
+                    ExcludeFromSource = false,
+                },
+                new MetadataFieldMappingDto
+                {
+                    SourceType = MetadataFieldType.Tag,
+                    SourceValue = "Girls love",
+                    DestinationType = MetadataFieldType.Genre,
+                    DestinationValue = "Romance",
+                    ExcludeFromSource = true,
+                },
+            ],
+        };
+
+        var tags = new List<string> { "Girl's Love"};
+        var genres = new List<string>();
+
+        ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, settings,
+            out var finalTags, out var finalGenres);
+
+        Assert.Contains("Yuri", finalGenres);
+        Assert.Contains("Romance", finalGenres);
+        Assert.DoesNotContain("Girls Love", finalGenres);
+    }
+
 
     #endregion
 

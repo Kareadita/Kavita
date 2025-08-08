@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  DestroyRef, effect,
   HostListener,
   inject,
   OnInit
@@ -97,7 +97,6 @@ export class AppComponent implements OnInit {
     }), takeUntilDestroyed(this.destroyRef));
 
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
-
   }
 
   @HostListener('window:resize', ['$event'])
@@ -118,9 +117,7 @@ export class AppComponent implements OnInit {
 
 
   setCurrentUser() {
-    const user = this.accountService.getUserFromLocalStorage();
-    this.accountService.setCurrentUser(user);
-
+    const user = this.accountService.currentUserSignal();
     if (!user) return;
 
     // Bootstrap anything that's needed

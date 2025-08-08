@@ -1,6 +1,7 @@
 import {EncodeFormat} from "./encode-format";
 import {CoverImageSize} from "./cover-image-size";
 import {SmtpConfig} from "./smtp-config";
+import {OidcConfig} from "./oidc-config";
 
 export interface ServerSettings {
     cacheDirectory: string;
@@ -25,6 +26,7 @@ export interface ServerSettings {
     onDeckUpdateDays: number;
     coverImageSize: CoverImageSize;
     smtpConfig: SmtpConfig;
+    oidcConfig: OidcConfig;
     installId: string;
     installVersion: string;
 }

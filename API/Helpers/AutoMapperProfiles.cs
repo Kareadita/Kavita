@@ -386,7 +386,6 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Overrides, opt => opt.MapFrom(src => src.Overrides ?? new List<MetadataSettingField>()))
             .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()));
 
-
-
+        CreateMap<OidcConfigDto, OidcPublicConfigDto>();
     }
 }

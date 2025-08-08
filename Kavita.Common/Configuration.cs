@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using Kavita.Common.EnvironmentInfo;
@@ -14,6 +15,8 @@ public static class Configuration
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
     public const long DefaultCacheMemory = 75;
+    public const string DefaultOidcAuthority = "";
+    public const string DefaultOidcClientId = "kavita";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static readonly string KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
@@ -48,6 +51,13 @@ public static class Configuration
     {
         get => GetCacheSize(GetAppSettingFilename());
         set => SetCacheSize(GetAppSettingFilename(), value);
+    }
+
+    /// <remarks>You must set this object to update the settings, setting one if it's fields will not save to disk</remarks>
+    public static OpenIdConnectSettings OidcSettings
+    {
+        get => GetOpenIdConnectSettings(GetAppSettingFilename());
+        set => SetOpenIdConnectSettings(GetAppSettingFilename(), value);
     }
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
@@ -312,6 +322,43 @@ public static class Configuration
     }
     #endregion
 
+    #region OIDC
+
+    private static OpenIdConnectSettings GetOpenIdConnectSettings(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+
+            return jsonObj.OpenIdConnectSettings ?? new OpenIdConnectSettings();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return new OpenIdConnectSettings();
+    }
+
+    private static void SetOpenIdConnectSettings(string filePath, OpenIdConnectSettings value)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.OpenIdConnectSettings = value;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+
+    #endregion
+
     private sealed class AppSettings
     {
         public string TokenKey { get; set; }
@@ -326,6 +373,20 @@ public static class Configuration
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public bool AllowIFraming { get; init; } = false;
+        public OpenIdConnectSettings OpenIdConnectSettings { get; set; } = new();
 #pragma warning restore S3218
+    }
+
+    public class OpenIdConnectSettings
+    {
+        public string Authority { get; set; } = DefaultOidcAuthority;
+        public string ClientId { get; set; } = DefaultOidcClientId;
+        public string Secret { get; set; } = string.Empty;
+        public List<string> CustomScopes { get; set; } = [];
+
+        public bool Enabled =>
+            !string.IsNullOrEmpty(Authority) &&
+            !string.IsNullOrEmpty(ClientId) &&
+            !string.IsNullOrEmpty(Secret);
     }
 }

@@ -209,12 +209,17 @@ public class SeriesService : ISeriesService
                 {
                     var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
                     var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
-                    var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, metadataSettings.AgeRatingMappings);
-                    if (updatedRating > series.Metadata.AgeRating)
+
+                    if (metadataSettings.EnableExtendedMetadataProcessing)
                     {
-                        series.Metadata.AgeRating = updatedRating;
-                        series.Metadata.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
+                        var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, metadataSettings.AgeRatingMappings);
+                        if (updatedRating > series.Metadata.AgeRating)
+                        {
+                            series.Metadata.AgeRating = updatedRating;
+                            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.AgeRating);
+                        }
                     }
+
                 }
             }
 

@@ -1,0 +1,171 @@
+<ng-container *transloco="let t; prefix: 'import-mappings'">
+
+  <div class="row g-0" style="min-width: 135px;">
+    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex()"></app-step-tracker>
+  </div>
+
+  <app-loading [loading]="isLoading()" />
+  @if (!isLoading()) {
+    <div>
+      @switch (currentStepIndex()) {
+        @case (Step.Import) {
+          <div class="row g-0">
+            <p>{{t('import-description')}}</p>
+            <form [formGroup]="uploadForm" enctype="multipart/form-data">
+              <file-upload [multiple]="false" formControlName="files"></file-upload>
+            </form>
+          </div>
+        }
+        @case (Step.Configure) {
+          <form class="row" [formGroup]="importSettingsForm">
+            <div class="col-md-6 col-sm-12">
+              @if (importSettingsForm.get('importMode'); as control) {
+                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
+                  <ng-template #view>
+                    <select formControlName="importMode" class="form-control">
+                      @for (mode of ImportModes; track mode) {
+                        <option [ngValue]="mode">{{mode | importMode}}</option>
+                      }
+                    </select>
+                  </ng-template>
+                </app-setting-item>
+              }
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+              @if (importSettingsForm.get('resolution'); as control) {
+                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
+                  <ng-template #view>
+                    <select formControlName="resolution" class="form-control">
+                      @for (resolution of ConflictResolutions; track resolution) {
+                        <option [ngValue]="resolution">{{resolution | conflictResolution}}</option>
+                      }
+                    </select>
+                  </ng-template>
+                </app-setting-item>
+              }
+            </div>
+
+            <div class="row">
+
+              <div class="conflict-group-title pt-4">{{t('fields-to-import')}}</div>
+              <div class="text-muted">{{t('fields-to-import-tooltip')}}</div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                @if (importSettingsForm.get('whitelist'); as control) {
+                  <app-setting-switch [title]="t('whitelist-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="whitelist-enabled" type="checkbox" class="form-check-input" formControlName="whitelist">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                @if (importSettingsForm.get('blacklist'); as control) {
+                  <app-setting-switch [title]="t('blacklist-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="blacklist-enabled" type="checkbox" class="form-check-input" formControlName="blacklist">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                @if (importSettingsForm.get('ageRatings'); as control) {
+                  <app-setting-switch [title]="t('age-ratings-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="ageRatings">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+
+              <div class="col-md-6 col-sm-12 pt-4">
+                @if (importSettingsForm.get('fieldMappings'); as control) {
+                  <app-setting-switch [title]="t('field-mappings-label')">
+                    <ng-template #switch>
+                      <div class="form-check form-switch">
+                        <input id="field-mappings-enabled" type="checkbox" class="form-check-input" formControlName="fieldMappings">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
+                }
+              </div>
+            </div>
+
+          </form>
+        }
+        @case (Step.Conflicts) {
+          @let res = importResult();
+          @if (res) {
+            <form class="row" [formGroup]="importSettingsForm">
+
+              @if (res.ageRatingConflicts.length > 0) {
+                <div class="conflict-group-title">{{t('age-ratings-label')}}</div>
+                <div class="text-muted">{{t('age-ratings-conflicts-tooltip')}}</div>
+              }
+
+              @for (arm of res.ageRatingConflicts; track arm) {
+                <div class="col-md-6 col-sm-12 pt-4">
+                  @if (importSettingsForm.get('ageRatingConflictResolutions.' + arm); as control) {
+                    <div formGroupName="ageRatingConflictResolutions">
+                      <span class="conflict-title">{{arm}}</span>
+                      <select [formControlName]="arm" class="form-control mt-2">
+                        @for (resolution of ConflictResolutions; track resolution) {
+                          <option [ngValue]="resolution">
+                            <ng-container [ngTemplateOutlet]="ageRatingConflict"
+                                          [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
+                            </ng-container>
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  }
+                </div>
+              }
+
+            </form>
+          }
+        }
+        @case (Step.Finalize) {
+          @let res = importResult();
+          @if (res) {
+            <app-manage-metadata-mappings
+              [settings]="res.resultingMetadataSettings"
+              [settingsForm]="mappingsForm"
+              [showHeader]="false">
+            </app-manage-metadata-mappings>
+          }
+        }
+      }
+    </div>
+  }
+
+  <div class="modal-footer mt-3">
+    <div class="col-auto ms-1">
+      <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">{{t('prev')}}</button>
+    </div>
+    <div class="col-auto ms-1">
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{t(nextButtonLabel())}}</button>
+    </div>
+  </div>
+
+</ng-container>
+
+<ng-template #ageRatingConflict let-arm let-resolution='resolution'>
+  @let oldValue = settings()!.ageRatingMappings[arm];
+  @let newValue = importedMappings()!.ageRatingMappings[arm];
+
+  @switch (resolution) {
+    @case (ConflictResolution.Manual) { {{'import-mappings.to-pick' | transloco}} }
+    @case (ConflictResolution.Keep) { {{ oldValue | ageRating }} }
+    @case (ConflictResolution.Replace) { {{ newValue | ageRating }} }
+  }
+</ng-template>

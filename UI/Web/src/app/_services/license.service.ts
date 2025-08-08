@@ -4,6 +4,7 @@ import {catchError, map, ReplaySubject, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
 import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class LicenseService {
    * Does the user have an active license
    */
   public readonly hasValidLicense$ = this.hasValidLicenseSource.asObservable();
+  public readonly hasValidLicenseSignal = toSignal(this.hasValidLicense$, {initialValue: false});
 
 
   /**
