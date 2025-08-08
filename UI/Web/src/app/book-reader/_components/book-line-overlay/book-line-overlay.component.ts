@@ -46,7 +46,6 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() refreshToC: EventEmitter<void> = new EventEmitter();
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
-  //xPath: string = '';
   startXPath: string = '';
   endXPath: string = '';
   allTextFromSelection: string = '';
@@ -209,7 +208,6 @@ export class BookLineOverlayComponent implements OnInit {
   reset() {
     this.bookmarkForm.reset();
     this.mode = BookLineOverlayMode.None;
-    //this.xPath = '';
     this.startXPath = '';
     this.endXPath = '';
 
