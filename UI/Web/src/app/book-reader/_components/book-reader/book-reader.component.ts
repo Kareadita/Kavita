@@ -582,7 +582,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Find the element that is on screen to bookmark against
     const xpath: string | null | undefined = this.getFirstVisibleElementXPath();
-    if (xpath !== null && xpath !== undefined) this.lastSeenScrollPartPath = xpath;
+    if (xpath !== null && xpath !== undefined) {
+      this.lastSeenScrollPartPath = this.readerService.descopeBookReaderXpath(xpath);
+    }
 
     if (this.lastSeenScrollPartPath !== '') {
       this.saveProgress();
@@ -704,6 +706,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.markForCheck();
 
         if (results.progress.bookScrollId) {
+          // Don't descope here as document hasn't loaded
           this.lastSeenScrollPartPath = results.progress.bookScrollId;
         }
 
@@ -921,7 +924,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
           const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
-            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.lastSeenScrollPartPath});
+            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
           }
 
           const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
@@ -1174,7 +1177,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       if (part !== undefined && part !== '') {
-        this.scrollTo(part);
+        this.scrollTo(this.readerService.scopeBookReaderXpath(part));
       } else if (scrollTop !== undefined && scrollTop !== 0) {
         setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       } else if ((this.writingStyle() === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
@@ -1652,7 +1655,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   applyWritingStyle() {
     setTimeout(() => this.updateImageSizes());
     if (this.layoutMode() !== BookPageLayoutMode.Default) {
-      const lastSelector = this.lastSeenScrollPartPath;
+      const lastSelector = this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath);
       setTimeout(() => {
         this.scrollTo(lastSelector);
       });
