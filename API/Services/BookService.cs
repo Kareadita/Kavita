@@ -133,38 +133,23 @@ public partial class BookService : IBookService
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
     {
-        return anchor.GetAttributeValue("href", string.Empty).Contains("#")
+        return anchor.GetAttributeValue("href", string.Empty).Contains('#')
                && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
                && anchor.GetAttributeValue("role", string.Empty) != "presentation";
     }
 
     public static string GetContentType(EpubContentType type)
     {
-        string contentType;
-        switch (type)
+        var contentType = type switch
         {
-            case EpubContentType.IMAGE_GIF:
-                contentType = "image/gif";
-                break;
-            case EpubContentType.IMAGE_PNG:
-                contentType = "image/png";
-                break;
-            case EpubContentType.IMAGE_JPEG:
-                contentType = "image/jpeg";
-                break;
-            case EpubContentType.FONT_OPENTYPE:
-                contentType = "font/otf";
-                break;
-            case EpubContentType.FONT_TRUETYPE:
-                contentType = "font/ttf";
-                break;
-            case EpubContentType.IMAGE_SVG:
-                contentType = "image/svg+xml";
-                break;
-            default:
-                contentType = "application/octet-stream";
-                break;
-        }
+            EpubContentType.IMAGE_GIF => "image/gif",
+            EpubContentType.IMAGE_PNG => "image/png",
+            EpubContentType.IMAGE_JPEG => "image/jpeg",
+            EpubContentType.FONT_OPENTYPE => "font/otf",
+            EpubContentType.FONT_TRUETYPE => "font/ttf",
+            EpubContentType.IMAGE_SVG => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
 
         return contentType;
     }
@@ -177,7 +162,7 @@ public partial class BookService : IBookService
         // Some keys get uri encoded when parsed, so replace any of those characters with original
         var mappingKey = Uri.UnescapeDataString(hrefParts[0]);
 
-        if (!mappings.ContainsKey(mappingKey))
+        if (!mappings.TryGetValue(mappingKey, out var mappedPage))
         {
             if (HasClickableHrefPart(anchor))
             {
@@ -191,7 +176,6 @@ public partial class BookService : IBookService
                 {
                     mappings.TryGetValue(pageKey, out currentPage);
                 }
-
 
                 anchor.Attributes.Add("kavita-page", $"{currentPage}");
                 anchor.Attributes.Add("kavita-part", part);
@@ -207,7 +191,6 @@ public partial class BookService : IBookService
             return;
         }
 
-        var mappedPage = mappings[mappingKey];
         anchor.Attributes.Add("kavita-page", $"{mappedPage}");
         if (hrefParts.Length > 1)
         {

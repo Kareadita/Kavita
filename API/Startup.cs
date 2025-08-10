@@ -298,6 +298,7 @@ public class Startup
 
                     // v0.8.8
                     await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
+                    await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
 
                     #endregion
 
