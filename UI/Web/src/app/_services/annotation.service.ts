@@ -96,9 +96,11 @@ export class AnnotationService {
           annotation: data
         });
       }),
-      //delay(100), // Give a bit of time to allow the next api call to get fresh data
-
     );
+  }
+
+  getAnnotation(annotationId: number) {
+    return this.httpClient.get<Annotation>(this.baseUrl + `annotation/${annotationId}`);
   }
 
   delete(id: number) {

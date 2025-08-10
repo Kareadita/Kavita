@@ -20,7 +20,7 @@ import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.serv
 import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-annotation-card',
@@ -43,6 +43,7 @@ export class AnnotationCardComponent {
   private readonly annotationService = inject(AnnotationService);
   private readonly epubMenuService = inject(EpubReaderMenuService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly highlightSlotPipe = new SlotColorPipe();
 
   annotation = model.required<Annotation>();
@@ -84,9 +85,17 @@ export class AnnotationCardComponent {
       this.navigate.emit(this.annotation());
       return;
     }
-    const url = this.router.url;
-    console.log(url); // TODO: Validate
-    this.router.navigateByUrl(url);
+
+    // If outside the reader, we need to use a load reader with a special handler
+    const queryParams = { ...this.route.snapshot.queryParams };
+    queryParams['annotation'] = this.annotation().id + '';
+
+    // Navigate to same route with updated query params
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      replaceUrl: false
+    });
   }
 
   editAnnotation() {

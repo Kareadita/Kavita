@@ -279,6 +279,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
   imageBookmarks = model<PageBookmark[]>([]);
+  annotationToLoad = model<number>(-1);
 
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
@@ -496,7 +497,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return '';
     });
 
-    //
     effect(() => {
       const annotationEvent = this.annotationService.events();
       const pageNum = this.pageNum();
@@ -519,7 +519,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * After the page has loaded, setup the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the
+   * After the page has loaded, set up the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the
    * table of content) then we calculate what has already been reached and grab the last reached one to save progress. If page anchors aren't setup (toc missing), then try to save progress
    * based on the last seen scroll part (xpath).
    */
@@ -635,6 +635,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
+    // If an annotation exists, load it and
+    if (this.route.snapshot.queryParamMap.has('annotation')) {
+      const annotationId = parseInt(this.route.snapshot.queryParamMap.get('annotation') ?? '0', 10);
+      this.annotationToLoad.set(annotationId);
+      console.log('annotation on load', annotationId);
+
+
+      // Remove the annotation from the url
+      const queryParams = { ...this.route.snapshot.queryParams };
+      delete queryParams['annotation'];
+
+      // Navigate to same route with updated query params
+      await this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams,
+        replaceUrl: true // This prevents adding to browser history
+      });
+    }
+
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
       this.readingListMode = true;
@@ -650,13 +669,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigateByUrl('/home');
         return;
       }
-
-      // this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-      //   if (!hasProgress) {
-      //     this.toggleDrawer(); // TODO: Remove toggling drawer on first load
-      //     this.toastr.info(translate('toasts.book-settings-info'));
-      //   }
-      // });
 
       await this.init();
     });
@@ -680,6 +692,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
         return;
       }
+
 
       this.bookTitle = info.bookTitle;
       this.titleService.setTitle('Kavita - ' + this.bookTitle);
@@ -746,9 +759,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setPageNum(this.pageNum());
         });
 
-        // Check if user progress has part, if so load it so we scroll to it
-        this.loadPage(results.progress.bookScrollId || undefined);
-        this.readerService.enableWakeLock(this.reader.nativeElement);
+        // If there is an annotation to load, prioritize it
+        if (this.annotationToLoad() > 0) {
+          this.annotationService.getAnnotation(this.annotationToLoad()).subscribe((data) => {
+            this.annotationToLoad.set(-1);
+            this.setPageNum(data.pageNumber);
+            this.loadPage(data.xPath || undefined);
+            this.readerService.enableWakeLock(this.reader.nativeElement);
+          });
+        } else {
+          // Check if user progress has part, if so load it so we scroll to it
+          this.loadPage(results.progress.bookScrollId || undefined);
+          this.readerService.enableWakeLock(this.reader.nativeElement);
+        }
       }, () => {
         setTimeout(() => {
           this.closeReader();

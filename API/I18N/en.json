@@ -116,6 +116,9 @@
     "generic-reading-list-create": "There was an issue creating the reading list",
     "reading-list-doesnt-exist": "Reading list does not exist",
 
+    "annotation-failed-create": "Failed to create annotation, try again",
+    "annotation-delete": "Couldn't delete annotation",
+
     "series-restricted": "User does not have access to this Series",
 
     "generic-scrobble-hold": "An error occurred while adding the hold",

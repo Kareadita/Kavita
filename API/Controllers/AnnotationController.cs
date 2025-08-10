@@ -45,6 +45,22 @@ public class AnnotationController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
     }
 
+    /// <summary>
+    /// Returns the Annotation by Id. User must have access to annotation.
+    /// </summary>
+    /// <param name="annotationId"></param>
+    /// <returns></returns>
+    [HttpGet("{annotationId}")]
+    public async Task<ActionResult<AnnotationDto>> GetAnnotation(int annotationId)
+    {
+        return Ok(await _unitOfWork.UserRepository.GetAnnotationDtoById(User.GetUserId(), annotationId));
+    }
+
+    /// <summary>
+    /// Create a new Annotation for the user against a Chapter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("create")]
     public async Task<ActionResult<AnnotationDto>> CreateAnnotation(AnnotationDto dto)
     {
@@ -52,7 +68,7 @@ public class AnnotationController : BaseApiController
         {
             if (dto.HighlightCount == 0 || string.IsNullOrWhiteSpace(dto.SelectedText))
             {
-                return BadRequest("Invalid Payload");
+                return BadRequest(_localizationService.Translate(User.GetUserId(), "invalid-payload"));
             }
 
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
@@ -99,10 +115,15 @@ public class AnnotationController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when creating an annotation on {ChapterId} - Page {Page}", dto.ChapterId, dto.PageNumber);
-            return BadRequest("Failed to create annotation, try again");
+            return BadRequest(_localizationService.Translate(User.GetUserId(), "annotation-failed-create"));
         }
     }
 
+    /// <summary>
+    /// Update the modifable fields (Spoiler, highlight slot, and comment) for an annotation
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update")]
     public async Task<ActionResult<AnnotationDto>> UpdateAnnotation(AnnotationDto dto)
     {
@@ -132,11 +153,16 @@ public class AnnotationController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Delete the annotation for the user
+    /// </summary>
+    /// <param name="annotationId"></param>
+    /// <returns></returns>
     [HttpDelete]
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
         var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
-        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest("Cannot  delete annotation");
+        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(_localizationService.Translate(User.GetUserId(), "annotation-delete"));
 
         _unitOfWork.AnnotationRepository.Remove(annotation);
         await _unitOfWork.CommitAsync();
