@@ -12,12 +12,17 @@
 
     @for(item of items; track item) {
 
-      <div class="card">
-        <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [classes]="'card-img-top'" [styles]="{width: '50%', height: '50%'}" />
+      <div class="card mb-2">
+        <div class="card-img-top">
+          <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [styles]="{width: '50%', height: '50%'}" />
+        </div>
         <div class="card-body">
           <h5 class="card-title">{{t('page-num-label', {page: item.page})}}</h5>
+          @if (item.chapterTitle) {
+            {{item.chapterTitle}}
+          }
 
-          <a href="javascript:void(0);" class="card-link" (click)="goToBookmark(item)">{{t('page-num-label', {page: item.page})}}</a>
+          <a href="javascript:void(0);" class="card-link" (click)="goToBookmark(item)">{{t('load-bookmark')}}</a>
           <button class="btn btn-danger card-link" (click)="deleteBookmark(item)">
             <i class="fa fa-trash-alt" aria-hidden="true"></i>
           </button>

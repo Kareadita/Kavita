@@ -64,6 +64,7 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {Annotation} from "../../_models/annotations/annotation";
+import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 
 
 interface HistoryPoint {
@@ -1072,16 +1073,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const icon = document.createElement('div');
       icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
 
-      // TODO: This needs to be dynamic to show in bottom right next to the image
-      //icon.attributes.title = hasBookmark ? 'Unbookmark' : 'Bookmark';
+      const boundingBox = getBoundingClientRect(img);
+      const topOffset = boundingBox.top + boundingBox.height - 5;
+      const widthOffset = boundingBox.left + boundingBox.width - 5;
+
+      // This needs to be dynamic to show in bottom right next to the image
+      icon.title = hasBookmark ? translate('manga-reader.unbookmark-page-tooltip') : translate('manga-reader.bookmark-page-tooltip');
       icon.style.cssText = `
       position: absolute;
-      bottom: 8px;
-      right: 8px;
+      top: ${topOffset}px;
+      left: ${widthOffset}px;
       background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 6px;
-      border-radius: 50%;
       cursor: pointer;
       z-index: 1000;
       font-size: 16px;

@@ -919,7 +919,8 @@
         "title": "Image Bookmarks",
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
-        "page-num-label": "{{book-reader.page-num-label}}"
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "Load"
     },
 
     "page-chapter-label-pipe": {
