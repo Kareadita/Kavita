@@ -902,7 +902,8 @@
     "view-annotations-drawer": {
         "title": "{{tabs.annotations-tab}}",
         "close": "{{common.close}}",
-        "filter-label": "Filter Annotations"
+        "filter-label": "Filter Annotations",
+        "no-data": "{{common.no-data}}"
     },
 
     "view-edit-annotation-drawer": {

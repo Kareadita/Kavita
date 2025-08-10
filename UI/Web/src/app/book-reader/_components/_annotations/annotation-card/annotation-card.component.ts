@@ -20,6 +20,7 @@ import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.serv
 import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-annotation-card',
@@ -41,12 +42,15 @@ export class AnnotationCardComponent {
   private readonly confirmService = inject(ConfirmService);
   private readonly annotationService = inject(AnnotationService);
   private readonly epubMenuService = inject(EpubReaderMenuService);
+  private readonly router = inject(Router);
   private readonly highlightSlotPipe = new SlotColorPipe();
 
   annotation = model.required<Annotation>();
   allowEdit = input<boolean>(true);
   showPageLink = input<boolean>(true);
+  isInReader = input<boolean>(true);
   @Output() delete = new EventEmitter();
+  @Output() navigate = new EventEmitter<Annotation>();
 
   titleColor: Signal<string>;
 
@@ -73,7 +77,16 @@ export class AnnotationCardComponent {
   }
 
   loadAnnotation() {
-    // TODO: How do I do this?
+    // Check if the url is within the reader or not
+    // If within the reader, we can use a event to allow drawer to load
+    // If outside the reader, we need to use a load reader with a special handler
+    if (this.isInReader()) {
+      this.navigate.emit(this.annotation());
+      return;
+    }
+    const url = this.router.url;
+    console.log(url); // TODO: Validate
+    this.router.navigateByUrl(url);
   }
 
   editAnnotation() {

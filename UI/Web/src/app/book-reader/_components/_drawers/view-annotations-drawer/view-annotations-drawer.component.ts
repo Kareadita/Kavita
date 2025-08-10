@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Output,
+  Signal
+} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
@@ -25,6 +33,8 @@ export class ViewAnnotationsDrawerComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly annotationService = inject(AnnotationService);
 
+  @Output() loadAnnotation: EventEmitter<Annotation> = new EventEmitter();
+
   annotations: Signal<Annotation[]> = this.annotationService.annotations;
   formGroup = new FormGroup({
     filter: new FormControl('', [])
@@ -33,6 +43,11 @@ export class ViewAnnotationsDrawerComponent {
 
   handleDelete(annotation: Annotation) {
     this.annotationService.delete(annotation.id).subscribe();
+  }
+
+  handleNavigateTo(annotation: Annotation) {
+    this.loadAnnotation.emit(annotation);
+    this.close();
   }
 
   close() {

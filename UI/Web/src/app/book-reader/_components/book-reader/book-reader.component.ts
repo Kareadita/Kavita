@@ -63,6 +63,7 @@ import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
+import {Annotation} from "../../_models/annotations/annotation";
 
 
 interface HistoryPoint {
@@ -1863,10 +1864,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       } else if (action === 'removeBookmark') {
         this.loadImageBookmarks();
+      }
+    });
+  }
 
+  viewAnnotations() {
+    this.epubMenuService.openViewAnnotationsDrawer((annotation: Annotation) => {
+      if (this.pageNum() != annotation.pageNumber) {
+        this.setPageNum(annotation.pageNumber);
       }
 
-
+      if (annotation.xPath != null) {
+        this.loadPage(annotation.xPath);
+      }
     });
   }
 

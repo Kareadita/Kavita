@@ -159,7 +159,7 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.mode === BookLineOverlayMode.Annotate) {
       const createAnnotation = {
         id: 0,
-        xpath: this.startXPath,
+        xPath: this.startXPath,
         endingXPath: this.endXPath,
         selectedText: this.selectedText,
         comment: '',
