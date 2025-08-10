@@ -919,7 +919,7 @@
         "title": "Image Bookmarks",
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
-        "page-num": "{{book-reader.page-num-label}}"
+        "page-num-label": "{{book-reader.page-num-label}}"
     },
 
     "page-chapter-label-pipe": {

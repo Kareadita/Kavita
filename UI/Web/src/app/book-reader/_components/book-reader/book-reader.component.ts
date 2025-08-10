@@ -1072,6 +1072,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const icon = document.createElement('div');
       icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
 
+      // TODO: This needs to be dynamic to show in bottom right next to the image
       //icon.attributes.title = hasBookmark ? 'Unbookmark' : 'Bookmark';
       icon.style.cssText = `
       position: absolute;

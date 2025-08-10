@@ -133,10 +133,6 @@ export class BookLineOverlayComponent implements OnInit {
       this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
       this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
 
-
-      // For backward compatibility, keep the original xPath as startXPath (TODO: Refactor the code)
-      //this.xPath = this.readerService.descopeBookReaderXpath(this.startXPath); // TODO: We need to clean cases of this as well
-
       // Get the context window for generating a blurb in annotation flow
       this.allTextFromSelection = (event.target as Element).textContent || '';
 
@@ -186,7 +182,6 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   createPTOC() {
-
     const xpath = this.readerService.descopeBookReaderXpath(this.startXPath);
 
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,

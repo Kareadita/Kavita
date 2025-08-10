@@ -30,6 +30,12 @@ namespace API.Data.Migrations
                 nullable: true,
                 defaultValue: "[]");
 
+            migrationBuilder.AddColumn<string>(
+                name: "ChapterTitle",
+                table: "AppUserBookmark",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.AddColumn<int>(
                 name: "ImageOffset",
                 table: "AppUserBookmark",
@@ -113,6 +119,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "BookReaderHighlightSlots",
                 table: "AppUserPreferences");
+
+            migrationBuilder.DropColumn(
+                name: "ChapterTitle",
+                table: "AppUserBookmark");
 
             migrationBuilder.DropColumn(
                 name: "ImageOffset",

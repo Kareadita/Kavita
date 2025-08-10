@@ -11,13 +11,17 @@
     @let items = bookmarks();
 
     @for(item of items; track item) {
-      <div class="mx-auto">
-        <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [styles]="{width: '50%', height: '50%'}" />
-        <br />
-        <a href="javascript:void(0);" (click)="goToBookmark(item)">{{t('page-num-label', {page: item.page})}}</a>
-        <button class="btn btn-danger" (click)="deleteBookmark(item)">
-          <i class="fa fa-trash-alt" aria-hidden="true"></i>
-        </button>
+
+      <div class="card">
+        <app-image [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)" [classes]="'card-img-top'" [styles]="{width: '50%', height: '50%'}" />
+        <div class="card-body">
+          <h5 class="card-title">{{t('page-num-label', {page: item.page})}}</h5>
+
+          <a href="javascript:void(0);" class="card-link" (click)="goToBookmark(item)">{{t('page-num-label', {page: item.page})}}</a>
+          <button class="btn btn-danger card-link" (click)="deleteBookmark(item)">
+            <i class="fa fa-trash-alt" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
     }
     @empty {

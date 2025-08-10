@@ -26,4 +26,8 @@ public sealed record BookmarkDto
     /// This is only used when getting all bookmarks.
     /// </summary>
     public SeriesDto? Series { get; set; }
+    /// <summary>
+    /// Not required, will be filled out at API before saving to the DB
+    /// </summary>
+    public string? ChapterTitle { get; set; }
 }

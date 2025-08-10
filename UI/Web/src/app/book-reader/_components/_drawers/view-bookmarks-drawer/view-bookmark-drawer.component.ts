@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  effect,
-  EventEmitter,
-  inject,
-  model
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, EventEmitter, inject, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {ReaderService} from "../../../../_services/reader.service";
@@ -28,7 +20,6 @@ import {ImageComponent} from "../../../../shared/image/image.component";
 })
 export class ViewBookmarkDrawerComponent {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
   protected readonly imageService = inject(ImageService);
 
