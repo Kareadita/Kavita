@@ -985,7 +985,8 @@
 
     "personal-table-of-contents": {
         "no-data": "Nothing Bookmarked yet",
-        "page": "Page {{value}}",
+        "page-title": "Page {{page}}",
+        "chapter-and-page-title": "Chapter {{chapterTitle}}, Page {{page}}",
         "delete": "Delete {{bookmarkName}}",
         "no-match": "No Bookmarks match filter",
         "filter-label": "{{common.filter}}"

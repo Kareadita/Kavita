@@ -15,15 +15,12 @@
         </div>
         <div class="subtitle text-muted">
           @if (ptoc.chapterTitle) {
-            Chapter "{{ptoc.chapterTitle}}" -
+            {{t('chapter-and-page-title', {chapterTitle: ptoc.chapterTitle, page: ptoc.pageNumber})}}
+          } @else {
+            {{t('page-title', {page: ptoc.pageNumber})}}
           }
-          {{t('page', {value: ptoc.pageNumber})}}
         </div>
       </div>
-
-
-
-
     </div>
   }
 </ng-container>
