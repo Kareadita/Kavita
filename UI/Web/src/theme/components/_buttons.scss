@@ -110,7 +110,7 @@
   }
 }
 
-.btn-actions {
+.btn-actions:not(.download) {
   color: var(--btn-fa-icon-color);
   border-radius: var(--btn-actions-border-radius);
 
