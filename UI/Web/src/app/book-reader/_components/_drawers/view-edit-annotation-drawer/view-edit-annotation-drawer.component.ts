@@ -14,7 +14,6 @@ import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
-import {QuillEditorComponent, QuillViewComponent} from "ngx-quill";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, switchMap} from "rxjs/operators";
@@ -28,6 +27,8 @@ import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {QuillWrapperComponent, QuillTheme} from "../../quill-wrapper/quill-wrapper.component";
+import {ContentChange, QuillViewComponent} from "ngx-quill";
 
 export enum AnnotationMode {
   View = 0,
@@ -40,13 +41,14 @@ const INIT_HIGHLIGHT_DELAY = 200;
 @Component({
   selector: 'app-view-edit-annotation-drawer',
   imports: [
-    QuillEditorComponent,
+    QuillWrapperComponent,
     ReactiveFormsModule,
-    QuillViewComponent,
     TranslocoDirective,
     HighlightBarComponent,
     NgStyle,
-    PageChapterLabelPipe
+    PageChapterLabelPipe,
+    QuillWrapperComponent,
+    QuillViewComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -225,7 +227,7 @@ export class ViewEditAnnotationDrawerComponent {
     // For create annotation, we have to have this hack
     highlightAnnotation.createdUtc = '0001-01-01T00:00:00Z';
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
-    
+
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });
@@ -245,7 +247,7 @@ export class ViewEditAnnotationDrawerComponent {
     this.activeOffcanvas.close();
   }
 
-  updateContent(event: any) {
+  updateContent(event: ContentChange) {
     this.annotationNote = event.content;
   }
 
@@ -315,4 +317,5 @@ export class ViewEditAnnotationDrawerComponent {
 
   protected readonly AnnotationMode = AnnotationMode;
   protected readonly UserBreakpoint = UserBreakpoint;
+  protected readonly QuillTheme = QuillTheme;
 }
