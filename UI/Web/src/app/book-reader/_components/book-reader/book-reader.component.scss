@@ -471,3 +471,24 @@ $pagination-opacity: 0;
         }
     }
 }
+
+
+
+
+.reader-header {
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+}
+
+.progress-bar-container {
+  border-top: 1px solid var(--bs-border-color-translucent);
+  background-color: var(--bs-gray-50);
+
+  .progress {
+    border-radius: 0;
+  }
+}
+
+.page-progress-slider {
+  margin: 0;
+}

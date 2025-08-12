@@ -24,7 +24,7 @@
               }
             </div>
             <div class="subtitle">
-              {{subtitle}}
+              {{chapterTitleLabel()}}
               @if (totalSeriesPages > 0) {
                 <span>{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
               }
@@ -32,11 +32,11 @@
           </div>
 
           <div style="margin-left: auto; padding-right: 3%;">
-            <button class="btn btn-icon" title="Shortcuts" (click)="openShortcutModal()">
+            <button class="btn btn-icon" [title]="t('shortcuts-menu-alt')" (click)="openShortcutModal()">
               <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
             </button>
-            @if (!bookmarkMode && hasBookmarkRights) {
+            @if (!bookmarkMode() && hasBookmarkRights) {
               <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                       title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
                 <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>

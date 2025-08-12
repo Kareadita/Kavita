@@ -31,7 +31,7 @@ import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'sr
 import {SeriesService} from 'src/app/_services/series.service';
 import {DomSanitizer, SafeHtml, Title} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
-import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -48,7 +48,7 @@ import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbProgressbar, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
@@ -65,6 +65,7 @@ import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {Annotation} from "../../_models/annotations/annotation";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
+import {LabelType, NgxSliderModule, Options} from "@angular-slider/ngx-slider";
 
 
 interface HistoryPoint {
@@ -78,7 +79,7 @@ interface HistoryPoint {
   scrollPart: string;
 }
 
-const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
+const TOP_OFFSET = -(50 + 10) * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
 const COLUMN_GAP = 20; // px
 /**
@@ -108,7 +109,7 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe]
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -125,7 +126,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly bookService = inject(BookService);
   private readonly memberService = inject(MemberService);
   private readonly scrollService = inject(ScrollService);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
   private readonly confirmService = inject(ConfirmService);
@@ -175,7 +176,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Max Pages
    */
-  maxPages = 1;
+  maxPages = model<number>(1);
   /**
    * This allows for exploration into different chapters
    */
@@ -264,6 +265,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
+  pageOptions: Options = {
+    floor: 0,
+    ceil: 0,
+    step: 1,
+    boundPointerLabels: false,
+    showSelectionBar: true,
+    animateOnMove: true,
+    translate: (_: number, label: LabelType) => {
+      if (label == LabelType.Floor) {
+        return 1 + '';
+      } else if (label === LabelType.Ceil) {
+        return this.maxPages() + '';
+      }
+      return (this.pageNum() + 1) + '';
+    },
+    animate: false
+  };
   /**
    * Used solely for fullscreen to apply a hack
    */
@@ -333,6 +351,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Will be set to false once the initial page is injected, signalling that annotations can now process changes
    */
   firstLoad: boolean = true;
+  /**
+   * Amount of virtualized page scroll (width). -1 means not in use
+   */
+  virtualPageScroll = model<number>(-1);
 
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
@@ -356,6 +378,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
   protected verticalBookContentWidth!: Signal<string>;
+  protected virtualizedPageNum!: Signal<number>;
+  protected virtualizedMaxPages!: Signal<number>;
 
   /**
    * Disables the Left most button
@@ -381,7 +405,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isNextPageDisabled() {
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-    const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() + 1 > this.maxPages - 1;
+    const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() + 1 > this.maxPages() - 1;
       if (this.layoutMode() !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === totalVirtualPages;
       }
@@ -402,13 +426,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   get IsNextChapter(): boolean {
     if (this.layoutMode() === BookPageLayoutMode.Default) {
-      return this.pageNum() + 1 >= this.maxPages;
+      return this.pageNum() + 1 >= this.maxPages();
     }
 
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-    if (this.bookContentElemRef == null) return this.pageNum() + 1 >= this.maxPages;
+    if (this.bookContentElemRef == null) return this.pageNum() + 1 >= this.maxPages();
 
-    return this.pageNum() + 1 >= this.maxPages && (currentVirtualPage === totalVirtualPages);
+    return this.pageNum() + 1 >= this.maxPages() && (currentVirtualPage === totalVirtualPages);
   }
   /**
    * Determines if we show << or <
@@ -419,7 +443,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const [currentVirtualPage,,] = this.getVirtualPage();
-    if (this.bookContentElemRef == null) return this.pageNum() + 1 >= this.maxPages;
+    if (this.bookContentElemRef == null) return this.pageNum() + 1 >= this.maxPages();
 
     return this.pageNum() === 0 && (currentVirtualPage === 0);
   }
@@ -497,6 +521,43 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return '';
     });
+
+    this.virtualizedPageNum = computed(() => {
+      const actualPageNum = this.pageNum();
+      const layout = this.layoutMode();
+      const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
+      const scrolledWidth = this.virtualPageScroll(); // This is just there to trigger the computed after virtualized pagination
+
+      switch (layout) {
+        case BookPageLayoutMode.Default:
+          return actualPageNum;
+        case BookPageLayoutMode.Column1:
+          return actualPageNum + currentVirtualPage;
+        case BookPageLayoutMode.Column2:
+          return actualPageNum + currentVirtualPage;
+      }
+    });
+
+    this.virtualizedMaxPages = computed(() => {
+      const actualMaxPages = this.maxPages();
+      const layout = this.layoutMode();
+      const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
+
+      switch (layout) {
+        case BookPageLayoutMode.Default:
+          return actualMaxPages;
+        case BookPageLayoutMode.Column1:
+          return actualMaxPages + totalVirtualPages;
+        case BookPageLayoutMode.Column2:
+          return actualMaxPages + totalVirtualPages;
+      }
+    });
+
+    effect(() => {
+      if (this.layoutMode() === BookPageLayoutMode.Default) {
+        this.virtualPageScroll.set(-1);
+      }
+    })
 
     effect(() => {
       const annotationEvent = this.annotationService.events();
@@ -595,7 +656,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   saveProgress() {
     let tempPageNum = this.pageNum();
-    if (this.pageNum() == this.maxPages - 1) {
+    if (this.pageNum() == this.maxPages() - 1) {
       tempPageNum = this.pageNum() + 1;
     }
 
@@ -715,7 +776,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }).subscribe(results => {
         this.chapter = results.chapter;
         this.volumeId = results.chapter.volumeId;
-        this.maxPages = results.chapter.pages;
+        this.maxPages.set(results.chapter.pages);
         this.chapters = results.chapters;
         this.pageNum.set(results.progress.pageNum);
         this.cdRef.markForCheck();
@@ -733,8 +794,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.updateImageSizes();
 
-        if (this.pageNum() >= this.maxPages) {
-          this.pageNum.set(this.maxPages - 1);
+        if (this.pageNum() >= this.maxPages()) {
+          this.pageNum.set(this.maxPages() - 1);
           this.cdRef.markForCheck();
           this.saveProgress();
         }
@@ -781,6 +842,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  // TODO: BUG: When I resize on 1 column, there is page shift that breaks the clean columns
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   onResize(){
@@ -788,6 +850,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateWidthAndHeightCalcs();
     this.updateImageSizes();
 
+    // Can I use this.virtualPageScroll to resume?
     const resumeElement = this.getFirstVisibleElementXPath();
     if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
@@ -810,20 +873,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
     } else if (event.key === KEY_CODES.ESC_KEY) {
       const isHighlighting = window.getSelection()?.toString() != '';
-      if (isHighlighting) return;
+      if (isHighlighting || this.isLineOverlayOpen) return;
       this.closeReader();
-    }
-    // else if (event.key === KEY_CODES.SPACE) {
-    //   this.toggleDrawer();
-    //   event.stopPropagation();
-    //   event.preventDefault();
-    // }
-    else if (event.key === KEY_CODES.G) {
+    } else if (event.key === KEY_CODES.G) {
       await this.goToPage();
+    } else if (event.key === KEY_CODES.F) {
+      this.applyFullscreen()
     }
-    // else if (event.key === KEY_CODES.F) {
-    //   this.applyFullscreen()
-    // } // TODO: Find a better key bind
   }
 
   onWheel(event: WheelEvent) {
@@ -976,7 +1032,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const promptConfig = {...this.confirmService.defaultPrompt};
     // Pages are called sections in the UI, manga reader uses the go-to-page string so we use a different one here
     promptConfig.header = translate('book-reader.go-to-section');
-    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages - 1});
+    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages() - 1});
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 
@@ -995,8 +1051,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (page === undefined || this.pageNum() === page) { return; }
 
-    if (page > this.maxPages - 1) {
-      page = this.maxPages - 1;
+    if (page > this.maxPages() - 1) {
+      page = this.maxPages() - 1;
     } else if (page < 0) {
       page = 0;
     }
@@ -1284,10 +1340,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    this.pageNum.set(Math.max(Math.min(pageNum, this.maxPages), 0));
+    this.pageNum.set(Math.max(Math.min(pageNum, this.maxPages()), 0));
     this.cdRef.markForCheck();
 
-    if (this.pageNum() >= this.maxPages - 10) {
+    if (this.pageNum() >= this.maxPages() - 10) {
       // Tell server to cache the next chapter
       if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1), catchError(err => {
@@ -1320,12 +1376,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param direction Direction to move
    */
   movePage(direction: PAGING_DIRECTION) {
-    if (direction === PAGING_DIRECTION.BACKWARDS) {
-      this.prevPage();
-      return;
+    switch (direction) {
+      case PAGING_DIRECTION.BACKWARDS:
+        this.prevPage();
+        break;
+      case PAGING_DIRECTION.FORWARD:
+        this.nextPage();
+        break;
     }
-
-    this.nextPage();
   }
 
   prevPage() {
@@ -1344,6 +1402,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement);
         }
+        this.virtualPageScroll.set((currentVirtualPage) * pageWidth);
         this.handleScrollEvent();
         return;
       }
@@ -1379,13 +1438,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.scrollService.scrollToX((currentVirtualPage) * pageWidth, this.bookContentElemRef.nativeElement);
         }
+
+        // In order to get virtualized pages in the progress bar, we need something to trigger the computed() signal on scroll
+        this.virtualPageScroll.set((currentVirtualPage) * pageWidth);
         this.handleScrollEvent();
         return;
       }
     }
 
     const oldPageNum = this.pageNum();
-    if (oldPageNum + 1 === this.maxPages) {
+    if (oldPageNum + 1 === this.maxPages()) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
@@ -1633,12 +1695,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    if(this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical ) {
+    const layout = this.layoutMode();
+
+    if(layout === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical ) {
       const windowWidth = window.innerWidth || document.documentElement.clientWidth;
       const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
       setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
     }
-    else if ((this.layoutMode() === BookPageLayoutMode.Default) && (this.writingStyle() === WritingStyle.Horizontal)) {
+    else if ((layout === BookPageLayoutMode.Default) && (this.writingStyle() === WritingStyle.Horizontal)) {
       const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
       // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
@@ -1915,4 +1979,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadPage(res.part);
     });
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }
