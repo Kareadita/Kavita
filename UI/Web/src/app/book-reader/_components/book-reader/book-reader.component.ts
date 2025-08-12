@@ -528,6 +528,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
       const scrolledWidth = this.virtualPageScroll(); // This is just there to trigger the computed after virtualized pagination
 
+      return actualPageNum;
+      
       switch (layout) {
         case BookPageLayoutMode.Default:
           return actualPageNum;
@@ -543,6 +545,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const layout = this.layoutMode();
       const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
 
+      return actualMaxPages;
+      // I'm not sure this will work because we don't know the other pages virtual pages
       switch (layout) {
         case BookPageLayoutMode.Default:
           return actualMaxPages;
