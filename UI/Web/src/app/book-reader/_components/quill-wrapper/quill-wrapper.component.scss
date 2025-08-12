@@ -1,0 +1,178 @@
+:host ::ng-deep quill-editor {
+
+  .ql-toolbar,
+  .ql-container {
+    border: 1px solid var(--primary-color);
+    background-color: var(--drawer-bg-color);
+  }
+
+ .ql-toolbar {
+   border-bottom: 1px solid var(--primary-color);
+   padding: 8px;
+   border-radius: 5px 5px 0 0 !important;
+
+   .ql-formats {
+      margin-right: 15px;
+    }
+  }
+
+  .ql-container {
+    border-top: none;
+    border-radius: 0 0 5px 5px !important;
+
+    .ql-editor {
+      background-color: var(--theme-bg-color);
+      color: var(--body-text-color);
+
+      &::before {
+        color: var(--input-placeholder-color);
+      }
+
+      p {
+        min-height: 75px;
+      }
+    }
+  }
+
+  .quil-wrapper-btn,
+  button[class*="ql-"] {
+    color: var(--drawer-text-color) !important;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 5px;
+    margin: 2px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--btn-primary-hover-bg-color);
+      color: var(--btn-primary-hover-text-color) !important;
+    }
+
+    svg {
+      transform: scale(1.5);
+    }
+
+    &.ql-active {
+      background-color: var(--btn-primary-bg-color);
+      color: var(--drawer-text-color) !important;
+
+      .ql-stroke {
+        stroke: var(--drawer-text-color) !important;
+      }
+
+      .ql-fill {
+        fill: var(--drawer-text-color) !important;
+      }
+    }
+  }
+
+  .ql-stroke {
+    stroke: var(--drawer-text-color) !important;
+  }
+
+  .ql-fill {
+    fill: var(--drawer-text-color) !important;
+  }
+
+  .quil-wrapper-select,
+  .ql-picker {
+    color: var(--drawer-text-color) !important;
+    background-color: var(--drawer-bg-color) !important;
+    margin: 2px;
+    min-width: 30px;
+
+    .ql-picker-label {
+      color: var(--drawer-text-color) !important;
+      border: 1px solid var(--input-border-color);
+      border-radius: 3px;
+      background-color: var(--input-bg-color) !important;
+
+      text-align: center !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: start !important;
+
+
+      &:hover {
+        .ql-stroke {
+          stroke: var(--btn-primary-hover-text-color) !important;
+        }
+      }
+
+      svg {
+        display: none !important;
+      }
+    }
+
+    .ql-picker-options {
+      background-color: var(--drawer-bg-color);
+      border: 1px solid var(--input-border-color);
+      border-radius: 3px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      // Ensure the dropdown is not wider than the select
+      min-width: auto !important;
+      width: 100% !important;
+
+      .ql-picker-item {
+        color: var(--drawer-text-color) !important;
+        border-radius: 5px;
+        padding-left: 2px;
+
+        &:hover {
+          background-color: var(--btn-primary-hover-bg-color);
+          color: var(--btn-primary-hover-text-color) !important;
+        }
+
+        &.ql-selected {
+          background-color: var(--btn-primary-bg-color);
+          color: var(--drawer-text-color) !important;
+        }
+      }
+    }
+
+    &.ql-expanded {
+      .ql-picker-label {
+        border-color: var(--primary-color);
+        background-color: var(--btn-primary-bg-color);
+        color: var(--drawer-text-color) !important;
+
+        .ql-stroke {
+          stroke: var(--drawer-text-color) !important;
+        }
+
+        svg {
+          display: none !important;
+        }
+      }
+    }
+  }
+
+  select.quil-wrapper-select {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 3px;
+
+    option {
+      background-color: var(--drawer-bg-color);
+      color: var(--drawer-text-color);
+    }
+  }
+
+  .ql-editor.ql-blank::before {
+    font-style: italic;
+    color: var(--input-placeholder-color);
+  }
+
+  .ql-editor:focus {
+    outline: none;
+  }
+
+  .ql-formats:not(:last-child) {
+    margin-right: 15px;
+    padding-right: 15px;
+    border-right: 1px solid var(--input-border-color);
+  }
+}

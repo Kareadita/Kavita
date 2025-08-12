@@ -49,29 +49,17 @@ export interface ToolbarItem {
 }
 
 const DefaultToolbarItems: ToolbarItem[] = [
-  {
-    key: QuillToolbarKey.Bold,
-    value: '',
-  },
-  {
-    key: QuillToolbarKey.Italic,
-    value: '',
-  },
-  {
-    key: QuillToolbarKey.Underline,
-    value: '',
-  },
-  {
-    key: QuillToolbarKey.Strikethrough,
-    value: '',
-  },
+  {key: QuillToolbarKey.Bold},
+  {key: QuillToolbarKey.Italic},
+  {key: QuillToolbarKey.Underline},
+  {key: QuillToolbarKey.Strikethrough},
   {
     key: QuillToolbarKey.FontSize,
-    values: ['small', '', 'large', 'huge']
+    values: ['small', '', 'large', 'huge'],
   },
   {
     key: QuillToolbarKey.Font,
-    values: ['', 'sans', 'monospace'],
+    values: ['', 'serif', 'monospace'],
   }
 ];
 
