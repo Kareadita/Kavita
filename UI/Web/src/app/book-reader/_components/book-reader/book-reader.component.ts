@@ -512,7 +512,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.verticalBookContentWidth = computed(() => {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
-      const pageStyles = this.pageStyles(); // Needed in inner method (not sure if Signals handle)
+      const pageStyles = this.pageStyles() ?? this.readerSettingsService.getDefaultPageStyles(); // Needed in inner method (not sure if Signals handle)
 
 
       if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal ) {
@@ -529,7 +529,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const scrolledWidth = this.virtualPageScroll(); // This is just there to trigger the computed after virtualized pagination
 
       return actualPageNum;
-      
+
       switch (layout) {
         case BookPageLayoutMode.Default:
           return actualPageNum;
@@ -857,7 +857,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Can I use this.virtualPageScroll to resume?
     const resumeElement = this.getFirstVisibleElementXPath();
     if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
-      this.scrollTo(resumeElement); // This works pretty well, but not perfect
+      this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement)); // This works pretty well, but not perfect
     }
   }
 
@@ -1606,7 +1606,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // After layout shifts, we need to refocus the scroll bar
     if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.updateWidthAndHeightCalcs();
-      this.scrollTo(resumeElement); // This works pretty well, but not perfect
+      this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement)); // This works pretty well, but not perfect
     }
   }
 
