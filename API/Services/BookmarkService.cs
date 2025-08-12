@@ -145,6 +145,7 @@ public class BookmarkService : IBookmarkService
                 FileName = Path.Join(targetFolderStem, fileInfo.Name),
                 ImageOffset = bookmarkDto.ImageOffset,
                 XPath = bookmarkDto.XPath,
+                ChapterTitle = bookmarkDto.ChapterTitle,
                 AppUserId = userWithBookmarks.Id
             };
 

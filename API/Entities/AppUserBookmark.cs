@@ -4,6 +4,7 @@ using API.Entities.Interfaces;
 
 namespace API.Entities;
 
+
 /// <summary>
 /// Represents a saved page in a Chapter entity for a given user.
 /// </summary>
@@ -28,6 +29,10 @@ public class AppUserBookmark : IEntityDate
     /// Only applicable for Epubs
     /// </summary>
     public string? XPath { get; set; }
+    /// <summary>
+    /// Chapter name (from ToC) or Title (from ComicInfo/PDF)
+    /// </summary>
+    public string? ChapterTitle { get; set; }
 
     // Relationships
     [JsonIgnore]

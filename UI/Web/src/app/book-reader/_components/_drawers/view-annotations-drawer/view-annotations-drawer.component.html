@@ -20,7 +20,10 @@
       }
 
       @for(annotation of annotations() | filter: filterList; track annotation.comment + annotation.highlightColor + annotation.containsSpolier) {
-        <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)"/>
+        <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)" (navigate)="handleNavigateTo($event)" />
+      }
+      @empty {
+        <p>{{t('no-data')}}</p>
       }
     </form>
   </div>

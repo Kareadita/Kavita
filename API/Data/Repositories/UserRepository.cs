@@ -115,6 +115,8 @@ public interface IUserRepository
     /// <param name="includes"></param>
     /// <returns></returns>
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
+
+    Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
 }
 
 public class UserRepository : IUserRepository
@@ -588,6 +590,14 @@ public class UserRepository : IUserRepository
         return await _context.AppUser
             .Where(u => u.OidcId == oidcId)
             .Includes(includes)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId)
+    {
+        return await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId && a.Id == annotationId)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
 

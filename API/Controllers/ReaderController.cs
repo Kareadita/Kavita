@@ -743,15 +743,26 @@ public class ReaderController : BaseApiController
 
 
             string path;
+            string? chapterTitle;
             if (Parser.IsEpub(chapter.Files.First().Extension!))
             {
                 var cachedFilePath = _cacheService.GetCachedFile(chapter);
                 path = await _bookService.CopyImageToTempFromBook(chapter.Id, bookmarkDto, cachedFilePath);
+
+
+                var chapterEntity =  await _unitOfWork.ChapterRepository.GetChapterAsync(bookmarkDto.ChapterId);
+                if (chapterEntity == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+                var toc = await _bookService.GenerateTableOfContents(chapterEntity);
+                chapterTitle = BookService.GetChapterTitleFromToC(toc, bookmarkDto.Page);
             }
             else
             {
                 path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
+                chapterTitle = chapter.TitleName;
             }
+
+            bookmarkDto.ChapterTitle = chapterTitle;
+
 
 
             if (string.IsNullOrEmpty(path) || !await _bookmarkService.BookmarkPage(user, bookmarkDto, path))

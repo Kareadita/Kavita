@@ -182,8 +182,6 @@ export class EpubReaderSettingsService {
     this._currentSeriesId.set(seriesId);
     this._currentReadingProfile.set(readingProfile);
 
-    console.log('init, reading profile: ', readingProfile);
-
     // Load parent profile if needed
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       try {

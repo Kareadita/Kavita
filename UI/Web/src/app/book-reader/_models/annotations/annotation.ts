@@ -10,7 +10,7 @@ export const allHighlightColors = [HighlightColor.Blue, HighlightColor.Green];
 
 export interface Annotation {
   id: number;
-  xpath: string;
+  xPath: string;
   endingXPath: string | null;
   selectedText: string | null;
   comment: string;

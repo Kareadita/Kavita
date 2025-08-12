@@ -63,6 +63,8 @@ import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
+import {Annotation} from "../../_models/annotations/annotation";
+import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 
 
 interface HistoryPoint {
@@ -278,6 +280,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
   imageBookmarks = model<PageBookmark[]>([]);
+  annotationToLoad = model<number>(-1);
 
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
@@ -495,7 +498,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return '';
     });
 
-    //
     effect(() => {
       const annotationEvent = this.annotationService.events();
       const pageNum = this.pageNum();
@@ -518,7 +520,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * After the page has loaded, setup the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the
+   * After the page has loaded, set up the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the
    * table of content) then we calculate what has already been reached and grab the last reached one to save progress. If page anchors aren't setup (toc missing), then try to save progress
    * based on the last seen scroll part (xpath).
    */
@@ -582,7 +584,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Find the element that is on screen to bookmark against
     const xpath: string | null | undefined = this.getFirstVisibleElementXPath();
-    if (xpath !== null && xpath !== undefined) this.lastSeenScrollPartPath = xpath;
+    if (xpath !== null && xpath !== undefined) {
+      this.lastSeenScrollPartPath = this.readerService.descopeBookReaderXpath(xpath);
+    }
 
     if (this.lastSeenScrollPartPath !== '') {
       this.saveProgress();
@@ -632,6 +636,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
+    // If an annotation exists, load it and
+    if (this.route.snapshot.queryParamMap.has('annotation')) {
+      const annotationId = parseInt(this.route.snapshot.queryParamMap.get('annotation') ?? '0', 10);
+      this.annotationToLoad.set(annotationId);
+      console.log('annotation on load', annotationId);
+
+
+      // Remove the annotation from the url
+      const queryParams = { ...this.route.snapshot.queryParams };
+      delete queryParams['annotation'];
+
+      // Navigate to same route with updated query params
+      await this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams,
+        replaceUrl: true // This prevents adding to browser history
+      });
+    }
+
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
       this.readingListMode = true;
@@ -647,13 +670,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigateByUrl('/home');
         return;
       }
-
-      // this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-      //   if (!hasProgress) {
-      //     this.toggleDrawer(); // TODO: Remove toggling drawer on first load
-      //     this.toastr.info(translate('toasts.book-settings-info'));
-      //   }
-      // });
 
       await this.init();
     });
@@ -677,6 +693,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
         return;
       }
+
 
       this.bookTitle = info.bookTitle;
       this.titleService.setTitle('Kavita - ' + this.bookTitle);
@@ -704,6 +721,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.markForCheck();
 
         if (results.progress.bookScrollId) {
+          // Don't descope here as document hasn't loaded
           this.lastSeenScrollPartPath = results.progress.bookScrollId;
         }
 
@@ -742,9 +760,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setPageNum(this.pageNum());
         });
 
-        // Check if user progress has part, if so load it so we scroll to it
-        this.loadPage(results.progress.bookScrollId || undefined);
-        this.readerService.enableWakeLock(this.reader.nativeElement);
+        // If there is an annotation to load, prioritize it
+        if (this.annotationToLoad() > 0) {
+          this.annotationService.getAnnotation(this.annotationToLoad()).subscribe((data) => {
+            this.annotationToLoad.set(-1);
+            this.setPageNum(data.pageNumber);
+            this.loadPage(data.xPath || undefined);
+            this.readerService.enableWakeLock(this.reader.nativeElement);
+          });
+        } else {
+          // Check if user progress has part, if so load it so we scroll to it
+          this.loadPage(results.progress.bookScrollId || undefined);
+          this.readerService.enableWakeLock(this.reader.nativeElement);
+        }
       }, () => {
         setTimeout(() => {
           this.closeReader();
@@ -921,7 +949,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
           const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
-            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.lastSeenScrollPartPath});
+            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
           }
 
           const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
@@ -1045,15 +1073,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const icon = document.createElement('div');
       icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
 
-      //icon.attributes.title = hasBookmark ? 'Unbookmark' : 'Bookmark';
+      const boundingBox = getBoundingClientRect(img);
+      const topOffset = boundingBox.top + boundingBox.height - 5;
+      const widthOffset = boundingBox.left + boundingBox.width - 5;
+
+      // This needs to be dynamic to show in bottom right next to the image
+      icon.title = hasBookmark ? translate('manga-reader.unbookmark-page-tooltip') : translate('manga-reader.bookmark-page-tooltip');
       icon.style.cssText = `
       position: absolute;
-      bottom: 8px;
-      right: 8px;
+      top: ${topOffset}px;
+      left: ${widthOffset}px;
       background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 6px;
-      border-radius: 50%;
       cursor: pointer;
       z-index: 1000;
       font-size: 16px;
@@ -1174,7 +1204,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       if (part !== undefined && part !== '') {
-        this.scrollTo(part);
+        this.scrollTo(this.readerService.scopeBookReaderXpath(part));
       } else if (scrollTop !== undefined && scrollTop !== 0) {
         setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       } else if ((this.writingStyle() === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
@@ -1652,7 +1682,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   applyWritingStyle() {
     setTimeout(() => this.updateImageSizes());
     if (this.layoutMode() !== BookPageLayoutMode.Default) {
-      const lastSelector = this.lastSeenScrollPartPath;
+      const lastSelector = this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath);
       setTimeout(() => {
         this.scrollTo(lastSelector);
       });
@@ -1860,10 +1890,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       } else if (action === 'removeBookmark') {
         this.loadImageBookmarks();
+      }
+    });
+  }
 
+  viewAnnotations() {
+    this.epubMenuService.openViewAnnotationsDrawer((annotation: Annotation) => {
+      if (this.pageNum() != annotation.pageNumber) {
+        this.setPageNum(annotation.pageNumber);
       }
 
-
+      if (annotation.xPath != null) {
+        this.loadPage(annotation.xPath);
+      }
     });
   }
 

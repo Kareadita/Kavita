@@ -46,7 +46,6 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() refreshToC: EventEmitter<void> = new EventEmitter();
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
-  //xPath: string = '';
   startXPath: string = '';
   endXPath: string = '';
   allTextFromSelection: string = '';
@@ -134,10 +133,6 @@ export class BookLineOverlayComponent implements OnInit {
       this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
       this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
 
-
-      // For backward compatibility, keep the original xPath as startXPath (TODO: Refactor the code)
-      //this.xPath = this.readerService.descopeBookReaderXpath(this.startXPath); // TODO: We need to clean cases of this as well
-
       // Get the context window for generating a blurb in annotation flow
       this.allTextFromSelection = (event.target as Element).textContent || '';
 
@@ -160,7 +155,7 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.mode === BookLineOverlayMode.Annotate) {
       const createAnnotation = {
         id: 0,
-        xpath: this.startXPath,
+        xPath: this.startXPath,
         endingXPath: this.endXPath,
         selectedText: this.selectedText,
         comment: '',
@@ -187,7 +182,6 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   createPTOC() {
-
     const xpath = this.readerService.descopeBookReaderXpath(this.startXPath);
 
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
@@ -209,7 +203,6 @@ export class BookLineOverlayComponent implements OnInit {
   reset() {
     this.bookmarkForm.reset();
     this.mode = BookLineOverlayMode.None;
-    //this.xPath = '';
     this.startXPath = '';
     this.endXPath = '';
 

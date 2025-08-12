@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center">
         <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
       </div>
-      <div class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+      <div  [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
     </div>
 
     <div class="card-body px-3 py-2">

@@ -51,11 +51,16 @@ export class EpubReaderMenuService {
   }
 
 
-  openViewAnnotationsDrawer() {
+  openViewAnnotationsDrawer(loadAnnotationCallback: (annotation: Annotation) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
+
     const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end'});
+    ref.componentInstance.loadAnnotation.subscribe((annotation: Annotation) => {
+      loadAnnotationCallback(annotation);
+    });
+
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 

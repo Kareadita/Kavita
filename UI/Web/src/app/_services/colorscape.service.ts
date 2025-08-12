@@ -1,4 +1,4 @@
-import {ElementRef, Inject, Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
@@ -30,6 +30,9 @@ const colorScapeSelector = 'colorscape';
   providedIn: 'root'
 })
 export class ColorscapeService {
+  private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
+
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
   private colorSeedSubject = new BehaviorSubject<{primary: string, complementary: string | null} | null>(null);
   public readonly colors$ = this.colorSubject.asObservable();
@@ -38,7 +41,8 @@ export class ColorscapeService {
   private maxDuration = 4000; // maximum duration
   private defaultColorspaceDuration = 300; // duration to wait before defaulting back to default colorspace
 
-  constructor(@Inject(DOCUMENT) private document: Document, private readonly router: Router) {
+
+  constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       tap(() => this.checkAndResetColorscapeAfterDelay())
@@ -61,9 +65,22 @@ export class ColorscapeService {
 
     const rgb = this.rgbStringToRGBA(bgColor);
 
-    // https://www.w3.org/WAI/GL/wiki/Relative_luminance
-    const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
-    return luminance < 0.5 ? 'white' : 'black';
+    // Convert RGB to relative luminance with gamma correction
+    const getRelativeLuminance = (color: number): number => {
+      const c = color / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+
+    const r = getRelativeLuminance(rgb.r);
+    const g = getRelativeLuminance(rgb.g);
+    const b = getRelativeLuminance(rgb.b);
+
+    // WCAG relative luminance formula (https://www.w3.org/WAI/GL/wiki/Relative_luminance)
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    // Use 0.179 as threshold (roughly equivalent to #767676)
+    // This gives better visual results than 0.5
+    return luminance > 0.179 ? 'black' : 'white';
   }
 
   /**

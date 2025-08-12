@@ -18,4 +18,8 @@ export interface PageBookmark {
    * This is only used when getting all bookmarks.
    */
   series: Series | null;
+  /**
+   * Chapter name (from ToC) or Title (from ComicInfo/PDF)
+   */
+  chapterTitle: string | null;
 }

@@ -133,38 +133,23 @@ public partial class BookService : IBookService
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
     {
-        return anchor.GetAttributeValue("href", string.Empty).Contains("#")
+        return anchor.GetAttributeValue("href", string.Empty).Contains('#')
                && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
                && anchor.GetAttributeValue("role", string.Empty) != "presentation";
     }
 
     public static string GetContentType(EpubContentType type)
     {
-        string contentType;
-        switch (type)
+        var contentType = type switch
         {
-            case EpubContentType.IMAGE_GIF:
-                contentType = "image/gif";
-                break;
-            case EpubContentType.IMAGE_PNG:
-                contentType = "image/png";
-                break;
-            case EpubContentType.IMAGE_JPEG:
-                contentType = "image/jpeg";
-                break;
-            case EpubContentType.FONT_OPENTYPE:
-                contentType = "font/otf";
-                break;
-            case EpubContentType.FONT_TRUETYPE:
-                contentType = "font/ttf";
-                break;
-            case EpubContentType.IMAGE_SVG:
-                contentType = "image/svg+xml";
-                break;
-            default:
-                contentType = "application/octet-stream";
-                break;
-        }
+            EpubContentType.IMAGE_GIF => "image/gif",
+            EpubContentType.IMAGE_PNG => "image/png",
+            EpubContentType.IMAGE_JPEG => "image/jpeg",
+            EpubContentType.FONT_OPENTYPE => "font/otf",
+            EpubContentType.FONT_TRUETYPE => "font/ttf",
+            EpubContentType.IMAGE_SVG => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
 
         return contentType;
     }
@@ -177,7 +162,7 @@ public partial class BookService : IBookService
         // Some keys get uri encoded when parsed, so replace any of those characters with original
         var mappingKey = Uri.UnescapeDataString(hrefParts[0]);
 
-        if (!mappings.ContainsKey(mappingKey))
+        if (!mappings.TryGetValue(mappingKey, out var mappedPage))
         {
             if (HasClickableHrefPart(anchor))
             {
@@ -191,7 +176,6 @@ public partial class BookService : IBookService
                 {
                     mappings.TryGetValue(pageKey, out currentPage);
                 }
-
 
                 anchor.Attributes.Add("kavita-page", $"{currentPage}");
                 anchor.Attributes.Add("kavita-part", part);
@@ -207,7 +191,6 @@ public partial class BookService : IBookService
             return;
         }
 
-        var mappedPage = mappings[mappingKey];
         anchor.Attributes.Add("kavita-page", $"{mappedPage}");
         if (hrefParts.Length > 1)
         {
@@ -359,83 +342,17 @@ public partial class BookService : IBookService
 
         AnnotationHelper.InjectSingleElementAnnotations(doc, singleElementAnnotations);
         AnnotationHelper.InjectMultiElementAnnotations(doc, multiElementAnnotations);
-
-        // var annotationsByElement = annotations
-        //     .Where(a => !string.IsNullOrEmpty(a.XPath))
-        //     .GroupBy(a => a.XPath.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant())
-        //     .ToDictionary(g => g.Key, g => g.ToList());
-        //
-        // foreach (var (xpath, elementAnnotations) in annotationsByElement)
-        // {
-        //     try
-        //     {
-        //         HtmlNode? elem = null;
-        //         if (xpath.StartsWith("//id"))
-        //         {
-        //             var id = xpath.Replace("//id(\"", string.Empty).Replace("\")", string.Empty);
-        //             if (string.IsNullOrWhiteSpace(id)) continue;
-        //             elem = doc.GetElementbyId(id);
-        //         }
-        //         else
-        //         {
-        //             elem = doc.DocumentNode.SelectSingleNode(xpath);
-        //         }
-        //
-        //         if (elem == null) continue;
-        //
-        //         var originalText = elem.InnerText;
-        //
-        //         // Calculate positions and sort by start position
-        //         var sortedAnnotations = elementAnnotations
-        //             .Select(a => new
-        //             {
-        //                 Annotation = a,
-        //                 StartPos = originalText.IndexOf(a.SelectedText, StringComparison.Ordinal)
-        //             })
-        //             .Where(a => a.StartPos >= 0)
-        //             .OrderBy(a => a.StartPos)
-        //             .ToList();
-        //
-        //         elem.RemoveAllChildren();
-        //
-        //         var currentPos = 0;
-        //
-        //         foreach (var item in sortedAnnotations)
-        //         {
-        //             // Add text before highlight
-        //             if (item.StartPos > currentPos)
-        //             {
-        //                 var beforeText = originalText.Substring(currentPos, item.StartPos - currentPos);
-        //                 elem.AppendChild(HtmlNode.CreateNode(beforeText));
-        //             }
-        //
-        //             // Add highlight
-        //             var highlightNode =
-        //                 HtmlNode.CreateNode(
-        //                     $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
-        //             elem.AppendChild(highlightNode);
-        //
-        //             currentPos = item.StartPos + item.Annotation.SelectedText.Length;
-        //         }
-        //
-        //         // Add remaining text
-        //         if (currentPos < originalText.Length)
-        //         {
-        //             elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
-        //         }
-        //     }
-        //     catch (XPathException ex)
-        //     {
-        //         continue;
-        //     }
-        // }
     }
 
     private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
     {
-        var images = doc.DocumentNode.SelectNodes("//img")
-                     ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
+        ScopeHtmlImageCollection(book, apiBase, doc.DocumentNode.SelectNodes("//img"));
+        ScopeHtmlImageCollection(book, apiBase, doc.DocumentNode.SelectNodes("//image"));
+        ScopeHtmlImageCollection(book, apiBase, doc.DocumentNode.SelectNodes("//svg"));
+    }
 
+    private static void ScopeHtmlImageCollection(EpubBookRef book, string apiBase, HtmlNodeCollection? images)
+    {
         if (images == null) return;
 
         var parent = images[0].ParentNode;
@@ -472,7 +389,6 @@ public partial class BookService : IBookService
             parent.AddClass("kavita-scale-width-container");
             image.AddClass("kavita-scale-width");
         }
-
     }
 
     private static void InjectImages(HtmlDocument doc, EpubBookRef book, string apiBase)

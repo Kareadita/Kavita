@@ -355,6 +355,11 @@ export class ReaderService {
     const bookContentElement = this.document.querySelector('.book-content');
     const bookContentXPath = this.getXPathTo(bookContentElement?.children[0]);
 
+    // Book reader progress can have this html prefix
+    if (xpath.startsWith('//html[1]///BODY')) {
+      xpath = xpath.replace('//html[1]///BODY', '//BODY')
+    }
+
     return xpath.replace(bookContentXPath, '//BODY');
   }
 
@@ -387,7 +392,10 @@ export class ReaderService {
   }
 
   private getXPath(element: any, pureXPath = false): string {
-    if (element === null) return '';
+    if (element === null || element === undefined) {
+      console.error('Expecting element, but got null instead');
+      return '';
+    }
     if (!pureXPath) {
       if (element.id !== '') { return 'id("' + element.id + '")'; }
       if (element === document.body) { return element.tagName; }
