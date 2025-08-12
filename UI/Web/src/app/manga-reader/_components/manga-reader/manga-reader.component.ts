@@ -3,13 +3,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
   inject,
+  model,
   OnDestroy,
   OnInit,
+  Signal,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, NgClass, NgStyle, PercentPipe} from '@angular/common';
@@ -77,6 +80,7 @@ import {
 } from "../../../_models/preferences/reading-profiles";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
+import {PageBookmark} from "../../../_models/readers/page-bookmark";
 
 
 const PREFETCH_PAGES = 10;
@@ -175,6 +179,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
+  chapterInfo = model<ChapterInfo | null>();
   /**
    * Reading List id. Defaults to -1.
    */
@@ -187,7 +192,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If this is true, we are reading a bookmark. ChapterId will be 0. There is no continuous reading. Progress is not saved. Bookmark control is removed.
    */
-  bookmarkMode: boolean = false;
+  bookmarkMode = model<boolean>(false);
 
   /**
    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
@@ -305,10 +310,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   title: string = '';
   /**
-   * Used to store the Volume/Chapter information
-   */
-  subtitle: string = '';
-  /**
    * Timeout id for auto-closing menu overlay
    */
   menuTimeout: any;
@@ -347,9 +348,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   settingsOpen: boolean = false;
   /**
-   * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
+   * A map of bookmarked pages to chapterTitle. Used for O(1) lookup time if a page is bookmarked or not.
    */
-  bookmarks: {[key: string]: number} = {};
+  bookmarks: {[key: string]: string} = {};
   /**
    * Library Type used for rendering chapter or issue
    */
@@ -417,6 +418,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Width override label for manual width control
   */
   widthOverrideLabel$ : Observable<string> = new Observable<string>();
+  /**
+   * If bookmark mode, the title of the bookmark chapter, else the normal chapter title
+   */
+  chapterTitleLabel: Signal<string>;
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
@@ -429,7 +434,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
-    if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
   }
 
@@ -484,6 +489,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
     this.cdRef.markForCheck();
+
+    this.chapterTitleLabel = computed(() => {
+      const chapterInfo = this.chapterInfo();
+      const bookmarkMode = this.bookmarkMode();
+
+      if (bookmarkMode) {
+        // TODO: This currently doesn't work as bookmark reader doesn't have the page/chapter binding in bookmark info, we'd need a new API
+        const hasKey = (this.bookmarks ?? {}).hasOwnProperty(this.pageNum);
+        if (!hasKey) return translate('manga-reader.bookmarks-title');
+        return this.bookmarks[this.pageNum];
+      }
+
+      return chapterInfo?.chapterTitle ?? '';
+    });
+
+
+
   }
 
   ngOnInit(): void {
@@ -501,7 +523,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
-    this.bookmarkMode = this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true';
+    this.bookmarkMode.set(this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true');
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.readingProfile = data['readingProfile'];
@@ -878,7 +900,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
 
     let img: HTMLImageElement | undefined;
-    if (this.bookmarkMode) img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    if (this.bookmarkMode()) img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
@@ -992,11 +1014,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goToPageEvent.complete();
     }
 
-    if (this.bookmarkMode) {
+    if (this.bookmarkMode()) {
       this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
         this.setPageNum(0);
         this.title = bookmarkInfo.seriesName;
-        this.subtitle = translate('manga-reader.bookmarks-title');
         this.libraryType = bookmarkInfo.libraryType;
         this.maxPages = bookmarkInfo.pages;
         this.mangaReaderService.load(bookmarkInfo);
@@ -1023,13 +1044,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId, true),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
-    }).pipe(take(1)).subscribe(results => {
+    }).subscribe(results => {
       if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
         this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId, this.chapterId, results.chapterInfo.seriesFormat), {queryParams: params});
         return;
       }
+
+      this.chapterInfo.set(results.chapterInfo);
 
       this.mangaReaderService.load(results.chapterInfo);
 
@@ -1056,22 +1079,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.libraryType = results.chapterInfo.libraryType;
       this.title = results.chapterInfo.title;
-      this.subtitle = results.chapterInfo.subtitle;
 
       this.inSetup = false;
 
       this.disableDoubleRendererIfScreenTooSmall();
       this.switchToWebtoonReaderIfPagesLikelyWebtoon();
-
-
-      // From bookmarks, create map of pages to make lookup time O(1)
-      this.bookmarks = {};
-      results.bookmarks.forEach(bookmark => {
-        this.bookmarks[bookmark.page] = 1;
-      });
       this.cdRef.markForCheck();
 
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      // From bookmarks, create map of pages to make lookup time O(1)
+      this.setupBookmarks(results.bookmarks);
+
+
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
@@ -1082,7 +1101,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         }
       });
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
@@ -1099,6 +1118,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.closeReader();
       }, 200);
     });
+  }
+
+  private setupBookmarks(bookmarks: PageBookmark[]) {
+    this.bookmarks = {};
+    bookmarks.forEach(bookmark => {
+      this.bookmarks[bookmark.page] = bookmark.chapterTitle ?? '';
+    });
+    this.cdRef.markForCheck();
   }
 
   closeReader() {
@@ -1399,7 +1426,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   loadNextChapter() {
-    if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) {
+    if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode()) {
       this.toastr.info(translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -1417,7 +1444,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadPrevChapter() {
-    if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) {
+    if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode()) {
       this.toastr.info(translate('manga-reader.no-prev-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
@@ -1600,8 +1627,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum + 1;
     }
 
-    if (!this.incognitoMode && !this.bookmarkMode) {
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.incognitoMode && !this.bookmarkMode()) {
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).subscribe(() => {/* No operation */});
     }
   }
 
@@ -1752,7 +1779,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (this.bookmarkMode) return;
+    if (this.bookmarkMode()) return;
     if (!(this.accountService.hasBookmarkRole(this.user) || this.accountService.hasAdminRole(this.user))) return;
 
     const pageNum = this.pageNum;
@@ -1772,8 +1799,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (isDouble) apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {
-        this.bookmarks[pageNum] = 1;
-        if (isDouble) this.bookmarks[pageNum + 1] = 1;
+        this.bookmarks[pageNum] = this.chapterInfo()?.chapterTitle ?? '';
+        if (isDouble) this.bookmarks[pageNum + 1] = this.chapterInfo()?.chapterTitle ?? '';
         this.cdRef.detectChanges();
       });
     }
@@ -1791,7 +1818,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info(translate('toasts.incognito-off'));
-    if (!this.bookmarkMode) {
+    if (!this.bookmarkMode()) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }

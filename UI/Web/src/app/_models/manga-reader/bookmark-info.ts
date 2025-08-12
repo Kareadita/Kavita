@@ -1,6 +1,6 @@
-import { FileDimension } from "src/app/manga-reader/_models/file-dimension";
-import { LibraryType } from "../library/library";
-import { MangaFormat } from "../manga-format";
+import {FileDimension} from "src/app/manga-reader/_models/file-dimension";
+import {LibraryType} from "../library/library";
+import {MangaFormat} from "../manga-format";
 
 export interface BookmarkInfo {
     seriesName: string;

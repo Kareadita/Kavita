@@ -456,6 +456,7 @@ export class EpubReaderSettingsService {
 
       const familyName = this.fontFamilies.find(f => f.title === fontName)?.family || 'default';
       const currentStyles = this._pageStyles();
+      console.log('setup form subs: ', this._pageStyles())
 
       const newStyles = { ...currentStyles };
       if (familyName === 'default') {

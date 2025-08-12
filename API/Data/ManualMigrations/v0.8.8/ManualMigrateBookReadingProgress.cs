@@ -25,8 +25,6 @@ public static class ManualMigrateBookReadingProgress
     /// New-descoped prefix
     /// </summary>
     private const string ReplacementScope = "//BODY/DIV[1]";
-    // TODO: Remove this before merge
-    private const bool DoNotSave = true;
 
     public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {
@@ -60,7 +58,7 @@ public static class ManualMigrateBookReadingProgress
             }
         }
 
-        if (!DoNotSave && unitOfWork.HasChanges())
+        if (unitOfWork.HasChanges())
         {
             await context.SaveChangesAsync();
         }
@@ -84,21 +82,18 @@ public static class ManualMigrateBookReadingProgress
             }
         }
 
-        if (!DoNotSave && unitOfWork.HasChanges())
+        if (unitOfWork.HasChanges())
         {
             await context.SaveChangesAsync();
         }
 
-        if (!DoNotSave)
+        await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
         {
-            await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
-            {
-                Name = "ManualMigrateBookReadingProgress",
-                ProductVersion = BuildInfo.Version.ToString(),
-                RanAt = DateTime.UtcNow
-            });
-            await context.SaveChangesAsync();
-        }
+            Name = "ManualMigrateBookReadingProgress",
+            ProductVersion = BuildInfo.Version.ToString(),
+            RanAt = DateTime.UtcNow
+        });
+        await context.SaveChangesAsync();
 
         logger.LogCritical("Running ManualMigrateBookReadingProgress migration - Completed. This is not an error");
     }
