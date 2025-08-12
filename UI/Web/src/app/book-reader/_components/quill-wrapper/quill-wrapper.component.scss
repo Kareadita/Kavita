@@ -1,24 +1,23 @@
 :host ::ng-deep quill-editor {
-
   .ql-toolbar,
   .ql-container {
-    border: 1px solid var(--primary-color);
+    border: 0.0625rem solid var(--primary-color);
     background-color: var(--drawer-bg-color);
   }
 
- .ql-toolbar {
-   border-bottom: 1px solid var(--primary-color);
-   padding: 8px;
-   border-radius: 5px 5px 0 0 !important;
+  .ql-toolbar {
+    border-bottom: 0.0625rem solid var(--primary-color);
+    padding: 0.5rem;
+    border-radius: 0.3125rem 0.3125rem 0 0 !important;
 
-   .ql-formats {
-      margin-right: 15px;
+    .ql-formats {
+      margin-right: 0.9375rem;
     }
   }
 
   .ql-container {
     border-top: none;
-    border-radius: 0 0 5px 5px !important;
+    border-radius: 0 0 0.3125rem 0.3125rem !important;
 
     .ql-editor {
       background-color: var(--theme-bg-color);
@@ -28,8 +27,13 @@
         color: var(--input-placeholder-color);
       }
 
-      p {
-        min-height: 75px;
+      &.ql-blank::before {
+        font-style: italic;
+        color: var(--input-placeholder-color);
+      }
+
+      &:focus {
+        outline: none;
       }
     }
   }
@@ -38,10 +42,10 @@
   button[class*="ql-"] {
     color: var(--drawer-text-color) !important;
     background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 5px;
-    margin: 2px;
+    border: 0.0625rem solid transparent;
+    border-radius: 0.1875rem;
+    padding: 0.3125rem;
+    margin: 0.125rem;
     cursor: pointer;
 
     &:hover {
@@ -79,20 +83,18 @@
   .ql-picker {
     color: var(--drawer-text-color) !important;
     background-color: var(--drawer-bg-color) !important;
-    margin: 2px;
-    min-width: 30px;
+    margin: 0.125rem;
+    min-width: 1.875rem;
 
     .ql-picker-label {
       color: var(--drawer-text-color) !important;
-      border: 1px solid var(--input-border-color);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--input-border-color);
+      border-radius: 0.1875rem;
       background-color: var(--input-bg-color) !important;
-
       text-align: center !important;
       display: flex !important;
       align-items: flex-start !important;
-      justify-content: start !important;
-
+      justify-content: flex-start !important;
 
       &:hover {
         .ql-stroke {
@@ -107,18 +109,16 @@
 
     .ql-picker-options {
       background-color: var(--drawer-bg-color);
-      border: 1px solid var(--input-border-color);
-      border-radius: 3px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-      // Ensure the dropdown is not wider than the select
+      border: 0.0625rem solid var(--input-border-color);
+      border-radius: 0.1875rem;
+      box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
       min-width: auto !important;
       width: 100% !important;
 
       .ql-picker-item {
         color: var(--drawer-text-color) !important;
-        border-radius: 5px;
-        padding-left: 2px;
+        border-radius: 0.3125rem;
+        padding-left: 0.125rem;
 
         &:hover {
           background-color: var(--btn-primary-hover-bg-color);
@@ -152,8 +152,8 @@
   select.quil-wrapper-select {
     background-color: var(--input-bg-color);
     color: var(--input-text-color);
-    border: 1px solid var(--input-border-color);
-    border-radius: 3px;
+    border: 0.0625rem solid var(--input-border-color);
+    border-radius: 0.1875rem;
 
     option {
       background-color: var(--drawer-bg-color);
@@ -161,18 +161,9 @@
     }
   }
 
-  .ql-editor.ql-blank::before {
-    font-style: italic;
-    color: var(--input-placeholder-color);
-  }
-
-  .ql-editor:focus {
-    outline: none;
-  }
-
   .ql-formats:not(:last-child) {
-    margin-right: 15px;
-    padding-right: 15px;
-    border-right: 1px solid var(--input-border-color);
+    margin-right: 0.9375rem;
+    padding-right: 0.9375rem;
+    border-right: 0.0625rem solid var(--input-border-color);
   }
 }

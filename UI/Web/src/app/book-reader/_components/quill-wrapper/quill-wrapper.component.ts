@@ -31,6 +31,7 @@ export enum QuillToolbarKey {
   EmbedImage = 'ql-image',
   EmbedVideo = 'ql-video',
   Table = 'ql-table',
+  Clean = 'ql-clean',
 }
 
 export interface ToolbarItem {
@@ -44,23 +45,40 @@ export interface ToolbarItem {
   value?: string;
   /**
    * Values used for the select component
+   * Pass an **empty** array to use the quill defaults
    */
   values?: string[];
 }
 
-const DefaultToolbarItems: ToolbarItem[] = [
-  {key: QuillToolbarKey.Bold},
-  {key: QuillToolbarKey.Italic},
-  {key: QuillToolbarKey.Underline},
-  {key: QuillToolbarKey.Strikethrough},
-  {
-    key: QuillToolbarKey.FontSize,
-    values: ['small', '', 'large', 'huge'],
-  },
-  {
-    key: QuillToolbarKey.Font,
-    values: ['', 'serif', 'monospace'],
-  }
+// There is very little documentation to what values are possible.
+// https://quilljs.com/docs/modules/toolbar + inspect the editor on that page to figure it out
+const DefaultToolbarItems: ToolbarItem[][] = [
+  [
+    {
+      key: QuillToolbarKey.FontSize,
+      values: [],
+    },
+    {
+      key: QuillToolbarKey.Font,
+      values: [],
+    },
+  ],
+  [
+    {key: QuillToolbarKey.Bold},
+    {key: QuillToolbarKey.Italic},
+    {key: QuillToolbarKey.Underline},
+    {key: QuillToolbarKey.Strikethrough},
+    {key: QuillToolbarKey.List, value: 'bullet'},
+    {key: QuillToolbarKey.List, value: 'ordered'},
+  ],
+  [
+    {key: QuillToolbarKey.EmbedLink},
+    {key: QuillToolbarKey.EmbedImage},
+  ],
+
+  [
+    {key: QuillToolbarKey.Clean},
+  ]
 ];
 
 /**
@@ -77,7 +95,7 @@ const DefaultToolbarItems: ToolbarItem[] = [
   styleUrl: './quill-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QuillWrapperComponent implements OnInit {
+export class QuillWrapperComponent {
 
   /**
    * The data format used to pass through quill.
@@ -125,15 +143,14 @@ export class QuillWrapperComponent implements OnInit {
     }
 
     if (whiteList.length > 0) {
-      return items.filter(item => whiteList.includes(item.key));
+      return items
+        .map(group => group.filter(item => whiteList.includes(item.key)))
+        .filter(group => group.length > 0);
     }
 
-    return items.filter(item => !blackList.includes(item.key));
+    return items
+      .map(group => group.filter(item => !blackList.includes(item.key)))
+      .filter(group => group.length > 0);
   });
-
-  ngOnInit() {
-    console.log("Init Quil Wrapper")
-  }
-
 
 }
