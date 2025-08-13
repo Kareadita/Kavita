@@ -158,7 +158,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    /**
     * If this is true, no progress will be saved.
     */
-  incognitoMode: boolean = false;
+  incognitoMode = model<boolean>(false);
 
    /**
     * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
@@ -198,7 +198,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If the action bar is visible
    */
-  actionBarVisible = true;
+  actionBarVisible = model<boolean>(true);
   /**
    * Book reader setting that hides the menuing system
    */
@@ -206,7 +206,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If we are loading from backend
    */
-  isLoading = true;
+  isLoading = model<boolean>(true);
   /**
    * Title of the book. Rendered in action bars
    */
@@ -381,44 +381,71 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected virtualizedPageNum!: Signal<number>;
   protected virtualizedMaxPages!: Signal<number>;
 
+  pageWidthForPagination = computed(() => {
+    const layoutMode = this.layoutMode();
+    const writingStyle = this.writingStyle();
+
+    if (layoutMode === BookPageLayoutMode.Default && writingStyle === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
+      return 'unset';
+    }
+    return '100%'
+  });
+
   /**
    * Disables the Left most button
    */
-  get IsPrevDisabled(): boolean {
-    if (this.readingDirection() === ReadingDirection.LeftToRight) {
+  isPrevDisabled = computed(() => {
+    const readingDirection = this.readingDirection();
+
+    if (readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Previous button
       return this.isPrevPageDisabled();
     }
 
     // Acting as a Next button
     return this.isNextPageDisabled();
-  }
+  });
 
-  get IsNextDisabled(): boolean {
-    if (this.readingDirection() === ReadingDirection.LeftToRight) {
+  isNextDisabled = computed(() => {
+    const readingDirection = this.readingDirection();
+
+    if (readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Next button
       return this.isNextPageDisabled();
     }
     // Acting as Previous button
     return this.isPrevPageDisabled();
-  }
+  });
+
+  shouldShowMenu = computed(() => {
+    const immersiveMode = this.immersiveMode();
+    const isDrawerOpen = this.epubMenuService.isDrawerOpen();
+    const actionBarVisible = this.actionBarVisible();
+
+    return !immersiveMode || isDrawerOpen || actionBarVisible;
+  })
+
 
   isNextPageDisabled() {
-    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() + 1 > this.maxPages() - 1;
-      if (this.layoutMode() !== BookPageLayoutMode.Default) {
-        return condition && currentVirtualPage === totalVirtualPages;
-      }
-      return condition;
+
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
+      const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
+      return condition && currentVirtualPage === totalVirtualPages;
+    }
+
+    return condition;
   }
 
   isPrevPageDisabled() {
-    const [currentVirtualPage,,] = this.getVirtualPage();
-    const condition =  (this.prevPageDisabled || this.prevChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() === 0;
-      if (this.layoutMode() !== BookPageLayoutMode.Default) {
-        return condition && currentVirtualPage === 0;
-      }
-      return condition;
+    const condition = (this.prevPageDisabled || this.prevChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() === 0;
+
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
+      const [currentVirtualPage,, ] = this.getVirtualPage();
+      return condition && currentVirtualPage === 1;
+    }
+
+    return condition;
   }
 
   /**
@@ -448,13 +475,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.pageNum() === 0 && (currentVirtualPage === 0);
   }
 
-
-  get PageWidthForPagination() {
-    if (this.layoutMode() === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
-      return 'unset';
-    }
-    return '100%'
-  }
 
   get PageHeightForPagination() {
     const layoutMode = this.layoutMode();
@@ -596,7 +616,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         debounceTime(200),
         takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
-        if (this.isLoading) return;
+        if (this.isLoading()) return;
 
         this.handleScrollEvent();
     });
@@ -664,7 +684,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum() + 1;
     }
 
-    if (!this.incognitoMode) {
+    if (!this.incognitoMode()) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
     }
 
@@ -699,7 +719,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
-    this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    this.incognitoMode.set(this.route.snapshot.queryParamMap.get('incognitoMode') === 'true');
 
     // If an annotation exists, load it and
     if (this.route.snapshot.queryParamMap.has('annotation')) {
@@ -754,7 +774,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bookService.getBookInfo(this.chapterId, true).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.
-        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+        const params = this.readerService.getQueryParamsObject(this.incognitoMode(), this.readingListMode, this.readingListId);
         await this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
         return;
       }
@@ -924,7 +944,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled) { return; }
-    this.isLoading = true;
+    this.isLoading.set(true);
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
@@ -938,7 +958,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPrevChapter() {
     if (this.prevPageDisabled) { return; }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.cdRef.markForCheck();
     this.continuousChaptersStack.pop();
     const prevChapter = this.continuousChaptersStack.peek();
@@ -951,7 +971,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.prevChapterPrefetched && this.prevChapterId === CHAPTER_ID_DOESNT_EXIST) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.cdRef.markForCheck();
       return;
     }
@@ -971,7 +991,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
       // Load chapter Id onto route but don't reload
-      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
@@ -981,7 +1001,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // This will only happen if no actual chapter can be found
       const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.warning(msg);
-      this.isLoading = false;
+      this.isLoading.set(false);
       if (direction === 'Prev') {
         this.prevPageDisabled = true;
       } else {
@@ -1034,9 +1054,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
-    // Pages are called sections in the UI, manga reader uses the go-to-page string so we use a different one here
-    promptConfig.header = translate('book-reader.go-to-section');
-    promptConfig.content = translate('book-reader.go-to-section-prompt', {totalSections: this.maxPages() - 1});
+    promptConfig.header = translate('book-reader.go-to-page');
+    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages() - 1});
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 
@@ -1069,7 +1088,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.cdRef.markForCheck();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
@@ -1250,7 +1269,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
-    this.isLoading = false;
+    this.isLoading.set(false);
     this.cdRef.markForCheck();
 
     // Virtual Paging stuff
@@ -1296,7 +1315,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
     this.saveProgress();
-    this.isLoading = false;
+    this.isLoading.set(false);
     this.cdRef.markForCheck();
 
     this.annotationService.getAllAnnotations(this.chapterId).subscribe(_ => {
@@ -1679,7 +1698,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?
-      this.actionBarVisible = false;
+      this.actionBarVisible.set(false);
     }
     this.cdRef.markForCheck();
   }
@@ -1719,8 +1738,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Turns off Incognito mode. This can only happen once if the user clicks the icon. This will modify URL state
    */
    turnOffIncognito() {
-    this.incognitoMode = false;
-    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+    this.incognitoMode.set(false);
+    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
@@ -1796,7 +1815,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyImmersiveMode(immersiveMode: boolean) {
     if (immersiveMode && !this.epubMenuService.isDrawerOpen()) {
-      this.actionBarVisible = false;
+      this.actionBarVisible.set(false);
       this.updateReadingSectionHeight();
     }
 
@@ -1927,7 +1946,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       Math.abs(this.mousePosition.x - event.clientX) <= mouseOffset &&
       Math.abs(this.mousePosition.y - event.clientY) <= mouseOffset
     ) {
-      this.actionBarVisible = !this.actionBarVisible;
+      this.actionBarVisible.update(v => !v);
       this.cdRef.markForCheck();
     }
   }

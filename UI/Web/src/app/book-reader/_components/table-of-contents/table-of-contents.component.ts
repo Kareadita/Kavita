@@ -5,9 +5,7 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnChanges,
-  Output,
-  SimpleChanges
+  Output
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -17,9 +15,9 @@ import {TranslocoDirective} from "@jsverse/transloco";
   templateUrl: './table-of-contents.component.html',
   styleUrls: ['./table-of-contents.component.scss'],
   imports: [TranslocoDirective],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TableOfContentsComponent implements OnChanges {
+export class TableOfContentsComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -30,10 +28,6 @@ export class TableOfContentsComponent implements OnChanges {
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
-  ngOnChanges(changes: SimpleChanges) {
-    //console.log('Current Page: ', this.pageNum, this.currentPageAnchor);
-    this.cdRef.markForCheck();
-  }
 
   cleanIdSelector(id: string) {
     const tokens = id.split('/');

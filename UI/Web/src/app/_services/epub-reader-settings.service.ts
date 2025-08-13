@@ -9,7 +9,7 @@ import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading
 import {BookService, FontFamily} from "../book-reader/_services/book.service";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
-import {debounceTime, skip, tap} from "rxjs/operators";
+import {debounceTime, filter, skip, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
@@ -95,7 +95,10 @@ export class EpubReaderSettingsService {
   });
 
   // Keep observable for now - can be converted to effect later
-  public readonly settingUpdates$ = this.settingUpdateSubject.asObservable();
+  public readonly settingUpdates$ = this.settingUpdateSubject.asObservable().pipe(filter(val => {
+    console.log('setting update: ', val);
+    return this._isInitialized();
+  }), tap(_ => console.log('setting update passed filter')));
 
   constructor() {
     // Effect to update form when signals change (only when not updating from form)
@@ -339,6 +342,8 @@ export class EpubReaderSettingsService {
 
   updateFullscreen(value: boolean) {
     this._isFullscreen.set(value);
+    if (!this._isInitialized()) return;
+
     this.settingUpdateSubject.next({ setting: 'fullscreen', object: null }); // TODO: Refactor into an effect
   }
 

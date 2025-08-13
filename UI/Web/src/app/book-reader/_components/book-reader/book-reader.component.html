@@ -19,8 +19,8 @@
     </div>
 
     <div #readingSection class="reading-section {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
-         [ngStyle]="{'width': PageWidthForPagination}"
-         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible}" [@isLoading]="isLoading" (click)="handleReaderClick($event)">
+         [ngStyle]="{'width': pageWidthForPagination()}"
+         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible()}" [@isLoading]="isLoading()" (click)="handleReaderClick($event)">
 
       @if (clickToPaginate() && !hidePagination) {
         <div class="left {{clickOverlayClass('left')}} no-observe"
@@ -55,13 +55,8 @@
       </div>
     </div>
 
-
-
-
-
-
     <ng-template #topActionBar>
-      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible) {
+      @if (shouldShowMenu()) {
         <div class="reader-header">
           <div class="action-bar d-flex align-items-center px-2">
             <button class="btn btn-secondary me-2" (click)="toggleDrawer()">
@@ -69,12 +64,12 @@
             </button>
 
             <div class="flex-grow-1 text-center d-none d-md-block">
-              @if (isLoading) {
+              @if (isLoading()) {
                 <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
                   <span class="visually-hidden">{{ t('loading-book') }}</span>
                 </div>
               } @else {
-                @if (incognitoMode) {
+                @if (incognitoMode()) {
                   <span (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
                     (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{ t('incognito-mode-label') }}</span>)
                   </span>
@@ -105,20 +100,25 @@
           </div>
 
           <div class="progress-bar-container">
-            <ngb-progressbar type="primary" height="10px" [value]="virtualizedPageNum()" [max]="virtualizedMaxPages()" (click)="goToPage()" [showValue]="true"></ngb-progressbar>
+            @if (isLoading()) {
+              <ngb-progressbar type="primary" height="10px" [value]="1" [max]="1" [striped]="true"></ngb-progressbar>
+            } @else {
+              <ngb-progressbar type="primary" height="10px" [value]="virtualizedPageNum()" [max]="virtualizedMaxPages()" (click)="goToPage()" [showValue]="true"></ngb-progressbar>
+            }
           </div>
         </div>
       }
     </ng-template>
 
     <ng-template #actionBar let-isTop>
-      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible) {
+      @let isLeftToRight = readingDirection() === ReadingDirection.LeftToRight;
+      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible()) {
         <div class="action-bar row g-0 justify-content-between">
           <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
-                  (click)="!isTop && movePage(readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-                  [disabled]="readingDirection() === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
-                  title="{{readingDirection() === ReadingDirection.LeftToRight ? t('previous') : t('next')}} Page">
-            <i class="fa {{(readingDirection() === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection() === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+                  (click)="!isTop && movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                  [disabled]="isPrevDisabled()"
+                  title="{{isLeftToRight ? t('previous') : t('next')}} Page">
+            <i class="fa {{(isLeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{isLeftToRight ? '' : 'next-page-highlight'}}" aria-hidden="true"></i>
           </button>
 
           @if (!this.adhocPageHistory.isEmpty()) {
@@ -129,36 +129,27 @@
 
 
           <div class="book-title col-3 d-none d-sm-block">
-            @if(isLoading) {
-              <!--Just render a blank div here-->
-            } @else {
-
-              <!--BookFusion: Page X                10 pages left, 30% -->
-
+            @if(!isLoading()) {
               <span class="me-1">
-                {{t('page-num-label', {page: pageNum()})}} / {{maxPages()}}
+                {{t('page-num-label', {page: virtualizedPageNum()})}} / {{virtualizedMaxPages()}}
               </span>
 
-              <span> {{t('completion-label', {percent: (pageNum() / maxPages()) | percent})}}</span>
-
-
-              @let timeLeft = readingTimeLeftResource.value();
-              @if (timeLeft) {
+              <span> {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}</span>
+              @if (readingTimeLeftResource.value(); as timeLeft) {
                 ,
                 <span class="time-left">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
                   {{timeLeft! | readTimeLeft:true }}
                 </span>
               }
-
             }
           </div>
 
           <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                  [disabled]="readingDirection() === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
-                  (click)="!isTop && movePage(readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-                  title="{{readingDirection() === ReadingDirection.LeftToRight ? t('next') : t('previous')}} Page">
-            <i class="fa {{(readingDirection() === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+                  [disabled]="isNextDisabled()"
+                  (click)="!isTop && movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                  title="{{isLeftToRight ? t('next') : t('previous')}} Page">
+            <i class="fa {{(isLeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
           </button>
         </div>
       }
