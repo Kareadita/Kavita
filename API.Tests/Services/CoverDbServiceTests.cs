@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private static readonly IEasyCachingProviderFactory CacheFactory = Substitute.For<IEasyCachingProviderFactory>();
 

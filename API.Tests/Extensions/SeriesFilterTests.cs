@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Extensions;
 
-public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     #region HasProgress

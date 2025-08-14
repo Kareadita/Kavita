@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
 
-public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     private TestGenreSet CreateTestGenres()

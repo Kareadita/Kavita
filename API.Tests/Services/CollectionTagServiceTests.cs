@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class CollectionTagServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class CollectionTagServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     private static async Task<ICollectionTagService> Setup(IUnitOfWork unitOfWork, DataContext context)

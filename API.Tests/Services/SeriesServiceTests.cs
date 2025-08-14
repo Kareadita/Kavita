@@ -44,7 +44,7 @@ internal class MockHostingEnvironment : IHostEnvironment {
 }
 
 
-public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     #region Setup

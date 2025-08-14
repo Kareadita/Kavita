@@ -91,7 +91,7 @@ public class MockReadingItemService : IReadingItemService
     }
 }
 
-public class ParseScannedFilesTests: AbstractDbTests
+public class ParseScannedFilesTests: AbstractDbTest
 {
     private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
     private readonly ITestOutputHelper _outputHelper;

@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class RatingServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class RatingServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
 

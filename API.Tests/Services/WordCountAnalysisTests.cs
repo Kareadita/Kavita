@@ -21,7 +21,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
     private const long WordCount = 33608; // 37417 if splitting on space, 33608 if just character count

@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private readonly ILogger<DeviceService> _logger = Substitute.For<ILogger<DeviceService>>();
 

@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ScannerServiceTests: AbstractDbTests
+public class ScannerServiceTests: AbstractDbTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/ScanTests");

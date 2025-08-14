@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     [Fact]

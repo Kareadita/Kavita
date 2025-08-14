@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 namespace API.Tests.Services;
 
 
-public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private readonly ITestOutputHelper _testOutputHelper = outputHelper;
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();

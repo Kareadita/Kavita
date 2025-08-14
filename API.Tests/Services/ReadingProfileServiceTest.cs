@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     /// <summary>

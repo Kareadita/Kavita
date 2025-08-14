@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 namespace API.Tests.Services;
 #nullable enable
 
-public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private const int ChapterPages = 100;
 

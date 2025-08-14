@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Helpers;
 
-public class PersonHelperTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class PersonHelperTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     // 1. Test adding new people and keeping existing ones

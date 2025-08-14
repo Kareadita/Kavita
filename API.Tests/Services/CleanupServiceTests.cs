@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     #region Setup

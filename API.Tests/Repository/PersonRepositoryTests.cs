@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
 
-public class PersonRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class PersonRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     private async Task<(AppUser, AppUser, AppUser)> Setup(DataContext context)

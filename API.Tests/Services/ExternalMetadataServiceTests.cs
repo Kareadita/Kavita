@@ -31,7 +31,7 @@ namespace API.Tests.Services;
 /// <summary>
 /// Given these rely on Kavita+, this will not have any [Fact]/[Theory] on them and must be manually checked
 /// </summary>
-public class ExternalMetadataServiceTests: AbstractDbTests
+public class ExternalMetadataServiceTests: AbstractDbTest
 {
     public ExternalMetadataServiceTests(ITestOutputHelper outputHelper): base(outputHelper)
     {

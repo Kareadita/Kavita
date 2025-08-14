@@ -22,7 +22,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTests(testOutputHelper)
+public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 

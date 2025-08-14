@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
 
-public class TagRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class TagRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     private TestTagSet CreateTestTags()

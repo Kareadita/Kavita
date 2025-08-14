@@ -22,7 +22,7 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTests(outputHelper)
+public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     [Fact]
