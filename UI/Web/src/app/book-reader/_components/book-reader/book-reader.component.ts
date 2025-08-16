@@ -1995,7 +1995,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   viewToCDrawer() {
-    this.epubMenuService.openViewTocDrawer(this.chapterId, (res: LoadPageEvent | null) => {
+    this.epubMenuService.openViewTocDrawer(this.chapterId, this.pageNum(), (res: LoadPageEvent | null) => {
       if (res === null) return;
 
       this.setPageNum(res.pageNumber);

@@ -67,12 +67,13 @@ export class EpubReaderMenuService {
     this.isDrawerOpen.set(true);
   }
 
-  openViewTocDrawer(chapterId: number, callbackFn: (evt: LoadPageEvent | null) => void) {
+  openViewTocDrawer(chapterId: number, pageNum: number, callbackFn: (evt: LoadPageEvent | null) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
     const ref = this.offcanvasService.open(ViewTocDrawerComponent, {position: 'end'});
     ref.componentInstance.chapterId.set(chapterId);
+    ref.componentInstance.pageNum.set(pageNum)
     ref.componentInstance.loadPage.subscribe((res: LoadPageEvent | null) => {
       // Check if we are on mobile to collapse the menu
       if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
