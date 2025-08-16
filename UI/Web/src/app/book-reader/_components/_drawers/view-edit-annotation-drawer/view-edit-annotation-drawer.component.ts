@@ -5,14 +5,14 @@ import {
   DestroyRef,
   effect,
   inject,
-  model,
+  model, OnInit,
   Signal,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -54,7 +54,7 @@ const INIT_HIGHLIGHT_DELAY = 200;
   styleUrl: './view-edit-annotation-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ViewEditAnnotationDrawerComponent {
+export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly annotationService = inject(AnnotationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -63,6 +63,7 @@ export class ViewEditAnnotationDrawerComponent {
   private readonly safeHtml = new SafeHtmlPipe();
   private readonly sanitizer = inject(DomSanitizer);
   private readonly epubHighlightService = inject(EpubHighlightService);
+  private readonly fb = inject(NonNullableFormBuilder);
   protected readonly utilityService = inject(UtilityService);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
@@ -76,9 +77,12 @@ export class ViewEditAnnotationDrawerComponent {
   totalText!: Signal<SafeHtml>;
 
 
-  formGroup!: FormGroup;
+  formGroup!: FormGroup<{
+    note: FormControl<object>,
+    hasSpoiler: FormControl<boolean>,
+    selectedSlotIndex: FormControl<number>,
+  }>;
   annotationNote: object = {};
-  isSetup = false;
 
   constructor() {
     this.titleColor = computed(() => {
@@ -183,39 +187,41 @@ export class ViewEditAnnotationDrawerComponent {
       return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
     });
 
+    this.formGroup = this.fb.group({
+      note: this.fb.control<object>({}, []),
+      hasSpoiler: this.fb.control<boolean>(false, []),
+      selectedSlotIndex: this.fb.control<number>(0, []),
+    });
 
     effect(() => {
-      const isEditMode = this.isEditMode();
       const annotation = this.annotation();
+      if (!annotation) return;
 
       // Side effect - patch in the current note
       // Parse the stored JSON string back to Delta object
-      this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {}
-      this.formGroup =  new FormGroup({
-        'note': new FormControl(this.annotationNote, []),
-        'hasSpoiler': new FormControl(annotation?.containsSpoiler, []),
-        'selectedSlotIndex': new FormControl(annotation?.selectedSlotIndex ?? 0, [])
-      });
-
-      if (isEditMode && !this.isSetup) {
-        console.log('Setting up auto-save');
-        this.formGroup.valueChanges.pipe(
-          debounceTime(350),
-          switchMap(_ => {
-            const updatedAnnotation = this.annotation();
-            if (!updatedAnnotation) return of();
-
-            updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-            updatedAnnotation.comment = JSON.stringify(this.annotationNote);
-
-            return this.annotationService.updateAnnotation(updatedAnnotation);
-          }),
-          takeUntilDestroyed(this.destroyRef)
-        ).subscribe();
-
-        this.isSetup = true;
-      }
+      this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {};
+      this.formGroup.get('note')!.setValue(this.annotationNote);
+      this.formGroup.get('hasSpoiler')!.setValue(annotation.containsSpoiler);
+      this.formGroup.get('selectedSlotIndex')!.setValue(annotation.selectedSlotIndex);
     });
+  }
+
+  ngOnInit(){
+    if (this.isEditMode()) {
+      this.formGroup.valueChanges.pipe(
+        debounceTime(350),
+        switchMap(_ => {
+          const updatedAnnotation = this.annotation();
+          if (!updatedAnnotation) return of();
+
+          updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+          updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+
+          return this.annotationService.updateAnnotation(updatedAnnotation);
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe();
+    }
   }
 
   createAnnotation() {
