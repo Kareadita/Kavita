@@ -69,6 +69,7 @@ export class EpubReaderSettingsService {
   private settingsForm!: BookReadingProfileFormGroup;
   private fontFamilies: FontFamily[] = this.bookService.getFontFamilies();
   private isUpdatingFromForm = false; // Flag to prevent infinite loops
+  private isInitialized = this._isInitialized(); // Non signal, updates in effect
 
   // Event subject for component communication (keep this for now, can be converted to effect later)
   private settingUpdateSubject = new Subject<ReaderSettingUpdate>();
@@ -76,7 +77,6 @@ export class EpubReaderSettingsService {
   // Public readonly signals
   public readonly currentReadingProfile = this._currentReadingProfile.asReadonly();
   public readonly parentReadingProfile = this._parentReadingProfile.asReadonly();
-  public readonly isInitialized = this._isInitialized.asReadonly();
 
   // Settings as readonly signals
   public readonly pageStyles = this._pageStyles.asReadonly();
@@ -123,65 +123,75 @@ export class EpubReaderSettingsService {
       }
     });
 
+    effect(() => {
+      this.isInitialized = this._isInitialized();
+    });
+
     // Effect to emit setting updates when signals change
     effect(() => {
-      if (!this._isInitialized()) return;
+      const styles = this._pageStyles();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'pageStyle',
-        object: this._pageStyles()
+        object: styles,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
+      const clickToPaginate = this._clickToPaginate();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'clickToPaginate',
-        object: this._clickToPaginate()
+        object: clickToPaginate,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
+      const mode = this._layoutMode();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'bookReaderLayoutMode',
-        object: this._layoutMode()
+        object: mode,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
+      const direction = this._readingDirection();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'readingDirection',
-        object: this._readingDirection()
+        object: direction,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
+      const style = this._writingStyle();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'writingStyle',
-        object: this._writingStyle()
+        object: style,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
+      const mode = this._immersiveMode();
+      if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
         setting: 'immersiveMode',
-        object: this._immersiveMode()
+        object: mode,
       });
     });
 
     effect(() => {
-      if (!this._isInitialized()) return;
-
       const theme = this._activeTheme();
+      if (!this.isInitialized) return;
+
       if (theme) {
         this.settingUpdateSubject.next({
           setting: 'theme',
