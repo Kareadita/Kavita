@@ -921,7 +921,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
   }
 
-
   sortElements(a: Element, b: Element) {
     const aTop = a.getBoundingClientRect().top;
       const bTop = b.getBoundingClientRect().top;
@@ -1011,7 +1010,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
   /**
    * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value
    * from 'kavita-part', which will cause the reader to scroll to the marker.
@@ -1051,7 +1049,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
     promptConfig.header = translate('book-reader.go-to-page');
@@ -1083,9 +1080,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum.set(page);
     this.loadPage();
   }
-
-
-
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading.set(true);
@@ -1121,7 +1115,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 10);
     });
   }
-
 
   /**
    * Injects the new DOM needed to provide the bookmark functionality.
@@ -1267,7 +1260,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading.set(false);
     this.cdRef.markForCheck();
@@ -1350,7 +1342,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.setStyle(emptyPage, 'width', this.columnHeight());
     this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
   }
-
 
   goBack() {
     if (!this.adhocPageHistory.isEmpty()) {
@@ -1558,7 +1549,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         : this.getPageWidth();
   }
 
-
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
     if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
@@ -1674,7 +1664,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case "writingStyle":
         this.applyWritingStyle();
         break;
-      case "layoutMode":
+      case "bookReaderLayoutMode":
         this.applyLayoutMode(res.object as BookPageLayoutMode);
         break;
       case "readingDirection":
@@ -1811,7 +1801,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //   setTimeout(() => this.scrollTo(lastSelector));
     // }
   }
-
 
   applyImmersiveMode(immersiveMode: boolean) {
     if (immersiveMode && !this.epubMenuService.isDrawerOpen()) {
@@ -1992,7 +1981,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
-
 
   viewToCDrawer() {
     this.epubMenuService.openViewTocDrawer(this.chapterId, this.pageNum(), (res: LoadPageEvent | null) => {

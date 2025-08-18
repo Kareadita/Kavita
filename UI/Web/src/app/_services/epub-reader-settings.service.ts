@@ -1,15 +1,15 @@
 import {computed, DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import {firstValueFrom, Observable, Subject} from 'rxjs';
 import {bookColorThemes, PageStyle} from "../book-reader/_components/reader-settings/reader-settings.component";
 import {ReadingDirection} from '../_models/preferences/reading-direction';
 import {WritingStyle} from '../_models/preferences/writing-style';
 import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, NonNullableFormBuilder} from "@angular/forms";
 import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
 import {BookService, FontFamily} from "../book-reader/_services/book.service";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
-import {debounceTime, filter, skip, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, filter, skip, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
@@ -18,9 +18,22 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 
 export interface ReaderSettingUpdate {
-  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
+  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'bookReaderLayoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
   object: any;
 }
+
+export type BookReadingProfileFormGroup = FormGroup<{
+  bookReaderMargin: FormControl<number>;
+  bookReaderLineSpacing: FormControl<number>;
+  bookReaderFontSize: FormControl<number>;
+  bookReaderFontFamily: FormControl<string>;
+  bookReaderTapToPaginate: FormControl<boolean>;
+  bookReaderReadingDirection: FormControl<ReadingDirection>;
+  bookReaderWritingStyle: FormControl<WritingStyle>;
+  bookReaderThemeName: FormControl<string>;
+  bookReaderLayoutMode: FormControl<BookPageLayoutMode>;
+  bookReaderImmersiveMode:FormControl <boolean>;
+}>
 
 
 @Injectable({
@@ -34,6 +47,7 @@ export class EpubReaderSettingsService {
   private readonly utilityService = inject(UtilityService);
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
+  private readonly fb = inject(NonNullableFormBuilder);
 
   // Core signals - these will be the single source of truth
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
@@ -52,7 +66,7 @@ export class EpubReaderSettingsService {
   private readonly _isFullscreen = signal<boolean>(false);
 
   // Form will be managed separately but updated from signals
-  private settingsForm: FormGroup = new FormGroup({});
+  private settingsForm!: BookReadingProfileFormGroup;
   private fontFamilies: FontFamily[] = this.bookService.getFontFamilies();
   private isUpdatingFromForm = false; // Flag to prevent infinite loops
 
@@ -132,7 +146,7 @@ export class EpubReaderSettingsService {
       if (!this._isInitialized()) return;
 
       this.settingUpdateSubject.next({
-        setting: 'layoutMode',
+        setting: 'bookReaderLayoutMode',
         object: this._layoutMode()
       });
     });
@@ -188,7 +202,7 @@ export class EpubReaderSettingsService {
     // Load parent profile if needed
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       try {
-        const parent = await this.readingProfileService.getForSeries(seriesId, true).toPromise();
+        const parent = await firstValueFrom(this.readingProfileService.getForSeries(seriesId, true));
         this._parentReadingProfile.set(parent || null);
       } catch (error) {
         console.error('Failed to load parent reading profile:', error);
@@ -253,7 +267,7 @@ export class EpubReaderSettingsService {
   /**
    * Get the current settings form (for components that need direct form access)
    */
-  getSettingsForm(): FormGroup {
+  getSettingsForm(): BookReadingProfileFormGroup {
     return this.settingsForm;
   }
 
@@ -288,7 +302,7 @@ export class EpubReaderSettingsService {
       : ReadingDirection.LeftToRight;
 
     this._readingDirection.set(newDirection);
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderReadingDirection')!.setValue(newDirection);
   }
 
   /**
@@ -301,7 +315,7 @@ export class EpubReaderSettingsService {
       : WritingStyle.Horizontal;
 
     this._writingStyle.set(newStyle);
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderWritingStyle')!.setValue(newStyle);
   }
 
   /**
@@ -312,7 +326,7 @@ export class EpubReaderSettingsService {
     if (theme) {
       this._activeTheme.set(theme);
       if (update) {
-        this.debouncedUpdateProfile();
+        this.settingsForm.get('bookReaderThemeName')!.setValue(themeName);
       }
     }
   }
@@ -320,24 +334,22 @@ export class EpubReaderSettingsService {
   updateLayoutMode(mode: BookPageLayoutMode): void {
     this._layoutMode.set(mode);
     // Update form control to keep in sync
-    this.settingsForm.get('layoutMode')?.setValue(mode, { emitEvent: false });
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderLayoutMode')?.setValue(mode, { emitEvent: false });
   }
 
   updateClickToPaginate(value: boolean): void {
     this._clickToPaginate.set(value);
-    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(value, { emitEvent: false });
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(value);
   }
 
   updateReadingDirection(value: ReadingDirection): void {
     this._readingDirection.set(value);
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderReadingDirection')?.setValue(value);
   }
 
   updateWritingStyle(value: WritingStyle) {
     this._writingStyle.set(value);
-    this.debouncedUpdateProfile();
+    this.settingsForm.get('bookReaderWritingStyle')?.setValue(value);
   }
 
   updateFullscreen(value: boolean) {
@@ -352,17 +364,6 @@ export class EpubReaderSettingsService {
     if (value) {
       this._clickToPaginate.set(true);
     }
-  }
-
-  // Debounced update method to prevent too many API calls
-  private updateTimeout: any;
-  private debouncedUpdateProfile(): void {
-    if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout);
-    }
-    this.updateTimeout = setTimeout(() => {
-      this.updateImplicitProfile();
-    }, 500);
   }
 
   /**
@@ -421,7 +422,7 @@ export class EpubReaderSettingsService {
       bookReaderTapToPaginate: this._clickToPaginate(),
       bookReaderLineSpacing: profile.bookReaderLineSpacing,
       bookReaderMargin: profile.bookReaderMargin,
-      layoutMode: this._layoutMode(),
+      bookReaderLayoutMode: this._layoutMode(),
       bookReaderImmersiveMode: this._immersiveMode()
     }, { emitEvent: false });
   }
@@ -433,17 +434,19 @@ export class EpubReaderSettingsService {
     const profile = this._currentReadingProfile();
     if (!profile) return;
 
-    // Clear existing form
-    this.settingsForm = new FormGroup({});
-
-    // Add controls with current values
-    this.settingsForm.addControl('bookReaderFontFamily', new FormControl(profile.bookReaderFontFamily));
-    this.settingsForm.addControl('bookReaderFontSize', new FormControl(profile.bookReaderFontSize));
-    this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this._clickToPaginate()));
-    this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(profile.bookReaderLineSpacing));
-    this.settingsForm.addControl('bookReaderMargin', new FormControl(profile.bookReaderMargin));
-    this.settingsForm.addControl('layoutMode', new FormControl(this._layoutMode()));
-    this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this._immersiveMode()));
+    // Recreate the form
+    this.settingsForm = new FormGroup({
+      bookReaderMargin: this.fb.control(profile.bookReaderMargin),
+      bookReaderLineSpacing: this.fb.control(profile.bookReaderLineSpacing),
+      bookReaderFontSize: this.fb.control(profile.bookReaderFontSize),
+      bookReaderFontFamily: this.fb.control(profile.bookReaderFontFamily),
+      bookReaderTapToPaginate: this.fb.control(this._clickToPaginate()),
+      bookReaderReadingDirection: this.fb.control(this._readingDirection()),
+      bookReaderWritingStyle: this.fb.control(profile.bookReaderWritingStyle),
+      bookReaderThemeName: this.fb.control(profile.bookReaderThemeName),
+      bookReaderLayoutMode: this.fb.control(this._layoutMode()),
+      bookReaderImmersiveMode: this.fb.control(this._immersiveMode()),
+    });
 
     // Set up value change subscriptions
     this.setupFormSubscriptions();
@@ -527,7 +530,7 @@ export class EpubReaderSettingsService {
     });
 
     // Layout mode changes
-    this.settingsForm.get('layoutMode')?.valueChanges.pipe(
+    this.settingsForm.get('bookReaderLayoutMode')?.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((layoutMode: BookPageLayoutMode) => {
       this.isUpdatingFromForm = true;
@@ -552,15 +555,13 @@ export class EpubReaderSettingsService {
 
     // Update implicit profile on form changes (debounced) - ONLY source of profile updates
     this.settingsForm.valueChanges.pipe(
-      debounceTime(500), // Increased debounce time
+      debounceTime(500),
+      distinctUntilChanged(),
       skip(1), // Skip initial form creation
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(() => {
-      // Only update if we're not currently updating from form changes
-      if (!this.isUpdatingFromForm) {
-        this.updateImplicitProfile();
-      }
-    });
+      takeUntilDestroyed(this.destroyRef),
+      filter(() => !this.isUpdatingFromForm),
+      tap(() => this.updateImplicitProfile()),
+    ).subscribe();
   }
 
   /**
@@ -594,6 +595,7 @@ export class EpubReaderSettingsService {
   private updateImplicitProfile(): void {
     if (!this._currentReadingProfile() || !this._currentSeriesId()) return;
 
+    console.log("Updating implicit reading profile")
     this.readingProfileService.updateImplicit(this.packReadingProfile(), this._currentSeriesId()!)
       .subscribe({
         next: newProfile => {
