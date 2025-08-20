@@ -134,6 +134,8 @@ public partial class BookService : IBookService
     private static bool HasClickableHrefPart(HtmlNode anchor)
     {
         return anchor.GetAttributeValue("href", string.Empty).Contains('#')
+               || anchor.GetAttributeValue("href", string.Empty).Contains(".xhtml")
+               || anchor.GetAttributeValue("href", string.Empty).Contains(".html")
                && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
                && anchor.GetAttributeValue("role", string.Empty) != "presentation";
     }

@@ -1735,7 +1735,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getElementFromXPath(partSelector: string) {
     if (partSelector.startsWith('#')) {
-      partSelector = partSelector.substr(1, partSelector.length);
+      partSelector = partSelector.substring(1, partSelector.length);
     }
 
     let element: Element | null = null;
