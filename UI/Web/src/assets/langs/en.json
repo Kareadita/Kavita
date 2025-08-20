@@ -892,7 +892,8 @@
 
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
-        "contains-spoilers-label": "Spoilers"
+        "contains-spoilers-label": "Spoilers",
+        "view-in-reader-label": "View in Reader"
     },
 
     "annotations-tab": {

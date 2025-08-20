@@ -127,6 +127,6 @@ export class AnnotationService {
    * @param item
    */
   navigateToAnnotation(item: Annotation) {
-    this.router.navigate(['library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
+    this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
   }
 }

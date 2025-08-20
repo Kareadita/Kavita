@@ -20,7 +20,7 @@ import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.serv
 import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-annotation-card',
@@ -30,7 +30,8 @@ import {ActivatedRoute, Router} from "@angular/router";
     DatePipe,
     TranslocoDirective,
     DefaultValuePipe,
-    NgStyle
+    NgStyle,
+    RouterLink
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',
@@ -49,6 +50,10 @@ export class AnnotationCardComponent {
   annotation = model.required<Annotation>();
   allowEdit = input<boolean>(true);
   showPageLink = input<boolean>(true);
+  /**
+   * Redirects to the reader with annotation in view
+   */
+  showInReaderLink = input<boolean>(false);
   isInReader = input<boolean>(true);
   @Output() delete = new EventEmitter();
   @Output() navigate = new EventEmitter<Annotation>();
