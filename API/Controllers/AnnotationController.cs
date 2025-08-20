@@ -96,6 +96,7 @@ public class AnnotationController : BaseApiController
                 ChapterId = dto.ChapterId,
                 SeriesId = dto.SeriesId,
                 VolumeId = dto.VolumeId,
+                LibraryId = dto.LibraryId,
                 HighlightCount = dto.HighlightCount,
                 SelectedText = dto.SelectedText,
                 Comment = dto.Comment,

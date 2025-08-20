@@ -204,6 +204,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PageNumber")
                         .HasColumnType("INTEGER");
 

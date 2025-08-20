@@ -65,6 +65,7 @@ namespace API.Data.Migrations
                     Context = table.Column<string>(type: "TEXT", nullable: true),
                     ContainsSpoiler = table.Column<bool>(type: "INTEGER", nullable: false),
                     ChapterTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    LibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
                     VolumeId = table.Column<int>(type: "INTEGER", nullable: false),
                     ChapterId = table.Column<int>(type: "INTEGER", nullable: false),
