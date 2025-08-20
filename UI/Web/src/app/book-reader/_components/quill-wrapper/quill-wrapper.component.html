@@ -1,0 +1,36 @@
+<div [formGroup]="formGroup()!">
+  <quill-editor class="w-100"
+                [format]="format()"
+                [theme]="theme()"
+                [formControlName]="controlName()"
+                (onContentChanged)="contentChanged.emit($event)">
+
+    <div quill-editor-toolbar>
+
+      @for (toolbarGroup of toolbar(); track $index) {
+
+        <div class="ql-formats">
+          @for (toolbarItem of toolbarGroup; track $index) {
+            <span>
+
+              @if (toolbarItem.value !== undefined) {
+                <button type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'" [value]="toolbarItem.value"></button>
+              } @else if (toolbarItem.values !== undefined) {
+                <select [class]="toolbarItem.key + ' quil-wrapper-select'">
+                  @for (value of toolbarItem.values; track value) {
+                    <option [value]="value">{{ value }}</option>
+                  }
+                </select>
+              } @else {
+                <button type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'"></button>
+              }
+
+          </span>
+          }
+        </div>
+
+      }
+    </div>
+
+  </quill-editor>
+</div>

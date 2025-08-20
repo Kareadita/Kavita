@@ -3,8 +3,8 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  inject,
-  Input,
+  inject, input,
+  Input, model,
   Output
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
@@ -21,10 +21,10 @@ export class TableOfContentsComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input({required: true}) chapterId!: number;
-  @Input({required: true}) pageNum!: number;
-  @Input({required: true}) currentPageAnchor!: string;
-  @Input() chapters:Array<BookChapterItem> = [];
+  chapterId = model.required<number>();
+  pageNum = model.required<number>();
+  currentPageAnchor = model.required<string>();
+  chapters = model.required<Array<BookChapterItem>>();
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
@@ -38,32 +38,38 @@ export class TableOfContentsComponent {
   }
 
   loadChapterPage(pageNum: number, part: string) {
+    this.pageNum.set(pageNum);
+    this.currentPageAnchor.set(part);
+
     this.loadChapter.emit({pageNum, part});
   }
 
   isChapterSelected(chapterGroup: BookChapterItem) {
-    if (chapterGroup.page === this.pageNum) {
+    const currentPageNum = this.pageNum();
+    const chapters = this.chapters();
+
+    if (chapterGroup.page === currentPageNum) {
       return true;
     }
 
-    const idx = this.chapters.indexOf(chapterGroup);
+    const idx = chapters.indexOf(chapterGroup);
     if (idx < 0) {
       return false; // should never happen
     }
 
     const nextIdx = idx + 1;
     // Last chapter
-    if (nextIdx >= this.chapters.length) {
-      return chapterGroup.page < this.pageNum;
+    if (nextIdx >= chapters.length) {
+      return chapterGroup.page < currentPageNum;
     }
 
     // Passed chapter, and next chapter has not been reached
-    const next = this.chapters[nextIdx];
-    return chapterGroup.page < this.pageNum && next.page > this.pageNum;
+    const next = chapters[nextIdx];
+    return chapterGroup.page < currentPageNum && next.page > currentPageNum;
   }
 
   isAnchorSelected(chapter: BookChapterItem) {
-    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor
+    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor();
   }
 
 }

@@ -66,6 +66,7 @@ import {AnnotationService} from "../../../_services/annotation.service";
 import {Annotation} from "../../_models/annotations/annotation";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {LabelType, NgxSliderModule, Options} from "@angular-slider/ngx-slider";
+import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
 
 
 interface HistoryPoint {
@@ -779,7 +780,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-
       this.bookTitle = info.bookTitle;
       this.titleService.setTitle('Kavita - ' + this.bookTitle);
       this.cdRef.markForCheck();
@@ -792,78 +792,84 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((update) => this.handleReaderSettingsUpdate(update))
       ).subscribe();
 
-
       forkJoin({
         chapter: this.seriesService.getChapter(this.chapterId),
         progress: this.readerService.getProgress(this.chapterId),
         chapters: this.bookService.getBookChapters(this.chapterId),
-      }).subscribe(results => {
-        this.chapter = results.chapter;
-        this.volumeId = results.chapter.volumeId;
-        this.maxPages.set(results.chapter.pages);
-        this.chapters = results.chapters;
-        this.pageNum.set(results.progress.pageNum);
-        this.cdRef.markForCheck();
-
-        if (results.progress.bookScrollId) {
-          // Don't descope here as document hasn't loaded
-          this.lastSeenScrollPartPath = results.progress.bookScrollId;
+      }).subscribe({
+        next: ({chapter, progress, chapters}) => {
+          this.setupBookReader(chapter, progress, chapters);
+        },
+        error: () => {
+          setTimeout(() => {
+            this.closeReader();
+          }, 200);
         }
-
-        this.continuousChaptersStack.push(this.chapterId);
-
-        this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
-          this.libraryType = type;
-        });
-
-        this.updateImageSizes();
-
-        if (this.pageNum() >= this.maxPages()) {
-          this.pageNum.set(this.maxPages() - 1);
-          this.cdRef.markForCheck();
-          this.saveProgress();
-        }
-
-        this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
-          this.nextChapterId = chapterId;
-          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
-            this.nextChapterDisabled = true;
-            this.nextChapterPrefetched = true;
-            this.cdRef.markForCheck();
-            return;
-          }
-          this.setPageNum(this.pageNum());
-        });
-        this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
-          this.prevChapterId = chapterId;
-          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
-            this.prevChapterDisabled = true;
-            this.prevChapterPrefetched = true; // If there is no prev chapter, then mark it as prefetched
-            this.cdRef.markForCheck();
-            return;
-          }
-          this.setPageNum(this.pageNum());
-        });
-
-        // If there is an annotation to load, prioritize it
-        if (this.annotationToLoad() > 0) {
-          this.annotationService.getAnnotation(this.annotationToLoad()).subscribe((data) => {
-            this.annotationToLoad.set(-1);
-            this.setPageNum(data.pageNumber);
-            this.loadPage(data.xPath || undefined);
-            this.readerService.enableWakeLock(this.reader.nativeElement);
-          });
-        } else {
-          // Check if user progress has part, if so load it so we scroll to it
-          this.loadPage(results.progress.bookScrollId || undefined);
-          this.readerService.enableWakeLock(this.reader.nativeElement);
-        }
-      }, () => {
-        setTimeout(() => {
-          this.closeReader();
-        }, 200);
       });
     });
+  }
+
+  private setupBookReader(chapter: Chapter, progress: ProgressBookmark, chapters: BookChapterItem[]) {
+    this.chapter = chapter;
+    this.volumeId = chapter.volumeId;
+    this.maxPages.set(chapter.pages);
+    this.chapters = chapters;
+    this.pageNum.set(progress.pageNum);
+    this.cdRef.markForCheck();
+
+    if (progress.bookScrollId) {
+      // Don't descope here as document hasn't loaded
+      this.lastSeenScrollPartPath = progress.bookScrollId;
+    }
+
+    this.continuousChaptersStack.push(this.chapterId);
+
+    this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
+      this.libraryType = type;
+    });
+
+    this.updateImageSizes();
+
+    if (this.pageNum() >= this.maxPages()) {
+      this.pageNum.set(this.maxPages() - 1);
+      this.cdRef.markForCheck();
+      this.saveProgress();
+    }
+
+    this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      this.nextChapterId = chapterId;
+      if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+        this.nextChapterDisabled = true;
+        this.nextChapterPrefetched = true;
+        this.cdRef.markForCheck();
+        return;
+      }
+      this.setPageNum(this.pageNum());
+    });
+    this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      this.prevChapterId = chapterId;
+      if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+        this.prevChapterDisabled = true;
+        this.prevChapterPrefetched = true; // If there is no prev chapter, then mark it as prefetched
+        this.cdRef.markForCheck();
+        return;
+      }
+      this.setPageNum(this.pageNum());
+    });
+
+    // If there is an annotation to load, prioritize it
+    if (this.annotationToLoad() > 0) {
+      this.annotationService.getAnnotation(this.annotationToLoad()).subscribe((data) => {
+        this.annotationToLoad.set(-1);
+        this.setPageNum(data.pageNumber);
+        this.loadPage(data.xPath || undefined);
+        this.readerService.enableWakeLock(this.reader.nativeElement);
+      });
+    } else {
+      // Check if user progress has part, if so load it so we scroll to it
+      this.loadPage(progress.bookScrollId || undefined);
+      this.readerService.enableWakeLock(this.reader.nativeElement);
+    }
   }
 
   // TODO: BUG: When I resize on 1 column, there is page shift that breaks the clean columns
@@ -920,7 +926,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   closeReader() {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
   }
-
 
   sortElements(a: Element, b: Element) {
     const aTop = a.getBoundingClientRect().top;
@@ -1011,7 +1016,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
   /**
    * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value
    * from 'kavita-part', which will cause the reader to scroll to the marker.
@@ -1051,7 +1055,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
     promptConfig.header = translate('book-reader.go-to-page');
@@ -1083,9 +1086,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum.set(page);
     this.loadPage();
   }
-
-
-
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading.set(true);
@@ -1121,7 +1121,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 10);
     });
   }
-
 
   /**
    * Injects the new DOM needed to provide the bookmark functionality.
@@ -1267,7 +1266,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading.set(false);
     this.cdRef.markForCheck();
@@ -1350,7 +1348,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.setStyle(emptyPage, 'width', this.columnHeight());
     this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
   }
-
 
   goBack() {
     if (!this.adhocPageHistory.isEmpty()) {
@@ -1557,7 +1554,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ? this.getPageHeight()
         : this.getPageWidth();
   }
-
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
@@ -1812,7 +1808,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // }
   }
 
-
   applyImmersiveMode(immersiveMode: boolean) {
     if (immersiveMode && !this.epubMenuService.isDrawerOpen()) {
       this.actionBarVisible.set(false);
@@ -1993,9 +1988,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-
   viewToCDrawer() {
-    this.epubMenuService.openViewTocDrawer(this.chapterId, (res: LoadPageEvent | null) => {
+    this.epubMenuService.openViewTocDrawer(this.chapterId, this.pageNum(), (res: LoadPageEvent | null) => {
       if (res === null) return;
 
       this.setPageNum(res.pageNumber);

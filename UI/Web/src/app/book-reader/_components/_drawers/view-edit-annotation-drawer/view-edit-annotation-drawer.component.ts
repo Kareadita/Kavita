@@ -5,16 +5,15 @@ import {
   DestroyRef,
   effect,
   inject,
-  model,
+  model, OnInit,
   Signal,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
-import {QuillEditorComponent, QuillViewComponent} from "ngx-quill";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, switchMap} from "rxjs/operators";
@@ -28,6 +27,8 @@ import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {QuillWrapperComponent, QuillTheme} from "../../quill-wrapper/quill-wrapper.component";
+import {ContentChange, QuillViewComponent} from "ngx-quill";
 
 export enum AnnotationMode {
   View = 0,
@@ -40,19 +41,20 @@ const INIT_HIGHLIGHT_DELAY = 200;
 @Component({
   selector: 'app-view-edit-annotation-drawer',
   imports: [
-    QuillEditorComponent,
+    QuillWrapperComponent,
     ReactiveFormsModule,
-    QuillViewComponent,
     TranslocoDirective,
     HighlightBarComponent,
     NgStyle,
-    PageChapterLabelPipe
+    PageChapterLabelPipe,
+    QuillWrapperComponent,
+    QuillViewComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ViewEditAnnotationDrawerComponent {
+export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly annotationService = inject(AnnotationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -61,6 +63,7 @@ export class ViewEditAnnotationDrawerComponent {
   private readonly safeHtml = new SafeHtmlPipe();
   private readonly sanitizer = inject(DomSanitizer);
   private readonly epubHighlightService = inject(EpubHighlightService);
+  private readonly fb = inject(NonNullableFormBuilder);
   protected readonly utilityService = inject(UtilityService);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
@@ -74,9 +77,12 @@ export class ViewEditAnnotationDrawerComponent {
   totalText!: Signal<SafeHtml>;
 
 
-  formGroup!: FormGroup;
+  formGroup!: FormGroup<{
+    note: FormControl<object>,
+    hasSpoiler: FormControl<boolean>,
+    selectedSlotIndex: FormControl<number>,
+  }>;
   annotationNote: object = {};
-  isSetup = false;
 
   constructor() {
     this.titleColor = computed(() => {
@@ -181,39 +187,43 @@ export class ViewEditAnnotationDrawerComponent {
       return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
     });
 
+    this.formGroup = this.fb.group({
+      note: this.fb.control<object>({}, []),
+      hasSpoiler: this.fb.control<boolean>(false, []),
+      selectedSlotIndex: this.fb.control<number>(0, []),
+    });
 
     effect(() => {
-      const isEditMode = this.isEditMode();
       const annotation = this.annotation();
+      if (!annotation) return;
 
       // Side effect - patch in the current note
       // Parse the stored JSON string back to Delta object
-      this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {}
-      this.formGroup =  new FormGroup({
-        'note': new FormControl(this.annotationNote, []),
-        'hasSpoiler': new FormControl(annotation?.containsSpoiler, []),
-        'selectedSlotIndex': new FormControl(annotation?.selectedSlotIndex ?? 0, [])
-      });
-
-      if (isEditMode && !this.isSetup) {
-        console.log('Setting up auto-save');
-        this.formGroup.valueChanges.pipe(
-          debounceTime(350),
-          switchMap(_ => {
-            const updatedAnnotation = this.annotation();
-            if (!updatedAnnotation) return of();
-
-            updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-            updatedAnnotation.comment = JSON.stringify(this.annotationNote);
-
-            return this.annotationService.updateAnnotation(updatedAnnotation);
-          }),
-          takeUntilDestroyed(this.destroyRef)
-        ).subscribe();
-
-        this.isSetup = true;
-      }
+      this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {};
+      this.formGroup.get('note')!.setValue(this.annotationNote);
+      this.formGroup.get('hasSpoiler')!.setValue(annotation.containsSpoiler);
+      this.formGroup.get('selectedSlotIndex')!.setValue(annotation.selectedSlotIndex);
     });
+  }
+
+  ngOnInit(){
+    if (!this.isEditMode()) {
+      return;
+    }
+
+    this.formGroup.valueChanges.pipe(
+      debounceTime(350),
+      switchMap(_ => {
+        const updatedAnnotation = this.annotation();
+        if (!updatedAnnotation) return of();
+
+        updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+        updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+
+        return this.annotationService.updateAnnotation(updatedAnnotation);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   createAnnotation() {
@@ -225,7 +235,7 @@ export class ViewEditAnnotationDrawerComponent {
     // For create annotation, we have to have this hack
     highlightAnnotation.createdUtc = '0001-01-01T00:00:00Z';
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
-    
+
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });
@@ -245,7 +255,7 @@ export class ViewEditAnnotationDrawerComponent {
     this.activeOffcanvas.close();
   }
 
-  updateContent(event: any) {
+  updateContent(event: ContentChange) {
     this.annotationNote = event.content;
   }
 
@@ -315,4 +325,5 @@ export class ViewEditAnnotationDrawerComponent {
 
   protected readonly AnnotationMode = AnnotationMode;
   protected readonly UserBreakpoint = UserBreakpoint;
+  protected readonly QuillTheme = QuillTheme;
 }

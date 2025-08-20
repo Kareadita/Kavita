@@ -59,6 +59,10 @@ export class ViewTocDrawerComponent {
   private readonly bookService = inject(BookService);
 
   chapterId = model<number>();
+  /**
+   * Current Page
+   */
+  pageNum = model.required<number>();
 
   /**
    * Sub Nav tab id
@@ -68,10 +72,6 @@ export class ViewTocDrawerComponent {
    * The actual pages from the epub, used for showing on table of contents. This must be here as we need access to it for scroll anchors
    */
   chapters = model<Array<BookChapterItem>>([]);
-  /**
-   * Current Page
-   */
-  pageNum = 0;
 
   /**
    * A anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
