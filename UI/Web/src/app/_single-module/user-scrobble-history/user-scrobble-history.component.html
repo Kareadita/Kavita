@@ -80,7 +80,7 @@
         {{t('series-header')}}
       </ng-template>
       <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-        <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank" id="scrobble-history--{{idx}}">{{item.seriesName}}</a>
+        <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank" id="scrobble-history--{{idx}}">{{item.seriesName}}</a>
       </ng-template>
     </ngx-datatable-column>
 

@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
@@ -7,17 +8,21 @@ using API.Entities.Person;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class PersonServiceTests: AbstractDbTest
+public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     [Fact]
     public async Task PersonMerge_KeepNonEmptyMetadata()
     {
-        var ps = new PersonService(UnitOfWork);
+        var (unitOfWork, _, _) = await CreateDatabase();
+
+        var ps = new PersonService(unitOfWork);
 
         var person1 = new Person
         {
@@ -36,13 +41,13 @@ public class PersonServiceTests: AbstractDbTest
             AniListId = 27,
         };
 
-        UnitOfWork.PersonRepository.Attach(person1);
-        UnitOfWork.PersonRepository.Attach(person2);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.PersonRepository.Attach(person1);
+        unitOfWork.PersonRepository.Attach(person2);
+        await unitOfWork.CommitAsync();
 
         await ps.MergePeopleAsync(person2, person1);
 
-        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        var allPeople = await unitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
 
         var person = allPeople[0];
@@ -58,7 +63,9 @@ public class PersonServiceTests: AbstractDbTest
     [Fact]
     public async Task PersonMerge_MergedPersonDestruction()
     {
-        var ps = new PersonService(UnitOfWork);
+        var (unitOfWork, _, _) = await CreateDatabase();
+
+        var ps = new PersonService(unitOfWork);
 
         var person1 = new Person
         {
@@ -72,27 +79,29 @@ public class PersonServiceTests: AbstractDbTest
             NormalizedName = "Delores Casey".ToNormalized(),
         };
 
-        UnitOfWork.PersonRepository.Attach(person1);
-        UnitOfWork.PersonRepository.Attach(person2);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.PersonRepository.Attach(person1);
+        unitOfWork.PersonRepository.Attach(person2);
+        await unitOfWork.CommitAsync();
 
         await ps.MergePeopleAsync(person2, person1);
-        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        var allPeople = await unitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
     }
 
     [Fact]
     public async Task PersonMerge_RetentionChapters()
     {
-        var ps = new PersonService(UnitOfWork);
+        var (unitOfWork, _, _) = await CreateDatabase();
+
+        var ps = new PersonService(unitOfWork);
 
         var library = new LibraryBuilder("My Library").Build();
-        UnitOfWork.LibraryRepository.Add(library);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
 
         var user = new AppUserBuilder("Amelia", "amelia@localhost")
             .WithLibrary(library).Build();
-        UnitOfWork.UserRepository.Add(user);
+        unitOfWork.UserRepository.Add(user);
 
         var person = new PersonBuilder("Jillian Cowan").Build();
 
@@ -120,26 +129,26 @@ public class PersonServiceTests: AbstractDbTest
                 .Build())
             .Build();
 
-        UnitOfWork.SeriesRepository.Add(series);
-        UnitOfWork.SeriesRepository.Add(series2);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.SeriesRepository.Add(series);
+        unitOfWork.SeriesRepository.Add(series2);
+        await unitOfWork.CommitAsync();
 
         await ps.MergePeopleAsync(person2, person);
 
-        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        var allPeople = await unitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
         var mergedPerson = allPeople[0];
 
         Assert.Equal("Jillian Cowan", mergedPerson.Name);
 
-        var chapters = await UnitOfWork.PersonRepository.GetChaptersForPersonByRole(1, 1, PersonRole.Editor);
+        var chapters = await unitOfWork.PersonRepository.GetChaptersForPersonByRole(1, 1, PersonRole.Editor);
         Assert.Equal(2, chapters.Count());
 
-        chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(1, ChapterIncludes.People);
+        chapter = await unitOfWork.ChapterRepository.GetChapterAsync(1, ChapterIncludes.People);
         Assert.NotNull(chapter);
         Assert.Single(chapter.People);
 
-        chapter2 = await UnitOfWork.ChapterRepository.GetChapterAsync(2, ChapterIncludes.People);
+        chapter2 = await unitOfWork.ChapterRepository.GetChapterAsync(2, ChapterIncludes.People);
         Assert.NotNull(chapter2);
         Assert.Single(chapter2.People);
 
@@ -149,17 +158,17 @@ public class PersonServiceTests: AbstractDbTest
     [Fact]
     public async Task PersonMerge_NoDuplicateChaptersOrSeries()
     {
-        await ResetDb();
+        var (unitOfWork, _, _) = await CreateDatabase();
 
-        var ps = new PersonService(UnitOfWork);
+        var ps = new PersonService(unitOfWork);
 
         var library = new LibraryBuilder("My Library").Build();
-        UnitOfWork.LibraryRepository.Add(library);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
 
         var user = new AppUserBuilder("Amelia", "amelia@localhost")
             .WithLibrary(library).Build();
-        UnitOfWork.UserRepository.Add(user);
+        unitOfWork.UserRepository.Add(user);
 
         var person = new PersonBuilder("Jillian Cowan").Build();
 
@@ -197,39 +206,39 @@ public class PersonServiceTests: AbstractDbTest
                 .Build())
             .Build();
 
-        UnitOfWork.SeriesRepository.Add(series);
-        UnitOfWork.SeriesRepository.Add(series2);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.SeriesRepository.Add(series);
+        unitOfWork.SeriesRepository.Add(series2);
+        await unitOfWork.CommitAsync();
 
         await ps.MergePeopleAsync(person2, person);
-        var allPeople = await UnitOfWork.PersonRepository.GetAllPeople();
+        var allPeople = await unitOfWork.PersonRepository.GetAllPeople();
         Assert.Single(allPeople);
 
-        var mergedPerson = await UnitOfWork.PersonRepository.GetPersonById(person.Id, PersonIncludes.All);
+        var mergedPerson = await unitOfWork.PersonRepository.GetPersonById(person.Id, PersonIncludes.All);
         Assert.NotNull(mergedPerson);
         Assert.Equal(3, mergedPerson.ChapterPeople.Count);
         Assert.Equal(3, mergedPerson.SeriesMetadataPeople.Count);
 
-        chapter = await UnitOfWork.ChapterRepository.GetChapterAsync(chapter.Id, ChapterIncludes.People);
+        chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapter.Id, ChapterIncludes.People);
         Assert.NotNull(chapter);
         Assert.Equal(2, chapter.People.Count);
         Assert.Single(chapter.People.Select(p => p.Person.Id).Distinct());
         Assert.Contains(chapter.People, p => p.Role == PersonRole.Editor);
         Assert.Contains(chapter.People, p => p.Role == PersonRole.Colorist);
 
-        chapter2 = await UnitOfWork.ChapterRepository.GetChapterAsync(chapter2.Id, ChapterIncludes.People);
+        chapter2 = await unitOfWork.ChapterRepository.GetChapterAsync(chapter2.Id, ChapterIncludes.People);
         Assert.NotNull(chapter2);
         Assert.Single(chapter2.People);
         Assert.Contains(chapter2.People, p => p.Role == PersonRole.Editor);
         Assert.DoesNotContain(chapter2.People, p => p.Role == PersonRole.Colorist);
 
-        series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata);
+        series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata);
         Assert.NotNull(series);
         Assert.Single(series.Metadata.People);
         Assert.Contains(series.Metadata.People, p => p.Role == PersonRole.Editor);
         Assert.DoesNotContain(series.Metadata.People, p => p.Role == PersonRole.Colorist);
 
-        series2 = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(series2.Id, SeriesIncludes.Metadata);
+        series2 = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series2.Id, SeriesIncludes.Metadata);
         Assert.NotNull(series2);
         Assert.Equal(2, series2.Metadata.People.Count);
         Assert.Contains(series2.Metadata.People, p => p.Role == PersonRole.Editor);
@@ -241,16 +250,16 @@ public class PersonServiceTests: AbstractDbTest
     [Fact]
     public async Task PersonAddAlias_NoOverlap()
     {
-        await ResetDb();
+        var (unitOfWork, _, _) = await CreateDatabase();
 
-        UnitOfWork.PersonRepository.Attach(new PersonBuilder("Jillian Cowan").Build());
-        UnitOfWork.PersonRepository.Attach(new PersonBuilder("Jilly Cowan").WithAlias("Jolly Cowan").Build());
-        await UnitOfWork.CommitAsync();
+        unitOfWork.PersonRepository.Attach(new PersonBuilder("Jillian Cowan").Build());
+        unitOfWork.PersonRepository.Attach(new PersonBuilder("Jilly Cowan").WithAlias("Jolly Cowan").Build());
+        await unitOfWork.CommitAsync();
 
-        var ps = new PersonService(UnitOfWork);
+        var ps = new PersonService(unitOfWork);
 
-        var person1 = await UnitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jillian Cowan");
-        var person2 = await UnitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jilly Cowan");
+        var person1 = await unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jillian Cowan");
+        var person2 = await unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jilly Cowan");
         Assert.NotNull(person1);
         Assert.NotNull(person2);
 
@@ -275,12 +284,5 @@ public class PersonServiceTests: AbstractDbTest
         Assert.False(success);
 
         Assert.Single(person2.Aliases);
-    }
-
-    protected override async Task ResetDb()
-    {
-        Context.Person.RemoveRange(Context.Person.ToList());
-
-        await Context.SaveChangesAsync();
     }
 }

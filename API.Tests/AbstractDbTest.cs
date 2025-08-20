@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,37 +15,36 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Polly;
+using Xunit.Abstractions;
 
 namespace API.Tests;
 
-public abstract class AbstractDbTest : AbstractFsTest , IDisposable
+public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): AbstractFsTest
 {
-    protected readonly DataContext Context;
-    protected readonly IUnitOfWork UnitOfWork;
-    protected readonly IMapper Mapper;
-    private readonly DbConnection _connection;
-    private bool _disposed;
 
-    protected AbstractDbTest()
+    protected async Task<(IUnitOfWork, DataContext, IMapper)> CreateDatabase()
     {
         var contextOptions = new DbContextOptionsBuilder<DataContext>()
             .UseSqlite(CreateInMemoryDatabase())
             .EnableSensitiveDataLogging()
             .Options;
 
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+        var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+        var context = new DataContext(contextOptions);
 
-        Context = new DataContext(contextOptions);
+        await context.Database.EnsureCreatedAsync();
 
-        Context.Database.EnsureCreated(); // Ensure DB schema is created
+        await SeedDb(context);
 
-        Task.Run(SeedDb).GetAwaiter().GetResult();
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        Mapper = config.CreateMapper();
+        var mapper = config.CreateMapper();
 
         GlobalConfiguration.Configuration.UseInMemoryStorage();
-        UnitOfWork = new UnitOfWork(Context, Mapper, null);
+        var unitOfWork = new UnitOfWork(context, mapper, null);
+
+        return (unitOfWork, context, mapper);
     }
 
     private static DbConnection CreateInMemoryDatabase()
@@ -56,67 +55,46 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
         return connection;
     }
 
-    private async Task<bool> SeedDb()
+    private async Task<bool> SeedDb(DataContext context)
     {
         try
         {
-            await Context.Database.EnsureCreatedAsync();
+            await context.Database.EnsureCreatedAsync();
             var filesystem = CreateFileSystem();
 
-            await Seed.SeedSettings(Context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
+            await Seed.SeedSettings(context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
 
-            var setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
+            var setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
             setting.Value = CacheDirectory;
 
-            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
+            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
             setting.Value = BackupDirectory;
 
-            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
+            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
             setting.Value = BookmarkDirectory;
 
-            setting = await Context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
+            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
             setting.Value = "10";
 
-            Context.ServerSetting.Update(setting);
+            context.ServerSetting.Update(setting);
 
 
-            Context.Library.Add(new LibraryBuilder("Manga")
+            context.Library.Add(new LibraryBuilder("Manga")
                 .WithAllowMetadataMatching(true)
                 .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
                 .Build());
 
-            await Context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            await Seed.SeedMetadataSettings(Context);
+            await Seed.SeedMetadataSettings(context);
 
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SeedDb] Error: {ex.Message}");
+            testOutputHelper.WriteLine($"[SeedDb] Error: {ex.Message}");
             return false;
         }
-    }
-
-    protected abstract Task ResetDb();
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-
-        if (disposing)
-        {
-            Context?.Dispose();
-            _connection?.Dispose();
-        }
-
-        _disposed = true;
     }
 
     /// <summary>
@@ -124,13 +102,14 @@ public abstract class AbstractDbTest : AbstractFsTest , IDisposable
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="roleName"></param>
-    protected async Task AddUserWithRole(int userId, string roleName)
+    protected async Task AddUserWithRole(DataContext context, int userId, string roleName)
     {
         var role = new AppRole { Id = userId, Name = roleName, NormalizedName = roleName.ToUpper() };
 
-        await Context.Roles.AddAsync(role);
-        await Context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
+        await context.Roles.AddAsync(role);
+        await context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
+
 }

@@ -2,6 +2,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Progress;
 using API.DTOs.Reader;
@@ -21,32 +22,17 @@ using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ReaderServiceTests: AbstractDbTest
+public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-    private readonly ReaderService _readerService;
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
-    public ReaderServiceTests(ITestOutputHelper testOutputHelper)
+    private async Task<ReaderService> Setup(IUnitOfWork unitOfWork)
     {
-        _testOutputHelper = testOutputHelper;
-
-        _readerService = new ReaderService(UnitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IScrobblingService>());
+     return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+         Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+         new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+         Substitute.For<IScrobblingService>());
     }
-
-    #region Setup
-
-
-    protected override async Task ResetDb()
-    {
-        Context.Series.RemoveRange(Context.Series.ToList());
-
-        await Context.SaveChangesAsync();
-    }
-
-    #endregion
 
     #region FormatBookmarkFolderPath
 
@@ -65,7 +51,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task CapPageToChapterTest()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -77,14 +64,14 @@ public class ReaderServiceTests: AbstractDbTest
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        Assert.Equal(0, (await _readerService.CapPageToChapter(1, -1)).Item1);
-        Assert.Equal(1, (await _readerService.CapPageToChapter(1, 10)).Item1);
+        Assert.Equal(0, (await readerService.CapPageToChapter(1, -1)).Item1);
+        Assert.Equal(1, (await readerService.CapPageToChapter(1, 10)).Item1);
     }
 
     #endregion
@@ -94,7 +81,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task SaveReadingProgress_ShouldCreateNewEntity()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -105,18 +93,18 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
         JobStorage.Current = new InMemoryStorage();
-        var successful = await _readerService.SaveReadingProgress(new ProgressDto()
+        var successful = await readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -126,13 +114,14 @@ public class ReaderServiceTests: AbstractDbTest
         }, 1);
 
         Assert.True(successful);
-        Assert.NotNull(await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
+        Assert.NotNull(await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
     }
 
     [Fact]
     public async Task SaveReadingProgress_ShouldUpdateExisting()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -143,17 +132,17 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         JobStorage.Current = new InMemoryStorage();
-        var successful = await _readerService.SaveReadingProgress(new ProgressDto()
+        var successful = await readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -163,9 +152,9 @@ public class ReaderServiceTests: AbstractDbTest
         }, 1);
 
         Assert.True(successful);
-        Assert.NotNull(await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
+        Assert.NotNull(await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
 
-        Assert.True(await _readerService.SaveReadingProgress(new ProgressDto()
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -174,7 +163,7 @@ public class ReaderServiceTests: AbstractDbTest
             BookScrollId = "/h1/"
         }, 1));
 
-        var userProgress = await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1);
+        var userProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1);
         Assert.NotNull(userProgress);
         Assert.Equal("/h1/", userProgress.BookScrollId);
 
@@ -188,7 +177,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkChaptersAsReadTest()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -202,22 +192,22 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var volumes = await UnitOfWork.VolumeRepository.GetVolumes(1);
-        await _readerService.MarkChaptersAsRead(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
-        await Context.SaveChangesAsync();
+        var volumes = await unitOfWork.VolumeRepository.GetVolumes(1);
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await context.SaveChangesAsync();
 
-        var userProgress = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        var userProgress = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
         Assert.NotNull(userProgress);
         Assert.Equal(2, userProgress.Progresses.Count);
     }
@@ -228,7 +218,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkChapterAsUnreadTest()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -242,27 +233,27 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var volumes = (await UnitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await _readerService.MarkChaptersAsRead(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
 
-        await Context.SaveChangesAsync();
-        Assert.Equal(2, (await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        await context.SaveChangesAsync();
+        Assert.Equal(2, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
 
-        await _readerService.MarkChaptersAsUnread(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
-        await Context.SaveChangesAsync();
+        await readerService.MarkChaptersAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        await context.SaveChangesAsync();
 
-        var progresses = (await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
+        var progresses = (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
     }
@@ -275,7 +266,8 @@ public class ReaderServiceTests: AbstractDbTest
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume()
     {
         // V1 -> V2
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -295,19 +287,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
@@ -316,7 +308,8 @@ public class ReaderServiceTests: AbstractDbTest
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume_WhenUsingRanges()
     {
         // V1 -> V2
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1-2")
@@ -329,17 +322,17 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("3-4", actualChapter.Volume.Name);
         Assert.Equal("1", actualChapter.Range);
@@ -349,7 +342,8 @@ public class ReaderServiceTests: AbstractDbTest
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume_OnlyFloats()
     {
         // V1 -> V2
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1.0")
@@ -372,19 +366,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 2, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 2, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("31", actualChapter.Range);
     }
@@ -392,7 +386,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -412,18 +407,18 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -431,7 +426,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolumeWithFloat()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -451,19 +447,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -471,7 +467,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoChaptersFromVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -486,18 +483,18 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, nextChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -505,7 +502,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextChapter_WhenVolumesAreOnlyOneChapter_AndNextChapterIs0()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -523,21 +521,21 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, actualChapter.Range);
     }
@@ -545,7 +543,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -560,22 +559,23 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.Equal(-1, nextChapter);
     }
 
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -585,22 +585,23 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.Equal(-1, nextChapter);
     }
 
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -610,15 +611,15 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -626,7 +627,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -639,22 +641,23 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.Equal(-1, nextChapter);
     }
 
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -675,15 +678,15 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -692,7 +695,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromVolumeToSpecial_NoLooseLeafChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -713,19 +717,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
@@ -733,7 +737,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromLooseLeafChapterToSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -751,19 +756,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
@@ -771,7 +776,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial_WithVolumeAndLooseLeafChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -793,16 +799,16 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 3, 4, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 3, 4, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -810,7 +816,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -830,19 +837,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("B.cbz", actualChapter.Range);
     }
@@ -850,7 +857,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume_WhenAllVolumesHaveAChapterToo()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -863,21 +871,21 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
         var user = new AppUserBuilder("majora2007", "fake").Build();
 
-        Context.AppUser.Add(user);
+        context.AppUser.Add(user);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        await _readerService.MarkChaptersAsRead(user, 1, new List<Chapter>()
+        await readerService.MarkChaptersAsRead(user, 1, new List<Chapter>()
         {
             series.Volumes[0].Chapters[0]
         });
 
-        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
         Assert.Equal(2, actualChapter.Volume.MinNumber);
     }
 
@@ -889,7 +897,8 @@ public class ReaderServiceTests: AbstractDbTest
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume()
     {
         // V1 -> V2
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -909,19 +918,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("1", actualChapter.Range);
     }
@@ -930,7 +939,8 @@ public class ReaderServiceTests: AbstractDbTest
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume_WithFloatVolume()
     {
         // V1 -> V2
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -949,18 +959,18 @@ public class ReaderServiceTests: AbstractDbTest
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
@@ -968,7 +978,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume_2()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -998,20 +1009,20 @@ public class ReaderServiceTests: AbstractDbTest
                 .Build())
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
-        Context.Series.Add(series);
-        Context.AppUser.Add(new AppUser()
+        context.Series.Add(series);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // prevChapter should be id from ch.21 from volume 2001
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 5, 7, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 5, 7, 1);
 
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -1019,7 +1030,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1039,20 +1051,20 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
@@ -1060,7 +1072,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1075,21 +1088,21 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(2, prevChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("2", actualChapter.Range);
     }
@@ -1097,7 +1110,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1107,26 +1121,27 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapter()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1135,26 +1150,27 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1168,23 +1184,24 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(-1, prevChapter);
     }
 
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters2()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1205,31 +1222,32 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,5, 1);
-        var chapterInfoDto = await UnitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,5, 1);
+        var chapterInfoDto = await unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
         Assert.Equal(1, chapterInfoDto.ChapterNumber.AsFloat());
 
         // This is first chapter of first volume
-        prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,4, 1);
+        prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,4, 1);
         Assert.Equal(-1, prevChapter);
     }
 
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromChapter()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1239,26 +1257,27 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1278,22 +1297,22 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, prevChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
     }
@@ -1301,7 +1320,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromChapterToVolume()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1316,18 +1336,18 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.NotEqual(-1, prevChapter);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
         Assert.Equal("22", actualChapter.Range);
     }
@@ -1335,7 +1355,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume_WhenAllVolumesHaveAChapterToo()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1348,16 +1369,16 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
         var user = new AppUserBuilder("majora2007", "fake").Build();
 
-        Context.AppUser.Add(user);
+        context.AppUser.Add(user);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 2, 1);
-        var actualChapter = await UnitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
+        var nextChapter = await readerService.GetPrevChapterIdAsync(1, 2, 2, 1);
+        var actualChapter = await unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
         Assert.Equal(1, actualChapter.Volume.MinNumber);
     }
 
@@ -1368,7 +1389,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_NoProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").Build())
@@ -1390,20 +1412,20 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1411,7 +1433,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1_WithProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(3).Build())
@@ -1423,26 +1446,26 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 2,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1450,7 +1473,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1Through11_WithProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1", "1-11").WithPages(3).Build())
@@ -1462,26 +1486,26 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 2,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1-11", nextChapter.Range);
     }
@@ -1489,7 +1513,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1507,34 +1532,34 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1542,9 +1567,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("22", nextChapter.Range);
 
@@ -1554,7 +1579,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1586,19 +1612,19 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // Save progress on first volume and 1st chapter of second volume
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 6, // Chapter 0 volume 1 id
@@ -1607,7 +1633,7 @@ public class ReaderServiceTests: AbstractDbTest
         }, 1);
 
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 7, // Chapter 21 volume 2 id
@@ -1615,9 +1641,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 3 // Volume 2 id
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("22", nextChapter.Range);
 
@@ -1628,7 +1654,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenHasSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1641,16 +1668,16 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1658,7 +1685,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1674,34 +1702,34 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1709,9 +1737,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("31", nextChapter.Range);
     }
@@ -1719,7 +1747,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
@@ -1736,18 +1765,18 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1755,7 +1784,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesRead_HasSpecialAndLooseChapters_Unread()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
@@ -1774,25 +1804,25 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
         var user = new AppUser()
         {
             UserName = "majora2007"
         };
-        Context.AppUser.Add(user);
+        context.AppUser.Add(user);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         // Mark everything but chapter 101 as read
-        await _readerService.MarkSeriesAsRead(user, 1);
-        await UnitOfWork.CommitAsync();
+        await readerService.MarkSeriesAsRead(user, 1);
+        await unitOfWork.CommitAsync();
 
         // Unmark last chapter as read
-        var vol = await UnitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
+        var vol = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
         foreach (var chapt in vol.Chapters)
         {
-            await _readerService.SaveReadingProgress(new ProgressDto()
+            await readerService.SaveReadingProgress(new ProgressDto()
             {
                 PageNum = 0,
                 ChapterId = chapt.Id,
@@ -1800,9 +1830,9 @@ public class ReaderServiceTests: AbstractDbTest
                 VolumeId = 1
             }, 1);
         }
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("100", nextChapter.Range);
     }
@@ -1810,7 +1840,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
@@ -1828,39 +1859,39 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
         var user = new AppUser()
         {
             UserName = "majora2007"
         };
-        Context.AppUser.Add(user);
+        context.AppUser.Add(user);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         // Mark everything but chapter 101 as read
-        await _readerService.MarkSeriesAsRead(user, 1);
-        await UnitOfWork.CommitAsync();
+        await readerService.MarkSeriesAsRead(user, 1);
+        await unitOfWork.CommitAsync();
 
         // Unmark last chapter as read
-        var vol = await UnitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        var vol = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = vol.Chapters.ElementAt(1).Id,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = vol.Chapters.ElementAt(2).Id,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("101", nextChapter.Range);
     }
@@ -1868,7 +1899,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1881,33 +1913,33 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1915,9 +1947,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1925,7 +1957,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1941,23 +1974,23 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await _readerService.MarkSeriesAsRead(user, 1);
-        await Context.SaveChangesAsync();
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user, 1);
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("11", nextChapter.Range);
     }
@@ -1965,7 +1998,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1979,33 +2013,33 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -2013,9 +2047,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 1
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("Some Special Title", nextChapter.Range);
     }
@@ -2023,7 +2057,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2042,20 +2077,20 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await _readerService.MarkSeriesAsRead(user, 1);
-        await Context.SaveChangesAsync();
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user, 1);
+        await context.SaveChangesAsync();
 
         // Add 2 new unread series to the Series
         series.Volumes[0].Chapters.Add(new ChapterBuilder("231")
@@ -2064,18 +2099,19 @@ public class ReaderServiceTests: AbstractDbTest
         series.Volumes[2].Chapters.Add(new ChapterBuilder("14.9")
             .WithPages(1)
             .Build());
-        Context.Series.Attach(series);
-        await Context.SaveChangesAsync();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
 
         // This tests that if you add a series later to a volume and a loose leaf chapter, we continue from that volume, rather than loose leaf
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
         Assert.Equal("14.9", nextChapter.Range);
     }
 
     [Fact]
     public async Task GetContinuePoint_ShouldReturnUnreadSingleVolume_WhenThereAreSomeSingleVolumesBeforeLooseLeafChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var readChapter1 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var readChapter2 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var volume = new VolumeBuilder("3").WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build()).Build();
@@ -2105,28 +2141,28 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
         // Save progress on first volume chapters and 1st of second volume
-        var user = await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await _readerService.MarkChaptersAsRead(user, 1,
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        await readerService.MarkChaptersAsRead(user, 1,
             new List<Chapter>()
             {
                 readChapter1, readChapter2
             });
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal(4, nextChapter.VolumeId);
     }
@@ -2141,7 +2177,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLastLooseChapter()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2161,30 +2198,30 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -2192,7 +2229,7 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 4,
@@ -2200,7 +2237,7 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 5,
@@ -2209,7 +2246,7 @@ public class ReaderServiceTests: AbstractDbTest
         }, 1);
 
         // Chapter 91 has partial progress, hence it should resume there
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 6,
@@ -2218,7 +2255,7 @@ public class ReaderServiceTests: AbstractDbTest
         }, 1);
 
         // Special is fully read
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 7,
@@ -2226,9 +2263,9 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 2
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("91", nextChapter.Range);
     }
@@ -2236,7 +2273,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task GetContinuePoint_DuplicateIssueNumberBetweenChapters()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2255,16 +2293,16 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
@@ -2272,39 +2310,39 @@ public class ReaderServiceTests: AbstractDbTest
             VolumeId = 1
         }, 1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("2", nextChapter.Range);
         Assert.Equal(1, nextChapter.VolumeId);
 
         // Mark chapter 2 as read
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        nextChapter = await _readerService.GetContinuePoint(1, 1);
+        nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("21", nextChapter.Range);
         Assert.Equal(1, nextChapter.VolumeId);
 
         // Mark chapter 21 as read
-        await _readerService.SaveReadingProgress(new ProgressDto()
+        await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        nextChapter = await _readerService.GetContinuePoint(1, 1);
+        nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("22", nextChapter.Range);
         Assert.Equal(1, nextChapter.VolumeId);
@@ -2318,7 +2356,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAllChaptersAsRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2332,32 +2371,33 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkChaptersUntilAsRead(user, 1, 5);
-        await Context.SaveChangesAsync();
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await context.SaveChangesAsync();
 
         // Validate correct chapters have read status
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)).PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)).PagesRead);
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(4, 1)));
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)).PagesRead);
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(4, 1)));
     }
 
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkUptTillChapterNumberAsRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2372,33 +2412,34 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkChaptersUntilAsRead(user, 1, 2.5f);
-        await Context.SaveChangesAsync();
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkChaptersUntilAsRead(user, 1, 2.5f);
+        await context.SaveChangesAsync();
 
         // Validate correct chapters have read status
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)).PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)).PagesRead);
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(4, 1)));
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)));
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)).PagesRead);
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(4, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)));
     }
 
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder("1")
@@ -2410,30 +2451,31 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         Assert.NotNull(user);
-        await _readerService.MarkChaptersUntilAsRead(user, 1, 2);
-        await Context.SaveChangesAsync();
+        await readerService.MarkChaptersUntilAsRead(user, 1, 2);
+        await context.SaveChangesAsync();
 
         // Validate correct chapters have read status
-        Assert.True(await UnitOfWork.AppUserProgressRepository.UserHasProgress(LibraryType.Manga, 1));
+        Assert.True(await unitOfWork.AppUserProgressRepository.UserHasProgress(LibraryType.Manga, 1));
     }
 
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsReadAnythingUntil()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2462,24 +2504,24 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         const int markReadUntilNumber = 47;
 
-        await _readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
-        await Context.SaveChangesAsync();
+        await readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
+        await context.SaveChangesAsync();
 
-        var volumes = await UnitOfWork.VolumeRepository.GetVolumesDtoAsync(1, 1);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(1, 1);
         Assert.True(volumes.SelectMany(v => v.Chapters).All(c =>
         {
             // Specials are ignored.
@@ -2501,7 +2543,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkSeriesAsReadTest()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
 
@@ -2516,21 +2559,21 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        await _readerService.MarkSeriesAsRead(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
-        await Context.SaveChangesAsync();
+        await readerService.MarkSeriesAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+        await context.SaveChangesAsync();
 
-        Assert.Equal(4, (await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        Assert.Equal(4, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
     }
 
 
@@ -2541,7 +2584,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkSeriesAsUnreadTest()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2551,27 +2595,27 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var volumes = (await UnitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await _readerService.MarkChaptersAsRead(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
 
-        await Context.SaveChangesAsync();
-        Assert.Equal(2, (await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        await context.SaveChangesAsync();
+        Assert.Equal(2, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
 
-        await _readerService.MarkSeriesAsUnread(await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
-        await Context.SaveChangesAsync();
+        await readerService.MarkSeriesAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+        await context.SaveChangesAsync();
 
-        var progresses = (await UnitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
+        var progresses = (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
     }
@@ -2614,7 +2658,8 @@ public class ReaderServiceTests: AbstractDbTest
     [Fact]
     public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2639,39 +2684,40 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
         Assert.NotNull(user);
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         // Validate loose leaf chapters don't get marked as read
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
 
         // Validate that volumes 1997 and 2002 both have their respective chapter 0 marked as read
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
         // Validate that the chapter 0 of the following volume (2003) is not read
-        Assert.Null(await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(7, 1));
+        Assert.Null(await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(7, 1));
 
     }
 
     [Fact]
     public async Task MarkVolumesUntilAsRead_ShouldMarkChapterBasedVolumesAsRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
@@ -2695,31 +2741,31 @@ public class ReaderServiceTests: AbstractDbTest
             .Build();
         series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
-        Context.Series.Add(series);
+        context.Series.Add(series);
 
-        Context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
         });
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
 
-        var user = await UnitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         Assert.NotNull(user);
-        await _readerService.MarkVolumesUntilAsRead(user, 1, 2002);
-        await Context.SaveChangesAsync();
+        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        await context.SaveChangesAsync();
 
         // Validate loose leaf chapters don't get marked as read
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
 
         // Validate volumes chapter 0 have read status
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1))?.PagesRead);
-        Assert.Equal(1, (await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1))?.PagesRead);
-        Assert.Null((await UnitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1))?.PagesRead);
+        Assert.Equal(1, (await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1))?.PagesRead);
+        Assert.Null((await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
     }
 
     #endregion
@@ -2746,11 +2792,14 @@ public class ReaderServiceTests: AbstractDbTest
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,8", "9,8"})]
     [InlineData("Edge_cases_SP05.zip", new [] {false, false, false, false, false, true, false, false, true, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,9"})]
-    public void GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
+    public async Task GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
     {
 
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = await Setup(unitOfWork);
+
         var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
-        var pairs = _readerService.GetPairs(files);
+        var pairs = readerService.GetPairs(files);
         var expectedDict = new Dictionary<int, int>();
         foreach (var pair in expectedPairs)
         {

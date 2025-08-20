@@ -10,25 +10,30 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers.Builders;
 using API.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class OidcServiceTests: AbstractDbTest
+public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
     [Fact]
     public async Task UserSync_Username()
     {
-        await ResetDb();
-        var (oidcService, _, _, userManager) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, userManager) = await Setup(unitOfWork, context, mapper);
 
-        var user = new AppUserBuilder("holo", "holo@localhost").Build();
+        var user = new AppUserBuilder("holo", "holo@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
         var res = await userManager.CreateAsync(user);
         Assert.Empty(res.Errors);
         Assert.True(res.Succeeded);
@@ -48,7 +53,7 @@ public class OidcServiceTests: AbstractDbTest
 
         // name is updated as the current username is not found, amelia is skipped as it is alredy in use
         await oidcService.SyncUserSettings(null!, settings, principal, user);
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal("Lawrence", user.UserName);
 
@@ -63,7 +68,7 @@ public class OidcServiceTests: AbstractDbTest
 
         // Ensure a name longer down the list isn't picked if the current username is found
         await oidcService.SyncUserSettings(null!, settings, principal, user);
-        dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal("Lawrence", user.UserName);
     }
@@ -71,15 +76,15 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task UserSync_CustomClaim()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var mangaLib = new LibraryBuilder("Manga", LibraryType.Manga).Build();
         var lightNovelsLib = new LibraryBuilder("Light Novels", LibraryType.LightNovel).Build();
 
-        UnitOfWork.LibraryRepository.Add(mangaLib);
-        UnitOfWork.LibraryRepository.Add(lightNovelsLib);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(mangaLib);
+        unitOfWork.LibraryRepository.Add(lightNovelsLib);
+        await unitOfWork.CommitAsync();
 
         const string claim = "groups";
         var claims = new List<Claim>()
@@ -103,19 +108,19 @@ public class OidcServiceTests: AbstractDbTest
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check correct roles assigned
-        var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        var userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
         Assert.Contains(PolicyConstants.DownloadRole, userRoles);
         Assert.DoesNotContain(PolicyConstants.PromoteRole, userRoles);
 
         // Check correct libraries
-        var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        var libraries = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
         Assert.Single(libraries);
         Assert.Contains(mangaLib.Name, libraries);
         Assert.DoesNotContain(lightNovelsLib.Name, libraries);
 
         // Check correct age restrictions
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
         Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
@@ -124,15 +129,15 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task UserSync_CustomPrefix()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var mangaLib = new LibraryBuilder("Manga", LibraryType.Manga).Build();
         var lightNovelsLib = new LibraryBuilder("Light Novels", LibraryType.LightNovel).Build();
 
-        UnitOfWork.LibraryRepository.Add(mangaLib);
-        UnitOfWork.LibraryRepository.Add(lightNovelsLib);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(mangaLib);
+        unitOfWork.LibraryRepository.Add(lightNovelsLib);
+        await unitOfWork.CommitAsync();
 
         const string prefix = "kavita-";
         var claims = new List<Claim>()
@@ -156,19 +161,19 @@ public class OidcServiceTests: AbstractDbTest
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check correct roles assigned
-        var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        var userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
         Assert.Contains(PolicyConstants.DownloadRole, userRoles);
         Assert.DoesNotContain(PolicyConstants.PromoteRole, userRoles);
 
         // Check correct libraries
-        var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        var libraries = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
         Assert.Single(libraries);
         Assert.Contains(mangaLib.Name, libraries);
         Assert.DoesNotContain(lightNovelsLib.Name, libraries);
 
         // Check correct age restrictions
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
         Assert.False(dbUser.AgeRestrictionIncludeUnknowns);
@@ -177,8 +182,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncRoles()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var claims = new List<Claim>()
         {
@@ -195,7 +200,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        var userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
         Assert.Contains(PolicyConstants.DownloadRole, userRoles);
 
@@ -206,7 +211,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        userRoles = await UnitOfWork.UserRepository.GetRoles(user.Id);
+        userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
         Assert.DoesNotContain(PolicyConstants.DownloadRole, userRoles);
     }
@@ -214,15 +219,15 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncLibraries()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var mangaLib = new LibraryBuilder("Manga", LibraryType.Manga).Build();
         var lightNovelsLib = new LibraryBuilder("Light Novels", LibraryType.LightNovel).Build();
 
-        UnitOfWork.LibraryRepository.Add(mangaLib);
-        UnitOfWork.LibraryRepository.Add(lightNovelsLib);
-        await UnitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(mangaLib);
+        unitOfWork.LibraryRepository.Add(lightNovelsLib);
+        await unitOfWork.CommitAsync();
 
         var claims = new List<Claim>()
         {
@@ -238,7 +243,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        var libraries = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
         Assert.Single(libraries);
         Assert.Contains(mangaLib.Name, libraries);
         Assert.DoesNotContain(lightNovelsLib.Name, libraries);
@@ -251,7 +256,7 @@ public class OidcServiceTests: AbstractDbTest
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
         // Check access has swicthed
-        libraries = (await UnitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
+        libraries = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).Select(l => l.Name).ToList();
         Assert.Single(libraries);
         Assert.Contains(lightNovelsLib.Name, libraries);
         Assert.DoesNotContain(mangaLib.Name, libraries);
@@ -260,8 +265,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncAgeRestrictions_NoRestrictions()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var claims = new List<Claim>()
         {
@@ -278,7 +283,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
@@ -287,8 +292,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncAgeRestrictions_IncludeUnknowns()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var claims = new List<Claim>()
         {
@@ -305,7 +310,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
@@ -314,8 +319,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncAgeRestriction_AdminNone()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var claims = new List<Claim>()
         {
@@ -332,7 +337,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
@@ -341,8 +346,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncAgeRestriction_MultipleAgeRestrictionClaims()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var claims = new List<Claim>()
         {
@@ -360,7 +365,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.Mature,  dbUser.AgeRestriction);
     }
@@ -368,8 +373,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncAgeRestriction_NoAgeRestrictionClaims()
     {
-        await ResetDb();
-        var (oidcService, user, _, _) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var identity = new ClaimsIdentity([]);
         var principal = new ClaimsPrincipal(identity);
@@ -381,7 +386,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
@@ -392,7 +397,7 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        dbUser = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        dbUser = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(dbUser);
         Assert.Equal(AgeRating.NotApplicable,  dbUser.AgeRestriction);
         Assert.True(dbUser.AgeRestrictionIncludeUnknowns);
@@ -401,11 +406,11 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task SyncUserSettings_DontChangeDefaultAdmin()
     {
-        await ResetDb();
-        var (oidcService, _, _, userManager) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, userManager) = await Setup(unitOfWork, context, mapper);
 
         // Make user default user
-        var user = await UnitOfWork.UserRepository.GetDefaultAdminUser();
+        var user = await unitOfWork.UserRepository.GetDefaultAdminUser();
 
         var settings = new OidcConfigDto
         {
@@ -422,17 +427,19 @@ public class OidcServiceTests: AbstractDbTest
 
         await oidcService.SyncUserSettings(null!, settings, principal, user);
 
-        var userFromDb = await UnitOfWork.UserRepository.GetUserByIdAsync(user.Id);
+        var userFromDb = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id);
         Assert.NotNull(userFromDb);
         Assert.NotEqual(AgeRating.Teen, userFromDb.AgeRestriction);
 
-        var newUser = new AppUserBuilder("NotAnAdmin", "NotAnAdmin@localhost").Build();
+        var newUser = new AppUserBuilder("NotAnAdmin", "NotAnAdmin@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
         var res = await userManager.CreateAsync(newUser);
         Assert.Empty(res.Errors);
         Assert.True(res.Succeeded);
 
         await oidcService.SyncUserSettings(null!, settings, principal, newUser);
-        userFromDb = await UnitOfWork.UserRepository.GetUserByIdAsync(newUser.Id);
+        userFromDb = await unitOfWork.UserRepository.GetUserByIdAsync(newUser.Id);
         Assert.NotNull(userFromDb);
         Assert.True(await userManager.IsInRoleAsync(newUser, PolicyConstants.ChangePasswordRole));
         Assert.Equal(AgeRating.Teen, userFromDb.AgeRestriction);
@@ -442,8 +449,8 @@ public class OidcServiceTests: AbstractDbTest
     [Fact]
     public async Task FindBestAvailableName_NoDuplicates()
     {
-        await ResetDb();
-        var (oidcService, _, _, userManager) = await Setup();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, userManager) = await Setup(unitOfWork, context, mapper);
 
 
         const string preferredName = "PreferredName";
@@ -510,12 +517,18 @@ public class OidcServiceTests: AbstractDbTest
         Assert.Null(bestName);
     }
 
-    private async Task<(OidcService, AppUser, IAccountService, UserManager<AppUser>)> Setup()
+    private async Task<(OidcService, AppUser, IAccountService, UserManager<AppUser>)> Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
     {
+        // Remove the default library created with the AbstractDbTest class
+        context.Library.RemoveRange(context.Library);
+        await context.SaveChangesAsync();
+
         var defaultAdmin = new AppUserBuilder("defaultAdmin", "defaultAdmin@localhost")
             .WithRole(PolicyConstants.AdminRole)
             .Build();
-        var user = new AppUserBuilder("amelia", "amelia@localhost").Build();
+        var user = new AppUserBuilder("amelia", "amelia@localhost")
+            .WithIdentityProvider(IdentityProvider.OpenIdConnect)
+            .Build();
 
         var roleStore = new RoleStore<
             AppRole,
@@ -523,7 +536,7 @@ public class OidcServiceTests: AbstractDbTest
             int,
             IdentityUserRole<int>,
             IdentityRoleClaim<int>
-        >(Context);
+        >(context);
 
         var roleManager = new RoleManager<AppRole>(
             roleStore,
@@ -553,7 +566,7 @@ public class OidcServiceTests: AbstractDbTest
             IdentityUserLogin<int>,
             IdentityUserToken<int>,
             IdentityRoleClaim<int>
-        >(Context);
+        >(context);
         var userManager = new UserManager<AppUser>(userStore,
             new OptionsWrapper<IdentityOptions>(new IdentityOptions()),
             new PasswordHasher<AppUser>(),
@@ -568,15 +581,8 @@ public class OidcServiceTests: AbstractDbTest
         await userManager.CreateAsync(user);
         await userManager.CreateAsync(defaultAdmin);
 
-        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), UnitOfWork, Mapper, Substitute.For<ILocalizationService>());
-        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, UnitOfWork, accountService, Substitute.For<IEmailService>());
+        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), unitOfWork, mapper, Substitute.For<ILocalizationService>());
+        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, unitOfWork, accountService, Substitute.For<IEmailService>());
         return (oidcService, user, accountService, userManager);
-    }
-
-    protected override async Task ResetDb()
-    {
-        Context.AppUser.RemoveRange(Context.AppUser);
-        Context.Library.RemoveRange(Context.Library);
-        await UnitOfWork.CommitAsync();
     }
 }

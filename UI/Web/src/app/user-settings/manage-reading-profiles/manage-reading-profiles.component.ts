@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
@@ -19,7 +19,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, take, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, map, take, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -41,7 +41,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {filter} from "rxjs";
+import {catchError, filter, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
@@ -110,6 +110,8 @@ export class ManageReadingProfilesComponent implements OnInit {
   private readonly transLoco = inject(TranslocoService);
 
   virtualScrollerBreakPoint = 20;
+
+  savingProfile = signal(false);
 
   fontFamilies: Array<string> = [];
   readingProfiles: ReadingProfile[] = [];
@@ -224,46 +226,69 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
+      filter(_ => !this.savingProfile()),
       filter(_ => this.readingProfileForm!.valid),
       takeUntilDestroyed(this.destroyRef),
-      tap(_ => this.autoSave()),
+      tap(_ => this.savingProfile.set(true)),
+      switchMap(_ => this.autoSave()),
+      tap(() => this.savingProfile.set(false))
     ).subscribe();
   }
 
   private autoSave() {
     if (this.selectedProfile!.id == 0) {
-      this.readingProfileService.createProfile(this.packData()).subscribe({
-        next: createdProfile => {
+      return this.readingProfileService.createProfile(this.packData()).pipe(
+        tap(createdProfile => {
           this.selectedProfile = createdProfile;
           this.readingProfiles.push(createdProfile);
           this.cdRef.markForCheck();
-        },
-        error: err => {
+        }),
+        catchError(err => {
           console.log(err);
           this.toastr.error(err.message);
-        }
-      })
-    } else {
-      const profile = this.packData();
-      this.readingProfileService.updateProfile(profile).subscribe({
-        next: newProfile => {
-          this.readingProfiles = this.readingProfiles.map(p => {
-            if (p.id !== profile.id) return p;
-            return newProfile;
-          });
-          this.cdRef.markForCheck();
-        },
-        error: err => {
-          console.log(err);
-          this.toastr.error(err.message);
-        }
-      })
+
+          return of(null);
+        })
+      );
     }
+
+    const profile = this.packData();
+    return this.readingProfileService.updateProfile(profile).pipe(
+      tap(newProfile => {
+        this.readingProfiles = this.readingProfiles.map(p => {
+          if (p.id !== profile.id) return p;
+
+          return newProfile;
+        });
+        this.cdRef.markForCheck();
+      }),
+      catchError(err => {
+        console.log(err);
+        this.toastr.error(err.message);
+
+        return of(null);
+      })
+    );
   }
 
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
+    data.readingDirection = parseInt(data.readingDirection + '');
+    data.scalingOption = parseInt(data.scalingOption + '');
+    data.pageSplitOption = parseInt(data.pageSplitOption + '');
+    data.readerMode = parseInt(data.readerMode + '');
+    data.layoutMode = parseInt(data.layoutMode + '');
+    data.disableWidthOverride = parseInt(data.disableWidthOverride + '');
+
+    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection + '');
+    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle + '');
+    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode + '');
+
+    data.pdfTheme = parseInt(data.pdfTheme + '');
+    data.pdfScrollMode = parseInt(data.pdfScrollMode + '');
+    data.pdfSpreadMode = parseInt(data.pdfSpreadMode + '');
+
     return data;
   }
 

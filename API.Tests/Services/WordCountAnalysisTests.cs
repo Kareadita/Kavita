@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -14,38 +15,34 @@ using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class WordCountAnalysisTests : AbstractDbTest
+public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    private readonly IReaderService _readerService;
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
     private const long WordCount = 33608; // 37417 if splitting on space, 33608 if just character count
     private const long MinHoursToRead = 1;
     private const float AvgHoursToRead = 1.66954792f;
     private const long MaxHoursToRead = 3;
 
-    public WordCountAnalysisTests()
+    private IReaderService Setup(IUnitOfWork unitOfWork)
     {
-        _readerService = new ReaderService(UnitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>());
     }
 
-    protected override async Task ResetDb()
-    {
-        Context.Series.RemoveRange(Context.Series.ToList());
-
-        await Context.SaveChangesAsync();
-    }
-
     [Fact]
     public async Task ReadingTimeShouldBeNonZero()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Epub)
             .Build();
@@ -57,7 +54,7 @@ public class WordCountAnalysisTests : AbstractDbTest
                 MangaFormat.Epub).Build())
             .Build();
 
-        Context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithSeries(series)
             .Build());
 
@@ -68,12 +65,12 @@ public class WordCountAnalysisTests : AbstractDbTest
                 .Build(),
         };
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
         var cacheService = new CacheHelper(new FileService());
-        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), UnitOfWork,
-            Substitute.For<IEventHub>(), cacheService, _readerService, Substitute.For<IMediaErrorService>());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
 
 
         await service.ScanSeries(1, 1);
@@ -101,7 +98,9 @@ public class WordCountAnalysisTests : AbstractDbTest
     [Fact]
     public async Task ReadingTimeShouldIncreaseWhenNewBookAdded()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
         var chapter = new ChapterBuilder("")
             .WithFile(new MangaFileBuilder(
                 Path.Join(_testDirectory,
@@ -115,17 +114,17 @@ public class WordCountAnalysisTests : AbstractDbTest
                 .Build())
             .Build();
 
-        Context.Library.Add(new LibraryBuilder("Test", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test", LibraryType.Book)
             .WithSeries(series)
             .Build());
 
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
         var cacheService = new CacheHelper(new FileService());
-        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), UnitOfWork,
-            Substitute.For<IEventHub>(), cacheService, _readerService, Substitute.For<IMediaErrorService>());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
         await service.ScanSeries(1, 1);
 
         var chapter2 = new ChapterBuilder("2")
@@ -141,7 +140,7 @@ public class WordCountAnalysisTests : AbstractDbTest
             .Build());
 
         series.Volumes[0].Chapters.Add(chapter2);
-        await UnitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
         await service.ScanSeries(1, 1);
 

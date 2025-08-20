@@ -1,7 +1,7 @@
 @use './theme/variables' as theme;
 
 .title {
-  color: white;
+  color: var(--detail-title-color, white);
   font-weight: bold;
   font-size: 1.75rem;
 }

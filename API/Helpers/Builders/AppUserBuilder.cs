@@ -2,6 +2,7 @@
 using System.Linq;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using Kavita.Common;
 
 namespace API.Helpers.Builders;
@@ -66,6 +67,12 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
     {
         _appUser.UserRoles ??= new List<AppUserRole>();
         _appUser.UserRoles.Add(new AppUserRole() {Role = new AppRole() {Name = role}});
+        return this;
+    }
+
+    public AppUserBuilder WithIdentityProvider(IdentityProvider identityProvider)
+    {
+        _appUser.IdentityProvider = identityProvider;
         return this;
     }
 }
