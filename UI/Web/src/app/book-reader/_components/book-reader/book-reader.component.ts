@@ -35,7 +35,6 @@ import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/ut
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Stack} from 'src/app/shared/data-structures/stack';
-import {MemberService} from 'src/app/_services/member.service';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {WritingStyle} from "../../../_models/preferences/writing-style";
 import {MangaFormat} from 'src/app/_models/manga-format';
@@ -58,15 +57,15 @@ import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.compone
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
 import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
-import {ChapterService} from "../../../_services/chapter.service";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {Annotation} from "../../_models/annotations/annotation";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
-import {LabelType, NgxSliderModule, Options} from "@angular-slider/ngx-slider";
+import {NgxSliderModule} from "@angular-slider/ngx-slider";
 import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
+import {LayoutMeasurementService} from "../../../_services/layout-measurement.service";
 
 
 interface HistoryPoint {
@@ -119,13 +118,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
   private readonly epubHighlightService = inject(EpubHighlightService);
-  private readonly chapterService = inject(ChapterService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
   private readonly toastr = inject(ToastrService);
   private readonly domSanitizer = inject(DomSanitizer);
   private readonly bookService = inject(BookService);
-  private readonly memberService = inject(MemberService);
   private readonly scrollService = inject(ScrollService);
   protected readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
@@ -138,6 +135,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly annotationService = inject(AnnotationService);
   private readonly titleService = inject(Title);
   private readonly document = inject(DOCUMENT);
+  private readonly layoutService = inject(LayoutMeasurementService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -266,23 +264,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
-  pageOptions: Options = {
-    floor: 0,
-    ceil: 0,
-    step: 1,
-    boundPointerLabels: false,
-    showSelectionBar: true,
-    animateOnMove: true,
-    translate: (_: number, label: LabelType) => {
-      if (label == LabelType.Floor) {
-        return 1 + '';
-      } else if (label === LabelType.Ceil) {
-        return this.maxPages() + '';
-      }
-      return (this.pageNum() + 1) + '';
-    },
-    animate: false
-  };
+
   /**
    * Used solely for fullscreen to apply a hack
    */
@@ -376,7 +358,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
 
-  protected columnWidth!: Signal<string>;
+  protected columnWidth = this.readerSettingsService.columnWidth;
+  protected readonly measurements = this.layoutService.measurements;
+  protected readonly virtualPageInfo = this.layoutService.virtualPageInfo;
   protected columnHeight!: Signal<string>;
   protected verticalBookContentWidth!: Signal<string>;
   protected virtualizedPageNum!: Signal<number>;
@@ -611,6 +595,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * based on the last seen scroll part (xpath).
    */
   ngAfterViewInit() {
+
+    // Hook up the observers
+    this.setupObservers();
+
+
     // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(
@@ -650,6 +639,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  private setupObservers() {
+    this.layoutService.observeElement(
+      this.bookContentElemRef.nativeElement,
+      'bookContent'
+    );
+
+    this.layoutService.observeElement(
+      this.readingSectionElemRef.nativeElement,
+      'readingSection'
+    );
   }
 
   handleScrollEvent() {
@@ -824,11 +825,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.continuousChaptersStack.push(this.chapterId);
 
-    this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
+    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
     });
 
-    this.updateImageSizes();
+    //this.updateImageSizes(); // NOTE: Should I do this here or wait till document fully loads as this needs some data after layout
 
     if (this.pageNum() >= this.maxPages()) {
       this.pageNum.set(this.maxPages() - 1);
@@ -1115,6 +1116,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.setupPage(part, scrollTop);
             this.updateImageSizes();
             this.injectImageBookmarkIndicators();
+            this.setupObservers();
           });
 
         this.firstLoad = false;
@@ -1569,9 +1571,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (intersectingEntries.length > 0) {
       let path = this.readerService.getXPathTo(intersectingEntries[0]);
-      if (path === '') { return; }
+      if (path === '') return;
+
       if (!path.startsWith('id')) {
-      path = '//html[1]/' + path;
+        if (path.startsWith('//BODY')) {
+          path = '//html[1]/' + path.replace('//BODY', '');
+        } else {
+          path = '//html[1]/' + path;
+        }
       }
       resumeElement = path;
     }
@@ -1579,7 +1586,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Applies styles onto the html of the book page
+   * Applies styles onto the html of the book page.
+   * Note: This has a critical role when margin changes and 2 column layout is in play
    */
   applyPageStyles(pageStyles: PageStyle) {
     if (this.bookContentElemRef === undefined || !this.bookContentElemRef.nativeElement) return;
@@ -1608,20 +1616,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     for(let i = 0; i < this.bookContentElemRef.nativeElement.children.length; i++) {
       const elem = this.bookContentElemRef.nativeElement.children.item(i);
       if (elem?.tagName === 'STYLE') continue;
+
       individualElementStyles.forEach(item => {
-          if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
-            // Remove the style or skip
-            this.renderer.removeStyle(elem, item[0]);
-            return;
-          }
-          this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
-        });
+        if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+          // Remove the style or skip
+          this.renderer.removeStyle(elem, item[0]);
+          return;
+        }
+        this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
+      });
     }
 
     // After layout shifts, we need to refocus the scroll bar
     if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.updateWidthAndHeightCalcs();
-      this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement)); // This works pretty well, but not perfect
+      this.updateImageSizes(); // Re-call this as we will change window width/height again
+
+      requestAnimationFrame(() => {
+        this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement));
+      });
     }
   }
 
@@ -1700,6 +1713,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   scrollTo(partSelector: string) {
+    const element = this.getElementFromXPath(partSelector);
+
+    if (element === null) return;
+
+    const layout = this.layoutMode();
+
+    if(layout === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical) {
+      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+      const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
+      setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
+    }
+    else if ((layout === BookPageLayoutMode.Default) && (this.writingStyle() === WritingStyle.Horizontal)) {
+      const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
+      // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
+      setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
+    } else {
+      setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
+    }
+  }
+
+  getElementFromXPath(partSelector: string) {
     if (partSelector.startsWith('#')) {
       partSelector = partSelector.substr(1, partSelector.length);
     }
@@ -1712,22 +1746,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       element = this.document.querySelector('*[id="' + partSelector + '"]');
     }
 
-    if (element === null) return;
-
-    const layout = this.layoutMode();
-
-    if(layout === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical ) {
-      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-      const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
-      setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
-    }
-    else if ((layout === BookPageLayoutMode.Default) && (this.writingStyle() === WritingStyle.Horizontal)) {
-      const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
-      // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
-      setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
-    } else {
-      setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
-    }
+    return element ?? null;
   }
 
   /**

@@ -483,6 +483,7 @@ $pagination-opacity: 0;
 .progress-bar-container {
   border-top: 1px solid var(--bs-border-color-translucent);
   background-color: var(--br-actionbar-bg-color); // TODO: BUG: This isn't coloring well
+  max-height: 10px;
 
   .progress {
     border-radius: 0;

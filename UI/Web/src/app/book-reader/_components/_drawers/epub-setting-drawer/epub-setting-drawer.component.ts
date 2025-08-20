@@ -22,9 +22,6 @@ export class EpubSettingDrawerComponent {
   seriesId = model<number>();
   readingProfile = model<ReadingProfile>();
 
-//  updated = new EventEmitter<ReaderSettingUpdate>();
-
-
   constructor() {
 
     effect(() => {
@@ -35,47 +32,6 @@ export class EpubSettingDrawerComponent {
       }
     });
   }
-
-  //
-  // updateColorTheme(theme: BookTheme) {
-  //   const evt = {setting: 'theme', object: theme} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // updateReaderStyles(pageStyles: PageStyle) {
-  //   const evt = {setting: 'pageStyle', object: pageStyles} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // showPaginationOverlay(clickToPaginate: boolean) {
-  //   const evt = {setting: 'clickToPaginate', object: clickToPaginate} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // toggleFullscreen() {
-  //   const evt = {setting: 'fullscreen', object: null} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // updateWritingStyle(writingStyle: WritingStyle) {
-  //   const evt = {setting: 'writingStyle', object: writingStyle} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // updateLayoutMode(mode: BookPageLayoutMode) {
-  //   const evt = {setting: 'layoutMode', object: mode} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // updateReadingDirection(readingDirection: ReadingDirection) {
-  //   const evt = {setting: 'readingDirection', object: readingDirection} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
-  //
-  // updateImmersiveMode(immersiveMode: boolean) {
-  //   const evt = {setting: 'immersiveMode', object: immersiveMode} as ReaderSettingUpdate;
-  //   this.updated.emit(evt);
-  // }
 
   close() {
     this.activeOffcanvas.close();

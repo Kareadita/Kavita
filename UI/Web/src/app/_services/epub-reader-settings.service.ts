@@ -16,6 +16,8 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {LayoutMeasurementService} from "./layout-measurement.service";
+import {environment} from "../../environments/environment";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
@@ -35,6 +37,8 @@ export type BookReadingProfileFormGroup = FormGroup<{
   bookReaderImmersiveMode:FormControl <boolean>;
 }>
 
+const COLUMN_GAP = 20; //px gap between columns
+
 
 @Injectable({
   providedIn: 'root'
@@ -48,6 +52,7 @@ export class EpubReaderSettingsService {
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly layoutMeasurements = inject(LayoutMeasurementService);
 
   // Core signals - these will be the single source of truth
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
@@ -69,7 +74,7 @@ export class EpubReaderSettingsService {
   private settingsForm!: BookReadingProfileFormGroup;
   private fontFamilies: FontFamily[] = this.bookService.getFontFamilies();
   private isUpdatingFromForm = false; // Flag to prevent infinite loops
-  private isInitialized = this._isInitialized(); // Non signal, updates in effect
+  private isInitialized = this._isInitialized(); // Non-signal, updates in effect
 
   // Event subject for component communication (keep this for now, can be converted to effect later)
   private settingUpdateSubject = new Subject<ReaderSettingUpdate>();
@@ -99,6 +104,28 @@ export class EpubReaderSettingsService {
     return BookPageLayoutMode.Column1;
   });
 
+  public readonly columnWidth = computed(() => {
+    const measurements = this.layoutMeasurements.measurements();
+    const layout = this.layoutMode();
+    const writingStyle = this.writingStyle();
+
+    if (layout === BookPageLayoutMode.Default) return 'unset';
+
+    const base = writingStyle === WritingStyle.Vertical
+      ? measurements.windowHeight
+      : measurements.windowWidth;
+
+    const width = layout === BookPageLayoutMode.Column1
+      ? (base / 2) - COLUMN_GAP
+      : (base / 4);
+
+    return width + 'px';
+  });
+
+  public readonly virtualPageInfo = computed(() => {
+    return this.layoutMeasurements.virtualPageInfo();
+  });
+
   public readonly canPromoteProfile = computed(() => {
     const profile = this._currentReadingProfile();
     return profile !== null && profile.kind === ReadingProfileKind.Implicit;
@@ -110,9 +137,12 @@ export class EpubReaderSettingsService {
 
   // Keep observable for now - can be converted to effect later
   public readonly settingUpdates$ = this.settingUpdateSubject.asObservable().pipe(filter(val => {
-    console.log('setting update: ', val);
+    if (!environment.production) {
+      console.log(`[SETTINGS EFFECT] ${val.setting}`, val.object);
+    }
+
     return this._isInitialized();
-  }), tap(_ => console.log('setting update passed filter')));
+  }));
 
   constructor() {
     // Effect to update form when signals change (only when not updating from form)
@@ -122,6 +152,7 @@ export class EpubReaderSettingsService {
         this.updateFormFromSignals();
       }
     });
+
 
     effect(() => {
       this.isInitialized = this._isInitialized();
@@ -226,6 +257,8 @@ export class EpubReaderSettingsService {
     // Set initial theme
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
     this.setTheme(themeName, false);
+
+    this.layoutMeasurements.updateSettings(this);
 
     // Mark as initialized - this will trigger effects to emit initial values
     this._isInitialized.set(true);
@@ -587,20 +620,6 @@ export class EpubReaderSettingsService {
     );
   }
 
-  // private emitInitialSettings(): void {
-  //   // Emit all current settings so the reader can initialize properly
-  //   this.settingUpdateSubject.next({ setting: 'pageStyle', object: this.pageStylesSubject.value });
-  //   this.settingUpdateSubject.next({ setting: 'clickToPaginate', object: this.clickToPaginateSubject.value });
-  //   this.settingUpdateSubject.next({ setting: 'layoutMode', object: this.layoutModeSubject.value });
-  //   this.settingUpdateSubject.next({ setting: 'readingDirection', object: this.readingDirectionSubject.value });
-  //   this.settingUpdateSubject.next({ setting: 'writingStyle', object: this.writingStyleSubject.value });
-  //   this.settingUpdateSubject.next({ setting: 'immersiveMode', object: this.immersiveModeSubject.value });
-  //
-  //   const activeTheme = this.activeThemeSubject.value;
-  //   if (activeTheme) {
-  //     this.settingUpdateSubject.next({ setting: 'theme', object: activeTheme });
-  //   }
-  // }
 
   private updateImplicitProfile(): void {
     if (!this._currentReadingProfile() || !this._currentSeriesId()) return;
@@ -646,33 +665,9 @@ export class EpubReaderSettingsService {
       data.bookReaderThemeName = activeTheme.name;
     }
 
-    console.log('packed reading profile:', data);
-
     return data;
   }
 
-  // private setPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string): void {
-  //   const windowWidth = window.innerWidth || this.document.documentElement.clientWidth || this.document.body.clientWidth;
-  //   const mobileBreakpointMarginOverride = 700;
-  //
-  //   let defaultMargin = '15vw';
-  //   if (windowWidth <= mobileBreakpointMarginOverride) {
-  //     defaultMargin = '5vw';
-  //   }
-  //
-  //   const currentStyles = this.pageStylesSubject.value;
-  //   const newStyles: PageStyle = {
-  //     'font-family': fontFamily || currentStyles['font-family'] || 'default',
-  //     'font-size': fontSize || currentStyles['font-size'] || '100%',
-  //     'margin-left': margin || currentStyles['margin-left'] || defaultMargin,
-  //     'margin-right': margin || currentStyles['margin-right'] || defaultMargin,
-  //     'line-height': lineHeight || currentStyles['line-height'] || '100%'
-  //   };
-  //
-  //   this.pageStylesSubject.next(newStyles);
-  //   this.updateImplicitProfile();
-  //   this.settingUpdateSubject.next({ setting: 'pageStyle', object: newStyles });
-  // }
   private setPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string): void {
     const windowWidth = window.innerWidth || this.document.documentElement.clientWidth || this.document.body.clientWidth;
     const mobileBreakpointMarginOverride = 700;
