@@ -22,105 +22,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class ReadingListServiceTests
+public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IReadingListService _readingListService;
-    private readonly DataContext _context;
-    private readonly IReaderService _readerService;
-
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
-
-    public ReadingListServiceTests()
+    public (IReadingListService, IReaderService) Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
     {
-        var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null!);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
-        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
+        var readingListService = new ReadingListService(unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(), ds);
 
-        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>());
+
+        return (readingListService, readerService);
     }
-
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context,
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
-            .Build());
-
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDb()
-    {
-        _context.AppUser.RemoveRange(_context.AppUser);
-        _context.Library.RemoveRange(_context.Library);
-        _context.Series.RemoveRange(_context.Series);
-        _context.ReadingList.RemoveRange(_context.ReadingList);
-        await _unitOfWork.CommitAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
-
-    #endregion
 
     #region AddChaptersToReadingList
     [Fact]
     public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+
         var library = new LibraryBuilder("Test Lib", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test")
                 .WithMetadata(new SeriesMetadataBuilder().Build())
@@ -143,24 +72,24 @@ public class ReadingListServiceTests
                 })
                 .Build())
             .Build();
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+        context.AppUser.Add(new AppUserBuilder("majora2007", "")
             .WithLibrary(library)
             .Build()
         );
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
+        await unitOfWork.CommitAsync();
 
         Assert.Single(readingList.Items);
         Assert.Equal(0, readingList.Items.First().Order);
@@ -169,8 +98,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task AddChaptersToReadingList_ShouldNewItems_AfterLastOrder()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUserBuilder("majora2007", "")
             .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
                 .WithSeries(new SeriesBuilder("Test")
                     .WithVolumes(new List<Volume>()
@@ -196,19 +126,19 @@ public class ReadingListServiceTests
             .Build()
         );
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
-        await _unitOfWork.CommitAsync();
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {2}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
+        await unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {2}, readingList);
+        await unitOfWork.CommitAsync();
 
         Assert.Equal(2, readingList.Items.Count);
         Assert.Equal(0, readingList.Items.First().Order);
@@ -222,8 +152,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUser()
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -254,20 +185,20 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await unitOfWork.CommitAsync();
         Assert.Equal(3, readingList.Items.Count);
 
-        await _readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
+        await readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
         {
             FromPosition = 2, ToPosition = 0, ReadingListId = 1, ReadingListItemId = 3
         });
@@ -282,8 +213,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift_ThenDeleteSecond_OrderShouldBeCorrect()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUser()
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -314,9 +246,9 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
@@ -324,13 +256,13 @@ public class ReadingListServiceTests
         };
 
         // Existing (order, chapterId): (0, 1), (1, 2), (2, 3)
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await unitOfWork.CommitAsync();
         Assert.Equal(3, readingList.Items.Count);
 
         // From 3 to 1
         // New (order, chapterId): (0, 3), (1, 2), (2, 1)
-        await _readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
+        await readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
         {
             FromPosition = 2, ToPosition = 0, ReadingListId = 1, ReadingListItemId = 3
         });
@@ -343,7 +275,7 @@ public class ReadingListServiceTests
         Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
 
         // New (order, chapterId): (0, 3), (2, 1): Delete 2nd item
-        await _readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
+        await readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
         {
             ReadingListId = 1, ReadingListItemId = readingList.Items.Single(i => i.ChapterId == 2).Id
         });
@@ -361,8 +293,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task DeleteReadingListItem_DeleteFirstItem_SecondShouldBecomeFirst()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUser()
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -389,20 +322,20 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+        await unitOfWork.CommitAsync();
         Assert.Equal(2, readingList.Items.Count);
 
-        await _readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
+        await readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
         {
             ReadingListId = 1, ReadingListItemId = 1
         });
@@ -418,8 +351,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task RemoveFullyReadItems_RemovesAllFullyReadItems()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUser()
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -450,25 +384,25 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
-        await _unitOfWork.CommitAsync();
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await unitOfWork.CommitAsync();
         Assert.Equal(3, readingList.Items.Count);
 
         // Mark 2 as fully read
-        await _readerService.MarkChaptersAsRead(user, 1,
-            (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2})).ToList());
-        await _unitOfWork.CommitAsync();
+        await readerService.MarkChaptersAsRead(user, 1,
+            (await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2})).ToList());
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.RemoveFullyReadItems(1, user);
+        await readingListService.RemoveFullyReadItems(1, user);
 
 
         Assert.Equal(2, readingList.Items.Count);
@@ -483,8 +417,9 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CalculateAgeRating_ShouldUpdateToUnknown_IfNoneSet()
     {
-        await ResetDb();
-        _context.AppUser.Add(new AppUser()
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -509,29 +444,30 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
 
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.CalculateReadingListAgeRating(readingList);
+        await readingListService.CalculateReadingListAgeRating(readingList);
         Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
     }
 
     [Fact]
     public async Task CalculateAgeRating_ShouldUpdateToMax()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -546,7 +482,7 @@ public class ReadingListServiceTests
                     .Build()
             })
             .Build();
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -560,29 +496,30 @@ public class ReadingListServiceTests
 
         s.Metadata.AgeRating = AgeRating.G;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
 
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.CalculateReadingListAgeRating(readingList);
+        await readingListService.CalculateReadingListAgeRating(readingList);
         Assert.Equal(AgeRating.G, readingList.AgeRating);
     }
 
     [Fact]
     public async Task UpdateReadingListAgeRatingForSeries()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var spiceAndWolf = new SeriesBuilder("Spice and Wolf")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes([
@@ -605,7 +542,7 @@ public class ReadingListServiceTests
             ]).Build();
         othersidePicnic.Metadata.AgeRating = AgeRating.Everyone;
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "Amelia",
             ReadingLists = new List<ReadingList>(),
@@ -618,8 +555,8 @@ public class ReadingListServiceTests
             },
         });
 
-        await _context.SaveChangesAsync();
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("Amelia", AppUserIncludes.ReadingLists);
+        await context.SaveChangesAsync();
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("Amelia", AppUserIncludes.ReadingLists);
         Assert.NotNull(user);
 
         var myTestReadingList = new ReadingListBuilder("MyReadingList").Build();
@@ -633,35 +570,35 @@ public class ReadingListServiceTests
         };
 
 
-        await _readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myTestReadingList);
-        await _readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, myTestReadingList);
-        await _readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myThirdTestReadingList);
-        await _readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, mySecondTestReadingList);
+        await readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myTestReadingList);
+        await readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, myTestReadingList);
+        await readingListService.AddChaptersToReadingList(spiceAndWolf.Id, new List<int> {1, 2}, myThirdTestReadingList);
+        await readingListService.AddChaptersToReadingList(othersidePicnic.Id, new List<int> {3, 4}, mySecondTestReadingList);
 
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.CalculateReadingListAgeRating(myTestReadingList);
-        await _readingListService.CalculateReadingListAgeRating(mySecondTestReadingList);
+        await readingListService.CalculateReadingListAgeRating(myTestReadingList);
+        await readingListService.CalculateReadingListAgeRating(mySecondTestReadingList);
         Assert.Equal(AgeRating.Everyone, myTestReadingList.AgeRating);
         Assert.Equal(AgeRating.Everyone, mySecondTestReadingList.AgeRating);
         Assert.Equal(AgeRating.Everyone, myThirdTestReadingList.AgeRating);
 
-        await _readingListService.UpdateReadingListAgeRatingForSeries(othersidePicnic.Id, AgeRating.Mature);
-        await _unitOfWork.CommitAsync();
+        await readingListService.UpdateReadingListAgeRatingForSeries(othersidePicnic.Id, AgeRating.Mature);
+        await unitOfWork.CommitAsync();
 
         // Reading lists containing Otherside Picnic are updated
-        myTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        myTestReadingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
         Assert.NotNull(myTestReadingList);
         Assert.Equal(AgeRating.Mature, myTestReadingList.AgeRating);
 
-        mySecondTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(2);
+        mySecondTestReadingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(2);
         Assert.NotNull(mySecondTestReadingList);
         Assert.Equal(AgeRating.Mature, mySecondTestReadingList.AgeRating);
 
         // Unrelated reading list is not updated
-        myThirdTestReadingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(3);
+        myThirdTestReadingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(3);
         Assert.NotNull(myThirdTestReadingList);
         Assert.Equal(AgeRating.Everyone, myThirdTestReadingList.AgeRating);
     }
@@ -673,7 +610,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CalculateStartAndEndDates_ShouldBeNothing_IfNothing()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -688,7 +626,7 @@ public class ReadingListServiceTests
                     .Build()
             })
             .Build();
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -700,22 +638,22 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
 
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.CalculateStartAndEndDates(readingList);
+        await readingListService.CalculateStartAndEndDates(readingList);
         Assert.Equal(0, readingList.StartingMonth);
         Assert.Equal(0, readingList.StartingYear);
         Assert.Equal(0, readingList.EndingMonth);
@@ -725,7 +663,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CalculateStartAndEndDates_ShouldBeSomething_IfChapterHasSet()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -742,7 +681,7 @@ public class ReadingListServiceTests
                     .Build()
             })
             .Build();
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -754,22 +693,22 @@ public class ReadingListServiceTests
             }
         });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
 
-        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+        await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
 
 
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
 
-        await _readingListService.CalculateStartAndEndDates(readingList);
+        await readingListService.CalculateStartAndEndDates(readingList);
         Assert.Equal(3, readingList.StartingMonth);
         Assert.Equal(2002, readingList.StartingYear);
         Assert.Equal(3, readingList.EndingMonth);
@@ -842,8 +781,9 @@ public class ReadingListServiceTests
 
     #region CreateReadingList
 
-    private async Task CreateReadingList_SetupBaseData()
+    private async Task CreateReadingList_SetupBaseData(IUnitOfWork unitOfWork, DataContext context)
     {
+
         var fablesSeries = new SeriesBuilder("Fables").Build();
         fablesSeries.Volumes.Add(
             new VolumeBuilder("1")
@@ -858,61 +798,70 @@ public class ReadingListServiceTests
             .WithSeries(fablesSeries)
             .Build();
 
-        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
+        context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
             .WithLibrary(library)
             .Build()
         );
-        _context.AppUser.Add(new AppUserBuilder("admin", string.Empty)
+        context.AppUser.Add(new AppUserBuilder("admin", string.Empty)
             .WithLibrary(library)
             .Build()
         );
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
     }
 
     [Fact]
     public async Task CreateReadingList_ShouldCreate_WhenNoOtherListsOnUser()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
-        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+
+        await readingListService.CreateReadingListForUser(user, "Test List");
+
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+        Assert.NotEmpty(user.ReadingLists);
     }
 
     [Fact]
     public async Task CreateReadingList_ShouldNotCreate_WhenExistingList()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
-        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await readingListService.CreateReadingListForUser(user, "Test List");
+        Assert.NotEmpty((await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
             .ReadingLists);
         try
         {
-            await _readingListService.CreateReadingListForUser(user, "Test List");
+            await readingListService.CreateReadingListForUser(user, "Test List");
         }
         catch (Exception ex)
         {
             Assert.Equal("reading-list-name-exists", ex.Message);
         }
-        Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+        Assert.Single((await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
             .ReadingLists);
     }
 
     [Fact]
     public async Task CreateReadingList_ShouldNotCreate_WhenPromotedListExists()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("admin", AppUserIncludes.ReadingLists);
-        var list = await _readingListService.CreateReadingListForUser(user, "Test List");
-        await _readingListService.UpdateReadingList(list,
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("admin", AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+
+        var list = await readingListService.CreateReadingListForUser(user, "Test List");
+        await readingListService.UpdateReadingList(list,
             new UpdateReadingListDto()
             {
                 ReadingListId = list.Id, Promoted = true, Title = list.Title, Summary = list.Summary,
@@ -921,7 +870,7 @@ public class ReadingListServiceTests
 
         try
         {
-            await _readingListService.CreateReadingListForUser(user, "Test List");
+            await readingListService.CreateReadingListForUser(user, "Test List");
         }
         catch (Exception ex)
         {
@@ -938,27 +887,35 @@ public class ReadingListServiceTests
     [Fact]
     public async Task DeleteReadingList_ShouldDelete()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
-        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+
+        await readingListService.CreateReadingListForUser(user, "Test List");
+
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+        Assert.NotEmpty(user.ReadingLists);
         try
         {
-            await _readingListService.CreateReadingListForUser(user, "Test List");
+            await readingListService.CreateReadingListForUser(user, "Test List");
         }
         catch (Exception ex)
         {
             Assert.Equal("reading-list-name-exists", ex.Message);
         }
-        Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
 
-        await _readingListService.DeleteReadingList(1, user);
-        Assert.Empty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+        Assert.Single(user.ReadingLists);
+
+        await readingListService.DeleteReadingList(1, user);
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+        Assert.Empty(user.ReadingLists);
     }
     #endregion
 
@@ -967,13 +924,14 @@ public class ReadingListServiceTests
     [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldWorkIfTheirList()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await readingListService.CreateReadingListForUser(user, "Test List");
 
-        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        var userWithList = await readingListService.UserHasReadingListAccess(1, "majora2007");
         Assert.NotNull(userWithList);
         Assert.Single(userWithList.ReadingLists);
     }
@@ -981,32 +939,34 @@ public class ReadingListServiceTests
     [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldNotWork_IfNotTheirList()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        await readingListService.CreateReadingListForUser(user, "Test List");
 
-        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        var userWithList = await readingListService.UserHasReadingListAccess(1, "majora2007");
         Assert.Null(userWithList);
     }
 
     [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldWork_IfNotTheirList_ButUserIsAdmin()
     {
-        await ResetDb();
-        await CreateReadingList_SetupBaseData();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        await CreateReadingList_SetupBaseData(unitOfWork, context);
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        await _readingListService.CreateReadingListForUser(user, "Test List");
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await readingListService.CreateReadingListForUser(user, "Test List");
 
-        //var admin = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        //var admin = await unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
         //_userManager.When(x => x.IsInRoleAsync(user, PolicyConstants.AdminRole)).Returns((info => true), null);
 
         //_userManager.IsInRoleAsync(admin, PolicyConstants.AdminRole).ReturnsForAnyArgs(true);
 
-        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        var userWithList = await readingListService.UserHasReadingListAccess(1, "majora2007");
         Assert.NotNull(userWithList);
         Assert.Single(userWithList.ReadingLists);
     }
@@ -1017,7 +977,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task ValidateCblFile_ShouldFail_UserHasAccessToNoSeries()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1041,17 +1002,17 @@ public class ReadingListServiceTests
             .Build()
         );
 
-        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty).Build());
+        context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty).Build());
 
-        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(fablesSeries)
             .WithSeries(fables2Series)
             .Build()
         );
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
-        var importSummary = await _readingListService.ValidateCblFile(1, cblReadingList);
+        var importSummary = await readingListService.ValidateCblFile(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Fail, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
@@ -1060,7 +1021,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task ValidateCblFile_ShouldFail_ServerHasNoSeries()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1080,21 +1042,21 @@ public class ReadingListServiceTests
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>(),
         });
 
-        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(fablesSeries)
             .WithSeries(fables2Series)
             .Build());
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
-        var importSummary = await _readingListService.ValidateCblFile(1, cblReadingList);
+        var importSummary = await readingListService.ValidateCblFile(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Fail, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
@@ -1118,7 +1080,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CreateReadingListFromCBL_ShouldCreateList()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1140,7 +1103,7 @@ public class ReadingListServiceTests
                 .Build())
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -1152,14 +1115,14 @@ public class ReadingListServiceTests
                     .Build()
             },
         });
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
-        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+        var importSummary = await readingListService.CreateReadingListFromCbl(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Partial, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
 
-        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        var createdList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
 
         Assert.NotNull(createdList);
         Assert.Equal("Fables", createdList.Title);
@@ -1174,7 +1137,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CreateReadingListFromCBL_ShouldCreateList_ButOnlyIncludeSeriesThatUserHasAccessTo()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1194,7 +1158,7 @@ public class ReadingListServiceTests
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -1206,18 +1170,18 @@ public class ReadingListServiceTests
             },
         });
 
-        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
             .WithSeries(fables2Series)
             .Build());
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
-        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+        var importSummary = await readingListService.CreateReadingListFromCbl(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Partial, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
 
-        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        var createdList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
 
         Assert.NotNull(createdList);
         Assert.Equal("Fables", createdList.Title);
@@ -1233,7 +1197,8 @@ public class ReadingListServiceTests
     [Fact]
     public async Task CreateReadingListFromCBL_ShouldUpdateAnExistingList()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1253,7 +1218,7 @@ public class ReadingListServiceTests
             .WithChapter(new ChapterBuilder("3").Build())
             .Build());
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -1266,21 +1231,21 @@ public class ReadingListServiceTests
             },
         });
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
         // Create a reading list named Fables and add 2 chapters to it
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
-        var readingList = await _readingListService.CreateReadingListForUser(user, "Fables");
-        Assert.True(await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 3}, readingList));
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        var readingList = await readingListService.CreateReadingListForUser(user, "Fables");
+        Assert.True(await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 3}, readingList));
         Assert.Equal(2, readingList.Items.Count);
 
         // Attempt to import a Cbl with same reading list name
-        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+        var importSummary = await readingListService.CreateReadingListFromCbl(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Partial, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
 
-        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        var createdList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
 
         Assert.NotNull(createdList);
         Assert.Equal("Fables", createdList.Title);
@@ -1301,7 +1266,8 @@ public class ReadingListServiceTests
     public async Task CreateReadingListFromCBL_ShouldCreateList_WithAnnuals()
     {
         // TODO: Implement this correctly
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Annual.cbl");
 
         // Mock up our series
@@ -1321,7 +1287,7 @@ public class ReadingListServiceTests
                 .Build())
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
@@ -1333,14 +1299,14 @@ public class ReadingListServiceTests
                     .Build()
             },
         });
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
-        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+        var importSummary = await readingListService.CreateReadingListFromCbl(1, cblReadingList);
 
         Assert.Equal(CblImportResult.Success, importSummary.Success);
         Assert.NotEmpty(importSummary.Results);
 
-        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+        var createdList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
 
         Assert.NotNull(createdList);
         Assert.Equal("Annual", createdList.Title);
@@ -1356,17 +1322,18 @@ public class ReadingListServiceTests
 
     #region CreateReadingListsFromSeries
 
-    private async Task<Tuple<Series, Series>> SetupData()
+    private async Task<Tuple<Series, Series>> SetupData(IUnitOfWork unitOfWork)
     {
+
         // Setup 2 series, only do this once tho
-        if (await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary("Series 1", 1, MangaFormat.Archive))
+        if (await unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary("Series 1", 1, MangaFormat.Archive))
         {
-            return new Tuple<Series, Series>(await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(1),
-                await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(2));
+            return new Tuple<Series, Series>(await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(1),
+                await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(2));
         }
 
         var library =
-            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Series | LibraryIncludes.AppUser);
         var user = new AppUserBuilder("majora2007", "majora2007@fake.com").Build();
         library!.AppUsers.Add(user);
@@ -1395,7 +1362,7 @@ public class ReadingListServiceTests
         library!.Series.Add(series1);
         library!.Series.Add(series2);
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
 
         return new Tuple<Series, Series>(series1, series2);
     }
@@ -1416,7 +1383,7 @@ public class ReadingListServiceTests
     //             .Build())
     //         .Build();
     //
-    //     _readingListService.CreateReadingListsFromSeries(series.Item1)
+    //     readingListService.CreateReadingListsFromSeries(series.Item1)
     // }
 
     #endregion
