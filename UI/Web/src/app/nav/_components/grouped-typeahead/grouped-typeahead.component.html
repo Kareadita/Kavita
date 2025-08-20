@@ -150,6 +150,18 @@
               </ul>
             }
 
+            @if (annotationTemplate !== undefined && groupedData.annotations.length > 0) {
+              <li class="list-group-item section-header"><h5 id="annotations-group">{{t('annotations')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="annotations-group">
+                @for(option of groupedData.annotations; track option; let index = $index) {
+                  <li (click)="handleResultClick(option)" tabindex="0"
+                      class="list-group-item" aria-labelledby="annotations-group" role="option">
+                    <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                  </li>
+                }
+              </ul>
+            }
+
             @if (!hasData && searchTerm.length > 0 && !isLoading) {
 
               <ul class="list-group results">

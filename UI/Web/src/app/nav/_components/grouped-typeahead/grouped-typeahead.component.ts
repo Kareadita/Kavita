@@ -97,6 +97,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
   @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
+  @ContentChild('annotationTemplate') annotationTemplate!: TemplateRef<any>;
 
 
   hasFocus: boolean = false;

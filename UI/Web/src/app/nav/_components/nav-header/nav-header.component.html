@@ -47,14 +47,31 @@
                       </div>
                       <div class="ms-1">
                         <app-series-format [format]="item.format"></app-series-format>
-                        @if (searchTerm.toLowerCase().trim(); as st) {
-                          @if (item.name.toLowerCase().trim().indexOf(st) >= 0) {
-                            <span>{{item.name}}</span>
-                          } @else {
-                            <span [innerHTML]="item.localizedName"></span>
-                          }
+                        @let normalizedSearchTerm = searchTerm.toLowerCase().trim();
+
+                        <span class="ms-1">
+                        @if (item.name.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+                          {{item.name}}
+                        } @else {
+                          <span [innerHTML]="item.localizedName"></span>
                         }
+                        </span>
                         <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #annotationTemplate let-item>
+                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickAnnotationSearchResult(item)">
+                      <div class="ms-1">
+                        @let normalizedSearchTerm = searchTerm.toLowerCase().trim();
+
+                        @if (item.comment.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+                          <!--We can't render the comment as it's json -->
+                          <quill-view [content]="item.context" />
+                        } @else {
+                          <span>{{item.chapterTitle}}</span>
+                        }
                       </div>
                     </div>
                   </ng-template>

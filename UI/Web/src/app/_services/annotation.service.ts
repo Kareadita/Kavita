@@ -9,6 +9,7 @@ import {AccountService} from "./account.service";
 import {User} from "../_models/user";
 import {MessageHubService} from "./message-hub.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
+import {Router} from "@angular/router";
 
 /**
  * Represents any modification (create/delete/edit) that occurs to annotations
@@ -28,6 +29,7 @@ export class AnnotationService {
   private readonly httpClient = inject(HttpClient);
   private readonly accountService = inject(AccountService);
   private readonly messageHub = inject(MessageHubService);
+  private readonly router = inject(Router);
   private readonly baseUrl = environment.apiUrl;
 
   private _annotations = signal<Annotation[]>([]);
@@ -118,5 +120,9 @@ export class AnnotationService {
         annotation: annotationToDelete
       });
     }));
+  }
+
+  navigateToAnnotation(item: Annotation) {
+    this.router.navigate(['library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
   }
 }

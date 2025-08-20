@@ -51,6 +51,7 @@ public class AppUserAnnotation : IEntityDate
      /// </summary>
      public string? ChapterTitle { get; set; }
 
+    public required int LibraryId { get; set; }
     public required int SeriesId { get; set; }
     public required int VolumeId { get; set; }
     public required int ChapterId { get; set; }

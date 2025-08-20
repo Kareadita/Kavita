@@ -7,7 +7,6 @@ import {
   ElementRef,
   HostListener,
   inject,
-  Inject,
   OnInit,
   ViewChild
 } from '@angular/core';
@@ -48,6 +47,9 @@ import {Breakpoint, UtilityService} from "../../../shared/_services/utility.serv
 import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
 import {MetadataService} from "../../../_services/metadata.service";
+import {Annotation} from "../../../book-reader/_models/annotations/annotation";
+import {QuillViewComponent} from "ngx-quill";
+import {AnnotationService} from "../../../_services/annotation.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -56,7 +58,7 @@ import {MetadataService} from "../../../_services/metadata.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent]
+    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -72,6 +74,8 @@ export class NavHeaderComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
   protected readonly metadataService = inject(MetadataService);
+  private readonly annotationService = inject(AnnotationService);
+  private readonly document = inject(DOCUMENT);
 
 
   protected readonly FilterField = FilterField;
@@ -101,7 +105,7 @@ export class NavHeaderComponent implements OnInit {
     this.breakpointSource.next(this.utilityService.getActiveBreakpoint());
   }
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
       this.scrollElem = this.document.body;
   }
 
@@ -185,6 +189,11 @@ export class NavHeaderComponent implements OnInit {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
+
+  clickAnnotationSearchResult(item: Annotation) {
+    this.clearSearch();
+    this.annotationService.navigateToAnnotation(item);
   }
 
   clickBookmarkSearchResult(item: BookmarkSearchResult) {

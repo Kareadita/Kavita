@@ -16,6 +16,7 @@ using API.DTOs.Filtering.v2;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Metadata;
 using API.DTOs.Person;
+using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
@@ -400,6 +401,14 @@ public class SeriesRepository : ISeriesRepository
             .Take(maxRecords)
             .OrderBy(l => l.Name.ToLower())
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        result.Annotations = await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId &&
+                        (EF.Functions.Like(a.Comment,  $"%{searchQueryNormalized}%") || EF.Functions.Like(a.Context, $"%{searchQueryNormalized}%")))
+            .Take(maxRecords)
+            .OrderBy(l => l.CreatedUtc)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         var justYear = _yearRegex.Match(searchQuery).Value;

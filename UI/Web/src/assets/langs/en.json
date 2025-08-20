@@ -1986,6 +1986,7 @@
         "chapters": "Chapters",
         "people": "People",
         "tags": "Tags",
+        "annotations": "{{tabs.annotations-tab}}",
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "libraries": "Libraries",

@@ -52,6 +52,7 @@ public sealed record AnnotationDto
     public required int ChapterId { get; set; }
     public required int VolumeId { get; set; }
     public required int SeriesId { get; set; }
+    public required int LibraryId { get; set; }
 
     public required int OwnerUserId { get; set; }
     public string OwnerUsername { get; set; }

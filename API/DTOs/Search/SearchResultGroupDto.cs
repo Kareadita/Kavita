@@ -23,6 +23,7 @@ public sealed record SearchResultGroupDto
     public IEnumerable<MangaFileDto> Files { get; set; } = default!;
     public IEnumerable<ChapterDto> Chapters { get; set; } = default!;
     public IEnumerable<BookmarkSearchResultDto> Bookmarks { get; set; } = default!;
+    public IEnumerable<AnnotationDto> Annotations { get; set; } = default!;
 
 
 }
