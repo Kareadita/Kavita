@@ -73,7 +73,7 @@ export class EpubReaderMenuService {
     }
     const ref = this.offcanvasService.open(ViewTocDrawerComponent, {position: 'end'});
     ref.componentInstance.chapterId.set(chapterId);
-    ref.componentInstance.pageNum.set(pageNum)
+    ref.componentInstance.pageNum.set(pageNum);
     ref.componentInstance.loadPage.subscribe((res: LoadPageEvent | null) => {
       // Check if we are on mobile to collapse the menu
       if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {

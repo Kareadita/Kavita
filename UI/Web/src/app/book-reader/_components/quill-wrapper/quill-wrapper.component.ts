@@ -16,7 +16,7 @@ export enum QuillToolbarKey {
   Underline = 'ql-underline',
   Strikethrough = 'ql-strike',
   Blockquote = 'ql-blockquote',
-  CodeBlock = 'ql-blockquote',
+  CodeBlock = 'ql-code-block',
   Header = 'ql-header',
   List = 'ql-list',
   Script = 'ql-script',
@@ -52,7 +52,7 @@ export interface ToolbarItem {
 
 // There is very little documentation to what values are possible.
 // https://quilljs.com/docs/modules/toolbar + inspect the editor on that page to figure it out
-const DefaultToolbarItems: ToolbarItem[][] = [
+const defaultToolbarItems: ToolbarItem[][] = [
   [
     {
       key: QuillToolbarKey.FontSize,
@@ -119,9 +119,9 @@ export class QuillWrapperComponent {
 
   /**
    * Items to show in the toolbar
-   * @default DefaultToolbarItems
+   * @default defaultToolbarItems
    */
-  toolBarItems = input(DefaultToolbarItems);
+  toolBarItems = input(defaultToolbarItems);
 
   /**
    * If not an empty list, only items with their keys present will be shown

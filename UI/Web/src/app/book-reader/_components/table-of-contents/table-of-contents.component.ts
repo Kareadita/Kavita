@@ -38,7 +38,7 @@ export class TableOfContentsComponent {
   }
 
   loadChapterPage(pageNum: number, part: string) {
-    this.pageNum.set(pageNum)
+    this.pageNum.set(pageNum);
     this.currentPageAnchor.set(part);
 
     this.loadChapter.emit({pageNum, part});
@@ -69,7 +69,7 @@ export class TableOfContentsComponent {
   }
 
   isAnchorSelected(chapter: BookChapterItem) {
-    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor()
+    return this.cleanIdSelector(chapter.part) === this.currentPageAnchor();
   }
 
 }
