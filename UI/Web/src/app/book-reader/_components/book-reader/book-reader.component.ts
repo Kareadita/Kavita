@@ -792,7 +792,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((update) => this.handleReaderSettingsUpdate(update))
       ).subscribe();
 
-      // Load all required data from the API
       forkJoin({
         chapter: this.seriesService.getChapter(this.chapterId),
         progress: this.readerService.getProgress(this.chapterId),
@@ -1671,7 +1670,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case "writingStyle":
         this.applyWritingStyle();
         break;
-      case "bookReaderLayoutMode":
+      case "layoutMode":
         this.applyLayoutMode(res.object as BookPageLayoutMode);
         break;
       case "readingDirection":

@@ -207,21 +207,23 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   }
 
   ngOnInit(){
-    if (this.isEditMode()) {
-      this.formGroup.valueChanges.pipe(
-        debounceTime(350),
-        switchMap(_ => {
-          const updatedAnnotation = this.annotation();
-          if (!updatedAnnotation) return of();
-
-          updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-          updatedAnnotation.comment = JSON.stringify(this.annotationNote);
-
-          return this.annotationService.updateAnnotation(updatedAnnotation);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
+    if (!this.isEditMode()) {
+      return;
     }
+
+    this.formGroup.valueChanges.pipe(
+      debounceTime(350),
+      switchMap(_ => {
+        const updatedAnnotation = this.annotation();
+        if (!updatedAnnotation) return of();
+
+        updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+        updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+
+        return this.annotationService.updateAnnotation(updatedAnnotation);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   createAnnotation() {

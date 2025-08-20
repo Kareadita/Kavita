@@ -18,7 +18,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 
 export interface ReaderSettingUpdate {
-  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'bookReaderLayoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
+  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
   object: any;
 }
 
@@ -153,7 +153,7 @@ export class EpubReaderSettingsService {
       if (!this.isInitialized) return;
 
       this.settingUpdateSubject.next({
-        setting: 'bookReaderLayoutMode',
+        setting: 'layoutMode',
         object: mode,
       });
     });
@@ -605,7 +605,6 @@ export class EpubReaderSettingsService {
   private updateImplicitProfile(): void {
     if (!this._currentReadingProfile() || !this._currentSeriesId()) return;
 
-    console.log("Updating implicit reading profile")
     this.readingProfileService.updateImplicit(this.packReadingProfile(), this._currentSeriesId()!)
       .subscribe({
         next: newProfile => {
@@ -634,11 +633,11 @@ export class EpubReaderSettingsService {
     data.bookReaderFontSize = modelSettings.bookReaderFontSize;
     data.bookReaderLineSpacing = modelSettings.bookReaderLineSpacing;
     data.bookReaderMargin = modelSettings.bookReaderMargin;
+
+    // Update from signals
     data.bookReaderTapToPaginate = this._clickToPaginate();
     data.bookReaderLayoutMode = this._layoutMode();
     data.bookReaderImmersiveMode = this._immersiveMode();
-
-    // Update from signals
     data.bookReaderReadingDirection = this._readingDirection();
     data.bookReaderWritingStyle = this._writingStyle();
 
