@@ -72,10 +72,15 @@
 
           <div class="setting-section-break" aria-hidden="true"></div>
 
-
           <div class="row g-0 mt-2 mb-2 mx-auto">
             @if (isEditOrCreateMode()) {
-              <quill-editor theme="snow" formControlName="note" format="object" (onContentChanged)="updateContent($event)"/>
+              <app-quill-wrapper
+                controlName="note"
+                [formGroup]="formGroup"
+                [theme]="QuillTheme.Snow"
+                (contentChanged)="updateContent($event)"
+              >
+              </app-quill-wrapper>
             } @else {
               <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
             }

@@ -12,14 +12,14 @@
       <li [ngbNavItem]="TabID.TableOfContents">
         <a ngbNavLink>{{t('toc-header')}}</a>
         <ng-template ngbNavContent>
-          <app-table-of-contents [chapters]="chapters()" [chapterId]="chapterId()!" [pageNum]="pageNum"
+          <app-table-of-contents [chapters]="chapters()" [chapterId]="chapterId()!" [pageNum]="pageNum()"
                                  [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
         </ng-template>
       </li>
       <li [ngbNavItem]="TabID.PersonalTableOfContents">
         <a ngbNavLink>{{t('personal-header')}}</a>
         <ng-template ngbNavContent>
-          <app-personal-table-of-contents [chapterId]="chapterId()!" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
+          <app-personal-table-of-contents [chapterId]="chapterId()!" [pageNum]="pageNum()" (loadChapter)="loadChapterPart($event)"
                                           [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
         </ng-template>
       </li>

@@ -23,7 +23,7 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
-import {EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
+import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
 
 /**
  * Used for book reader. Do not use for other components
@@ -103,7 +103,7 @@ export class ReaderSettingsComponent implements OnInit {
    */
   fontOptions: Array<string> = [];
   fontFamilies: Array<FontFamily> = [];
-  settingsForm: FormGroup = new FormGroup({});
+  settingsForm!: BookReadingProfileFormGroup;
   /**
    * System provided themes
    */
