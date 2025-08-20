@@ -1,19 +1,21 @@
-<ng-container *transloco="let t; read:'settings'">
-  @if (accountService.currentUser$ | async; as user) {
+<ng-container *transloco="let t; prefix:'settings'">
+  @if (accountService.currentUserSignal(); as user) {
 
-    @if((navService.sideNavCollapsed$ | async) === false) {
-      <div class="preference side-nav-container"  [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
-      'hidden': (navService.sideNavVisibility$ | async) === false,
-      'no-donate': (licenseService.hasValidLicense$ | async) === true}">
+    @if(!navService.sideNavCollapsedSignal()) {
+      <div class="preference side-nav-container"  [ngClass]="{
+      'closed' : navService.sideNavCollapsedSignal(),
+      'hidden': !navService.sideNavVisibilitySignal(),
+      'no-donate': licenseService.hasValidLicenseSignal()
+      }">
         <div class="side-nav">
 
           @for(section of sections; track section.title + section.children.length; let idx = $index;) {
-            @if (hasAnyChildren(user, section)) {
+            @let children = getVisibleChildren(user, section);
+
+            @if (children.length > 0) {
               <h5 class="side-nav-header mb-2" [ngClass]="{'mt-4': idx > 0}">{{t(section.title)}}</h5>
-              @for(item of section.children; track item.fragment) {
-                @if (accountService.hasAnyRole(user, item.roles, item.restrictRoles)) {
-                  <app-side-nav-item [id]="'nav-item-' + item.fragment" [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
-                }
+              @for(item of children; track item.fragment) {
+                <app-side-nav-item [id]="'nav-item-' + item.fragment" [noIcon]="true" link="/settings" [fragment]="item.fragment" [title]="item.fragment | settingFragment" [badgeCount]="item.badgeCount$ | async"></app-side-nav-item>
               }
             }
           }
@@ -22,7 +24,7 @@
       </div>
       @if (utilityService.activeBreakpoint$ | async; as breakpoint) {
         @if (breakpoint < Breakpoint.Desktop) {
-          <div class="side-nav-overlay" (click)="collapse()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
+          <div class="side-nav-overlay" (click)="collapse()" [ngClass]="{'closed' : navService.sideNavCollapsedSignal()}"></div>
         }
       }
     }

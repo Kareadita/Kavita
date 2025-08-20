@@ -1,4 +1,12 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
@@ -55,8 +63,16 @@ export enum SettingsTabId {
   CBLImport = 'cbl-import'
 }
 
+export enum SettingSectionId {
+  AccountSection = 'account-section-title',
+  ServerSection = 'server-section-title',
+  ImportSection = 'import-section-title',
+  InfoSection = 'info-section-title',
+  KavitaPlusSection = 'kavitaplus-section-title',
+}
+
 interface PrefSection {
-  title: string;
+  title: SettingSectionId;
   children: SideNavItem[];
 }
 
@@ -68,13 +84,27 @@ class SideNavItem {
    */
   restrictRoles: Array<Role> = [];
   badgeCount$?: Observable<number> | undefined;
+  kPlusOnly: boolean;
 
-  constructor(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined, restrictRoles: Array<Role> = []) {
+  constructor(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined, restrictRoles: Array<Role> = [], kPlusOnly: boolean = false) {
     this.fragment = fragment;
     this.roles = roles;
     this.restrictRoles = restrictRoles;
     this.badgeCount$ = badgeCount$;
+    this.kPlusOnly = kPlusOnly;
   }
+
+  /**
+   * Create a new SideNavItem with kPlusOnly set to true
+   * @param fragment
+   * @param roles
+   * @param badgeCount$
+   * @param restrictRoles
+   */
+  static kPlusOnly(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined, restrictRoles: Array<Role> = []) {
+    return new SideNavItem(fragment, roles, badgeCount$, restrictRoles, true);
+  }
+
 }
 
 @Component({
@@ -105,76 +135,11 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly manageService = inject(ManageService);
   private readonly document = inject(DOCUMENT);
 
-  hasActiveLicense = false;
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
    */
-  sections: Array<PrefSection> = [
-    {
-      title: 'account-section-title',
-      children: [
-        new SideNavItem(SettingsTabId.Account, []),
-        new SideNavItem(SettingsTabId.Preferences),
-        new SideNavItem(SettingsTabId.ReadingProfiles),
-        new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
-        new SideNavItem(SettingsTabId.Clients),
-        new SideNavItem(SettingsTabId.Theme),
-        new SideNavItem(SettingsTabId.Devices),
-        new SideNavItem(SettingsTabId.UserStats),
-      ]
-    },
-    {
-      title: 'server-section-title',
-      children: [
-        new SideNavItem(SettingsTabId.General, [Role.Admin]),
-        new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
-        new SideNavItem(SettingsTabId.OpenIDConnect, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Media, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Email, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Users, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
-      ]
-    },
-    {
-      title: 'import-section-title',
-      children: [
-        new SideNavItem(SettingsTabId.CBLImport, [], undefined, [Role.ReadOnly]),
-        new SideNavItem(SettingsTabId.MappingsImport, [Role.Admin]),
-      ]
-    },
-    {
-      title: 'info-section-title',
-      children: [
-        new SideNavItem(SettingsTabId.System, [Role.Admin]),
-        new SideNavItem(SettingsTabId.Statistics, [Role.Admin]),
-        new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin],
-          this.accountService.currentUser$.pipe(
-            take(1),
-            switchMap(user => {
-              if (!user || !this.accountService.hasAdminRole(user)) {
-                // If no user or user does not have the admin role, return an observable of -1
-                return of(-1);
-              } else {
-                return this.serverService.getMediaErrors().pipe(
-                  takeUntilDestroyed(this.destroyRef),
-                  map(d => d.length),
-                  shareReplay({ bufferSize: 1, refCount: true })
-                );
-              }
-            })
-          )),
-        new SideNavItem(SettingsTabId.EmailHistory, [Role.Admin]),
-      ]
-    },
-    {
-      title: 'kavitaplus-section-title',
-      children: [
-        new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin])
-        // All other sections added dynamically
-      ]
-    }
-  ];
+  sections: Array<PrefSection> = [];
+
   collapseSideNavOnMobileNav$ = this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),
     takeUntilDestroyed(this.destroyRef),
@@ -225,6 +190,22 @@ export class PreferenceNavComponent implements AfterViewInit {
     })
   );
 
+  private readonly mediaIssuesBadgeCount$ = this.accountService.currentUser$.pipe(
+    take(1),
+    switchMap(user => {
+      if (!user || !this.accountService.hasAdminRole(user)) {
+        // If no user or user does not have the admin role, return an observable of -1
+        return of(-1);
+      }
+
+      return this.serverService.getMediaErrors().pipe(
+        takeUntilDestroyed(this.destroyRef),
+        map(d => d.length),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+    })
+  );
+
   constructor() {
     this.collapseSideNavOnMobileNav$.subscribe();
 
@@ -233,32 +214,70 @@ export class PreferenceNavComponent implements AfterViewInit {
       this.navService.collapseSideNav(true);
     }
 
-    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      this.hasActiveLicense = res;
-      if (res) {
-        const kavitaPlusSection = this.sections[4];
-        if (kavitaPlusSection.children.length === 1) {
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ManageUserTokens, [Role.Admin]));
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Metadata, [Role.Admin]));
-
-          // Keep all setting type of screens above this line
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.MatchedMetadata, [Role.Admin],
-            this.matchedMetadataBadgeCount$
-          ));
-
-          // Scrobbling History needs to be per-user and allow admin to view all
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.ScrobblingHolds, []));
-          kavitaPlusSection.children.push(new SideNavItem(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount$)
-          );
-        }
-
-        if (this.sections[2].children.length === 1) {
-          this.sections[2].children.push(new SideNavItem(SettingsTabId.MALStackImport, []));
-        }
-
-        this.scrollToActiveItem();
-        this.cdRef.markForCheck();
+    this.sections = [
+      {
+        title: SettingSectionId.AccountSection,
+        children: [
+          new SideNavItem(SettingsTabId.Account, []),
+          new SideNavItem(SettingsTabId.Preferences),
+          new SideNavItem(SettingsTabId.ReadingProfiles),
+          new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
+          new SideNavItem(SettingsTabId.Clients),
+          new SideNavItem(SettingsTabId.Theme),
+          new SideNavItem(SettingsTabId.Devices),
+          new SideNavItem(SettingsTabId.UserStats),
+        ]
+      },
+      {
+        title: SettingSectionId.ServerSection,
+        children: [
+          new SideNavItem(SettingsTabId.General, [Role.Admin]),
+          new SideNavItem(SettingsTabId.ManageMetadata, [Role.Admin]),
+          new SideNavItem(SettingsTabId.OpenIDConnect, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Media, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Email, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Users, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Libraries, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Tasks, [Role.Admin]),
+        ]
+      },
+      {
+        title: SettingSectionId.ImportSection,
+        children: [
+          new SideNavItem(SettingsTabId.MappingsImport, [Role.Admin]),
+          new SideNavItem(SettingsTabId.CBLImport, [], undefined, [Role.ReadOnly]),
+          SideNavItem.kPlusOnly(SettingsTabId.MALStackImport),
+        ]
+      },
+      {
+        title: SettingSectionId.InfoSection,
+        children: [
+          new SideNavItem(SettingsTabId.System, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Statistics, [Role.Admin]),
+          new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin], this.mediaIssuesBadgeCount$),
+          new SideNavItem(SettingsTabId.EmailHistory, [Role.Admin]),
+        ]
+      },
+      {
+        title: SettingSectionId.KavitaPlusSection,
+        children: [
+          new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin]),
+          SideNavItem.kPlusOnly(SettingsTabId.ManageUserTokens, [Role.Admin]),
+          SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
+          SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount$),
+          SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
+          SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount$),
+        ]
       }
+    ];
+
+    this.scrollToActiveItem();
+    this.cdRef.markForCheck();
+
+    // Refresh visibility if license changes
+    effect(() => {
+      this.licenseService.hasValidLicenseSignal();
+      this.cdRef.markForCheck();
     });
   }
 
@@ -276,14 +295,12 @@ export class PreferenceNavComponent implements AfterViewInit {
     }
   }
 
-  hasAnyChildren(user: User, section: PrefSection) {
-    // Filter out items where the user has a restricted role
-    const visibleItems = section.children.filter(item =>
-      (item.restrictRoles.length === 0 || !this.accountService.hasAnyRestrictedRole(user, item.restrictRoles)) &&
-      (item.roles.length === 0 || this.accountService.hasAnyRole(user, item.roles))
-    );
+  getVisibleChildren(user: User, section: PrefSection) {
+    return section.children.filter(item => this.isItemVisible(user, item));
+  }
 
-    return visibleItems.length > 0;
+  isItemVisible(user: User, item: SideNavItem) {
+    return this.accountService.hasAnyRole(user, item.roles, item.restrictRoles) && (!item.kPlusOnly || this.licenseService.hasValidLicenseSignal())
   }
 
   collapse() {
