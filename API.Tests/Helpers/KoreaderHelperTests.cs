@@ -14,6 +14,7 @@ public class KoreaderHelperTests
     [InlineData("/body/DocFragment[11]/body/div/a", 10, null)]
     [InlineData("/body/DocFragment[1]/body/div/p[40]", 0, 40)]
     [InlineData("/body/DocFragment[8]/body/div/p[28]/text().264", 7, 28)]
+    [InlineData("/body/DocFragment[6]/body/p[12]/text().0", 5, 12)] // Real-world example without div
     public void GetEpubPositionDto(string koreaderPosition, int page, int? pNumber)
     {
         var expected = EmptyProgressDto();
@@ -37,6 +38,35 @@ public class KoreaderHelperTests
         given.PageNum = page;
 
         Assert.Equal(koreaderPosition, KoreaderHelper.GetKoreaderPosition(given));
+    }
+
+    [Fact]
+    public void GetKoreaderPosition_HandlesNullProgressDto()
+    {
+        var result = KoreaderHelper.GetKoreaderPosition(null);
+        Assert.Equal("/body/DocFragment[1]/body/div/a", result);
+    }
+
+    [Theory]
+    [InlineData("/body/DocFragment[5]/body/p[15]/text().0")]
+    [InlineData("/body/DocFragment[3]/body/div/span[7]/text().123")]
+    [InlineData("/body/DocFragment[2]/body/h1[1]")]
+    public void UpdateProgressDto_HandlesVariousRealWorldFormats(string koreaderPosition)
+    {
+        var progressDto = EmptyProgressDto();
+        
+        // Should not throw exception
+        KoreaderHelper.UpdateProgressDto(progressDto, koreaderPosition);
+        
+        // Should extract valid page number
+        var parts = koreaderPosition.Split('/');
+        var expectedDocNumber = parts[2].Replace("DocFragment[", "").Replace("]", "");
+        var expectedPage = int.Parse(expectedDocNumber) - 1;
+        
+        Assert.Equal(expectedPage, progressDto.PageNum);
+        
+        // Should have valid BookScrollId (unless element is 'a')
+        Assert.NotNull(progressDto.BookScrollId);
     }
 
     [Theory]
