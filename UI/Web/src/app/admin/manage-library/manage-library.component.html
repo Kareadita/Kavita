@@ -2,7 +2,7 @@
   <div class="position-relative">
     <div class="position-absolute custom-position-2">
       <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')"
-                            [disabled]="bulkMode">
+                            [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null!)">
       </app-card-actionables>
     </div>
 
