@@ -12,7 +12,7 @@ public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
 
-    [GeneratedRegex("""^//id\("([^"]+)"\)$""")]
+    [GeneratedRegex("""^id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
 
 
@@ -37,7 +37,7 @@ public static partial class AnnotationHelper
             try
             {
                 var scopedXPath = DescopeXpath(xpath);
-                var elem = FindElementByXPath(doc, scopedXPath);
+                var elem = FindElementByXPath(doc, xpath);
                 if (elem == null) continue;
 
                 var originalText = elem.InnerText;

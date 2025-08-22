@@ -314,15 +314,14 @@ public partial class BookService : IBookService
     /// For each bookmark on this page, inject a specialized icon
     /// </summary>
     /// <param name="doc"></param>
-    /// <param name="book"></param>
     /// <param name="ptocBookmarks"></param>
-    private static void InjectPTOCBookmarks(HtmlDocument doc, EpubBookRef book, List<PersonalToCDto> ptocBookmarks)
+    private static void InjectPTOCBookmarks(HtmlDocument doc, List<PersonalToCDto> ptocBookmarks)
     {
         if (ptocBookmarks.Count == 0) return;
 
         foreach (var bookmark in ptocBookmarks.Where(b => !string.IsNullOrEmpty(b.BookScrollId)))
         {
-            var unscopedSelector = bookmark.BookScrollId.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
+            var unscopedSelector = bookmark.BookScrollId!.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
             var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
             elem?.PrependChild(HtmlNode.CreateNode($"<i class='fa-solid fa-bookmark ps-1 pe-1' role='button' id='ptoc-{bookmark.Id}' title='{bookmark.Title}'></i>"));
         }
@@ -332,7 +331,6 @@ public partial class BookService : IBookService
     private static void InjectAnnotations(HtmlDocument doc, List<AnnotationDto> annotations)
     {
         if (annotations.Count == 0) return;
-
 
         var singleElementAnnotations = annotations
             .Where(a => !string.IsNullOrEmpty(a.XPath) && a.XPath == a.EndingXPath)
@@ -1223,7 +1221,7 @@ public partial class BookService : IBookService
         InjectImages(doc, book, apiBase);
 
         // Inject PTOC Bookmark Icons
-        InjectPTOCBookmarks(doc, book, ptocBookmarks);
+        InjectPTOCBookmarks(doc, ptocBookmarks);
 
         // Inject Annotations
         InjectAnnotations(doc, annotations);

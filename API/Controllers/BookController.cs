@@ -174,7 +174,7 @@ public class BookController : BaseApiController
         {
             var ptocBookmarks =
                 await _unitOfWork.UserTableOfContentRepository.GetPersonalToCForPage(User.GetUserId(), chapterId, page);
-            var annotations = await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapter.Id);
+            var annotations = await _unitOfWork.UserRepository.GetAnnotationsByPage(User.GetUserId(), chapter.Id, page);
 
             return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl, ptocBookmarks, annotations));
         }

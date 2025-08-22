@@ -360,6 +360,7 @@ export class ReaderService {
       xpath = xpath.replace('//html[1]///BODY', '//BODY')
     }
 
+    // We need to keep the last /DIV[1] as that is the bookContent 
     return xpath.replace(bookContentXPath, '//BODY');
   }
 

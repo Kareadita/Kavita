@@ -104,27 +104,6 @@ export class EpubReaderSettingsService {
     return BookPageLayoutMode.Column1;
   });
 
-  // public readonly columnWidth = computed(() => {
-  //   const measurements = this.layoutMeasurements.measurements();
-  //   const layout = this.layoutMode();
-  //   const writingStyle = this.writingStyle();
-  //
-  //   if (layout === BookPageLayoutMode.Default) return 'unset';
-  //
-  //   const base = writingStyle === WritingStyle.Vertical
-  //     ? measurements.windowHeight
-  //     : measurements.windowWidth;
-  //
-  //   const width = layout === BookPageLayoutMode.Column1
-  //     ? (base / 2) - COLUMN_GAP
-  //     : (base / 4);
-  //
-  //   return width + 'px';
-  // });
-
-  // public readonly virtualPageInfo = computed(() => {
-  //   return this.layoutMeasurements.virtualPageInfo();
-  // });
 
   public readonly canPromoteProfile = computed(() => {
     const profile = this._currentReadingProfile();

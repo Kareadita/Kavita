@@ -108,6 +108,7 @@ public interface IUserRepository
     Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo();
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail);
     Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId);
+    Task<List<AnnotationDto>> GetAnnotationsByPage(int userId, int chapterId, int pageNum);
     /// <summary>
     /// Try getting a user by the id provided by OIDC
     /// </summary>
@@ -568,7 +569,7 @@ public class UserRepository : IUserRepository
     }
 
     /// <summary>
-    /// Returns a list of annotations ordered by page number. If the user has
+    /// Returns a list of annotations ordered by page number.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="chapterId"></param>
@@ -578,6 +579,16 @@ public class UserRepository : IUserRepository
         // TODO: Check settings if I should include other user's annotations
         return await _context.AppUserAnnotation
             .Where(a => a.AppUserId == userId && a.ChapterId == chapterId)
+            .OrderBy(a => a.PageNumber)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<List<AnnotationDto>> GetAnnotationsByPage(int userId, int chapterId, int pageNum)
+    {
+        // TODO: Check settings if I should include other user's annotations
+        return await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId && a.PageNumber == pageNum)
             .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
