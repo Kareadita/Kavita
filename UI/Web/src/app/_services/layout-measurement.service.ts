@@ -1,7 +1,4 @@
-import {computed, Injectable, OnDestroy, Signal, signal} from '@angular/core';
-import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
-import {WritingStyle} from "../_models/preferences/writing-style";
-import {EpubReaderSettingsService} from "./epub-reader-settings.service";
+import {Injectable, OnDestroy, signal} from '@angular/core';
 
 export interface LayoutMeasurements {
   windowWidth: number,
@@ -22,9 +19,11 @@ export interface LayoutMeasurements {
 })
 export class LayoutMeasurementService implements OnDestroy {
   private resizeObserver?: ResizeObserver;
-  private intersectionObserver?: IntersectionObserver;
   private rafId?: number;
   private observedElements = new Map<string, HTMLElement>();
+
+  private readingSectionElement?: HTMLElement;
+  private bookContentElement?: HTMLElement;
 
   // Public signals for components to consume
   readonly measurements = signal<LayoutMeasurements>({
@@ -38,38 +37,6 @@ export class LayoutMeasurementService implements OnDestroy {
     readerHeight: 0,
   });
 
-  // Settings passed in from outside to avoid circular dependency
-  private layoutMode: Signal<BookPageLayoutMode> = signal<BookPageLayoutMode>(BookPageLayoutMode.Default);
-  private writingStyle: Signal<WritingStyle> = signal<WritingStyle>(WritingStyle.Horizontal);
-
-
-  // Computed values based on measurements and settings
-  readonly virtualPageInfo = computed(() => {
-    const m = this.measurements();
-    const layoutMode = this.layoutMode();
-    const writingStyle = this.writingStyle();
-
-    if (layoutMode === BookPageLayoutMode.Default) {
-      return { currentPage: 1, totalPages: 1, pageSize: 0 };
-    }
-
-    // Calculate based on current measurements
-    const pageSize = writingStyle === WritingStyle.Vertical
-      ? m.readerHeight
-      : m.readerWidth;
-
-    const totalSize = writingStyle === WritingStyle.Vertical
-      ? m.scrollHeight
-      : m.scrollWidth;
-
-    const totalPages = Math.max(1, Math.ceil(totalSize / pageSize));
-
-    return {
-      currentPage: 1, // This would be calculated based on scroll position
-      totalPages,
-      pageSize
-    };
-  });
 
   constructor() {
     this.initializeObservers();
@@ -77,33 +44,14 @@ export class LayoutMeasurementService implements OnDestroy {
   }
 
 
-  updateSettings(epubReaderSettingsService: EpubReaderSettingsService) {
-    this.layoutMode = epubReaderSettingsService.layoutMode;
-    this.writingStyle = epubReaderSettingsService.writingStyle;
-  }
-
-  private initializeObservers(): void {
+  private initializeObservers() {
     // ResizeObserver for element size changes
     this.resizeObserver = new ResizeObserver(entries => {
       this.scheduleUpdate(() => this.handleResize(entries));
     });
-
-    // IntersectionObserver for visibility tracking
-    this.intersectionObserver = new IntersectionObserver(
-      entries => this.handleIntersection(entries),
-      {
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-        rootMargin: '50px'
-      }
-    );
   }
 
-  private setupWindowListeners(): void {
-    // Debounced window resize handler
-    // const handleWindowResize = debounce(() => {
-    //   this.updateWindowMeasurements();
-    // }, 150);
-
+  private setupWindowListeners() {
     window.addEventListener('resize', this.updateWindowMeasurements.bind(this));
     window.addEventListener('orientationchange', this.updateWindowMeasurements.bind(this));
   }
@@ -111,13 +59,20 @@ export class LayoutMeasurementService implements OnDestroy {
   /**
    * Start observing an element for size changes
    */
-  observeElement(element: HTMLElement, key: string): void {
+  observeElement(element: HTMLElement, key: 'readingSection' | 'bookContent') {
     if (this.observedElements.has(key)) {
       this.unobserveElement(key);
     }
 
     this.observedElements.set(key, element);
     this.resizeObserver?.observe(element);
+
+    // Store reference to key elements
+    if (key === 'readingSection') {
+      this.readingSectionElement = element;
+    } else if (key === 'bookContent') {
+      this.bookContentElement = element;
+    }
 
     // Initial measurement
     this.measureElement(element, key);
@@ -134,12 +89,7 @@ export class LayoutMeasurementService implements OnDestroy {
     }
   }
 
-  /**
-   * Observe elements for intersection (visibility)
-   */
-  observeForIntersection(elements: Element[]): void {
-    elements.forEach(el => this.intersectionObserver?.observe(el));
-  }
+
 
   private handleResize(entries: ResizeObserverEntry[]): void {
     const updates: Partial<LayoutMeasurements> = {};
@@ -170,21 +120,6 @@ export class LayoutMeasurementService implements OnDestroy {
     this.measurements.update(current => ({ ...current, ...updates }));
   }
 
-  private handleIntersection(entries: IntersectionObserverEntry[]): void {
-    // Track which elements are visible for progress tracking
-    const visibleElements = entries
-      .filter(e => e.isIntersecting)
-      .map(e => e.target);
-
-    // You can emit this to another service or signal
-    this.updateVisibleElements(visibleElements);
-  }
-
-  private updateVisibleElements(elements: Element[]): void {
-    // Implementation for tracking visible elements
-    // This could update a signal that the reader component consumes
-  }
-
   private measureElement(element: HTMLElement, key: string): void {
     const rect = element.getBoundingClientRect();
     const updates: Partial<LayoutMeasurements> = {};
@@ -206,10 +141,12 @@ export class LayoutMeasurementService implements OnDestroy {
   }
 
   private updateWindowMeasurements(): void {
+
+
     this.measurements.update(current => ({
       ...current,
       windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight
+      windowHeight: window.innerHeight,
     }));
   }
 
@@ -226,7 +163,7 @@ export class LayoutMeasurementService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
-    this.intersectionObserver?.disconnect();
+
     if (this.rafId) {
       cancelAnimationFrame(this.rafId);
     }

@@ -104,27 +104,27 @@ export class EpubReaderSettingsService {
     return BookPageLayoutMode.Column1;
   });
 
-  public readonly columnWidth = computed(() => {
-    const measurements = this.layoutMeasurements.measurements();
-    const layout = this.layoutMode();
-    const writingStyle = this.writingStyle();
+  // public readonly columnWidth = computed(() => {
+  //   const measurements = this.layoutMeasurements.measurements();
+  //   const layout = this.layoutMode();
+  //   const writingStyle = this.writingStyle();
+  //
+  //   if (layout === BookPageLayoutMode.Default) return 'unset';
+  //
+  //   const base = writingStyle === WritingStyle.Vertical
+  //     ? measurements.windowHeight
+  //     : measurements.windowWidth;
+  //
+  //   const width = layout === BookPageLayoutMode.Column1
+  //     ? (base / 2) - COLUMN_GAP
+  //     : (base / 4);
+  //
+  //   return width + 'px';
+  // });
 
-    if (layout === BookPageLayoutMode.Default) return 'unset';
-
-    const base = writingStyle === WritingStyle.Vertical
-      ? measurements.windowHeight
-      : measurements.windowWidth;
-
-    const width = layout === BookPageLayoutMode.Column1
-      ? (base / 2) - COLUMN_GAP
-      : (base / 4);
-
-    return width + 'px';
-  });
-
-  public readonly virtualPageInfo = computed(() => {
-    return this.layoutMeasurements.virtualPageInfo();
-  });
+  // public readonly virtualPageInfo = computed(() => {
+  //   return this.layoutMeasurements.virtualPageInfo();
+  // });
 
   public readonly canPromoteProfile = computed(() => {
     const profile = this._currentReadingProfile();
@@ -257,8 +257,6 @@ export class EpubReaderSettingsService {
     // Set initial theme
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
     this.setTheme(themeName, false);
-
-    this.layoutMeasurements.updateSettings(this);
 
     // Mark as initialized - this will trigger effects to emit initial values
     this._isInitialized.set(true);

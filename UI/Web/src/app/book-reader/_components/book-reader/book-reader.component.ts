@@ -193,7 +193,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If the word/line overlay is open
    */
-  isLineOverlayOpen = false;
+  isLineOverlayOpen = model<boolean>(false);
   /**
    * If the action bar is visible
    */
@@ -358,9 +358,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
 
-  protected columnWidth = this.readerSettingsService.columnWidth;
-  protected readonly measurements = this.layoutService.measurements;
-  protected readonly virtualPageInfo = this.layoutService.virtualPageInfo;
+  //protected columnWidth = this.readerSettingsService.columnWidth;
+  protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
   protected verticalBookContentWidth!: Signal<string>;
   protected virtualizedPageNum!: Signal<number>;
@@ -465,6 +464,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const layoutMode = this.layoutMode();
     const immersiveMode = this.immersiveMode();
     const widthHeight = this.windowHeight();
+    //const measurements = this.layoutService.measurements();
+
 
     if (layoutMode=== BookPageLayoutMode.Default) {
       // if the book content is less than the height of the container, override and return height of container for pagination area
@@ -486,14 +487,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.columnWidth = computed(() => {
-      const base = this.writingStyle() === WritingStyle.Vertical ? this.windowHeight() : this.windowWidth();
+      const baseWidth = this.writingStyle() === WritingStyle.Vertical ? this.windowHeight() : this.windowWidth();
+
       switch (this.layoutMode()) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((base / 2) - 4) + 'px';
+          return ((baseWidth / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return (base / 4) + 'px';
+          return (baseWidth / 4) + 'px';
         default:
           return 'unset';
       }
@@ -517,49 +519,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.verticalBookContentWidth = computed(() => {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
+      const verticalPageWidth = this.getVerticalPageWidth();
       const pageStyles = this.pageStyles() ?? this.readerSettingsService.getDefaultPageStyles(); // Needed in inner method (not sure if Signals handle)
 
 
-      if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal ) {
-        const width = this.getVerticalPageWidth()
-        return width + 'px';
+      if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal) {
+        return `${verticalPageWidth}px`;
       }
       return '';
     });
 
     this.virtualizedPageNum = computed(() => {
-      const actualPageNum = this.pageNum();
-      const layout = this.layoutMode();
-      const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
-      const scrolledWidth = this.virtualPageScroll(); // This is just there to trigger the computed after virtualized pagination
-
-      return actualPageNum;
-
-      switch (layout) {
-        case BookPageLayoutMode.Default:
-          return actualPageNum;
-        case BookPageLayoutMode.Column1:
-          return actualPageNum + currentVirtualPage;
-        case BookPageLayoutMode.Column2:
-          return actualPageNum + currentVirtualPage;
-      }
+      return this.pageNum();
     });
 
     this.virtualizedMaxPages = computed(() => {
-      const actualMaxPages = this.maxPages();
-      const layout = this.layoutMode();
-      const [currentVirtualPage, totalVirtualPages, pageSize] = this.getVirtualPage();
-
-      return actualMaxPages;
-      // I'm not sure this will work because we don't know the other pages virtual pages
-      switch (layout) {
-        case BookPageLayoutMode.Default:
-          return actualMaxPages;
-        case BookPageLayoutMode.Column1:
-          return actualMaxPages + totalVirtualPages;
-        case BookPageLayoutMode.Column2:
-          return actualMaxPages + totalVirtualPages;
-      }
+      return this.maxPages();
     });
 
     effect(() => {
@@ -904,7 +879,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
     } else if (event.key === KEY_CODES.ESC_KEY) {
       const isHighlighting = window.getSelection()?.toString() != '';
-      if (isHighlighting || this.isLineOverlayOpen) return;
+      if (isHighlighting || this.isLineOverlayOpen()) return;
       this.closeReader();
     } else if (event.key === KEY_CODES.G) {
       await this.goToPage();
@@ -920,7 +895,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (event.deltaY !== 0) {
       event.preventDefault()
-      this.scrollService.scrollToX(  event.deltaY + this.reader.nativeElement.scrollLeft, this.reader.nativeElement);
+      this.scrollService.scrollToX(event.deltaY + this.reader.nativeElement.scrollLeft, this.reader.nativeElement);
     }
 }
 
@@ -1343,7 +1318,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Need to adjust height with the column gap to ensure we don't have too much extra page
-    const columnHeight = this.getPageHeight() - COLUMN_GAP;
+    const columnHeight = this.pageHeight() - COLUMN_GAP;
     const emptyPage = this.renderer.createElement('div');
 
     this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
@@ -1483,22 +1458,40 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
+
+  // getPageWidth() {
+  //   if (this.readingSectionElemRef == null) return 0;
+  //   const margin = (this.convertVwToPx(parseInt(this.pageStyles()['margin-left'], 10)) * 2);
+  //   return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
+  // }
+
   /**
    *
    * @returns Total Page width (excluding margin)
    */
-  getPageWidth() {
+  pageWidth = computed(() => {
+    const marginLeft = this.pageStyles()['margin-left'];
     if (this.readingSectionElemRef == null) return 0;
-    const margin = (this.convertVwToPx(parseInt(this.pageStyles()['margin-left'], 10)) * 2);
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
-  }
+  });
 
-  getPageHeight() {
+  pageHeight = computed(() => {
+    const columnHeight = this.columnHeight();
     if (this.readingSectionElemRef == null) return 0;
-    const height = (parseInt(this.columnHeight().replace('px', ''), 10));
+
+    const height = (parseInt(columnHeight.replace('px', ''), 10));
 
     return height - COLUMN_GAP;
-  }
+  });
+
+
+  // getPageHeight() {
+  //   if (this.readingSectionElemRef == null) return 0;
+  //   const height = (parseInt(this.columnHeight().replace('px', ''), 10));
+  //
+  //   return height - COLUMN_GAP;
+  // }
 
   getVerticalPageWidth() {
     if (!(this.pageStyles() || {}).hasOwnProperty('margin-left')) return 0; // TODO: Test this, added for safety during refactor
@@ -1518,10 +1511,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns currentVirtualPage, totalVirtualPages, pageSize
    */
   getVirtualPage() {
+
+    //return this.layoutService.virtualPageInfo();
+
     if (!this.bookContentElemRef || !this.readingSectionElemRef) return [1, 1, 0];
 
     const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
-    const pageSize = this.getPageSize();
+    const pageSize = this.pageSize();
     const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
     const delta = scrollOffset - totalScroll;
     let currentVirtualPage = 1;
@@ -1551,11 +1547,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return [scrollOffset, totalScroll];
   }
 
-  private getPageSize() {
+  pageSize = computed(() => {
     return this.writingStyle() === WritingStyle.Vertical
-        ? this.getPageHeight()
-        : this.getPageWidth();
-  }
+      ? this.pageHeight()
+      : this.pageWidth();
+  });
+
+  // private getPageSize() {
+  //   return this.writingStyle() === WritingStyle.Vertical
+  //       ? this.pageHeight()
+  //       : this.pageWidth();
+  // }
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
@@ -1931,7 +1933,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleReaderClick(event: MouseEvent) {
-    if (!this.clickToPaginate) {
+    if (!this.clickToPaginate()) {
       event.preventDefault();
       event.stopPropagation();
       this.toggleMenu(event);
@@ -1966,8 +1968,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   mouseDown($event: MouseEvent) {
-    this.mousePosition.x = $event.clientX;
-    this.mousePosition.y = $event.clientY;
+    this.mousePosition = {x: $event.clientX, y: $event.clientY};
   }
 
   refreshPersonalToC() {
@@ -1975,8 +1976,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateLineOverlayOpen(isOpen: boolean) {
-    this.isLineOverlayOpen = isOpen;
-    this.cdRef.markForCheck();
+    this.isLineOverlayOpen.set(isOpen);
   }
 
   viewBookmarkImages() {
