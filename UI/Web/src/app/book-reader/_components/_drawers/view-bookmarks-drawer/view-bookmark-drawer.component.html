@@ -12,34 +12,34 @@
 
     <div class="px-2 py-1">
       @for(item of items; track item) {
-        <div class="card mb-2 shadow-sm border-0">
-          <div class="row no-gutters h-100">
-            <div class="col-3 p-0">
-              <div class="h-100 bg-light d-flex align-items-center justify-content-center">
-                <app-image
-                  [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)"
-                  [styles]="{width: '100%', height: '100%', objectFit: 'cover'}" />
+        <div class="bookmark-item mb-2" role="listitem" tabindex="0">
+          <div class="thumb-wrapper">
+            <app-image
+              [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)"
+              [styles]="{width: '100%', height: '100%', objectFit: 'cover'}" />
+          </div>
+          <div class="bookmark-meta">
+            <div class="title-row">
+              <span class="page-label">{{t('page-num-label', {page: item.page})}}</span>
+              <div class="actions d-none d-sm-flex">
+                <button class="btn btn-success btn-icon" (click)="goToBookmark(item)" [attr.aria-label]="t('view')">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn btn-danger btn-icon" (click)="deleteBookmark(item)" [attr.aria-label]="t('delete')">
+                  <i class="fa fa-trash-alt"></i>
+                </button>
               </div>
             </div>
-
-            <div class="col-9 p-0">
-              <div class="card-body h-100 d-flex flex-column justify-content-between py-2 px-3">
-                <div class="flex-grow-1">
-                  <h6 class="card-title mb-1 font-weight-bold text-white">{{t('page-num-label', {page: item.page})}}</h6>
-                  @if (item.chapterTitle) {
-                    <p class="card-text mb-0 text-muted small">{{item.chapterTitle}}</p>
-                  }
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mt-2">
-                  <button class="btn btn-success btn-sm px-3" (click)="goToBookmark(item)">
-                    <i class="fa-solid fa-eye mr-1"></i>
-                  </button>
-                  <button class="btn btn-danger btn-sm px-2" (click)="deleteBookmark(item)">
-                    <i class="fa fa-trash-alt"></i>
-                  </button>
-                </div>
-              </div>
+            @if (item.chapterTitle) {
+              <div class="chapter-title" [title]="item.chapterTitle">{{item.chapterTitle}}</div>
+            }
+            <div class="actions actions-mobile mt-2 d-flex d-sm-none">
+              <button class="btn btn-success flex-fill mr-2" (click)="goToBookmark(item)" [attr.aria-label]="t('view')">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="btn btn-danger flex-fill" (click)="deleteBookmark(item)" [attr.aria-label]="t('delete')">
+                <i class="fa fa-trash-alt"></i>
+              </button>
             </div>
           </div>
         </div>
