@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "npm run cache-locale && ng serve --host 0.0.0.0",
     "build": "npm run cache-locale && ng build",
+    "build-backend": "ng build && rm -r ../../API/wwwroot/* && cp -r dist/browser/* ../../API/wwwroot",
     "minify-langs": "node minify-json.js",
     "cache-locale": "node hash-localization.js",
     "cache-locale-prime": "node hash-localization-prime.js",

@@ -23,7 +23,7 @@ import {
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, fromEvent, merge, of} from 'rxjs';
+import {forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
 import {NavService} from 'src/app/_services/nav.service';
@@ -65,6 +65,7 @@ import {Annotation} from "../../_models/annotations/annotation";
 import {NgxSliderModule} from "@angular-slider/ngx-slider";
 import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
 import {LayoutMeasurementService} from "../../../_services/layout-measurement.service";
+import {ColorscapeService} from "../../../_services/colorscape.service";
 
 
 interface HistoryPoint {
@@ -135,6 +136,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly titleService = inject(Title);
   private readonly document = inject(DOCUMENT);
   private readonly layoutService = inject(LayoutMeasurementService);
+  private readonly colorscapeService = inject(ColorscapeService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -1121,60 +1123,70 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (img.nextElementSibling?.classList.contains('bookmark-overlay')) return;
 
       const xpath = this.readerService.descopeBookReaderXpath(this.readerService.getXPathTo(img));
-      const matchingBookmarks = bookmarksForPage.filter(b => b.imageOffset == index);
+      const matchingBookmarks = bookmarksForPage.filter(b => b.imageOffset === index);
+      let hasBookmark = matchingBookmarks.length > 0;
 
-      let hasBookmark = false;
-      if (matchingBookmarks.length > 0) {
-        hasBookmark = true;
-      }
+      const container = img.parentNode;
+      if (container == null) return;
+
+      const imgRect = img.getBoundingClientRect();
+      const parentRect = (container as HTMLElement).getBoundingClientRect();
+
+      const relativeX = imgRect.left - parentRect.left;
+      const relativeY = imgRect.top - parentRect.top;
 
       const icon = document.createElement('div');
       icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+      icon.title = hasBookmark
+        ? translate('manga-reader.unbookmark-page-tooltip')
+        : translate('manga-reader.bookmark-page-tooltip');
 
-      const boundingBox = img.getBoundingClientRect();
-      const topOffset = boundingBox.top + boundingBox.height - 5;
-      const widthOffset = boundingBox.left + boundingBox.width - 5;
+      const avgColour = this.colorscapeService.getAverageColour(img);
+      let backgroundColor;
+      let textColor;
 
-      // This needs to be dynamic to show in bottom right next to the image
-      icon.title = hasBookmark ? translate('manga-reader.unbookmark-page-tooltip') : translate('manga-reader.bookmark-page-tooltip');
-      icon.style.cssText = `
-      position: absolute;
-      top: ${topOffset}px;
-      left: ${widthOffset}px;
-      background: rgba(0,0,0,0.8);
-      cursor: pointer;
-      z-index: 1000;
-      font-size: 16px;
-      pointer-events: auto;
-    `;
-
-      // Make parent relative if needed
-      const parent = img.parentElement;
-      if (parent == null) return;
-
-      if (getComputedStyle(parent).position === 'static') {
-        parent.style.position = 'relative';
+      if (!avgColour || this.colorscapeService.getLuminance(avgColour) > ColorscapeService.defaultLuminanceThreshold) {
+        backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        textColor = 'white';
+      } else {
+        backgroundColor = 'rgba(255, 255, 255, 1)';
+        textColor = 'black';
       }
 
-      parent.appendChild(icon);
+      icon.style.cssText = `
+          position: absolute;
+          left: ${relativeX + imgRect.width - 16 * 2}px;
+          top: ${relativeY + imgRect.height - 16 * 2}px;
+          margin: 0;
+          transform-origin: bottom right;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          z-index: 1100;
+          cursor: pointer;
+          border-radius: 2px;
+          background: ${backgroundColor} !important;
+          color: ${textColor} !important;
+        `;
 
-      icon.addEventListener('click', () => {
-        if (hasBookmark) {
-          this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index).subscribe(bookmark => {
-            const newState = !hasBookmark;
-            icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+
+      (container as HTMLElement).style.position = 'relative';
+      container.appendChild(icon);
+
+      fromEvent(icon, 'click')
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          distinctUntilChanged(),
+          debounceTime(200),
+          switchMap(() => hasBookmark
+            ? this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index)
+            : this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index, xpath)),
+          tap(() => {
             hasBookmark = !hasBookmark;
+            icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
             this.loadImageBookmarks();
-          });
-        } else {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum(), index, xpath).subscribe(bookmark => {
-            const newState = !hasBookmark;
-            icon.className = 'bookmark-overlay ' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
-            hasBookmark = !hasBookmark;
-            this.loadImageBookmarks();
-          });
-        }
-      });
+          }),
+        )
+        .subscribe();
     });
 
   }
