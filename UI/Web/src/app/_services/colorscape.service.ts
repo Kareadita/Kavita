@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
+import {environment} from "../../environments/environment";
 
 interface ColorSpace {
   primary: string;
@@ -40,6 +41,9 @@ export class ColorscapeService {
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration
   private defaultColorspaceDuration = 300; // duration to wait before defaulting back to default colorspace
+  // Use 0.179 as threshold (roughly equivalent to #767676)
+  // This gives better visual results than 0.5
+  public static readonly defaultLuminanceThreshold =  0.179;
 
 
   constructor() {
@@ -63,24 +67,85 @@ export class ColorscapeService {
       return 'black';
     }
 
-    const rgb = this.rgbStringToRGBA(bgColor);
+    const rgba = this.rgbStringToRGBA(bgColor);
+    const luminance = this.getLuminance(rgba);
 
+    return luminance > ColorscapeService.defaultLuminanceThreshold ? 'black' : 'white';
+  }
+
+  getLuminance(rgba: RGBAColor): number {
     // Convert RGB to relative luminance with gamma correction
     const getRelativeLuminance = (color: number): number => {
       const c = color / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     };
 
-    const r = getRelativeLuminance(rgb.r);
-    const g = getRelativeLuminance(rgb.g);
-    const b = getRelativeLuminance(rgb.b);
+    const r = getRelativeLuminance(rgba.r);
+    const g = getRelativeLuminance(rgba.g);
+    const b = getRelativeLuminance(rgba.b);
 
     // WCAG relative luminance formula (https://www.w3.org/WAI/GL/wiki/Relative_luminance)
-    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
 
-    // Use 0.179 as threshold (roughly equivalent to #767676)
-    // This gives better visual results than 0.5
-    return luminance > 0.179 ? 'black' : 'white';
+  /**
+   * Generates a base64 encoding for an Image. Used in manual file upload flow.
+   * @param img
+   * @returns
+   */
+  getBase64Image(img: HTMLImageElement) {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d", {alpha: false});
+    if (!ctx) {
+      return '';
+    }
+
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL("image/png");
+  }
+
+  getAverageColour(img: HTMLImageElement, sampleWidth?: number, sampleHeight?: number): RGBAColor | undefined {
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const sw = sampleWidth ?? 20;
+    const sh = sampleHeight ?? 20;
+    let imageData: ImageData;
+    try {
+      imageData = ctx.getImageData(
+        canvas.width -sw,
+        canvas.height - sh,
+        sw,
+        sh
+      );
+    } catch (e) {
+      return;
+    }
+
+    let r = 0, g = 0, b = 0;
+    const pixels = imageData.data;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      r += pixels[i];
+      g += pixels[i + 1];
+      b += pixels[i + 2];
+    }
+
+    const pixelCount = pixels.length / 4;
+    return {
+      r: Math.round(r / pixelCount),
+      g: Math.round(g / pixelCount),
+      b: Math.round(b / pixelCount),
+      a: 0.5,
+    };
   }
 
   /**
