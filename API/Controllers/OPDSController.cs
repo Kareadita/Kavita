@@ -51,6 +51,7 @@ public class OpdsController : BaseApiController
 
 
     private readonly XmlSerializer _xmlSerializer;
+    private readonly XmlSerializerNamespaces _xmlSerializerNamespaces;
     private readonly XmlSerializer _xmlOpenSearchSerializer;
     private readonly FilterDto _filterDto = new FilterDto()
     {
@@ -99,6 +100,11 @@ public class OpdsController : BaseApiController
         _logger = logger;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
+        _xmlSerializerNamespaces = new XmlSerializerNamespaces();
+        _xmlSerializerNamespaces.Add("dc", "http://purl.org/dc/terms/");
+        _xmlSerializerNamespaces.Add("opds", "http://opds-spec.org/2011/catalog");
+        _xmlSerializerNamespaces.Add("opensearch", "http://a9.com/-/spec/opensearch/1.1/");
+        _xmlSerializerNamespaces.Add("pse", "http://vaemendis.net/opds-pse/ns");
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
 
@@ -1378,7 +1384,7 @@ public class OpdsController : BaseApiController
         SanitizeFeed(feed);
 
         using var sm = new StringWriter();
-        _xmlSerializer.Serialize(sm, feed);
+        _xmlSerializer.Serialize(sm, feed, _xmlSerializerNamespaces);
 
         var ret = sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
 

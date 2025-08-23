@@ -31,7 +31,7 @@ public sealed record FeedEntry
     /// Format of the file
     /// https://dublincore.org/specifications/dublin-core/dcmi-terms/
     /// </summary>
-    [XmlElement("format", Namespace = "http://purl.org/dc/terms/format")]
+    [XmlElement("format", Namespace = "http://purl.org/dc/terms/")]
     public string? Format { get; set; }
 
     [XmlElement("language", Namespace = "http://purl.org/dc/terms/")]
