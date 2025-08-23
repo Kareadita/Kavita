@@ -39,18 +39,16 @@
         [ngClass]="{'immersive' : immersiveMode()}"
            (mousedown)="mouseDown($event)" >
 
-        @if (page !== undefined) {
-          <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
-               [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
-               [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
-               [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+        <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
+             [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
+             [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
+             [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
-          @if ((scrollbarNeeded || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
-            <div (click)="$event.stopPropagation();"
-                 [ngClass]="{'bottom-bar': layoutMode() !== BookPageLayoutMode.Default}">
-              <ng-container [ngTemplateOutlet]="actionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
-            </div>
-          }
+        @if ((scrollbarNeeded || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
+          <div (click)="$event.stopPropagation();"
+               [ngClass]="{'bottom-bar': layoutMode() !== BookPageLayoutMode.Default}">
+            <ng-container [ngTemplateOutlet]="actionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
+          </div>
         }
       </div>
     </div>

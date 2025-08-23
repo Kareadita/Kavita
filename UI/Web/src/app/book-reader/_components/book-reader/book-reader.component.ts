@@ -117,7 +117,8 @@ const minImageSize = {
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar]
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar],
+  providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -1786,7 +1787,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile);
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile, this.readerSettingsService);
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?

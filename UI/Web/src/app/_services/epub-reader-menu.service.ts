@@ -22,6 +22,7 @@ import {
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
 import {AccountService} from "./account.service";
+import { EpubReaderSettingsService } from './epub-reader-settings.service';
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -112,7 +113,7 @@ export class EpubReaderMenuService {
   }
 
 
-  openSettingsDrawer(chapterId: number, seriesId: number, readingProfile: ReadingProfile) {
+  openSettingsDrawer(chapterId: number, seriesId: number, readingProfile: ReadingProfile, readerSettingsService: EpubReaderSettingsService) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
@@ -120,6 +121,7 @@ export class EpubReaderMenuService {
     ref.componentInstance.chapterId.set(chapterId);
     ref.componentInstance.seriesId.set(seriesId);
     ref.componentInstance.readingProfile.set(readingProfile);
+    ref.componentInstance.readerSettingsService.set(readerSettingsService);
 
     ref.closed.subscribe(() => this.setDrawerClosed());
     ref.dismissed.subscribe(() => this.setDrawerClosed());
