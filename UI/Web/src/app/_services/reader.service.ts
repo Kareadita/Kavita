@@ -344,11 +344,16 @@ export class ReaderService {
 
 
   getElementFromXPath(path: string) {
-    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (node?.nodeType === Node.ELEMENT_NODE) {
-      return node as Element;
+    try {
+      const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (node?.nodeType === Node.ELEMENT_NODE) {
+        return node as Element;
+      }
+      return null;
+    } catch (e) {
+      console.debug("Failed to evaluate XPath:", path, " exception:", e)
+      return null;
     }
-    return null;
   }
 
   /**
@@ -358,6 +363,8 @@ export class ReaderService {
    * @param xpath
    */
   descopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
     const bookContentElement = this.document.querySelector('.book-content');
     if (!bookContentElement?.children[0]) {
       console.warn('Book content element not found, returning original xpath');
@@ -386,6 +393,8 @@ export class ReaderService {
    * @param xpath
    */
   scopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
     const bookContentElement = this.document.querySelector('.book-content');
     if (!bookContentElement?.children[0]) {
       console.warn('Book content element not found, returning original xpath');
