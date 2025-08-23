@@ -1,6 +1,6 @@
 import {NgClass, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
-import {FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
@@ -21,7 +21,6 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
 
@@ -91,9 +90,7 @@ export const bookColorThemes = [
 export class ReaderSettingsComponent implements OnInit {
 
   private readonly readerSettingsService = inject(EpubReaderSettingsService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly readingProfileService = inject(ReadingProfileService);
 
   @Input({required:true}) seriesId!: number;
   @Input({required:true}) readingProfile!: ReadingProfile;

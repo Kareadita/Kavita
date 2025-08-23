@@ -221,7 +221,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * This is the html we get from the server
    */
-  page: SafeHtml | undefined = undefined;
+  page = model<SafeHtml | undefined>(undefined);
   /**
    * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
@@ -290,7 +290,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
   /**
-   * Last seen progress part path
+   * Last seen progress part path. This is not descoped.
    */
   lastSeenScrollPartPath: string = '';
   /**
@@ -648,7 +648,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Find the element that is on screen to bookmark against
     const xpath: string | null | undefined = this.getFirstVisibleElementXPath();
     if (xpath !== null && xpath !== undefined) {
-      this.lastSeenScrollPartPath = this.readerService.descopeBookReaderXpath(xpath);
+      this.lastSeenScrollPartPath = xpath; //this.readerService.descopeBookReaderXpath(xpath);
     }
 
     if (this.lastSeenScrollPartPath !== '') {
@@ -657,13 +657,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveProgress() {
-    let tempPageNum = this.pageNum();
-    if (this.pageNum() == this.maxPages() - 1) {
-      tempPageNum = this.pageNum() + 1;
-    }
-
     if (!this.incognitoMode()) {
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+      let tempPageNum = this.pageNum();
+      if (this.pageNum() == this.maxPages() - 1) {
+        tempPageNum = this.pageNum() + 1;
+      }
+
+      const descopedPath = this.readerService.descopeBookReaderXpath(this.lastSeenScrollPartPath);
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, descopedPath).subscribe();
     }
 
   }
@@ -1072,7 +1073,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
       this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
-      this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
+      this.page.set(this.domSanitizer.bypassSecurityTrustHtml(content));
 
       this.cdRef.markForCheck();
 
@@ -1240,9 +1241,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return false;
     }
 
-    const images = doc.querySelectorAll('img, svg');
-    return images.length === 1;
+    const images = doc.querySelectorAll('img, svg, image');
 
+    return images.length === 1;
   }
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
@@ -1980,6 +1981,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateLineOverlayOpen(isOpen: boolean) {
     this.isLineOverlayOpen.set(isOpen);
   }
+
 
   viewBookmarkImages() {
     this.epubMenuService.openViewBookmarksDrawer(this.chapterId, (res: PageBookmark | null, action) => {

@@ -349,19 +349,31 @@ export class ReaderService {
   /**
    * Removes the Kavita UI aspect of the xpath from a given xpath variable
    * Used for Annotations and Bookmarks within epub reader
+   *
    * @param xpath
    */
   descopeBookReaderXpath(xpath: string) {
     const bookContentElement = this.document.querySelector('.book-content');
-    const bookContentXPath = this.getXPathTo(bookContentElement?.children[0]);
-
-    // Book reader progress can have this html prefix
-    if (xpath.startsWith('//html[1]///BODY')) {
-      xpath = xpath.replace('//html[1]///BODY', '//BODY')
+    if (!bookContentElement?.children[0]) {
+      console.warn('Book content element not found, returning original xpath');
+      return xpath;
     }
 
-    // We need to keep the last /DIV[1] as that is the bookContent 
-    return xpath.replace(bookContentXPath, '//BODY');
+    const bookContentXPath = this.getXPathTo(bookContentElement.children[0], true);
+
+    // Normalize both paths
+    const normalizedXpath = this.normalizeXPath(xpath);
+    const normalizedBookContentXPath = this.normalizeXPath(bookContentXPath);
+
+    console.log('Descoping - Original:', xpath);
+    console.log('Descoping - Normalized xpath:', normalizedXpath);
+    console.log('Descoping - Book content path:', normalizedBookContentXPath);
+
+    // Find the UI container pattern and extract content path
+    const descopedPath = this.extractContentPath(normalizedXpath, normalizedBookContentXPath);
+
+    console.log('Descoped', xpath, 'to', descopedPath);
+    return descopedPath;
   }
 
   /**
@@ -370,12 +382,138 @@ export class ReaderService {
    */
   scopeBookReaderXpath(xpath: string) {
     const bookContentElement = this.document.querySelector('.book-content');
-    const bookContentXPath = this.getXPathTo(bookContentElement?.children[0]);
+    if (!bookContentElement?.children[0]) {
+      console.warn('Book content element not found, returning original xpath');
+      return xpath;
+    }
 
-    if (xpath.startsWith(bookContentXPath)) return xpath;
+    const bookContentXPath = this.getXPathTo(bookContentElement.children[0], true);
+    const normalizedXpath = this.normalizeXPath(xpath);
+    const normalizedBookContentXPath = this.normalizeXPath(bookContentXPath);
 
-    return xpath.replace('//BODY', bookContentXPath);
+    // If already scoped, return as-is
+    if (normalizedXpath.includes(normalizedBookContentXPath)) {
+      return xpath;
+    }
+
+    // Replace //body with the actual book content path
+    if (normalizedXpath.startsWith('//body')) {
+      const relativePath = normalizedXpath.substring(6); // Remove '//body'
+      return bookContentXPath + relativePath;
+    }
+
+    // If it starts with /body, replace with book content path
+    if (normalizedXpath.startsWith('/body')) {
+      const relativePath = normalizedXpath.substring(5); // Remove '/body'
+      return bookContentXPath + relativePath;
+    }
+
+    // Default: prepend the book content path
+    return bookContentXPath + (normalizedXpath.startsWith('/') ? normalizedXpath : '/' + normalizedXpath);
   }
+
+  /**
+   * Extract the content path by finding the UI container boundary
+   */
+  private extractContentPath(fullXpath: string, bookContentXPath: string): string {
+    // Look for the pattern where the book content container ends
+    // The book content path should be a prefix of the full path
+
+    // First, try direct substring match
+    if (fullXpath.startsWith(bookContentXPath)) {
+      const contentPath = fullXpath.substring(bookContentXPath.length);
+      return '//body' + (contentPath.startsWith('/') ? contentPath : '/' + contentPath);
+    }
+
+    // If direct match fails, try to find the common UI structure pattern
+    // Look for the app-book-reader container end point
+    const readerPattern = /\/app-book-reader\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]/;
+    const match = fullXpath.match(readerPattern);
+
+    if (match) {
+      const containerEndIndex = fullXpath.indexOf(match[0]) + match[0].length;
+      const contentPath = fullXpath.substring(containerEndIndex);
+      return '//body' + (contentPath.startsWith('/') ? contentPath : '/' + contentPath);
+    }
+
+    // Alternative approach: look for the deepest common path structure
+    // Split both paths and find where they diverge after the UI container
+    const fullParts = fullXpath.split('/').filter(p => p.length > 0);
+    const bookParts = bookContentXPath.split('/').filter(p => p.length > 0);
+
+    // Find the app-book-reader index in full path
+    const readerIndex = fullParts.findIndex(part => part.startsWith('app-book-reader'));
+
+    if (readerIndex !== -1) {
+      // Look for the pattern after app-book-reader that matches book content structure
+      // Typically: app-book-reader[1]/div[1]/div[2]/div[3]/div[1]/div[1] then content starts
+      let contentStartIndex = readerIndex + 6; // Skip the typical 6 div containers
+
+      // Adjust based on actual book content depth
+      const bookReaderIndex = bookParts.findIndex(part => part.startsWith('app-book-reader'));
+      if (bookReaderIndex !== -1) {
+        const expectedDepth = bookParts.length - bookReaderIndex - 1;
+        contentStartIndex = readerIndex + 1 + expectedDepth;
+      }
+
+      if (contentStartIndex < fullParts.length) {
+        const contentParts = fullParts.slice(contentStartIndex);
+        return '//body/' + contentParts.join('/');
+      }
+    }
+
+    // Fallback: clean common UI prefixes
+    return this.cleanCommonUIPrefixes(fullXpath);
+  }
+
+  /**
+   * Normalize XPath by cleaning common variations and converting to lowercase
+   */
+  private normalizeXPath(xpath: string): string {
+    let normalized = xpath.toLowerCase();
+
+    // Remove common HTML document prefixes
+    const prefixesToRemove = [
+      '//html[1]//body',
+      '//html[1]//app-root[1]',
+      '//html//body',
+      '//html//app-root[1]'
+    ];
+
+    for (const prefix of prefixesToRemove) {
+      if (normalized.startsWith(prefix)) {
+        normalized = '//body' + normalized.substring(prefix.length);
+        break;
+      }
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Clean common UI prefixes that shouldn't be in descoped paths
+   */
+  private cleanCommonUIPrefixes(xpath: string): string {
+    let cleaned = xpath;
+
+    // Remove app-root references
+    cleaned = cleaned.replace(/\/app-root\[\d+\]/g, '');
+
+    // Ensure it starts with //body
+    if (!cleaned.startsWith('//body') && !cleaned.startsWith('/body')) {
+      // Try to find body in the path
+      const bodyIndex = cleaned.indexOf('/body');
+      if (bodyIndex !== -1) {
+        cleaned = '//' + cleaned.substring(bodyIndex + 1);
+      } else {
+        // If no body found, assume it should start with //body
+        cleaned = '//body' + (cleaned.startsWith('/') ? cleaned : '/' + cleaned);
+      }
+    }
+
+    return cleaned;
+  }
+
 
   /**
    *
@@ -383,38 +521,58 @@ export class ReaderService {
    * @param pureXPath Will ignore shortcuts like id('')
    */
   getXPathTo(element: any, pureXPath = false): string {
+    if (!element) {
+      console.error('getXPathTo: element is null or undefined');
+      return '';
+    }
+
     let xpath = this.getXPath(element, pureXPath);
 
-    if (xpath != '' && xpath.toLowerCase().startsWith('body')) {
-      xpath = `//${xpath}`;
+    // Ensure xpath starts with // for absolute paths
+    if (xpath && !xpath.startsWith('//') && !xpath.startsWith('id(')) {
+      xpath = '//' + xpath;
     }
 
     return xpath;
   }
 
-  private getXPath(element: any, pureXPath = false): string {
-    if (element === null || element === undefined) {
-      console.error('Expecting element, but got null instead');
+  private getXPath(element: HTMLElement, pureXPath = false): string {
+    if (!element) {
+      console.error('getXPath: element is null or undefined');
       return '';
     }
-    if (!pureXPath) {
-      if (element.id !== '') { return 'id("' + element.id + '")'; }
-      if (element === document.body) { return element.tagName; }
+
+    // Handle shortcuts (unless pureXPath is requested)
+    if (!pureXPath && element.id) {
+      return `id("${element.id}")`;
     }
 
+    if (element === document.body) {
+      return 'body';
+    }
 
-    let ix = 0;
-    const siblings = element.parentNode?.childNodes || [];
-    for (let sibling of siblings) {
+    if (!element.parentNode) {
+      return element.tagName.toLowerCase();
+    }
+
+    // Count same-tag siblings
+    let siblingIndex = 1;
+    const siblings = Array.from(element.parentNode?.children ?? []);
+    const tagName = element.tagName;
+
+    for (const sibling of siblings) {
       if (sibling === element) {
-        return this.getXPath(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
+        break;
       }
-      if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
-        ix++;
+      if (sibling.tagName === tagName) {
+        siblingIndex++;
       }
-
     }
-    return '';
+
+    const currentPath = `${element.tagName.toLowerCase()}[${siblingIndex}]`;
+    const parentPath = this.getXPath(element.parentElement!, pureXPath);
+
+    return parentPath ? `${parentPath}/${currentPath}` : currentPath;
   }
 
   readVolume(libraryId: number, seriesId: number, volume: Volume, incognitoMode: boolean = false) {

@@ -43,7 +43,7 @@
           <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
                [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
                [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
-               [innerHtml]="page" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+               [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
           @if ((scrollbarNeeded || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
             <div (click)="$event.stopPropagation();"
@@ -90,9 +90,6 @@
                   <i class="fa fa-reply" aria-hidden="true"></i>
                 </button>
               }
-              <button class="btn btn-secondary btn-icon me-1" (click)="closeReader()">
-                <i class="fa fa-times-circle" aria-hidden="true"></i>
-              </button>
               <button class="btn btn-secondary btn-icon me-1" (click)="viewBookmarkImages()">
                 <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
               </button>
@@ -101,6 +98,9 @@
               </button>
               <button class="btn btn-secondary btn-icon" (click)="viewToCDrawer()">
                 <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+              </button>
+              <button class="btn btn-secondary btn-icon me-1" (click)="closeReader()">
+                <i class="fa fa-times-circle" aria-hidden="true"></i>
               </button>
             </div>
           </div>
