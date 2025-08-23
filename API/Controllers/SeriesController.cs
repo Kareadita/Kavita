@@ -185,6 +185,11 @@ public class SeriesController : BaseApiController
         return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter));
     }
 
+    /// <summary>
+    /// All chapter entities will load this data by default. Will not be maintained as of v0.8.1
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
     [Obsolete("All chapter entities will load this data by default. Will not be maintained as of v0.8.1")]
     [HttpGet("chapter-metadata")]
     public async Task<ActionResult<ChapterMetadataDto>> GetChapterMetadata(int chapterId)

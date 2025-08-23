@@ -127,8 +127,8 @@ public class ChapterRepository : IChapterRepository
             })
             .Select(data => new ChapterInfoDto()
             {
-                ChapterNumber = data.ChapterNumber + string.Empty, // TODO: Fix this
-                VolumeNumber = data.VolumeNumber + string.Empty, // TODO: Fix this
+                ChapterNumber = data.ChapterNumber + string.Empty,
+                VolumeNumber = data.VolumeNumber + string.Empty,
                 VolumeId = data.VolumeId,
                 IsSpecial = data.IsSpecial,
                 SeriesId = data.SeriesId,
