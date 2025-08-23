@@ -315,13 +315,18 @@ export class ReaderService {
   /**
    * Closes the reader and causes a redirection
    */
-  closeReader(readingListMode: boolean = false, readingListId: number = 0) {
+  closeReader(libraryId: number, seriesId: number, chapterId: number, readingListMode: boolean = false, readingListId: number = 0) {
     if (readingListMode) {
       this.router.navigateByUrl('lists/' + readingListId);
-    } else {
-      // TODO: back doesn't always work, it might be nice to check the pattern of the url and see if we can be smart before just going back
-      this.location.back();
+      return
     }
+
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    this.router.navigateByUrl(`/library/${libraryId}/series/${seriesId}/chapter/${chapterId}`);
   }
 
   removePersonalToc(chapterId: number, pageNumber: number, title: string) {
