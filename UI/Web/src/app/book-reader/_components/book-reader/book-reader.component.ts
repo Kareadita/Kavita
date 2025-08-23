@@ -1349,7 +1349,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const emptyPage = this.renderer.createElement('div');
 
     this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
-    this.renderer.setStyle(emptyPage, 'width', this.columnHeight());
+    this.renderer.setStyle(emptyPage, 'width', this.columnWidth());
     this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
   }
 
