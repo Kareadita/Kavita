@@ -62,7 +62,6 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {EpubHighlightService} from "../../../_services/epub-highlight.service";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {Annotation} from "../../_models/annotations/annotation";
-import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {NgxSliderModule} from "@angular-slider/ngx-slider";
 import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
 import {LayoutMeasurementService} from "../../../_services/layout-measurement.service";
@@ -160,12 +159,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   incognitoMode = model<boolean>(false);
 
    /**
-    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
+    * If this is true, chapters will be fetched in the order of a reading list,
+    * rather than natural series order.
     */
   readingListMode: boolean = false;
 
   /**
-   * The actual pages from the epub, used for showing on table of contents. This must be here as we need access to it for scroll anchors
+   * The actual pages from the epub, used for showing on table of contents.
+   * This must be here as we need access to it for scroll anchors
    */
   chapters: Array<BookChapterItem> = [];
   /**
@@ -198,10 +199,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If the action bar is visible
    */
   actionBarVisible = model<boolean>(true);
-  /**
-   * Book reader setting that hides the menuing system
-   */
-  //immersiveMode = model<boolean>(false);
   /**
    * If we are loading from backend
    */
@@ -794,7 +791,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapter = chapter;
     this.volumeId = chapter.volumeId;
     this.maxPages.set(chapter.pages);
-    this.chapters = chapters;
+    //this.chapters = chapters;
     this.pageNum.set(progress.pageNum);
     this.cdRef.markForCheck();
 
@@ -1133,7 +1130,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const icon = document.createElement('div');
       icon.className = 'bookmark-overlay ' + (hasBookmark ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
 
-      const boundingBox = getBoundingClientRect(img);
+      const boundingBox = img.getBoundingClientRect();
       const topOffset = boundingBox.top + boundingBox.height - 5;
       const widthOffset = boundingBox.left + boundingBox.width - 5;
 
