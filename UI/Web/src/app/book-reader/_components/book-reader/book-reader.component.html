@@ -1,10 +1,12 @@
+@let isLeftToRight = readingDirection() === ReadingDirection.LeftToRight;
+
 <div class="container-flex {{darkMode() ? 'dark-mode' : ''}} reader-container {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
      tabindex="0" #reader>
   <ng-container *transloco="let t; prefix: 'book-reader'">
     <div class="fixed-top" #stickyTop>
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
       <ng-container [ngTemplateOutlet]="topActionBar"  [ngTemplateOutletContext]="{isTop: true}"></ng-container>
-      @if (page !== undefined) {
+      @if (page() !== undefined) {
         <app-book-line-overlay [parent]="bookContainerElemRef"
                                [libraryId]="libraryId"
                                [volumeId]="volumeId"
@@ -22,14 +24,14 @@
          [ngStyle]="{'width': pageWidthForPagination()}"
          [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible()}" [@isLoading]="isLoading()" (click)="handleReaderClick($event)">
 
-      @if (clickToPaginate() && !hidePagination) {
+      @if (clickToPaginate() && !hidePagination()) {
         <div class="left {{clickOverlayClass('left')}} no-observe"
-             (click)="movePage(readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+             (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
              [ngClass]="{'immersive' : immersiveMode()}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
-        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-             (click)="movePage(readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+        <div class="{{scrollbarNeeded() ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
+             (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
              [ngClass]="{'immersive' : immersiveMode()}"
              tabindex="-1"
              [ngStyle]="{height: PageHeightForPagination}"></div>
@@ -45,7 +47,7 @@
                [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
                [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
-          @if ((scrollbarNeeded || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
+          @if ((scrollbarNeeded() || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
             <div (click)="$event.stopPropagation();"
                  [ngClass]="{'bottom-bar': layoutMode() !== BookPageLayoutMode.Default}">
               <ng-container [ngTemplateOutlet]="actionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
@@ -117,7 +119,7 @@
     </ng-template>
 
     <ng-template #actionBar let-isTop>
-      @let isLeftToRight = readingDirection() === ReadingDirection.LeftToRight;
+
       @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible()) {
         <div class="action-bar row g-0 justify-content-between">
           <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
