@@ -365,14 +365,14 @@ export class ReaderService {
     const normalizedXpath = this.normalizeXPath(xpath);
     const normalizedBookContentXPath = this.normalizeXPath(bookContentXPath);
 
-    console.log('Descoping - Original:', xpath);
-    console.log('Descoping - Normalized xpath:', normalizedXpath);
-    console.log('Descoping - Book content path:', normalizedBookContentXPath);
+    //console.log('Descoping - Original:', xpath);
+    //console.log('Descoping - Normalized xpath:', normalizedXpath);
+    //console.log('Descoping - Book content path:', normalizedBookContentXPath);
 
     // Find the UI container pattern and extract content path
     const descopedPath = this.extractContentPath(normalizedXpath, normalizedBookContentXPath);
 
-    console.log('Descoped', xpath, 'to', descopedPath);
+    //console.log('Descoped', xpath, 'to', descopedPath);
     return descopedPath;
   }
 

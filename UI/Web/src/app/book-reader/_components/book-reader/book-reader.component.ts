@@ -1556,11 +1556,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       : this.pageWidth();
   });
 
-  // private getPageSize() {
-  //   return this.writingStyle() === WritingStyle.Vertical
-  //       ? this.pageHeight()
-  //       : this.pageWidth();
-  // }
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
@@ -1572,7 +1567,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.utilityService.isInViewport(entry, this.topOffset);
       });
 
-    intersectingEntries.sort(this.sortElements);
+    intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
 
     if (intersectingEntries.length > 0) {
       let path = this.readerService.getXPathTo(intersectingEntries[0]);
@@ -1588,6 +1583,65 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       resumeElement = path;
     }
     return resumeElement;
+  }
+
+  /**
+   * Sort elements based on layout mode for better scroll position tracking
+   */
+  private sortElementsForLayout(a: Element, b: Element): number {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+
+    switch (this.layoutMode()) {
+      case BookPageLayoutMode.Default:
+        return this.sortElements(a, b);
+      case BookPageLayoutMode.Column1:
+        return this.sortForSingleColumnLayout(a, b, aRect, bRect);
+      case BookPageLayoutMode.Column2:
+        return this.sortForTwoColumnLayout(a, b, aRect, bRect);
+    }
+  }
+
+  /**
+   * Sort for 2-column layout: prefer elements closer to the left (smaller scrollTop equivalent)
+   */
+  private sortForTwoColumnLayout(a: Element, b: Element, aRect: DOMRect, bRect: DOMRect): number {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Convert horizontal position to a "reading order" score
+    // Elements on the left column should be preferred over right column
+    // Within the same column, prefer elements higher up
+
+    // Determine which column each element is in
+    const aColumn = aRect.left < viewportWidth / 2 ? 0 : 1; // 0 = left, 1 = right
+    const bColumn = bRect.left < viewportWidth / 2 ? 0 : 1;
+
+    // If elements are in different columns, prefer left column
+    if (aColumn !== bColumn) {
+      return aColumn - bColumn;
+    }
+
+    // If in the same column, prefer elements higher up (smaller top value)
+    if (Math.abs(aRect.top - bRect.top) > 10) { // 10px tolerance for "same row"
+      return aRect.top - bRect.top;
+    }
+
+    // If roughly at the same vertical level, prefer left-most
+    return aRect.left - bRect.left;
+  }
+
+  /**
+   * Sort for single column layout: prefer elements higher up
+   */
+  private sortForSingleColumnLayout(a: Element, b: Element, aRect: DOMRect, bRect: DOMRect): number {
+    // Primary sort: vertical position (top to bottom)
+    if (Math.abs(aRect.top - bRect.top) > 5) { // 5px tolerance
+      return aRect.top - bRect.top;
+    }
+
+    // Secondary sort: horizontal position (left to right)
+    return aRect.left - bRect.left;
   }
 
   /**
