@@ -207,9 +207,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isLoading = model<boolean>(true);
   /**
-   * Title of the book. Rendered in action bars
+   * Title of the book. Rendered in action bar
    */
-  bookTitle: string = '';
+  bookTitle = model<string>('');
+  /**
+   * Authors of the book. Rendered in action bar
+   */
+  authorText = model<string>('');
   /**
    * The boolean that decides if the clickToPaginate overlay is visible or not.
    */
@@ -756,8 +760,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.bookTitle = info.bookTitle;
-      this.titleService.setTitle('Kavita - ' + this.bookTitle);
+      this.bookTitle.set(info.bookTitle);
+      this.titleService.setTitle('Kavita - ' + this.bookTitle());
       this.cdRef.markForCheck();
 
       await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
@@ -774,6 +778,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         chapters: this.bookService.getBookChapters(this.chapterId),
       }).subscribe({
         next: ({chapter, progress, chapters}) => {
+          this.authorText.set(chapter.writers.map(p => p.name).join(', '));
           this.setupBookReader(chapter, progress, chapters);
         },
         error: () => {

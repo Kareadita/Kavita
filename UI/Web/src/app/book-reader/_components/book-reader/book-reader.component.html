@@ -74,7 +74,13 @@
                     (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{ t('incognito-mode-label') }}</span>)
                   </span>
                 }
-                <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle">{{ bookTitle }}</span>
+                <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle() + ' - ' + authorText()">
+                  {{ bookTitle() }}
+                  @if (utilityService.getActiveBreakpoint() >= Breakpoint.Desktop) {
+                    - {{ authorText() }}
+                  }
+                </span>
+
               }
             </div>
 

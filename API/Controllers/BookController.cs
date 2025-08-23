@@ -96,9 +96,6 @@ public class BookController : BaseApiController
         };
 
 
-
-
-
         return Ok(info);
     }
 
