@@ -1129,7 +1129,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeReader() {
-    this.readerService.closeReader(this.readingListMode, this.readingListId);
+    this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
   }
 
   render() {

@@ -1,5 +1,5 @@
 @if (readingProfile !== null) {
-  <ng-container *transloco="let t; read: 'reader-settings'">
+  <ng-container *transloco="let t; prefix: 'reader-settings'">
     <form [formGroup]="settingsForm">
       <div ngbAccordion [closeOthers]="false" #acc="ngbAccordion">
         <div ngbAccordionItem id="general-panel" title="General Settings" [collapsed]="false">

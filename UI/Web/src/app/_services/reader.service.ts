@@ -315,13 +315,18 @@ export class ReaderService {
   /**
    * Closes the reader and causes a redirection
    */
-  closeReader(readingListMode: boolean = false, readingListId: number = 0) {
+  closeReader(libraryId: number, seriesId: number, chapterId: number, readingListMode: boolean = false, readingListId: number = 0) {
     if (readingListMode) {
       this.router.navigateByUrl('lists/' + readingListId);
-    } else {
-      // TODO: back doesn't always work, it might be nice to check the pattern of the url and see if we can be smart before just going back
-      this.location.back();
+      return
     }
+
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    this.router.navigateByUrl(`/library/${libraryId}/series/${seriesId}/chapter/${chapterId}`);
   }
 
   removePersonalToc(chapterId: number, pageNumber: number, title: string) {
@@ -339,11 +344,16 @@ export class ReaderService {
 
 
   getElementFromXPath(path: string) {
-    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (node?.nodeType === Node.ELEMENT_NODE) {
-      return node as Element;
+    try {
+      const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (node?.nodeType === Node.ELEMENT_NODE) {
+        return node as Element;
+      }
+      return null;
+    } catch (e) {
+      console.debug("Failed to evaluate XPath:", path, " exception:", e)
+      return null;
     }
-    return null;
   }
 
   /**
@@ -353,6 +363,8 @@ export class ReaderService {
    * @param xpath
    */
   descopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
     const bookContentElement = this.document.querySelector('.book-content');
     if (!bookContentElement?.children[0]) {
       console.warn('Book content element not found, returning original xpath');
@@ -381,6 +393,8 @@ export class ReaderService {
    * @param xpath
    */
   scopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
     const bookContentElement = this.document.querySelector('.book-content');
     if (!bookContentElement?.children[0]) {
       console.warn('Book content element not found, returning original xpath');

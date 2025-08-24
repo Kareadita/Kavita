@@ -14,9 +14,7 @@ export interface LayoutMeasurements {
 /**
  * Used in Epub reader to simplify
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class LayoutMeasurementService implements OnDestroy {
   private resizeObserver?: ResizeObserver;
   private rafId?: number;

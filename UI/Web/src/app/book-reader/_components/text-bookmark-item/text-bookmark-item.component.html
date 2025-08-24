@@ -5,15 +5,14 @@
     <div class="card clickable" (click)="goTo($event)">
 
       <div class="card-body">
-        <div class="card-title" [ngbTooltip]="ptoc.title" placement="left" container="body">
+        <div class="card-title d-flex">
           <span class="ellipsis">{{ptoc.title}}</span>
-
-          <button class="btn btn-icon ms-auto" (click)="remove($event)">
+          <button class="btn btn-icon ms-auto align-self-end" (click)="remove($event)">
             <i class="fa-solid fa-trash" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('delete', {bookmarkName: ptoc.title})}}</span>
           </button>
         </div>
-        <div class="subtitle text-muted">
+        <div class="subtitle content">
           @if (ptoc.chapterTitle) {
             {{t('chapter-and-page-title', {chapterTitle: ptoc.chapterTitle, page: ptoc.pageNumber})}}
           } @else {

@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'series-detail'">
+<ng-container *transloco="let t; prefix: 'series-detail'">
 
   <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0"></app-bulk-operations>
 
@@ -193,7 +193,10 @@
 
         @if (volume.chapters.length === 1 && annotations().length > 0) {
           <li [ngbNavItem]="TabID.Annotations">
-            <a ngbNavLink>{{t(TabID.Annotations)}}</a>
+            <a ngbNavLink>
+              {{t(TabID.Annotations)}}
+              <span class="badge rounded-pill text-bg-secondary">{{annotations().length}}</span>
+            </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
                 <app-annotations-tab [annotations]="annotations()" />

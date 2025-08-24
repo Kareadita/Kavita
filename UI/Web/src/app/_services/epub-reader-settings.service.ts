@@ -40,9 +40,7 @@ export type BookReadingProfileFormGroup = FormGroup<{
 const COLUMN_GAP = 20; //px gap between columns
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EpubReaderSettingsService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly bookService = inject(BookService);
@@ -484,7 +482,6 @@ export class EpubReaderSettingsService {
 
       const familyName = this.fontFamilies.find(f => f.title === fontName)?.family || 'default';
       const currentStyles = this._pageStyles();
-      console.log('setup form subs: ', this._pageStyles())
 
       const newStyles = { ...currentStyles };
       if (familyName === 'default') {

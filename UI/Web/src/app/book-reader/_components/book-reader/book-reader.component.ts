@@ -91,6 +91,14 @@ const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
  */
 const elementLevelStyles = ['line-height', 'font-family'];
 
+/**
+ * Minimum size to be assigned a bookmark
+ */
+const minImageSize = {
+  height: 200,
+  width: 100
+};
+
 @Component({
     selector: 'app-book-reader',
     templateUrl: './book-reader.component.html',
@@ -109,7 +117,8 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar]
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar],
+  providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -916,7 +925,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 }
 
   closeReader() {
-    this.readerService.closeReader(this.readingListMode, this.readingListId);
+    this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
   }
 
   sortElements(a: Element, b: Element) {
@@ -1141,6 +1150,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (container == null) return;
 
       const imgRect = img.getBoundingClientRect();
+      if (imgRect.height < minImageSize.height || imgRect.width < minImageSize.width) {
+        return;
+      }
+
       const parentRect = (container as HTMLElement).getBoundingClientRect();
 
       const relativeX = imgRect.left - parentRect.left;
@@ -1172,7 +1185,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           transform-origin: bottom right;
           padding-top: 5px;
           padding-bottom: 5px;
-          z-index: 1100;
+          z-index: 1000;
           cursor: pointer;
           border-radius: 2px;
           background: ${backgroundColor} !important;
@@ -1694,7 +1707,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Line Height must be placed on each element in the page
 
     // Apply page level overrides
-    Object.entries(this.pageStyles()).forEach(item => {
+    Object.entries(pageStyles).forEach(item => {
       if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
         // Remove the style or skip
         this.renderer.removeStyle(this.bookContentElemRef.nativeElement, item[0]);
@@ -1705,7 +1718,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    const individualElementStyles = Object.entries(this.pageStyles).filter(item => elementLevelStyles.includes(item[0]));
+    const individualElementStyles = Object.entries(pageStyles).filter(item => elementLevelStyles.includes(item[0]));
     for(let i = 0; i < this.bookContentElemRef.nativeElement.children.length; i++) {
       const elem = this.bookContentElemRef.nativeElement.children.item(i);
       if (elem?.tagName === 'STYLE') continue;
@@ -1796,7 +1809,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile);
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile, this.readerSettingsService);
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?

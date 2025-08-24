@@ -1,5 +1,5 @@
 import {NgClass, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, Signal} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
 import {BookTheme} from 'src/app/_models/preferences/book-theme';
@@ -23,6 +23,7 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
+import {LayoutMode} from "../../../manga-reader/_models/layout-mode";
 
 /**
  * Used for book reader. Do not use for other components
@@ -89,11 +90,11 @@ export const bookColorThemes = [
 })
 export class ReaderSettingsComponent implements OnInit {
 
-  private readonly readerSettingsService = inject(EpubReaderSettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required:true}) seriesId!: number;
   @Input({required:true}) readingProfile!: ReadingProfile;
+  @Input({required:true}) readerSettingsService!: EpubReaderSettingsService;
 
   /**
    * List of all font families user can select from
@@ -104,23 +105,39 @@ export class ReaderSettingsComponent implements OnInit {
   /**
    * System provided themes
    */
-  themes: Array<BookTheme> = this.readerSettingsService.getThemes();
+  themes: Array<BookTheme> = [];
 
-  protected readonly pageStyles = this.readerSettingsService.pageStyles;
-  protected readonly readingDirectionModel = this.readerSettingsService.readingDirection;
-  protected readonly writingStyleModel = this.readerSettingsService.writingStyle;
-  protected readonly activeTheme = this.readerSettingsService.activeTheme;
-  protected readonly layoutMode = this.readerSettingsService.layoutMode;
-  protected readonly immersiveMode = this.readerSettingsService.immersiveMode;
-  protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
-  protected readonly isFullscreen = this.readerSettingsService.isFullscreen;
-  protected readonly canPromoteProfile = this.readerSettingsService.canPromoteProfile;
-  protected readonly hasParentProfile = this.readerSettingsService.hasParentProfile;
-  protected readonly parentReadingProfile = this.readerSettingsService.parentReadingProfile;
-  protected readonly currentReadingProfile = this.readerSettingsService.currentReadingProfile;
+  protected pageStyles!: Signal<PageStyle>;
+  protected readingDirectionModel!: Signal<ReadingDirection>;
+  protected writingStyleModel!: Signal<WritingStyle>;
+  protected activeTheme!: Signal<BookTheme | undefined>;
+  protected layoutMode!: Signal<BookPageLayoutMode>;
+  protected immersiveMode!: Signal<boolean>;
+  protected clickToPaginate!: Signal<boolean>;
+  protected isFullscreen!: Signal<boolean>;
+  protected canPromoteProfile!: Signal<boolean>;
+  protected hasParentProfile!: Signal<boolean>;
+  protected parentReadingProfile!: Signal<ReadingProfile | null>;
+  protected currentReadingProfile!: Signal<ReadingProfile | null>;
 
 
   async ngOnInit() {
+    this.pageStyles = this.readerSettingsService.pageStyles;
+    this.readingDirectionModel = this.readerSettingsService.readingDirection;
+    this.writingStyleModel = this.readerSettingsService.writingStyle;
+    this.activeTheme = this.readerSettingsService.activeTheme;
+    this.layoutMode = this.readerSettingsService.layoutMode;
+    this.immersiveMode = this.readerSettingsService.immersiveMode;
+    this.clickToPaginate = this.readerSettingsService.clickToPaginate;
+    this.isFullscreen = this.readerSettingsService.isFullscreen;
+    this.canPromoteProfile = this.readerSettingsService.canPromoteProfile;
+    this.hasParentProfile = this.readerSettingsService.hasParentProfile;
+    this.parentReadingProfile = this.readerSettingsService.parentReadingProfile;
+    this.currentReadingProfile = this.readerSettingsService.currentReadingProfile;
+
+    this.themes = this.readerSettingsService.getThemes();
+
+
     // Initialize the service if not already done
     if (!this.readerSettingsService.getCurrentReadingProfile()) {
       await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
