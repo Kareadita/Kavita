@@ -33,6 +33,8 @@
                 (selectPicker)="selectSlot(index, slot)"
                 [editMode]="isEditMode()"
                 (editModeChange)="isEditMode.set($event)"
+                [first]="$first"
+                [last]="$last"
               />
             }
           </div>

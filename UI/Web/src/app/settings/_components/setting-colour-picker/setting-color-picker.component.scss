@@ -23,6 +23,18 @@ $dotSize: 30px;
     0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
+// This doesn't seem to work
+// @media (max-width: var(--setting-mobile-breakpoint)px) {
+@media (max-width: 768px) {
+  .floating-picker.left {
+    transform: translateX(-25%);
+  }
+
+  .floating-picker.right {
+    transform: translateX(-75%);
+  }
+}
+
 :host ::ng-deep chrome-picker {
 
   rgba-input-component {
