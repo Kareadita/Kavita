@@ -20,7 +20,8 @@ public static class SearchQueryableExtensions
             .Where(s => EF.Functions.Like(s.Title!, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle!, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle);
+            .OrderBy(s => s.NormalizedTitle.Length)
+            .ThenBy(s => s.NormalizedTitle);
     }
 
     public static IQueryable<ReadingList> Search(this IQueryable<ReadingList> queryable,
@@ -30,7 +31,8 @@ public static class SearchQueryableExtensions
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle);
+            .OrderBy(s => s.NormalizedTitle.Length)
+            .ThenBy(s => s.NormalizedTitle);
     }
 
     public static IQueryable<Library> Search(this IQueryable<Library> queryable,
@@ -80,7 +82,8 @@ public static class SearchQueryableExtensions
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .Distinct()
-            .OrderBy(t => t.NormalizedTitle);
+            .OrderBy(t => t.NormalizedTitle.Length)
+            .ThenBy(t => t.NormalizedTitle);
     }
 
     public static IQueryable<Tag> SearchTags(this IQueryable<SeriesMetadata> queryable,
@@ -91,6 +94,7 @@ public static class SearchQueryableExtensions
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Distinct()
-            .OrderBy(t => t.NormalizedTitle);
+            .OrderBy(t => t.NormalizedTitle.Length)
+            .ThenBy(t => t.NormalizedTitle);
     }
 }

@@ -417,7 +417,8 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Library)
             .AsNoTracking()
             .AsSplitQuery()
-            .OrderBy(s => s.SortName!.ToLower())
+            .OrderBy(s => s.SortName.Length)
+            .ThenBy(s => s.SortName.ToLower())
             .Take(maxRecords)
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
@@ -435,7 +436,8 @@ public class SeriesRepository : ISeriesRepository
                                EF.Functions.Like(joined.Series.OriginalName, $"%{searchQuery}%")) ||
                               (joined.Series.LocalizedName != null &&
                                EF.Functions.Like(joined.Series.LocalizedName, $"%{searchQuery}%"))))
-            .OrderBy(joined => joined.Series.Name)
+            .OrderBy(joined => joined.Series.NormalizedName.Length)
+            .ThenBy(joined => joined.Series.NormalizedName)
             .Take(maxRecords)
             .Select(joined => new BookmarkSearchResultDto()
             {
@@ -473,7 +475,8 @@ public class SeriesRepository : ISeriesRepository
 
         result.Persons = await _context.Person
             .Where(p => personIds.Contains(p.Id))
-            .OrderBy(p => p.NormalizedName)
+            .OrderBy(p => p.NormalizedName.Length)
+            .ThenBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -523,7 +526,8 @@ public class SeriesRepository : ISeriesRepository
                 )
                 .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
                 .AsSplitQuery()
-                .OrderBy(c => c.TitleName)
+                .OrderBy(c => c.TitleName.Length)
+                .ThenBy(c => c.TitleName)
                 .Take(maxRecords)
                 .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
