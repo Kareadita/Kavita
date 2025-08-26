@@ -723,11 +723,19 @@ public class OpdsController : BaseApiController
     {
         var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+        {
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
-        var (baseUrl, prefix) = await GetPrefix();
-        var seriesDtos = (await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, PageSize)).ToList();
+        }
+
+        var userParams = new UserParams
+        {
+            PageNumber = pageNumber,
+            PageSize = PageSize,
+        };
+        var seriesDtos = (await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, userParams)).ToList();
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.SeriesId));
 
+        var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "recently-updated"), $"{apiKey}/recently-updated", apiKey, prefix);
         SetFeedId(feed, "recently-updated");
 

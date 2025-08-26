@@ -299,12 +299,14 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// Returns series that were recently updated, like adding or removing a chapter
     /// </summary>
+    /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
-    public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
+    public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
-        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(User.GetUserId(), 20));
+        userParams ??= UserParams.Default;
+        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(User.GetUserId(), userParams));
     }
 
     /// <summary>

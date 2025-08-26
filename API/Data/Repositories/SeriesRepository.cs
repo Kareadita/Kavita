@@ -134,7 +134,7 @@ public interface ISeriesRepository
     Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
+    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams userParams);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
@@ -1476,12 +1476,10 @@ public class SeriesRepository : ISeriesRepository
     /// <remarks>This provides 2 levels of pagination. Fetching the individual chapters only looks at 3000. Then when performing grouping
     /// in memory, we stop after 30 series. </remarks>
     /// <param name="userId">Used to ensure user has access to libraries</param>
-    /// <param name="pageSize">How many entities to return</param>
+    /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
-    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30)
+    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams userParams)
     {
-        var seriesMap = new Dictionary<string, GroupedSeriesDto>();
-        var index = 0;
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var items = (await GetRecentlyAddedChaptersQuery(userId));
@@ -1490,20 +1488,32 @@ public class SeriesRepository : ISeriesRepository
             items = items.RestrictAgainstAgeRestriction(userRating);
         }
 
+        var index = 0;
+        var seriesMap = new Dictionary<string, GroupedSeriesDto>();
+        var toSkip = (userParams.PageNumber - 1) * userParams.PageSize;
+        var skipped = new HashSet<string>();
+
         foreach (var item in items)
         {
-            if (seriesMap.Keys.Count == pageSize) break;
+            if (seriesMap.Keys.Count == userParams.PageSize) break;
 
             if (item.SeriesName == null) continue;
 
+            var key = item.SeriesName + "_" + item.LibraryId;
 
-            if (seriesMap.TryGetValue(item.SeriesName + "_" + item.LibraryId, out var value))
+            if (skipped.Count < toSkip)
+            {
+                skipped.Add(key);
+                continue;
+            }
+
+            if (seriesMap.TryGetValue(key, out var value))
             {
                 value.Count += 1;
             }
             else
             {
-                seriesMap[item.SeriesName + "_" + item.LibraryId] = new GroupedSeriesDto()
+                seriesMap[key] = new GroupedSeriesDto()
                 {
                     LibraryId = item.LibraryId,
                     LibraryType = item.LibraryType,
