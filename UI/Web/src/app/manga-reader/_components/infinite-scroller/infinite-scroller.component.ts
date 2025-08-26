@@ -14,7 +14,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  Renderer2, Signal,
+  Renderer2, signal, Signal,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -45,6 +45,11 @@ const DEFAULT_SCROLL_DEBOUNCE = 20;
  * Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
  */
 const EMULATE_SCROLL_END_DEBOUNCE = 100;
+/**
+ * Time which must have passed before auto chapter changes can occur.
+ * See: https://github.com/Kareadita/Kavita/issues/3970
+ */
+const INITIAL_LOAD_GRACE_PERIOD = 1000;
 
 /**
  * Bitwise enums for configuring how much debug information we want
@@ -179,6 +184,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     */
    initFinished: boolean = false;
   /**
+   * True until INITIAL_LOAD_GRACE_PERIOD ms have passed since the component was created
+   */
+  isInitialLoad = true;
+  /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
@@ -252,6 +261,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.isInitialLoad = false;
+    }, INITIAL_LOAD_GRACE_PERIOD);
+
     this.initScrollHandler();
 
     this.recalculateImageWidth();
@@ -430,7 +443,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   checkIfShouldTriggerContinuousReader() {
-    if (this.isScrolling) return;
+    if (this.isScrolling || this.isInitialLoad) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
       const totalHeight = this.getTotalHeight();
