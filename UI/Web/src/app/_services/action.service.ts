@@ -136,32 +136,6 @@ export class ActionService {
       });
   }
 
-  /**
-   * Request an analysis of files for a given Library (currently just word count)
-   * @param library Partial Library, must have id and name populated
-   * @param callback Optional callback to perform actions after API completes
-   * @returns
-   */
-   async analyzeFiles(library: Partial<Library>, callback?: LibraryActionCallback) {
-    if (!library.hasOwnProperty('id') || library.id === undefined) {
-      return;
-    }
-
-    if (!await this.confirmService.alert(translate('toasts.alert-long-running'))) {
-      if (callback) {
-        callback(library);
-      }
-      return;
-    }
-
-    this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(translate('toasts.library-file-analysis-queued', {name: library.name}));
-      if (callback) {
-        callback(library);
-      }
-    });
-  }
-
   async deleteLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;

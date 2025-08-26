@@ -169,9 +169,6 @@ export class SideNavComponent implements OnInit {
       case(Action.GenerateColorScape):
         await this.actionService.refreshLibraryMetadata(lib, undefined, false);
         break;
-      case (Action.AnalyzeFiles):
-        await this.actionService.analyzeFiles(lib);
-        break;
       case (Action.Delete):
         await this.actionService.deleteLibrary(lib);
         break;

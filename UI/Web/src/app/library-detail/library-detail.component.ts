@@ -280,9 +280,6 @@ export class LibraryDetailComponent implements OnInit {
               this.loadPageSource.next(true);
             });
             break;
-          case (Action.AnalyzeFiles):
-            await this.actionService.analyzeFiles(library);
-            break;
           case(Action.Edit):
             this.actionService.editLibrary(library);
             break;
