@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Progress;
@@ -16,22 +17,18 @@ using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Extensions;
 
-public class SeriesFilterTests : AbstractDbTest
+public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    protected override async Task ResetDb()
-    {
-        Context.Series.RemoveRange(Context.Series);
-        Context.AppUser.RemoveRange(Context.AppUser);
-        await Context.SaveChangesAsync();
-    }
 
     #region HasProgress
 
-    private async Task<AppUser> SetupHasProgress()
+    private async Task<AppUser> SetupHasProgress(IUnitOfWork unitOfWork, DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("None").WithPages(10)
@@ -54,18 +51,18 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
 
         // Create read progress on Partial and Full
-        var readerService = new ReaderService(UnitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>());
 
         // Select Partial and set pages read to 5 on first chapter
-        var partialSeries = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
+        var partialSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
         var partialChapter = partialSeries.Volumes.First().Chapters.First();
 
         Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
@@ -78,7 +75,7 @@ public class SeriesFilterTests : AbstractDbTest
         }, user.Id));
 
         // Select Full and set pages read to 10 on first chapter
-        var fullSeries = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
+        var fullSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
         var fullChapter = fullSeries.Volumes.First().Chapters.First();
 
         Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
@@ -96,9 +93,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_LessThan50_ShouldReturnSingle()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.LessThan, 50, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.LessThan, 50, user.Id)
             .ToListAsync();
 
         Assert.Single(queryResult);
@@ -108,10 +106,11 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_LessThanOrEqual50_ShouldReturnTwo()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
         // Query series with progress <= 50%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.LessThanEqual, 50, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.LessThanEqual, 50, user.Id)
             .ToListAsync();
 
         Assert.Equal(2, queryResult.Count);
@@ -122,10 +121,11 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_GreaterThan50_ShouldReturnFull()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
         // Query series with progress > 50%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.GreaterThan, 50, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.GreaterThan, 50, user.Id)
             .ToListAsync();
 
         Assert.Single(queryResult);
@@ -135,10 +135,11 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_Equal100_ShouldReturnFull()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
         // Query series with progress == 100%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.Equal, 100, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.Equal, 100, user.Id)
             .ToListAsync();
 
         Assert.Single(queryResult);
@@ -148,10 +149,11 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_LessThan100_ShouldReturnTwo()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
         // Query series with progress < 100%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.LessThan, 100, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.LessThan, 100, user.Id)
             .ToListAsync();
 
         Assert.Equal(2, queryResult.Count);
@@ -162,10 +164,11 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_LessThanOrEqual100_ShouldReturnAll()
     {
-        var user = await SetupHasProgress();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasProgress(unitOfWork, context);
 
         // Query series with progress <= 100%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.LessThanEqual, 100, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.LessThanEqual, 100, user.Id)
             .ToListAsync();
 
         Assert.Equal(3, queryResult.Count);
@@ -177,6 +180,8 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasProgress_LessThan100_WithProgress99_99_ShouldReturnSeries()
     {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("AlmostFull").WithPages(100)
                 .WithVolume(new VolumeBuilder("1")
@@ -188,16 +193,16 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
-        var readerService = new ReaderService(UnitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>());
 
         // Set progress to 99.99% (99/100 pages read)
-        var series = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         var chapter = series.Volumes.First().Chapters.First();
 
         Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
@@ -210,7 +215,7 @@ public class SeriesFilterTests : AbstractDbTest
         }, user.Id));
 
         // Query series with progress < 100%
-        var queryResult = await Context.Series.HasReadingProgress(true, FilterComparison.LessThan, 100, user.Id)
+        var queryResult = await context.Series.HasReadingProgress(true, FilterComparison.LessThan, 100, user.Id)
             .ToListAsync();
 
         Assert.Single(queryResult);
@@ -220,7 +225,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasLanguage
 
-    private async Task<AppUser> SetupHasLanguage()
+    private async Task<AppUser> SetupHasLanguage(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("English").WithPages(10)
@@ -246,9 +251,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -256,9 +261,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_Equal_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.Equal, ["en"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.Equal, ["en"]).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("en", foundSeries[0].Metadata.Language);
     }
@@ -266,9 +272,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_NotEqual_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.NotEqual, ["en"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.NotEqual, ["en"]).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.DoesNotContain(foundSeries, s => s.Metadata.Language == "en");
     }
@@ -276,9 +283,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_Contains_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.Contains, ["en", "fr"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.Contains, ["en", "fr"]).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Metadata.Language == "en");
         Assert.Contains(foundSeries, s => s.Metadata.Language == "fr");
@@ -287,9 +295,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_NotContains_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.NotContains, ["en", "fr"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.NotContains, ["en", "fr"]).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("es", foundSeries[0].Metadata.Language);
     }
@@ -297,14 +306,15 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_MustContains_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
         // Since "MustContains" matches all the provided languages, no series should match in this case.
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.MustContains, ["en", "fr"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.MustContains, ["en", "fr"]).ToListAsync();
         Assert.Empty(foundSeries);
 
         // Single language should work.
-        foundSeries = await Context.Series.HasLanguage(true, FilterComparison.MustContains, ["en"]).ToListAsync();
+        foundSeries = await context.Series.HasLanguage(true, FilterComparison.MustContains, ["en"]).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("en", foundSeries[0].Metadata.Language);
     }
@@ -312,9 +322,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_Matches_Works()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.Matches, ["e"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.Matches, ["e"]).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains("en", foundSeries.Select(s => s.Metadata.Language));
         Assert.Contains("es", foundSeries.Select(s => s.Metadata.Language));
@@ -323,29 +334,32 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasLanguage_DisabledCondition_ReturnsAll()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(false, FilterComparison.Equal, ["en"]).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(false, FilterComparison.Equal, ["en"]).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasLanguage_EmptyLanguageList_ReturnsAll()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
-        var foundSeries = await Context.Series.HasLanguage(true, FilterComparison.Equal, new List<string>()).ToListAsync();
+        var foundSeries = await context.Series.HasLanguage(true, FilterComparison.Equal, new List<string>()).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasLanguage_UnsupportedComparison_ThrowsException()
     {
-        await SetupHasLanguage();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasLanguage(context);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await Context.Series.HasLanguage(true, FilterComparison.GreaterThan, ["en"]).ToListAsync();
+            await context.Series.HasLanguage(true, FilterComparison.GreaterThan, ["en"]).ToListAsync();
         });
     }
 
@@ -353,7 +367,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasAverageRating
 
-    private async Task<AppUser> SetupHasAverageRating()
+    private async Task<AppUser> SetupHasAverageRating(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("None").WithPages(10)
@@ -379,9 +393,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -389,9 +403,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_Equal_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.Equal, 100).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.Equal, 100).ToListAsync();
         Assert.Single(series);
         Assert.Equal("Full", series[0].Name);
     }
@@ -399,9 +414,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_GreaterThan_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.GreaterThan, 50).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.GreaterThan, 50).ToListAsync();
         Assert.Single(series);
         Assert.Equal("Full", series[0].Name);
     }
@@ -409,9 +425,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_GreaterThanEqual_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.GreaterThanEqual, 50).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.GreaterThanEqual, 50).ToListAsync();
         Assert.Equal(2, series.Count);
         Assert.Contains(series, s => s.Name == "Partial");
         Assert.Contains(series, s => s.Name == "Full");
@@ -420,9 +437,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_LessThan_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.LessThan, 50).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.LessThan, 50).ToListAsync();
         Assert.Single(series);
         Assert.Equal("None", series[0].Name);
     }
@@ -430,9 +448,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_LessThanEqual_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.LessThanEqual, 50).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.LessThanEqual, 50).ToListAsync();
         Assert.Equal(2, series.Count);
         Assert.Contains(series, s => s.Name == "None");
         Assert.Contains(series, s => s.Name == "Partial");
@@ -441,9 +460,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_NotEqual_Works()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.NotEqual, 100).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.NotEqual, 100).ToListAsync();
         Assert.Equal(2, series.Count);
         Assert.DoesNotContain(series, s => s.Name == "Full");
     }
@@ -451,18 +471,20 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_ConditionFalse_ReturnsAll()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(false, FilterComparison.Equal, 100).ToListAsync();
+        var series = await context.Series.HasAverageRating(false, FilterComparison.Equal, 100).ToListAsync();
         Assert.Equal(3, series.Count);
     }
 
     [Fact]
     public async Task HasAverageRating_NotSet_IsHandled()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
-        var series = await Context.Series.HasAverageRating(true, FilterComparison.Equal, -1).ToListAsync();
+        var series = await context.Series.HasAverageRating(true, FilterComparison.Equal, -1).ToListAsync();
         Assert.Single(series);
         Assert.Equal("None", series[0].Name);
     }
@@ -470,22 +492,24 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAverageRating_ThrowsForInvalidComparison()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await Context.Series.HasAverageRating(true, FilterComparison.Contains, 50).ToListAsync();
+            await context.Series.HasAverageRating(true, FilterComparison.Contains, 50).ToListAsync();
         });
     }
 
     [Fact]
     public async Task HasAverageRating_ThrowsForOutOfRangeComparison()
     {
-        await SetupHasAverageRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAverageRating(context);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await Context.Series.HasAverageRating(true, (FilterComparison)999, 50).ToListAsync();
+            await context.Series.HasAverageRating(true, (FilterComparison)999, 50).ToListAsync();
         });
     }
 
@@ -493,7 +517,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     # region HasPublicationStatus
 
-    private async Task<AppUser> SetupHasPublicationStatus()
+    private async Task<AppUser> SetupHasPublicationStatus(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("Cancelled").WithPages(10)
@@ -519,9 +543,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -529,9 +553,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasPublicationStatus_Equal_Works()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("Cancelled", foundSeries[0].Name);
     }
@@ -539,9 +564,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasPublicationStatus_Contains_Works()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(true, FilterComparison.Contains, new List<PublicationStatus> { PublicationStatus.Cancelled, PublicationStatus.Completed }).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(true, FilterComparison.Contains, new List<PublicationStatus> { PublicationStatus.Cancelled, PublicationStatus.Completed }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "Cancelled");
         Assert.Contains(foundSeries, s => s.Name == "Completed");
@@ -550,9 +576,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasPublicationStatus_NotContains_Works()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(true, FilterComparison.NotContains, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(true, FilterComparison.NotContains, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "OnGoing");
         Assert.Contains(foundSeries, s => s.Name == "Completed");
@@ -561,9 +588,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasPublicationStatus_NotEqual_Works()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(true, FilterComparison.NotEqual, new List<PublicationStatus> { PublicationStatus.OnGoing }).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(true, FilterComparison.NotEqual, new List<PublicationStatus> { PublicationStatus.OnGoing }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "Cancelled");
         Assert.Contains(foundSeries, s => s.Name == "Completed");
@@ -572,46 +600,50 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasPublicationStatus_ConditionFalse_ReturnsAll()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(false, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(false, FilterComparison.Equal, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasPublicationStatus_EmptyPubStatuses_ReturnsAll()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
-        var foundSeries = await Context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus>()).ToListAsync();
+        var foundSeries = await context.Series.HasPublicationStatus(true, FilterComparison.Equal, new List<PublicationStatus>()).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasPublicationStatus_ThrowsForInvalidComparison()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await Context.Series.HasPublicationStatus(true, FilterComparison.BeginsWith, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+            await context.Series.HasPublicationStatus(true, FilterComparison.BeginsWith, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         });
     }
 
     [Fact]
     public async Task HasPublicationStatus_ThrowsForOutOfRangeComparison()
     {
-        await SetupHasPublicationStatus();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasPublicationStatus(context);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await Context.Series.HasPublicationStatus(true, (FilterComparison)999, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
+            await context.Series.HasPublicationStatus(true, (FilterComparison)999, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         });
     }
     #endregion
 
     #region HasAgeRating
-    private async Task<AppUser> SetupHasAgeRating()
+    private async Task<AppUser> SetupHasAgeRating(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("Unknown").WithPages(10)
@@ -637,9 +669,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -647,9 +679,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_Equal_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.Equal, [AgeRating.G]).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.Equal, [AgeRating.G]).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("G", foundSeries[0].Name);
     }
@@ -657,9 +690,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_Contains_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.Contains, new List<AgeRating> { AgeRating.G, AgeRating.Mature }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.Contains, new List<AgeRating> { AgeRating.G, AgeRating.Mature }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "G");
         Assert.Contains(foundSeries, s => s.Name == "Mature");
@@ -668,9 +702,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_NotContains_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.NotContains, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.NotContains, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "G");
         Assert.Contains(foundSeries, s => s.Name == "Mature");
@@ -679,9 +714,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_NotEqual_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.NotEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.NotEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "Unknown");
         Assert.Contains(foundSeries, s => s.Name == "Mature");
@@ -690,9 +726,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_GreaterThan_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.GreaterThan, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.GreaterThan, new List<AgeRating> { AgeRating.Unknown }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "G");
         Assert.Contains(foundSeries, s => s.Name == "Mature");
@@ -701,9 +738,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_GreaterThanEqual_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.GreaterThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.GreaterThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "G");
         Assert.Contains(foundSeries, s => s.Name == "Mature");
@@ -712,9 +750,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_LessThan_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.LessThan, new List<AgeRating> { AgeRating.Mature }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.LessThan, new List<AgeRating> { AgeRating.Mature }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "Unknown");
         Assert.Contains(foundSeries, s => s.Name == "G");
@@ -723,9 +762,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_LessThanEqual_Works()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.LessThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.LessThanEqual, new List<AgeRating> { AgeRating.G }).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "Unknown");
         Assert.Contains(foundSeries, s => s.Name == "G");
@@ -734,40 +774,44 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasAgeRating_ConditionFalse_ReturnsAll()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(false, FilterComparison.Equal, new List<AgeRating> { AgeRating.G }).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(false, FilterComparison.Equal, new List<AgeRating> { AgeRating.G }).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasAgeRating_EmptyRatings_ReturnsAll()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
-        var foundSeries = await Context.Series.HasAgeRating(true, FilterComparison.Equal, new List<AgeRating>()).ToListAsync();
+        var foundSeries = await context.Series.HasAgeRating(true, FilterComparison.Equal, new List<AgeRating>()).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasAgeRating_ThrowsForInvalidComparison()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await Context.Series.HasAgeRating(true, FilterComparison.BeginsWith, new List<AgeRating> { AgeRating.G }).ToListAsync();
+            await context.Series.HasAgeRating(true, FilterComparison.BeginsWith, new List<AgeRating> { AgeRating.G }).ToListAsync();
         });
     }
 
     [Fact]
     public async Task HasAgeRating_ThrowsForOutOfRangeComparison()
     {
-        await SetupHasAgeRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasAgeRating(context);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await Context.Series.HasAgeRating(true, (FilterComparison)999, new List<AgeRating> { AgeRating.G }).ToListAsync();
+            await context.Series.HasAgeRating(true, (FilterComparison)999, new List<AgeRating> { AgeRating.G }).ToListAsync();
         });
     }
 
@@ -775,7 +819,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasReleaseYear
 
-    private async Task<AppUser> SetupHasReleaseYear()
+    private async Task<AppUser> SetupHasReleaseYear(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("2000").WithPages(10)
@@ -801,9 +845,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -811,9 +855,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasReleaseYear_Equal_Works()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.Equal, 2020).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.Equal, 2020).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("2020", foundSeries[0].Name);
     }
@@ -821,9 +866,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasReleaseYear_GreaterThan_Works()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.GreaterThan, 2000).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.GreaterThan, 2000).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "2020");
         Assert.Contains(foundSeries, s => s.Name == "2025");
@@ -832,9 +878,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasReleaseYear_LessThan_Works()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.LessThan, 2025).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.LessThan, 2025).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
         Assert.Contains(foundSeries, s => s.Name == "2000");
         Assert.Contains(foundSeries, s => s.Name == "2020");
@@ -843,18 +890,20 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasReleaseYear_IsInLast_Works()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.IsInLast, 5).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsInLast, 5).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasReleaseYear_IsNotInLast_Works()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, 5).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, 5).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Contains(foundSeries, s => s.Name == "2000");
     }
@@ -862,24 +911,28 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasReleaseYear_ConditionFalse_ReturnsAll()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(false, FilterComparison.Equal, 2020).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(false, FilterComparison.Equal, 2020).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasReleaseYear_ReleaseYearNull_ReturnsAll()
     {
-        await SetupHasReleaseYear();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasReleaseYear(context);
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.Equal, null).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.Equal, null).ToListAsync();
         Assert.Equal(3, foundSeries.Count);
     }
 
     [Fact]
     public async Task HasReleaseYear_IsEmpty_Works()
     {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("EmptyYear").WithPages(10)
                 .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(0).Build())
@@ -889,10 +942,10 @@ public class SeriesFilterTests : AbstractDbTest
                 .Build())
             .Build();
 
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
-        var foundSeries = await Context.Series.HasReleaseYear(true, FilterComparison.IsEmpty, 0).ToListAsync();
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsEmpty, 0).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Equal("EmptyYear", foundSeries[0].Name);
     }
@@ -902,7 +955,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasRating
 
-    private async Task<AppUser> SetupHasRating()
+    private async Task<AppUser> SetupHasRating(IUnitOfWork unitOfWork, DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("No Rating").WithPages(10)
@@ -925,14 +978,14 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
-        var ratingService = new RatingService(UnitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
+        var ratingService = new RatingService(unitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
 
         // Select 0 Rating
-        var zeroRating = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
+        var zeroRating = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
         Assert.NotNull(zeroRating);
 
         Assert.True(await ratingService.UpdateSeriesRating(user, new UpdateRatingDto()
@@ -942,7 +995,7 @@ public class SeriesFilterTests : AbstractDbTest
         }));
 
         // Select 4.5 Rating
-        var partialRating = await UnitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
+        var partialRating = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(3);
 
         Assert.True(await ratingService.UpdateSeriesRating(user, new UpdateRatingDto()
         {
@@ -956,9 +1009,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_Equal_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.Equal, 4.5f, user.Id)
             .ToListAsync();
 
@@ -969,9 +1023,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_GreaterThan_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.GreaterThan, 0, user.Id)
             .ToListAsync();
 
@@ -982,9 +1037,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_LessThan_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.LessThan, 4.5f, user.Id)
             .ToListAsync();
 
@@ -995,9 +1051,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_IsEmpty_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.IsEmpty, 0, user.Id)
             .ToListAsync();
 
@@ -1008,9 +1065,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_GreaterThanEqual_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.GreaterThanEqual, 4.5f, user.Id)
             .ToListAsync();
 
@@ -1021,9 +1079,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasRating_LessThanEqual_Works()
     {
-        var user = await SetupHasRating();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SetupHasRating(unitOfWork, context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasRating(true, FilterComparison.LessThanEqual, 0, user.Id)
             .ToListAsync();
 
@@ -1083,7 +1142,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasName
 
-    private async Task<AppUser> SetupHasName()
+    private async Task<AppUser> SetupHasName(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("Don't Toy With Me, Miss Nagatoro").WithLocalizedName("Ijiranaide, Nagatoro-san").WithPages(10)
@@ -1101,9 +1160,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -1111,9 +1170,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_Equal_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.Equal, "My Dress-Up Darling")
             .ToListAsync();
 
@@ -1124,9 +1184,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_Equal_LocalizedName_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.Equal, "Ijiranaide, Nagatoro-san")
             .ToListAsync();
 
@@ -1137,9 +1198,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_BeginsWith_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.BeginsWith, "My Dress")
             .ToListAsync();
 
@@ -1150,9 +1212,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_BeginsWith_LocalizedName_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.BeginsWith, "Sono Bisque")
             .ToListAsync();
 
@@ -1163,9 +1226,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_EndsWith_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.EndsWith, "Nagatoro")
             .ToListAsync();
 
@@ -1176,9 +1240,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_Matches_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.Matches, "Toy With Me")
             .ToListAsync();
 
@@ -1189,9 +1254,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasName_NotEqual_Works()
     {
-        await SetupHasName();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasName(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasName(true, FilterComparison.NotEqual, "My Dress-Up Darling")
             .ToListAsync();
 
@@ -1204,7 +1270,7 @@ public class SeriesFilterTests : AbstractDbTest
 
     #region HasSummary
 
-    private async Task<AppUser> SetupHasSummary()
+    private async Task<AppUser> SetupHasSummary(DataContext context)
     {
         var library = new LibraryBuilder("Manga")
             .WithSeries(new SeriesBuilder("Hippos").WithPages(10)
@@ -1235,9 +1301,9 @@ public class SeriesFilterTests : AbstractDbTest
             .WithLibrary(library)
             .Build();
 
-        Context.Users.Add(user);
-        Context.Library.Add(library);
-        await Context.SaveChangesAsync();
+        context.Users.Add(user);
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         return user;
     }
@@ -1245,9 +1311,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_Equal_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.Equal, "I like hippos")
             .ToListAsync();
 
@@ -1258,9 +1325,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_BeginsWith_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.BeginsWith, "I like h")
             .ToListAsync();
 
@@ -1271,9 +1339,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_EndsWith_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.EndsWith, "apples")
             .ToListAsync();
 
@@ -1284,9 +1353,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_Matches_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.Matches, "like ducks")
             .ToListAsync();
 
@@ -1297,9 +1367,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_NotEqual_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.NotEqual, "I like ducks")
             .ToListAsync();
 
@@ -1310,9 +1381,10 @@ public class SeriesFilterTests : AbstractDbTest
     [Fact]
     public async Task HasSummary_IsEmpty_Works()
     {
-        await SetupHasSummary();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await SetupHasSummary(context);
 
-        var foundSeries = await Context.Series
+        var foundSeries = await context.Series
             .HasSummary(true, FilterComparison.IsEmpty, string.Empty)
             .ToListAsync();
 

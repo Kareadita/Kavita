@@ -1,11 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, Injectable} from '@angular/core';
-import { of } from 'rxjs';
+import {of} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { JumpKey } from '../_models/jumpbar/jump-key';
-import { Library, LibraryType } from '../_models/library/library';
-import { DirectoryDto } from '../_models/system/directory-dto';
+import {environment} from 'src/environments/environment';
+import {JumpKey} from '../_models/jumpbar/jump-key';
+import {Library, LibraryType} from '../_models/library/library';
+import {DirectoryDto} from '../_models/system/directory-dto';
 import {EVENTS, MessageHubService} from "./message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -71,6 +71,10 @@ export class LibraryService {
     }
 
     return this.httpClient.get<DirectoryDto[]>(this.baseUrl + 'library/list' + query);
+  }
+
+  hasFilesAtRoot(roots: Array<string>) {
+    return this.httpClient.post<{[key: string]: boolean}>(this.baseUrl + 'library/has-files-at-root', {roots});
   }
 
   getJumpBar(libraryId: number) {

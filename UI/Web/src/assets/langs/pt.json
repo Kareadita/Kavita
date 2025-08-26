@@ -85,7 +85,7 @@
     },
     "user-preferences": {
         "title": "Painel do Utilizador",
-        "pref-description": "Estas definições globais estão ligadas à sua conta. As definições do Leitor estão nos Perfis de Leitura",
+        "pref-description": "Estas definições globais estão ligadas à sua conta. As definições do Leitor estão nos Perfis de Leitura.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -822,7 +822,7 @@
         "library-name-unique": "O nome da biblioteca tem de ser único",
         "last-scanned-label": "Último Scan:",
         "type-label": "Tipo",
-        "type-tooltip": "O tipo de biblioteca indica como os nomes dos ficheiros são processados e se o UI mostra Capítulos (Manga) vs Números (BDs). Verifique o wiki para mais detalhes relativamente às diferenças entre os dois tipos de bibliotecas.",
+        "type-tooltip": "O tipo de biblioteca indica como os nomes dos ficheiros são processados e se o UI mostra Capítulos (Manga) vs Edições (BDs). Verifique o wiki para mais detalhes relativamente às diferenças entre os dois tipos de bibliotecas.",
         "kavitaplus-eligible-label": "Kavita+ Elegível",
         "kavitaplus-eligible-tooltip": "Suporta as funcionalidades de metadados do Kavita+ ou Scrobbling",
         "folder-description": "Adicione pastas à sua biblioteca",
@@ -907,7 +907,12 @@
         "theme-paper": "Papel",
         "update-parent": "Gravar para {{name}}",
         "loading": "a carregar",
-        "create-new": "Novo perfil implícito"
+        "create-new": "Novo perfil implícito",
+        "create-new-tooltip": "Crie um novo perfil a partir do seu perfil implícito atual",
+        "reading-profile-updated": "Perfil de leitura atualizado",
+        "reading-profile-promoted": "Perfil de leitura promovido",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "table-of-contents": {
         "no-data": "Este livro não tem um Indíce definido nos metadados ou um ficheiro toc"
@@ -1348,7 +1353,8 @@
         "admin-matched-metadata": "Metadados com Correspondência",
         "admin-manage-tokens": "Gerir Tokens de Utilizador",
         "scrobble-holds": "Pausas de Scrobble",
-        "admin-metadata": "Gerir Metadados"
+        "admin-metadata": "Gerir Metadados",
+        "reading-profiles": "Perfis de Leitura"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1472,7 +1478,10 @@
         "logout": "Terminar Sessão",
         "all-filters": "Filtros Inteligentes",
         "nav-link-header": "Opções de Navegação",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "Corresponde um pseudónimo",
+        "browse-genres": "Explorar Géneros",
+        "browse-tags": "Explorar Etiquetas"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1618,7 +1627,13 @@
         "no-next-chapter": "Não há Capítulo Seguinte",
         "no-prev-chapter": "Não há Capítulo Anterior",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
-        "series-progress": "Progresso da Série: {{percentage}}"
+        "series-progress": "Progresso da Série: {{percentage}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "Perfil de leitura atualizado",
+        "reading-profile-promoted": "Perfil de leitura promovido"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1675,7 +1690,10 @@
         "release-year": "Ano de Lançamento",
         "read-progress": "Última Leitura",
         "average-rating": "Classificação Média",
-        "random": "Aleatório"
+        "random": "Aleatório",
+        "person-name": "Nome",
+        "person-series-count": "Número de Séries",
+        "person-chapter-count": "Número de Capítulos"
     },
     "edit-series-modal": {
         "title": "Detalhes de {{seriesName}}",
@@ -2208,7 +2226,12 @@
         "bulk-delete-libraries": "Tem a certeza que deseja eliminar {{count}} bibliotecas?",
         "match-success": "Séries correspondidas com sucesso",
         "webtoon-override": "O modo Webtoon vai ser usado porque as imagens representam um webtoon.",
-        "scrobble-gen-init": "Foi colocada uma tarefa em fila para gerar eventos de scrobble a partir do historial de leitura e classificações existentes, sincronizando-as com os serviços que estão configurados."
+        "scrobble-gen-init": "Foi colocada uma tarefa em fila para gerar eventos de scrobble a partir do historial de leitura e classificações existentes, sincronizando-as com os serviços que estão configurados.",
+        "series-added-want-to-read": "Série adicionada da lista Leituras Futuras",
+        "confirm-delete-multiple-volumes": "Tem a certeza que deseja apagar {{count}} volumes? Os ficheiros em disco não serão alterados.",
+        "series-bound-to-reading-profile": "Série vinculada ao Perfil de Leitura {{name}}",
+        "library-bound-to-reading-profile": "Biblioteca vinculada ao Perfil de Leitura {{name}}",
+        "external-match-rate-error": "O Kavita ficou sem taxa à procura de {{seriesName}}. Tente novamente em 5 minutos."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2281,7 +2304,16 @@
         "copy-settings": "Copiar Definições De",
         "match": "Correspondência",
         "match-tooltip": "Fazer a associação manual das Séries com o Kavita+",
-        "reorder": "Reordenar"
+        "reorder": "Reordenar",
+        "reading-profiles": "Perfis de Leitura",
+        "set-reading-profile": "Escolher Perfil de Leitura",
+        "set-reading-profile-tooltip": "Vincular um Perfil de Leitura a esta Biblioteca",
+        "clear-reading-profile": "Limpar Perfil de Leitura",
+        "clear-reading-profile-tooltip": "Limpar Perfil de Leitura para esta Biblioteca",
+        "cleared-profile": "Perfil de Leitura Limpo",
+        "rename": "Renomear",
+        "rename-tooltip": "Renomear o Filtro Inteligente",
+        "merge": "Juntar"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2386,7 +2418,7 @@
         "series-count": "{{num}} Séries",
         "item-count": "{{num}} Itens",
         "book-num": "Livro",
-        "issue-hash-num": "Número #",
+        "issue-hash-num": "Edição #",
         "issue-num": "Número",
         "chapter-num": "Capítulo",
         "volume-num": "Volume",
@@ -2395,19 +2427,21 @@
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
         "book-nums": "Livros",
-        "issue-nums": "Números",
+        "issue-nums": "Edições",
         "chapter-nums": "Capítulos",
         "volume-nums": "Volumes",
         "author-count": "{{num}} Autores",
         "chapter-count": "{{num}} Capítulos",
-        "no-data": "Sem Dados"
+        "no-data": "Sem Dados",
+        "issue-count": "{{num}} Edições"
     },
     "confirm": {
         "alert": "Alerta",
         "confirm": "Confirmar",
         "cancel": "{{common.cancel}}",
         "info": "Informação",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "Questão"
     },
     "person-detail": {
         "all-roles": "Funções",
@@ -2440,7 +2474,11 @@
         "cover-image-description-extra": "Em alternativa pode descarregar uma capa a partir do CoversDB, se disponível.",
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "download-coversdb": "Descarregar de CoversDB"
+        "download-coversdb": "Descarregar de CoversDB",
+        "aliases-tab": "Pseudónimos",
+        "aliases-label": "Editar pseudónimos",
+        "alias-overlap": "Este pseudónimo refere-se a outra pessoa ou é o nome desta pessoa, considere juntar as duas pessoas.",
+        "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito."
     },
     "changelog-update-item": {
         "fixed": "Corrigido",
@@ -2569,15 +2607,15 @@
         "overrides-label": "Substituições",
         "person-roles-label": "Papéis",
         "enable-chapter-title-label": "Título",
-        "enable-chapter-title-tooltip": "Permitir que o Título do Capítulo/Número seja gravado",
+        "enable-chapter-title-tooltip": "Permitir que o Título do Capítulo/Edição seja gravado",
         "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
         "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
         "enable-chapter-release-date-label": "Data de Lançamento",
-        "enable-chapter-release-date-tooltip": "Permitir que a Data de Lançamento do Capítulo/Número seja gravado",
+        "enable-chapter-release-date-tooltip": "Permitir que a Data de Lançamento do Capítulo/Edição seja gravado",
         "enable-chapter-publisher-label": "Editora",
-        "enable-chapter-publisher-tooltip": "Permitir que a Editor do Capítulo/Número seja gravado",
+        "enable-chapter-publisher-tooltip": "Permitir que o Editor do Capítulo/Edição seja gravado",
         "enable-chapter-cover-label": "Capa do Capítulo",
-        "enable-chapter-cover-tooltip": "Permitir que a Capa do Capítulo/Número seja definida",
+        "enable-chapter-cover-tooltip": "Permitir que a Capa do Capítulo/Editor seja definida",
         "chapter-header": "Campos do Capítulo"
     },
     "metadata-setting-field-pipe": {
@@ -2589,7 +2627,12 @@
         "localized-name": "{{edit-series-modal.localized-name-label}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "covers": "Capas",
-        "start-date": "{{manage-metadata-settings.enable-start-date-label}}"
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "chapter-release-date": "Data de Lançamento (Capítulo)",
+        "chapter-summary": "Sumário (Capítulo)",
+        "chapter-covers": "Capas (Capítulo)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Capítulo)",
+        "chapter-title": "Título (Capítulo)"
     },
     "role-localized-pipe": {
         "admin": "Administrador",
@@ -2609,7 +2652,76 @@
         "critical": "Crítico"
     },
     "manage-reading-profiles": {
-        "reset": "{{common.reset}}"
+        "reset": "{{common.reset}}",
+        "description": "Nem todas as séries podem ser lidas da mesma maneira, defina perfis de leitura distintos por biblioteca ou séries para que o regresso às suas séries seja o mais simples possível.",
+        "extra-tip": "Atribua perfis de leitura a partir do menu de ações nas séries ou bibliotecas, ou em massa. Quando alterar definições num leitor, é criado um perfil escondido que memoriza as suas escolhas para essa série (não se aplica a pdfs). Este perfil é removido quando atribui o seu próprio perfil de leitura à série. Pode encontrar mais informação no",
+        "wiki-title": "wiki",
+        "profiles-title": "Os seus perfis de leitura",
+        "default-profile": "Por Defeito",
+        "add": "{{common.add}}",
+        "add-tooltip": "O seu novo perfil será gravado depois de lhe fazer qualquer alteração",
+        "make-default": "Definir por defeito",
+        "no-selected": "Nenhum perfil selecionado",
+        "confirm": "Tem a certeza que deseja eliminar o perfil de leitura {{name}}?",
+        "selection-tip": "Selecione um perfil da lista ou crie um novo à direita no topo",
+        "image-reader-settings-title": "Leitor de Imagens",
+        "reading-direction-label": "Direção de Leitura",
+        "reading-direction-tooltip": "Direção em que deve clicar para ir para a página seguinte. Direita para Esquerda significa que se clica no lado esquerdo do ecrã para ir para a página seguinte.",
+        "scaling-option-label": "Opções de Escala",
+        "scaling-option-tooltip": "Como a imagem é dimensionada no seu ecrã.",
+        "page-splitting-label": "Divisão de Páginas",
+        "page-splitting-tooltip": "Como dividir uma imagem que ocupa a largura toda (p.e., a imagem da esquerda e direita estão juntas)",
+        "reading-mode-label": "Modo de Leitura",
+        "reading-mode-tooltip": "Alterar o leitor para paginar verticalmente, horizontalmente ou para ter scroll infinito",
+        "layout-mode-label": "Modo de Layout",
+        "layout-mode-tooltip": "Mostrar apenas uma imagem no ecrã ou duas imagens lado a lado",
+        "background-color-label": "Cor de fundo",
+        "background-color-tooltip": "Cor de fundo do Leitor de Imagens",
+        "auto-close-menu-label": "Fechar Menu Automaticamente",
+        "auto-close-menu-tooltip": "Se o menu deve fechar automaticamente",
+        "show-screen-hints-label": "Mostrar Dicas no Ecrã",
+        "show-screen-hints-tooltip": "Mostrar dicas no ecrã que ajudam a compreender a área e direção de paginação",
+        "emulate-comic-book-label": "Emular livro de banda desenhada",
+        "emulate-comic-book-tooltip": "Aplica um efeito de sombra para emular a leitura a partir de um livro físico",
+        "swipe-to-paginate-label": "Deslizar para Paginar",
+        "swipe-to-paginate-tooltip": "Se o gesto de deslizar no ecrã causa que as páginas seguinte ou anterior sejam mostradas",
+        "allow-auto-webtoon-reader-label": "Modo Leitor Webtoon Automático",
+        "allow-auto-webtoon-reader-tooltip": "Muda para o modo Leitor Webtoon se as páginas indicam que é um webtoon. Podem acontecer falsos positivos.",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "Substituir a largura das imagens no leitor",
+        "disable-width-override-label": "Desabilitar a substituição da largura",
+        "disable-width-override-tooltip": "Evitar que a substituição da largura tenha efeito quando o seu ecrã está configurado com o valor mínimo aceite",
+        "book-reader-settings-title": "Leitor de Livros",
+        "tap-to-paginate-label": "Tocar par Paginar",
+        "tap-to-paginate-tooltip": "Se as laterais do leitor de livros permitem que o toque mostre a página anterior/seguinte",
+        "immersive-mode-label": "Modo Imersivo",
+        "immersive-mode-tooltip": "Irá esconder o menu quando se clicar no documento e ligar o toque para paginar",
+        "reading-direction-book-label": "Direção de Leitura",
+        "reading-direction-book-tooltip": "Direção a clicar para ir para a página seguinte. Direita para Esquerda significa que se tem de clicar no lado esquerdo do ecrã para ir para a página seguinte.",
+        "font-family-label": "Família de Font",
+        "font-family-tooltip": "Família de fonts que vai ser carregada. Por defeito é carregada a font usada pelo livro",
+        "writing-style-label": "Estilo de Escrita",
+        "writing-style-tooltip": "Muda a direção do texto. A direção horizontal é da esquerda para direita, vertical é do topo para o fundo.",
+        "layout-mode-book-label": "Modo de Layout",
+        "layout-mode-book-tooltip": "Como o conteúdo deve ser disposto. O modo Scroll é como o livro define. O modo 1 ou 2 Colunas, ajusta-se à altura do dispositivo e tenta mostrar 1 ou 2 colunas de texto por página",
+        "color-theme-book-label": "Tema de Cores",
+        "color-theme-book-tooltip": "Que tema de cores deve ser aplicado ao conteúdo e menu do leitor de livros",
+        "font-size-book-label": "Tamanho da Font",
+        "font-size-book-tooltip": "Percentagem de dimensionamento que vai ser aplicado à font do livro",
+        "line-height-book-label": "Espaçamento entre Linhas",
+        "line-height-book-tooltip": "O espaçamento que existe entre linhas do livro",
+        "margin-book-label": "Margem",
+        "margin-book-tooltip": "Quando espaçamento existe de cada lado do ecrã. Esta opção será colocada a 0 em dispositivos móveis independentemente do valor que é aqui colocado.",
+        "pdf-reader-settings-title": "Leitor de PDF",
+        "pdf-scroll-mode-label": "Modo de Scroll",
+        "pdf-scroll-mode-tooltip": "Como é feito o scroll pelas páginas. Vertical/Horizontal e Tocar para Paginar (sem scroll)",
+        "pdf-spread-mode-label": "Modo de Layout",
+        "pdf-spread-mode-tooltip": "Como as páginas devem ser dispostas. Individual ou dupla (ímpar/par)",
+        "pdf-theme-label": "Tema",
+        "pdf-theme-tooltip": "O tema de cores do leitor",
+        "reading-profile-series-settings-title": "Séries",
+        "reading-profile-library-settings-title": "Biblioteca",
+        "delete": "{{common.delete}}"
     },
     "reviews": {
         "user-reviews-local": "Criticas Locais",
@@ -2647,5 +2759,59 @@
         "genre-count": "{{num}} Etiquetas",
         "issue-count": "{{common.issue-count}}",
         "series-count": "{{common.series-count}}"
+    },
+    "bulk-set-reading-profile-modal": {
+        "title": "Definir perfil de leitura",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "Ainda não foram criadas coleções",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}",
+        "bound": "Vinculado"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Juntar Pessoa",
+        "merge-warning": "Se continuar, a pessoa selecionada será removida. O nome da pessoa selecionada será adicionada como pseudónimo e todas as suas funções serão transferidas.",
+        "alias-title": "Novos pseudónimos",
+        "known-for-title": "Conhecido por"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} trabalhos",
+        "age-rating": "Avaliado com {{value}}",
+        "user-rating": "{{value}} classificação em estrelas",
+        "tag": "Tem Etiqueta {{value}}",
+        "translator": "Traduzido por {{value}}",
+        "character": "Tem o personagem {{value}}",
+        "publisher": "Publicado por {{value}}",
+        "editor": "Editado por {{value}}",
+        "artist": "Desenhado por {{value}}",
+        "letterer": "Com letras de {{value}}",
+        "colorist": "Colorido por {{value}}",
+        "inker": "Arte-finalizado por {{value}}",
+        "penciller": "Desenhado por {{value}}",
+        "writer": "Escrito por {{value}}",
+        "genre": "Tem o Género {{value}}",
+        "library": "Dentro da biblioteca {{value}}",
+        "format": "Formato de {{value}}",
+        "release-year": "Lançado em {{value}}",
+        "imprint": "Impressão de {{value}}",
+        "team": "Equipa {{value}}",
+        "location": "Na localização {{value}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "Função",
+        "person-name": "Nome",
+        "person-series-count": "Número de Séries",
+        "person-chapter-count": "Número de Capítulos"
+    },
+    "breakpoint-pipe": {
+        "never": "Nunca",
+        "mobile": "Móvel",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
     }
 }

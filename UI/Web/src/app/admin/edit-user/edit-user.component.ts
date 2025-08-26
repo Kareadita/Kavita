@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  model,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
@@ -9,20 +18,23 @@ import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
 import {LibrarySelectorComponent} from '../library-selector/library-selector.component';
 import {RoleSelectorComponent} from '../role-selector/role-selector.component';
-import {AsyncPipe, NgIf} from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {debounceTime, distinctUntilChanged, Observable, startWith, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, Observable, startWith, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ServerSettings} from "../_models/server-settings";
+import {IdentityProvider, IdentityProviders} from "../../_models/user";
+import {IdentityProviderPipePipe} from "../../_pipes/identity-provider.pipe";
 
-const AllowedUsernameCharacters = /^[\sa-zA-Z0-9\-._@+/\s]*$/;
+const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-    imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe],
+  imports: [ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -32,7 +44,14 @@ export class EditUserComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly modal = inject(NgbActiveModal);
 
-  @Input({required: true}) member!: Member;
+  member = model.required<Member>();
+  settings = model.required<ServerSettings>();
+
+  isLocked = computed(() => {
+    const setting = this.settings();
+    const member = this.member();
+    return setting.oidcConfig.syncUserSettings && member.identityProvider === IdentityProvider.OpenIdConnect;
+  });
 
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
@@ -52,18 +71,29 @@ export class EditUserComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required]));
-    this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
+    this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required]));
+    this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
+    this.userForm.addControl('identityProvider', new FormControl(this.member().identityProvider, [Validators.required]));
+
+    this.userForm.get('identityProvider')!.valueChanges.pipe(
+      tap(value => {
+        const newIdentityProvider = parseInt(value, 10) as IdentityProvider;
+        if (newIdentityProvider === IdentityProvider.OpenIdConnect) return;
+        this.member.set({
+          ...this.member(),
+          identityProvider: newIdentityProvider,
+        })
+      })).subscribe();
 
     this.isEmailInvalid$ = this.userForm.get('email')!.valueChanges.pipe(
-      startWith(this.member.email),
+      startWith(this.member().email),
       distinctUntilChanged(),
       debounceTime(10),
       map(value => !EmailRegex.test(value)),
       takeUntilDestroyed(this.destroyRef)
     );
 
-    this.selectedRestriction = this.member.ageRestriction;
+    this.selectedRestriction = this.member().ageRestriction;
     this.cdRef.markForCheck();
   }
 
@@ -88,14 +118,23 @@ export class EditUserComponent implements OnInit {
 
   save() {
     const model = this.userForm.getRawValue();
-    model.userId = this.member.id;
+    model.userId = this.member().id;
     model.roles = this.selectedRoles;
     model.libraries = this.selectedLibraries;
     model.ageRestriction = this.selectedRestriction;
+    model.identityProvider = parseInt(model.identityProvider, 10) as IdentityProvider;
 
-    this.accountService.update(model).subscribe(() => {
-      this.modal.close(true);
+
+    this.accountService.update(model).subscribe({
+      next: () => {
+        this.modal.close(true);
+      },
+      error: err => {
+        console.error(err);
+      }
     });
   }
 
+  protected readonly IdentityProvider = IdentityProvider;
+  protected readonly IdentityProviders = IdentityProviders;
 }

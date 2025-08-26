@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library/library';
@@ -35,6 +35,7 @@ import {ToastrService} from "ngx-toastr";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
 import {QueryContext} from "../../_models/metadata/v2/query-context";
+import {LicenseService} from "../../_services/license.service";
 
 enum StreamId {
   OnDeck,
@@ -70,6 +71,7 @@ export class DashboardComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
+  private readonly licenseService = inject(LicenseService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = true;
@@ -120,7 +122,11 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+    this.licenseService.hasValidLicense()
+      .pipe(
+        filter((hasLic: boolean) => hasLic),
+        switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
+      ).subscribe((hasExpired: boolean) => {
       if (hasExpired) {
         this.toastr.error(translate('toasts.anilist-token-expired'));
       }

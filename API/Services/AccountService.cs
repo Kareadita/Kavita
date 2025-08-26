@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Account;
 using API.Entities;
+using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Helpers.Builders;
+using API.SignalR;
+using AutoMapper;
 using Kavita.Common;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -24,25 +27,56 @@ public interface IAccountService
 {
     Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
     Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
-    Task<IEnumerable<ApiException>> ValidateUsername(string username);
+    Task<IEnumerable<ApiException>> ValidateUsername(string? username);
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
     Task<bool> HasBookmarkPermission(AppUser? user);
     Task<bool> HasDownloadPermission(AppUser? user);
     Task<bool> CanChangeAgeRestriction(AppUser? user);
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="actingUserId">The user who is changing the identity</param>
+    /// <param name="user">the user being changed</param>
+    /// <param name="identityProvider"> the provider being changed to</param>
+    /// <returns>If true, user should not be updated by kavita (anymore)</returns>
+    /// <exception cref="KavitaException">Throws if invalid actions are being performed</exception>
+    Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider);
+    /// <summary>
+    /// Removes access to all libraries, then grant access to all given libraries or all libraries if the user is admin.
+    /// Creates side nav streams as well
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="librariesIds"></param>
+    /// <param name="hasAdminRole"></param>
+    /// <returns></returns>
+    /// <remarks>Ensure that the users SideNavStreams are loaded</remarks>
+    /// <remarks>Does NOT commit</remarks>
+    Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
+    Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
+    void AddDefaultStreamsToUser(AppUser user);
+    Task AddDefaultReadingProfileToUser(AppUser user);
 }
 
-public class AccountService : IAccountService
+public partial class AccountService : IAccountService
 {
+    private readonly ILocalizationService _localizationService;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<AccountService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
     public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
+    public static readonly Regex AllowedUsernameRegex = AllowedUsernameRegexAttr();
 
-    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork)
+
+    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork,
+        IMapper mapper, ILocalizationService localizationService)
     {
+        _localizationService = localizationService;
         _userManager = userManager;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
     }
 
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
@@ -77,8 +111,13 @@ public class AccountService : IAccountService
 
         return Array.Empty<ApiException>();
     }
-    public async Task<IEnumerable<ApiException>> ValidateUsername(string username)
+    public async Task<IEnumerable<ApiException>> ValidateUsername(string? username)
     {
+        if (string.IsNullOrWhiteSpace(username) || !AllowedUsernameRegex.IsMatch(username))
+        {
+            return [new ApiException(400, "Invalid username")];
+        }
+
         // Reverted because of https://go.microsoft.com/fwlink/?linkid=2129535
         if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName != null
                                                    && x.NormalizedUserName == username.ToUpper()))
@@ -143,4 +182,113 @@ public class AccountService : IAccountService
 
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
     }
+
+    public async Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider)
+    {
+        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        if (user.Id == defaultAdminUser.Id)
+        {
+            throw new KavitaException(await _localizationService.Translate(actingUserId, "cannot-change-identity-provider-original-user"));
+        }
+
+        // Allow changes if users aren't being synced
+        var oidcSettings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (!oidcSettings.SyncUserSettings)
+        {
+            user.IdentityProvider = identityProvider;
+            await _unitOfWork.CommitAsync();
+            return false;
+        }
+
+        // Don't allow changes to the user if they're managed by oidc, and their identity provider isn't being changed to something else
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect && identityProvider == IdentityProvider.OpenIdConnect)
+        {
+            throw new KavitaException(await _localizationService.Translate(actingUserId, "oidc-managed"));
+        }
+
+        user.IdentityProvider = identityProvider;
+        await _unitOfWork.CommitAsync();
+        return user.IdentityProvider == IdentityProvider.OpenIdConnect;
+    }
+
+    public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole)
+    {
+        var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
+        var currentLibrary = allLibraries.Where(l => l.AppUsers.Contains(user)).ToList();
+
+        List<Library> libraries;
+        if (hasAdminRole)
+        {
+            _logger.LogDebug("{UserId} is admin. Granting access to all libraries", user.Id);
+            libraries = allLibraries;
+        }
+        else
+        {
+            libraries = allLibraries.Where(lib => librariesIds.Contains(lib.Id)).ToList();
+        }
+
+        var toRemove = currentLibrary.Except(libraries);
+        var toAdd = libraries.Except(currentLibrary);
+
+        foreach (var lib in toRemove)
+        {
+            lib.AppUsers ??= [];
+            lib.AppUsers.Remove(user);
+            user.RemoveSideNavFromLibrary(lib);
+        }
+
+        foreach (var lib in toAdd)
+        {
+            lib.AppUsers ??= [];
+            lib.AppUsers.Add(user);
+            user.CreateSideNavFromLibrary(lib);
+        }
+    }
+
+    public async Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles)
+    {
+        var existingRoles = await _userManager.GetRolesAsync(user);
+        var hasAdminRole = roles.Contains(PolicyConstants.AdminRole);
+        if (!hasAdminRole)
+        {
+            roles.Add(PolicyConstants.PlebRole);
+        }
+
+        if (existingRoles.Except(roles).Any() || roles.Except(existingRoles).Any())
+        {
+            var roleResult = await _userManager.RemoveFromRolesAsync(user, existingRoles);
+            if (!roleResult.Succeeded) return roleResult.Errors;
+
+            roleResult = await _userManager.AddToRolesAsync(user, roles);
+            if (!roleResult.Succeeded) return roleResult.Errors;
+        }
+
+        return [];
+    }
+
+    public void AddDefaultStreamsToUser(AppUser user)
+    {
+        foreach (var newStream in Seed.DefaultStreams.Select(_mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
+        {
+            user.DashboardStreams.Add(newStream);
+        }
+
+        foreach (var stream in Seed.DefaultSideNavStreams.Select(_mapper.Map<AppUserSideNavStream, AppUserSideNavStream>))
+        {
+            user.SideNavStreams.Add(stream);
+        }
+    }
+
+    public async Task AddDefaultReadingProfileToUser(AppUser user)
+    {
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Default Profile")
+            .WithKind(ReadingProfileKind.Default)
+            .Build();
+        _unitOfWork.AppUserReadingProfileRepository.Add(profile);
+        await _unitOfWork.CommitAsync();
+    }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9\-._@+/]*$")]
+    private static partial Regex AllowedUsernameRegexAttr();
 }

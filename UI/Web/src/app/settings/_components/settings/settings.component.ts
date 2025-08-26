@@ -55,6 +55,11 @@ import {
 import {
   ManageReadingProfilesComponent
 } from "../../../user-settings/manage-reading-profiles/manage-reading-profiles.component";
+import {
+  ManagePublicMetadataSettingsComponent
+} from "../../../admin/manage-public-metadata-settings/manage-public-metadata-settings.component";
+import {ImportMappingsComponent} from "../../../admin/import-mappings/import-mappings.component";
+import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
 
 @Component({
     selector: 'app-settings',
@@ -91,7 +96,10 @@ import {
     EmailHistoryComponent,
     ScrobblingHoldsComponent,
     ManageMetadataSettingsComponent,
-    ManageReadingProfilesComponent
+    ManageReadingProfilesComponent,
+    ManageOpenIDConnectComponent,
+    ManagePublicMetadataSettingsComponent,
+    ImportMappingsComponent
   ],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',

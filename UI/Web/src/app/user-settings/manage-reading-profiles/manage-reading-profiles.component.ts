@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
@@ -19,7 +19,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, take, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, map, take, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -42,7 +42,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {ColorPickerDirective} from "ngx-color-picker";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {filter} from "rxjs";
+import {catchError, filter, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
@@ -95,7 +95,18 @@ enum TabId {
 })
 export class ManageReadingProfilesComponent implements OnInit {
 
+  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly bookService = inject(BookService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly transLoco = inject(TranslocoService);
+
   virtualScrollerBreakPoint = 20;
+
+  savingProfile = signal(false);
 
   fontFamilies: Array<string> = [];
   readingProfiles: ReadingProfile[] = [];
@@ -111,16 +122,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     return d;
   });
 
-  constructor(
-    private readingProfileService: ReadingProfileService,
-    private cdRef: ChangeDetectorRef,
-    private accountService: AccountService,
-    private bookService: BookService,
-    private destroyRef: DestroyRef,
-    private toastr: ToastrService,
-    private confirmService: ConfirmService,
-    private transLoco: TranslocoService,
-  ) {
+  constructor() {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
   }
@@ -219,60 +221,68 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
+      filter(_ => !this.savingProfile()),
       filter(_ => this.readingProfileForm!.valid),
       takeUntilDestroyed(this.destroyRef),
-      tap(_ => this.autoSave()),
+      tap(_ => this.savingProfile.set(true)),
+      switchMap(_ => this.autoSave()),
+      tap(() => this.savingProfile.set(false))
     ).subscribe();
   }
 
   private autoSave() {
     if (this.selectedProfile!.id == 0) {
-      this.readingProfileService.createProfile(this.packData()).subscribe({
-        next: createdProfile => {
+      return this.readingProfileService.createProfile(this.packData()).pipe(
+        tap(createdProfile => {
           this.selectedProfile = createdProfile;
           this.readingProfiles.push(createdProfile);
           this.cdRef.markForCheck();
-        },
-        error: err => {
+        }),
+        catchError(err => {
           console.log(err);
           this.toastr.error(err.message);
-        }
-      })
-    } else {
-      const profile = this.packData();
-      this.readingProfileService.updateProfile(profile).subscribe({
-        next: newProfile => {
-          this.readingProfiles = this.readingProfiles.map(p => {
-            if (p.id !== profile.id) return p;
-            return newProfile;
-          });
-          this.cdRef.markForCheck();
-        },
-        error: err => {
-          console.log(err);
-          this.toastr.error(err.message);
-        }
-      })
+
+          return of(null);
+        })
+      );
     }
+
+    const profile = this.packData();
+    return this.readingProfileService.updateProfile(profile).pipe(
+      tap(newProfile => {
+        this.readingProfiles = this.readingProfiles.map(p => {
+          if (p.id !== profile.id) return p;
+
+          return newProfile;
+        });
+        this.cdRef.markForCheck();
+      }),
+      catchError(err => {
+        console.log(err);
+        this.toastr.error(err.message);
+
+        return of(null);
+      })
+    );
   }
 
   private packData(): ReadingProfile {
     const data: ReadingProfile = this.readingProfileForm!.getRawValue();
     data.id = this.selectedProfile!.id;
-    data.readingDirection = parseInt(data.readingDirection as unknown as string);
-    data.scalingOption = parseInt(data.scalingOption as unknown as string);
-    data.pageSplitOption = parseInt(data.pageSplitOption as unknown as string);
-    data.readerMode = parseInt(data.readerMode as unknown as string);
-    data.layoutMode = parseInt(data.layoutMode as unknown as string);
-    data.disableWidthOverride = parseInt(data.disableWidthOverride as unknown as string);
+    data.readingDirection = parseInt(data.readingDirection + '');
+    data.scalingOption = parseInt(data.scalingOption + '');
+    data.pageSplitOption = parseInt(data.pageSplitOption + '');
+    data.readerMode = parseInt(data.readerMode + '');
+    data.layoutMode = parseInt(data.layoutMode + '');
+    data.disableWidthOverride = parseInt(data.disableWidthOverride + '');
 
-    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection as unknown as string);
-    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle as unknown as string);
-    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode as unknown as string);
+    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection + '');
+    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle + '');
+    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode + '');
 
-    data.pdfTheme = parseInt(data.pdfTheme as unknown as string);
-    data.pdfScrollMode = parseInt(data.pdfScrollMode as unknown as string);
-    data.pdfSpreadMode = parseInt(data.pdfSpreadMode as unknown as string);
+    data.pdfTheme = parseInt(data.pdfTheme + '');
+    data.pdfScrollMode = parseInt(data.pdfScrollMode + '');
+    data.pdfSpreadMode = parseInt(data.pdfSpreadMode + '');
 
     return data;
   }

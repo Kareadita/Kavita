@@ -78,6 +78,16 @@ public class MangaParsingTests
     [InlineData("Accel World Volume 2", "2")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake", "30")]
     [InlineData("Zom 100 - Bucket List of the Dead v01",  "1")]
+    // Tome Tests
+    [InlineData("Daredevil - t6 - 10 - (2019)", "6")]
+    [InlineData("Batgirl T2000 #57", "2000")]
+    [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+    [InlineData("Conquistador_Tome_2", "2")]
+    [InlineData("Max_l_explorateur-_Tome_0", "0")]
+    [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
+    [InlineData("Adventure Time (2012)/Adventure Time  Ch 1 (2012)", Parser.LooseLeafVolume)]
+    [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
@@ -248,6 +258,11 @@ public class MangaParsingTests
     [InlineData("[218565]-(C92) [BRIO (Puyocha)] Mika-nee no Tanryoku Shidou - Mika s Guide to Self-Confidence (THE IDOLM@STE", "")]
     [InlineData("Monster #8 Ch. 001", "Monster #8")]
     [InlineData("Zom 100 - Bucket List of the Dead v01",  "Zom 100 - Bucket List of the Dead")]
+    [InlineData("Zom 100 - Tome 2", "Zom 100")]
+    [InlineData("Max_l_explorateur Tome 0", "Max l explorateur")]
+    [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
+    [InlineData("Bd Fr-Aldebaran-Antares-t6", "Bd Fr-Aldebaran-Antares")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "Monster")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseSeries(filename, LibraryType.Manga));
@@ -341,6 +356,7 @@ public class MangaParsingTests
     [InlineData("Max Level Returner ตอนที่ 5", "5")]
     [InlineData("หนึ่งความคิด นิจนิรันดร์ บทที่ 112", "112")]
     [InlineData("Monster #8 Ch. 001", "1")]
+    [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
@@ -391,6 +407,7 @@ public class MangaParsingTests
     {
         Assert.Equal(expected, Parser.ParseEdition(input));
     }
+
     [Theory]
     [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", false)]
     [InlineData("Beelzebub_Omake_June_2012_RHS", false)]

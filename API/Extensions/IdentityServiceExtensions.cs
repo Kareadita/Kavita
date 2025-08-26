@@ -1,21 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Services;
+using Kavita.Common;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
+using TokenValidatedContext = Microsoft.AspNetCore.Authentication.OpenIdConnect.TokenValidatedContext;
 
 namespace API.Extensions;
 #nullable enable
 
 public static class IdentityServiceExtensions
 {
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
+    private const string DynamicHybrid = nameof(DynamicHybrid);
+    public const string OpenIdConnect = nameof(OpenIdConnect);
+    private const string LocalIdentity = nameof(LocalIdentity);
+
+    private const string OidcCallback = "/signin-oidc";
+    private const string OidcLogoutCallback = "/signout-callback-oidc";
+
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment environment)
     {
         services.Configure<IdentityOptions>(options =>
         {
@@ -47,42 +69,264 @@ public static class IdentityServiceExtensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddEntityFrameworkStores<DataContext>();
 
+        var oidcSettings = Configuration.OidcSettings;
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+        var auth = services.AddAuthentication(DynamicHybrid)
+            .AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]!)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidIssuer = "Kavita"
-                };
+                var enabled = oidcSettings.Enabled;
 
-                options.Events = new JwtBearerEvents()
+                options.ForwardDefaultSelector = ctx =>
                 {
-                    OnMessageReceived = context =>
+                    if (!enabled) return LocalIdentity;
+
+                    if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
+                        ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
                     {
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-                        // Only use query string based token on SignalR hubs
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
-                        {
-                            context.Token = accessToken;
-                        }
-
-                        return Task.CompletedTask;
+                        return OpenIdConnect;
                     }
+
+                    if (ctx.Request.Headers.Authorization.Count != 0)
+                    {
+                        return LocalIdentity;
+                    }
+
+                    if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
+                    {
+                        return OpenIdConnect;
+                    }
+
+                    return LocalIdentity;
                 };
+
             });
-        services.AddAuthorization(opt =>
+
+
+        if (oidcSettings.Enabled)
         {
-            opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole));
-            opt.AddPolicy("RequireDownloadRole", policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole));
-            opt.AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
+            services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
+        }
+
+        auth.AddJwtBearer(LocalIdentity, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]!)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidIssuer = "Kavita",
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = SetTokenFromQuery,
+            };
         });
 
+
+        services.AddAuthorizationBuilder()
+            .AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole))
+            .AddPolicy("RequireDownloadRole", policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
+            .AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
+
         return services;
+    }
+
+    private static void SetupOpenIdConnectAuthentication(this IServiceCollection services, AuthenticationBuilder auth,
+        Configuration.OpenIdConnectSettings settings, IWebHostEnvironment environment)
+    {
+        var isDevelopment = environment.IsEnvironment(Environments.Development);
+        var baseUrl = Configuration.BaseUrl;
+
+        var apiPrefix = baseUrl + "api";
+        var hubsPrefix = baseUrl + "hubs";
+
+        services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme).Configure<ITicketStore>((options, store) =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.SlidingExpiration = true;
+
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.Cookie.MaxAge = TimeSpan.FromDays(7);
+            options.SessionStore = store;
+
+            if (isDevelopment)
+            {
+                options.Cookie.Domain = null;
+            }
+
+            options.Events = new CookieAuthenticationEvents
+            {
+                OnValidatePrincipal = async ctx =>
+                {
+                    var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+                    var user = await oidcService.RefreshCookieToken(ctx);
+
+                    if (user != null)
+                    {
+                        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user!, false);
+                        ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
+                    }
+                },
+                OnRedirectToAccessDenied = ctx =>
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                },
+            };
+        });
+
+        auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+        auth.AddOpenIdConnect(OpenIdConnect, options =>
+        {
+            options.Authority = settings.Authority;
+            options.ClientId = settings.ClientId;
+            options.ClientSecret = settings.Secret;
+            options.RequireHttpsMetadata = options.Authority.StartsWith("https://");
+
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.ResponseType = OpenIdConnectResponseType.Code;
+            options.CallbackPath = OidcCallback;
+            options.SignedOutCallbackPath = OidcLogoutCallback;
+
+            options.SaveTokens = true;
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("offline_access");
+            options.Scope.Add("roles");
+            options.Scope.Add("email");
+
+            foreach (var customScope in settings.CustomScopes)
+            {
+                options.Scope.Add(customScope);
+            }
+
+            options.Events = new OpenIdConnectEvents
+            {
+                OnTokenValidated = OidcClaimsPrincipalConverter,
+                OnAuthenticationFailed = ctx =>
+                {
+                    ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
+                    ctx.HandleResponse();
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProviderForSignOut = ctx =>
+                {
+                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.PostLogoutRedirectUri))
+                    {
+                        ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
+                    }
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProvider = ctx =>
+                {
+                    // Intercept redirects on API requests and instead return 401
+                    // These redirects are auto login when .NET finds a cookie that it can't match inside the cookie store. I.e. after a restart
+                    if (ctx.Request.Path.StartsWithSegments(apiPrefix) || ctx.Request.Path.StartsWithSegments(hubsPrefix))
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        ctx.HandleResponse();
+                        return Task.CompletedTask;
+                    }
+
+                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.RedirectUri))
+                    {
+                        ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
+                    }
+
+                    return Task.CompletedTask;
+                },
+            };
+        });
+    }
+
+    /// <summary>
+    /// Called after the redirect from the OIDC provider, tries matching the user and update the principal
+    /// to have the correct claims and properties. This is required to later auto refresh; and ensure .NET knows which
+    /// Kavita roles the user has
+    /// </summary>
+    /// <param name="ctx"></param>
+    private static async Task OidcClaimsPrincipalConverter(TokenValidatedContext ctx)
+    {
+        if (ctx.Principal == null) return;
+
+        var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
+        var user = await oidcService.LoginOrCreate(ctx.Request, ctx.Principal);
+        if (user == null)
+        {
+            throw new KavitaException("errors.oidc.no-account");
+        }
+
+        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
+        var tokens = CopyOidcTokens(ctx);
+
+        var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+
+        ctx.Properties ??= new AuthenticationProperties();
+        ctx.Properties.StoreTokens(tokens);
+
+        ctx.HttpContext.User = principal;
+        ctx.Principal = principal;
+
+        ctx.Success();
+    }
+
+    /// <summary>
+    /// Copy tokens returned by the OIDC provider that we require later
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <returns></returns>
+    private static List<AuthenticationToken> CopyOidcTokens(TokenValidatedContext ctx)
+    {
+        if (ctx.TokenEndpointResponse == null)
+        {
+            return [];
+        }
+
+        var tokens = new List<AuthenticationToken>();
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
+        }
+        else
+        {
+            var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<OidcService>>();
+            logger.LogWarning("OIDC login without refresh token, automatic sync will not work for this user");
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.IdToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = OidcService.IdToken, Value = ctx.TokenEndpointResponse.IdToken });
+        }
+
+        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
+        {
+            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(ctx.TokenEndpointResponse.ExpiresIn));
+            tokens.Add(new AuthenticationToken { Name = OidcService.ExpiresAt, Value = expiresAt.ToString("o") });
+        }
+
+        return tokens;
+    }
+
+    private static Task SetTokenFromQuery(MessageReceivedContext context)
+    {
+        var accessToken = context.Request.Query["access_token"];
+        var path = context.HttpContext.Request.Path;
+
+        // Only use query string based token on SignalR hubs
+        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+        {
+            context.Token = accessToken;
+        }
+
+        return Task.CompletedTask;
     }
 }

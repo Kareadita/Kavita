@@ -39,7 +39,7 @@
         </h5>
         <div class="ps-1 d-none d-md-inline-block mb-1">
           <app-series-format [format]="item.seriesFormat"></app-series-format>
-          <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
+          <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
         </div>
 
         <app-read-more [text]="item.summary || ''" [showToggle]="false" [maxLength]="500"></app-read-more>

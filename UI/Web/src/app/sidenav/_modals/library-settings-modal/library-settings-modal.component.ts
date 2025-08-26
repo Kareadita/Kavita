@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  model,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -13,7 +22,6 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
-import {SettingsService} from 'src/app/admin/settings.service';
 import {
   DirectoryPickerComponent,
   DirectoryPickerResult
@@ -78,7 +86,6 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
   private readonly modalService = inject(NgbModal);
-  private readonly settingService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
@@ -115,6 +122,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
+    removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
   });
 
   selectedFolders: string[] = [];
@@ -127,12 +135,13 @@ export class LibrarySettingsModalComponent implements OnInit {
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
+  filesAtRoot = model<boolean>(false);
 
   tasks: ActionItem<Library>[] = this.getTasks();
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return allKavitaPlusScrobbleEligibleTypes.includes(libType);
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
   }
 
   get IsMetadataDownloadEligible() {
@@ -144,6 +153,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
+    } else {
+      this.checkForFilesAtRoot();
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
@@ -273,7 +284,8 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
       this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
-      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata, true);
+      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
+      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.selectedFolders = this.library.folders;
 
       this.madeChanges = false;
@@ -308,7 +320,14 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   isDisabled() {
-    return !(this.libraryForm.valid && this.selectedFolders.length > 0);
+    const selectedFileTypes = [];
+    for(let fileTypeGroup of allFileTypeGroup) {
+      if (this.libraryForm.value[fileTypeGroup]) {
+        selectedFileTypes.push(fileTypeGroup);
+      }
+    }
+
+    return !(this.libraryForm.valid && this.selectedFolders.length > 0 && selectedFileTypes.length > 0);
   }
 
   reset() {
@@ -337,6 +356,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       }
     }
     model.excludePatterns = this.excludePatterns;
+
 
     if (this.libraryForm.errors) {
       return;
@@ -400,6 +420,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
+          this.checkForFilesAtRoot();
           this.cdRef.markForCheck();
         }
       }
@@ -409,6 +430,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   removeFolder(folder: string) {
     this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
     this.madeChanges = true;
+    this.checkForFilesAtRoot();
     this.cdRef.markForCheck();
   }
 
@@ -450,5 +472,19 @@ export class LibrarySettingsModalComponent implements OnInit {
         });
         break;
     }
+  }
+
+  checkForFilesAtRoot() {
+    this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
+      let containsMultipleFiles = false;
+      Object.keys(results).forEach(key => {
+        if (results[key]) {
+          containsMultipleFiles = true;
+          return;
+        }
+      });
+
+      this.filesAtRoot.set(containsMultipleFiles);
+    })
   }
 }

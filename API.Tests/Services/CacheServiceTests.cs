@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
@@ -60,87 +61,27 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         throw new System.NotImplementedException();
     }
 }
-public class CacheServiceTests: AbstractFsTest
+public class CacheServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
     private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
-
-    private readonly DbConnection _connection;
-    private readonly DataContext _context;
-
-    public CacheServiceTests()
-    {
-        var contextOptions = new DbContextOptionsBuilder()
-            .UseSqlite(CreateInMemoryDatabase())
-            .Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
-    }
-
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    public void Dispose() => _connection.Dispose();
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
-            .Build());
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDB()
-    {
-        _context.Series.RemoveRange(_context.Series.ToList());
-
-        await _context.SaveChangesAsync();
-    }
-
-    #endregion
 
     #region Ensure
 
     [Fact]
     public async Task Ensure_DirectoryAlreadyExists_DontExtractAnything()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{DataDirectory}Test v1.zip", new MockFileData(""));
         filesystem.AddDirectory($"{CacheDirectory}1/");
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CacheService(_logger, _unitOfWork, ds,
+        var cleanupService = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(),
                 Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
 
-        await ResetDB();
         var s = new SeriesBuilder("Test").Build();
         var v = new VolumeBuilder("1").Build();
         var c = new ChapterBuilder("1")
@@ -149,9 +90,9 @@ public class CacheServiceTests: AbstractFsTest
         v.Chapters.Add(c);
         s.Volumes.Add(v);
         s.LibraryId = 1;
-        _context.Series.Add(s);
+        context.Series.Add(s);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         await cleanupService.Ensure(1);
         Assert.Empty(ds.GetFiles(filesystem.Path.Join(CacheDirectory, "1"), searchOption:SearchOption.AllDirectories));
@@ -203,15 +144,17 @@ public class CacheServiceTests: AbstractFsTest
     #region CleanupChapters
 
     [Fact]
-    public void CleanupChapters_AllFilesShouldBeDeleted()
+    public async Task CleanupChapters_AllFilesShouldBeDeleted()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{CacheDirectory}1/001.jpg", new MockFileData(""));
         filesystem.AddFile($"{CacheDirectory}1/002.jpg", new MockFileData(""));
         filesystem.AddFile($"{CacheDirectory}3/003.jpg", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CacheService(_logger, _unitOfWork, ds,
+        var cleanupService = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
@@ -226,14 +169,16 @@ public class CacheServiceTests: AbstractFsTest
     #region GetCachedEpubFile
 
     [Fact]
-    public void GetCachedEpubFile_ShouldReturnFirstEpub()
+    public async Task GetCachedEpubFile_ShouldReturnFirstEpub()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.epub", new MockFileData(""));
         filesystem.AddFile($"{DataDirectory}2.epub", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds,
+        var cs = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
@@ -251,8 +196,10 @@ public class CacheServiceTests: AbstractFsTest
     #region GetCachedPagePath
 
     [Fact]
-    public void GetCachedPagePath_ReturnNullIfNoFiles()
+    public async Task GetCachedPagePath_ReturnNullIfNoFiles()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
@@ -274,7 +221,7 @@ public class CacheServiceTests: AbstractFsTest
         }
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds,
+        var cs = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
@@ -287,8 +234,10 @@ public class CacheServiceTests: AbstractFsTest
     }
 
     [Fact]
-    public void GetCachedPagePath_GetFileFromFirstFile()
+    public async Task GetCachedPagePath_GetFileFromFirstFile()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
@@ -318,7 +267,7 @@ public class CacheServiceTests: AbstractFsTest
         }
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds,
+        var cs = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
@@ -332,8 +281,10 @@ public class CacheServiceTests: AbstractFsTest
 
 
     [Fact]
-    public void GetCachedPagePath_GetLastPageFromSingleFile()
+    public async Task GetCachedPagePath_GetLastPageFromSingleFile()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
@@ -359,7 +310,7 @@ public class CacheServiceTests: AbstractFsTest
         }
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds,
+        var cs = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());
@@ -373,8 +324,10 @@ public class CacheServiceTests: AbstractFsTest
     }
 
     [Fact]
-    public void GetCachedPagePath_GetFileFromSecondFile()
+    public async Task GetCachedPagePath_GetFileFromSecondFile()
     {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
         var filesystem = CreateFileSystem();
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
@@ -404,7 +357,7 @@ public class CacheServiceTests: AbstractFsTest
         }
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds,
+        var cs = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>());

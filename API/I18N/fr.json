@@ -207,5 +207,7 @@
     "sidenav-stream-only-delete-smart-filter": "Seuls les flux de filtres intelligents peuvent être supprimés de la SideNav",
     "dashboard-stream-only-delete-smart-filter": "Seuls les flux de filtres intelligents peuvent être supprimés du tableau de bord",
     "smart-filter-name-required": "Nom du filtre intelligent requis",
-    "smart-filter-system-name": "Vous ne pouvez pas utiliser le nom d'un flux fourni par le système"
+    "smart-filter-system-name": "Vous ne pouvez pas utiliser le nom d'un flux fourni par le système",
+    "aliases-have-overlap": "Un ou plusieurs alias se chevauchent avec d'autres personnes et ne peuvent pas être mis à jour",
+    "generated-reading-profile-name": "Généré à partir de {0}"
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs.Account;
+using API.Entities.Enums;
 
 namespace API.DTOs;
 #nullable enable
@@ -24,4 +25,5 @@ public sealed record MemberDto
     public DateTime LastActiveUtc { get; init; }
     public IEnumerable<LibraryDto>? Libraries { get; init; }
     public IEnumerable<string>? Roles { get; init; }
+    public IdentityProvider IdentityProvider { get; init; }
 }

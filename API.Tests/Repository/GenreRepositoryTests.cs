@@ -2,28 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
 
-public class GenreRepositoryTests : AbstractDbTest
+public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    private AppUser _fullAccess;
-    private AppUser _restrictedAccess;
-    private AppUser _restrictedAgeAccess;
-
-    protected override async Task ResetDb()
-    {
-        Context.Genre.RemoveRange(Context.Genre);
-        Context.Library.RemoveRange(Context.Library);
-        await Context.SaveChangesAsync();
-    }
 
     private TestGenreSet CreateTestGenres()
     {
@@ -42,36 +35,35 @@ public class GenreRepositoryTests : AbstractDbTest
         };
     }
 
-    private async Task SeedDbWithGenres(TestGenreSet genres)
+    private async Task<(AppUser, AppUser, AppUser)> Setup(DataContext context, TestGenreSet genres)
     {
-        await CreateTestUsers();
-        await AddGenresToContext(genres);
-        await CreateLibrariesWithGenres(genres);
-        await AssignLibrariesToUsers();
+        var fullAccess = new AppUserBuilder("amelia", "amelia@example.com").Build();
+        var restrictedAccess = new AppUserBuilder("mila", "mila@example.com").Build();
+        var restrictedAgeAccess = new AppUserBuilder("eva", "eva@example.com").Build();
+        restrictedAgeAccess.AgeRestriction = AgeRating.Teen;
+        restrictedAgeAccess.AgeRestrictionIncludeUnknowns = true;
+
+        context.Users.Add(fullAccess);
+        context.Users.Add(restrictedAccess);
+        context.Users.Add(restrictedAgeAccess);
+        await context.SaveChangesAsync();
+
+
+        await AddGenresToContext(context, genres);
+        await CreateLibrariesWithGenres(context, genres);
+        await AssignLibrariesToUsers(context, fullAccess, restrictedAccess, restrictedAgeAccess);
+
+        return (fullAccess, restrictedAccess, restrictedAgeAccess);
     }
 
-    private async Task CreateTestUsers()
-    {
-        _fullAccess = new AppUserBuilder("amelia", "amelia@example.com").Build();
-        _restrictedAccess = new AppUserBuilder("mila", "mila@example.com").Build();
-        _restrictedAgeAccess = new AppUserBuilder("eva", "eva@example.com").Build();
-        _restrictedAgeAccess.AgeRestriction = AgeRating.Teen;
-        _restrictedAgeAccess.AgeRestrictionIncludeUnknowns = true;
-
-        Context.Users.Add(_fullAccess);
-        Context.Users.Add(_restrictedAccess);
-        Context.Users.Add(_restrictedAgeAccess);
-        await Context.SaveChangesAsync();
-    }
-
-    private async Task AddGenresToContext(TestGenreSet genres)
+    private async Task AddGenresToContext(DataContext context, TestGenreSet genres)
     {
         var allGenres = genres.GetAllGenres();
-        Context.Genre.AddRange(allGenres);
-        await Context.SaveChangesAsync();
+        context.Genre.AddRange(allGenres);
+        await context.SaveChangesAsync();
     }
 
-    private async Task CreateLibrariesWithGenres(TestGenreSet genres)
+    private async Task CreateLibrariesWithGenres(DataContext context, TestGenreSet genres)
     {
         var lib0 = new LibraryBuilder("lib0")
             .WithSeries(new SeriesBuilder("lib0-s0")
@@ -120,22 +112,22 @@ public class GenreRepositoryTests : AbstractDbTest
                 .Build())
             .Build();
 
-        Context.Library.Add(lib0);
-        Context.Library.Add(lib1);
-        await Context.SaveChangesAsync();
+        context.Library.Add(lib0);
+        context.Library.Add(lib1);
+        await context.SaveChangesAsync();
     }
 
-    private async Task AssignLibrariesToUsers()
+    private async Task AssignLibrariesToUsers(DataContext context, AppUser fullAccess, AppUser restrictedAccess, AppUser restrictedAgeAccess)
     {
-        var lib0 = Context.Library.First(l => l.Name == "lib0");
-        var lib1 = Context.Library.First(l => l.Name == "lib1");
+        var lib0 = context.Library.First(l => l.Name == "lib0");
+        var lib1 = context.Library.First(l => l.Name == "lib1");
 
-        _fullAccess.Libraries.Add(lib0);
-        _fullAccess.Libraries.Add(lib1);
-        _restrictedAccess.Libraries.Add(lib1);
-        _restrictedAgeAccess.Libraries.Add(lib1);
+        fullAccess.Libraries.Add(lib0);
+        fullAccess.Libraries.Add(lib1);
+        restrictedAccess.Libraries.Add(lib1);
+        restrictedAgeAccess.Libraries.Add(lib1);
 
-        await Context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     private static Predicate<BrowseGenreDto> ContainsGenreCheck(Genre genre)
@@ -159,15 +151,14 @@ public class GenreRepositoryTests : AbstractDbTest
     }
 
     [Fact]
-    public async Task GetBrowseableGenre_FullAccess_ReturnsAllGenresWithCorrectCounts()
+    public async Task GetBrowseableGenrefullAccess_ReturnsAllGenresWithCorrectCounts()
     {
-        // Arrange
-        await ResetDb();
         var genres = CreateTestGenres();
-        await SeedDbWithGenres(genres);
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
 
         // Act
-        var fullAccessGenres = await UnitOfWork.GenreRepository.GetBrowseableGenre(_fullAccess.Id, new UserParams());
+        var fullAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(fullAccess.Id, new UserParams());
 
         // Assert
         Assert.Equal(genres.GetAllGenres().Count, fullAccessGenres.TotalCount);
@@ -186,13 +177,12 @@ public class GenreRepositoryTests : AbstractDbTest
     [Fact]
     public async Task GetBrowseableGenre_RestrictedAccess_ReturnsOnlyAccessibleGenres()
     {
-        // Arrange
-        await ResetDb();
         var genres = CreateTestGenres();
-        await SeedDbWithGenres(genres);
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
 
         // Act
-        var restrictedAccessGenres = await UnitOfWork.GenreRepository.GetBrowseableGenre(_restrictedAccess.Id, new UserParams());
+        var restrictedAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(restrictedAccess.Id, new UserParams());
 
         // Assert - Should see: 3 shared + 4 library 1 specific = 7 genres
         Assert.Equal(7, restrictedAccessGenres.TotalCount);
@@ -222,13 +212,12 @@ public class GenreRepositoryTests : AbstractDbTest
     [Fact]
     public async Task GetBrowseableGenre_RestrictedAgeAccess_FiltersAgeRestrictedContent()
     {
-        // Arrange
-        await ResetDb();
         var genres = CreateTestGenres();
-        await SeedDbWithGenres(genres);
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
 
         // Act
-        var restrictedAgeAccessGenres = await UnitOfWork.GenreRepository.GetBrowseableGenre(_restrictedAgeAccess.Id, new UserParams());
+        var restrictedAgeAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(restrictedAgeAccess.Id, new UserParams());
 
         // Assert - Should see: 3 shared + 3 lib1 specific = 6 genres (age-restricted genre filtered out)
         Assert.Equal(6, restrictedAgeAccessGenres.TotalCount);
