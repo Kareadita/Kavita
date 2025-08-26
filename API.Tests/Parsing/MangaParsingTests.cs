@@ -88,6 +88,8 @@ public class MangaParsingTests
     [InlineData("Adventure Time (2012)/Adventure Time  Ch 1 (2012)", Parser.LooseLeafVolume)]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
+    [InlineData("Alter Ego (2020) (Digital) (v3dio)", Parser.LooseLeafVolume)]
+    [InlineData("Alter Ego (2020) (Digital) (t3dio)", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
