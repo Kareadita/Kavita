@@ -74,7 +74,7 @@ public class KoreaderController : BaseApiController
             var userId = await GetUserId(apiKey);
             await _koreaderService.SaveProgress(request, userId);
 
-            return Ok(new KoreaderProgressUpdateDto{ Document = request.Document, Timestamp = DateTime.UtcNow });
+            return Ok(new KoreaderProgressUpdateDto{ Document = request.document, Timestamp = DateTime.UtcNow });
         }
         catch (KavitaException ex)
         {
@@ -89,15 +89,24 @@ public class KoreaderController : BaseApiController
     /// <param name="ebookHash"></param>
     /// <returns></returns>
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
-    public async Task<ActionResult<KoreaderBookDto>> GetProgress(string apiKey, string ebookHash)
+    public async Task<IActionResult> GetProgress(string apiKey, string ebookHash)
     {
         try
         {
             var userId = await GetUserId(apiKey);
             var response = await _koreaderService.GetProgress(ebookHash, userId);
-            _logger.LogDebug("Koreader response progress for User ({UserId}): {Progress}", userId, response.Progress.Sanitize());
+            _logger.LogDebug("Koreader response progress for User ({UserId}): {Progress}", userId, response.progress.Sanitize());
 
-            return Ok(response);
+
+            // We must pack this manually for Koreader due to a bug in their code: https://github.com/koreader/koreader/issues/13629
+            var json = System.Text.Json.JsonSerializer.Serialize(response);
+
+            return new ContentResult()
+            {
+                Content = json,
+                ContentType = "application/json",
+                StatusCode = 200
+            };
         }
         catch (KavitaException ex)
         {
