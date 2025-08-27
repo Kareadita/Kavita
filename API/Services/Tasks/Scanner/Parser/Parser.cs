@@ -438,7 +438,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
+            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])(\b|_)",
             MatchOptions, RegexTimeout),
         // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
         new Regex(
@@ -452,9 +452,9 @@ public static partial class Parser
         new Regex(
             @"((volume|tome)\s)(?<Volume>\d+(\.\d)?)",
             MatchOptions, RegexTimeout),
-        // Tower Of God S01 014 (CBT) (digital).cbz, Tower Of God T01 014 (CBT) (digital).cbz,
+            // Tower Of God S01 014 (CBT) (digital).cbz, Tower Of God T01 014 (CBT) (digital).cbz,
         new Regex(
-            @"(?<Series>.*)(\b|_)((S|T)(?<Volume>\d+))",
+            @"(?<Series>.*)(\b|_)((S|T)(?<Volume>\d+)(\b|_))",
             MatchOptions, RegexTimeout),
         // vol_001-1.cbz for MangaPy default naming convention
         new Regex(
