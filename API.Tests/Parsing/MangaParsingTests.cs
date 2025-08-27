@@ -73,6 +73,7 @@ public class MangaParsingTests
     [InlineData("몰?루 아카이브 7.5권", "7.5")]
     [InlineData("63권#200", "63")]
     [InlineData("시즌34삽화2", "34")]
+    [InlineData("시즌3-4삽화2", "3-4")]
     [InlineData("Accel World Chapter 001 Volume 002", "2")]
     [InlineData("Accel World Volume 2", "2")]
     [InlineData("Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake", "30")]
@@ -87,7 +88,49 @@ public class MangaParsingTests
     [InlineData("Adventure Time (2012)/Adventure Time  Ch 1 (2012)", Parser.LooseLeafVolume)]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
+    [InlineData("Alter Ego (2020) (Digital) (v3dio)", Parser.LooseLeafVolume)]
+    [InlineData("Alter Ego (2020) (Digital) (t3dio)", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
+    {
+        Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
+    }
+
+    [Theory]
+    [InlineData("One Piece - Vol 2 Ch 1.1 - Volume 4 Omakes", "2")]
+    [InlineData("Attack on Titan - Vol. 5 Ch. 20 - Vol.10 Special", "5")]
+    [InlineData("Naruto - Volume 1 Chapter 1 - Volume 2 Preview", "1")]
+    [InlineData("My Hero Academia - Vol 15 - Vol 20 Extras", "15")]
+
+    // Edge cases for duplicate detection
+    [InlineData("Series - Vol 1 - Not Vol but Voldemort", "1")] // Should not trigger false positive
+    [InlineData("Volume Wars - Vol 1 vs Vol 2", "1")] // Series name contains "Volume"
+    [InlineData("Vol 3 - The Volume Chronicles - Vol 5", "3")] // Multiple volume references
+
+    // Thai Volume tests
+    [InlineData("เล่ม 5 - Chapter 1", "5")]
+    [InlineData("เล่มที่ 12 Test", "12")]
+
+    // Chinese Volume tests
+    [InlineData("幽游白书完全版 第03卷 天下", "3")]
+    [InlineData("阿衰online 第1册", "1")]
+    [InlineData("卷5 Test", "5")]
+    [InlineData("册10 Test", "10")]
+
+    // Korean Volume tests
+    [InlineData("제5권 Test", "5")]
+    [InlineData("10화 Test", "10")]
+    [InlineData("시즌3 Test", "3")]
+    [InlineData("5시즌 Test", Parser.LooseLeafVolume)]
+
+    // Japanese Volume tests
+    [InlineData("Test 5巻", "5")]
+    [InlineData("Series 10-15巻", "10-15")]
+
+    // Russian Volume tests
+    [InlineData("Том 5 Test", "5")]
+    [InlineData("Тома 10 Test", "10")]
+    [InlineData("5 Том Test", "5")]
+    public void ParseDuplicateVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
     }
@@ -317,6 +360,35 @@ public class MangaParsingTests
     [InlineData("Monster #8 Ch. 001", "1")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     public void ParseChaptersTest(string filename, string expected)
+    {
+        Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
+    }
+
+    /// <summary>
+    /// Handles edge case testing around duplicate numbers in the filename
+    /// </summary>
+    [Theory]
+    [InlineData("Manga Title - Ch.1 - The 22 beers", "1")]
+    public void ParseExtraNumberChaptersTest(string filename, string expected)
+    {
+        Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
+    }
+
+    [Theory]
+    [InlineData("Manga Title - Ch.1 Part.A - Ch.2 Omake", "1")]
+    [InlineData("Another Series - Chapter 10 Something - Chapter 15 Extra", "10")]
+    [InlineData("Test_Ch_3_Content_Ch_7_Bonus", "3")]
+    [InlineData("One Piece - Ch 5 Part 1 - Chapter 10 Omakes", "5")]
+    [InlineData("Attack on Titan - Chapter 20 Content - Ch 25 Special", "20")]
+    [InlineData("Naruto - Ch. 1 Story - Ch. 5 Preview", "1")]
+    [InlineData("My Hero Academia - Chapter 15 - Chapter 20 Extras", "15")]
+    [InlineData("Series Name - c2 Content - c5 Bonus", "2")]
+    [InlineData("Test Series - c1 Part1 - Chapter 3 Extra", "1")]
+    [InlineData("Another Test - Chapter 7 - c10 Omake", "7")]
+    [InlineData("Series - Ch 1 - Not Ch but Chaos", "1")]
+    [InlineData("Chapter Wars - Ch 1 vs Ch 2", "1")]
+    [InlineData("Ch 3 - The Chapter Chronicles - Ch 5", "3")]
+    public void ParseDuplicateChapterTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
     }
