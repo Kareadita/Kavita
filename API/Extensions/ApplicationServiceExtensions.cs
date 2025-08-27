@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using API.Constants;
+using API.Controllers;
 using API.Data;
 using API.Helpers;
 using API.Services;
@@ -86,6 +87,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
+        services.AddScoped<OpdsActionFilterAttribute>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

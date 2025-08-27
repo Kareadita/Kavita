@@ -134,7 +134,7 @@ public interface ISeriesRepository
     Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams userParams);
+    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
@@ -417,8 +417,8 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Library)
             .AsNoTracking()
             .AsSplitQuery()
-            .OrderBy(s => s.SortName.Length)
-            .ThenBy(s => s.SortName.ToLower())
+            .OrderBy(s => s.SortName!.Length)
+            .ThenBy(s => s.SortName!.ToLower())
             .Take(maxRecords)
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
@@ -1482,8 +1482,10 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userId">Used to ensure user has access to libraries</param>
     /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
-    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams userParams)
+    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams)
     {
+        userParams ??= UserParams.Default;
+
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var items = (await GetRecentlyAddedChaptersQuery(userId));
@@ -1493,9 +1495,9 @@ public class SeriesRepository : ISeriesRepository
         }
 
         var index = 0;
-        var seriesMap = new Dictionary<string, GroupedSeriesDto>();
+        var seriesMap = new Dictionary<int, GroupedSeriesDto>();
         var toSkip = (userParams.PageNumber - 1) * userParams.PageSize;
-        var skipped = new HashSet<string>();
+        var skipped = new HashSet<int>();
 
         foreach (var item in items)
         {
@@ -1503,21 +1505,19 @@ public class SeriesRepository : ISeriesRepository
 
             if (item.SeriesName == null) continue;
 
-            var key = item.SeriesName + "_" + item.LibraryId;
-
             if (skipped.Count < toSkip)
             {
-                skipped.Add(key);
+                skipped.Add(item.SeriesId);
                 continue;
             }
 
-            if (seriesMap.TryGetValue(key, out var value))
+            if (seriesMap.TryGetValue(item.SeriesId, out var value))
             {
                 value.Count += 1;
             }
             else
             {
-                seriesMap[key] = new GroupedSeriesDto()
+                seriesMap[item.SeriesId] = new GroupedSeriesDto()
                 {
                     LibraryId = item.LibraryId,
                     LibraryType = item.LibraryType,
