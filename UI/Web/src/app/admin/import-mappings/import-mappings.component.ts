@@ -33,7 +33,7 @@ import {
   ImportModes,
   ImportSettings
 } from "../../_models/import-field-mappings";
-import {firstValueFrom, switchMap} from "rxjs";
+import {catchError, firstValueFrom, of, switchMap} from "rxjs";
 import {map, tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {NgTemplateOutlet} from "@angular/common";
@@ -213,8 +213,16 @@ export class ImportMappingsComponent implements OnInit {
     const settings = this.importSettingsForm.value as ImportSettings;
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
-      tap((res) => this.importResult.set(res)),
+      catchError(err => {
+        console.error(err);
+        this.toastr.error(translate('import-mappings.invalid-file'));
+        return of(null)
+      }),
       switchMap((res) => {
+        if (res == null) return of(null);
+
+        this.importResult.set(res);
+
         return this.settingsService.getMetadataSettings().pipe(
           tap(dto => this.settings.set(dto)),
           tap(() => {
