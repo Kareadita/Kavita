@@ -38,7 +38,7 @@ namespace API.Controllers;
 #nullable enable
 
 /**
- * Middleware that checks if Opds has been enabled for this server
+ * Middleware that checks if Opds has been enabled for this server, and sets OpdsController.UserId in HttpContext
  */
 [AttributeUsage(AttributeTargets.Class)]
 public class OpdsActionFilterAttribute(IUnitOfWork unitOfWork, ILocalizationService localizationService, ILogger<OpdsController> logger): ActionFilterAttribute
@@ -49,14 +49,13 @@ public class OpdsActionFilterAttribute(IUnitOfWork unitOfWork, ILocalizationServ
         int userId;
         try
         {
-            if (!context.ActionArguments.TryGetValue("apiKey", out var apiKeyObj) ||
-                apiKeyObj is not string apiKey || context.Controller is not OpdsController controller)
+            if (!context.ActionArguments.TryGetValue("apiKey", out var apiKeyObj) || apiKeyObj is not string apiKey)
             {
                 context.Result = new BadRequestResult();
                 return;
             }
 
-            userId = await controller.GetUser(apiKey);
+            userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
             if (userId == null || userId == 0)
             {
                 context.Result = new UnauthorizedResult();
@@ -1346,7 +1345,7 @@ public class OpdsController : BaseApiController
     /// Gets the user from the API key
     /// </summary>
     /// <returns></returns>
-    public async Task<int> GetUser(string apiKey)
+    private async Task<int> GetUser(string apiKey)
     {
         try
         {
