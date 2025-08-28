@@ -38,7 +38,15 @@ export class SettingColorPickerComponent implements OnInit {
   @ViewChild('colorPopup') colorPopup?: ElementRef;
 
   id = input.required<string>();
-  label = input.required<string>()
+  label = input.required<string>();
+  /**
+   * Moves the pop-up right on mobile devices
+   */
+  first = input(false);
+  /**
+   * Moves the pop-up left on mobile devices
+   */
+  last = input(false);
 
   editMode = model(false);
   color = model.required<RgbaColor>();

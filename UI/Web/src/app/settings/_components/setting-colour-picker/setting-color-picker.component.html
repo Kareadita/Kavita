@@ -3,7 +3,13 @@
     <button class="btn btn-icon color">
       @if (showPicker()) {
         <div #colorPopup>
-          <chrome-picker class="floating-picker" [control]="chromeControl"></chrome-picker>
+          <chrome-picker
+            class="floating-picker"
+            [class.left]="first()"
+            [class.right]="last()"
+            [control]="chromeControl"
+          >
+          </chrome-picker>
         </div>
       }
 
