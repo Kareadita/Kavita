@@ -221,14 +221,6 @@ export class ManageLibraryComponent implements OnInit {
           this.resetBulkMode();
         });
         break
-      case Action.AnalyzeFiles:
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
-        this.libraryService.analyzeFilesMultipleLibraries(selected.map(l => l.id)).subscribe(() => {
-          this.getLibraries();
-          this.resetBulkMode();
-        });
-        break;
       case Action.GenerateColorScape:
         this.bulkMode = true;
         this.cdRef.markForCheck();
@@ -280,7 +272,6 @@ export class ManageLibraryComponent implements OnInit {
       case(Action.RefreshMetadata):
       case(Action.GenerateColorScape):
       case (Action.Delete):
-      case (Action.AnalyzeFiles):
         await this.applyBulkAction();
         break;
       case (Action.CopySettings):

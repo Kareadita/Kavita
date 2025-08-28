@@ -135,7 +135,7 @@ public interface ISeriesRepository
     Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
+    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
@@ -426,7 +426,8 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Library)
             .AsNoTracking()
             .AsSplitQuery()
-            .OrderBy(s => s.SortName!.ToLower())
+            .OrderBy(s => s.SortName!.Length)
+            .ThenBy(s => s.SortName!.ToLower())
             .Take(maxRecords)
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
@@ -444,7 +445,8 @@ public class SeriesRepository : ISeriesRepository
                                EF.Functions.Like(joined.Series.OriginalName, $"%{searchQuery}%")) ||
                               (joined.Series.LocalizedName != null &&
                                EF.Functions.Like(joined.Series.LocalizedName, $"%{searchQuery}%"))))
-            .OrderBy(joined => joined.Series.Name)
+            .OrderBy(joined => joined.Series.NormalizedName.Length)
+            .ThenBy(joined => joined.Series.NormalizedName)
             .Take(maxRecords)
             .Select(joined => new BookmarkSearchResultDto()
             {
@@ -482,7 +484,8 @@ public class SeriesRepository : ISeriesRepository
 
         result.Persons = await _context.Person
             .Where(p => personIds.Contains(p.Id))
-            .OrderBy(p => p.NormalizedName)
+            .OrderBy(p => p.NormalizedName.Length)
+            .ThenBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -532,7 +535,8 @@ public class SeriesRepository : ISeriesRepository
                 )
                 .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
                 .AsSplitQuery()
-                .OrderBy(c => c.TitleName)
+                .OrderBy(c => c.TitleName.Length)
+                .ThenBy(c => c.TitleName)
                 .Take(maxRecords)
                 .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -1485,12 +1489,12 @@ public class SeriesRepository : ISeriesRepository
     /// <remarks>This provides 2 levels of pagination. Fetching the individual chapters only looks at 3000. Then when performing grouping
     /// in memory, we stop after 30 series. </remarks>
     /// <param name="userId">Used to ensure user has access to libraries</param>
-    /// <param name="pageSize">How many entities to return</param>
+    /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
-    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30)
+    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams)
     {
-        var seriesMap = new Dictionary<string, GroupedSeriesDto>();
-        var index = 0;
+        userParams ??= UserParams.Default;
+
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var items = (await GetRecentlyAddedChaptersQuery(userId));
@@ -1499,20 +1503,30 @@ public class SeriesRepository : ISeriesRepository
             items = items.RestrictAgainstAgeRestriction(userRating);
         }
 
+        var index = 0;
+        var seriesMap = new Dictionary<int, GroupedSeriesDto>();
+        var toSkip = (userParams.PageNumber - 1) * userParams.PageSize;
+        var skipped = new HashSet<int>();
+
         foreach (var item in items)
         {
-            if (seriesMap.Keys.Count == pageSize) break;
+            if (seriesMap.Keys.Count == userParams.PageSize) break;
 
             if (item.SeriesName == null) continue;
 
+            if (skipped.Count < toSkip)
+            {
+                skipped.Add(item.SeriesId);
+                continue;
+            }
 
-            if (seriesMap.TryGetValue(item.SeriesName + "_" + item.LibraryId, out var value))
+            if (seriesMap.TryGetValue(item.SeriesId, out var value))
             {
                 value.Count += 1;
             }
             else
             {
-                seriesMap[item.SeriesName + "_" + item.LibraryId] = new GroupedSeriesDto()
+                seriesMap[item.SeriesId] = new GroupedSeriesDto()
                 {
                     LibraryId = item.LibraryId,
                     LibraryType = item.LibraryType,

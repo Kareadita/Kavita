@@ -303,7 +303,7 @@ export class ActionFactoryService {
 
     // Scan is currently not supported due to the backend not being able to handle it yet
     const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
-      return [Action.Delete, Action.GenerateColorScape, Action.AnalyzeFiles, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
+      return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
     });
 
     actions.push({
@@ -404,16 +404,6 @@ export class ActionFactoryService {
             action: Action.GenerateColorScape,
             title: 'generate-colorscape',
             description: 'generate-colorscape-tooltip',
-            callback: this.dummyCallback,
-            shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
-            requiredRoles: [Role.Admin],
-            children: [],
-          },
-          {
-            action: Action.AnalyzeFiles,
-            title: 'analyze-files',
-            description: 'analyze-files-tooltip',
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
             requiresAdmin: true,

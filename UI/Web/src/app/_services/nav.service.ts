@@ -8,7 +8,7 @@ import {TextResonse} from "../_types/text-response";
 import {AccountService} from "./account.service";
 import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
 import {WikiLink} from "../_models/wiki";
 import {AuthGuard} from "../_guards/auth.guard";
@@ -79,12 +79,14 @@ export class NavService {
    * If the Side Nav is in a collapsed state or not.
    */
   sideNavCollapsed$ = this.sideNavCollapseSource.asObservable();
+  sideNavCollapsedSignal = toSignal(this.sideNavCollapsed$, {initialValue: false});
 
   private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
   /**
    * If the side nav is rendered or not into the DOM.
    */
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
+  sideNavVisibilitySignal = toSignal(this.sideNavVisibility$, {initialValue: false})
 
   usePreferenceSideNav$ = this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),

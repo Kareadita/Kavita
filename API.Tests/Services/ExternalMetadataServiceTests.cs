@@ -41,11 +41,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
     private async Task<(IExternalMetadataService, Dictionary<string, Genre>, Dictionary<string, Tag>, Dictionary<string, Person>)> Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
     {
-       context.Series.RemoveRange(context.Series);
-       context.AppUser.RemoveRange(context.AppUser);
-       context.Genre.RemoveRange(context.Genre);
-       context.Tag.RemoveRange(context.Tag);
-       context.Person.RemoveRange(context.Person);
 
        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
        metadataSettings.Enabled = false;

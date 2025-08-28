@@ -1,8 +1,12 @@
-﻿using API.Extensions;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -20,11 +24,18 @@ public class OidcController: ControllerBase
     }
 
     [HttpGet("logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
 
         if (!Request.Cookies.ContainsKey(OidcService.CookieName))
         {
+            return Redirect("/");
+        }
+
+        var res = await Request.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (!res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetString(OidcService.IdToken)))
+        {
+            HttpContext.Response.Cookies.Delete(OidcService.CookieName);
             return Redirect("/");
         }
 

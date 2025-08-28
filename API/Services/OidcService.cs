@@ -102,7 +102,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.missing-external-id");
         }
 
-        var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences);
+        var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
         if (user != null)
         {
             await SyncUserSettings(request, settings, principal, user);
