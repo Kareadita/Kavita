@@ -891,13 +891,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateWidthAndHeightCalcs();
     this.updateImageSizes();
 
-    // Can I use this.virtualPageScroll to resume?
-    const resumeElement = this.getFirstVisibleElementXPath();
-    const layoutMode = this.layoutMode();
-    if (layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+    // Attempt to restore the reading position
+    this.snapScrollOnResize();
+    // const resumeElement = this.getFirstVisibleElementXPath();
+    // const layoutMode = this.layoutMode();
+    // if (layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+    //
+    //   //const element = this.getElementFromXPath(resumeElement);
+    //   //console.log('Resuming from resize to element: ', element);
+    //
+    //   this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
+    // }
+  }
 
-      //const element = this.getElementFromXPath(resumeElement);
-      //console.log('Resuming from resize to element: ', element);
+  /**
+   * Only applies to non BookPageLayoutMode.Default and non-WritingStyle Horizontal
+   * @private
+   */
+  private snapScrollOnResize() {
+    const layoutMode = this.layoutMode();
+    if (layoutMode === BookPageLayoutMode.Default) return;
+
+    // NOTE: Need to test on one of these books to validate
+    //  || this.writingStyle() === WritingStyle.Horizontal
+
+
+    const resumeElement = this.getFirstVisibleElementXPath() ?? null;
+    if (resumeElement !== null) {
+
+      const element = this.getElementFromXPath(resumeElement);
+      console.log('Attempting to snap to element: ', element);
 
       this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
     }
@@ -1662,14 +1685,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let path = this.readerService.getXPathTo(intersectingEntries[0]);
       if (path === '') return;
 
-      console.log('Path: ', path);
-      // if (!path.startsWith('id')) {
-      //   if (path.startsWith('//body') || path.startsWith('//BODY')) {
-      //     path = '//html[1]/' + path.replace('//body', '').replace('//BODY', '');
-      //   } else {
-      //     path = '//html[1]/' + path;
-      //   }
-      // }
       resumeElement = path;
     }
     return resumeElement;
