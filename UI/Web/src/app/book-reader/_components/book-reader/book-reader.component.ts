@@ -66,6 +66,7 @@ import {NgxSliderModule} from "@angular-slider/ngx-slider";
 import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
 import {LayoutMeasurementService} from "../../../_services/layout-measurement.service";
 import {ColorscapeService} from "../../../_services/colorscape.service";
+import {environment} from "../../../../environments/environment";
 
 
 interface HistoryPoint {
@@ -1848,7 +1849,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scrollTo(partSelector: string) {
     const element = this.getElementFromXPath(partSelector);
 
-    if (element === null) return;
+    if (element === null) {
+      if (!environment.production) {
+        console.warn("Tried to scroll to a non existing XPath", partSelector);
+      }
+
+      return;
+    }
 
     const layout = this.layoutMode();
     const writingStyle = this.writingStyle();
