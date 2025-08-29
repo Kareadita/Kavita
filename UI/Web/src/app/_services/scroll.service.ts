@@ -1,11 +1,24 @@
-import {ElementRef, inject, Injectable} from '@angular/core';
+import {ElementRef, inject, Injectable, signal} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {filter, ReplaySubject} from 'rxjs';
+import {environment} from "../../environments/environment";
+
+const DEFAULT_TIMEOUT = 3000;
+const DEFAULT_TOLERANCE = 3;
+const DEFAULT_DEBOUNCE = 100;
 
 interface ScrollEndOptions {
   tolerance?: number;
   timeout?: number;
   debounce?: number;
+}
+
+interface ScrollHandler {
+  timeoutId?: number;
+  callback?: () => void;
+  targetPosition?: { x?: number; y?: number };
+  tolerance: number;
+  cleanup?: () => void;
 }
 
 @Injectable({
@@ -23,12 +36,10 @@ export class ScrollService {
    */
   public readonly scrollContainer$ = this.scrollContainerSource.asObservable();
 
-  private activeScrollHandlers = new Map<HTMLElement, {
-    timeoutId?: number;
-    callback?: () => void;
-    targetPosition?: { x?: number; y?: number };
-    tolerance: number;
-  }>();
+  private activeScrollHandlers = new Map<HTMLElement, ScrollHandler>();
+
+  private readonly _lock = signal(false);
+  public readonly lock = this._lock.asReadonly();
 
   constructor() {
     this.router.events
@@ -55,8 +66,63 @@ export class ScrollService {
       || document.body.scrollLeft || 0);
   }
 
+  /**
+   * Returns true if the log is active
+   * @private
+   */
+  private checkLock(): boolean {
+    if (!this._lock()) return false;
+
+    console.warn("[ScrollService] tried to scroll while locked, timings should be checked")
+
+    if (!environment.production) {
+      console.trace("[ScrollService] lock trace")
+    }
+
+    return true;
+  }
+
+  private intersectionObserver(element: HTMLElement, callback?: () => void) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.executeCallback(element, callback);
+        }
+      });
+    }, {threshold: 1.0});
+
+    observer.observe(element);
+    return observer;
+  }
+
+  scrollIntoView(element: HTMLElement, options?: ScrollIntoViewOptions, callback?: () => void) {
+    if (this.checkLock()) return;
+    this._lock.set(true);
+
+    const timeoutId = window.setTimeout(() => {
+      console.warn('Intersection observer timed out - forcing callback execution');
+      this.executeCallback(element, callback)
+    }, DEFAULT_TIMEOUT)
+
+    const observer = this.intersectionObserver(element, callback);
+    const scrollHandler: ScrollHandler = {
+      timeoutId: timeoutId,
+      callback: callback,
+      tolerance: 0,
+      cleanup: () => {
+        observer.disconnect();
+        observer.unobserve(element);
+        clearTimeout(timeoutId);
+      },
+    }
+
+    this.activeScrollHandlers.set(element, scrollHandler);
+    element.scrollIntoView(options);
+  }
+
   scrollTo(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'smooth',
            onComplete?: () => void, options?: ScrollEndOptions) {
+    if (this.checkLock()) return;
 
     element.scrollTo({
       top: position,
@@ -70,6 +136,7 @@ export class ScrollService {
 
   scrollToX(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'auto',
             onComplete?: () => void, options?: ScrollEndOptions) {
+    if (this.checkLock()) return;
 
     element.scrollTo({
       left: position,
@@ -96,9 +163,9 @@ export class ScrollService {
     targetPosition?: { x?: number; y?: number },
     options?: ScrollEndOptions
   ): void {
-    const tolerance = options?.tolerance ?? 5;
-    const timeout = options?.timeout ?? 3000;
-    const debounce = options?.debounce ?? 100;
+    const tolerance = options?.tolerance ?? DEFAULT_TOLERANCE;
+    const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
+    const debounce = options?.debounce ?? DEFAULT_DEBOUNCE;
 
     this.clearScrollHandler(element);
 
@@ -159,7 +226,7 @@ export class ScrollService {
     };
 
     // Rest of your existing scroll handler setup...
-    const handlerData = {
+    const handlerData: ScrollHandler = {
       callback,
       targetPosition,
       tolerance,
@@ -172,7 +239,7 @@ export class ScrollService {
     this.activeScrollHandlers.set(element, handlerData);
     element.addEventListener('scroll', scrollHandler, { passive: true });
 
-    (handlerData as any).cleanup = () => {
+    handlerData.cleanup = () => {
       this.debugLog('Cleaning up scroll handler');
       element.removeEventListener('scroll', scrollHandler);
       clearTimeout(debounceTimer);
@@ -188,8 +255,12 @@ export class ScrollService {
     }, 50);
   }
 
-  private executeCallback(element: HTMLElement, callback: () => void): void {
+  private executeCallback(element: HTMLElement, callback?: () => void): void {
+    this._lock.set(false);
+
     this.clearScrollHandler(element);
+
+    if (!callback) return;
 
     try {
       callback();
@@ -200,11 +271,11 @@ export class ScrollService {
 
   private clearScrollHandler(element: HTMLElement): void {
     const handler = this.activeScrollHandlers.get(element);
-    if (handler) {
-      if ((handler as any).cleanup) {
-        (handler as any).cleanup();
-      }
-      this.activeScrollHandlers.delete(element);
+    if (!handler) return;
+
+    this.activeScrollHandlers.delete(element);
+    if (handler.cleanup) {
+      handler.cleanup();
     }
   }
 

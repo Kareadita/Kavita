@@ -1824,18 +1824,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (element === null) return;
 
     const layout = this.layoutMode();
+    const writingStyle = this.writingStyle();
 
-    if(layout === BookPageLayoutMode.Default && this.writingStyle() === WritingStyle.Vertical) {
-      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-      const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
-      setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
+    if (layout !== BookPageLayoutMode.Default) {
+      setTimeout(() => this.scrollService.scrollIntoView(element as HTMLElement, {'block': 'start', 'inline': 'start'}));
+      return;
     }
-    else if ((layout === BookPageLayoutMode.Default) && (this.writingStyle() === WritingStyle.Horizontal)) {
-      const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
-      // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
-      setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
-    } else {
-      setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
+
+    switch (writingStyle) {
+      case WritingStyle.Vertical:
+        const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+        const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
+        setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
+        break;
+      case WritingStyle.Horizontal:
+        const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
+        // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
+        setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     }
   }
 
