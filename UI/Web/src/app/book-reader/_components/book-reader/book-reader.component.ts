@@ -898,18 +898,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (isInputFocused) return;
 
-    if (event.key === KEY_CODES.RIGHT_ARROW) {
-      this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
-    } else if (event.key === KEY_CODES.LEFT_ARROW) {
-      this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-    } else if (event.key === KEY_CODES.ESC_KEY) {
-      const isHighlighting = window.getSelection()?.toString() != '';
-      if (isHighlighting || this.isLineOverlayOpen()) return;
-      this.closeReader();
-    } else if (event.key === KEY_CODES.G) {
-      await this.goToPage();
-    } else if (event.key === KEY_CODES.F) {
-      this.applyFullscreen()
+    switch (event.key) {
+      case KEY_CODES.RIGHT_ARROW:
+        this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+        break;
+      case KEY_CODES.LEFT_ARROW:
+        this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+        break;
+      case KEY_CODES.ESC_KEY:
+        const isHighlighting = window.getSelection()?.toString() != '';
+        if (isHighlighting || this.isLineOverlayOpen()) return;
+
+        this.closeReader();
+        break;
+      case KEY_CODES.G:
+        await this.goToPage();
+        break;
+      case KEY_CODES.F:
+        this.applyFullscreen();
+        break;
     }
   }
 
@@ -956,9 +963,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'Next');
       });
-    } else {
-      this.loadChapter(this.nextChapterId, 'Next');
+      return;
     }
+
+    this.loadChapter(this.nextChapterId, 'Next');
   }
 
   loadPrevChapter() {
@@ -1003,18 +1011,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
       this.init();
-    } else {
-      // This will only happen if no actual chapter can be found
-      const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
-      this.toastr.warning(msg);
-      this.isLoading.set(false);
-      if (direction === 'Prev') {
-        this.prevPageDisabled = true;
-      } else {
-        this.nextPageDisabled = true;
-      }
-      this.cdRef.markForCheck();
+      return;
     }
+
+    // This will only happen if no actual chapter can be found
+    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+    this.toastr.warning(msg);
+    this.isLoading.set(false);
+    if (direction === 'Prev') {
+      this.prevPageDisabled = true;
+    } else {
+      this.nextPageDisabled = true;
+    }
+    this.cdRef.markForCheck();
   }
 
   /**
@@ -1296,32 +1305,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     try {
-      if (part !== undefined && part !== '') {
-        this.scrollTo(this.readerService.scopeBookReaderXpath(part));
-      } else if (scrollTop !== undefined && scrollTop !== 0) {
-        setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
-      } else if ((this.writingStyle() === WritingStyle.Vertical) && (this.layoutMode() === BookPageLayoutMode.Default)) {
-        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
-      } else {
-
-        if (this.layoutMode() === BookPageLayoutMode.Default) {
-          setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
-        } else if (this.writingStyle() === WritingStyle.Vertical) {
-          if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-            setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
-          } else {
-            setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
-          }
-        }
-        else {
-          // We need to check if we are paging back, because we need to adjust the scroll
-          if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-            setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
-          } else {
-            setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
-          }
-        }
-      }
+      this.setupPageScroll(part, scrollTop);
     } catch (ex) {
       console.error(ex); // TODO: Fix loading bug with xpath
     }
@@ -1335,6 +1319,49 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.annotationService.getAllAnnotations(this.chapterId).subscribe(_ => {
       this.setupAnnotationElements();
     });
+  }
+
+  private setupPageScroll(part?: string | undefined, scrollTop?: number) {
+    if (part !== undefined && part !== '') {
+      this.scrollTo(this.readerService.scopeBookReaderXpath(part));
+      return;
+    }
+
+    if (scrollTop !== undefined && scrollTop !== 0) {
+      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      return;
+    }
+
+    const layoutMode = this.layoutMode();
+    const writingStyle = this.writingStyle();
+
+    if (layoutMode === BookPageLayoutMode.Default) {
+      if (writingStyle === WritingStyle.Vertical) {
+        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        return;
+      }
+
+      setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
+      return;
+    }
+
+    if (writingStyle === WritingStyle.Vertical) {
+      if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+        setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
+        return;
+      }
+
+      setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
+      return;
+    }
+
+    // We need to check if we are paging back, because we need to adjust the scroll
+    if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+      setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
+      return;
+    }
+
+    setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
   }
 
   private setupAnnotationElements() {
