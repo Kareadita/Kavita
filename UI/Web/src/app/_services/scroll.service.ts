@@ -123,6 +123,7 @@ export class ScrollService {
   scrollTo(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'smooth',
            onComplete?: () => void, options?: ScrollEndOptions) {
     if (this.checkLock()) return;
+    this._lock.set(true);
 
     element.scrollTo({
       top: position,
@@ -137,6 +138,7 @@ export class ScrollService {
   scrollToX(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'auto',
             onComplete?: () => void, options?: ScrollEndOptions) {
     if (this.checkLock()) return;
+    this._lock.set(true);
 
     element.scrollTo({
       left: position,
