@@ -13,6 +13,11 @@ interface ScrollEndOptions {
   debounce?: number;
 }
 
+interface ScrollToOptions {
+  scrollIntoViewOptions: ScrollIntoViewOptions;
+  timeout: number;
+}
+
 interface ScrollHandler {
   timeoutId?: number;
   callback?: () => void;
@@ -39,7 +44,7 @@ export class ScrollService {
   private activeScrollHandlers = new Map<HTMLElement, ScrollHandler>();
 
   private readonly _lock = signal(false);
-  public readonly lock = this._lock.asReadonly();
+  public readonly isScrollingLock = this._lock.asReadonly();
 
   constructor() {
     this.router.events
@@ -76,7 +81,7 @@ export class ScrollService {
     console.warn("[ScrollService] tried to scroll while locked, timings should be checked")
 
     if (!environment.production) {
-      console.trace("[ScrollService] lock trace")
+      //console.trace("[ScrollService] lock trace")
     }
 
     return true;
@@ -95,7 +100,7 @@ export class ScrollService {
     return observer;
   }
 
-  scrollIntoView(element: HTMLElement, options?: ScrollIntoViewOptions, callback?: () => void) {
+  scrollIntoView(element: HTMLElement, options?: ScrollToOptions, callback?: () => void) {
     if (this.checkLock()) return;
     this._lock.set(true);
 
@@ -117,7 +122,12 @@ export class ScrollService {
     }
 
     this.activeScrollHandlers.set(element, scrollHandler);
-    element.scrollIntoView(options);
+    if (options?.timeout || 0) {
+      setTimeout(() => element.scrollIntoView(options?.scrollIntoViewOptions), options?.timeout || 0);
+    } else {
+      element.scrollIntoView(options?.scrollIntoViewOptions);
+    }
+
   }
 
   scrollTo(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'smooth',

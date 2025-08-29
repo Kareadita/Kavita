@@ -766,6 +766,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       await this.init();
     });
+
+
+    const resize$ = fromEvent(window, 'resize');
+    const orientationChange$ = fromEvent(window, 'orientationchange');
+
+    merge(resize$, orientationChange$)
+      .pipe(
+        debounceTime(200),
+        takeUntilDestroyed(this.destroyRef),
+        tap(_ => this.onResize())
+      )
+      .subscribe();
   }
 
   async init() {
@@ -874,9 +886,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // TODO: BUG: When I resize on 1 column, there is page shift that breaks the clean columns
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window:orientationchange', ['$event'])
   onResize(){
     // Update the window Height
     this.updateWidthAndHeightCalcs();
@@ -884,8 +893,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Can I use this.virtualPageScroll to resume?
     const resumeElement = this.getFirstVisibleElementXPath();
-    if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
-      this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement)); // This works pretty well, but not perfect
+    const layoutMode = this.layoutMode();
+    if (layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+
+      //const element = this.getElementFromXPath(resumeElement);
+      //console.log('Resuming from resize to element: ', element);
+
+      this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
     }
   }
 
@@ -1648,13 +1662,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let path = this.readerService.getXPathTo(intersectingEntries[0]);
       if (path === '') return;
 
-      if (!path.startsWith('id')) {
-        if (path.startsWith('//BODY')) {
-          path = '//html[1]/' + path.replace('//BODY', '');
-        } else {
-          path = '//html[1]/' + path;
-        }
-      }
+      console.log('Path: ', path);
+      // if (!path.startsWith('id')) {
+      //   if (path.startsWith('//body') || path.startsWith('//BODY')) {
+      //     path = '//html[1]/' + path.replace('//body', '').replace('//BODY', '');
+      //   } else {
+      //     path = '//html[1]/' + path;
+      //   }
+      // }
       resumeElement = path;
     }
     return resumeElement;
@@ -1846,7 +1861,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  scrollTo(partSelector: string) {
+  scrollTo(partSelector: string, timeout: number = 0) {
     const element = this.getElementFromXPath(partSelector);
 
     if (element === null) {
@@ -1861,7 +1876,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const writingStyle = this.writingStyle();
 
     if (layout !== BookPageLayoutMode.Default) {
-      setTimeout(() => this.scrollService.scrollIntoView(element as HTMLElement, {'block': 'start', 'inline': 'start'}));
+      setTimeout(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
       return;
     }
 
