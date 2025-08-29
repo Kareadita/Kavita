@@ -115,7 +115,7 @@ export class EpubReaderSettingsService {
   // Keep observable for now - can be converted to effect later
   public readonly settingUpdates$ = this.settingUpdateSubject.asObservable().pipe(filter(val => {
     if (!environment.production) {
-      console.log(`[SETTINGS EFFECT] ${val.setting}`, val.object);
+      console.log(`[SETTINGS EFFECT] ${val.setting}`, val.setting === 'theme' ? val.object.name : val.object);
     }
 
     return this._isInitialized();
