@@ -917,11 +917,13 @@
     },
 
     "view-bookmark-drawer": {
-        "title": "Image Bookmarks",
+        "title": "Bookmarks",
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}",
-        "load-bookmark": "Load"
+        "load-bookmark": "Load",
+        "image-header": "Image",
+        "text-header": "Text"
     },
 
     "page-chapter-label-pipe": {

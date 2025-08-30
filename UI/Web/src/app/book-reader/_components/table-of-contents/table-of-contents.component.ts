@@ -3,8 +3,8 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  inject, input,
-  Input, model,
+  inject,
+  model,
   Output
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
@@ -23,7 +23,7 @@ export class TableOfContentsComponent {
 
   chapterId = model.required<number>();
   pageNum = model.required<number>();
-  currentPageAnchor = model.required<string>();
+  currentPageAnchor = model<string>();
   chapters = model.required<Array<BookChapterItem>>();
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();

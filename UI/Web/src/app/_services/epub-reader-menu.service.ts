@@ -4,12 +4,10 @@ import {
   ViewAnnotationsDrawerComponent
 } from "../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component";
 import {
+  LoadPageEvent,
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
-import {
-  LoadPageEvent,
-  ViewTocDrawerComponent
-} from "../book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component";
+import {ViewTocDrawerComponent} from "../book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component";
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {
   EpubSettingDrawerComponent,
@@ -22,7 +20,7 @@ import {
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
 import {AccountService} from "./account.service";
-import { EpubReaderSettingsService } from './epub-reader-settings.service';
+import {EpubReaderSettingsService} from './epub-reader-settings.service';
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -88,18 +86,29 @@ export class EpubReaderMenuService {
     this.isDrawerOpen.set(true);
   }
 
-  openViewBookmarksDrawer(chapterId: number, callbackFn: (evt: PageBookmark | null, action: 'loadPage' | 'removeBookmark') => void) {
+  openViewBookmarksDrawer(chapterId: number,
+                          pageNum: number,
+                          callbackFn: (evt: PageBookmark | null, action: 'loadPage' | 'removeBookmark') => void,
+                          loadPtocCallbackFn: (evt: LoadPageEvent) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
     const ref = this.offcanvasService.open(ViewBookmarkDrawerComponent, {position: 'end', panelClass: ''});
     ref.componentInstance.chapterId.set(chapterId);
+    ref.componentInstance.pageNum.set(pageNum);
     ref.componentInstance.loadPage.subscribe((res: PageBookmark | null) => {
       // Check if we are on mobile to collapse the menu
       if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
         this.closeAll();
       }
       callbackFn(res, 'loadPage');
+    });
+    ref.componentInstance.loadPtoc.subscribe((res: LoadPageEvent) => {
+      // Check if we are on mobile to collapse the menu
+      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+        this.closeAll();
+      }
+      loadPtocCallbackFn(res);
     });
     ref.componentInstance.removeBookmark.subscribe((res: PageBookmark) => {
       // Check if we are on mobile to collapse the menu

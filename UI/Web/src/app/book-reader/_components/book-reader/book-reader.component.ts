@@ -53,7 +53,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
-import {LoadPageEvent} from "../_drawers/view-toc-drawer/view-toc-drawer.component";
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
 import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
@@ -67,6 +66,7 @@ import {ProgressBookmark} from "../../../_models/readers/progress-bookmark";
 import {LayoutMeasurementService} from "../../../_services/layout-measurement.service";
 import {ColorscapeService} from "../../../_services/colorscape.service";
 import {environment} from "../../../../environments/environment";
+import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 
 
 interface HistoryPoint {
@@ -2134,7 +2134,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   viewBookmarkImages() {
-    this.epubMenuService.openViewBookmarksDrawer(this.chapterId, (res: PageBookmark | null, action) => {
+    this.epubMenuService.openViewBookmarksDrawer(this.chapterId, this.pageNum(),
+      (res: PageBookmark | null, action) => {
       if (res === null) return;
 
       if (action === 'loadPage') {
@@ -2146,6 +2147,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else if (action === 'removeBookmark') {
         this.loadImageBookmarks();
       }
+    }, (res: LoadPageEvent) => {
+        if (res === null) return;
+
+        this.setPageNum(res.pageNumber);
+        this.loadPage(res.part);
     });
   }
 

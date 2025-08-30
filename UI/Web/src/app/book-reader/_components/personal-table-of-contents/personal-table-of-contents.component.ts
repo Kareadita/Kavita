@@ -44,8 +44,6 @@ export class PersonalTableOfContentsComponent implements OnInit {
   @Output() loadChapter: EventEmitter<PersonalToCEvent> = new EventEmitter();
 
 
-
-
   ptocBookmarks = model<PersonalToC[]>([]);
   formGroup = new FormGroup({
     filter: new FormControl('', [])
