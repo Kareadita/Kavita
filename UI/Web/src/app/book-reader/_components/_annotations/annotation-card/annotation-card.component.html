@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'annotation-card'">
-  <div class="card border-0 shadow-sm mb-3">
+  <div class="card annotation-card border-0 shadow-sm mb-3">
     <div #username class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable" [ngStyle]="{'background-color': titleColor()}" (click)="viewAnnotation()">
       <div class="d-flex align-items-center">
         <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
