@@ -995,6 +995,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadNextChapter() {
     if (this.nextPageDisabled) { return; }
     this.isLoading.set(true);
+
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
@@ -1041,6 +1042,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (chapterId >= 0) {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
+      // Ensure all scroll locks are undone
+      this.scrollService.unlock();
+      console.log('cleared lock: ', this.scrollService.isScrollingLock())
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
@@ -1142,6 +1146,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
       this.page.set(this.domSanitizer.bypassSecurityTrustHtml(content));
+      this.scrollService.unlock();
 
       this.cdRef.markForCheck();
 
@@ -1344,7 +1349,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.setupPageScroll(part, scrollTop);
     } catch (ex) {
-      console.error(ex); // TODO: Fix loading bug with xpath
+      console.error(ex);
     }
 
     // we need to click the document before arrow keys will scroll down.
@@ -1462,9 +1467,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const oldPageNum = this.pageNum();
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
+    const isColumnLayout = this.layoutMode() !== BookPageLayoutMode.Default;
 
     // We need to handle virtual paging before we increment the actual page
-    if (this.layoutMode() !== BookPageLayoutMode.Default) {
+    if (isColumnLayout) {
       const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
 
       if (currentVirtualPage > 1) {
@@ -1479,8 +1485,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.bookContentElemRef.nativeElement,
           'auto',
           () => {
-            console.log('Scroll completion callback executed');
-            this.debugVirtualPaging();
             this.handleScrollEvent();
           },
           {
@@ -1492,7 +1496,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    this.setPageNum(this.pageNum() - 1);
+
+    const newPageNum = this.pageNum() - 1;
+    this.setPageNum(newPageNum);
 
     if (oldPageNum === 0) {
       // Move to next volume/chapter automatically
@@ -1500,7 +1506,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (oldPageNum === this.pageNum()) { return; }
+    if (oldPageNum === newPageNum) { return; }
+
     this.loadPage();
   }
 
@@ -1523,17 +1530,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         const targetScroll = currentVirtualPage * pageSize;
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
-        console.log('NextPage virtual paging:', {
-          currentVirtualPage,
-          totalVirtualPages,
-          pageSize,
-          targetScroll,
-          currentScroll: isVertical ?
-            this.bookContentElemRef.nativeElement.scrollTop :
-            this.bookContentElemRef.nativeElement.scrollLeft,
-          isVertical
-        });
-
         // +0 apparently goes forward 1 virtual page...
         const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
         this.scrollService[scrollMethod](
@@ -1541,8 +1537,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.bookContentElemRef.nativeElement,
           'auto',
           () => {
-            console.log('Scroll completion callback executed');
-            this.debugVirtualPaging();
             this.handleScrollEvent();
           },
           {
@@ -1617,27 +1611,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (pageSize <= 0 || totalScroll <= 0) return [1, 1, pageSize];
 
-
-
-
-    // const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
-    //
-    // // Simplified calculation - just divide scroll position by page size
-    // let currentVirtualPage = Math.floor(scrollOffset / pageSize) + 1;
-    //
-    // // Ensure we're within bounds
-    // currentVirtualPage = Math.max(1, Math.min(currentVirtualPage, totalVirtualPages));
-    //
-    // return [currentVirtualPage, totalVirtualPages, pageSize];
-
-
     const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
-    //const delta = scrollOffset - totalScroll; // This is always negative
-    const delta = totalScroll - scrollOffset; // This is always negative
+    const delta = totalScroll - scrollOffset;
     let currentVirtualPage = 1;
 
-    // console.log('Delta: ', delta);
-    // console.log('Page Size: ', pageSize);
     //If first virtual page, i.e. totalScroll and delta are the same value
     if (totalScroll === delta) {
       currentVirtualPage = 1;
@@ -1793,12 +1770,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // After layout shifts, we need to refocus the scroll bar
+    // NOTE: THis is called almost always and not just from layout shift
     if (this.layoutMode() !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.updateWidthAndHeightCalcs();
       this.updateImageSizes(); // Re-call this as we will change window width/height again
 
       requestAnimationFrame(() => {
-        this.scrollTo(this.readerService.descopeBookReaderXpath(resumeElement));
+        this.scrollTo(resumeElement);
       });
     }
   }

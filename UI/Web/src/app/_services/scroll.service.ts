@@ -1,7 +1,6 @@
 import {ElementRef, inject, Injectable, signal} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {filter, ReplaySubject} from 'rxjs';
-import {environment} from "../../environments/environment";
 
 const DEFAULT_TIMEOUT = 3000;
 const DEFAULT_TOLERANCE = 3;
@@ -76,13 +75,12 @@ export class ScrollService {
    * @private
    */
   private checkLock(): boolean {
+
+    return false; // NOTE: We don't need locking anymore - it bugs out
+
     if (!this._lock()) return false;
 
     console.warn("[ScrollService] tried to scroll while locked, timings should be checked")
-
-    if (!environment.production) {
-      //console.trace("[ScrollService] lock trace")
-    }
 
     return true;
   }
@@ -243,7 +241,6 @@ export class ScrollService {
       targetPosition,
       tolerance,
       timeoutId: window.setTimeout(() => {
-        console.warn('Scroll completion timeout reached - forcing completion');
         this.executeCallback(element, callback);
       }, timeout)
     };
@@ -298,6 +295,14 @@ export class ScrollService {
     this.activeScrollHandlers.forEach((handler, element) => {
       this.clearScrollHandler(element);
     });
+  }
+
+  /**
+   * Force unlocking of scroll lock
+   */
+  unlock() {
+    this._lock.set(false);
+    this.cleanup();
   }
 
   private debugLog(message: string, extraData?: any) {

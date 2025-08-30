@@ -113,13 +113,14 @@ export class EpubReaderSettingsService {
   });
 
   // Keep observable for now - can be converted to effect later
-  public readonly settingUpdates$ = this.settingUpdateSubject.asObservable().pipe(filter(val => {
+  public readonly settingUpdates$ = this.settingUpdateSubject.asObservable()
+    .pipe(filter(val => {
     if (!environment.production) {
       console.log(`[SETTINGS EFFECT] ${val.setting}`, val.setting === 'theme' ? val.object.name : val.object);
     }
 
     return this._isInitialized();
-  }));
+  }), debounceTime(10));
 
   constructor() {
     // Effect to update form when signals change (only when not updating from form)
