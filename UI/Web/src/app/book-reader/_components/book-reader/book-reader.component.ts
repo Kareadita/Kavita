@@ -474,8 +474,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const layoutMode = this.layoutMode();
     const immersiveMode = this.immersiveMode();
     const widthHeight = this.windowHeight();
-    //const measurements = this.layoutService.measurements();
-
 
     if (layoutMode=== BookPageLayoutMode.Default) {
       // if the book content is less than the height of the container, override and return height of container for pagination area
@@ -497,15 +495,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.columnWidth = computed(() => {
-      const baseWidth = this.writingStyle() === WritingStyle.Vertical ? this.windowHeight() : this.windowWidth();
-
       switch (this.layoutMode()) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((baseWidth / 2) - 4) + 'px';
+          return ((this.pageWidth() / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return (baseWidth / 4) + 'px';
+          return (this.pageWidth() / 4) + 'px'
         default:
           return 'unset';
       }
@@ -658,6 +654,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  /**
+   * Updates the TOC current page anchor, last scene path and saves progress
+   */
   handleScrollEvent() {
 
     // TODO: See if we can move this to a service for ToC
@@ -1571,16 +1570,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   /**
-   *
+   * This is the total space for the book content, excluding margin and the column gap (aka how big each column is)
    * @returns Total Page width (excluding margin)
    */
   pageWidth = computed(() => {
     const marginLeft = this.pageStyles()['margin-left'];
     const columnGapModifier = this.layoutMode() === BookPageLayoutMode.Default ? 0 : 1;
     if (this.readingSectionElemRef == null) return 0;
-    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
-    console.log('margin: ', margin);
 
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + (COLUMN_GAP * columnGapModifier);
   });
 
@@ -1634,9 +1632,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
-    const delta = scrollOffset - totalScroll;
+    //const delta = scrollOffset - totalScroll; // This is always negative
+    const delta = totalScroll - scrollOffset; // This is always negative
     let currentVirtualPage = 1;
 
+    // console.log('Delta: ', delta);
+    // console.log('Page Size: ', pageSize);
     //If first virtual page, i.e. totalScroll and delta are the same value
     if (totalScroll === delta) {
       currentVirtualPage = 1;
