@@ -13,7 +13,7 @@ import {
   Output,
 } from '@angular/core';
 import {fromEvent, merge, of} from "rxjs";
-import {catchError} from "rxjs/operators";
+import {catchError, debounceTime, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
@@ -63,7 +63,6 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly elementRef = inject(ElementRef);
   private readonly epubMenuService = inject(EpubReaderMenuService);
-  private readonly document = inject(Document);
 
 
   @HostListener('window:keydown', ['$event'])
@@ -85,10 +84,11 @@ export class BookLineOverlayComponent implements OnInit {
       const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
 
       merge(mouseUp$, touchEnd$)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((event: MouseEvent | TouchEvent) => {
-          this.handleEvent(event);
-        });
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          debounceTime(20),  // Need extra time for this extension to inject DOM https://github.com/Kareadita/Kavita/issues/3521
+          tap((event: MouseEvent | TouchEvent) => this.handleEvent(event))
+        ).subscribe();
     }
   }
 
@@ -96,10 +96,6 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (!event.target) return;
 
-    // If the yomitan-popup is open, just suppress. This user is using an extension: https://github.com/Kareadita/Kavita/issues/3521
-    if (this.document.querySelector('.yomitan-popup')) {
-      return;
-    }
 
     // NOTE: This doesn't account for a partial occlusion with an annotation
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));

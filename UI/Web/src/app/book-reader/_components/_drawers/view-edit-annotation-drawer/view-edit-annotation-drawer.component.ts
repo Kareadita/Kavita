@@ -5,7 +5,8 @@ import {
   DestroyRef,
   effect,
   inject,
-  model, OnInit,
+  model,
+  OnInit,
   Signal,
   ViewChild,
   ViewContainerRef
@@ -27,7 +28,7 @@ import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
-import {QuillWrapperComponent, QuillTheme} from "../../quill-wrapper/quill-wrapper.component";
+import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
 
 export enum AnnotationMode {
@@ -245,9 +246,12 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const annotation = this.annotation();
 
     if (annotation) {
-      console.log('view-edit drawer, slot index changed: ', slotIndex);
+      console.log('view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
       this.annotation.set({...annotation, selectedSlotIndex: slotIndex});
       this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
+
+      // Patch back in any text in the quill editor
+      console.log('(2) view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
     }
   }
 
