@@ -83,7 +83,7 @@ export class CarouselReelComponent {
   onProgress(event: any) {
     let progress = 0;
     [this.swiper, progress] = event.detail;
-    this.cdRef.markForCheck()
+    this.cdRef.markForCheck();
   }
 
 

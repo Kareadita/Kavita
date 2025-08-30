@@ -153,6 +153,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   packSettings(): Preferences {
     const modelSettings = this.settingsForm.value;
+
     return  {
       theme: modelSettings.theme,
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
