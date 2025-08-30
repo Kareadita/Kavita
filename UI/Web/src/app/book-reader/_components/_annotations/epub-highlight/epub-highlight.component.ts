@@ -55,7 +55,6 @@ export class EpubHighlightComponent {
       return '';
     }
 
-    //console.log('[highlight] slot updated', annotation);
     return this.highlightSlotPipe.transform(slots[annotation.selectedSlotIndex].color);
   });
 
@@ -65,11 +64,6 @@ export class EpubHighlightComponent {
     if (this.epubMenuService.isDrawerOpen()) return;
 
     this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {});
-  }
-
-
-  toggleHighlight() {
-    this.showHighlight.set(!this.showHighlight());
   }
 
 }

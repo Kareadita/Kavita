@@ -63,6 +63,7 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly elementRef = inject(ElementRef);
   private readonly epubMenuService = inject(EpubReaderMenuService);
+  private readonly document = inject(Document);
 
 
   @HostListener('window:keydown', ['$event'])
@@ -94,6 +95,11 @@ export class BookLineOverlayComponent implements OnInit {
   handleEvent(event: MouseEvent | TouchEvent) {
     const selection = window.getSelection();
     if (!event.target) return;
+
+    // If the yomitan-popup is open, just suppress. This user is using an extension: https://github.com/Kareadita/Kavita/issues/3521
+    if (this.document.querySelector('.yomitan-popup')) {
+      return;
+    }
 
     // NOTE: This doesn't account for a partial occlusion with an annotation
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));

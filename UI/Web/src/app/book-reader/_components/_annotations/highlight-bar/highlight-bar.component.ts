@@ -1,27 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  model,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {HighlightSlot, RgbaColor} from "../../../_models/annotations/highlight-slot";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
-import {ReplaySubject} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, tap} from "rxjs/operators";
 import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 import {
   SettingColorPickerComponent
 } from "../../../../settings/_components/setting-colour-picker/setting-color-picker.component";
-import {Color} from "@iplab/ngx-color-picker";
-import {AccountService} from "../../../../_services/account.service";
 
 @Component({
   selector: 'app-highlight-bar',
@@ -76,5 +62,4 @@ export class HighlightBarComponent {
   }
 
   protected readonly Breakpoint = Breakpoint;
-  protected readonly UserBreakpoint = UserBreakpoint;
 }
