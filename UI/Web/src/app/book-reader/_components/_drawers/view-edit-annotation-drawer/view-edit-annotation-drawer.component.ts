@@ -193,21 +193,17 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
       hasSpoiler: this.fb.control<boolean>(false, []),
       selectedSlotIndex: this.fb.control<number>(0, []),
     });
+  }
 
-    effect(() => {
-      const annotation = this.annotation();
-      if (!annotation) return;
-
-      // Side effect - patch in the current note
-      // Parse the stored JSON string back to Delta object
+  ngOnInit(){
+    const annotation = this.annotation();
+    if (annotation) {
       this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {};
       this.formGroup.get('note')!.setValue(this.annotationNote);
       this.formGroup.get('hasSpoiler')!.setValue(annotation.containsSpoiler);
       this.formGroup.get('selectedSlotIndex')!.setValue(annotation.selectedSlotIndex);
-    });
-  }
+    }
 
-  ngOnInit(){
     if (!this.isEditMode()) {
       return;
     }
