@@ -368,7 +368,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
 
-  //protected columnWidth = this.readerSettingsService.columnWidth;
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
   protected verticalBookContentWidth!: Signal<string>;
@@ -417,7 +416,26 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const actionBarVisible = this.actionBarVisible();
 
     return !immersiveMode || isDrawerOpen || actionBarVisible;
-  })
+  });
+
+  shouldShowBottomActionBar = computed(() => {
+    const layoutMode = this.layoutMode();
+    const scrollbarNeeded = this.scrollbarNeeded();
+    const writingStyle = this.writingStyle();
+    const immersiveMode = this.immersiveMode();
+    const actionBarVisible = this.actionBarVisible();
+    const isDrawerOpen = this.epubMenuService.isDrawerOpen();
+
+
+
+    const baseCondition = (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && (layoutMode === BookPageLayoutMode.Default));
+
+    const showForVerticalDefault = layoutMode === BookPageLayoutMode.Default && writingStyle === WritingStyle.Vertical;
+
+    const otherCondition = !immersiveMode || isDrawerOpen || actionBarVisible;
+
+    return (baseCondition || showForVerticalDefault) && otherCondition;
+  });
 
 
   isNextPageDisabled() {
@@ -495,13 +513,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.columnWidth = computed(() => {
-      switch (this.layoutMode()) {
+      const layoutMode = this.layoutMode();
+      const writingStyle = this.writingStyle();
+
+      const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
+
+      switch (layoutMode) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((this.pageWidth() / 2) - 4) + 'px';
+          return ((base / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return (this.pageWidth() / 4) + 'px'
+          return (base / 4) + 'px'
         default:
           return 'unset';
       }
@@ -892,27 +915,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Attempt to restore the reading position
     this.snapScrollOnResize();
-    // const resumeElement = this.getFirstVisibleElementXPath();
-    // const layoutMode = this.layoutMode();
-    // if (layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
-    //
-    //   //const element = this.getElementFromXPath(resumeElement);
-    //   //console.log('Resuming from resize to element: ', element);
-    //
-    //   this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
-    // }
   }
 
   /**
-   * Only applies to non BookPageLayoutMode.Default and non-WritingStyle Horizontal
+   * Only applies to non BookPageLayoutMode. Default and WritingStyle Horizontal
    * @private
    */
   private snapScrollOnResize() {
     const layoutMode = this.layoutMode();
     if (layoutMode === BookPageLayoutMode.Default) return;
-
-    // NOTE: Need to test on one of these books to validate
-    //  || this.writingStyle() === WritingStyle.Horizontal
 
 
     const resumeElement = this.getFirstVisibleElementXPath() ?? null;

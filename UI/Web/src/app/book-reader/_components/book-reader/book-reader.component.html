@@ -46,10 +46,9 @@
              [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
              [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
-          @if ((scrollbarNeeded() || layoutMode() !== BookPageLayoutMode.Default) && !(writingStyle() === WritingStyle.Vertical && layoutMode() === BookPageLayoutMode.Default)) {
-            <div (click)="$event.stopPropagation();"
-                 [ngClass]="{'bottom-bar': layoutMode() !== BookPageLayoutMode.Default}">
-              <ng-container [ngTemplateOutlet]="actionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
+          @if (shouldShowBottomActionBar()) {
+            <div class="bottom-bar" (click)="$event.stopPropagation();">
+              <ng-container [ngTemplateOutlet]="bottomActionBar" [ngTemplateOutletContext]="{isTop: false}"></ng-container>
             </div>
           }
       </div>
@@ -116,49 +115,46 @@
       }
     </ng-template>
 
-    <ng-template #actionBar let-isTop>
+    <ng-template #bottomActionBar>
+      <div class="action-bar row g-0 justify-content-between">
+        <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
+                (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                [disabled]="isPrevDisabled()"
+                title="{{isLeftToRight ? t('previous') : t('next')}} Page">
+          <i class="fa {{(isLeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{isLeftToRight ? '' : 'next-page-highlight'}}" aria-hidden="true"></i>
+        </button>
 
-      @if (!immersiveMode() || epubMenuService.isDrawerOpen() || actionBarVisible()) {
-        <div class="action-bar row g-0 justify-content-between">
-          <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
-                  (click)="!isTop && movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-                  [disabled]="isPrevDisabled()"
-                  title="{{isLeftToRight ? t('previous') : t('next')}} Page">
-            <i class="fa {{(isLeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{isLeftToRight ? '' : 'next-page-highlight'}}" aria-hidden="true"></i>
+        @if (!this.adhocPageHistory.isEmpty()) {
+          <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" [title]="t('go-back')">
+            <i class="fa fa-reply" aria-hidden="true"></i>
           </button>
-
-          @if (!this.adhocPageHistory.isEmpty()) {
-            <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" [title]="t('go-back')">
-              <i class="fa fa-reply" aria-hidden="true"></i>
-            </button>
-          }
+        }
 
 
-          <div class="book-title col-3 d-none d-sm-block">
-            @if(!isLoading()) {
-              <span class="me-1">
+        <div class="book-title col-3 d-none d-sm-block">
+          @if(!isLoading()) {
+            <span class="me-1">
                 {{t('page-num-label', {page: virtualizedPageNum()})}} / {{virtualizedMaxPages()}}
               </span>
 
-              <span> {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}</span>
-              @if (readingTimeLeftResource.value(); as timeLeft) {
-                ,
-                <span class="time-left">
+            <span> {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}</span>
+            @if (readingTimeLeftResource.value(); as timeLeft) {
+              ,
+              <span class="time-left">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                  {{timeLeft! | readTimeLeft:true }}
+                {{timeLeft! | readTimeLeft:true }}
                 </span>
-              }
             }
-          </div>
-
-          <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                  [disabled]="isNextDisabled()"
-                  (click)="!isTop && movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-                  title="{{isLeftToRight ? t('next') : t('previous')}} Page">
-            <i class="fa {{(isLeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
-          </button>
+          }
         </div>
-      }
+
+        <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
+                [disabled]="isNextDisabled()"
+                (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                title="{{isLeftToRight ? t('next') : t('previous')}} Page">
+          <i class="fa {{(isLeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+        </button>
+      </div>
     </ng-template>
   </ng-container>
 </div>
