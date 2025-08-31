@@ -208,7 +208,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isLineOverlayOpen = model<boolean>(false);
   /**
-   * If the action bar is visible
+   * If the action bar (menu bars) is visible
    */
   actionBarVisible = model<boolean>(true);
   /**
@@ -415,7 +415,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const isDrawerOpen = this.epubMenuService.isDrawerOpen();
     const actionBarVisible = this.actionBarVisible();
 
-    return !immersiveMode || isDrawerOpen || actionBarVisible;
+    return actionBarVisible || !immersiveMode || isDrawerOpen;
   });
 
   shouldShowBottomActionBar = computed(() => {
@@ -426,11 +426,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const actionBarVisible = this.actionBarVisible();
     const isDrawerOpen = this.epubMenuService.isDrawerOpen();
 
+    const isColumnMode = layoutMode !== BookPageLayoutMode.Default;
+    const isVerticalLayout = writingStyle === WritingStyle.Vertical;
+    
 
+    const baseCondition = (scrollbarNeeded || isColumnMode)
+      && !(isVerticalLayout && !isColumnMode);
 
-    const baseCondition = (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && (layoutMode === BookPageLayoutMode.Default));
-
-    const showForVerticalDefault = layoutMode === BookPageLayoutMode.Default && writingStyle === WritingStyle.Vertical;
+    const showForVerticalDefault = !isColumnMode && isVerticalLayout;
 
     const otherCondition = !immersiveMode || isDrawerOpen || actionBarVisible;
 
@@ -2129,7 +2132,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       Math.abs(this.mousePosition.y - event.clientY) <= mouseOffset
     ) {
       this.actionBarVisible.update(v => !v);
-      this.cdRef.markForCheck();
     }
   }
 
