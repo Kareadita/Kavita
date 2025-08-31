@@ -218,7 +218,7 @@ export class EpubReaderSettingsService {
     this._currentSeriesId.set(seriesId);
     this._currentReadingProfile.set(readingProfile);
 
-    // Load parent profile if needed
+    // Load parent profile if needed, otherwise profile is its own parent
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       try {
         const parent = await firstValueFrom(this.readingProfileService.getForSeries(seriesId, true));
@@ -226,6 +226,8 @@ export class EpubReaderSettingsService {
       } catch (error) {
         console.error('Failed to load parent reading profile:', error);
       }
+    } else {
+      this._parentReadingProfile.set(readingProfile);
     }
 
     // Setup defaults and update signals
@@ -575,7 +577,6 @@ export class EpubReaderSettingsService {
     this.settingsForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
-      skip(1), // Skip initial form creation
       takeUntilDestroyed(this.destroyRef),
       filter(() => !this.isUpdatingFromForm),
       tap(() => this.updateImplicitProfile()),
