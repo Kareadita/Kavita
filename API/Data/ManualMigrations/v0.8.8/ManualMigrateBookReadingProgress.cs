@@ -28,65 +28,78 @@ public static class ManualMigrateBookReadingProgress
 
     public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger<Program> logger)
     {
-
         if (await context.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateBookReadingProgress"))
         {
             return;
         }
 
-
-
         logger.LogCritical("Running ManualMigrateBookReadingProgress migration - Please be patient, this may take some time. This is not an error");
 
-        var bookProgress = await context.AppUserProgresses
-                .Where(p => p.BookScrollId != null && (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
+        // Disable change tracking so that LastUpdated isn't updated breaking stats
+        var originalAutoDetectChanges = context.ChangeTracker.AutoDetectChangesEnabled;
+        context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+        try
+        {
+            var bookProgress = await context.AppUserProgresses
+                .Where(p => p.BookScrollId != null &&
+                            (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
                 .ToListAsync();
 
 
-        foreach (var progress in bookProgress)
-        {
-            if (string.IsNullOrEmpty(progress.BookScrollId)) continue;
+            foreach (var progress in bookProgress)
+            {
+                if (string.IsNullOrEmpty(progress.BookScrollId)) continue;
 
-            if (progress.BookScrollId.StartsWith(OldScope))
+                if (progress.BookScrollId.StartsWith(OldScope))
+                {
+                    progress.BookScrollId = progress.BookScrollId.Replace(OldScope, ReplacementScope);
+                    context.AppUserProgresses.Update(progress);
+                }
+                else if (progress.BookScrollId.StartsWith(NewScope))
+                {
+                    progress.BookScrollId = progress.BookScrollId.Replace(NewScope, ReplacementScope);
+                    context.AppUserProgresses.Update(progress);
+                }
+            }
+
+            if (unitOfWork.HasChanges())
             {
-                progress.BookScrollId = progress.BookScrollId.Replace(OldScope, ReplacementScope);
-                context.AppUserProgresses.Update(progress);
-            } else if (progress.BookScrollId.StartsWith(NewScope))
+                await context.SaveChangesAsync();
+            }
+
+            var ptocEntries = await context.AppUserTableOfContent
+                .Where(p => p.BookScrollId != null &&
+                            (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
+                .ToListAsync();
+
+            foreach (var ptoc in ptocEntries)
             {
-                progress.BookScrollId = progress.BookScrollId.Replace(NewScope, ReplacementScope);
-                context.AppUserProgresses.Update(progress);
+                if (string.IsNullOrEmpty(ptoc.BookScrollId)) continue;
+
+                if (ptoc.BookScrollId.StartsWith("id", StringComparison.InvariantCultureIgnoreCase)) continue;
+
+                if (ptoc.BookScrollId.StartsWith(OldScope))
+                {
+                    ptoc.BookScrollId = ptoc.BookScrollId.Replace(OldScope, ReplacementScope);
+                    context.AppUserTableOfContent.Update(ptoc);
+                }
+                else if (ptoc.BookScrollId.StartsWith(NewScope))
+                {
+                    ptoc.BookScrollId = ptoc.BookScrollId.Replace(NewScope, ReplacementScope);
+                    context.AppUserTableOfContent.Update(ptoc);
+                }
+            }
+
+            if (unitOfWork.HasChanges())
+            {
+                await context.SaveChangesAsync();
             }
         }
-
-        if (unitOfWork.HasChanges())
+        finally
         {
-            await context.SaveChangesAsync();
-        }
-
-        var ptocEntries = await context.AppUserTableOfContent
-            .Where(p => p.BookScrollId != null && (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
-            .ToListAsync();
-
-        foreach (var ptoc in ptocEntries)
-        {
-            if (string.IsNullOrEmpty(ptoc.BookScrollId)) continue;
-
-            if (ptoc.BookScrollId.StartsWith("id", StringComparison.InvariantCultureIgnoreCase)) continue;
-
-            if (ptoc.BookScrollId.StartsWith(OldScope))
-            {
-                ptoc.BookScrollId = ptoc.BookScrollId.Replace(OldScope, ReplacementScope);
-                context.AppUserTableOfContent.Update(ptoc);
-            } else if (ptoc.BookScrollId.StartsWith(NewScope))
-            {
-                ptoc.BookScrollId = ptoc.BookScrollId.Replace(NewScope, ReplacementScope);
-                context.AppUserTableOfContent.Update(ptoc);
-            }
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await context.SaveChangesAsync();
+            // Restore original setting
+            context.ChangeTracker.AutoDetectChangesEnabled = originalAutoDetectChanges;
         }
 
         await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
