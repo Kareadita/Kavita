@@ -154,18 +154,23 @@ export class BookLineOverlayComponent implements OnInit {
       return;
     }
 
+    // On mobile, first selection might not match as users can select after the fact. Recalculate
+    const windowText = window.getSelection();
+    const selectedText = windowText?.toString() === '' ? this.selectedText : windowText?.toString() ?? this.selectedText;
+
     if (this.mode === BookLineOverlayMode.Annotate) {
+
       const createAnnotation = {
         id: 0,
         xPath: this.startXPath,
         endingXPath: this.endXPath,
-        selectedText: this.selectedText,
+        selectedText: selectedText,
         comment: '',
         containsSpoiler: false,
         pageNumber: this.pageNumber,
         selectedSlotIndex: 0,
         chapterTitle: '',
-        highlightCount: this.selectedText.length,
+        highlightCount: selectedText.length,
         ownerUserId: 0,
         ownerUsername: '',
         createdUtc: '',
