@@ -61,7 +61,8 @@ export class ViewTocDrawerComponent {
   }
 
   loadChapterPage(event: {pageNum: number, part: string}) {
-    const evt = {pageNumber: event.pageNum, part: `id("${event.part}")`} as LoadPageEvent;
+    const part = event.part.length === 0 ? '' : `id("${event.part}")`;
+    const evt = {pageNumber: event.pageNum, part: part} as LoadPageEvent;
     this.loadPage.emit(evt);
   }
 
