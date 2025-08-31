@@ -321,9 +321,22 @@ public partial class BookService : IBookService
 
         foreach (var bookmark in ptocBookmarks.Where(b => !string.IsNullOrEmpty(b.BookScrollId)))
         {
-            var unscopedSelector = bookmark.BookScrollId!.Replace("//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]", "//BODY").ToLowerInvariant();
-            var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
-            elem?.PrependChild(HtmlNode.CreateNode($"<i class='fa-solid fa-bookmark ps-1 pe-1' role='button' id='ptoc-{bookmark.Id}' title='{bookmark.Title}'></i>"));
+            try
+            {
+                var unscopedSelector = bookmark.BookScrollId!
+                    .Replace(
+                        "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]",
+                        "//BODY").ToLowerInvariant();
+                var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
+                if (elem == null) continue;
+
+                elem.PrependChild(HtmlNode.CreateNode(
+                    $"<i class='fa-solid fa-bookmark ps-1 pe-1' role='button' id='ptoc-{bookmark.Id}' title='{bookmark.Title}'></i>"));
+            }
+            catch (Exception)
+            {
+               // Swallow
+            }
         }
     }
 
