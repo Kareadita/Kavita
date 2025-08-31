@@ -100,6 +100,12 @@ const minImageSize = {
   width: 100
 };
 
+/**
+ * A slight delay before scrolling, to ensure everything has rendered correctly
+ * Ex. after jumping in the ToC
+ */
+const SCROLL_DELAY = 10;
+
 @Component({
     selector: 'app-book-reader',
     templateUrl: './book-reader.component.html',
@@ -428,7 +434,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const isColumnMode = layoutMode !== BookPageLayoutMode.Default;
     const isVerticalLayout = writingStyle === WritingStyle.Vertical;
-    
+
 
     const baseCondition = (scrollbarNeeded || isColumnMode)
       && !(isVerticalLayout && !isColumnMode);
@@ -1185,7 +1191,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           });
 
         this.firstLoad = false;
-      }, 10);
+      }, SCROLL_DELAY);
     });
   }
 
@@ -1393,31 +1399,31 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layoutMode === BookPageLayoutMode.Default) {
       if (writingStyle === WritingStyle.Vertical) {
-        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement), SCROLL_DELAY);
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
+      setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement), SCROLL_DELAY);
       return;
     }
 
     if (writingStyle === WritingStyle.Vertical) {
       if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-        setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
+        setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'), SCROLL_DELAY);
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
+      setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ), SCROLL_DELAY);
       return;
     }
 
     // We need to check if we are paging back, because we need to adjust the scroll
     if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
+      setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
       return;
     }
 
-    setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
+    setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
   }
 
   private setupAnnotationElements() {
@@ -1894,12 +1900,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case WritingStyle.Vertical:
         const windowWidth = window.innerWidth || document.documentElement.clientWidth;
         const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
-        setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
+        setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), SCROLL_DELAY);
         break;
       case WritingStyle.Horizontal:
         const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
         // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
-        setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
+        setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), SCROLL_DELAY);
     }
   }
 
