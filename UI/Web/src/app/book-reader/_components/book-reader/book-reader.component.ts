@@ -1568,6 +1568,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns Total Page width (excluding margin)
    */
   pageWidth = computed(() => {
+    this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
+
     const marginLeft = this.pageStyles()['margin-left'];
     const columnGapModifier = this.layoutMode() === BookPageLayoutMode.Default ? 0 : 1;
     if (this.readingSectionElemRef == null) return 0;
