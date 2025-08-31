@@ -44,6 +44,7 @@ public static class ManualMigrateBookReadingProgress
             var bookProgress = await context.AppUserProgresses
                 .Where(p => p.BookScrollId != null &&
                             (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
+                .AsNoTracking()
                 .ToListAsync();
 
 
@@ -71,6 +72,7 @@ public static class ManualMigrateBookReadingProgress
             var ptocEntries = await context.AppUserTableOfContent
                 .Where(p => p.BookScrollId != null &&
                             (p.BookScrollId.StartsWith(OldScope) || p.BookScrollId.StartsWith(NewScope)))
+                .AsNoTracking()
                 .ToListAsync();
 
             foreach (var ptoc in ptocEntries)
