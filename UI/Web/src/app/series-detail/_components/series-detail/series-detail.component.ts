@@ -911,16 +911,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   shouldShowStorylineTab() {
     if (this.libraryType === LibraryType.ComicVine) return false;
     // Edge case for bad pdf parse
-    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters().length === 0 && this.storyChapters.length > 0)) return true;
 
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
-      && (this.volumes.length > 0 || this.chapters.length > 0);
+      && (this.volumes.length > 0 || this.chapters().length > 0);
   }
 
   shouldShowVolumeTab() {
     if (this.libraryType === LibraryType.ComicVine) {
       if (this.volumes.length > 1) return true;
-      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      if (this.specials.length === 0 && this.chapters().length === 0) return true;
       return false;
     }
     return this.volumes.length > 0;
@@ -958,11 +958,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
+    if (this.volumes.length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
       if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
-        if (this.chapters.length === 0) {
+        if (this.chapters().length === 0) {
           if (this.specials.length > 0) {
             this.activeTabId = TabID.Specials;
           } else {
