@@ -1,12 +1,3 @@
-export enum HighlightColor {
-  Blue = 1,
-  Green = 2,
-}
-
-export const allHighlightColors = [HighlightColor.Blue, HighlightColor.Green];
-
-
-
 
 export interface Annotation {
   id: number;

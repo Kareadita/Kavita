@@ -1,5 +1,5 @@
 import {Component, computed, DestroyRef, effect, ElementRef, inject, input, model, ViewChild} from '@angular/core';
-import {Annotation, HighlightColor} from "../../../_models/annotations/annotation";
+import {Annotation} from "../../../_models/annotations/annotation";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
@@ -21,7 +21,6 @@ export class EpubHighlightComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   showHighlight = model<boolean>(true);
-  color = input<HighlightColor>(HighlightColor.Blue);
 
   annotation = model.required<Annotation | null>();
 
