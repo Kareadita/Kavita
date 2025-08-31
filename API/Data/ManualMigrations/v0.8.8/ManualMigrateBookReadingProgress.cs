@@ -71,6 +71,8 @@ public static class ManualMigrateBookReadingProgress
         {
             if (string.IsNullOrEmpty(ptoc.BookScrollId)) continue;
 
+            if (ptoc.BookScrollId.StartsWith("id", StringComparison.InvariantCultureIgnoreCase)) continue;
+
             if (ptoc.BookScrollId.StartsWith(OldScope))
             {
                 ptoc.BookScrollId = ptoc.BookScrollId.Replace(OldScope, ReplacementScope);
