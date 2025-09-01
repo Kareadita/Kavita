@@ -1311,7 +1311,7 @@ public class OpdsController : BaseApiController
                 await _readerService.SaveReadingProgress(new ProgressDto()
                 {
                     ChapterId = chapterId,
-                    PageNum = pageNumber,
+                    PageNum = pageNumber + 1, // Pages are numbered from 0 to N-1 in OPDS-PS but are not internally
                     SeriesId = seriesId,
                     VolumeId = volumeId,
                     LibraryId =libraryId
