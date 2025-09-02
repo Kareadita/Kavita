@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'grouped-typeahead'">
+<ng-container *transloco="let t; prefix: 'grouped-typeahead'">
   <form [formGroup]="typeaheadForm" class="grouped-typeahead">
     <div class="typeahead-input" [ngClass]="{'focused': hasFocus}" (click)="onInputFocus($event)">
       <div class="search">

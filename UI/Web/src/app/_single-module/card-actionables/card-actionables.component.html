@@ -1,4 +1,4 @@
-  <ng-container *transloco="let t; read: 'actionable'">
+  <ng-container *transloco="let t; prefix: 'actionable'">
     @if (actions.length > 0) {
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
         <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}"

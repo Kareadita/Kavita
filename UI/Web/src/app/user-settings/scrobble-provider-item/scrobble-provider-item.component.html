@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'scrobbling-providers'">
+<ng-container *transloco="let t; prefix:'scrobbling-providers'">
   <div class="col-auto">
     <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/{{provider | scrobbleProviderName}}.png" alt="{{provider | scrobbleProviderName}}" [ngbTooltip]="provider | scrobbleProviderName">
     @if(token && token.length > 0) {

@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'user-preferences'">
+<ng-container *transloco="let t; prefix:'user-preferences'">
   @if (!opdsEnabled) {
     <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
   }

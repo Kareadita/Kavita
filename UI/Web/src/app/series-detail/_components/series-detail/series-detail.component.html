@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'series-detail'">
+<ng-container *transloco="let t; prefix: 'series-detail'">
   <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0"></app-bulk-operations>
 
   @if (series && seriesMetadata && libraryType !== null) {

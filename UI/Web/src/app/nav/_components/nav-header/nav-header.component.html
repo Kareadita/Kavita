@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'nav-header'">
+<ng-container *transloco="let t; prefix: 'nav-header'">
   @if (navService.navbarVisible$ | async) {
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
       <div class="container-fluid">

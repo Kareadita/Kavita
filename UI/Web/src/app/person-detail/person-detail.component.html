@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'person-detail'">
+  <ng-container *transloco="let t; prefix: 'person-detail'">
     @if (person$ | async; as person) {
     <div #companionBar>
       <app-side-nav-companion-bar>

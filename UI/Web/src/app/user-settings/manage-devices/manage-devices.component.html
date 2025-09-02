@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'manage-devices'">
+<ng-container *transloco="let t; prefix:'manage-devices'">
 
   <div class="position-relative">
     <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly$ | async" (click)="addDevice()">

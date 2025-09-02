@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'reading-list-detail'">
+  <ng-container *transloco="let t; prefix: 'reading-list-detail'">
     <form [formGroup]="formGroup">
       @if (readingList) {
       <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>

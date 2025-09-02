@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'manga-reader'">
+<ng-container *transloco="let t; prefix: 'manga-reader'">
   <div class="reader" #reader [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}">
     @if(debugMode) {
       <div class="fixed-top overlay">

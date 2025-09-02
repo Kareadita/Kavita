@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'draggable-ordered-list'">
+<ng-container *transloco="let t; prefix: 'draggable-ordered-list'">
     @if (items.length > virtualizeAfter) {
       <div class="example-list list-group-flush">
         <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">

@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'all-collections'">
+  <ng-container *transloco="let t; prefix: 'all-collections'">
     <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
       <h4 title>{{t('title')}}</h4>
       <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>

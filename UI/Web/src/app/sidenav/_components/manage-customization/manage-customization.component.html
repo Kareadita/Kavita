@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'customize-dashboard-modal'">
+<ng-container *transloco="let t; prefix: 'customize-dashboard-modal'">
   <p>{{t('description')}}</p>
   <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-pills" orientation="horizontal" style="min-width: 154px;">
     <li [ngbNavItem]="TabID.Dashboard">

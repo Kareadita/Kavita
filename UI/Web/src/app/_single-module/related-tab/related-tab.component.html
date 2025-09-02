@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'related-tab'">
+<ng-container *transloco="let t; prefix: 'related-tab'">
   <div class="pb-2">
     @if (relations.length > 0) {
       <app-carousel-reel [items]="relations" [title]="t('relations-title')">

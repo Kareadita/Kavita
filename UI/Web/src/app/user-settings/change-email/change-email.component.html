@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'change-email'">
+<ng-container *transloco="let t; prefix:'change-email'">
 
   <app-setting-item [title]="t('email-title')" [canEdit]="canEdit" [isEditMode]="isEditMode" (editMode)="updateEditMode($event)">
     <ng-template #view>

@@ -1,7 +1,7 @@
 <div class="main-container">
 <app-side-nav-companion-bar></app-side-nav-companion-bar>
 
-  <ng-container *transloco="let t; read: 'dashboard'">
+  <ng-container *transloco="let t; prefix: 'dashboard'">
     @if (libraries$ | async; as libraries) {
       @if (libraries.length === 0) {
         @if (accountService.isAdmin$ | async; as isAdmin) {

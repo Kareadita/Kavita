@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'typeahead'">
+<ng-container *transloco="let t; prefix:'typeahead'">
   @if(settings) {
     <form [formGroup]="typeaheadForm">
       <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">

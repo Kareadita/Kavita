@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'side-nav'">
+<ng-container *transloco="let t; prefix: 'side-nav'">
   @if (accountService.currentUser$ | async; as user) {
     <div class="side-nav-container" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
     'hidden': (navService.sideNavVisibility$ | async) === false,

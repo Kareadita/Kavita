@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'pdf-reader'">
+<ng-container *transloco="let t; prefix: 'pdf-reader'">
   @if (accountService.currentUser$ | async; as user) {
     <div class="{{theme}}" #container>
 

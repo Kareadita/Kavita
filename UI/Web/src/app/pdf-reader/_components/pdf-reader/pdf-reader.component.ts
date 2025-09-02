@@ -6,7 +6,6 @@ import {
   ElementRef,
   HostListener,
   inject,
-  Inject,
   OnDestroy,
   OnInit,
   ViewChild
@@ -61,6 +60,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
+  public readonly document = inject(DOCUMENT);
 
   protected readonly ScrollModeType = ScrollModeType;
   protected readonly Breakpoint = Breakpoint;
@@ -122,7 +122,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   spreadMode: SpreadType = 'off';
   isSearchOpen: boolean = false;
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
@@ -387,5 +387,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     if (this.currentPage > this.maxPages) this.currentPage = this.maxPages;
     this.cdRef.markForCheck();
   }
+
 
 }

@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'download-indicator'">
+<ng-container *transloco="let t; prefix: 'download-indicator'">
   @if (download$ | async; as download) {
     <span class="download">
       <app-circular-loader [currentValue]="download.progress"></app-circular-loader>

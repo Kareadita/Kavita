@@ -121,8 +121,17 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // Find all Series that are eligible and limit
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25);
-        if (ids.Count == 0) return;
-        ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
+        if (ids.Count == 0)
+        {
+            ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
+        }
+
+        if (ids.Count == 0)
+        {
+            _logger.LogInformation("[Kavita+ Data Refresh] No series need matching or refreshing (stale data)");
+            return;
+        }
+
 
         _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
         var count = 0;
@@ -137,7 +146,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 count++;
                 successfulMatches.Add(seriesId);
             }
-            await Task.Delay(6000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
+            await Task.Delay(10000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }

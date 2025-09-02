@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'collection-owner'">
+<ng-container *transloco="let t; prefix: 'collection-owner'">
   @if (accountService.currentUser$ | async; as user) {
     <div class="fw-light text-accent">
       {{t('collection-created-label', {owner: collection.owner})}}

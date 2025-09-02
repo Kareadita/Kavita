@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'collection-detail'">
+  <ng-container *transloco="let t; prefix: 'collection-detail'">
     <div #companionBar>
       @if (series) {
         <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">

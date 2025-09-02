@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'change-age-restriction'">
+<ng-container *transloco="let t; prefix:'change-age-restriction'">
   @if (user) {
     <app-setting-item [title]="t('age-restriction-label')" [canEdit]="accountService.hasChangeAgeRestrictionRole(user)">
       <ng-template #view>

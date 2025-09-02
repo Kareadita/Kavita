@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'card-item'">
+<ng-container *transloco="let t; prefix: 'card-item'">
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {

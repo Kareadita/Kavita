@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'bookmarks'">
+  <ng-container *transloco="let t; prefix: 'bookmarks'">
     <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <h4 title>
         {{t('title')}}
