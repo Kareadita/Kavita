@@ -9,12 +9,13 @@ import {
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-table-of-contents',
   templateUrl: './table-of-contents.component.html',
   styleUrls: ['./table-of-contents.component.scss'],
-  imports: [TranslocoDirective],
+  imports: [TranslocoDirective, LoadingComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableOfContentsComponent {
@@ -25,6 +26,7 @@ export class TableOfContentsComponent {
   pageNum = model.required<number>();
   currentPageAnchor = model<string>();
   chapters = model.required<Array<BookChapterItem>>();
+  loading = model.required<boolean>();
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 

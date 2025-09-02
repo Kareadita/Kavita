@@ -3,9 +3,15 @@
     @let bookChapters = chapters();
 
     @if (bookChapters.length === 0) {
-      <div>
-        <em>{{t('no-data')}}</em>
-      </div>
+
+      @if (loading()) {
+        <app-loading [loading]="true"></app-loading>
+      } @else {
+        <div>
+          <em>{{t('no-data')}}</em>
+        </div>
+      }
+
     } @else if (bookChapters.length === 1) {
       <div>
         <ul>

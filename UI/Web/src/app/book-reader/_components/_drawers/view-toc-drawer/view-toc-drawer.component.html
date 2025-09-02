@@ -8,6 +8,6 @@
 
   <div class="offcanvas-body">
     <app-table-of-contents [chapters]="chapters()" [chapterId]="chapterId()!" [pageNum]="pageNum()"
-                           (loadChapter)="loadChapterPage($event)" />
+                           (loadChapter)="loadChapterPage($event)" [loading]="loading()" />
   </div>
 </ng-container>
