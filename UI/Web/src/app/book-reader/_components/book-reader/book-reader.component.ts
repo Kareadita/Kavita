@@ -67,6 +67,7 @@ import {LayoutMeasurementService} from "../../../_services/layout-measurement.se
 import {ColorscapeService} from "../../../_services/colorscape.service";
 import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
+import afterFrame from "afterframe";
 
 
 interface HistoryPoint {
@@ -1385,12 +1386,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private setupPageScroll(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
-      this.scrollTo(this.readerService.scopeBookReaderXpath(part));
+      afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
       return;
     }
 
     if (scrollTop !== undefined && scrollTop !== 0) {
-      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      afterFrame(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       return;
     }
 
@@ -1399,31 +1400,31 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layoutMode === BookPageLayoutMode.Default) {
       if (writingStyle === WritingStyle.Vertical) {
-        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement), SCROLL_DELAY);
+        afterFrame(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement), SCROLL_DELAY);
+      afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       return;
     }
 
     if (writingStyle === WritingStyle.Vertical) {
       if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-        setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'), SCROLL_DELAY);
+        afterFrame(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ), SCROLL_DELAY);
+      afterFrame(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
       return;
     }
 
     // We need to check if we are paging back, because we need to adjust the scroll
     if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
+      afterFrame(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
       return;
     }
 
-    setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
+    afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
   }
 
   private setupAnnotationElements() {
@@ -1892,7 +1893,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const writingStyle = this.writingStyle();
 
     if (layout !== BookPageLayoutMode.Default) {
-      setTimeout(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
+      afterFrame(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
       return;
     }
 
@@ -1900,12 +1901,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case WritingStyle.Vertical:
         const windowWidth = window.innerWidth || document.documentElement.clientWidth;
         const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
-        setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), SCROLL_DELAY);
+        afterFrame(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'));
         break;
       case WritingStyle.Horizontal:
         const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
         // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
-        setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), SCROLL_DELAY);
+        afterFrame(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement));
     }
   }
 
