@@ -1,9 +1,6 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {
-  ViewAnnotationsDrawerComponent
-} from "../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component";
-import {
   LoadPageEvent,
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
@@ -50,10 +47,15 @@ export class EpubReaderMenuService {
   }
 
 
-  openViewAnnotationsDrawer(loadAnnotationCallback: (annotation: Annotation) => void) {
+  async openViewAnnotationsDrawer(loadAnnotationCallback: (annotation: Annotation) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
+
+    // This component needs to be imported dynamically as something breaks within Angular if it's not.
+    // I do not know what, but this fixes the drawer from not showing up in a production build.
+    const module = await import('../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component');
+    const ViewAnnotationsDrawerComponent = module.ViewAnnotationsDrawerComponent;
 
     const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end'});
     ref.componentInstance.loadAnnotation.subscribe((annotation: Annotation) => {
