@@ -975,6 +975,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case KEY_CODES.F:
         this.applyFullscreen();
         break;
+      case KEY_CODES.SPACE:
+        this.actionBarVisible.update(x => !x);
+        break;
     }
   }
 
