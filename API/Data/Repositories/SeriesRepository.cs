@@ -752,7 +752,10 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId)
     {
-        return await _context.Series
+
+        // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
+        // Updating stale data should prioritize ExernalSeriesMetada before Weblinks, to priorize prior matches
+        var result = await _context.Series
             .Where(s => s.Id == seriesId)
             .Include(s => s.ExternalSeriesMetadata)
             .Select(series => new PlusSeriesRequestDto()
@@ -760,13 +763,16 @@ public class SeriesRepository : ISeriesRepository
                 MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
                 AltSeriesName = series.LocalizedName,
-                AniListId = ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks,
-                    ScrobblingService.AniListWeblinkWebsite),
-                MalId = ScrobblingService.ExtractId<long?>(series.Metadata.WebLinks,
-                    ScrobblingService.MalWeblinkWebsite),
+                AniListId = series.ExternalSeriesMetadata.AniListId != 0
+                    ? series.ExternalSeriesMetadata.AniListId
+                    : ScrobblingService.ExtractId<int?>(series.Metadata.WebLinks, ScrobblingService.AniListWeblinkWebsite),
+                MalId = series.ExternalSeriesMetadata.MalId != 0
+                    ? series.ExternalSeriesMetadata.MalId
+                    : ScrobblingService.ExtractId<long?>(series.Metadata.WebLinks, ScrobblingService.MalWeblinkWebsite),
                 CbrId = series.ExternalSeriesMetadata.CbrId,
-                GoogleBooksId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
-                    ScrobblingService.GoogleBooksWeblinkWebsite),
+                GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
+                    ? series.ExternalSeriesMetadata.GoogleBooksId
+                    : ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks, ScrobblingService.GoogleBooksWeblinkWebsite),
                 MangaDexId = ScrobblingService.ExtractId<string?>(series.Metadata.WebLinks,
                     ScrobblingService.MangaDexWeblinkWebsite),
                 VolumeCount = series.Volumes.Count,
@@ -774,6 +780,8 @@ public class SeriesRepository : ISeriesRepository
                 Year = series.Metadata.ReleaseYear
             })
             .FirstOrDefaultAsync();
+
+        return result;
     }
 
     public async Task<int> GetCountAsync()
