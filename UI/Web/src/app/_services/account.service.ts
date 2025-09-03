@@ -1,4 +1,4 @@
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -48,6 +48,10 @@ export class AccountService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly themeService = inject(ThemeService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -72,9 +76,8 @@ export class AccountService {
 
   private isOnline: boolean = true;
 
-  constructor(private httpClient: HttpClient, private router: Router,
-    private messageHub: MessageHubService, private themeService: ThemeService) {
-      messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
+  constructor() {
+      this.messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
         map(evt => evt.payload as UserUpdateEvent),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshAccount()))
