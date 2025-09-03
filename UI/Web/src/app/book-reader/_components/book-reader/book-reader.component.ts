@@ -362,10 +362,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * book-content class
    */
   @ViewChild('readingHtml', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('readingHtml', { read: ViewContainerRef }) readingContainer!: ViewContainerRef;
+
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: false}) reader!: ElementRef;
-  @ViewChild('readingHtml', { read: ViewContainerRef }) readingContainer!: ViewContainerRef;
+
 
 
   protected readonly layoutMode = this.readerSettingsService.layoutMode;
@@ -563,6 +565,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
       if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal) {
+        console.log('verticalBookContentWidth: ', verticalPageWidth)
         return `${verticalPageWidth}px`;
       }
       return '';
@@ -1683,9 +1686,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   pageSize = computed(() => {
-    return this.writingStyle() === WritingStyle.Vertical
-      ? this.pageHeight()
-      : this.pageWidth();
+    const height = this.pageHeight();
+    const width = this.pageWidth();
+    const writingStyle = this.writingStyle();
+
+    return writingStyle === WritingStyle.Vertical
+      ? height
+      : width;
   });
 
 
@@ -1792,9 +1799,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (pageLevelStyles.includes(item[0])) {
-        this.renderer.setStyle(this.bookContentElemRef.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
+
+        let value = item[1];
+        // Convert vw for margin into fixed pixels otherwise when paging, 2 column mode will bleed text between columns
+        if (item[0].startsWith('margin')) {
+          const vw = parseInt(item[1].replace('vw', ''), 10);
+          value = `${this.convertVwToPx(vw)}px`;
+        }
+
+        this.renderer.setStyle(this.bookContentElemRef.nativeElement, item[0], value, RendererStyleFlags2.Important);
       }
     });
+
+
 
     const individualElementStyles = Object.entries(pageStyles).filter(item => elementLevelStyles.includes(item[0]));
     for(let i = 0; i < this.bookContentElemRef.nativeElement.children.length; i++) {
@@ -2217,27 +2234,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private debugVirtualPaging() {
-    if (this.layoutMode() === BookPageLayoutMode.Default) return;
-
-    const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
-    const pageSize = this.pageSize();
-    const [currentVirtualPage, totalVirtualPages] = this.getVirtualPage();
-
-    console.log('Virtual Paging Debug:', {
-      scrollOffset,
-      totalScroll,
-      pageSize,
-      currentVirtualPage,
-      totalVirtualPages,
-      layoutMode: this.layoutMode(),
-      writingStyle: this.writingStyle(),
-      bookContentWidth: this.bookContentElemRef?.nativeElement?.clientWidth,
-      bookContentHeight: this.bookContentElemRef?.nativeElement?.clientHeight,
-      scrollWidth: this.bookContentElemRef?.nativeElement?.scrollWidth,
-      scrollHeight: this.bookContentElemRef?.nativeElement?.scrollHeight
-    });
-  }
 
   protected readonly Breakpoint = Breakpoint;
 }
