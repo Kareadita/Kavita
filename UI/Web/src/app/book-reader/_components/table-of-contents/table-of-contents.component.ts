@@ -2,14 +2,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed, effect,
   EventEmitter,
   inject,
-  model,
+  model, OnInit,
   Output
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {DOCUMENT} from "@angular/common";
 
 @Component({
   selector: 'app-table-of-contents',
@@ -20,7 +22,7 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 })
 export class TableOfContentsComponent {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly document = inject(DOCUMENT)
 
   chapterId = model.required<number>();
   pageNum = model.required<number>();
@@ -28,8 +30,34 @@ export class TableOfContentsComponent {
   chapters = model.required<Array<BookChapterItem>>();
   loading = model.required<boolean>();
 
+  displayedChapters = computed(() => {
+    const chapters = this.chapters();
+    if (chapters.length === 1) {
+      return chapters[0].children;
+    }
+
+    return chapters;
+  });
+  isDisplayingChildrenOnly = computed(() => this.chapters().length === 1);
+
+
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
+  constructor() {
+    effect(() => {
+      const selectedChapterIdx = this.displayedChapters()
+        .findIndex(chapter => this.isChapterSelected(chapter));
+
+      if (selectedChapterIdx < 0) return;
+
+      setTimeout(() => {
+        const chapterElement = this.document.getElementById(`${selectedChapterIdx}`);
+        if (chapterElement) {
+          chapterElement.scrollIntoView({behavior: 'smooth'});
+        }
+      }, 10); // Some delay to allow the items to be rendered into the DOM
+    });
+  }
 
   cleanIdSelector(id: string) {
     const tokens = id.split('/');
@@ -48,7 +76,7 @@ export class TableOfContentsComponent {
 
   isChapterSelected(chapterGroup: BookChapterItem) {
     const currentPageNum = this.pageNum();
-    const chapters = this.chapters();
+    const chapters = this.displayedChapters();
 
     if (chapterGroup.page === currentPageNum) {
       return true;
