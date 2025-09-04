@@ -1459,11 +1459,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const [,, pageWidth] = this.getVirtualPage();
-    const actualWidth = this.bookContentElemRef.nativeElement.scrollWidth;
-    const lastPageWidth = actualWidth % pageWidth;
+    const pageSize = this.pageSize();
+    const [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    const lastPageSize = totalScroll % pageSize;
 
-    if (lastPageWidth >= pageWidth / 2 || lastPageWidth === 0) {
+    if (lastPageSize >= pageSize / 2 || lastPageSize === 0) {
       // The last page needs more than one column, no pages will be duplicated
       return;
     }
