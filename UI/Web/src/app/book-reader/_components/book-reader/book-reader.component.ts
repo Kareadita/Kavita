@@ -2266,6 +2266,93 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * With queries and pure math, determines the actual viewport the user can see.
+   *
+   * NOTE: On Scroll LayoutMode, the height/bottom are not correct
+   */
+  getViewportBoundingRect() {
+    const margin = this.getMargin();
+    const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+    const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
+
+    let bookContentPadding = 20;
+    let bookPadding = getComputedStyle(this.bookContentElemRef?.nativeElement!).paddingTop;
+    if (bookPadding) {
+      bookContentPadding = parseInt(bookPadding.toString().replace('px', ''), 10);
+    }
+
+    // Adjust the bounding box for what is actually visible
+    const bottomBarHeight = this.document.querySelector('.bottom-bar')?.getBoundingClientRect().height ?? 38;
+    const topBarHeight = this.document.querySelector('.fixed-top')?.getBoundingClientRect().height ?? 48;
+
+//    console.log('bottom: ', visibleBoundingBox.bottom) // TODO: Bottom isn't ideal in scroll mode
+
+    const left = margin;
+    const top = topBarHeight;
+    const bottom = visibleBoundingBox.bottom - bottomBarHeight + bookContentPadding; // bookContent has a 20px padding top/bottom
+    const width = pageSize;
+    const height = bottom - top;
+    const right = left + width;
+
+    console.log('Visible Viewport', {
+      left, right, top, bottom, width, height
+    });
+
+    return {
+      left, right, top, bottom, width, height
+    }
+  }
+
+  debugInsertViewportView() {
+
+    const viewport = this.getViewportBoundingRect();
+
+    // Insert a debug element to help visualize
+    document.querySelector('#test')?.remove();
+
+    // Create and inject the red rectangle div
+    const redRect = document.createElement('div');
+    redRect.id = 'test';
+    redRect.style.position = 'absolute';
+    redRect.style.left = `${viewport.left}px`;
+    redRect.style.top = `${viewport.top}px`;
+    redRect.style.width = `${viewport.width}px`;
+    redRect.style.height = `${viewport.height}px`;
+    redRect.style.border = '5px solid red';
+    redRect.style.pointerEvents = 'none';
+    redRect.style.zIndex = '1000';
+
+    // Inject into the document
+    document.body.appendChild(redRect);
+  }
+
+  /**
+   * Get actual px margin (just one side), falls back to vw -> px mapping calculation
+   */
+  getMargin() {
+    const pageStyles = this.pageStyles();
+    let usedComputed = false;
+    let margin = this.convertVwToPx(parseInt(pageStyles['margin-left'], 10));
+
+
+    const computedMargin = getComputedStyle(this.bookContentElemRef?.nativeElement!).marginLeft;
+    if (computedMargin) {
+      margin = parseInt(computedMargin.toString().replace('px', ''), 10);
+      usedComputed = true;
+    }
+
+    // Sometimes computed will be 0 when first loading which can cause issues (first load)
+    if (usedComputed && margin < this.convertVwToPx(parseInt(pageStyles['margin-left'], 10))) {
+      console.warn('Computed margin was 0px when we expected non-zero. Defaulted back to derived vw->px value');
+      return this.convertVwToPx(parseInt(pageStyles['margin-left'], 10));
+    }
+
+
+    return margin;
+  }
+
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly environment = environment;
 }
