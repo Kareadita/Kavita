@@ -43,7 +43,7 @@
 
         <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
              [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
-             [ngClass]="{'immersive': immersiveMode() && actionBarVisible}"
+             [ngClass]="{'immersive': immersiveMode() && actionBarVisible, 'debug': debugMode()}"
              [innerHtml]="page()" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
           @if (shouldShowBottomActionBar()) {
@@ -90,9 +90,9 @@
                 </button>
               }
 
-              @if (!environment.production) {
+              @if (debugMode()) {
                 <button class="btn btn-secondary btn-icon me-1" (click)="debugInsertViewportView()">
-                  D
+                  V
                 </button>
               }
 
@@ -145,6 +145,12 @@
                 </span>
             }
           }
+
+          @if (debugMode()) {
+            @let vp = getVirtualPage();
+            {{vp[0] * vp[2]}} / {{vp[1] * vp[2]}}
+          }
+
         </div>
 
         <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"

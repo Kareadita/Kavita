@@ -47,7 +47,7 @@ import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbProgressbar, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
@@ -125,7 +125,7 @@ const SCROLL_DELAY = 10;
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar],
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
   providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -355,6 +355,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   firstLoad: boolean = true;
 
+  /**
+   * Injects information to help debug issues
+   */
+  debugMode = model<boolean>(!environment.production && true);
+
 
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
@@ -536,7 +541,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Column1:
           return ((base / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return (base / 4) + 'px'
+          return ((base) / 4) + (COLUMN_GAP / 2) + 'px'
         default:
           return 'unset';
       }
@@ -1650,7 +1655,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + (COLUMN_GAP * columnGapModifier);
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + ((COLUMN_GAP / 2) * columnGapModifier);
   });
 
   pageHeight = computed(() => {
