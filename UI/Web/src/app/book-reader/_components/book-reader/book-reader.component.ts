@@ -533,7 +533,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
 
+      const windowWidth = this.windowWidth();
       const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
+
+      // console.log('window width: ', windowWidth)
+      // console.log('book content width: ', this.readingSectionElemRef?.nativeElement?.clientWidth);
+      // console.log('column width: ', base / 4);
+
 
       switch (layoutMode) {
         case BookPageLayoutMode.Default:
@@ -541,7 +547,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Column1:
           return ((base / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return ((base) / 4) + 'px'
+          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
+          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
+          //return ((base) / 4) + 6 + 'px'
         default:
           return 'unset';
       }
@@ -1655,7 +1663,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + ((COLUMN_GAP / 2) * columnGapModifier);
+
+    // console.log('page size calc, client width: ', this.readingSectionElemRef.nativeElement.clientWidth)
+    // console.log('page size calc, margin: ', margin)
+    // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
+    // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + ((COLUMN_GAP) * columnGapModifier);
   });
 
   pageHeight = computed(() => {

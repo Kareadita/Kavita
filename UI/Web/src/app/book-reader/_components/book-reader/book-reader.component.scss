@@ -170,8 +170,6 @@ $action-bar-height: 38px;
 
   &.immersive {
     height: calc((var(--vh, 1vh) * 100));
-    //padding-top: 0px;
-    //padding-bottom: 0px;
   }
 
   &.writing-style-vertical {
@@ -284,6 +282,11 @@ $action-bar-height: 38px;
     overflow: hidden;
     word-break: break-word;
     overflow-wrap: break-word;
+
+    &.debug {
+      overflow: scroll;
+      overflow-y: hidden;
+    }
   }
 }
 
