@@ -30,7 +30,6 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
             .EnableSensitiveDataLogging()
             .Options;
 
-        var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
         var context = new DataContext(contextOptions);
 
         await context.Database.EnsureCreatedAsync();
@@ -59,9 +58,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
     {
         try
         {
-            await context.Database.EnsureCreatedAsync();
             var filesystem = CreateFileSystem();
-
             await Seed.SeedSettings(context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
 
             var setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
