@@ -1392,18 +1392,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private scroll(lambda: () => void) {
+    afterFrame(() => {
+      setTimeout(lambda, SCROLL_DELAY)
+    });
+  }
+
   private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
-      setTimeout(() => {
-        afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
-      }, SCROLL_DELAY);
+
+      console.log('Scrolling via part: ', part);
+      this.scroll(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
+
+      // afterFrame(() => {
+      //   setTimeout(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)), SCROLL_DELAY)
+      // })
+      //
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
+      // }, SCROLL_DELAY);
       return;
     }
 
     if (scrollTop !== undefined && scrollTop !== 0) {
-      setTimeout(() => {
-        afterFrame(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
-      }, SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('Scrolling via scrollTop: ', scrollTop);
+      this.scroll(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       return;
     }
 
@@ -1412,43 +1428,57 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layoutMode === BookPageLayoutMode.Default) {
       if (writingStyle === WritingStyle.Vertical) {
-        setTimeout(() => {
-          afterFrame(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
-        }, SCROLL_DELAY);
+        console.log('Scrolling via x axis: ', this.bookContentElemRef.nativeElement.clientWidth, ' via ', this.reader.nativeElement);
+        this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        //
+        // setTimeout(() => {
+        //   afterFrame(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        // }, SCROLL_DELAY);
         return;
       }
 
-      setTimeout(() => {
-        afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
-      }, SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('Scrolling via x axis to 0: ', 0, ' via ', this.reader.nativeElement);
+      this.scroll(() => this.scrollService.scrollToX(0, this.reader.nativeElement));
       return;
     }
 
     if (writingStyle === WritingStyle.Vertical) {
       if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-        setTimeout(() => {
-          afterFrame(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
-        }, SCROLL_DELAY);
+        // setTimeout(() => {
+        //   afterFrame(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
+        // }, SCROLL_DELAY);
+        console.log('(Vertical) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollHeight, ' via ', this.bookContentElemRef.nativeElement);
+        this.scroll(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
         return;
       }
 
-      setTimeout(() => {
-        afterFrame(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
-      }, SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
+      // }, SCROLL_DELAY);
+      console.log('(Vertical) Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+      this.scroll(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
       return;
     }
 
     // We need to check if we are paging back, because we need to adjust the scroll
     if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      setTimeout(() => {
-        afterFrame(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
-      }, SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('(Page Back) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollWidth, ' via ', this.bookContentElemRef.nativeElement);
+      this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
       return;
     }
 
     setTimeout(() => {
       afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
     }, SCROLL_DELAY);
+
+    console.log('Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+    this.scroll(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
   }
 
   private setupAnnotationElements() {
