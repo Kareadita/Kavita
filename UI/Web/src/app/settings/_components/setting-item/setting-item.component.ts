@@ -6,7 +6,7 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
-  inject,
+  inject, input,
   Input,
   OnChanges,
   Output,
@@ -53,6 +53,11 @@ export class SettingItemComponent implements OnChanges {
   @Output() editMode = new EventEmitter<boolean>();
 
   /**
+   * When true, allows click events to bubble up to components within
+   */
+  allowClickEvents = input(false);
+
+  /**
    * Extra information to show next to the title
    */
   @ContentChild('titleExtra') titleExtraRef!: TemplateRef<any>;
@@ -71,6 +76,8 @@ export class SettingItemComponent implements OnChanges {
 
   @HostListener('click', ['$event'])
   onClickInside(event: MouseEvent) {
+    if (this.allowClickEvents()) return;
+
     event.stopPropagation(); // Prevent the click from bubbling up
   }
 

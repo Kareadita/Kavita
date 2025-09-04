@@ -203,6 +203,8 @@
         "collapse-series-relationships-tooltip": "Should Kavita show Series that have no relationships or is the parent/prequel",
         "share-series-reviews-label": "Share Series Reviews",
         "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
+        "highlight-bar-label": "Annotations highlight colours",
+        "highlight-bar-tooltip": "These colours are shared between all books",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",

@@ -32,6 +32,7 @@
                 [selected]="slot.slotNumber === selectedSlotIndex()"
                 (selectPicker)="selectSlot(index, slot)"
                 [editMode]="isEditMode()"
+                [canChangeEditMode]="canChangeEditMode()"
                 (editModeChange)="isEditMode.set($event)"
                 [first]="$first"
                 [last]="$last"
