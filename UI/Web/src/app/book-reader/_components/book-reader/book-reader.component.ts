@@ -1100,30 +1100,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   addLinkClickHandlers() {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
-      links.forEach((link: any) => {
-        link.addEventListener('click', (e: any) => {
-          e.stopPropagation();
-          let targetElem = e.target;
-          if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
-            // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
-            targetElem = e.target.parentNode;
-          }
-          if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
-          const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
-          if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
-            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
-          }
+    links.forEach((link: any) => {
+      link.addEventListener('click', (e: any) => {
+        e.stopPropagation();
+        let targetElem = e.target;
+        if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
+          // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
+          targetElem = e.target.parentNode;
+        }
+        if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
+        const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
+        if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
+          this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
+        }
 
-          const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
-          if (partValue && page === this.pageNum()) {
-            this.scrollTo(targetElem.attributes['kavita-part'].value);
-            return;
-          }
+        const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
+        if (partValue && page === this.pageNum()) {
+          this.scrollTo(targetElem.attributes['kavita-part'].value);
+          return;
+        }
 
-          this.setPageNum(page);
-          this.loadPage(partValue);
-        });
+        this.setPageNum(page);
+        this.loadPage(partValue);
       });
+    });
   }
 
   moveFocus() {
@@ -1166,39 +1166,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
+
+    console.log('load page called with: part: ', part, 'scrollTop: ', scrollTop);
     this.isLoading.set(true);
     this.cdRef.markForCheck();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
-      this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
+      this.isSingleImagePage = this.checkSingleImagePage(content); // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
+
       this.page.set(this.domSanitizer.bypassSecurityTrustHtml(content));
+
       this.scrollService.unlock();
+      this.setupObservers();
 
-      this.cdRef.markForCheck();
-
-      setTimeout(() => {
+      afterFrame(() => {
         this.addLinkClickHandlers();
         this.applyPageStyles(this.pageStyles());
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
-        if (imgs === null || imgs.length === 0) {
+        if (imgs !== null && imgs.length > 0) {
+          Promise.all(Array.from(imgs ?? [])
+            .filter(img => !img.complete)
+            .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+            .then(() => {
+              this.setupPage(part, scrollTop);
+              this.updateImageSizes();
+              this.injectImageBookmarkIndicators();
+            });
+        } else {
           this.setupPage(part, scrollTop);
-          return;
         }
 
-        Promise.all(Array.from(imgs)
-          .filter(img => !img.complete)
-          .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
-          .then(() => {
-            this.setupPage(part, scrollTop);
-            this.updateImageSizes();
-            this.injectImageBookmarkIndicators();
-            this.setupObservers();
-          });
 
         this.firstLoad = false;
-      }, SCROLL_DELAY);
+      });
     });
   }
 
@@ -1374,7 +1376,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     try {
-      this.setupPageScroll(part, scrollTop);
+      this.scrollWithinPage(part, scrollTop);
     } catch (ex) {
       console.error(ex);
     }
@@ -1390,7 +1392,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private setupPageScroll(part?: string | undefined, scrollTop?: number) {
+  private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
       setTimeout(() => {
         afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
@@ -2020,7 +2022,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.updateImageSizes()
     }, 200);
 
-    this.updateSingleImagePageStyles()
+    this.updateSingleImagePageStyles();
 
     // Calculate if bottom actionbar is needed. On a timeout to get accurate heights
     // if (this.bookContentElemRef == null) {
