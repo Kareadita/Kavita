@@ -19,7 +19,7 @@ import {PieDataItem} from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {MangaFormatPipe} from '../../../_pipes/manga-format.pipe';
 import {BytesPipe} from '../../../_pipes/bytes.pipe';
-import {AsyncPipe, DecimalPipe, NgFor, NgIf} from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
@@ -35,7 +35,7 @@ export interface StackedBarChartDataItem {
     templateUrl: './file-breakdown-stats.component.html',
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule, UtcToLocalTimePipe]
+  imports: [NgbTooltip, ReactiveFormsModule, PieChartModule, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule, UtcToLocalTimePipe]
 })
 export class FileBreakdownStatsComponent {
 

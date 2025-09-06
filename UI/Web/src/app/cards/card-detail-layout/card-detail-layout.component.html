@@ -15,7 +15,7 @@
             {{header()}}&nbsp;
             @if (pagination) {
               <span class="badge bg-primary rounded-pill"
-                    [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
+              [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
             }
           </span>
 
@@ -39,9 +39,9 @@
           <div class="grid row g-0" #container>
             @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
               <div class="card col-auto mt-2 mb-2"
-                   (click)="tryToSaveJumpKey()"
-                   id="jumpbar-index--{{i}}"
-                   [attr.jumpbar-index]="i">
+                (click)="tryToSaveJumpKey()"
+                id="jumpbar-index--{{i}}"
+                [attr.jumpbar-index]="i">
                 <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
               </div>
             }
@@ -59,9 +59,11 @@
     <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
 
-        <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-          <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-        </div>
+        @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
+          <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+          </div>
+        }
 
       </div>
     </virtual-scroller>
@@ -84,7 +86,7 @@
     <div class="jump-bar">
       @for(jumpKey of jumpBarKeysToRender; track jumpKey.key; let i = $index) {
         <button class="btn btn-link flip-button" [ngClass]="{'disabled': hasCustomSort()}"
-                (click)="scrollTo(jumpKey)">
+          (click)="scrollTo(jumpKey)">
           <div class="flip-button-inner">
             <div class="flip-button-front">{{jumpKey.title}}</div>
             <div class="flip-button-back">{{jumpKey.size}}</div>

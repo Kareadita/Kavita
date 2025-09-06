@@ -7,7 +7,7 @@ import {MemberService} from 'src/app/_services/member.service';
 import {AccountService} from 'src/app/_services/account.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {LibraryService} from 'src/app/_services/library.service';
-import {AsyncPipe, NgIf, PercentPipe} from '@angular/common';
+import { AsyncPipe, PercentPipe } from '@angular/common';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
@@ -21,14 +21,13 @@ import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
     styleUrls: ['./user-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        NgIf,
-        UserStatsInfoCardsComponent,
-        ReadingActivityComponent,
-        StatListComponent,
-        AsyncPipe,
-        TranslocoModule,
-        DayBreakdownComponent,
-    ]
+    UserStatsInfoCardsComponent,
+    ReadingActivityComponent,
+    StatListComponent,
+    AsyncPipe,
+    TranslocoModule,
+    DayBreakdownComponent
+]
 })
 export class UserStatsComponent implements OnInit {
 

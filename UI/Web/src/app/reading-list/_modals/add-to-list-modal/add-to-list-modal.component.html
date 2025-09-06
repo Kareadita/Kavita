@@ -8,38 +8,48 @@
   </div>
   <form style="width: 100%" [formGroup]="listForm">
     <div class="modal-body scrollable-modal">
-      <div class="mb-3" *ngIf="lists.length >= 5">
-        <label for="filter" class="form-label">{{t('filter-label')}}</label>
-        <div class="input-group">
-          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
+      @if (lists.length >= 5) {
+        <div class="mb-3">
+          <label for="filter" class="form-label">{{t('filter-label')}}</label>
+          <div class="input-group">
+            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
+          </div>
         </div>
-      </div>
+      }
       <ul class="list-group">
-        <li class="list-group-item clickable" tabindex="0" role="option" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
-          {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" [title]="t('promoted-alt')"></i>
+        @for (readingList of lists | filter: filterList; track readingList; let i = $index) {
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="addToList(readingList)">
+            {{readingList.title}} @if (readingList.promoted) {
+            <i class="fa fa-angle-double-up" [title]="t('promoted-alt')"></i>
+          }
         </li>
-        <li class="list-group-item" *ngIf="lists.length === 0 && !loading">{{t('no-data')}}</li>
-        <li class="list-group-item" *ngIf="loading">
+      }
+      @if (lists.length === 0 && !loading) {
+        <li class="list-group-item">{{t('no-data')}}</li>
+      }
+      @if (loading) {
+        <li class="list-group-item">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">{{t('loading')}}</span>
           </div>
         </li>
-      </ul>
-    </div>
-    <div class="modal-footer" style="justify-content: normal">
-      <div style="width: 100%;">
-        <div class="d-flex">
-          <div class="col-9 col-lg-10">
-            <label class="form-label visually-hidden" for="add-rlist">{{t('reading-list-label')}}</label>
-            <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
-          </div>
-          <div class="col-2 ps-2">
-            <button type="submit" class="btn btn-primary" (click)="create()">{{t('create')}}</button>
-          </div>
+      }
+    </ul>
+  </div>
+  <div class="modal-footer" style="justify-content: normal">
+    <div style="width: 100%;">
+      <div class="d-flex">
+        <div class="col-9 col-lg-10">
+          <label class="form-label visually-hidden" for="add-rlist">{{t('reading-list-label')}}</label>
+          <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
+        </div>
+        <div class="col-2 ps-2">
+          <button type="submit" class="btn btn-primary" (click)="create()">{{t('create')}}</button>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</form>
 
 </ng-container>

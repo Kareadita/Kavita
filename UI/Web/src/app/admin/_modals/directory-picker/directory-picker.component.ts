@@ -4,7 +4,7 @@ import { catchError, debounceTime, distinctUntilChanged, filter, map, merge, Obs
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { DirectoryDto } from 'src/app/_models/system/directory-dto';
 import { LibraryService } from '../../../_services/library.service';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
@@ -19,7 +19,7 @@ export interface DirectoryPickerResult {
     selector: 'app-directory-picker',
     templateUrl: './directory-picker.component.html',
     styleUrls: ['./directory-picker.component.scss'],
-    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
 

@@ -1,4 +1,4 @@
-import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
+import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -30,7 +30,7 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-no-cover-renderer.component.html',
     styleUrls: ['./double-no-cover-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
 

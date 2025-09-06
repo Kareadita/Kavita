@@ -1,8 +1,9 @@
-import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Inject,
@@ -10,17 +11,17 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { MangaReaderService } from '../../_service/manga-reader.service';
+import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
@@ -31,7 +32,7 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-reverse-renderer.component.html',
     styleUrls: ['./double-reverse-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 
