@@ -55,13 +55,17 @@
                 @for (opt of libraryTypes; track opt.value) {
                   <option [value]="opt.value">{{opt.title}}</option>
                 }
-
               </select>
+              <div class="text-muted mt-2">
+                {{LibraryTypeValue | libraryTypeSubtitle}}
+              </div>
             </div>
-            <div *ngIf="!isAddLibrary">
-              {{t('last-scanned-label')}}
-              <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
-            </div>
+            @if (!isAddLibrary) {
+              <div>
+                {{t('last-scanned-label')}}
+                <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
+              </div>
+            }
           </ng-template>
         </li>
 

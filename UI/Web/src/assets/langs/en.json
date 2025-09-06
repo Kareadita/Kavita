@@ -597,11 +597,20 @@
 
     "library-type-pipe": {
         "book": "Book",
-        "comic": "Comic (Legacy)",
+        "comic": "Comic (Flexible)",
         "manga": "Manga",
         "comicVine": "Comic",
         "image": "Image",
         "lightNovel": "Light Novel"
+    },
+
+    "library-type-subtitle-pipe": {
+        "book": "Generic book library",
+        "comic": "Comic patterns, supports Volume grouping, TPBs within one series. Cannot support multiple runs.",
+        "manga": "Japanese comics, supports volume grouping. Can support some loose image configurations.",
+        "comicVine": "A strict Comic implementation built around Comic Vine metadata and integration of tooling in the space.",
+        "image": "Loose Image files with basic support. Must adhere mostly to wiki documentation.",
+        "lightNovel": "Books with special handling more Light Novels."
     },
 
     "age-rating-pipe": {

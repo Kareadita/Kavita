@@ -1219,7 +1219,7 @@ public partial class BookService : IBookService
     /// <param name="body">Body element from the epub</param>
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
-    /// <param name="ptocBookmarks">Ptoc Bookmarks to tie against</param>
+    /// <param name="ptocBookmarks">Ptoc (Text) Bookmarks to tie against</param>
     /// <returns></returns>
     private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body,
         Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
@@ -1228,7 +1228,6 @@ public partial class BookService : IBookService
 
         RewriteAnchors(page, doc, mappings);
 
-        // TODO: Pass bookmarks here for state management
         ScopeImages(doc, book, apiBase);
 
         InjectImages(doc, book, apiBase);
@@ -1329,8 +1328,8 @@ public partial class BookService : IBookService
         var tocPage = book.Content.Html.Local.Select(s => s.Key)
             .FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
             k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
-        if (string.IsNullOrEmpty(tocPage)) return chaptersList;
 
+        if (string.IsNullOrEmpty(tocPage)) return chaptersList;
         if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
         var content = await file.ReadContentAsync();
 

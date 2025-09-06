@@ -12,7 +12,8 @@ public enum LibraryType
     /// <summary>
     /// Uses Comic regex for filename parsing
     /// </summary>
-    [Description("Comic (Legacy)")]
+    /// <remarks>This was the original implementation and is much more flexible</remarks>
+    [Description("Comic (Flexible)")]
     Comic = 1,
     /// <summary>
     /// Uses Manga regex for filename parsing also uses epub metadata
