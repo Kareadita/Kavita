@@ -197,11 +197,7 @@ public class AccountController : BaseApiController
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            // Assign default streams
-            _accountService.AddDefaultStreamsToUser(user);
-
-            // Assign default reading profile
-            await _accountService.AddDefaultReadingProfileToUser(user);
+            await _accountService.SeedUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -745,11 +741,7 @@ public class AccountController : BaseApiController
             var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            // Assign default streams
-            _accountService.AddDefaultStreamsToUser(user);
-
-            // Assign default reading profile
-            await _accountService.AddDefaultReadingProfileToUser(user);
+            await _accountService.SeedUser(user);
 
             // Assign Roles
             var roles = dto.Roles;
