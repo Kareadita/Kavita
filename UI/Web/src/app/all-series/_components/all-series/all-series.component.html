@@ -8,7 +8,7 @@
         <h5 subtitle>{{t('series-count', {num: pagination.totalItems | number})}}</h5>
       }
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [actionCallback]="bulkActionCallback" />
     @if (filter) {
       <app-card-detail-layout
                               [isLoading]="loadingSeries"
@@ -22,7 +22,7 @@
         <ng-template #cardItem let-item let-position="idx">
           <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
                            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                           [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+                           [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true" />
         </ng-template>
       </app-card-detail-layout>
     }

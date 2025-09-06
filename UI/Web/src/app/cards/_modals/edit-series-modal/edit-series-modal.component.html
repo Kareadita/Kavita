@@ -40,7 +40,7 @@
                       <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
                           <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
                             <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors) {
                               @if (formControl.errors.required) {
@@ -60,7 +60,7 @@
                       <ng-template #view>
                         @if (editSeriesForm.get('localizedName'); as formControl) {
                           <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }" />
                             <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                           </div>
                         }
@@ -75,7 +75,7 @@
                       <app-setting-item [title]="t('summary-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
                           <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }" />
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                           </div>
                         </ng-template>
@@ -118,7 +118,7 @@
                         <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false">
                           <ng-template #view>
                             <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
+                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
                               <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
                                      maxlength="4" minlength="4"
                                      [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
@@ -186,7 +186,7 @@
                         <app-setting-item [title]="t('age-rating-label')" [toggleOnViewClick]="false" [showEdit]="false">
                           <ng-template #view>
                             <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }"></ng-container>
+                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }" />
                               <select class="form-select" id="age-rating" formControlName="ageRating">
                                 @for (opt of ageRatings; track opt.title) {
                                   <option [value]="opt.value">{{opt.title | titlecase}}</option>
@@ -202,7 +202,7 @@
                         <app-setting-item [title]="t('publication-status-label')" [toggleOnViewClick]="false" [showEdit]="false">
                           <ng-template #view>
                             <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
+                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }" />
                               <select class="form-select" id="publication-status" formControlName="publicationStatus">
                                 @for (opt of publicationStatuses; track opt.value) {
                                   <option [value]="opt.value">{{opt.value | publicationStatus}}</option>
@@ -504,7 +504,7 @@
                 <a ngbNavLink>{{t(tabs[TabID.WebLinks])}}</a>
                 <ng-template ngbNavContent>
                   <p>{{t('web-link-description')}}</p>
-                  <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)"></app-edit-list>
+                  <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)" />
                 </ng-template>
               </li>
             }
@@ -515,14 +515,14 @@
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
 
             <li [ngbNavItem]="tabs[TabID.Related]">
               <a ngbNavLink>{{t(tabs[TabID.Related])}}</a>
               <ng-template ngbNavContent>
-                <app-edit-series-relation [series]="series" [save]="saveNestedComponents"></app-edit-series-relation>
+                <app-edit-series-relation [series]="series" [save]="saveNestedComponents" />
               </ng-template>
             </li>
 
@@ -689,7 +689,7 @@
                   <ul class="list-unstyled">
                     @for (volume of seriesVolumes; track volume.id) {
                       <li class="d-flex my-4">
-                        <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+                        <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
                         <div class="flex-grow-1">
                           <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                           <div>

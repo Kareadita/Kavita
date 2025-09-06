@@ -8,15 +8,15 @@
       }
 
       <div class="mt-4">
-        <app-update-section [items]="update.added" [title]="t('added')"></app-update-section>
-        <app-update-section [items]="update.changed" [title]="t('changed')"></app-update-section>
-        <app-update-section [items]="update.fixed" [title]="t('fixed')"></app-update-section>
-        <app-update-section [items]="update.developer" [title]="t('developer')"></app-update-section>
-        <app-update-section [items]="update.theme" [title]="t('theme')"></app-update-section>
-        <app-update-section [items]="update.removed" [title]="t('removed')"></app-update-section>
-        <app-update-section [items]="update.api" [title]="t('api')"></app-update-section>
-        <app-update-section [items]="update.featureRequests" [title]="t('feature-requests')"></app-update-section>
-        <app-update-section [items]="update.knownIssues" [title]="t('known-issues')"></app-update-section>
+        <app-update-section [items]="update.added" [title]="t('added')" />
+        <app-update-section [items]="update.changed" [title]="t('changed')" />
+        <app-update-section [items]="update.fixed" [title]="t('fixed')" />
+        <app-update-section [items]="update.developer" [title]="t('developer')" />
+        <app-update-section [items]="update.theme" [title]="t('theme')" />
+        <app-update-section [items]="update.removed" [title]="t('removed')" />
+        <app-update-section [items]="update.api" [title]="t('api')" />
+        <app-update-section [items]="update.featureRequests" [title]="t('feature-requests')" />
+        <app-update-section [items]="update.knownIssues" [title]="t('known-issues')" />
       </div>
 
       @if (showExtras) {

@@ -9,7 +9,7 @@
             {{title}}
           }
           @if (titleExtraRef) {
-            <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
+            <ng-container [ngTemplateOutlet]="titleExtraRef" />
           }
         </h6>
       </div>
@@ -20,16 +20,16 @@
         </button>
         }
         @if (titleActionsRef) {
-          <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
+          <ng-container [ngTemplateOutlet]="titleActionsRef" />
         }
       </div>
     </div>
 
     @if (isEditMode) {
-      <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
+      <ng-container [ngTemplateOutlet]="valueEditRef" />
     } @else {
       <span class="view-value" [ngClass]="{'non-selectable': (!canEdit || !showEdit)}" (click)="toggleEditMode()">
-        <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
+        <ng-container [ngTemplateOutlet]="valueViewRef" />
       </span>
     }
 

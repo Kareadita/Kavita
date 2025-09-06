@@ -25,10 +25,10 @@
             <div class="d-flex flex-row justify-content-center align-items-center">
               @switch (member.identityProvider) {
                 @case (IdentityProvider.OpenIdConnect) {
-                  <app-image [ngbTooltip]="t('identity-provider-oidc-tooltip')" imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px"></app-image>
+                  <app-image [ngbTooltip]="t('identity-provider-oidc-tooltip')" imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px" />
                 }
                 @case (IdentityProvider.Kavita) {
-                  <app-image [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px"></app-image>
+                  <app-image [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px" />
                 }
               }
             </div>
@@ -113,7 +113,7 @@
       }
       @empty {
         @if (loadingMembers) {
-          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loadingMembers"></app-loading></td></tr>
+          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loadingMembers" /></td></tr>
         } @else {
           <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
         }

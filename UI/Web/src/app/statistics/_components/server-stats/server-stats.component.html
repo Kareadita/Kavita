@@ -69,40 +69,39 @@
 
   <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
     <div class="col-auto">
-      <app-stat-list [data$]="releaseYears$" [title]="t('release-years-title')" [label]="t('series')"></app-stat-list>
+      <app-stat-list [data$]="releaseYears$" [title]="t('release-years-title')" [label]="t('series')" />
     </div>
     <div class="col-auto">
-      <app-stat-list [data$]="mostActiveUsers$" [title]="t('most-active-users-title')" [label]="t('reads')"></app-stat-list>
+      <app-stat-list [data$]="mostActiveUsers$" [title]="t('most-active-users-title')" [label]="t('reads')" />
     </div>
     <div class="col-auto">
-      <app-stat-list [data$]="mostActiveLibrary$" [title]="t('popular-libraries-title')" [label]="t('reads')"></app-stat-list>
+      <app-stat-list [data$]="mostActiveLibrary$" [title]="t('popular-libraries-title')" [label]="t('reads')" />
     </div>
     <div class="col-auto">
-      <app-stat-list [data$]="mostActiveSeries$" [title]="t('popular-series-title')" [image]="seriesImage" [handleClick]="openSeries">
-      </app-stat-list>
+      <app-stat-list [data$]="mostActiveSeries$" [title]="t('popular-series-title')" [image]="seriesImage" [handleClick]="openSeries" />
     </div>
     <div class="col-auto">
-      <app-stat-list [data$]="recentlyRead$" [title]="t('recently-read-title')" [image]="seriesImage" [handleClick]="openSeries"></app-stat-list>
+      <app-stat-list [data$]="recentlyRead$" [title]="t('recently-read-title')" [image]="seriesImage" [handleClick]="openSeries" />
     </div>
   </div>
 
   <div class="row g-0 pt-2 pb-2">
-    <app-top-readers></app-top-readers>
+    <app-top-readers />
   </div>
 
   <div class="row g-0 pt-4 pb-2">
-    <app-file-breakdown-stats></app-file-breakdown-stats>
+    <app-file-breakdown-stats />
   </div>
 
   <div class="row g-0 pt-4 pb-2">
-    <app-publication-status-stats></app-publication-status-stats>
+    <app-publication-status-stats />
   </div>
 
   <div class="row g-0 pt-4 pb-2">
-    <app-reading-activity [isAdmin]="true"></app-reading-activity>
+    <app-reading-activity [isAdmin]="true" />
   </div>
 
   <div class="row g-0 pt-4 pb-2">
-    <app-day-breakdown></app-day-breakdown>
+    <app-day-breakdown />
   </div>
 </ng-container>

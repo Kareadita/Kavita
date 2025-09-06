@@ -16,7 +16,7 @@
       </li>
     } @empty {
       @if (isLoading) {
-        <app-loading [loading]="isLoading"></app-loading>
+        <app-loading [loading]="isLoading" />
       } @else {
         <p>{{t('nothing-found')}}</p>
       }

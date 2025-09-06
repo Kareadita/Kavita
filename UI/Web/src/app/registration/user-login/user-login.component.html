@@ -35,7 +35,7 @@
             class="btn btn-outline-primary mt-2 d-flex align-items-center gap-2"
             href="oidc/login"
           >
-            <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}"></app-image>
+            <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}" />
             {{oidcConfig()?.providerName || t('oidc')}}
           </a>
         }

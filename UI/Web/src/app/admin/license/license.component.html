@@ -15,7 +15,7 @@
           <ng-template #titleExtra>
             <button class="btn btn-icon btn-sm" (click)="loadLicenseInfo(true)">
               @if (isChecking()) {
-                <app-loading [loading]="isChecking()" size="spinner-border-sm"></app-loading>
+                <app-loading [loading]="isChecking()" size="spinner-border-sm" />
               } @else if (hasLicense()) {
                 <span>
                 <i class="fa-solid fa-refresh" tabindex="0" [ngbTooltip]="t('check')"></i>
@@ -92,7 +92,7 @@
                   <span>{{t('activate-save')}}</span>
                 }
 
-                <app-loading [loading]="isSaving()" size="spinner-border-sm"></app-loading>
+                <app-loading [loading]="isSaving()" size="spinner-border-sm" />
               </button>
             </div>
 

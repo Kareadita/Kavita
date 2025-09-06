@@ -43,10 +43,10 @@
                   <ng-template #seriesTemplate let-item>
                     <div class="clickable" style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
                       <div style="width: 24px" class="me-1">
-                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
                       </div>
                       <div class="ms-1">
-                        <app-series-format [format]="item.format"></app-series-format>
+                        <app-series-format [format]="item.format" />
                         @let normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
                         <span class="ms-1">
@@ -79,10 +79,10 @@
                   <ng-template #bookmarkTemplate let-item>
                     <div class="clickable" style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
                       <div style="width: 24px" class="me-1">
-                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
                       </div>
                       <div class="ms-1">
-                        <app-series-format [format]="item.format"></app-series-format>
+                        <app-series-format [format]="item.format" />
 
                         @if (searchTerm.toLowerCase().trim(); as st) {
                           @if (item.seriesName.toLowerCase().trim().indexOf(st) >= 0) {
@@ -98,14 +98,14 @@
                   <ng-template #collectionTemplate let-item>
                     <div class="clickable" style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
                       <div style="width: 24px" class="me-1">
-                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+                        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)" />
                       </div>
                       <div class="ms-1">
                         <div>
                           <span>{{item.title}}</span>
-                          <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
+                          <app-promoted-icon [promoted]="item.promoted" />
                         </div>
-                        <app-collection-owner [collection]="item"></app-collection-owner>
+                        <app-collection-owner [collection]="item" />
                       </div>
                     </div>
                   </ng-template>
@@ -114,7 +114,7 @@
                     <div class="clickable" style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
                       <div class="ms-1">
                         <span>{{item.title}}</span>
-                        <app-promoted-icon [promoted]="item.promoted"></app-promoted-icon>
+                        <app-promoted-icon [promoted]="item.promoted" />
                       </div>
                     </div>
                   </ng-template>
@@ -132,7 +132,7 @@
                   <div style="width: 24px" class="me-1">
                     <app-image class="me-3 search-result"
                                [styles]="{'background': 'none', 'max-height': '24px', 'height': '24px', 'width': '24px', 'border-radius': '50%'}"
-                               width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage"></app-image>
+                               width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage" />
                   </div>
                   <div class="ms-1">
                     <div>
@@ -161,7 +161,7 @@
                     <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
                       <div class="ms-1">
                         @if (item.files.length > 0) {
-                          <app-series-format [format]="item.files?.[0].format"></app-series-format>
+                          <app-series-format [format]="item.files?.[0].format" />
                         }
                         <!-- TODO: this needs the series name before the chapter issue -->
                         <span>{{item.titleName || item.range}}</span>
@@ -172,7 +172,7 @@
                   <ng-template #fileTemplate let-item>
                     <div class="clickable" style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
                       <div class="ms-1">
-                        <app-series-format [format]="item.format"></app-series-format>
+                        <app-series-format [format]="item.format" />
                         <span>{{item.filePath}}</span>
                       </div>
                     </div>
@@ -200,7 +200,7 @@
 
           @if (accountService.currentUser$ | async; as user) {
             <div class="nav-item me-2">
-              <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
+              <app-nav-events-toggle [user]="user" />
             </div>
 
             @if((breakpoint$ | async)! <= Breakpoint.Mobile) {

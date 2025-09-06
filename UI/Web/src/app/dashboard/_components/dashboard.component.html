@@ -1,5 +1,5 @@
 <div class="main-container">
-<app-side-nav-companion-bar></app-side-nav-companion-bar>
+<app-side-nav-companion-bar />
 
   <ng-container *transloco="let t; prefix: 'dashboard'">
     @if (libraries$ | async; as libraries) {
@@ -23,19 +23,19 @@
     @for(stream of streams; track stream.id) {
       @switch (stream.streamType) {
         @case (StreamType.OnDeck) {
-          <ng-container [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+          <ng-container [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }" />
         }
         @case (StreamType.RecentlyUpdated) {
-          <ng-container [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+          <ng-container [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }" />
         }
         @case (StreamType.NewlyAdded) {
-          <ng-container [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+          <ng-container [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }" />
         }
         @case (StreamType.SmartFilter) {
-          <ng-container [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+          <ng-container [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }" />
         }
         @case (StreamType.MoreInGenre) {
-          <ng-container [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+          <ng-container [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }" />
         }
       }
 
@@ -45,7 +45,7 @@
           <app-carousel-reel [items]="data" [title]="stream.name" (sectionClick)="handleFilterSectionClick(stream)">
             <ng-template #carouselItem let-item>
               <app-series-card [series]="item" [libraryId]="item.libraryId"
-                              (reload)="reloadStream(item.id)" (dataChanged)="reloadStream(item.id)"></app-series-card>
+                              (reload)="reloadStream(item.id)" (dataChanged)="reloadStream(item.id)" />
             </ng-template>
           </app-carousel-reel>
         }
@@ -56,7 +56,7 @@
           <app-carousel-reel [items]="data" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick(StreamId.OnDeck)">
             <ng-template #carouselItem let-item>
               <app-series-card [series]="item" [libraryId]="item.libraryId" [isOnDeck]="true"
-                              (reload)="reloadStream(stream.id, true)" (dataChanged)="reloadStream(stream.id)"></app-series-card>
+                              (reload)="reloadStream(stream.id, true)" (dataChanged)="reloadStream(stream.id)" />
             </ng-template>
           </app-carousel-reel>
         }
@@ -69,9 +69,7 @@
               <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                             [suppressArchiveWarning]="true" [count]="item.count" (clicked)="handleRecentlyAddedChapterClick(item)"
                             [showReadButton]="true" (readClicked)="handleRecentlyAddedChapterRead(item)"
-                            [linkUrl]="'/library/' + item.libraryId + '/series/' + item.seriesId">
-
-              </app-card-item>
+                            [linkUrl]="'/library/' + item.libraryId + '/series/' + item.seriesId" />
             </ng-template>
           </app-carousel-reel>
         }
@@ -81,7 +79,7 @@
         @if(stream.api | async; as data) {
           <app-carousel-reel [items]="data" [title]="t('recently-added-title')" (sectionClick)="handleSectionClick(StreamId.NewlyAddedSeries)">
             <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)"></app-series-card>
+              <app-series-card [series]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)" />
             </ng-template>
           </app-carousel-reel>
         }
@@ -91,14 +89,14 @@
         @if(stream.api | async; as data) {
           <app-carousel-reel [items]="data" [title]="t('more-in-genre-title', {genre: genre?.title})" (sectionClick)="handleSectionClick(StreamId.MoreInGenre)">
             <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)"></app-series-card>
+              <app-series-card [series]="item" [libraryId]="item.libraryId" (dataChanged)="reloadStream(stream.id)" />
             </ng-template>
           </app-carousel-reel>
         }
       </ng-template>
     }
 
-    <app-loading [loading]="isLoadingDashboard || (streamCount !== streamsLoaded)"></app-loading>
+    <app-loading [loading]="isLoadingDashboard || (streamCount !== streamsLoaded)" />
   </ng-container>
 </div>
 

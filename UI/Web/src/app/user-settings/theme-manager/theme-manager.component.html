@@ -21,7 +21,7 @@
           </li>
 
           @for (theme of downloadedThemes; track theme.name) {
-            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: true}"></ng-container>
+            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: true}" />
           }
 
           <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 40px" aria-hidden="true">
@@ -29,7 +29,7 @@
           </li>
 
           @for (theme of downloadableThemes; track theme.name) {
-            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: false}"></ng-container>
+            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: false}" />
           }
         </ul>
       </div>
@@ -55,7 +55,7 @@
 
 
           @if (files && files.length > 0) {
-            <app-loading [loading]="isUploadingTheme"></app-loading>
+            <app-loading [loading]="isUploadingTheme" />
           } @else if (hasAdmin$ | async) {
             <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
@@ -104,7 +104,7 @@
 
             <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
-                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)"></app-image>
+                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />
               </ng-template>
             </app-carousel-reel>
           } @else {
@@ -112,7 +112,7 @@
 
             <app-carousel-reel [items]="selectedTheme.site!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
-                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)"></app-image>
+                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />
               </ng-template>
             </app-carousel-reel>
           }

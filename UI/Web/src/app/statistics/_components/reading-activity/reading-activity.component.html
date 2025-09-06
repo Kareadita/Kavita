@@ -37,8 +37,7 @@
       <div class="row g-0">
         @if (data$ | async; as data) {
           @if (data.length > 0) {
-            <ngx-charts-line-chart
-              class="dark"
+            <ngx-charts-line-chart class="dark"
               [legend]="true"
               [legendTitle]="t('legend-label')"
               [showXAxisLabel]="true"
@@ -53,8 +52,7 @@
               [yAxisLabel]="t('y-axis-label')"
               [timeline]="false"
               [results]="data"
-              >
-            </ngx-charts-line-chart>
+               />
           } @else {
             {{t('no-data')}}
           }

@@ -41,7 +41,7 @@
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('format-title')}}</h4>
       <div class="ms-3">
-        <app-series-format [format]="format"></app-series-format> {{format | mangaFormat }}
+        <app-series-format [format]="format" /> {{format | mangaFormat }}
       </div>
     </div>
   }
@@ -80,7 +80,7 @@
       <ng-template #carouselItem let-item>
         <a class="me-1" [href]="item | safeUrl"  target="_blank" rel="noopener noreferrer" [title]="item">
           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
-                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+                     [errorImage]="imageService.errorWebLinkImage" />
         </a>
       </ng-template>
     </app-carousel-reel>
@@ -94,7 +94,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -102,7 +102,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.colorists" [title]="t('colorists-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -110,7 +110,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.editors" [title]="t('editors-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -119,7 +119,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -127,7 +127,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.inkers" [title]="t('inkers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -135,7 +135,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.letterers" [title]="t('letterers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -143,7 +143,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.pencillers" [title]="t('pencillers-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -151,7 +151,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -159,7 +159,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -167,7 +167,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.locations" [title]="t('locations-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -175,7 +175,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.teams" [title]="t('teams-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>
@@ -183,7 +183,7 @@
   <div class="mb-3">
     <app-carousel-reel [items]="metadata.imprints" [title]="t('imprints-title')">
       <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item"></app-person-badge>
+        <app-person-badge [person]="item" />
       </ng-template>
     </app-carousel-reel>
   </div>

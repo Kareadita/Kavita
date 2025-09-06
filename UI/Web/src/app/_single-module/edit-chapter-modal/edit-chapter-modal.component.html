@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'edit-chapter-modal'">
   <div class="modal-container">
     <div class="modal-header">
-      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title></h4>
+      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="false" /></h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
@@ -23,7 +23,7 @@
                       <ng-template #view>
                         @if (editForm.get('titleName'); as formControl) {
                           <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
                             <input class="form-control" formControlName="titleName" type="text"
                                    [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors; as errors) {
@@ -44,7 +44,7 @@
                       <ng-template #view>
                         @if (editForm.get('sortOrder'); as formControl) {
                           <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
                             <input class="form-control" formControlName="sortOrder" type="number" min="0" step="0.1" inputmode="numeric"
                                    [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors; as errors) {
@@ -67,7 +67,7 @@
                       <ng-template #view>
                         @if (editForm.get('isbn'); as formControl) {
                           <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
                             <input class="form-control" formControlName="isbn" type="text"
                                    [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors; as errors) {
@@ -88,7 +88,7 @@
                       <ng-template #view>
                         @if (editForm.get('ageRating'); as formControl) {
                           <div class="input-group" [ngClass]="{'lock-active': chapter.ageRatingLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'ageRatingLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'ageRatingLocked' }" />
                             <select class="form-select" id="age-rating" formControlName="ageRating">
                               @for(opt of ageRatings; track opt.value) {
                                 <option [value]="opt.value">{{opt.title | titlecase}}</option>
@@ -128,7 +128,7 @@
                       <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false">
                         <ng-template #view>
                           <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
                             <input
                               class="form-control"
                               formControlName="releaseDate"
@@ -147,7 +147,7 @@
                       <ng-template #view>
                         @if (editForm.get('summary'); as formControl) {
                           <div class="input-group" [ngClass]="{'lock-active': chapter.summaryLocked}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'summaryLocked' }"></ng-container>
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'summaryLocked' }" />
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                           </div>
                         }
@@ -511,7 +511,7 @@
                   {{t('cover-image-description')}}
                 </p>
                 <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                         [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                                         [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
           }
@@ -595,7 +595,7 @@
                       @for(link of WebLinks; track link) {
                         <a class="me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" [title]="link">
                           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
-                                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+                                     [errorImage]="imageService.errorWebLinkImage" />
                         </a>
                       }
                     </div>
@@ -624,7 +624,7 @@
           <li [ngbNavItem]="TabID.Progress">
             <a ngbNavLink>{{t(TabID.Progress)}}</a>
             <ng-template ngbNavContent>
-              <app-edit-chapter-progress [chapter]="chapter"></app-edit-chapter-progress>
+              <app-edit-chapter-progress [chapter]="chapter" />
             </ng-template>
           </li>
 

@@ -5,7 +5,7 @@
     @if (bookChapters.length === 0) {
 
       @if (loading()) {
-        <app-loading [loading]="true"></app-loading>
+        <app-loading [loading]="true" />
       } @else {
         <div>
           <em>{{t('no-data')}}</em>

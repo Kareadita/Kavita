@@ -3,7 +3,7 @@
     @if (utilityService.getActiveBreakpoint(); as activeBreakpoint) {
       @if (activeBreakpoint >= Breakpoint.Tablet) {
         <div [@inOutAnimation]>
-          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}"></ng-container>
+          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
         </div>
       } @else {
         <div>
@@ -13,7 +13,7 @@
             </h5>
             <div body class="drawer-body">
               <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd (also this isn't animating like my custom version)-->
-              <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
+              <ng-container [ngTemplateOutlet]="filterSection" />
             </div>
           </app-drawer>
         </div>
@@ -28,8 +28,7 @@
           <app-metadata-builder [filter]="filterV2"
                                 [entityType]="filterSettings().type"
                                 [statementLimit]="filterSettings().statementLimit"
-                                (update)="handleFilters($event)">
-          </app-metadata-builder>
+                                (update)="handleFilters($event)" />
         </div>
         <form [formGroup]="sortGroup" class="container-fluid">
           <div class="row mb-3">
@@ -58,13 +57,13 @@
 
 
             @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
-              <ng-container [ngTemplateOutlet]="buttons"></ng-container>
+              <ng-container [ngTemplateOutlet]="buttons" />
             }
           </div>
 
           @if (utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {
             <div class="row mb-3">
-              <ng-container [ngTemplateOutlet]="buttons"></ng-container>
+              <ng-container [ngTemplateOutlet]="buttons" />
             </div>
           }
         </form>

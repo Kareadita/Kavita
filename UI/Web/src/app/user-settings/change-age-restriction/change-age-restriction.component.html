@@ -9,7 +9,7 @@
         </span>
       </ng-template>
       <ng-template #edit>
-        <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset"></app-restriction-selector>
+        <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset" />
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
           <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">{{t('reset')}}</button>
           <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">{{t('save')}}</button>

@@ -25,7 +25,7 @@
         @if(filterApiMap[stream.name] | async; as data) {
           <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter" [actionables]="actions" (handleAction)="handleAction($event, stream)">
             <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" [libraryId]="item.libraryId"></app-series-card>
+              <app-series-card [series]="item" [libraryId]="item.libraryId" />
             </ng-template>
           </app-carousel-reel>
         }

@@ -3,14 +3,14 @@
     <app-side-nav-companion-bar>
       <h4 title>
         <span>{{t('title')}}</span>
-        <app-card-actionables [inputActions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
+        <app-card-actionables [inputActions]="globalActions" (actionHandler)="performGlobalAction($event)" />
       </h4>
       @if (pagination) {
         <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h5>
       }
 
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
     <app-card-detail-layout
       [isLoading]="loadingLists"
@@ -28,8 +28,7 @@
                        (clicked)="handleClick(item)"
                        [selected]="bulkSelectionService.isCardSelected('readingList', position)"
                        [allowSelection]="true" [showFormat]="false"
-                       (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)">
-        </app-card-item>
+                       (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)" />
       </ng-template>
 
       <ng-template #noData>

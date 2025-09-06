@@ -15,11 +15,11 @@
         @if (navStreams$ | async; as streams) {
           @if (showAll) {
             <app-side-nav-item cdkDrag cdkDragDisabled icon="fa fa-chevron-left"
-                               [title]="t(editMode ? 'cancel-edit' : 'back')" (click)="showLess()"></app-side-nav-item>
+                               [title]="t(editMode ? 'cancel-edit' : 'back')" (click)="showLess()" />
             @if (!isReadOnly) {
               <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-cogs"
                                  [title]="t('customize')" link="/settings"
-                                 [fragment]="SettingsTabId.Customize"></app-side-nav-item>
+                                 [fragment]="SettingsTabId.Customize" />
             }
             @if (streams.length > ItemLimit && (navService.sideNavCollapsed$ | async) === false && !editMode) {
               <div cdkDrag cdkDragDisabled class="mb-2 mt-3 ms-2 me-2">
@@ -43,59 +43,59 @@
                                    [imageUrl]="getLibraryImage(navStream.library!)" [title]="navStream.library!.name"
                                    [comparisonMethod]="'startsWith'">
                   <ng-container actions>
-                    <app-card-actionables [entity]="navStream.library" [inputActions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+                    <app-card-actionables [entity]="navStream.library" [inputActions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v" />
                   </ng-container>
                 </app-side-nav-item>
               }
 
               @case (SideNavStreamType.AllSeries) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/"></app-side-nav-item>
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/" />
               }
 
               @case (SideNavStreamType.Bookmarks) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent" [cdkDragDisabled]="!editMode"
-                                   [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>
+                                   [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/" />
               }
 
               @case (SideNavStreamType.ReadingLists) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode"
-                                   icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/"></app-side-nav-item>
+                                   icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/" />
               }
 
               @case (SideNavStreamType.Collections) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-list" [title]="t('collections')" link="/collections/" />
               }
 
               @case (SideNavStreamType.WantToRead) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/" />
               }
 
               @case (SideNavStreamType.BrowseAuthors) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-users" [title]="t('browse-people')" link="/browse/authors/"></app-side-nav-item>
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-users" [title]="t('browse-people')" link="/browse/authors/" />
               }
 
               @case (SideNavStreamType.SmartFilter) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded"></app-side-nav-item>
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded" />
               }
 
               @case (SideNavStreamType.ExternalSource) {
                 <app-side-nav-item [editMode]="editMode" icon="fa-server"
                                    cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
                                    [title]="navStream.name" [link]="navStream.externalSource.host + 'login?apiKey=' + navStream.externalSource.apiKey"
-                                   [external]="true"></app-side-nav-item>
+                                   [external]="true" />
               }
 
             }
           }
 
           @if (totalSize > ItemLimit && !showAll) {
-            <app-side-nav-item icon="fa fa-chevron-right" [title]="t('more')" (click)="showMore()"></app-side-nav-item>
+            <app-side-nav-item icon="fa fa-chevron-right" [title]="t('more')" (click)="showMore()" />
           }
         }
       </div>
@@ -114,7 +114,7 @@
         <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                           [ngbTooltip]="t('donate-tooltip')"
                           [link]="WikiLink.Donation"
-                          [external]="true"></app-side-nav-item>
+                          [external]="true" />
       }
     </div>
 

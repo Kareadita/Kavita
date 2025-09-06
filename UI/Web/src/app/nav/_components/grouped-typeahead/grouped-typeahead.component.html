@@ -33,7 +33,7 @@
                 @for(option of groupedData.series; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" aria-labelledby="series-group" role="option">
-                    <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -46,7 +46,7 @@
                 @for(option of groupedData.collections; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -59,7 +59,7 @@
                 @for(option of groupedData.readingLists; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -71,7 +71,7 @@
                 @for(option of groupedData.bookmarks; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -84,7 +84,7 @@
                 @for(option of groupedData.libraries; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" aria-labelledby="libraries-group" role="option">
-                    <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -96,7 +96,7 @@
                 @for(option of groupedData.genres; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -108,7 +108,7 @@
                 @for(option of groupedData.tags; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -120,7 +120,7 @@
                 @for(option of groupedData.persons; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -132,7 +132,7 @@
                 @for(option of groupedData.chapters; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -144,7 +144,7 @@
                 @for(option of groupedData.files; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" role="option">
-                    <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -156,7 +156,7 @@
                 @for(option of groupedData.annotations; track option; let index = $index) {
                   <li (click)="handleResultClick(option)" tabindex="0"
                       class="list-group-item" aria-labelledby="annotations-group" role="option">
-                    <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }" />
                   </li>
                 }
               </ul>
@@ -166,14 +166,14 @@
 
               <ul class="list-group results">
                 <li class="list-group-item">
-                  <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
+                  <ng-container [ngTemplateOutlet]="noResultsTemplate" />
                 </li>
               </ul>
             }
 
             @if (searchTerm.length > 0 && !isLoading) {
               <li class="list-group-item" style="min-height: 34px" (click)="$event.stopPropagation()">
-                <ng-container [ngTemplateOutlet]="extraTemplate"></ng-container>
+                <ng-container [ngTemplateOutlet]="extraTemplate" />
                 <form [formGroup]="searchSettingsForm">
                   <div class="form-check form-switch">
                     <input type="checkbox" id="search-include-extras" role="switch" formControlName="includeExtras" class="form-check-input" switch

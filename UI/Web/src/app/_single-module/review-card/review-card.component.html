@@ -16,7 +16,7 @@
             {{review.isExternal ? t('external-review') : t('local-review')}}
           </h6>-->
           <p class="card-text no-images">
-            <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="140" [showToggle]="false"></app-read-more>
+            <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="140" [showToggle]="false" />
           </p>
         </div>
       </div>

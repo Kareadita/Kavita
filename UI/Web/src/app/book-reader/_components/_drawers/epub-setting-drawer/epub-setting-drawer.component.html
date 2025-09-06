@@ -12,11 +12,10 @@
     @let sId = seriesId();
     @let rp = readingProfile();
     @if (sId && rp) {
-      <app-reader-settings
-        [seriesId]="sId"
+      <app-reader-settings [seriesId]="sId"
         [readingProfile]="rp"
         [readerSettingsService]="readerSettingsService()"
-      ></app-reader-settings>
+       />
     }
   </div>
 </ng-container>

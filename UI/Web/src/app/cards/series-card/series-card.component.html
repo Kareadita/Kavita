@@ -2,20 +2,20 @@
   <div class="card-item-container card position-relative {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick()">
       @if (series.pages > 0) {
-        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
       } @else if (series.pages === 0) {
-        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage" />
       }
 
       <div class="progress-banner">
         @if (series.pagesRead > 0 && series.pagesRead < series.pages && series.pages > 0 && series.pagesRead !== series.pages) {
           <p ngbTooltip="{{((series.pagesRead / series.pages) * 100) | number:'1.0-1'}}%" container="body">
-            <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+            <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages" />
           </p>
         }
 
         <span class="download">
-          <app-download-indicator [download$]="download$"></app-download-indicator>
+          <app-download-indicator [download$]="download$" />
         </span>
       </div>
 
@@ -65,7 +65,7 @@
     </div>
 
     <div class="card-title-container">
-      <app-series-format [format]="series.format"></app-series-format>
+      <app-series-format [format]="series.format" />
       <span class="card-title" [ngbTooltip]="series.name" placement="top" id="{{series.id}}">
         <a class="dark-exempt btn-icon" routerLink="/library/{{libraryId}}/series/{{series.id}}">
           {{series.name}}
@@ -74,7 +74,7 @@
 
       @if (actions && actions.length > 0) {
         <span class="card-actions">
-            <app-card-actionables [entity]="series" [inputActions]="actions" [labelBy]="series.name"></app-card-actionables>
+            <app-card-actionables [entity]="series" [inputActions]="actions" [labelBy]="series.name" />
         </span>
       }
     </div>

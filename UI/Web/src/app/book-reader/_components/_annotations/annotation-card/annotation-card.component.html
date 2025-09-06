@@ -16,7 +16,7 @@
       <div class="mb-2 small text-muted">
         @let content = annotation().comment;
         @if (content !== '\"\"') {
-          <quill-view [content]="annotation().comment" format="json" theme="snow"></quill-view>
+          <quill-view [content]="annotation().comment" format="json" theme="snow" />
         } @else {
           {{null | defaultValue}}
         }

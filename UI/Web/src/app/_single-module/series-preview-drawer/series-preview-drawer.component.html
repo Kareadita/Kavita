@@ -10,7 +10,7 @@
     @if (CoverUrl; as coverUrl) {
       <div style="width: 160px" class="mx-auto mb-3">
         @if (coverUrl) {
-          <app-image height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="coverUrl"></app-image>
+          <app-image height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="coverUrl" />
         }
       </div>
     }
@@ -30,7 +30,7 @@
       }
 
       @if (externalSeries.summary) {
-        <app-read-more [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
+        <app-read-more [maxLength]="300" [text]="externalSeries.summary" />
       }
     }
 
@@ -62,7 +62,7 @@
               <div class="row g-0">
                 <div class="col-md-3">
                   @if (item.imageUrl && !item.imageUrl.endsWith('default.jpg')) {
-                    <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
+                    <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img" />
                   } @else {
                     <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>
                   }
@@ -89,7 +89,7 @@
         </button>
       </div>
 
-      <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
+      <app-read-more [maxLength]="300" [text]="localSeries.summary" />
 
       <div class="mt-3">
         <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
@@ -128,6 +128,6 @@
       </div>
     }
 
-    <app-loading [loading]="isLoading"></app-loading>
+    <app-loading [loading]="isLoading" />
   </div>
 </ng-container>

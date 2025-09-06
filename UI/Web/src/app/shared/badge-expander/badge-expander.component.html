@@ -2,7 +2,7 @@
   <div class="badge-expander">
     <div class="content">
       @for(item of visibleItems; track item; let i = $index; let last = $last) {
-        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }"></ng-container>
+        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }" />
         @if (!last && includeComma) {
           <span>, </span>
         }

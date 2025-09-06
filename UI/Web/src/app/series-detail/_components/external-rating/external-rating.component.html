@@ -5,12 +5,12 @@
       @if (utilityService.activeBreakpoint$ | async; as activeBreakpoint) {
         @if (activeBreakpoint <= Breakpoint.Tablet) {
           <div class="col-auto custom-col clickable" tabindex="0" role="button" (click)="openRatingModal()">
-            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+            <ng-container [ngTemplateOutlet]="kavitaRating" />
           </div>
         } @else {
           <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
                [popoverTitle]="t('kavita-tooltip')" popoverClass="md-popover">
-            <ng-container [ngTemplateOutlet]="kavitaRating"></ng-container>
+            <ng-container [ngTemplateOutlet]="kavitaRating" />
           </div>
         }
       }
@@ -26,14 +26,14 @@
     }
 
     <div class="col-auto" style="padding-top: 8px">
-      <app-loading [loading]="isLoading" size="spinner-border-sm"></app-loading>
+      <app-loading [loading]="isLoading" size="spinner-border-sm" />
     </div>
 
     <div class="col-auto ms-2"  style="padding-top: 4px">
       @for(link of webLinks; track link) {
         <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
-                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+                     [errorImage]="imageService.errorWebLinkImage" />
         </a>
       }
     </div>
@@ -59,7 +59,7 @@
 
   <ng-template #popContent>
     <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
-               [maxStars]="5" [color]="starColor"></ngx-stars>
+               [maxStars]="5" [color]="starColor" />
     {{userRating * 20}}%
   </ng-template>
 

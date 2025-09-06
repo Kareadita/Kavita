@@ -4,14 +4,12 @@
       <div class="d-flex flex-column align-items-center justify-content-center">
         <div class="image-container d-flex align-items-center justify-content-center">
           @if (HasCoverImage) {
-            <app-image
-                      objectFit="cover"
+            <app-image objectFit="cover"
                       [styles]="{'object-position': 'top'}"
                       height="96px"
                       width="96px"
                       [imageUrl]="ImageUrl"
-                      [errorImage]="imageService.noPersonImage">
-            </app-image>
+                      [errorImage]="imageService.noPersonImage" />
           } @else {
              <i class="fas fa-user" aria-hidden="true"></i>
           }

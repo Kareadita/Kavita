@@ -1,25 +1,25 @@
 
 @if (link === undefined || link.length === 0) {
   <div class="side-nav-item" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}">
-    <ng-container [ngTemplateOutlet]="inner"></ng-container>
+    <ng-container [ngTemplateOutlet]="inner" />
   </div>
 } @else {
   @if (external) {
     <a [id]="id" class="side-nav-item" [href]="link" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}" rel="noopener noreferrer" target="_blank">
-      <ng-container [ngTemplateOutlet]="inner"></ng-container>
+      <ng-container [ngTemplateOutlet]="inner" />
     </a>
   } @else {
     @if (queryParams && queryParams !== {}) {
       <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}" (click)="openLink()">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+        <ng-container [ngTemplateOutlet]="inner" />
       </a>
     } @else if (fragment) {
       <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}" [routerLink]="link" [fragment]="fragment">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+        <ng-container [ngTemplateOutlet]="inner" />
       </a>
     } @else {
       <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': ((navService.sideNavCollapsed$ | async)), 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+        <ng-container [ngTemplateOutlet]="inner" />
       </a>
     }
   }
@@ -37,7 +37,7 @@
       <span class="phone-hidden" title="{{title}}">
         <div>
           @if (imageUrl !== null && imageUrl !== '') {
-            <app-image [imageUrl]="imageUrl" width="20px" height="20px"></app-image>
+            <app-image [imageUrl]="imageUrl" width="20px" height="20px" />
           } @else {
             <i class="fa {{icon}}" aria-hidden="true"></i>
           }
@@ -54,6 +54,6 @@
         </div>
     </span>
     <span class="card-actions">
-        <ng-content select="[actions]"></ng-content>
+        <ng-content select="[actions]" />
     </span>
 </ng-template>

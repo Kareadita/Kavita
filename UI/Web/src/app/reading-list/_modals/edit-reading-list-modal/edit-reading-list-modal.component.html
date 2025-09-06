@@ -39,7 +39,7 @@
                         <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
                         <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
                         <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
-                        <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
+                        <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
                       </div>
                     </div>
                   }
@@ -134,7 +134,7 @@
                 <li [ngbNavItem]="TabID.CoverImage">
                   <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
                   <ng-template ngbNavContent>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()" />
                   </ng-template>
                 </li>
               </ul>

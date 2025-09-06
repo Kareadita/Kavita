@@ -45,16 +45,14 @@
         </ng-template>
       </ngx-file-drop>
 
-      <ng-template>
-
-      </ng-template>
+      <ng-template />
     </form>
 
     <div class="row g-0 chooser" style="padding-top: 10px">
       @if (showReset) {
         <div class="clickable col-auto" tabindex="0" (click)="reset()"
              [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
-          <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage"></app-image>
+          <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage" />
           @if (showApplyButton) {
             <br>
             <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
@@ -65,7 +63,7 @@
       @for (url of imageUrls; track url; let idx = $index) {
         <div class="clickable col-auto" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
              [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
-          <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
+          <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0" />
           @if (showApplyButton) {
             <br>
             <button class="btn btn-primary" style="width: 100%;"

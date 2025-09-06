@@ -87,17 +87,17 @@
 
         <div class="row g-0 mb-3">
           <div class="col-md-12">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member()"></app-restriction-selector>
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member()" />
           </div>
         </div>
 
           <div class="row g-0 mb-3">
             <div class="col-md-6 pe-4">
-              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member()"></app-role-selector>
+              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member()" />
             </div>
 
             <div class="col-md-6">
-              <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member()"></app-library-selector>
+              <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member()" />
             </div>
           </div>
       </form>
