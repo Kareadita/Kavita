@@ -2,10 +2,10 @@
   <div class="mt-2 mb-2">
     @if (entity.publishers.length > 0) {
       <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
-        <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
+        <!--<app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
                   aria-hidden="true"></app-image>
-        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
-<!--        <app-publisher-flipper [publishers]="entity.publishers"></app-publisher-flipper>-->
+        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>-->
+        <app-publisher-flipper [publishers]="entity.publishers"></app-publisher-flipper>
       </div>
     }
     <span class="me-2">
