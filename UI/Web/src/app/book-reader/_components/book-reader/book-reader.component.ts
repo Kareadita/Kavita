@@ -1454,7 +1454,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       //   afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       // }, SCROLL_DELAY);
       console.log('Scrolling via x axis to 0: ', 0, ' via ', this.reader.nativeElement);
-      this.scroll(() => this.scrollService.scrollToX(0, this.reader.nativeElement));
+      this.scroll(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       return;
     }
 
