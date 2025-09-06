@@ -605,12 +605,12 @@
     },
 
     "library-type-subtitle-pipe": {
-        "book": "Generic book library",
-        "comic": "Comic patterns, supports Volume grouping, TPBs within one series. Cannot support multiple runs.",
-        "manga": "Japanese comics, supports volume grouping. Can support some loose image configurations.",
-        "comicVine": "A strict Comic implementation built around Comic Vine metadata and integration of tooling in the space.",
-        "image": "Loose Image files with basic support. Must adhere mostly to wiki documentation.",
-        "lightNovel": "Books with special handling more Light Novels."
+        "book": "General-purpose book library.",
+        "comic": "Comic library with support for volume grouping and trade paperbacks within a single series. Does not support multiple runs in same Series.",
+        "manga": "Japanese comics with volume grouping support. Also handles some loose image configurations.",
+        "comicVine": "Strict comic implementation based on Comic Vine metadata with integration for specialized tooling.",
+        "image": "Loose image files with limited support. Must largely follow wiki documentation.",
+        "lightNovel": "Book library with special handling optimized for light novels"
     },
 
     "age-rating-pipe": {
