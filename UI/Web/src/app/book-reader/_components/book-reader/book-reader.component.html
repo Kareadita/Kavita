@@ -64,28 +64,29 @@
               </button>
             </div>
 
-            <div class="text-center d-none d-md-block">
+            <div class="text-center d-none d-md-block center-group">
               @if (isLoading()) {
                 <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
                   <span class="visually-hidden">{{ t('loading-book') }}</span>
                 </div>
               } @else {
-                @if (incognitoMode()) {
-                  <span (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
+                <div class="d-flex">
+                  @if (incognitoMode()) {
+                    <span (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
                     (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{ t('incognito-mode-label') }}</span>)
                   </span>
-                }
-                <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle() + ' - ' + authorText()">
-                  {{ bookTitle() }}
-                  @if (utilityService.getActiveBreakpoint() >= Breakpoint.Desktop) {
-                    - {{ authorText() }}
                   }
+                  <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle() + ' - ' + authorText()">
+                  {{ bookTitle() }}
+                    @if (utilityService.getActiveBreakpoint() >= Breakpoint.Desktop) {
+                      - {{ authorText() }}
+                    }
                 </span>
-
+                </div>
               }
             </div>
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center right-group">
               @if (!this.adhocPageHistory.isEmpty()) {
                 <button class="btn btn-outline-secondary btn-icon me-1" (click)="goBack()" [title]="t('go-back')">
                   <i class="fa fa-reply" aria-hidden="true"></i>
